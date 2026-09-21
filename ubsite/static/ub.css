@@ -218,7 +218,7 @@ a.cit:hover { color: var(--link); text-decoration: underline; }
 
 /* ---- front page -------------------------------------------------------- */
 .front h1 { font-size: 2.6rem; margin-bottom: .6rem; }
-.front .lead { font-size: 1.12rem; max-width: 36ch; margin-bottom: 2.2rem; }
+.front .lead { font-size: 1.12rem; margin-bottom: 2.2rem; }
 .front h2 { margin-top: 2.6rem; }
 .front-toc { list-style: none; padding: 0; margin: 0; }
 .front-toc li { border-top: 1px solid var(--rule); }
