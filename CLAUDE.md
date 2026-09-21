@@ -83,13 +83,15 @@ failed build leaves the previous database untouched.
 - `ubsite/` — FastAPI + Jinja2, server-rendered, no build step, ~10 KB CSS, 556 B JS
 - `vendor/` — copied by value with `UPSTREAM.lock`: press's tokenizer/macros/
   normalize, index's `cite.py`/`xref.py`
-- `.venv/` — created with `uv venv --python 3.14` (the version is pinned in
-  `.python-version`, matching the system interpreter everything was verified on)
-  and filled with `uv pip sync requirements.txt`. Gitignored. `requirements.txt`
-  is compiled from `requirements.in` with `uv pip compile`, the same arrangement
-  as `../libnodes`. **Everything runs under it** — `make` sets
+- `.venv/` — `uv venv` + `uv pip sync requirements.txt`, gitignored;
+  `requirements.txt` is compiled from `requirements.in` with `uv pip compile`.
+  Same arrangement as `../libnodes`. **Everything runs under it** — `make` sets
   `PY := .venv/bin/python`, so the build gets fontTools and the server gets
-  uvicorn from the same place.
+  uvicorn from one place.
+  **Python 3.12**, pinned in `.python-version` to match `../libnodes` and
+  `urantia-library`: all three will be hosted on the same Raspberry Pi 5 with
+  uv-managed venvs, and sharing one interpreter saves fetching and storing a
+  second. The full gate suite passes on it, with byte-identical output.
 
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz,
 figures behind the rights gate), then 7 (human sources), 8 (chronology, map),
