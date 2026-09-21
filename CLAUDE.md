@@ -6,7 +6,11 @@ directions — from a concept into the text, and from any paragraph back to
 everything the index says about it.
 
 The plan this was built from is `~/.claude/plans/have-a-look-at-fluttering-peacock.md`.
-Read §0 and §1 here first; read the plan for the phases beyond what is built.
+`ROADMAP.md` beside this file is the survey of what the data makes possible —
+seventeen ideas ranked, with what to build and what deliberately not to.
+
+Read §0 and §1 here first; `ROADMAP.md` for where this is going; the plan for
+the phase-by-phase detail.
 
 ---
 
@@ -307,4 +311,5 @@ about two thirds of its footnotes (`[^}]+` against braces nested three deep),
 and `\tunemarkup` there means the opposite of what it means in press — see §7.
 
 The plan's later phases (human sources, chronology and map, deploy) are
-unchanged; read them in the plan file rather than duplicating them here.
+unchanged; read them in the plan file rather than duplicating them here, and
+`ROADMAP.md` for why each is worth doing.
