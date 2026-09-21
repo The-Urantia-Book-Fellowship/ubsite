@@ -1,0 +1,9 @@
+# Install as root:root 0440 at /etc/sudoers.d/ubsite:
+#
+#     sudo install -m0440 -o root -g root deploy/ubsite.sudoers /etc/sudoers.d/ubsite
+#
+# This is what makes every LATER deploy password-free. It grants three verbs on
+# one unit and nothing else -- no daemon-reload, no nginx, no other service.
+tigran ALL=(root) NOPASSWD: /usr/bin/systemctl restart ubsite, \
+                            /usr/bin/systemctl start ubsite, \
+                            /usr/bin/systemctl stop ubsite

@@ -73,8 +73,18 @@ serve-bg: stop
 # shell running it, so it kills itself and leaves the server orphaned -- which
 # is how four of them ended up listening at once.
 stop:
-	@if [ -f $(PIDFILE) ]; then \
-		kill $$(cat $(PIDFILE)) 2>/dev/null || true; rm -f $(PIDFILE); \
+	@if [ -f $(PIDFILE) ]; then kill $$(cat $(PIDFILE)) 2>/dev/null || true; fi
+	@rm -f $(PIDFILE)
+	@# Verify the port actually freed.  Killing the recorded pid and deleting the
+	@# pidfile is not enough: if the pid was stale the process survives AND the only
+	@# record of it is gone.  So fall back to whoever holds the port.
+	@for i in 1 2 3 4 5; do \
+		ss -ltn 2>/dev/null | grep -q "127.0.0.1:$(PORT)" || exit 0; sleep 1; done; \
+	held=$$(ss -ltnp 2>/dev/null | grep -oE "127.0.0.1:$(PORT).*pid=[0-9]+" \
+		| grep -oE "pid=[0-9]+" | cut -d= -f2 | sort -u); \
+	if [ -n "$$held" ]; then \
+		echo "stop: pidfile was stale; $(PORT) still held by $$held -- killing"; \
+		kill $$held 2>/dev/null || true; \
 	fi
 	@exit 0
 

@@ -53,6 +53,20 @@ def page(request, template, **ctx):
     return T.TemplateResponse(request, template, ctx)
 
 
+@app.get("/healthz")
+def healthz():
+    """What deploy.sh polls, and what a restart must satisfy before it counts.
+
+    Touches the database rather than just returning 200, so a deploy that ships
+    a missing or truncated ub.db fails at the push instead of at a reader.
+    """
+    try:
+        n = db().execute("SELECT value FROM stat WHERE key='paragraphs'").fetchone()
+        return {"ok": bool(n and n[0] == 14586), "paragraphs": n[0] if n else 0}
+    except Exception as exc:                       # noqa: BLE001
+        return {"ok": False, "error": str(exc)}
+
+
 # --------------------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):

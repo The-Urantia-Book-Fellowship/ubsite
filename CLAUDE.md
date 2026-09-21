@@ -97,9 +97,13 @@ failed build leaves the previous database untouched.
   uv-managed venvs, and sharing one interpreter saves fetching and storing a
   second. The full gate suite passes on it, with byte-identical output.
 
+- `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and
+  `deploy.sh`, with a README naming the four steps that need root. Written, not
+  yet run. **The database is the artifact**: the three source repos are not on
+  pi5 and do not need to be, so `make data` runs here and `var/ub.db` is shipped.
+
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz,
-figures behind the rights gate), then 7 (human sources), 8 (chronology, map),
-9 (deploy).
+figures behind the rights gate), then 7 (human sources), 8 (chronology, map).
 
 ---
 
