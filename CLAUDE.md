@@ -277,3 +277,34 @@ Carried from the plan, none blocking:
 4. **Domain and host**; whether `urantia-library` on this box merges or coexists.
    Port 80 is reportedly not forwarded, which affects certbot.
 5. **The 58 rights-restricted images** — attribution cards, or seek permission.
+
+---
+
+## 11. Where we left off (2026-09-21)
+
+The annotated reader is running and looks right. `make serve` → 8130.
+
+Everything through Phase 5 is committed in seven commits, the last four of
+which are typography: the site was set too small and wanted 150% browser zoom
+to be comfortable, which is a Goudy problem — small x-height, long descenders,
+so it reads a full step below its nominal size.
+
+**One open question, not a defect.** On a concept page the first line of the
+tree repeats the heading: `/i/adoption` shows "adoption" under the `<h1>`
+"adoption". On `/i/oaths` the same line reads "oaths. *See also* promises" and
+earns its place, because the level-1 entry carries citations and cross-
+references. Suppressing it when it adds nothing was offered and not yet ruled on.
+
+**Next is Phase 6**, the study-edition apparatus, and it is the largest
+remaining import: 307 `\fnst` study footnotes, 54 human-source `\bibitem`
+records, 86 `\bibref` cross-references, the whole KJV (24,974 verses + 5,069
+marginal notes), 819 quiz questions (**83 of them multi-answer** — a
+single-answer model marks correct responses wrong), and 84 figures of which
+**58 are rights-restricted** and must be separable at query time.
+
+Note when starting it: the study edition's own `tools/extracttext.py` truncates
+about two thirds of its footnotes (`[^}]+` against braces nested three deep),
+and `\tunemarkup` there means the opposite of what it means in press — see §7.
+
+The plan's later phases (human sources, chronology and map, deploy) are
+unchanged; read them in the plan file rather than duplicating them here.
