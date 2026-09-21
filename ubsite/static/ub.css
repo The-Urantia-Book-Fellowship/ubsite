@@ -14,9 +14,16 @@
   --rule:  oklch(0.88 0.010 80);
   --jesus: oklch(0.44 0.15 25);
   --link:  oklch(0.40 0.09 250);
-  --measure: 34rem;
-  --size: 1.1875rem;
-  --lead: 1.58;
+  /* Goudy Old Style has a small x-height and long descenders, so it reads a
+     full step smaller than its nominal size.  19px here looked like 16px of a
+     modern face and wanted browser zoom to be comfortable. */
+  --size: clamp(1.3rem, 1.1rem + 0.6vw, 1.55rem);
+  --lead: 1.55;
+  /* In ch, so the measure follows the type size instead of staying fixed at a
+     pixel width and losing characters per line as the text grows.  `ch` is the
+     width of "0", which is narrow in Goudy, so 60ch sets about 68 characters --
+     the range this face reads best at. */
+  --measure: 60ch;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -52,23 +59,23 @@ a:hover { text-decoration-thickness: 2px; }
 /* ---- chrome ------------------------------------------------------------ */
 .top { display: flex; gap: 1rem; align-items: baseline; flex-wrap: wrap;
        padding: .8rem 1rem; border-bottom: 1px solid var(--rule); }
-.brand { font-weight: 400; font-size: 1.05rem; text-decoration: none; letter-spacing: .02em; }
+.brand { font-weight: 400; font-size: 1.2rem; text-decoration: none; letter-spacing: .02em; }
 .top nav { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
-.top nav a { font-size: .82rem; text-decoration: none; color: var(--faint); }
+.top nav a { font-size: .92rem; text-decoration: none; color: var(--faint); }
 .top nav a:hover, .top .mode { color: var(--ink); }
 .find { flex: 1 1 14rem; max-width: 26rem; }
-.find input { width: 100%; font: inherit; font-size: .9rem; padding: .3rem .5rem;
+.find input { width: 100%; font: inherit; font-size: 1rem; padding: .3rem .5rem;
   background: transparent; color: inherit; border: 1px solid var(--rule); border-radius: 3px; }
 .theme { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 1rem; }
 
 footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1rem;
-  font-size: .78rem; color: var(--faint); }
+  font-size: .88rem; color: var(--faint); }
 footer p { margin: .2rem 0; }
 
 /* ---- the reader -------------------------------------------------------- */
-.reader { display: grid; grid-template-columns: 14rem minmax(0,1fr); gap: 2rem;
-          padding: 2rem 1rem 0; max-width: 78rem; margin: 0 auto; }
-.rail { font-size: .82rem; line-height: 1.45; position: sticky; top: 1rem;
+.reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 2.4rem;
+          padding: 2rem 1.2rem 0; max-width: 92rem; margin: 0 auto; }
+.rail { font-size: .95rem; line-height: 1.45; position: sticky; top: 1rem;
         align-self: start; max-height: 90vh; overflow: auto; }
 .rail ol { list-style: none; margin: .4rem 0 0; padding: 0; }
 .rail li { margin: .18rem 0; }
@@ -80,21 +87,22 @@ article { min-width: 0; }
 .papertop { margin-bottom: 1.6rem; }
 .papernum { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase;
             color: var(--faint); margin: 0; }
-h1 { font-size: 1.9rem; font-weight: 400; line-height: 1.15; margin: .2rem 0 .3rem; }
-h2 { font-size: 1.15rem; font-weight: 400; margin: 1.6rem 0 .6rem;
+h1 { font-size: 2.1rem; font-weight: 400; line-height: 1.15; margin: .2rem 0 .3rem; }
+h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
      font-variant-caps: small-caps; letter-spacing: .03em; }
 .author { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
 
 /* Each paragraph emits TWO grid cells -- text and apparatus.  The browser
    aligns them for free, a paragraph with nine chips simply makes its row
    taller, and there is no JS position-syncing to break on resize. */
-.grid { display: grid; grid-template-columns: minmax(0, var(--measure)) 17rem; gap: 0 1.6rem; }
+.grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 24ch);
+        gap: 0 2rem; }
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
 p.t.pc { margin-top: .85rem; }          /* a 1955 blank-line group starts here */
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
-.num { float: left; margin-left: -1.9rem; width: 1.5rem; text-align: right;
-       font-size: .66rem; color: var(--faint); text-decoration: none;
+.num { float: left; margin-left: -2.2rem; width: 1.7rem; text-align: right;
+       font-size: .78rem; color: var(--faint); text-decoration: none;
        position: relative; top: .35rem; }
 .num:hover { color: var(--ink); }
 
@@ -117,7 +125,7 @@ p.t:has(.leader) { display: flex; align-items: baseline; }
 a.fn { text-decoration: none; }
 a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(--link); }
 
-.a { font-size: .74rem; line-height: 1.42; color: var(--faint); }
+.a { font-size: .88rem; line-height: 1.42; color: var(--faint); }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
 .chips a { color: var(--faint); text-decoration: none; display: block;
@@ -128,18 +136,18 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .note .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--link); }
 
 .blanket { border: 1px solid var(--rule); border-radius: 4px; padding: .7rem .9rem;
-  margin: 0 0 1.6rem; font-size: .78rem; max-width: var(--measure); }
-.blanket h3 { margin: 0 0 .4rem; font-size: .72rem; font-variant-caps: small-caps;
+  margin: 0 0 1.6rem; font-size: .9rem; max-width: var(--measure); }
+.blanket h3 { margin: 0 0 .4rem; font-size: .82rem; font-variant-caps: small-caps;
   letter-spacing: .06em; color: var(--faint); font-weight: 400; }
 .blanket ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 1.4rem; }
 .blanket a { color: var(--faint); text-decoration: none; }
 .blanket a:hover { color: var(--ink); }
 
-.pager { display: flex; margin: 2.5rem 0 1rem; max-width: var(--measure); font-size: .85rem; }
+.pager { display: flex; margin: 2.5rem 0 1rem; max-width: var(--measure); font-size: .95rem; }
 .pager .next { margin-left: auto; }
 
 /* ---- prose pages ------------------------------------------------------- */
-.prose { max-width: 46rem; margin: 0 auto; padding: 2rem 1rem 0; }
+.prose { max-width: 62ch; margin: 0 auto; padding: 2rem 1rem 0; }
 .lead { font-size: 1.05rem; }
 .cta { display: inline-block; margin: .4rem 1rem .4rem 0; }
 .counts { display: flex; gap: 2rem; flex-wrap: wrap; margin: 1.6rem 0; }
@@ -149,21 +157,21 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .toc li { display: flex; gap: .8rem; padding: .18rem 0; border-bottom: 1px solid var(--rule); }
 .toc a { flex: 1; text-decoration: none; }
 .toc b { display: inline-block; width: 2.2rem; color: var(--faint); font-weight: 400; }
-.toc i { color: var(--faint); font-size: .8rem; }
+.toc i { color: var(--faint); font-size: .9rem; }
 .letters { display: flex; flex-wrap: wrap; gap: .5rem; }
 .letters a { border: 1px solid var(--rule); border-radius: 3px; padding: .5rem .7rem;
   text-decoration: none; text-align: center; min-width: 3.2rem; }
-.letters span { display: block; font-size: .7rem; color: var(--faint); }
+.letters span { display: block; font-size: .82rem; color: var(--faint); }
 .heads li { padding: .12rem 0; }
-.heads span { color: var(--faint); font-size: .75rem; }
-.tree { list-style: none; padding: 0; font-size: .95rem; }
+.heads span { color: var(--faint); font-size: .85rem; }
+.tree { list-style: none; padding: 0; font-size: 1rem; }
 .tree li { padding: .1rem 0; }
 .tree .l2 { margin-left: 1.2rem; } .tree .l3 { margin-left: 2.4rem; }
 .tree .l4 { margin-left: 3.6rem; } .tree .l5 { margin-left: 4.8rem; }
 .near, .xrefs { list-style: none; padding: 0; }
-.near span { color: var(--faint); font-size: .78rem; }
+.near span { color: var(--faint); font-size: .88rem; }
 .results section { margin: 1.6rem 0; }
-.results h2 span { color: var(--faint); font-size: .8rem; }
+.results h2 span { color: var(--faint); font-size: .9rem; }
 .hits { list-style: none; padding: 0; }
 .hits li { padding: .22rem 0; border-bottom: 1px solid var(--rule); }
 .hits mark { background: color-mix(in oklch, var(--link) 22%, transparent); color: inherit; }
@@ -196,9 +204,9 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
   a { color: inherit; text-decoration: none; }
 }
 
-.hint { color: var(--faint); font-size: .8rem; margin: -.4rem 0 1rem; }
+.hint { color: var(--faint); font-size: .92rem; margin: -.4rem 0 1rem; }
 .heads-hit a { font-size: 1.05rem; }
-.heads-hit span { color: var(--faint); font-size: .78rem; margin-left: .5rem; }
+.heads-hit span { color: var(--faint); font-size: .88rem; margin-left: .5rem; }
 .near span { cursor: help; }
 
 /* A citation in an index entry is a place in the book, not a string. */
@@ -207,8 +215,8 @@ a.cit:hover { color: var(--link); text-decoration: underline; }
 .tree i, .hits i { font-style: italic; }
 
 /* ---- front page -------------------------------------------------------- */
-.front h1 { font-size: 2.3rem; margin-bottom: .6rem; }
-.front .lead { font-size: 1.08rem; max-width: 34rem; margin-bottom: 2.2rem; }
+.front h1 { font-size: 2.6rem; margin-bottom: .6rem; }
+.front .lead { font-size: 1.12rem; max-width: 36ch; margin-bottom: 2.2rem; }
 .front h2 { margin-top: 2.6rem; }
 .front-toc { list-style: none; padding: 0; margin: 0; }
 .front-toc li { border-top: 1px solid var(--rule); }
@@ -216,9 +224,9 @@ a.cit:hover { color: var(--link); text-decoration: underline; }
 .front-toc a { display: flex; align-items: baseline; gap: 1rem;
   padding: .7rem .2rem; text-decoration: none; color: inherit; }
 .front-toc a:hover { background: color-mix(in oklch, var(--link) 7%, transparent); }
-.front-toc .lbl { flex: 1; font-size: 1.12rem; }
+.front-toc .lbl { flex: 1; font-size: 1.25rem; }
 .front-toc a:hover .lbl { color: var(--link); }
-.front-toc .range { color: var(--faint); font-size: .8rem; white-space: nowrap; }
+.front-toc .range { color: var(--faint); font-size: .9rem; white-space: nowrap; }
 .front-toc .foreword .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
 .ways { list-style: none; padding: 0; }
 .ways li { padding: .3rem 0; }
