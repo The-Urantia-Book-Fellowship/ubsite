@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% block title %}{{ root.headword }}{% endblock %}
 {% block body %}<main class="prose concept">
 <h1>{{ root.headword }}</h1>
-{% set n = tree|length - 1 %}{% if n %}<p class="hint">{{ n }} {{ 'entry' if n == 1 else 'entries' }} under this headword.</p>{% endif %}
+{% set n = tree|length - 1 %}{% if n %}<p class="hint">{{ n }} {{ 'subentry' if n == 1 else 'subentries' }}</p>{% endif %}
 <ul class="tree">
 {% for e in tree %}
   <li class="l{{ e.level }}">{{ e.text_html|safe }}</li>
@@ -12,8 +12,8 @@
   {% if x.slug %}<a href="/i/{{ x.slug }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}</li>{% endfor %}
 </ul>{% endif %}
 {% if near %}<h2>Cited alongside</h2>
-<p class="hint">Headwords that cite the same paragraphs as this one, commonest first.
-The number is how many entries each contains.</p>
+<p class="hint">Headwords that cite the same paragraphs as this one, commonest
+first. The number is how many subentries each has.</p>
 <ul class="near">
 {% for n in near %}<li><a href="/i/{{ n.slug }}">{{ n.headword }}</a>
   <span title="{{ n.shared }} paragraphs in common">{{ n.kids }}</span></li>{% endfor %}
