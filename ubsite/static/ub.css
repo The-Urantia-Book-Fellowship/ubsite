@@ -95,7 +95,7 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
 /* Each paragraph emits TWO grid cells -- text and apparatus.  The browser
    aligns them for free, a paragraph with nine chips simply makes its row
    taller, and there is no JS position-syncing to break on resize. */
-.grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 24ch);
+.grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch);
         gap: 0 2rem; }
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
 p.t.pc { margin-top: .85rem; }          /* a 1955 blank-line group starts here */
@@ -125,7 +125,7 @@ p.t:has(.leader) { display: flex; align-items: baseline; }
 a.fn { text-decoration: none; }
 a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(--link); }
 
-.a { font-size: .88rem; line-height: 1.42; color: var(--faint); }
+.a { font-size: 1rem; line-height: 1.45; color: var(--faint); }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
 .chips a { color: var(--faint); text-decoration: none; display: block;
@@ -140,6 +140,8 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .blanket h3 { margin: 0 0 .4rem; font-size: .82rem; font-variant-caps: small-caps;
   letter-spacing: .06em; color: var(--faint); font-weight: 400; }
 .blanket ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 1.4rem; }
+/* One entry must not be split down the middle by the column break. */
+.blanket li { break-inside: avoid; margin-bottom: .2rem; }
 .blanket a { color: var(--faint); text-decoration: none; }
 .blanket a:hover { color: var(--ink); }
 
