@@ -3,4 +3,3 @@ var/
 __pycache__/
 *.pyc
 .venv/
-vendor-py/

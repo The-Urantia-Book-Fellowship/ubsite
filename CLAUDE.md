@@ -49,6 +49,8 @@ Careful: there are three `urantia-study-edition` trees on this machine.
 ## 2. Commands
 
 ```
+make venv           create .venv (uv) and sync requirements.txt -- run this first
+make lock           recompile requirements.txt from requirements.in
 make sources        the three repos and the revisions in use
 make vendor-check   re-hash the vendored copies against upstream (fails with a diff)
 make data           build var/ub.db          (~14 s)
@@ -81,9 +83,13 @@ failed build leaves the previous database untouched.
 - `ubsite/` — FastAPI + Jinja2, server-rendered, no build step, ~10 KB CSS, 556 B JS
 - `vendor/` — copied by value with `UPSTREAM.lock`: press's tokenizer/macros/
   normalize, index's `cite.py`/`xref.py`
-- `vendor-py/` — FastAPI + uvicorn, installed with `pip install --target`
-  (gitignored). `python3-venv` is not installed on this machine and installing it
-  needs `sudo`, which has not been asked for.
+- `.venv/` — created with `uv venv --python 3.14` (the version is pinned in
+  `.python-version`, matching the system interpreter everything was verified on)
+  and filled with `uv pip sync requirements.txt`. Gitignored. `requirements.txt`
+  is compiled from `requirements.in` with `uv pip compile`, the same arrangement
+  as `../libnodes`. **Everything runs under it** — `make` sets
+  `PY := .venv/bin/python`, so the build gets fontTools and the server gets
+  uvicorn from the same place.
 
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz,
 figures behind the rights gate), then 7 (human sources), 8 (chronology, map),

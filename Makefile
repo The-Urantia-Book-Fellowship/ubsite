@@ -2,13 +2,23 @@
 #
 # The sources are MASTERS.  Nothing here writes to them; `make paranoid` proves it.
 
-PY      := python3
+PY      := .venv/bin/python
 DB      := var/ub.db
 
-.PHONY: all sources vendor-check vendor-sync data check test paranoid serve serve-bg stop ports clean help
+.PHONY: all venv lock sources vendor-check vendor-sync data check test paranoid serve serve-bg stop ports clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
+
+## venv          create .venv on the pinned Python and sync requirements.txt
+venv:
+	@uv venv --python $$(cat .python-version)
+	@uv pip sync requirements.txt
+	@$(PY) -c "import fastapi, uvicorn, jinja2, fontTools; print('venv ready')"
+
+## lock          recompile requirements.txt from requirements.in
+lock:
+	@uv pip compile requirements.in -o requirements.txt
 
 ## sources       show the three source repos and the revisions in use
 sources:
@@ -48,13 +58,13 @@ PIDFILE := var/serve.pid
 
 ## serve         run the reader at http://127.0.0.1:$(PORT), in the foreground
 serve: stop
-	@PYTHONPATH=vendor-py $(PY) -m uvicorn ubsite.app:app \
+	@$(PY) -m uvicorn ubsite.app:app \
 		--host 127.0.0.1 --port $(PORT) --reload
 
 ## serve-bg      same, in the background, recording its pid
 serve-bg: stop
 	@mkdir -p var
-	@PYTHONPATH=vendor-py nohup $(PY) -m uvicorn ubsite.app:app \
+	@nohup $(PY) -m uvicorn ubsite.app:app \
 		--host 127.0.0.1 --port $(PORT) > var/serve.log 2>&1 & echo $$! > $(PIDFILE)
 	@sleep 2; echo "serving on http://127.0.0.1:$(PORT)  (pid $$(cat $(PIDFILE)))"
 

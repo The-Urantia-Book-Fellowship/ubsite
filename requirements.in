@@ -1,0 +1,12 @@
+# Direct dependencies only.  The pinned set is requirements.txt, compiled from
+# this file with `uv pip compile requirements.in -o requirements.txt`.
+
+# The reader.  Server-rendered HTML; uvicorn's standard extras bring uvloop and
+# httptools (the flags the deploy uses) and watchfiles for --reload.
+fastapi
+uvicorn[standard]
+jinja2
+
+# The build.  fontTools subsets UB Goudy to the corpus; the woff extra brings
+# brotli, without which it cannot write WOFF2.
+fonttools[woff]

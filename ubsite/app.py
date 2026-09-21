@@ -17,7 +17,6 @@ import sqlite3
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "vendor-py"))
 sys.path.insert(0, str(ROOT / "vendor" / "index"))
 
 import cite  # noqa: E402
