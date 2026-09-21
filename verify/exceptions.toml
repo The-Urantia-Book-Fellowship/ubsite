@@ -1,0 +1,15 @@
+# Declared divergences.  Each entry demotes a `fatal` problem to a recorded
+# decision.  An undeclared divergence fails the build.
+#
+# Keys are "<code>@<where>".  Every entry carries a reason and the date it was
+# taken, so the list reads as a record rather than a suppression.
+
+# (empty)
+#
+# 2026-09-21: the two editions were brought into exact agreement -- 14,586
+# paragraph keys each, no exceptions.  Ten section dividers in the study edition
+# carried paragraph numbers that press leaves bare (p031, p056, p120, p134 and
+# six in p144's prayers); those were de-numbered and their sections renumbered.
+# The Foreword's ACKNOWLEDGMENT, which study had set as an unnumbered
+# \usection, was restored to a numbered paragraph at 0:12.10 by the editor.
+[alignment]

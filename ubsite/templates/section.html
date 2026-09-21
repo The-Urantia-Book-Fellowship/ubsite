@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
+{% block body %}
+<main class="reader">
+  <nav class="rail" aria-label="Sections">
+    <p class="railhead"><a href="/{{ paper.n }}">Paper {{ paper.n }}</a></p>
+    <ol>
+    {% for s in all_sections %}
+      <li{% if s.n == section.n %} class="here"{% endif %}>
+        <a href="/{{ paper.n }}:{{ s.n }}">{% if s.n %}{{ s.n }}. {{ s.title }}{% else %}Introduction{% endif %}</a></li>
+    {% endfor %}
+    </ol>
+  </nav>
+
+  <article>
+    <header class="papertop">
+      <p class="papernum">Paper {{ paper.n }}</p>
+      <h1>{{ paper.title }}</h1>
+      {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
+      <h2>{% if section.n %}{{ section.n }}{% if section.combined_with %} and {{ section.combined_with }}{% endif %}. {{ section.title }}{% else %}Introduction{% endif %}</h2>
+    </header>
+
+    {% if blanket %}
+    <aside class="blanket">
+      <h3>Cited across this whole section</h3>
+      {# read_pack's rule: a blanket citation is listed ONCE here, never repeated
+         under every paragraph -- otherwise Paper 15's 470 citations print some
+         entries forty times over and the eye stops reading. #}
+      <ul>{% for b in blanket %}<li><a href="/i/{{ b.rslug }}">{{ b.path }}</a></li>{% endfor %}</ul>
+    </aside>
+    {% endif %}
+
+    <div class="grid">
+    {% for p in paras %}
+      {% set hit = focus and p.para_n >= focus and p.para_n <= last %}
+      <p class="t{% if p.gap_before %} pc{% endif %}{% if hit %} hit{% endif %}"
+         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.para_n }}</a>{{ p.html|safe }}</p>
+      <div class="a">
+      {% set cs = citers.get(p.id, []) %}
+        {% if cs %}
+          <ul class="chips">
+          {% for c in cs %}<li><a href="/i/{{ c.rslug }}">{{ c.path }}</a></li>{% endfor %}
+          </ul>
+        {% elif p.thin %}
+          <p class="thin">no entry cites this paragraph precisely</p>
+        {% endif %}
+        {% for n in notes.get(p.id, []) %}
+          <p class="note" id="fn{{ n.ord }}"><span class="lbl">1955</span> {{ n.text }}</p>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    </div>
+
+    <nav class="pager">
+      {% if prv %}<a href="/{{ paper.n }}:{{ prv.n }}">← previous</a>{% endif %}
+      {% if nxt %}<a class="next" href="/{{ paper.n }}:{{ nxt.n }}">next →</a>{% endif %}
+    </nav>
+  </article>
+</main>
+{% endblock %}

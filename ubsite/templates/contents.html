@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}Contents{% endblock %}
+{% block body %}<main class="prose"><h1>Contents</h1>
+
+{# The Foreword belongs at the head of the book, where it is printed. It carries
+   no part number -- the four parts begin at Paper 1 -- so it is listed on its
+   own rather than falling out of the loop below. #}
+<ol class="toc">
+{% for p in papers if p.n == 0 %}
+  <li><a href="/0"><b>0</b> {{ p.title }}</a><i>{{ p.author or '' }}</i></li>
+{% endfor %}
+</ol>
+
+{% for part in parts %}
+  <h2>{{ part.title }}</h2>
+  <ol class="toc">
+  {% for p in papers if p.part_n == part.n %}
+    <li><a href="/{{ p.n }}"><b>{{ p.n }}</b> {{ p.title }}</a><i>{{ p.author or '' }}</i></li>
+  {% endfor %}
+  </ol>
+{% endfor %}
+</main>{% endblock %}

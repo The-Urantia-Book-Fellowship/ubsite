@@ -1,0 +1,29 @@
+# The three source repositories.  These paths appear here and NOWHERE else in
+# this project -- build/config.py is the only module that reads this file.
+#
+# The repos are MASTERS.  ubsite reads them and never writes to them; see
+# build/readers/_io.py, tests/test_no_writes.py and `make paranoid`.
+
+[press]
+# The authoritative text.  Uversa Press 3rd edition.
+path = "../urantia-uversa-press-claude"
+tex  = "tex"
+rev  = "worktree"          # or a git revision
+
+[study]
+# The British Study Edition.  Apparatus: footnotes, human sources, KJV, quiz,
+# images.  NOTE: `urantia-study-edition-latest` is OLDER despite its name.
+# This tree and ../translation/urantia-study-edition are independent clones of
+# the same repo; the paragraph realignment of 2026-09-21 was applied HERE, so
+# this is the one the build reads until it is committed and the other pulled.
+path = "../urantia-study-edition"
+tex  = "tex"
+rev  = "worktree"
+
+[index]
+# The 2019 Uversa Press index, hand-corrected.  Read BY GIT REVISION, not the
+# working tree: this repo is edited in another session, and a site build must
+# never race an editorial edit.
+path = "../index"
+tex  = "tex"
+rev  = "HEAD"

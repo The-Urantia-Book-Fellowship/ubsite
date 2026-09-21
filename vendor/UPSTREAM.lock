@@ -1,0 +1,42 @@
+[
+  {
+    "repo": "press",
+    "path": "tools/text-verify/latex_tokenizer.py",
+    "dest": "press/latex_tokenizer.py",
+    "sha256": "8b620ef668bb1325e9607cb8a27401e20446d251c7422336e2496e0f4f975473",
+    "bytes": 12689,
+    "commit": "5222a21582a1ef7ba78aa649622eeb2cc91c355a"
+  },
+  {
+    "repo": "press",
+    "path": "tools/text-verify/macros.py",
+    "dest": "press/macros.py",
+    "sha256": "4f0f9d033df24ecb29c3cd3a6c2a62560acc6287cb7cc6a44b55f88fe76f586f",
+    "bytes": 11784,
+    "commit": "5222a21582a1ef7ba78aa649622eeb2cc91c355a"
+  },
+  {
+    "repo": "press",
+    "path": "tools/text-verify/normalize.py",
+    "dest": "press/normalize.py",
+    "sha256": "f2e93063e5e09effba1ec44e39ff69153d439b4bcfbc67bfffa0534a4a3d60ab",
+    "bytes": 5015,
+    "commit": "5222a21582a1ef7ba78aa649622eeb2cc91c355a"
+  },
+  {
+    "repo": "index",
+    "path": "cite.py",
+    "dest": "index/cite.py",
+    "sha256": "083b6f84521e9564f919fae487c317709c6c4cfa8496274f0363057097aa795d",
+    "bytes": 15165,
+    "commit": "f0ee66f93176da9f0339bb86ce2c50c1d7dd0041"
+  },
+  {
+    "repo": "index",
+    "path": "xref.py",
+    "dest": "index/xref.py",
+    "sha256": "91643f77ef18114610b4740329d87c0bde139903a3acc7aeaa67f92537313330",
+    "bytes": 4686,
+    "commit": "f0ee66f93176da9f0339bb86ce2c50c1d7dd0041"
+  }
+]

@@ -1,0 +1,6 @@
+# Derived. Rebuilt from the three source repos in a couple of minutes.
+var/
+__pycache__/
+*.pyc
+.venv/
+vendor-py/

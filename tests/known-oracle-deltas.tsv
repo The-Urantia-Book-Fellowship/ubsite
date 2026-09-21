@@ -1,0 +1,13 @@
+# Places where ubsite deliberately differs from ../index/data/srt.jsonl.
+#
+# The oracle is an independent parse and an excellent check, but it is not the
+# authority: the SRT reference HTML in urantia-uversa-press-claude/misc/html is,
+# because the press project's own text-verify run is gated against it.  Each row
+# below was arbitrated against that HTML, and in every case the HTML agrees with
+# us.  The gate requires EXACTLY this set -- a new disagreement fails the build,
+# and so does one of these silently going away.
+#
+# ref	code	ours	oracle	arbitration (SRT HTML)
+15:2.25	oracle-swallowed-environment	…material existence.	…material existence. 2	build_srt.py appends unclaimed lines to the previous paragraph and ate \begin{multicols}{2}, detexing the {2}. HTML ends the paragraph at "existence."
+30:1.104	fbhyp-is-a-line-break	UNREVEALED	UNRE-VEALED	\fbhyp{} is a forced line-break hyphen, not a compound hyphen; the word is unbroken in the canonical text. HTML: "UNREVEALED ORDERS."
+168:0.3	ldots-is-ascii	“...this sickness	“… this sickness	The SRT uses ASCII "..." with no following space. HTML: "heard Jesus say, “...this sickness is really not to the death.”"

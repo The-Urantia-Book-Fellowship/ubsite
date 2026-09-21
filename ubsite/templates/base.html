@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en" data-mode="{{ mode }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}The Urantia Book{% endblock %}</title>
+<link rel="stylesheet" href="/static/ub.css">
+<script>
+// Theme before first paint, so there is no flash.  Wrapped because site data
+// can be blocked or cleared, and the page must render correctly without it.
+try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">The Urantia Book</a>
+  <form class="find" action="/search"><input name="q" value="{{ q|default('') }}"
+    placeholder="a word, or a citation like 101:4.2" autocomplete="off"></form>
+  <nav>
+    <a href="/read">Contents</a>
+    <a href="/index">Index</a>
+    <button class="theme" type="button" aria-label="Theme">◐</button>
+  </nav>
+</header>
+{% block body %}{% endblock %}
+<footer>
+  <p>Text: the Uversa Press edition. Index: the Uversa Press index as revised
+     for the seventh printing.
+     Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</p>
+  <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.</p>
+</footer>
+<script src="/static/ub.js" defer></script>
+</body>
+</html>

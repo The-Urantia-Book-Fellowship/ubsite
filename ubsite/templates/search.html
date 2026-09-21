@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}{{ q }}{% endblock %}
+{% block body %}<main class="prose results">
+<h1>{{ q }}</h1>
+{% if diagnose and diagnose[1] %}<p class="didyou">Did you mean
+  {% for c in diagnose[1] %}<a href="/search?q={{ c }}">{{ c }}</a>{% if not loop.last %} or {% endif %}{% endfor %}?</p>{% endif %}
+{% if heads %}<section><h2>Headwords</h2>
+<ul class="hits heads-hit">{% for h in heads %}<li><a href="/i/{{ h.slug }}">{{ h.headword }}</a>
+  {% if h.kids %}<span>{{ h.kids }} {{ 'entry' if h.kids == 1 else 'entries' }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
+<section><h2>In the index <span>{{ n_idx }}</span></h2>
+{% if idx %}<ul class="hits">{% for e in idx %}<li><a href="/i/{{ e.slug }}">{{ e.path }}</a></li>{% endfor %}</ul>
+{% else %}<p class="none">nothing</p>{% endif %}</section>
+<section><h2>In the text <span>{{ n_txt }}</span></h2>
+{% if txt %}<ul class="hits">{% for t in txt %}<li><a href="/{{ t.ref }}">{{ t.ref }}</a> {{ t.s|safe }}</li>{% endfor %}</ul>
+{% else %}<p class="none">nothing</p>{% endif %}</section>
+</main>{% endblock %}

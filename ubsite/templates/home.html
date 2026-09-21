@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="prose front">
+
+  <h1>The Urantia Book</h1>
+
+  <p class="lead">The Uversa Press text, read together with the Uversa Press
+  index. Every paragraph carries in its margin the index entries that cite it,
+  so the index works in both directions at once: from a concept into the text,
+  and from any passage back to everything the index has to say about it.</p>
+
+  {# Reading begins here.  The parts ARE the entry points -- a separate "start
+     reading" button sat apart from them and made the page read as two halves. #}
+  <ol class="front-toc">
+    {% for p in papers if p.n == 0 %}
+    <li class="foreword">
+      <a href="/0"><span class="lbl">Foreword</span>
+        <span class="range">Definitions and terminology</span></a>
+    </li>
+    {% endfor %}
+    {% for part in parts %}
+    <li>
+      <a href="/{{ part.first_paper }}">
+        <span class="lbl">{{ part.title }}</span>
+        <span class="range">Papers {{ part.first_paper }}&ndash;{{ part.last_paper }}</span></a>
+    </li>
+    {% endfor %}
+  </ol>
+
+  <h2>Other ways in</h2>
+  <ul class="ways">
+    <li><a href="/index">The index</a> — {{ '{:,}'.format(stats.az_entries) }}
+      entries under {{ '{:,}'.format(stats.headwords) }} headwords, each opening onto the
+      passages it cites.</li>
+    <li><a href="/search?q=101%3A4.2">A citation</a> — type any reference such as
+      <code>101:4.2</code>, <code>Paper 100</code> or <code>76:2sec</code> into
+      the search box and it opens there.</li>
+    <li><a href="/read">The contents</a> — all {{ stats.papers }} papers with
+      their authors.</li>
+  </ul>
+
+  <h2>About this edition</h2>
+  <p>The text is the Uversa Press edition of <i>The Urantia Book</i>, published
+  by the Urantia Book Fellowship. The index is the Uversa Press index, revised
+  with numerous corrections for the seventh printing &mdash; the third edition,
+  2026 &mdash; where it is bound together with the text in a single volume.</p>
+  <p>Its {{ '{:,}'.format(stats.citation_targets) }} references, compiled and
+  checked over many years, are what make the margins of this reader possible.
+  The printed volume remains the book; this is an additional way to move
+  through it.</p>
+
+</main>
+{% endblock %}

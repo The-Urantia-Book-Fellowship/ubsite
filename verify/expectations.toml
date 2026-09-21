@@ -1,0 +1,61 @@
+# Every number this build asserts, with where and when it was measured.
+# Numbers live here, never in code, so a change is a reviewed diff.
+
+[press]
+source_commit = "5222a215"
+measured_on   = "2026-09-21"
+papers               = 197
+paragraphs           = 14586     # 14,442 \vs + 144 verse lines
+vs_paragraphs        = 14442
+paper_section_pairs  = 1626      # 1,429 titled sections + 197 untitled introductions
+redletter_spans      = 1267      # \textcolor{ubdarkred} -- the words of Jesus
+variant_1955_notes   = 177       # \fnc
+listmark_spans       = 2397      # \ublistelem
+dotleader_spans      = 26        # \bibdf
+em_spans             = 2294      # 2,299 \bibemph less the 5 inside \fnc bodies,
+                                 # which emit no paragraph text (p059 p102x2 p111 p112)
+gap_before_flags     = 4185      # 4,186 \pc less one occurrence inside a comment
+                                 # at p048.tex:114
+[study]
+source_commit = "8af25c5"
+measured_on   = "2026-09-21"
+papers               = 197
+paragraphs           = 14586     # realigned to press in 8af25c5,
+                                 # "Match Uversa Press paragraph numbering"
+paper_section_pairs  = 1626
+study_footnotes      = 307       # \fnst
+human_sources        = 54        # \bibitem, across 19 papers
+bibrefs              = 86
+quiz_questions       = 819
+quiz_correct_flags   = 1002      # 83 questions have more than one correct answer
+kjv_verses           = 24974
+kjv_marginal_notes   = 5069
+figures              = 84
+figures_private      = 58
+figures_free         = 26
+
+[index]
+# Read at HEAD; these drift legitimately as the index is edited, so they are
+# REPORTED as a band, never asserted.  check_tex.py's own EXPECT_ENTRIES moved
+# four times in five commits.  Only `dividers` is structural (26 letters + NUMBERS).
+source_commit = "f0ee66f9"
+measured_on   = "2026-09-21"
+entries              = 32837     # levels 1..5 = 4736 16455 10205 1262 179
+headwords            = 4736
+dividers             = 27        # structural: assert this one
+appendix_entries     = 1351      # B 308, C 86, D 429, E 72, F 456; A has none
+chronology_events    = 437       # \chrontext 244 + \chronsubtext 193
+citations            = 39771     # A-Z 38266 + appendices 1505
+citation_targets     = 50758     # para 47871, sec 2254, paper 633
+xref_targets         = 5133      # after splitting \see/\seealso args on ";"
+thin_paragraphs      = 1528      # 10.5% -- a BAND, moves with editing
+
+[derived]
+# Phase 4.  Reconciled against `read_pack.py --stats` in ../index.
+measured_on        = "2026-09-21"
+para_citers        = 113846
+cocitation_pairs   = 9721     # level-1 roots, paragraph precision, shared >= 2
+thin_all_scopes    = 1527     # our number: A-Z + Appendices A-F
+thin_read_pack     = 1528     # read_pack's, which excludes Appendix F by default
+orphan_paragraphs  = 10       # cited by nothing at any precision
+combined_headings  = 1        # p139 \usectiontwo{9 and 10}

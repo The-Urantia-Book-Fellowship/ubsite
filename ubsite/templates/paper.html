@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Paper {{ paper.n }} — {{ paper.title }}{% endblock %}
+{% block body %}<main class="prose">
+<p class="papernum">Paper {{ paper.n }}</p><h1>{{ paper.title }}</h1>
+{% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
+<ol class="toc">
+{% for s in sections %}<li><a href="/{{ paper.n }}:{{ s.n }}">{% if s.n %}<b>{{ s.n }}{% if s.combined_with %} and {{ s.combined_with }}{% endif %}.</b> {{ s.title }}{% else %}<b></b> Introduction{% endif %}</a></li>{% endfor %}
+</ol></main>{% endblock %}
