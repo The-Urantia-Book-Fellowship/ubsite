@@ -63,10 +63,11 @@ enabled site that points at a missing key stops it. With no server block
 claiming the name, certbot adds a temporary one of its own for the challenge.
 
 `certonly` rather than plain `--nginx` so that certbot does not rewrite
-`ubsite.nginx` on the box: the installed file stays identical to this one. The
-`--deploy-hook` is saved in the renewal config. Without an installer, nothing
-else would reload nginx after a renewal, and it would keep serving the old
-certificate until it expired.
+`ubsite.nginx` on the box: the installed file stays identical to this one.
+`--nginx` still records `installer = nginx` in the renewal config, and certbot
+reloads nginx after a renewal on that alone. The `--deploy-hook` (saved as
+`renew_hook`) is a second reload. It is harmless, and it still fires if the
+installer is ever changed.
 
 Take a **separate** certificate rather than adding the name to
 `ulib.ddns.net`'s: independent renewal, and one name failing cannot take the
