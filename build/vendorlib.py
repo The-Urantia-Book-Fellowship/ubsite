@@ -81,7 +81,7 @@ def check(repos) -> int:
             print(f"\nvendor: UPSTREAM MOVED  {e['repo']}:{e['path']}", file=sys.stderr)
             diff = difflib.unified_diff(
                 ours.read_text(errors="replace").splitlines(True),
-                up.read_text(errors="replace").splitlines(True),
+                up.decode(errors="replace").splitlines(True),
                 fromfile=f"vendor/{e['dest']}", tofile=str(src), n=2)
             sys.stderr.writelines(list(diff)[:60])
         elif sha256(ours.read_bytes()) != e["sha256"]:
