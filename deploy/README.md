@@ -15,7 +15,7 @@ pi5 already runs two services behind nginx on 443, told apart by name (TLS SNI):
 ```
 ulib.ddns.net, urantia.zapto.org  ->  127.0.0.1:8000   urantia-library
 proxyai.ddns.net                  ->  127.0.0.1:8090   libnodes
-ub.ddns.net                       ->  127.0.0.1:8130   ubsite      <- new
+ubsite.ddns.net                   ->  127.0.0.1:8130   ubsite      <- new
 _  (no-sni-default)               ->  444
 ```
 
@@ -48,13 +48,25 @@ sudo systemctl enable --now ubsite
 
 ### 2. The certificate
 
-`ub.ddns.net` must resolve to this box first. The existing certificate renews
+`ubsite.ddns.net` must resolve to this box first. The existing certificate renews
 with `authenticator = nginx`, i.e. the HTTP-01 challenge over port 80 — which
 is therefore forwarded on the router, and must stay so.
 
 ```
-sudo certbot --nginx -d ub.ddns.net
+sudo certbot certonly --nginx -d ubsite.ddns.net --deploy-hook "systemctl reload nginx"
 ```
+
+This comes **before** step 3, and the site must not be linked into
+`sites-enabled/` yet. `ubsite.nginx` names key files that do not exist until
+this step has run, and certbot runs `nginx -t` before doing anything, so an
+enabled site that points at a missing key stops it. With no server block
+claiming the name, certbot adds a temporary one of its own for the challenge.
+
+`certonly` rather than plain `--nginx` so that certbot does not rewrite
+`ubsite.nginx` on the box: the installed file stays identical to this one. The
+`--deploy-hook` is saved in the renewal config. Without an installer, nothing
+else would reload nginx after a renewal, and it would keep serving the old
+certificate until it expired.
 
 Take a **separate** certificate rather than adding the name to
 `ulib.ddns.net`'s: independent renewal, and one name failing cannot take the
@@ -63,15 +75,15 @@ other down. `certbot.timer` already runs twice daily and will pick it up.
 ### 3. The nginx site
 
 ```
-sudo cp deploy/ubsite.nginx /etc/nginx/sites-available/ubsite
-sudo ln -s /etc/nginx/sites-available/ubsite /etc/nginx/sites-enabled/
+sudo install -m0644 -o root -g root deploy/ubsite.nginx /etc/nginx/sites-available/ubsite.ddns.net
+sudo ln -s /etc/nginx/sites-available/ubsite.ddns.net /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
 Two things that will break it silently if ignored:
 
 * `no-sni-default` must remain the **only** `default_server` on 443.
-* `ub.ddns.net` must not also appear in `ulib.ddns.net`'s `server_name`.
+* `ubsite.ddns.net` must not also appear in `ulib.ddns.net`'s `server_name`.
   Two blocks claiming one name means the first parsed wins.
 
 ### 4. The sudoers drop-in

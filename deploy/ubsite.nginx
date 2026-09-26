@@ -1,13 +1,13 @@
-# Install as root:root 0644 at /etc/nginx/sites-available/ubsite, then:
+# Install as root:root 0644 at /etc/nginx/sites-available/ubsite.ddns.net, then:
 #
-#     sudo ln -s /etc/nginx/sites-available/ubsite /etc/nginx/sites-enabled/
+#     sudo ln -s /etc/nginx/sites-available/ubsite.ddns.net /etc/nginx/sites-enabled/
 #     sudo nginx -t && sudo systemctl reload nginx
 #
 # Two rules this file must not break:
 #
 #   1. `no-sni-default` is the ONLY default_server on 443. Do not add another
 #      here -- nginx refuses to start with a duplicate.
-#   2. ub.ddns.net must not also appear in ulib.ddns.net's server_name. Two
+#   2. ubsite.ddns.net must not also appear in ulib.ddns.net's server_name. Two
 #      blocks claiming one name means the first parsed wins, silently.
 #
 # Unlike ulib and libnodes there is NO allow/deny: this site is meant to be
@@ -18,7 +18,7 @@ limit_req_zone $binary_remote_addr zone=ubsite_search:10m rate=30r/m;
 
 server {
     listen 80;
-    server_name ub.ddns.net;
+    server_name ubsite.ddns.net;
     # Certbot's HTTP-01 challenge needs this to stay reachable; the existing
     # cert renews the same way, which is why port 80 is forwarded at all.
     return 301 https://$host$request_uri;
@@ -27,10 +27,10 @@ server {
 server {
     listen 443 ssl;
     http2 on;
-    server_name ub.ddns.net;
+    server_name ubsite.ddns.net;
 
-    ssl_certificate     /etc/letsencrypt/live/ub.ddns.net/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/ub.ddns.net/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/ubsite.ddns.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ubsite.ddns.net/privkey.pem;
 
     # The site accepts no uploads of any kind.
     client_max_body_size 1k;
