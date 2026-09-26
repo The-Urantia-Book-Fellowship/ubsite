@@ -21,9 +21,11 @@ sys.path.insert(0, str(ROOT / "vendor" / "index"))
 
 import cite  # noqa: E402
 from fastapi import FastAPI, Query, Request  # noqa: E402
+from fastapi.exception_handlers import http_exception_handler  # noqa: E402
 from fastapi.responses import HTMLResponse, RedirectResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fastapi.templating import Jinja2Templates  # noqa: E402
+from starlette.exceptions import HTTPException  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -78,9 +80,24 @@ def mode_of(request: Request) -> str:
     return "study"
 
 
-def page(request, template, **ctx):
+def page(request, template, status_code=200, **ctx):
     ctx.setdefault("mode", mode_of(request))
-    return T.TemplateResponse(request, template, ctx)
+    return T.TemplateResponse(request, template, ctx, status_code=status_code)
+
+
+def missing(request, msg: str):
+    """A 404 that is still a page of the site, with its header and search box."""
+    return page(request, "notfound.html", status_code=404, msg=msg,
+                path=request.url.path)
+
+
+@app.exception_handler(HTTPException)
+async def http_error(request: Request, exc: HTTPException):
+    # Routes nothing matches, such as /i/foo/bar, would otherwise get FastAPI's
+    # JSON {"detail": "Not Found"}.
+    if exc.status_code == 404:
+        return missing(request, "There is no page at this address.")
+    return await http_exception_handler(request, exc)
 
 
 @app.get("/healthz")
@@ -219,6 +236,8 @@ def index_letter(request: Request, letter: str):
         " FROM index_entry e JOIN entry_stats s ON s.entry_id=e.id"
         " WHERE e.scope='az' AND e.level=1 AND e.letter=? ORDER BY e.ord",
         (letter.upper(),)).fetchall()
+    if not rows:
+        return missing(request, f"The index has no section headed “{letter}”.")
     return page(request, "index_letter.html", letter=letter.upper(), rows=rows)
 
 
@@ -227,7 +246,7 @@ def concept(request: Request, slug: str):
     con = db()
     root = con.execute("SELECT * FROM index_entry WHERE slug=?", (slug,)).fetchone()
     if root is None:
-        return HTMLResponse("not found", 404)
+        return missing(request, "No headword in the index has this address.")
     tree = con.execute(
         "SELECT e.*, s.n_targets FROM index_entry e"
         " LEFT JOIN entry_stats s ON s.entry_id=e.id"
@@ -260,7 +279,8 @@ def paper_page(request: Request, paper: int):
     first = con.execute(
         "SELECT MIN(n) FROM section WHERE paper_n=?", (paper,)).fetchone()[0]
     if first is None:
-        return HTMLResponse("no such paper", 404)
+        return missing(request, f"There is no Paper {paper}. The Foreword is Paper 0,"
+                                " and the papers run to 196.")
     return RedirectResponse(f"/{paper}:{first}", status_code=307)
 
 
@@ -268,7 +288,7 @@ def paper_page(request: Request, paper: int):
 def read(request: Request, ref: str):
     m = RE_REF.match(ref)
     if not m:
-        return HTMLResponse("not a citation", 404)
+        return missing(request, "There is no page at this address.")
     paper, sec = int(m.group(1)), int(m.group(2))
     focus = int(m.group(3)) if m.group(3) else None
     last = int(m.group(4)) if m.group(4) else focus
@@ -276,8 +296,11 @@ def read(request: Request, ref: str):
     p = con.execute("SELECT * FROM paper WHERE n=?", (paper,)).fetchone()
     s = con.execute("SELECT * FROM section WHERE paper_n=? AND n=?",
                     (paper, sec)).fetchone()
-    if p is None or s is None:
-        return HTMLResponse("no such section", 404)
+    if p is None:
+        return missing(request, f"There is no Paper {paper}. The Foreword is Paper 0,"
+                                " and the papers run to 196.")
+    if s is None:
+        return missing(request, f"Paper {paper} has no section {sec}.")
     paras = con.execute(
         "SELECT p.*, d.precise_citers, d.thin FROM paragraph p"
         " LEFT JOIN para_density d ON d.paragraph_id=p.id"
