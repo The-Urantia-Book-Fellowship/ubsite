@@ -90,7 +90,7 @@ been red. Read end to end, searchable, each one citable.
 correct responses wrong. Spaced repetition; per-paper self-test.
 
 **10. The variorum layer.**
-177 `\fnc` first-edition readings `[imported]` + 84 study-edition variant notes +
+180 `\fnc` first-edition readings `[imported]` + 84 study-edition variant notes +
 the index errata. "What the 1955 printing said here", as a toggle.
 
 **11. Two editions, diffed.**

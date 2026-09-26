@@ -11,7 +11,7 @@ QUERIES = [
     ("paragraphs",          "SELECT COUNT(*) FROM paragraph", 14586),
     ("red-letter spans",    "SELECT COUNT(*) FROM span WHERE kind='redletter'", 1267),
     ("em spans",            "SELECT COUNT(*) FROM span WHERE kind='em'", 2295),
-    ("1955 variant notes",  "SELECT COUNT(*) FROM footnote WHERE kind='variant-1955'", 177),
+    ("1955 variant notes",  "SELECT COUNT(*) FROM footnote WHERE kind='variant-1955'", 180),
     ("index entries",       "SELECT COUNT(*) FROM index_entry", None),
     ("citations",           "SELECT COUNT(*) FROM citation", None),
     ("citation targets",    "SELECT COUNT(*) FROM citation_target", None),

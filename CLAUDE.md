@@ -115,7 +115,7 @@ and should stay that way.
 
 ```
 papers 197 · sections 1,626 · paragraphs 14,586
-red-letter spans 1,267 · em spans 2,295 · 1955 variant notes 177
+red-letter spans 1,267 · em spans 2,295 · 1955 variant notes 180
 index entries 34,625 (32,837 A–Z + 1,351 appendix + 437 chronology events)
 citations 39,771 → 50,758 targets {para 47,871, sec 2,254, paper 633}
 cross-references 5,133, 0 dangling · headwords 4,736
