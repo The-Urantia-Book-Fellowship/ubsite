@@ -67,7 +67,9 @@ if [ "$BUILD" = 1 ]; then
 fi
 
 echo "==> venv on $HOST"
-ssh "$HOST" "cd $DEST && $UV venv --python \$(cat .python-version) >/dev/null && $UV pip sync -q requirements.txt"
+# Created once, then only synced: uv 0.12 refuses to create a venv over an
+# existing one, so an unconditional `uv venv` failed every deploy but the first.
+ssh "$HOST" "cd $DEST && { [ -x .venv/bin/python ] || $UV venv --python \$(cat .python-version) >/dev/null; } && $UV pip sync -q requirements.txt"
 
 if [ "$RESTART" = 1 ]; then
     echo "==> restart"
