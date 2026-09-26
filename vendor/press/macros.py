@@ -131,7 +131,7 @@ TABLE: dict[str, Spec] = {
 
     # ---- Editorial footnotes — strip entirely (not present in SRT) ----
     "fnc":           Spec(STRIP, args=1, note="editorial footnote (added by this print edition only)"),
-    "footnote":      Spec(STRIP, args=1, note="footnote (only 1 occurrence, in p000 1:24)"),
+    "footnote":      Spec(STRIP, args=1, note="raw footnote; the book uses \\fnc instead -- 0 occurrences since 0:1.24 was converted. Kept so the coverage guard still recognises it"),
 
     # ---- Misc one-offs to handle ----
     "makebox":       Spec(EMIT_ARG, opt=2, args=1, note="\\makebox[width][alignment]{text}; emit text — both optional args are layout-only"),
