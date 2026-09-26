@@ -4,7 +4,7 @@
 {% set n = tree|length - 1 %}{% if n %}<p class="hint">{{ n }} {{ 'subentry' if n == 1 else 'subentries' }}</p>{% endif %}
 <ul class="tree">
 {% for e in tree %}
-  <li class="l{{ e.level }}">{{ e.text_html|safe }}</li>
+  <li class="l{{ e.level }}" id="{{ e.anchor }}">{{ e.text_html|safe }}</li>
 {% endfor %}
 </ul>
 {% if xrefs %}<h2>Cross-references</h2><ul class="xrefs">

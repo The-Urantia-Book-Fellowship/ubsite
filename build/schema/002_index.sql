@@ -24,6 +24,8 @@ CREATE TABLE index_entry (
   source_line INTEGER NOT NULL,
   ord INTEGER NOT NULL,
   UNIQUE (source_file, source_line)           -- the 'where' read_pack dedupes on
+  -- Two columns are added after loading: `slug` (level 1, from data/slugs.tsv,
+  -- in cli.py) and `anchor` (every entry, the fragment id, in derive.anchors).
 );
 CREATE INDEX index_entry_parent ON index_entry(parent_id);
 CREATE INDEX index_entry_root   ON index_entry(root_id);

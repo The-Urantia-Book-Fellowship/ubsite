@@ -172,6 +172,9 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .tree li { padding: .12rem 0; text-indent: -1.4em; padding-left: 1.4em; }
 .tree .l2 { margin-left: 1.5em; } .tree .l3 { margin-left: 3em; }
 .tree .l4 { margin-left: 4.5em; } .tree .l5 { margin-left: 6em; }
+/* A search hit on a subentry lands here: /i/<headword>#<anchor>. */
+.tree li:target { background: color-mix(in oklch, var(--link) 12%, transparent);
+  border-radius: 3px; box-shadow: 0 0 0 .3rem color-mix(in oklch, var(--link) 12%, transparent); }
 .near, .xrefs { list-style: none; padding: 0; }
 .near span { color: var(--faint); font-size: .88rem; }
 .results section { margin: 1.6rem 0; }

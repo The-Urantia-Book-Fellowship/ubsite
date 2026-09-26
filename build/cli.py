@@ -98,6 +98,7 @@ def main(argv: list[str]) -> int:
         derive.reverse_map(con)
         derive.density(con)
         derive.entry_stats(con)
+        derive.anchors(con, report)
         n_pairs = derive.cocitation(con)
         derive.fts(con)
         con.execute("INSERT INTO build VALUES (1, ?, 1, 0)",

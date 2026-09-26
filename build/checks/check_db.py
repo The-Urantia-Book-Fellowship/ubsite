@@ -31,6 +31,11 @@ INVARIANTS = [
          WHERE r.level <> 1"""),
     ("every chronology event has a sortable year",
      "SELECT COUNT(*) FROM chronology_event WHERE year_sort IS NULL"),
+    ("every index entry has an anchor",
+     "SELECT COUNT(*) FROM index_entry WHERE anchor IS NULL"),
+    ("no two entries of one headword share an anchor",
+     """SELECT COUNT(*) FROM (SELECT 1 FROM index_entry
+         GROUP BY root_id, anchor HAVING COUNT(*) > 1)"""),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]

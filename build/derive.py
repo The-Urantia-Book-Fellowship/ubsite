@@ -7,6 +7,7 @@ said about it.
 
 from __future__ import annotations
 
+import hashlib
 import itertools
 import math
 
@@ -64,6 +65,33 @@ def entry_stats(con) -> None:
              (SELECT COUNT(DISTINCT paper) FROM citation_target WHERE entry_id = e.id),
              (SELECT COUNT(*) FROM index_entry d WHERE d.root_id = e.id AND d.id <> e.id)
         FROM index_entry e""")
+
+
+def anchors(con, report) -> None:
+    """A fragment id for every entry, so that a link can land on a subentry.
+
+    Subentries have no slug.  A position or a row id would shift silently when
+    the index is edited, and a saved link would land on the wrong line.  A hash
+    of the entry's path can only stop matching, and then an old link opens the
+    headword at the top.  The path hashed is `path_fold`, citations and all:
+    `path_plain` cannot serve, because it drops every parenthesis and so makes
+    "Isaiah (first)" and "Isaiah (second)" the same string.  The same path twice
+    under one headword takes -2, -3, as slugs take a numeric suffix; each such
+    repeat is reported, because two identical subentries under one headword are
+    usually one heading split in two.
+    """
+    con.execute("ALTER TABLE index_entry ADD COLUMN anchor TEXT")
+    seen: dict[tuple[int, str], int] = {}
+    rows = []
+    for eid, root, fold, where, line in con.execute(
+            "SELECT id, root_id, path_fold, source_file, source_line"
+            "  FROM index_entry ORDER BY root_id, ord").fetchall():
+        base = "e" + hashlib.sha1(fold.encode("utf-8")).hexdigest()[:8]
+        k = seen[(root, base)] = seen.get((root, base), 0) + 1
+        if k > 1:
+            report.warn("index-repeated-subentry", f"{where}:{line}", fold)
+        rows.append((base if k == 1 else f"{base}-{k}", eid))
+    con.executemany("UPDATE index_entry SET anchor=? WHERE id=?", rows)
 
 
 def cocitation(con, floor: int = 2) -> int:
