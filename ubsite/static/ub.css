@@ -183,6 +183,8 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .hits li { padding: .22rem 0; border-bottom: 1px solid var(--rule); }
 .hits mark { background: color-mix(in oklch, var(--link) 22%, transparent); color: inherit; }
 .none { color: var(--faint); font-style: italic; }
+.more { margin: .6rem 0 0; }
+.results .pager { margin: 1.2rem 0 0; }
 .didyou { color: var(--faint); }
 
 /* ---- phone ------------------------------------------------------------- */

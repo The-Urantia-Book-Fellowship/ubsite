@@ -1,15 +1,28 @@
 {% extends "base.html" %}{% block title %}{{ q }}{% endblock %}
+{# One list's heading count.  On the overview a list cut short says "25 of 58";
+   opened whole it says which hundred this page holds. #}
+{% macro count(h) %}<span>{% if h.first > 1 or h.more %}{% if scope %}{{ '{:,}'.format(h.first) }}–{{ '{:,}'.format(h.last) }}{% else %}{{ h.last }}{% endif %} of {% endif %}{{ '{:,}'.format(h.n) }}</span>{% endmacro %}
+{% macro more(h, name, noun) %}
+{% if scope %}{% if h.first > 1 or h.more %}<nav class="pager">
+  {% if h.first > 1 %}<a href="/search?q={{ q|urlencode }}&amp;in={{ name }}&amp;page={{ h.page - 1 }}">Earlier</a>{% endif %}
+  {% if h.more %}<a class="next" href="/search?q={{ q|urlencode }}&amp;in={{ name }}&amp;page={{ h.page + 1 }}">Later</a>{% endif %}
+</nav>{% endif %}
+{% elif h.more %}<p class="more"><a href="/search?q={{ q|urlencode }}&amp;in={{ name }}">Show all {{ '{:,}'.format(h.n) }} {{ noun }}</a></p>{% endif %}
+{% endmacro %}
 {% block body %}<main class="prose results">
 <h1>{{ q }}</h1>
+{% if scope %}<p class="hint"><a href="/search?q={{ q|urlencode }}">All results for “{{ q }}”</a></p>{% endif %}
 {% if diagnose and diagnose[1] %}<p class="didyou">Did you mean
-  {% for c in diagnose[1] %}<a href="/search?q={{ c }}">{{ c }}</a>{% if not loop.last %} or {% endif %}{% endfor %}?</p>{% endif %}
+  {% for c in diagnose[1] %}<a href="/search?q={{ c|urlencode }}">{{ c }}</a>{% if not loop.last %} or {% endif %}{% endfor %}?</p>{% endif %}
 {% if heads %}<section><h2>Headwords</h2>
 <ul class="hits heads-hit">{% for h in heads %}<li><a href="/i/{{ h.slug }}">{{ h.headword }}</a>
   {% if h.kids %}<span>{{ h.kids }} {{ 'subentry' if h.kids == 1 else 'subentries' }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
-<section><h2>In the index <span>{{ n_idx }}</span></h2>
-{% if idx %}<ul class="hits">{% for e in idx %}<li><a href="/i/{{ e.slug }}">{{ e.path }}</a></li>{% endfor %}</ul>
-{% else %}<p class="none">nothing</p>{% endif %}</section>
-<section><h2>In the text <span>{{ n_txt }}</span></h2>
-{% if txt %}<ul class="hits">{% for t in txt %}<li><a href="/{{ t.ref }}">{{ t.ref }}</a> {{ t.s|safe }}</li>{% endfor %}</ul>
-{% else %}<p class="none">nothing</p>{% endif %}</section>
+{% if scope != 'text' %}<section><h2>In the index {% if idx %}{{ count(idx) }}{% else %}<span>0</span>{% endif %}</h2>
+{% if idx and idx.rows %}<ul class="hits">{% for e in idx.rows %}<li><a href="/i/{{ e.rslug }}{% if e.level > 1 %}#{{ e.anchor }}{% endif %}">{{ e.path }}</a></li>{% endfor %}</ul>
+{{ more(idx, 'index', 'index entries') }}
+{% else %}<p class="none">nothing</p>{% endif %}</section>{% endif %}
+{% if scope != 'index' %}<section><h2>In the text {% if txt %}{{ count(txt) }}{% else %}<span>0</span>{% endif %}</h2>
+{% if txt and txt.rows %}<ul class="hits">{% for t in txt.rows %}<li><a href="/{{ t.ref }}">{{ t.ref }}</a> {{ t.s|safe }}</li>{% endfor %}</ul>
+{{ more(txt, 'text', 'paragraphs') }}
+{% else %}<p class="none">nothing</p>{% endif %}</section>{% endif %}
 </main>{% endblock %}
