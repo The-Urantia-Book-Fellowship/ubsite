@@ -99,6 +99,8 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
         gap: 0 2rem; }
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
 p.t.pc { margin-top: .85rem; }          /* a 1955 blank-line group starts here */
+/* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
+p.t.hit, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 .num { float: left; margin-left: -2.2rem; width: 1.7rem; text-align: right;
