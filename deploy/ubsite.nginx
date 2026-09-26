@@ -1,9 +1,7 @@
 # Install as root:root 0644 at /etc/nginx/sites-available/ubsite, then:
 #
 #     sudo ln -s /etc/nginx/sites-available/ubsite /etc/nginx/sites-enabled/
-#     sudo /usr/sbin/nginx -t && sudo systemctl reload nginx
-#
-# (nginx is not on the PATH on pi5; use the absolute path to test.)
+#     sudo nginx -t && sudo systemctl reload nginx
 #
 # Two rules this file must not break:
 #

@@ -65,10 +65,8 @@ other down. `certbot.timer` already runs twice daily and will pick it up.
 ```
 sudo cp deploy/ubsite.nginx /etc/nginx/sites-available/ubsite
 sudo ln -s /etc/nginx/sites-available/ubsite /etc/nginx/sites-enabled/
-sudo /usr/sbin/nginx -t && sudo systemctl reload nginx
+sudo nginx -t && sudo systemctl reload nginx
 ```
-
-`nginx` is not on the PATH on pi5; use the absolute path to test.
 
 Two things that will break it silently if ignored:
 
