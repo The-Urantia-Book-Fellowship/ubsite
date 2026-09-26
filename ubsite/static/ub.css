@@ -133,6 +133,10 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .chips a { color: var(--faint); text-decoration: none; display: block;
   border-left: 2px solid var(--rule); padding-left: .5rem; }
 .chips a:hover { color: var(--ink); border-left-color: var(--link); }
+/* An appendix entry: no page yet, so named rather than linked. */
+.chips .app { display: block; border-left: 2px solid var(--rule); padding-left: .5rem; }
+.app .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
+.blanket .app { color: var(--faint); }
 .thin { font-style: italic; opacity: .6; margin: .25rem 0 0; }
 .note { margin: .4rem 0 0; }
 .note .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--link); }

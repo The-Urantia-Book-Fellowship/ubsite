@@ -32,6 +32,26 @@ app = FastAPI(docs_url=None, redoc_url=None)
 app.mount("/static", StaticFiles(directory=ROOT / "ubsite" / "static"), name="static")
 T = Jinja2Templates(directory=str(ROOT / "ubsite" / "templates"))
 
+
+def entry_href(rslug: str, level: int, anchor: str) -> str:
+    """Where an index entry lives: its headword's page, at the entry's own line.
+
+    A headword is the page itself, so it takes no fragment; a subentry takes its
+    anchor, and the concept page highlights it with :target.
+    """
+    return f"/i/{rslug}" + (f"#{anchor}" if level > 1 else "")
+
+
+T.env.globals["entry_href"] = entry_href
+
+# What a margin chip needs.  An appendix entry -- a Chronology event, a named
+# being, person or place -- has no page yet and so no slug; it is shown by
+# name with its appendix, and an event with its date, rather than linked.
+CHIP_COLS = ("e.path_plain AS path, e.level, e.anchor, r.slug AS rslug,"
+                 " a.title AS appendix, ev.year_label AS year")
+CHIP_JOIN = (" LEFT JOIN appendix a ON a.letter=e.scope"
+                 " LEFT JOIN chronology_event ev ON ev.entry_id=e.id")
+
 RE_REF = re.compile(r"^(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?$")
 RE_TERM = re.compile(r'"([^"]*)"?|(\S+)')
 
@@ -308,17 +328,19 @@ def read(request: Request, ref: str):
         (paper, sec)).fetchall()
     citers = {}
     for row in con.execute(
-            "SELECT c.paragraph_id, e.slug, e.path_plain AS path, e.root_id, r.slug AS rslug"
+            "SELECT c.paragraph_id, " + CHIP_COLS +
             " FROM para_citers c JOIN index_entry e ON e.id=c.entry_id"
-            " JOIN index_entry r ON r.id=e.root_id"
+            " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
             " JOIN paragraph p ON p.id=c.paragraph_id"
             " WHERE p.paper_n=? AND p.section_n=? AND c.precision='para'"
             " ORDER BY e.ord", (paper, sec)):
         citers.setdefault(row["paragraph_id"], []).append(row)
     blanket = con.execute(
-        "SELECT DISTINCT e.path_plain AS path, r.slug AS rslug FROM para_citers c"
+        "SELECT DISTINCT " + CHIP_COLS +
+        " FROM para_citers c"
         " JOIN index_entry e ON e.id=c.entry_id"
-        " JOIN index_entry r ON r.id=e.root_id JOIN paragraph p ON p.id=c.paragraph_id"
+        " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
+        " JOIN paragraph p ON p.id=c.paragraph_id"
         " WHERE p.paper_n=? AND p.section_n=? AND c.precision IN ('sec','paper')"
         " ORDER BY e.ord LIMIT 60", (paper, sec)).fetchall()
     notes = {}

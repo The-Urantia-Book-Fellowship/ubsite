@@ -18,7 +18,7 @@
 <ul class="hits heads-hit">{% for h in heads %}<li><a href="/i/{{ h.slug }}">{{ h.headword }}</a>
   {% if h.kids %}<span>{{ h.kids }} {{ 'subentry' if h.kids == 1 else 'subentries' }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
 {% if scope != 'text' %}<section><h2>In the index {% if idx %}{{ count(idx) }}{% else %}<span>0</span>{% endif %}</h2>
-{% if idx and idx.rows %}<ul class="hits">{% for e in idx.rows %}<li><a href="/i/{{ e.rslug }}{% if e.level > 1 %}#{{ e.anchor }}{% endif %}">{{ e.path }}</a></li>{% endfor %}</ul>
+{% if idx and idx.rows %}<ul class="hits">{% for e in idx.rows %}<li><a href="{{ entry_href(e.rslug, e.level, e.anchor) }}">{{ e.path }}</a></li>{% endfor %}</ul>
 {{ more(idx, 'index', 'index entries') }}
 {% else %}<p class="none">nothing</p>{% endif %}</section>{% endif %}
 {% if scope != 'index' %}<section><h2>In the text {% if txt %}{{ count(txt) }}{% else %}<span>0</span>{% endif %}</h2>

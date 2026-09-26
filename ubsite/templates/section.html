@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{# An index entry beside the text.  A headword or subentry links to its line on
+   the concept page; an appendix entry has no page yet, so it is named instead. #}
+{% macro chip(c) -%}
+{% if c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path }}</a>
+{%- else %}<span class="app"><span class="lbl">{{ c.appendix }}</span> {% if c.year %}{{ c.year }}: {% endif %}{{ c.path }}</span>{% endif %}
+{%- endmacro %}
 {% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
 {% block body %}
 <main class="reader">
@@ -26,7 +32,7 @@
       {# read_pack's rule: a blanket citation is listed ONCE here, never repeated
          under every paragraph -- otherwise Paper 15's 470 citations print some
          entries forty times over and the eye stops reading. #}
-      <ul>{% for b in blanket %}<li><a href="/i/{{ b.rslug }}">{{ b.path }}</a></li>{% endfor %}</ul>
+      <ul>{% for b in blanket %}<li>{{ chip(b) }}</li>{% endfor %}</ul>
     </aside>
     {% endif %}
 
@@ -39,7 +45,7 @@
       {% set cs = citers.get(p.id, []) %}
         {% if cs %}
           <ul class="chips">
-          {% for c in cs %}<li><a href="/i/{{ c.rslug }}">{{ c.path }}</a></li>{% endfor %}
+          {% for c in cs %}<li>{{ chip(c) }}</li>{% endfor %}
           </ul>
         {% elif p.thin %}
           <p class="thin">no entry cites this paragraph precisely</p>

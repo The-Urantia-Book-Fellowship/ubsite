@@ -11,19 +11,23 @@
     try { localStorage.setItem('ub_theme', next); } catch (e) {}
   });
 
-  // /61:7.18 renders the whole of 61:7 with paragraph 18 marked .hit.  Nothing
-  // in the address says where to scroll -- a #fragment would, but it would
-  // also make the permalink something other than the citation -- so the page
-  // brings its own focus into view.  Again once the fonts are in: UB Goudy
+  // Bring the page's focus into view.  /61:7.18 renders the whole of 61:7 with
+  // paragraph 18 marked .hit, and nothing in the address says where to scroll
+  // -- a #fragment would, but then the permalink would stop being the
+  // citation.  A margin chip opens /i/god#e…, which the browser scrolls to
+  // itself.  Either way, scroll once more when the fonts are in: UB Goudy
   // loads with font-display: swap, the text reflows, and the first scroll
-  // drifts.  Not if the reader has scrolled meanwhile, and never over an
-  // explicit #fragment, which the browser has already honoured.
-  var hit = document.querySelector('.hit');
-  if (hit && !location.hash) {
-    hit.scrollIntoView({ block: 'start' });
+  // drifts.  Not if the reader has scrolled meanwhile.
+  var focus = null;
+  try {
+    focus = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1)))
+                          : document.querySelector('.hit');
+  } catch (e) {}
+  if (focus) {
+    focus.scrollIntoView({ block: 'start' });
     var y = window.scrollY;
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
-      if (window.scrollY === y) hit.scrollIntoView({ block: 'start' });
+      if (window.scrollY === y) focus.scrollIntoView({ block: 'start' });
     });
   }
 })();
