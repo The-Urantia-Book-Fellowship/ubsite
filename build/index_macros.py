@@ -59,6 +59,9 @@ RE_ESCAPE = re.compile(r"\\([#$%&_^~{}])")
 RE_CIT = re.compile(r"\\cit\{([^}]*)\}")
 RE_XREF = re.compile(r"\\(see|seealso)\{([^}]*)\}")
 RE_AB = re.compile(r"\\ab\{([^}]*)\}")
+# A See clause, with the period that introduces it: "death. See also atonement".
+RE_XREF_CLAUSE = re.compile(r"\.?\s*\\(?:see|seealso)\{[^}]*\}")
+RE_QV = re.compile(r"\\qv\b")
 
 
 def unescape(s: str) -> str:
@@ -82,6 +85,21 @@ def render(s: str, where: str = "", report=None) -> str:
         else:
             raise ValueError(f"{where}: {msg}")
     return re.sub(r"\s+", " ", s).strip()
+
+
+def label(s: str, where: str = "", report=None) -> str:
+    r"""What an entry names, without what it points at: the margin chip.
+
+    Exactly \cit{}, \see{}, \seealso{} and \qv come out, with the period
+    that introduces a See clause.  Every other parenthesis is the editor's own
+    words and stays -- "Adam (village)" and "Adam (original of Satania)" are two
+    different people, and a chip that calls them both "Adam" has lost that.
+    Stripping every parenthesis from the rendered text, as the chips used to,
+    also took "(first)" off Isaiah and "(temporary members)" off Technical
+    Advisers.
+    """
+    return render(RE_QV.sub("", RE_XREF_CLAUSE.sub("", RE_CIT.sub("", s))),
+                  where, report)
 
 
 # The HTML rendering.  Same closed set, same order, but it keeps what the plain

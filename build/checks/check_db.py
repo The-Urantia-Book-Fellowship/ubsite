@@ -72,6 +72,24 @@ def run(con) -> int:
     if toff:
         bad += 1
 
+    # The chip must keep the editor's words.  Every "(" in an entry's printed
+    # text is one of its citations, or inside a See target, or in its chip --
+    # the old chip text dropped them all, and "Adam (village)" became "Adam".
+    cits = dict(con.execute("SELECT entry_id, COUNT(*) FROM citation GROUP BY 1"))
+    refs = {}
+    for eid, target in con.execute("SELECT entry_id, target FROM xref"):
+        refs[eid] = refs.get(eid, 0) + target.count("(")
+    j = lost = 0
+    for eid, text, path in con.execute("SELECT id, text, path_plain FROM index_entry"):
+        j += 1
+        chip = path.split(" \u203a ")[-1]
+        if text.count("(") != chip.count("(") + cits.get(eid, 0) + refs.get(eid, 0):
+            lost += 1
+    print(f"chips:      {j - lost}/{j} keep every parenthesis that is not a citation"
+          + ("" if not lost else f"   {lost} FAIL"))
+    if lost:
+        bad += 1
+
     print("counts")
     for name, q, expect in QUERIES:
         got = con.execute(q).fetchone()[0]

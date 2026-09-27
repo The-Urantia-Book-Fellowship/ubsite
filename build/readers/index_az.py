@@ -18,7 +18,8 @@ import pathlib
 import re
 
 from ..index_macros import (CHRON_MACROS, ENTRY_MACROS, LEVEL_OF, OTHER_MACROS,
-                            RE_AB, RE_CIT, RE_XREF, balanced, render, unescape)
+                            RE_AB, RE_CIT, RE_XREF, balanced, label, render,
+                            unescape)
 from ._io import read_text
 
 LETTERS = ["numbers"] + [chr(c) for c in range(ord("a"), ord("z") + 1)]
@@ -36,6 +37,9 @@ class Entry:
     text_expanded: str         # with \ab{} expanded against the headword
     chain: list[str]           # ancestor texts, shallowest first, then this entry
     path: str                  # ' > '.join(chain)
+    # The chip: each level's label -- the headword, or an entry without its
+    # citations and cross-references -- joined by ' › '.
+    path_plain: str
     cites: list[str]           # raw \cit{} arguments, in order
     xrefs: list[tuple[str, str]]   # ('see'|'seealso', target) after ';' splitting
     qv: bool
@@ -66,6 +70,7 @@ def read_az(texdir: pathlib.Path, report) -> list[Entry]:
             continue
         stack: dict[int, str] = {}          # reset per file, unlike upstream
         stack_head: dict[int, str] = {}
+        stack_label: dict[int, str] = {}
         current_letter = None
         prev_level = 0
         for lineno, raw in enumerate(read_text(path).splitlines(), 1):
@@ -87,7 +92,7 @@ def read_az(texdir: pathlib.Path, report) -> list[Entry]:
 
             if macro == "idivider":
                 current_letter, _ = balanced(line, line.index("{"))
-                stack.clear(); stack_head.clear(); prev_level = 0
+                stack.clear(); stack_head.clear(); stack_label.clear(); prev_level = 0
                 continue
             if macro in OTHER_MACROS:
                 continue
@@ -121,9 +126,11 @@ def read_az(texdir: pathlib.Path, report) -> list[Entry]:
 
             stack[level] = text
             stack_head[level] = headword if macro == "iA" else text
+            stack_label[level] = headword if macro == "iA" else label(src, where, report)
             for deeper in [k for k in stack if k > level]:
                 del stack[deeper]
                 stack_head.pop(deeper, None)
+                stack_label.pop(deeper, None)
 
             # Ancestors contribute their HEAD only -- a level-1 parent's own
             # citations and See-also list restated in front of each of its
@@ -140,6 +147,7 @@ def read_az(texdir: pathlib.Path, report) -> list[Entry]:
                 where=where, scope="az", letter=current_letter, level=level,
                 headword=headword, text=text, text_expanded=expanded,
                 chain=chain, path=" > ".join(chain),
+                path_plain=" \u203a ".join(stack_label[k] for k in sorted(stack_label)),
                 cites=RE_CIT.findall(line), xrefs=xrefs,
                 qv=bool(re.search(r"\\qv\b", line)), raw=line, src_text=src,
                 ord=ordinal))

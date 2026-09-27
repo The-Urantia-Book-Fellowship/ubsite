@@ -22,8 +22,8 @@ import dataclasses
 import pathlib
 import re
 
-from ..index_macros import (CHRON_MACROS, RE_CIT, RE_XREF, balanced, render,
-                            unescape)
+from ..index_macros import (CHRON_MACROS, RE_CIT, RE_XREF, balanced, label,
+                            render, unescape)
 from ._io import read_text
 from .index_az import Entry
 
@@ -39,6 +39,7 @@ class ChronEvent:
     month_label: str | None      # None for a \chrontext -- it hangs off the year
     text: str
     src_text: str
+    label: str                   # the event without its citations: the chip
     cites: list[str]
     ord: int
 
@@ -104,7 +105,8 @@ def read_appendices(texdir: pathlib.Path, report,
                     where=where, year_label=year or "",
                     # chrontext hangs off the year; only chronsubtext takes the month
                     month_label=month if macro == "chronsubtext" else None,
-                    text=text, src_text=raw_arg, cites=RE_CIT.findall(line), ord=ordinal))
+                    text=text, src_text=raw_arg, label=label(raw_arg, where, report),
+                    cites=RE_CIT.findall(line), ord=ordinal))
                 continue
 
             if macro != "iapp":
@@ -125,7 +127,8 @@ def read_appendices(texdir: pathlib.Path, report,
             entries.append(Entry(
                 where=where, scope=letter.upper(), letter=letter.upper(), level=1,
                 headword=text.rstrip("."), text=text, text_expanded=text,
-                chain=[text], path=text, cites=RE_CIT.findall(line), xrefs=xrefs,
+                chain=[text], path=text, path_plain=label(src, where, report),
+                cites=RE_CIT.findall(line), xrefs=xrefs,
                 qv=bool(re.search(r"\\qv\b", line)), raw=line, src_text=src,
                 ord=ordinal))
 

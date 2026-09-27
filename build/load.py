@@ -98,7 +98,7 @@ def load_index(con, az, apps, para_key, report) -> None:
             del stack[deeper]
         con.execute("INSERT INTO index_entry VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (eid, scope, parent, root, e.level, e.letter, e.headword,
-                     e.text, render_html(e.src_text), e.text_expanded, e.path, _plain(e.path), xref.fold(e.path),
+                     e.text, render_html(e.src_text), e.text_expanded, e.path, e.path_plain, xref.fold(e.path),
                      int(e.qv), e.where.split(":")[0], int(e.where.split(":")[1]),
                      e.ord))
         by_where[e.where] = eid
@@ -136,7 +136,7 @@ def load_index(con, az, apps, para_key, report) -> None:
             eid += 1
             con.execute("INSERT INTO index_entry VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (eid, a.letter, None, eid, 1, None, None, v.text,
-                         render_html(v.src_text), v.text, v.text, _plain(v.text), xref.fold(v.text), 0,
+                         render_html(v.src_text), v.text, v.text, v.label, xref.fold(v.text), 0,
                          v.where.split(":")[0], int(v.where.split(":")[1]), v.ord))
             ysort, approx = parse_year(v.year_label)
             if ysort is None:
@@ -175,18 +175,11 @@ _RE_PAREN = re.compile(r"\s*\([^)]*\)")
 _RE_SEE = re.compile(r"\s*\bSee(?: also)?\b.*$")
 
 
+# Keys for resolving cross-references, never for display.  Both sides of a
+# lookup are cleaned alike, so dropping every parenthesis is harmless here; what
+# a reader sees is index_macros.label(), which keeps them.
 def _clean(s: str) -> str:
     return _RE_PAREN.sub("", _RE_SEE.sub("", s)).strip()
-
-
-def _plain(path: str) -> str:
-    """The path as a reader sees it on screen: concepts, not numbers.
-
-    The terminal period is the printed index's cue that a cross-reference
-    follows.  With the citations and the See clause gone it is just a stray
-    dot, so it goes too -- the period was always presentation.
-    """
-    return " \u203a ".join(_clean(p).rstrip(".") for p in path.split(" > "))
 
 
 def _path_key(path: str) -> str:
