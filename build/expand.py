@@ -50,6 +50,10 @@ class Note:
     offset: int
     kind: str
     raw: str
+    # The body expanded like any paragraph.  Stored raw, the seven notes that
+    # carry a macro reached the reader as "\bibemph {the}" and "\ldots \ ".
+    text: str
+    spans: list[Span]
 
 
 @dataclasses.dataclass(slots=True)
@@ -72,13 +76,16 @@ class Expander:
         self.where = where
 
     def run(self, src: str) -> Expanded:
+        return self._run(tokenize(src))
+
+    def _run(self, tokens) -> Expanded:
         self.out: list[str] = []
         self.n = 0                       # running length of "".join(self.out)
         self.spans: list[Span] = []
         self.notes: list[Note] = []
         self.flags: dict[str, float] = {}
         self.seen: set[str] = set()
-        self._expand(TokenStream(tokenize(src)))
+        self._expand(TokenStream(tokens))
         return Expanded("".join(self.out), self.spans, self.notes,
                         self.flags, self.seen)
 
@@ -198,8 +205,14 @@ class Expander:
             self._emit(spec.text)
             return
         if a == NOTE:
-            raw = _raw(args[spec.which - 1]) if args else ""
-            self.notes.append(Note(self.n, spec.kind, raw))
+            body = args[spec.which - 1] if args else []
+            # A fresh expander, so the note's text and spans are its own and the
+            # paragraph's running offset is untouched.
+            inner = Expander(self.table, self.environments, self.report, self.where,
+                             self.unbraced_lengths, self.italic_openers)._run(body)
+            if inner.notes:
+                self.report.hard("note-inside-note", self.where, _raw(body)[:60])
+            self.notes.append(Note(self.n, spec.kind, _raw(body), inner.text, inner.spans))
             self.spans.append(Span(self.n, self.n, "fnref",
                                    {"kind": spec.kind, "i": len(self.notes) - 1}))
             return

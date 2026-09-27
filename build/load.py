@@ -74,8 +74,9 @@ def load_text(con, papers, repo, report) -> dict:
                             (spid, qid, s.start, s.end, s.kind, None, i))
             for i, nt in enumerate(q.ex.notes):
                 fid += 1
-                con.execute("INSERT INTO footnote VALUES (?,1,?,?,?,?,?)",
-                            (fid, nt.kind, qid, nt.offset, i, nt.raw))
+                con.execute("INSERT INTO footnote VALUES (?,1,?,?,?,?,?,?)",
+                            (fid, nt.kind, qid, nt.offset, i, nt.text,
+                             render(nt.text, nt.spans)))
     return para_key
 
 

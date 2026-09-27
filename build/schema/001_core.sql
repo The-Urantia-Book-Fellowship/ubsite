@@ -97,6 +97,7 @@ CREATE TABLE footnote (
   paragraph_id INTEGER REFERENCES paragraph(id),
   anchor INTEGER,                             -- code-point offset in paragraph.text
   ord INTEGER NOT NULL,
-  text TEXT NOT NULL
+  text TEXT NOT NULL,
+  html TEXT NOT NULL                          -- derived cache: render(text, spans)
 );
 CREATE INDEX footnote_para ON footnote(paragraph_id);

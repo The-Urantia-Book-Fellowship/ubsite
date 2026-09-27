@@ -14,7 +14,8 @@ variant_1955_notes   = 180       # \fnc; 177 at 5222a215, then press 36927e0 set
 listmark_spans       = 2397      # \ublistelem
 dotleader_spans      = 26        # \bibdf
 em_spans             = 2294      # 2,299 \bibemph less the 5 inside \fnc bodies,
-                                 # which emit no paragraph text (p059 p102x2 p111 p112)
+                                 # which emit no paragraph text (p059 p102x2 p111 p112):
+                                 # they are the 1955 notes' own italics, in footnote.html
 gap_before_flags     = 4185      # 4,186 \pc less one occurrence inside a comment
                                  # at p048.tex:114
 [study]

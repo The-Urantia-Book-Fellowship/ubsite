@@ -36,6 +36,15 @@ INVARIANTS = [
     ("no two entries of one headword share an anchor",
      """SELECT COUNT(*) FROM (SELECT 1 FROM index_entry
          GROUP BY root_id, anchor HAVING COUNT(*) > 1)"""),
+    # Nothing a reader sees may still be LaTeX.  The 1955 notes were stored
+    # raw, and seven of them showed "\bibemph {the}" on the page.
+    ("no backslash in any text a reader sees",
+     """SELECT (SELECT COUNT(*) FROM paragraph WHERE text GLOB '*\\*')
+             + (SELECT COUNT(*) FROM footnote WHERE text GLOB '*\\*')
+             + (SELECT COUNT(*) FROM section WHERE title GLOB '*\\*')
+             + (SELECT COUNT(*) FROM paper WHERE title GLOB '*\\*')
+             + (SELECT COUNT(*) FROM index_entry WHERE text GLOB '*\\*'
+                                                    OR path_plain GLOB '*\\*')"""),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]
@@ -61,6 +70,15 @@ def run(con) -> int:
     print(f"            {m - ioff}/{m} index entries round-trip"
           + ("" if not ioff else f"   {ioff} FAIL"))
     if ioff:
+        bad += 1
+    k = foff = 0
+    for text, h in con.execute("SELECT text, html FROM footnote"):
+        k += 1
+        if strip_tags(h) != text:
+            foff += 1
+    print(f"            {k - foff}/{k} notes round-trip"
+          + ("" if not foff else f"   {foff} FAIL"))
+    if foff:
         bad += 1
     k = toff = 0
     for text, h in con.execute("SELECT title, title_html FROM section WHERE n > 0"):
