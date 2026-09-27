@@ -33,7 +33,10 @@ CREATE TABLE section (
   paper_id INTEGER NOT NULL REFERENCES paper(id),
   paper_n INTEGER NOT NULL,
   n INTEGER NOT NULL,                         -- 0 = the untitled introduction
-  title TEXT,                                 -- NULL iff n = 0
+  title TEXT,                                 -- NULL iff n = 0; one line, plain
+  -- A derived cache, like paragraph.html: the title with a <br> at each of its
+  -- printed line breaks.  Stripping its tags returns `title` byte for byte.
+  title_html TEXT,
   -- \usectiontwo{9 and 10}: one printed heading spanning two section numbers.
   -- p139's paragraphs all run 139:9.x and the text jumps straight to 11, so
   -- section 10 is a label, not a container.  Only sections that hold paragraphs

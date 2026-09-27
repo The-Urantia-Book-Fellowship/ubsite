@@ -356,5 +356,5 @@ def read(request: Request, ref: str):
                 citers=citers, blanket=blanket, notes=notes,
                 focus=focus, last=last, nxt=nxt, prv=prv,
                 all_sections=con.execute(
-                    "SELECT n, title FROM section WHERE paper_n=? ORDER BY n",
+                    "SELECT n, title_html FROM section WHERE paper_n=? ORDER BY n",
                     (paper,)).fetchall())

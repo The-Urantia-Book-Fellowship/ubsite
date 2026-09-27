@@ -62,6 +62,15 @@ def run(con) -> int:
           + ("" if not ioff else f"   {ioff} FAIL"))
     if ioff:
         bad += 1
+    k = toff = 0
+    for text, h in con.execute("SELECT title, title_html FROM section WHERE n > 0"):
+        k += 1
+        if strip_tags(h) != text:
+            toff += 1
+    print(f"            {k - toff}/{k} section titles round-trip"
+          + ("" if not toff else f"   {toff} FAIL"))
+    if toff:
+        bad += 1
 
     print("counts")
     for name, q, expect in QUERIES:

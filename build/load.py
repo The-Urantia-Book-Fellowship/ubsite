@@ -13,7 +13,7 @@ import sys
 
 from .chronology import parse_year
 from .index_macros import render_html
-from .render import render
+from .render import render, title as render_title
 
 VENDOR = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "index"
 sys.path.insert(0, str(VENDOR))
@@ -56,8 +56,9 @@ def load_text(con, papers, repo, report) -> dict:
             sec_id[n] = sid
             combined = n + 1 if (n + 1) in p.sections and (n + 1) not in present \
                 and p.sections.get(n) == p.sections.get(n + 1) else None
-            con.execute("INSERT INTO section VALUES (?,1,?,?,?,?,?)",
-                        (sid, pid, p.n, n, p.sections.get(n) or None, combined))
+            plain, shown = render_title(p.sections[n]) if p.sections.get(n) else (None, None)
+            con.execute("INSERT INTO section VALUES (?,1,?,?,?,?,?,?)",
+                        (sid, pid, p.n, n, plain, shown, combined))
         for q in p.paragraphs:
             qid += 1
             para_key[(q.paper, q.section, q.n)] = qid

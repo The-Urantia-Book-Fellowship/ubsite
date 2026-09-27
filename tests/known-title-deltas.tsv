@@ -1,0 +1,11 @@
+# Section titles where ubsite deliberately differs from the press HTML headings.
+#
+# Both are one line in the TeX, which is the master: LaTeX breaks them at the
+# em dash only because they are long, and that break is the typesetter's, not
+# the text's.  The HTML hard-codes it as <br />.  The gate requires EXACTLY this
+# set, each differing ONLY by that break -- a new disagreement fails, and so does
+# one of these silently going away.
+#
+# section	code	note
+51:5	break-after-dash	TeX: Racial Amalgamation---Bestowal of the Adamic Blood
+148:6	break-after-dash	TeX: The Misunderstanding of Suffering---Discourse on Job

@@ -156,6 +156,14 @@ def main(argv: list[str]) -> int:
         rc = text_run(papers,
                       load_oracle(srt or repos["index"]["path"] / "data" / "srt.jsonl"),
                       load_deltas(root / "tests" / "known-oracle-deltas.tsv"))
+        print("\n== section titles vs press HTML ==")
+        from .checks.check_titles import load_press_titles, run as titles_run
+        htmldir = repos["press"]["path"] / "misc" / "html"
+        if htmldir.is_dir():
+            rc |= titles_run(papers, load_press_titles(htmldir),
+                             load_deltas(root / "tests" / "known-title-deltas.tsv"))
+        else:
+            print("  press misc/html absent -- skipped")
         print("\n== edition alignment ==")
         rc |= align_run(repos["study"]["tex"],
                         repos["index"]["path"] / "data" / "srt.jsonl", {})

@@ -29,6 +29,9 @@ RE_AUTHOR   = re.compile(r"^\\author\{")
 RE_USECTION = re.compile(r"^\\usection(two)?\b")
 RE_SUPER    = re.compile(r"\\printvssuper\{(\d+)\}")
 RE_MARK     = re.compile(r"\\vsmark\{(\d+)\}\{(\d+)\}")
+# \\ in a section title is a printed line break.  It may carry a star and an
+# optional vertical skip, \\[1ex], which is spacing and never text.
+RE_NEWLINE  = re.compile(r"\\\\\*?(?:\[[^\]]*\])?")
 RE_LAYOUT   = re.compile(r"\\hspace\*?\{[^{}]*\}|\\setlength\{[^{}]*\}\{[^{}]*\}"
                          r"|\\par\b|\\parindent|\\relax")
 
@@ -52,7 +55,9 @@ class Paper:
     n: int
     title: str
     author: str | None
-    sections: dict[int, str]       # section number -> title ('' for the introduction)
+    # section number -> title ('' for the introduction), its printed line
+    # breaks kept as "\n": the book sets some titles on two or three lines.
+    sections: dict[int, str]
     paragraphs: list[Paragraph]
 
 
@@ -104,6 +109,13 @@ def read_paper(path: pathlib.Path, report) -> Paper:
     def inline(text: str) -> Expanded:
         return exp.run(text)
 
+    def title_of(body: str) -> str:
+        # Each printed line expanded on its own.  Replacing \\ with a space ran
+        # the lines together, and left the [1ex] of a \\[1ex] behind as text.
+        lines = [re.sub(r"\s+", " ", inline(part).text).strip()
+                 for part in RE_NEWLINE.split(body)]
+        return "\n".join(x for x in lines if x)
+
     for lineno, raw in enumerate(src.splitlines(), 1):
         line = raw.strip()
         if not line:
@@ -128,12 +140,10 @@ def read_paper(path: pathlib.Path, report) -> Paper:
             if m.group(1):                      # \usectiontwo{L}{Title}: counter +2
                 body, _ = _brace_arg(line, j)
                 secnum += 2
-                sections[secnum - 1] = sections[secnum] = \
-                    inline(body.replace("\\\\", " ")).text.strip()
+                sections[secnum - 1] = sections[secnum] = title_of(body)
             else:
                 secnum += 1
-                sections[secnum] = re.sub(
-                    r"\s+", " ", inline(body.replace("\\\\", " ")).text).strip()
+                sections[secnum] = title_of(body)
             continue
 
         m = RE_VS.search(line)

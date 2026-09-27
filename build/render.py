@@ -97,3 +97,21 @@ def strip_tags(s: str) -> str:
         import re
         _TAG_RE = re.compile(r"<[^>]+>")
     return html.unescape(_TAG_RE.sub("", s))
+
+
+def title(lines: str) -> tuple[str, str]:
+    """A section title's plain text and its HTML, from its printed lines.
+
+    Some titles are set on two or three lines, and the reader keeps the breaks
+    as "\\n".  The plain title joins the lines with a space -- or with nothing
+    after a dash, since "Racial Amalgamation—" breaks after its em dash.  The
+    HTML is that same text with a <br> at each break, placed after the joining
+    space, so stripping its tags returns the plain title byte for byte.
+    """
+    parts = lines.split("\n")
+    plain, out = parts[0], [html.escape(parts[0], quote=False)]
+    for prev, line in zip(parts, parts[1:]):
+        sep = "" if prev.endswith(("—", "–", "-")) else " "
+        plain += sep + line
+        out.append(sep + "<br>" + html.escape(line, quote=False))
+    return plain, "".join(out)
