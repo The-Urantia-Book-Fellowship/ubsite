@@ -22,6 +22,14 @@ def read_text(path: pathlib.Path) -> str:
         return fh.read()
 
 
+def read_bytes(path: pathlib.Path) -> bytes:
+    """Read a binary source file -- the press project's fonts -- read-only."""
+    p = pathlib.Path(path)
+    _READ[str(p)] = _READ.get(str(p), 0) + 1
+    with open(p, "rb") as fh:
+        return fh.read()
+
+
 def read_at_rev(repo: pathlib.Path, rel: str, rev: str) -> str:
     """Read a file at a git revision, never touching the working tree.
 

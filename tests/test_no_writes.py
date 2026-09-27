@@ -18,6 +18,7 @@ ALLOWED = {
     "build/readers/_io.py": None,                  # reads only; asserted below
     "build/slugs.py": "data/slugs.tsv",            # the append-only slug ledger
     "build/vendorlib.py": "vendor/",               # the vendored copies + lock
+    "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
 }
 
 WRITE_OPEN = re.compile(r"""\bopen\s*\([^)]*['"][waxr]?\+?[wax]\+?['"]""")

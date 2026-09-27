@@ -101,6 +101,11 @@ def main(argv: list[str]) -> int:
         derive.anchors(con, report)
         n_pairs = derive.cocitation(con)
         derive.fts(con)
+        print("fonts ...")
+        from . import fonts
+        for name, (size, glyphs) in fonts.build(
+                con, repos["press"]["path"] / "fonts", root / "ubsite", report).items():
+            print(f"  {name:22} {size:>7,} bytes  {glyphs} glyphs")
         con.execute("INSERT INTO build VALUES (1, ?, 1, 0)",
                     (time.strftime("%Y-%m-%dT%H:%M:%S"),))
         for k, q in [
