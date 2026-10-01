@@ -15,7 +15,9 @@ QUERIES = [
     ("index entries",       "SELECT COUNT(*) FROM index_entry", None),
     ("citations",           "SELECT COUNT(*) FROM citation", None),
     ("citation targets",    "SELECT COUNT(*) FROM citation_target", None),
-    ("chronology events",   "SELECT COUNT(*) FROM chronology_event", 437),
+    # 436 since the index's 6cd4d19 (2026-10-01): `29 A.D. > May 8 > death of
+    # Salome' dropped by ruling -- 154:2.4 sends her to bed, not to her death.
+    ("chronology events",   "SELECT COUNT(*) FROM chronology_event", 436),
 ]
 
 INVARIANTS = [

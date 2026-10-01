@@ -36,7 +36,7 @@ module that reads it.
 |---|---|---|
 | `press` | `../urantia-uversa-press-claude` | the authoritative text |
 | `study` | `../urantia-study-edition` | apparatus: footnotes, human sources, KJV, quiz, images *(not yet imported)* |
-| `index` | `../index` | the Uversa Press index, revised for the seventh printing |
+| `index` | `../index` | the Uversa Press index, revised for the third edition |
 
 All three share one address space: the `\vs` macro addresses `\vs p133 1:3` (a
 Urantia paragraph) and `\vs Gen 1:1` (a Bible verse) alike.
