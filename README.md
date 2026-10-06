@@ -196,7 +196,8 @@ The script:
    from `deploy/README.md` step 4 allows exactly that and nothing else;
 6. polls `/healthz` for 30 s, and prints the unit's status if it never reports ok.
 
-It takes about a minute. The script refuses to run on pi5 against its own live tree.
+It takes about 30 s, mostly the rebuild and the gates. The script refuses to run
+on pi5 against its own live tree.
 
 ### 7. Verify live
 
