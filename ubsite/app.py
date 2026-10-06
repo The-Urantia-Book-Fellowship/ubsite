@@ -11,6 +11,7 @@ switches under Settings, rather than one coarse lever that hides them together.
 
 from __future__ import annotations
 
+import functools
 import pathlib
 import re
 import sqlite3
@@ -120,16 +121,52 @@ async def http_error(request: Request, exc: HTTPException):
     return await http_exception_handler(request, exc)
 
 
+@functools.lru_cache(maxsize=4)
+def _sources(mtime_ns: int) -> dict:
+    try:
+        rows = db().execute(
+            "SELECT repo, commit_id, dirty, committed_at FROM build_source").fetchall()
+    except sqlite3.Error:
+        # A database from before build_source -- a --no-data deploy of this code
+        # over an older ub.db.  The footer then omits the commits; every page
+        # turning into a 500 would be the worse failure.
+        return {}
+    return {r["repo"]: {"commit": r["commit_id"], "dirty": bool(r["dirty"]),
+                        "date": r["committed_at"]} for r in rows}
+
+
+def sources() -> dict:
+    """The commits this database was built from, keyed by repo.
+
+    Cached on the file's mtime, so a database swapped in under a running server
+    is re-read, and an unchanged one is not queried once per page.
+    """
+    try:
+        return _sources(DB.stat().st_mtime_ns)
+    except OSError:
+        return {}
+
+
+T.env.globals["sources"] = sources
+
+
 @app.get("/healthz")
 def healthz():
     """What deploy.sh polls, and what a restart must satisfy before it counts.
 
     Touches the database rather than just returning 200, so a deploy that ships
-    a missing or truncated ub.db fails at the push instead of at a reader.
+    a missing or truncated ub.db fails at the push instead of at a reader.  The
+    source commits say which text and index the site carries, so whether it is
+    behind is one comparison with `git rev-parse HEAD` in each repo.
     """
     try:
-        n = db().execute("SELECT value FROM stat WHERE key='paragraphs'").fetchone()
-        return {"ok": bool(n and n[0] == 14586), "paragraphs": n[0] if n else 0}
+        con = db()
+        n = con.execute("SELECT value FROM stat WHERE key='paragraphs'").fetchone()
+        built = con.execute("SELECT built_at FROM build").fetchone()
+        return {"ok": bool(n and n[0] == 14586), "paragraphs": n[0] if n else 0,
+                "built_at": built[0] if built else None,
+                "sources": {k: {"commit": v["commit"], "dirty": v["dirty"]}
+                            for k, v in sources().items()}}
     except Exception as exc:                       # noqa: BLE001
         return {"ok": False, "error": str(exc)}
 

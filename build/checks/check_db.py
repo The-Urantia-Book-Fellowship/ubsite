@@ -47,6 +47,9 @@ INVARIANTS = [
              + (SELECT COUNT(*) FROM paper WHERE title GLOB '*\\*')
              + (SELECT COUNT(*) FROM index_entry WHERE text GLOB '*\\*'
                                                     OR path_plain GLOB '*\\*')"""),
+    # The footer and /healthz name these commits; a build that cannot is not shipped.
+    ("press and index commits recorded (missing)",
+     "SELECT 2 - COUNT(*) FROM build_source WHERE repo IN ('press','index')"),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]

@@ -23,8 +23,25 @@ def _git(repo: pathlib.Path, *args: str) -> str | None:
         return None
 
 
+def _dirty(path: pathlib.Path, tex: str) -> bool:
+    """Do the inputs differ from the commit?
+
+    Any change to a tracked file, or an untracked file under tex/, where the
+    reader globs for papers.  Untracked files elsewhere are not inputs: press
+    carries an untracked tools/press/Lakeside/ that no build reads, and counting
+    it would mark every build from that tree as modified.
+    """
+    return bool(_git(path, "status", "--porcelain", "--untracked-files=no")
+                or _git(path, "ls-files", "--others", "--exclude-standard", "--", tex))
+
+
 def load() -> dict:
-    """Return {key: {path, tex, rev, commit, dirty, describe}}."""
+    """Return {key: {path, tex, rev, at, commit, dirty, subject, date}}.
+
+    ``at`` is what the readers read: 'worktree', or the commit ``rev`` resolved
+    to, resolved here ONCE.  The index session can commit while a build runs;
+    reading at a fixed SHA means the build reads exactly the commit it records.
+    """
     with open(ROOT / "sources.toml", "rb") as fh:
         raw = tomllib.load(fh)
 
@@ -35,17 +52,21 @@ def load() -> dict:
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
                              f"        fix the path in sources.toml")
         rev = cfg.get("rev", "worktree")
-        commit = _git(path, "rev-parse", "HEAD" if rev == "worktree" else rev)
-        dirty = bool(_git(path, "status", "--porcelain")) if rev == "worktree" else False
+        tex = cfg.get("tex", "tex")
+        commit = _git(path, "rev-parse", "HEAD" if rev == "worktree" else f"{rev}^{{commit}}")
+        if rev != "worktree" and commit is None:
+            raise SystemExit(f"config: {key}: cannot resolve rev {rev!r} in {path}")
+        dirty = _dirty(path, tex) if rev == "worktree" else False
         repos[key] = {
             "key": key,
             "path": path,
-            "tex": path / cfg.get("tex", "tex"),
+            "tex": path / tex,
             "rev": rev,
+            "at": "worktree" if rev == "worktree" else commit,
             "commit": commit,
             "dirty": dirty,
-            "subject": _git(path, "log", "-1", "--format=%s"),
-            "date": _git(path, "log", "-1", "--format=%cd", "--date=short"),
+            "subject": _git(path, "log", "-1", "--format=%s", commit or "HEAD"),
+            "date": _git(path, "log", "-1", "--format=%cd", "--date=short", commit or "HEAD"),
         }
     return repos
 

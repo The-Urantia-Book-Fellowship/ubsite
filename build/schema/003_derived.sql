@@ -51,6 +51,15 @@ CREATE TABLE build (
   schema_version INTEGER NOT NULL,
   degraded INTEGER NOT NULL DEFAULT 0
 );
+-- The commit each source repo was read at.  `dirty` means the inputs had
+-- uncommitted changes, so the commit alone does not reproduce this database.
+CREATE TABLE build_source (
+  repo TEXT PRIMARY KEY,                      -- 'press' | 'index'
+  commit_id TEXT NOT NULL,
+  dirty INTEGER NOT NULL,
+  rev TEXT NOT NULL,                          -- as sources.toml asked: 'worktree' or a revision
+  committed_at TEXT                           -- that commit's date, YYYY-MM-DD
+);
 CREATE TABLE source_file (
   id INTEGER PRIMARY KEY,
   repo TEXT NOT NULL, repo_commit TEXT, repo_dirty INTEGER NOT NULL,

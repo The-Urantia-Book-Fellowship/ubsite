@@ -20,7 +20,7 @@ import re
 from ..index_macros import (CHRON_MACROS, ENTRY_MACROS, LEVEL_OF, OTHER_MACROS,
                             RE_AB, RE_CIT, RE_XREF, balanced, label, render,
                             unescape)
-from ._io import read_text
+from ._io import read_tex
 
 LETTERS = ["numbers"] + [chr(c) for c in range(ord("a"), ord("z") + 1)]
 RE_LINE = re.compile(r"^\\([a-zA-Z@]+)")
@@ -59,22 +59,24 @@ def _expand_ab(text_src: str, headword: str | None) -> str:
     return RE_AB.sub(lambda m: headword, text_src)
 
 
-def read_az(texdir: pathlib.Path, report) -> list[Entry]:
+def read_az(texdir: pathlib.Path, report, rev: str = "worktree") -> list[Entry]:
+    """``rev`` is 'worktree' or the commit to read at -- see config's ``at``."""
     out: list[Entry] = []
     ordinal = 0
     for letter in LETTERS:
-        path = texdir / f"idx-{letter}.tex"
-        if not path.exists():
-            report.hard("index-missing-file", str(path),
-                        f"idx-{letter}.tex is not present")
+        fname = f"idx-{letter}.tex"
+        src_file = read_tex(texdir, fname, rev)
+        if src_file is None:
+            report.hard("index-missing-file", f"{texdir / fname} at {rev}",
+                        f"{fname} is not present")
             continue
         stack: dict[int, str] = {}          # reset per file, unlike upstream
         stack_head: dict[int, str] = {}
         stack_label: dict[int, str] = {}
         current_letter = None
         prev_level = 0
-        for lineno, raw in enumerate(read_text(path).splitlines(), 1):
-            where = f"{path.name}:{lineno}"
+        for lineno, raw in enumerate(src_file.splitlines(), 1):
+            where = f"{fname}:{lineno}"
             line = raw.rstrip()
             if not line.strip():
                 report.hard("index-blank-line", where, "blank line in a generated file")

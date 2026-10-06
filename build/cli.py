@@ -70,11 +70,15 @@ def main(argv: list[str]) -> int:
         report = Report()
         t0 = time.time()
 
-        print("reading press text ...")
+        def at(r):
+            return (r["commit"] or "?")[:7] + ("-dirty" if r["dirty"] else "")
+
+        print(f"reading press text, {repos['press']['rev']} at {at(repos['press'])} ...")
         papers = read_all(repos["press"]["tex"], report)
-        print("reading index ...")
-        az = read_az(repos["index"]["tex"], report)
-        apps = read_appendices(repos["index"]["tex"], report)
+        ix = repos["index"]
+        print(f"reading index at {at(ix)} ...")
+        az = read_az(ix["tex"], report, rev=ix["at"])
+        apps = read_appendices(ix["tex"], report, rev=ix["at"])
 
         con = db.create(tmp)
         print("loading ...")
@@ -106,8 +110,14 @@ def main(argv: list[str]) -> int:
         for name, (size, glyphs) in fonts.build(
                 con, repos["press"]["path"] / "fonts", root / "ubsite", report).items():
             print(f"  {name:22} {size:>7,} bytes  {glyphs} glyphs")
-        con.execute("INSERT INTO build VALUES (1, ?, 1, 0)",
+        con.execute("INSERT INTO build VALUES (1, ?, 2, 0)",
                     (time.strftime("%Y-%m-%dT%H:%M:%S"),))
+        # The commits this database was read from: the footer and /healthz show
+        # them, so the live site can say which index it carries.  Only the repos
+        # the build reads; study joins when Phase 6 imports it.
+        con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?)",
+                        [(k, repos[k]["commit"], int(repos[k]["dirty"]),
+                          repos[k]["rev"], repos[k]["date"]) for k in ("press", "index")])
         for k, q in [
                 ("papers", "SELECT COUNT(*) FROM paper"),
                 ("sections", "SELECT COUNT(*) FROM section"),
@@ -184,9 +194,9 @@ def main(argv: list[str]) -> int:
         from .checks.check_index import check_citations, check_xrefs
         from .readers.index_app import read_appendices
         from .readers.index_az import read_az
-        itex = repos["index"]["tex"]
-        az = read_az(itex, report)
-        apps = read_appendices(itex, report)
+        itex, iat = repos["index"]["tex"], repos["index"]["at"]
+        az = read_az(itex, report, rev=iat)
+        apps = read_appendices(itex, report, rev=iat)
         app_entries = [e for a in apps for e in a.entries]
         events = [v for a in apps for v in a.events]
         paras = {(q.paper, q.section, q.n) for p_ in papers for q in p_.paragraphs}

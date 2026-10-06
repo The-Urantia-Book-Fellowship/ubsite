@@ -24,8 +24,13 @@ try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.
 </header>
 {% block body %}{% endblock %}
 <footer>
-  <p>Text: the Uversa Press edition. Index: the Uversa Press index as revised
-     for the third edition.
+  {#- The commit each source was built from: which text and which index this is. #}
+  {%- macro rev(r) %}{% if r %} <span class="rev" title="built from commit {{ r.commit }}
+    {%- if r.date %} of {{ r.date }}{% endif %}{% if r.dirty %}, with uncommitted changes{% endif %}">(
+    {{- r.commit[:7] }}{% if r.dirty %}-dirty{% endif %})</span>{% endif %}{% endmacro %}
+  {%- set src = sources() %}
+  <p>Text{{ rev(src.press) }}: the Uversa Press edition. Index{{ rev(src.index) }}: the
+     Uversa Press index as revised for the third edition.
      Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</p>
   <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.</p>
 </footer>

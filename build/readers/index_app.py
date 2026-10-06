@@ -24,7 +24,7 @@ import re
 
 from ..index_macros import (CHRON_MACROS, RE_CIT, RE_XREF, balanced, label,
                             render, unescape)
-from ._io import read_text
+from ._io import read_tex
 from .index_az import Entry
 
 APPENDICES = "abcdef"
@@ -54,20 +54,22 @@ class Appendix:
 
 
 def read_appendices(texdir: pathlib.Path, report,
-                    letters: str = APPENDICES) -> list[Appendix]:
+                    letters: str = APPENDICES, rev: str = "worktree") -> list[Appendix]:
+    """``rev`` is 'worktree' or the commit to read at -- see config's ``at``."""
     out = []
     ordinal = 0
     for letter in letters:
-        path = texdir / f"app-{letter}.tex"
-        if not path.exists():
-            report.hard("index-missing-file", str(path), f"app-{letter}.tex absent")
+        fname = f"app-{letter}.tex"
+        src_file = read_tex(texdir, fname, rev)
+        if src_file is None:
+            report.hard("index-missing-file", f"{texdir / fname} at {rev}", f"{fname} absent")
             continue
         name = title = ""
         entries: list[Entry] = []
         events: list[ChronEvent] = []
         year = month = None
-        for lineno, raw in enumerate(read_text(path).splitlines(), 1):
-            where = f"{path.name}:{lineno}"
+        for lineno, raw in enumerate(src_file.splitlines(), 1):
+            where = f"{fname}:{lineno}"
             line = raw.rstrip()
             if not line.strip() or line.startswith("%"):
                 continue
@@ -110,7 +112,7 @@ def read_appendices(texdir: pathlib.Path, report,
                 continue
 
             if macro != "iapp":
-                report.hard("index-unknown-macro", where, f"\\{macro} in {path.name}")
+                report.hard("index-unknown-macro", where, f"\\{macro} in {fname}")
                 continue
 
             src, i = balanced(line, line.index("{"))

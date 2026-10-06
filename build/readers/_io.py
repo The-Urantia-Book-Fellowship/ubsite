@@ -39,11 +39,29 @@ def read_at_rev(repo: pathlib.Path, rel: str, rev: str) -> str:
     if rev == "worktree":
         return read_text(pathlib.Path(repo) / rel)
     out = subprocess.run(["git", "-C", str(repo), "show", f"{rev}:{rel}"],
-                         capture_output=True, text=True)
+                         capture_output=True, text=True, encoding="utf-8")
     if out.returncode != 0:
         raise SystemExit(f"_io: cannot read {rel} at {rev} in {repo}:\n{out.stderr}")
     _READ[f"{repo}:{rev}:{rel}"] = 1
     return out.stdout
+
+
+def read_tex(texdir: pathlib.Path, name: str, rev: str = "worktree") -> str | None:
+    """One file of a source's tex/ directory, at the revision config pins.
+
+    ``rev`` is 'worktree' or a commit.  None if the file is absent there, so a
+    reader can report the missing file rather than die on it.  At a commit the
+    path is given as ``./name``, which git resolves against ``-C texdir``: the
+    reader never needs to know where the repository root is.
+    """
+    if rev == "worktree":
+        p = pathlib.Path(texdir) / name
+        return read_text(p) if p.exists() else None
+    there = subprocess.run(["git", "-C", str(texdir), "cat-file", "-e", f"{rev}:./{name}"],
+                           capture_output=True)
+    if there.returncode != 0:
+        return None
+    return read_at_rev(texdir, f"./{name}", rev)
 
 
 def files_read() -> dict[str, int]:
