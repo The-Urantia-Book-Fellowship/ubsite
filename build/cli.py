@@ -110,14 +110,20 @@ def main(argv: list[str]) -> int:
         for name, (size, glyphs) in fonts.build(
                 con, repos["press"]["path"] / "fonts", root / "ubsite", report).items():
             print(f"  {name:22} {size:>7,} bytes  {glyphs} glyphs")
-        con.execute("INSERT INTO build VALUES (1, ?, 2, 0)",
+        con.execute("INSERT INTO build VALUES (1, ?, 3, 0)",
                     (time.strftime("%Y-%m-%dT%H:%M:%S"),))
         # The commits this database was read from: the footer and /healthz show
-        # them, so the live site can say which index it carries.  Only the repos
-        # the build reads; study joins when Phase 6 imports it.
-        con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?)",
-                        [(k, repos[k]["commit"], int(repos[k]["dirty"]),
-                          repos[k]["rev"], repos[k]["date"]) for k in ("press", "index")])
+        # them, so the live site can say which index it carries, and the footer
+        # links each to its page.  Only the repos the build reads; study joins
+        # when Phase 6 imports it.
+        con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
+                        [(k, repos[k]["commit"], int(repos[k]["dirty"]), repos[k]["rev"],
+                          repos[k]["date"], repos[k]["commit_url"]) for k in ("press", "index")])
+        for k in ("press", "index"):
+            if repos[k]["commit_url"] and not repos[k]["pushed"]:
+                report.warn("source-not-pushed", f"{k} {repos[k]['commit'][:7]}",
+                            "on no remote branch as of the last fetch: the footer's"
+                            " link to it is a 404 until it is pushed")
         for k, q in [
                 ("papers", "SELECT COUNT(*) FROM paper"),
                 ("sections", "SELECT COUNT(*) FROM section"),

@@ -9,6 +9,10 @@
 path = "../urantia-uversa-press-claude"
 tex  = "tex"
 rev  = "worktree"          # or a git revision
+# Where its commits can be seen: the footer links the commit id to <url>/commit/<sha>.
+# The repository is PRIVATE (2026-10-06): the link opens for signed-in members of
+# the organisation and is a 404 for everyone else -- linked anyway, by decision.
+url  = "https://github.com/The-Urantia-Book-Fellowship/urantia-uversa-press"
 
 [study]
 # The British Study Edition.  Apparatus: footnotes, human sources, KJV, quiz,
@@ -27,3 +31,4 @@ rev  = "worktree"
 path = "../index"
 tex  = "tex"
 rev  = "HEAD"
+url  = "https://github.com/The-Urantia-Book-Fellowship/index"   # PRIVATE, as above

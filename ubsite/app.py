@@ -125,14 +125,15 @@ async def http_error(request: Request, exc: HTTPException):
 def _sources(mtime_ns: int) -> dict:
     try:
         rows = db().execute(
-            "SELECT repo, commit_id, dirty, committed_at FROM build_source").fetchall()
+            "SELECT repo, commit_id, dirty, committed_at, commit_url"
+            " FROM build_source").fetchall()
     except sqlite3.Error:
-        # A database from before build_source -- a --no-data deploy of this code
-        # over an older ub.db.  The footer then omits the commits; every page
-        # turning into a 500 would be the worse failure.
+        # A database from before build_source or its commit_url -- a --no-data
+        # deploy of this code over an older ub.db.  The footer then omits the
+        # commits; every page turning into a 500 would be the worse failure.
         return {}
     return {r["repo"]: {"commit": r["commit_id"], "dirty": bool(r["dirty"]),
-                        "date": r["committed_at"]} for r in rows}
+                        "date": r["committed_at"], "url": r["commit_url"]} for r in rows}
 
 
 def sources() -> dict:

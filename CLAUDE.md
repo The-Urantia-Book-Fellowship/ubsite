@@ -258,6 +258,10 @@ CSS: markup must not inject characters a reader would copy.
   SHAs too. A dirty build says `-dirty`, deliberately ugly; do not deploy one.
   (Tigran, 2026-10-06, after `2:5.12` went uncited for three days on a stale
   database.)
+- **Each commit ID links to its GitHub commit**, built as `commit_url` from the
+  `url` in `sources.toml`. Both repositories are private, so a public visitor gets
+  a 404. Tigran chose to link them anyway (2026-10-06). `make data` warns
+  `source-not-pushed` when a commit is on no remote branch.
 - **UB Goudy is OFL 1.1** — verified in the name table, a correctly renamed Sorts
   Mill Goudy derivative — so the site serves the book's own face, subsetted to
   the corpus with a gate that fails on a missing glyph. **Goudy Handtooled BT is

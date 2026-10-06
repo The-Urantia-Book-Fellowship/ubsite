@@ -36,7 +36,7 @@ def _dirty(path: pathlib.Path, tex: str) -> bool:
 
 
 def load() -> dict:
-    """Return {key: {path, tex, rev, at, commit, dirty, subject, date}}.
+    """Return {key: {path, tex, rev, at, commit, dirty, commit_url, pushed, subject, date}}.
 
     ``at`` is what the readers read: 'worktree', or the commit ``rev`` resolved
     to, resolved here ONCE.  The index session can commit while a build runs;
@@ -57,6 +57,7 @@ def load() -> dict:
         if rev != "worktree" and commit is None:
             raise SystemExit(f"config: {key}: cannot resolve rev {rev!r} in {path}")
         dirty = _dirty(path, tex) if rev == "worktree" else False
+        url = cfg.get("url")
         repos[key] = {
             "key": key,
             "path": path,
@@ -65,6 +66,10 @@ def load() -> dict:
             "at": "worktree" if rev == "worktree" else commit,
             "commit": commit,
             "dirty": dirty,
+            # The commit's page on the repository's host, or None.  `pushed` is
+            # as of the last fetch: an unpushed commit's page is a 404 until it is.
+            "commit_url": f"{url.rstrip('/')}/commit/{commit}" if url and commit else None,
+            "pushed": bool(commit and _git(path, "branch", "-r", "--contains", commit)),
             "subject": _git(path, "log", "-1", "--format=%s", commit or "HEAD"),
             "date": _git(path, "log", "-1", "--format=%cd", "--date=short", commit or "HEAD"),
         }

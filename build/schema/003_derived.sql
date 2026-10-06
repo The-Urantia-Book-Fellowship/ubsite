@@ -58,7 +58,8 @@ CREATE TABLE build_source (
   commit_id TEXT NOT NULL,
   dirty INTEGER NOT NULL,
   rev TEXT NOT NULL,                          -- as sources.toml asked: 'worktree' or a revision
-  committed_at TEXT                           -- that commit's date, YYYY-MM-DD
+  committed_at TEXT,                          -- that commit's date, YYYY-MM-DD
+  commit_url TEXT                             -- its page on the repo's host; NULL if none is set
 );
 CREATE TABLE source_file (
   id INTEGER PRIMARY KEY,

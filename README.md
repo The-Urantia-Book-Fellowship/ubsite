@@ -23,7 +23,11 @@ The footer of every page names the commits the database was built from:
 
 > Text (3983645): the Uversa Press edition. Index (b12500f): the Uversa Press index …
 
-Hover over either ID for the full commit and its date.
+Hover over either ID for the full commit and its date. Each ID links to its commit
+on GitHub, at the `url` that `sources.toml` gives each repository. Both repositories
+are **private**: a link opens for members of The-Urantia-Book-Fellowship who are
+signed in, and is GitHub's 404 page for everyone else. That is a decision on the
+record, not an oversight. Delete a `url` and rebuild to drop its link.
 
 ---
 
@@ -77,6 +81,9 @@ Two rules decide what a build sees:
   tracked file has uncommitted changes, or if `tex/` has an untracked file. An
   untracked directory elsewhere in press does not count. Do not deploy a dirty build:
   the footer would say `-dirty`, and the commit alone could not reproduce it.
+- **Push the source commits.** The footer links to them on GitHub. If a commit is
+  on no remote branch as of the last fetch, `make data` warns `source-not-pushed`.
+  The link is then a 404 even for members, until that commit is pushed.
 
 To ask whether one paragraph is cited in the database you have built:
 
