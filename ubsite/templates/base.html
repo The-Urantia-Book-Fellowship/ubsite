@@ -16,7 +16,7 @@ try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="/">The Urantia Book</a>
+  <a class="brand" href="/">{{ mark }}The Urantia Book</a>
   <form class="find" action="/search"><input name="q" value="{{ q|default('') }}"
     placeholder="a word, or a citation like 101:4.2" autocomplete="off"></form>
   <nav>

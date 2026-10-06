@@ -63,6 +63,9 @@ a:hover { text-decoration-thickness: 2px; }
 .top { display: flex; gap: 1rem; align-items: baseline; flex-wrap: wrap;
        padding: .8rem 1rem; border-bottom: 1px solid var(--rule); }
 .brand { font-weight: 400; font-size: 1.2rem; text-decoration: none; letter-spacing: .02em; }
+/* The mark, inline so the name keeps the baseline the header aligns on. */
+.brand .logo { display: inline-block; width: 1.55em; height: 1.55em; margin-right: .4em;
+               vertical-align: -.36em; }
 .top nav { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
 .top nav a { font-size: .92rem; text-decoration: none; color: var(--faint); }
 .top nav a:hover, .top .mode { color: var(--ink); }
