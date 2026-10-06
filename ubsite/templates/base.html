@@ -29,7 +29,7 @@ try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.
       repository a url; the full id is in the tooltip. #}
   {%- macro rev(r) %}{% if r %} <span class="rev" title="built from commit {{ r.commit }}
     {%- if r.date %} of {{ r.date }}{% endif %}{% if r.dirty %}, with uncommitted changes{% endif %}">(
-    {%- if r.url %}<a href="{{ r.url }}">{% endif %}{{ r.date or r.commit[:7] }}{% if r.url %}</a>{% endif %}
+    {%- if r.url %}<a href="{{ r.url }}" target="_blank" rel="noopener">{% endif %}{{ r.date or r.commit[:7] }}{% if r.url %}</a>{% endif %}
     {%- if r.dirty %}, dirty{% endif %})</span>{% endif %}{% endmacro %}
   {%- set src = sources() %}
   <p>Text{{ rev(src.press) }}: the Uversa Press edition. Index{{ rev(src.index) }}: the
