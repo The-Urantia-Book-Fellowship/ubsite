@@ -45,6 +45,11 @@ The index is read **at HEAD** and the revision recorded in the build, because
 that repo is under active editorial work. Count gates against it are therefore
 reported bands; structural gates stay hard.
 
+Until 2026-10-06 the first half of that was not true. The readers opened the
+working tree, while `config` reported HEAD as clean. Now `config` resolves `rev`
+to one SHA (`at`), `_io.read_tex` reads `tex/` at it, and `build_source` records
+it. `tests/test_read_tex.py` proves that worktree edits do not get through.
+
 Careful: there are three `urantia-study-edition` trees on this machine.
 `urantia-study-edition-latest` is the **oldest**. `sources.toml` pins the right one.
 
@@ -67,6 +72,10 @@ make stop           stop it (by pid — never by pattern, see §6)
 
 `make data` never edits in place: it builds `var/ub.db.tmp` and swaps it in, so a
 failed build leaves the previous database untouched.
+
+**Updating the live site and deploying it** is a fixed procedure, and it lives in
+`README.md`, not here: is pi5 behind, vendor drift, build, gate, look, commit,
+`./deploy/deploy.sh`, verify.
 
 ---
 
@@ -98,9 +107,10 @@ failed build leaves the previous database untouched.
   second. The full gate suite passes on it, with byte-identical output.
 
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and
-  `deploy.sh`, with a README naming the four steps that need root. Written, not
-  yet run. **The database is the artifact**: the three source repos are not on
-  pi5 and do not need to be, so `make data` runs here and `var/ub.db` is shipped.
+  `deploy.sh`, with a README naming the four steps that need root. All four have
+  been run; the site is live at **https://ubsite.ddns.net**. **The database is the
+  artifact**: the three source repos are not on pi5 and do not need to be, so
+  `make data` runs here and `var/ub.db` is shipped.
 
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz,
 figures behind the rights gate), then 7 (human sources), 8 (chronology, map).
@@ -243,6 +253,11 @@ CSS: markup must not inject characters a reader would copy.
   citations are readable.
 - **`/101` redirects to `/101:0`.** Every paper opens with an introduction, and
   the section list is always in the left rail.
+- **The footer names its sources:** `Text (3983645)` and `Index (b12500f)`, read
+  from `build_source`, with the full SHA in a tooltip. `/healthz` carries the full
+  SHAs too. A dirty build says `-dirty`, deliberately ugly; do not deploy one.
+  (Tigran, 2026-10-06, after `2:5.12` went uncited for three days on a stale
+  database.)
 - **UB Goudy is OFL 1.1** — verified in the name table, a correctly renamed Sorts
   Mill Goudy derivative — so the site serves the book's own face, subsetted to
   the corpus with a gate that fails on a missing glyph. **Goudy Handtooled BT is
