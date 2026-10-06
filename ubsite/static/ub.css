@@ -104,7 +104,14 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
 .grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch);
         gap: 0 2rem; }
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
-p.t.pc { margin-top: .85rem; }          /* a 1955 blank-line group starts here */
+/* \pc: a 1955 blank-line group starts here.  It was extra space above the
+   paragraph, which nobody could see; now a pilcrow before the first word, as the
+   British edition prints it.  An empty span drawn with a mask: no character is
+   injected, so copying the paragraph still returns its text exactly. */
+.pcm { display: inline-block; width: .47em; height: .7em; margin-right: .3em;
+       background: var(--faint); vertical-align: -.02em;
+       -webkit-mask: url(/static/pilcrow.svg) center / contain no-repeat;
+               mask: url(/static/pilcrow.svg) center / contain no-repeat; }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
 p.t.hit, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);

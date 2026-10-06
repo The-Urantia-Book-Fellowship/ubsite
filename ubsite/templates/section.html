@@ -40,7 +40,9 @@
     {% for p in paras %}
       {% set hit = focus and p.para_n >= focus and p.para_n <= last %}
       <p class="t{% if p.gap_before %} pc{% endif %}{% if hit %} hit{% endif %}"
-         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.para_n }}</a>{{ p.html|safe }}</p>
+         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.para_n }}</a>
+         {%- if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}
+         {{- p.html|safe }}</p>
       <div class="a">
       {% set cs = citers.get(p.id, []) %}
         {% if cs %}
