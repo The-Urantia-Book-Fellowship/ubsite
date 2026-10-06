@@ -18,6 +18,7 @@ by hand when the SVG changes, and commit the outputs.
 from __future__ import annotations
 
 import pathlib
+import re
 import subprocess
 import tempfile
 
@@ -58,8 +59,14 @@ def main() -> int:
                         str(STATIC / "favicon.ico")], check=True)
 
     # The touch icon: the same drawing at about 70% on an opaque paper square.
-    tile = svg.replace('viewBox="0 0 32 32">',
-                       f'viewBox="-7 -7 46 46"><rect x="-7" y="-7" width="46" height="46" fill="{PAPER}"/>')
+    m = re.search(r'viewBox="0 0 (\d+(?:\.\d+)?) \1"', svg)
+    if not m:
+        raise SystemExit("make_icons: favicon.svg needs a square viewBox starting at 0 0")
+    n = float(m.group(1))
+    p = round(n * 0.22, 2)
+    tile = svg.replace(m.group(0) + ">",
+                       f'viewBox="{-p:g} {-p:g} {n + 2 * p:g} {n + 2 * p:g}">'
+                       f'<rect x="{-p:g}" y="{-p:g}" width="{n + 2 * p:g}" height="{n + 2 * p:g}" fill="{PAPER}"/>')
     render(tile, 180, STATIC / "apple-touch-icon.png")
     for f in ("favicon.ico", "apple-touch-icon.png"):
         print(f"  {f:22} {(STATIC / f).stat().st_size:>6,} bytes")

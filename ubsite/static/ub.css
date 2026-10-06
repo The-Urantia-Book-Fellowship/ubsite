@@ -14,6 +14,7 @@
   --rule:  oklch(0.88 0.010 80);
   --jesus: oklch(0.44 0.15 25);
   --link:  oklch(0.40 0.09 250);
+  --flame: oklch(0.65 0.13 76);    /* the mark's flame (#b9821f), and nothing else */
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
      modern face and wanted browser zoom to be comfortable. */
@@ -30,12 +31,14 @@
     --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85);
     --faint: oklch(0.62 0.010 75);  --rule: oklch(0.30 0.010 75);
     --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
+    --flame: oklch(0.80 0.12 82);
   }
 }
 :root[data-theme="dark"] {
   --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85);
   --faint: oklch(0.62 0.010 75);  --rule: oklch(0.30 0.010 75);
   --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
+  --flame: oklch(0.80 0.12 82);
 }
 :root[data-theme="dark"] body, @media (prefers-color-scheme: dark) { }
 
@@ -233,6 +236,17 @@ a.cit:hover { color: var(--link); text-decoration: underline; }
 .tree i, .hits i { font-style: italic; }
 
 /* ---- front page -------------------------------------------------------- */
+/* The mark, inline from static/favicon.svg (app.py _mark), coloured by the theme. */
+.logo .book { fill: var(--link); }
+.logo .edge { fill: none; stroke: var(--link); }
+.logo .flame { fill: var(--flame); }
+.masthead { display: flex; align-items: flex-start; gap: 1.4rem; }
+.masthead > div { min-width: 0; }
+.masthead .logo { flex: none; width: 7.5rem; height: 7.5rem; margin-top: -.4rem; }
+@media (max-width: 34rem) {
+  .masthead { flex-direction: column; gap: .4rem; }
+  .masthead .logo { width: 4.5rem; height: 4.5rem; margin-top: 0; }
+}
 .front h1 { font-size: 2.6rem; margin-bottom: .6rem; }
 .front .lead { font-size: 1.12rem; margin-bottom: 2.2rem; }
 .front h2 { margin-top: 2.6rem; }

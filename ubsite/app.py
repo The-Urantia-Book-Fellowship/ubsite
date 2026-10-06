@@ -26,6 +26,7 @@ from fastapi.exception_handlers import http_exception_handler  # noqa: E402
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fastapi.templating import Jinja2Templates  # noqa: E402
+from markupsafe import Markup  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
@@ -44,6 +45,21 @@ def entry_href(rslug: str, level: int, anchor: str) -> str:
 
 
 T.env.globals["entry_href"] = entry_href
+
+
+def _mark() -> Markup:
+    """The site's mark, inline, from the one drawing in static/favicon.svg.
+
+    Inline rather than <img> so that ub.css colours it from the theme tokens: an
+    SVG image follows the operating system's dark mode, but not the site's own
+    theme switch.  Its built-in colours are stripped; .logo rules supply them.
+    """
+    svg = (ROOT / "ubsite" / "static" / "favicon.svg").read_text()
+    svg = re.sub(r"\s*<style>.*?</style>|\s*<!--.*?-->", "", svg, flags=re.S)
+    return Markup(svg.replace("<svg ", '<svg class="logo" aria-hidden="true" focusable="false" ', 1))
+
+
+T.env.globals["mark"] = _mark()
 
 # What a margin chip needs.  An appendix entry -- a Chronology event, a named
 # being, person or place -- has no page yet and so no slug; it is shown by
