@@ -19,11 +19,11 @@ the index session commits a correction, the site carries it only after someone
 rebuilds and deploys. Until then, a paragraph can say "no entry cites this paragraph
 precisely" while the index plainly cites it.
 
-The footer of every page names the commits the database was built from:
+The footer of every page gives the date of each commit the database was built from:
 
-> Text (3983645): the Uversa Press edition. Index (b12500f): the Uversa Press index …
+> Text (2026-10-03): the Uversa Press edition. Index (2026-10-03): the Uversa Press index …
 
-Hover over either ID for the full commit and its date. Each ID links to its commit
+Hover over either date for the full commit ID. Each date links to its commit
 on GitHub, at the `url` that `sources.toml` gives each repository. Both repositories
 are **private**: a link opens for members of The-Urantia-Book-Fellowship who are
 signed in, and is GitHub's 404 page for everyone else. That is a decision on the
@@ -80,7 +80,8 @@ Two rules decide what a build sees:
 - **Press is read from its working tree.** `make sources` marks it `+dirty` if a
   tracked file has uncommitted changes, or if `tex/` has an untracked file. An
   untracked directory elsewhere in press does not count. Do not deploy a dirty build:
-  the footer would say `-dirty`, and the commit alone could not reproduce it.
+  the footer would say `(2026-10-03, dirty)`, and the commit alone could not
+  reproduce it.
 - **Push the source commits.** The footer links to them on GitHub. If a commit is
   on no remote branch as of the last fetch, `make data` warns `source-not-pushed`.
   The link is then a 404 even for members, until that commit is pushed.
@@ -174,7 +175,7 @@ make serve        # http://127.0.0.1:8130, in the foreground; Ctrl-C to stop
 ```
 
 Open the paragraph that prompted the update, for example `http://127.0.0.1:8130/2:5.12`,
-and check the footer's two IDs. To serve in the background, run `make serve-bg`, and
+and check the footer's two dates, and the commit IDs in their tooltips. To serve in the background, run `make serve-bg`, and
 stop it with `make stop`. **Never** use `pkill -f` (see CLAUDE.md §6).
 
 ### 5. Commit

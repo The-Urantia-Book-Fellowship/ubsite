@@ -24,12 +24,13 @@ try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.
 </header>
 {% block body %}{% endblock %}
 <footer>
-  {#- The commit each source was built from: which text and which index this is,
-      linked to its page when sources.toml gives the repository a url. #}
+  {#- The commit each source was built from: which text and which index this is.
+      Shown as the commit's date, linked to its page when sources.toml gives the
+      repository a url; the full id is in the tooltip. #}
   {%- macro rev(r) %}{% if r %} <span class="rev" title="built from commit {{ r.commit }}
     {%- if r.date %} of {{ r.date }}{% endif %}{% if r.dirty %}, with uncommitted changes{% endif %}">(
-    {%- if r.url %}<a href="{{ r.url }}">{% endif %}{{ r.commit[:7] }}{% if r.url %}</a>{% endif %}
-    {%- if r.dirty %}-dirty{% endif %})</span>{% endif %}{% endmacro %}
+    {%- if r.url %}<a href="{{ r.url }}">{% endif %}{{ r.date or r.commit[:7] }}{% if r.url %}</a>{% endif %}
+    {%- if r.dirty %}, dirty{% endif %})</span>{% endif %}{% endmacro %}
   {%- set src = sources() %}
   <p>Text{{ rev(src.press) }}: the Uversa Press edition. Index{{ rev(src.index) }}: the
      Uversa Press index as revised for the third edition.

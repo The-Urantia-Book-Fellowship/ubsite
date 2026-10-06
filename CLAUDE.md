@@ -253,12 +253,13 @@ CSS: markup must not inject characters a reader would copy.
   citations are readable.
 - **`/101` redirects to `/101:0`.** Every paper opens with an introduction, and
   the section list is always in the left rail.
-- **The footer names its sources:** `Text (3983645)` and `Index (b12500f)`, read
-  from `build_source`, with the full SHA in a tooltip. `/healthz` carries the full
-  SHAs too. A dirty build says `-dirty`, deliberately ugly; do not deploy one.
-  (Tigran, 2026-10-06, after `2:5.12` went uncited for three days on a stale
-  database.)
-- **Each commit ID links to its GitHub commit**, built as `commit_url` from the
+- **The footer names its sources** by commit date: `Text (2026-10-03)` and
+  `Index (2026-10-03)`, read from `build_source`. The full SHA and the date are in
+  the tooltip, and the date, not the ID, is the link text. `/healthz` carries the
+  full SHAs too. A dirty build says `(2026-10-03, dirty)`, deliberately ugly; do
+  not deploy one. (Tigran, 2026-10-06, after `2:5.12` went uncited for three days
+  on a stale database.)
+- **Each date links to its GitHub commit**, built as `commit_url` from the
   `url` in `sources.toml`. Both repositories are private, so a public visitor gets
   a 404. Tigran chose to link them anyway (2026-10-06). `make data` warns
   `source-not-pushed` when a commit is on no remote branch.
