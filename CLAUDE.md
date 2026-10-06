@@ -263,6 +263,13 @@ CSS: markup must not inject characters a reader would copy.
   `url` in `sources.toml`. Both repositories are private, so a public visitor gets
   a 404. Tigran chose to link them anyway (2026-10-06). `make data` warns
   `source-not-pushed` when a commit is on no remote branch.
+- **The icon is two rings and a dot, all resting on one point at the foot**
+  (`ubsite/static/favicon.svg`). It hints at three circles without being the
+  Foundation's mark: the centres climb instead of coinciding, and the colour is the
+  site's own `--link` ink blue (`#1b4a76`, `#84afdc` in dark mode), not their royal
+  blue. **Do not make it concentric** (see §10.2). After editing the SVG, run
+  `tools/make_icons.py`; it renders `favicon.ico` and `apple-touch-icon.png` with
+  headless Chrome and ImageMagick (Tigran, 2026-10-06).
 - **UB Goudy is OFL 1.1** — verified in the name table, a correctly renamed Sorts
   Mill Goudy derivative — so the site serves the book's own face, subsetted to
   the corpus with a gate that fails on a missing glyph. **Goudy Handtooled BT is

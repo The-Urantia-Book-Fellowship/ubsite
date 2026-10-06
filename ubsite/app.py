@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT / "vendor" / "index"))
 import cite  # noqa: E402
 from fastapi import FastAPI, Query, Request  # noqa: E402
 from fastapi.exception_handlers import http_exception_handler  # noqa: E402
-from fastapi.responses import HTMLResponse, RedirectResponse  # noqa: E402
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fastapi.templating import Jinja2Templates  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
@@ -149,6 +149,20 @@ def sources() -> dict:
 
 
 T.env.globals["sources"] = sources
+
+
+# Asked for by fixed name at the root, with or without a <link>: browsers try
+# /favicon.ico, iOS /apple-touch-icon.png.  Both are drawn from favicon.svg by
+# tools/make_icons.py.  Without these they fell through to the {ref} route and
+# got the not-found page, as HTML.
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(ROOT / "ubsite" / "static" / "favicon.ico", media_type="image/x-icon")
+
+
+@app.get("/apple-touch-icon.png", include_in_schema=False)
+def touch_icon():
+    return FileResponse(ROOT / "ubsite" / "static" / "apple-touch-icon.png")
 
 
 @app.get("/healthz")
