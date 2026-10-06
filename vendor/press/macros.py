@@ -128,6 +128,7 @@ TABLE: dict[str, Spec] = {
     "bodybaselineskiplone": Spec(STRIP, note="lone-line-pass \\usection title-space twin (autobalance strips + re-derives it each run); length, non-textual"),
     "columnwidth":   Spec(STRIP, note="length variable inside \\hspace*{0.15\\columnwidth}"),
     "linewidth":     Spec(STRIP, note="length variable"),
+    "fill":          Spec(STRIP, note="infinite glue inside \\vspace*{\\fill} (p098 7:13: the attribution set at the foot, as the 2012 does)"),
 
     # ---- Editorial footnotes — strip entirely (not present in SRT) ----
     "fnc":           Spec(STRIP, args=1, note="editorial footnote (added by this print edition only)"),
