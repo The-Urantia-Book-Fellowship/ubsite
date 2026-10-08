@@ -125,12 +125,12 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
 /* \pc: a 1955 blank-line group starts here.  It was extra space above the
    paragraph, which nobody could see; now a pilcrow before the first word, as the
-   British edition prints it.  An empty span drawn with a mask: no character is
-   injected, so copying the paragraph still returns its text exactly. */
-.pcm { display: inline-block; width: .47em; height: .7em; margin-right: .3em;
-       background: var(--faint); vertical-align: -.02em;
-       -webkit-mask: url(/static/pilcrow.svg) center / contain no-repeat;
-               mask: url(/static/pilcrow.svg) center / contain no-repeat; }
+   British edition prints it.  The typeface's own ¶ (U+00B6), so it is UB Goudy's
+   with Goudy and the device's with the other faces, and it prints, as a drawn
+   mask did not.  Generated content of an empty span: no character is in the
+   text, so copying the paragraph still returns it exactly, and the "" after the
+   slash keeps a screen reader from reading it out. */
+.pcm::before { content: "¶"; content: "¶" / ""; color: var(--faint); margin-right: .3em; }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
 p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);

@@ -334,11 +334,14 @@ CSS: markup must not inject characters a reader would copy.
   use the Foundation's concentric circles (§10.2). After editing the SVG, run
   `tools/make_icons.py`; it renders `favicon.ico` and `apple-touch-icon.png` with
   headless Chrome and ImageMagick.
-- **A `\pc` paragraph is marked with a pilcrow**, drawn before its first word from
-  `static/pilcrow.svg` (candidate #1 of the six) as a CSS mask, faint like the
+- **A `\pc` paragraph is marked with a pilcrow** before its first word, faint like the
   paragraph numbers. It replaced an extra .85rem of space above the paragraph,
-  which nobody could see (Tigran, 2026-10-06). The span is empty, so copying a
-  paragraph still returns its text exactly.
+  which nobody could see (Tigran, 2026-10-06). It is the typeface's own ¶ (U+00B6),
+  UB Goudy's with Goudy, as CSS generated content of an empty span: never a
+  character in the text, so copying a paragraph still returns its text exactly.
+  Until 2026-10-08 it was a drawn SVG (one of the logo candidates) used as a mask;
+  Tigran asked why not the Unicode symbol, and the font's own is lighter, matches
+  the face, follows the Typeface setting, and prints, which a mask did not.
 - **Settings, per browser, no accounts** (2026-10-07, made a framework 2026-10-08):
   - Reading: Theme (System, Light, Dark; ◐ in the header stays as the shortcut),
     Text size (90–125% of the root, like zoom), Typeface (the book's Goudy, or the

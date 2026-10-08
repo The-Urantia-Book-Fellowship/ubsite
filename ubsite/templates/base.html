@@ -48,13 +48,15 @@ window.ubDefaults = {{ settings_defaults|tojson }};
     <fieldset>
       <legend>{{ g.legend }}</legend>
       {%- for it in g["items"] %}
-      {%- set needs %}{% if it.needs %} data-needs="{{ it.needs }}"{% endif %}{% endset %}
+      {#- Built inside the tag, so fonts.py, which reads a template's text for the
+          characters to subset, does not count it as words on the page. #}
+      {%- set needs = (' data-needs="' ~ it.needs ~ '"') if it.needs else '' %}
       {%- if it.kind == 'switch' %}
-      <label{{ needs }}><input type="checkbox" name="{{ it.key }}"> {{ it.label }}
+      <label{{ needs|safe }}><input type="checkbox" name="{{ it.key }}"> {{ it.label }}
         {%- if it.key == 'pilcrow' %} <span class="pcm" aria-hidden="true"></span>{% endif %}
         {%- if it.hint %} <small>{{ it.hint }}</small>{% endif %}</label>
       {%- elif it.kind == 'segmented' %}
-      <div class="row"{{ needs }}><span id="set-{{ it.key }}">{{ it.label }}</span>
+      <div class="row"{{ needs|safe }}><span id="set-{{ it.key }}">{{ it.label }}</span>
         <div class="seg" role="radiogroup" aria-labelledby="set-{{ it.key }}">
         {%- for c in it.choices %}
           <label class="{{ c.cls }}"{% if c.hint %} title="{{ c.hint }}"{% endif %}><input type="radio"
@@ -64,11 +66,11 @@ window.ubDefaults = {{ settings_defaults|tojson }};
       {%- elif it.kind == 'radio' %}
       {%- if it.key != 'voice' %}<p class="sub">{{ it.label }}</p>{% endif %}
       {%- for c in it.choices %}
-      <label class="{{ c.cls }}"{{ needs }}><input type="radio" name="{{ it.key }}" value="{{ c.value }}"> {{ c.label }}
+      <label class="{{ c.cls }}"{{ needs|safe }}><input type="radio" name="{{ it.key }}" value="{{ c.value }}"> {{ c.label }}
         {%- if c.hint %} <small>{{ c.hint }}</small>{% endif %}</label>
       {%- endfor %}
       {%- elif it.kind == 'select' %}
-      <label class="row set-{{ it.key }}"{{ needs }}>{{ it.label }} <select name="{{ it.key }}">
+      <label class="row set-{{ it.key }}"{{ needs|safe }}>{{ it.label }} <select name="{{ it.key }}">
         {%- for c in it.choices %}<option value="{{ c.value }}">{{ c.label }}</option>{% endfor %}
       </select></label>
       {%- endif %}
