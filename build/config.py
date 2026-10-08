@@ -47,6 +47,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
+        if key == "audio":
+            continue                                # not a repository: see audio()
         path = (ROOT / cfg["path"]).resolve()
         if not path.is_dir():
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
@@ -74,6 +76,29 @@ def load() -> dict:
             "date": _git(path, "log", "-1", "--format=%cd", "--date=short", commit or "HEAD"),
         }
     return repos
+
+
+def audio() -> dict:
+    """Return {key: {key, path, root, label, kind}} for each [audio.<key>] in sources.toml.
+
+    A recording directory has no git and no revision: what pins it is the
+    per-file list in data/audio/<key>-files.tsv.  A human reading's is a master
+    like the repos, at an absolute path that pi5 shares.  The AI voice's is made
+    here (tools/tts/book.py), under var/, so its path is relative to the
+    project: `root` is the path as written, which the database records and the
+    app resolves against its own tree, here or on pi5.
+    """
+    with open(ROOT / "sources.toml", "rb") as fh:
+        raw = tomllib.load(fh).get("audio", {})
+    out = {}
+    for key, cfg in raw.items():
+        path = pathlib.Path(cfg["path"]).expanduser()
+        if not path.is_absolute():
+            path = ROOT / path
+        out[key] = {"key": key, "path": path, "root": cfg["path"], "label": cfg["label"],
+                    "kind": cfg["kind"], "credit": cfg.get("credit"),
+                    "credit_url": cfg.get("credit_url"), "present": path.is_dir()}
+    return out
 
 
 def describe(repos: dict) -> str:

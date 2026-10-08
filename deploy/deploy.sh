@@ -4,6 +4,7 @@
 #   ./deploy/deploy.sh                 build the database here, ship it, restart
 #   ./deploy/deploy.sh --no-data       ship code only, leave the database alone
 #   ./deploy/deploy.sh --no-restart    ship, do not restart
+#   ./deploy/deploy.sh --audio         also copy the AI voice (var/audio/ai, ~4 GB) first
 #   UBSITE_HOST=other ./deploy/deploy.sh
 #
 # The three source repositories are NOT on pi5, and do not need to be: the
@@ -18,14 +19,17 @@ HOST="${UBSITE_HOST:-pi5}"
 DEST="${UBSITE_DEST:-/home/tigran/ubsite}"
 UV="${UBSITE_UV:-/home/tigran/.local/bin/uv}"   # pi5 has uv here, not /usr/local/bin
 PORT="${UBSITE_PORT:-8130}"                     # 8000 and 8090 are taken on pi5
+COPY_HOST="${UBSITE_COPY_HOST:-pi5f}"           # pi5's address on the fast link, for big copies
 BUILD=1
 RESTART=1
+AUDIO=0
 
 for arg in "$@"; do
     case "$arg" in
         --no-data)    BUILD=0 ;;
         --no-restart) RESTART=0 ;;
-        *) echo "usage: $(basename "$0") [--no-data] [--no-restart]" >&2; exit 2 ;;
+        --audio)      AUDIO=1 ;;
+        *) echo "usage: $(basename "$0") [--no-data] [--no-restart] [--audio]" >&2; exit 2 ;;
     esac
 done
 
@@ -57,13 +61,61 @@ rsync -az --delete \
     --exclude 'export/' \
     "$HERE"/ "$HOST:$DEST"/
 
+if [ "$AUDIO" = 1 ]; then
+    # The AI voice is made here, under var/, which the rsync above skips.  To
+    # the same relative path on pi5, adding and never deleting: a page opened
+    # before the new database goes live still plays the files the old one
+    # named.  The old files are pruned below, one deploy later.
+    echo "==> AI voice to $COPY_HOST:$DEST/var/audio/ai ($(du -sh var/audio/ai | cut -f1))"
+    ssh "$COPY_HOST" "mkdir -p $DEST/var/audio/ai"
+    rsync -a --info=progress2 var/audio/ai/ "$COPY_HOST:$DEST/var/audio/ai/"
+fi
+
 if [ "$BUILD" = 1 ]; then
+    # The database names every recording it will serve; pi5 must hold exactly
+    # those files, at the path the database records -- a relative one under
+    # $DEST.  By size, which is cheap and catches a missing or truncated copy;
+    # the SHA-256s are in data/audio/<key>-files.tsv for when that is not enough.
+    for key in $(sqlite3 var/ub.db "SELECT key FROM audio_source ORDER BY id"); do
+        root=$(sqlite3 var/ub.db "SELECT root FROM audio_source WHERE key='$key'")
+        case "$root" in /*) ;; *) root="$DEST/$root" ;; esac
+        echo "==> recordings ($key) on $HOST at $root"
+        want=$(sqlite3 -separator ' ' var/ub.db \
+            "SELECT f.name, f.bytes FROM audio_file f JOIN audio_source s ON s.id=f.source_id
+              WHERE s.key='$key'" | LC_ALL=C sort)
+        # A missing directory is an empty list, reported below, not a silent
+        # exit: under pipefail a failing ssh would end the script here.
+        have=$(ssh "$HOST" "{ cd '$root' 2>/dev/null && find . -name '*.mp3' -printf '%P %s\n'; } || true" | LC_ALL=C sort)
+        missing=$(LC_ALL=C comm -23 <(echo "$want") <(echo "$have") | head -5)
+        if [ -n "$missing" ]; then
+            echo "FAILED: $HOST lacks, or has a different size of, recordings the database serves:" >&2
+            echo "$missing" >&2
+            [ "$key" = ai ] && echo "(./deploy/deploy.sh --audio copies the AI voice)" >&2
+            exit 1
+        fi
+        echo "    $(echo "$want" | wc -l) files present"
+    done
+
+    # The AI files the database being replaced names: kept through this
+    # deploy for pages already open, pruned at the next.
+    LIST="SELECT s.root || '/' || f.name FROM audio_file f JOIN audio_source s ON s.id=f.source_id WHERE s.key='ai'"
+    served=$(ssh "$HOST" "cd $DEST && [ -f var/ub.db ] && .venv/bin/python -c \"import sqlite3; print('\\n'.join(r[0] for r in sqlite3.connect('file:var/ub.db?mode=ro', uri=True).execute(\\\"$LIST\\\")))\" 2>/dev/null" || true)
+
     echo "==> shipping var/ub.db ($(du -h var/ub.db | cut -f1))"
     ssh "$HOST" "mkdir -p $DEST/var"
     # To a temp name then mv, so a half-transferred database is never the one
     # being served. mv within a filesystem is atomic.
     rsync -az --info=progress2 var/ub.db "$HOST:$DEST/var/ub.db.new"
     ssh "$HOST" "mv $DEST/var/ub.db.new $DEST/var/ub.db"
+
+    # Prune: an AI file neither the new database nor the one it replaced names.
+    keep=$( { echo "$served"; sqlite3 var/ub.db "$LIST"; } | grep -v '^$' | LC_ALL=C sort -u)
+    have=$(ssh "$HOST" "cd $DEST && { [ ! -d var/audio/ai ] || find var/audio/ai -name '*.mp3'; }" | LC_ALL=C sort)
+    stale=$(LC_ALL=C comm -23 <(echo "$have") <(echo "$keep") | grep -v '^$' || true)
+    if [ -n "$stale" ]; then
+        echo "==> pruning $(echo "$stale" | wc -l) AI files no database names"
+        echo "$stale" | ssh "$HOST" "cd $DEST && xargs -r rm -f --"
+    fi
 fi
 
 echo "==> venv on $HOST"

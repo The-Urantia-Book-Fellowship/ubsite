@@ -32,3 +32,37 @@ path = "../index"
 tex  = "tex"
 rev  = "HEAD"
 url  = "https://github.com/The-Urantia-Book-Fellowship/index"   # PRIVATE, as above
+
+# The recordings.  Not repositories: no git, no revision.  Each is listed by
+# file in data/audio/ with its size and SHA-256, and the build checks the
+# directory against that list.
+[audio.mh]
+# Merritt Horn's reading of the whole book: one MP3 per section, 121 hours, as
+# published on the Uversa Press DVD (2006): 128 kbps joint stereo, 44.1 kHz.
+# Copied from the disc with the folder names lowercased (it mixes Paper005 and
+# paper105); README-DVD.txt is the disc's own readme.  /Audio/Urantia/Urantia-
+# MH-Audio is the same recordings re-encoded at 32 kbps mono, and is not used.
+# A MASTER like the repos above -- read, never written.  pi5 holds an identical
+# copy at the same path, which is what the site serves.
+path  = "/Audio/Urantia/Urantia-MH-Audio-DVD"
+label = "Merritt Horn"
+kind  = "human"
+
+[audio.ai]
+# The AI voice: Higgs TTS 3 (Boson AI's Higgs Audio), cloned from a synthetic
+# reference voice ("mature", var/tts/refs/higgs2_mature_clean.wav), made here
+# on the 3090 by `make tts` (tools/tts/book.py), every chunk heard back by
+# Whisper.  One MP3 per section, 64 kbps mono.  NOT a master: this project
+# writes it, under var/, so the path is relative to the project, here and on
+# pi5 alike; `deploy.sh --audio` copies it there.
+#
+# Boson's licence (Creator Use Grant, II-A(b)) requires the acknowledgment below
+# "displayed prominently together with the content", and allows its name only as
+# that acknowledgment, "not as the leading or primary name of any product"
+# (IV(d)(i)) -- so the voice is called "AI voice", and the credit is shown
+# wherever it is offered or plays.
+path  = "var/audio/ai/higgs3_mature"
+label = "AI voice"
+kind  = "synthetic"
+credit     = "This audio was created with Boson AI's Higgs Audio"
+credit_url = "https://www.boson.ai/higgs-audio"

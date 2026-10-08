@@ -9,9 +9,20 @@
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <script>
-// Theme before first paint, so there is no flash.  Wrapped because site data
-// can be blocked or cleared, and the page must render correctly without it.
-try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+// Settings before first paint, so there is no flash of the wrong state: each
+// stored value that differs from its default becomes data-<key> on <html>,
+// 'off' for a switch (ubsite/settings.py).  Wrapped because site data can be
+// blocked or cleared, and the page must render correctly without it.  The
+// theme was once kept apart, as ub_theme; it is read from there until ub.js
+// moves it.  ub.js owns the rest.
+window.ubDefaults = {{ settings_defaults|tojson }};
+(function (r, D) {
+  try {
+    var s = JSON.parse(localStorage.getItem('ub_settings') || '{}') || {};
+    if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
+    for (var k in D) if (k in s && s[k] !== D[k]) r.dataset[k] = s[k] === false ? 'off' : s[k];
+  } catch (e) {}
+})(document.documentElement, window.ubDefaults);
 </script>
 </head>
 <body>
@@ -23,8 +34,53 @@ try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.
     <a href="/read">Contents</a>
     <a href="/index">Index</a>
     <button class="theme" type="button" aria-label="Theme">◐</button>
+    {#- Hidden until ub.js runs: with JavaScript off there is nothing to set. #}
+    <button class="gear" type="button" aria-label="Settings" aria-haspopup="dialog" hidden>
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h12M2 12h12"/>
+        <circle cx="5" cy="4" r="1.8"/><circle cx="11" cy="8" r="1.8"/><circle cx="6.5" cy="12" r="1.8"/></svg></button>
   </nav>
 </header>
+<dialog class="settings" aria-labelledby="settings-title">
+  {#- Rendered from ubsite/settings.py; ub.js fills in the values and keeps them. #}
+  <form method="dialog">
+    <h2 id="settings-title">Settings</h2>
+    {%- for g in settings_groups(voices()) %}
+    <fieldset>
+      <legend>{{ g.legend }}</legend>
+      {%- for it in g["items"] %}
+      {%- if it.kind == 'switch' %}
+      <label><input type="checkbox" name="{{ it.key }}"> {{ it.label }}
+        {%- if it.key == 'pilcrow' %} <span class="pcm" aria-hidden="true"></span>{% endif %}
+        {%- if it.hint %} <small>{{ it.hint }}</small>{% endif %}</label>
+      {%- elif it.kind == 'segmented' %}
+      <div class="row"><span id="set-{{ it.key }}">{{ it.label }}</span>
+        <div class="seg" role="radiogroup" aria-labelledby="set-{{ it.key }}">
+        {%- for c in it.choices %}
+          <label class="{{ c.cls }}"{% if c.hint %} title="{{ c.hint }}"{% endif %}><input type="radio"
+            name="{{ it.key }}" value="{{ c.value }}"{% if c.label == 'A' %} aria-label="{{ c.hint }}"{% endif %}><span>{{ c.label }}</span></label>
+        {%- endfor %}
+        </div></div>
+      {%- elif it.kind == 'radio' %}
+      {%- if it.key != 'voice' %}<p class="sub">{{ it.label }}</p>{% endif %}
+      {%- for c in it.choices %}
+      <label class="{{ c.cls }}"><input type="radio" name="{{ it.key }}" value="{{ c.value }}"> {{ c.label }}
+        {%- if c.hint %} <small>{{ c.hint }}</small>{% endif %}</label>
+      {%- endfor %}
+      {%- elif it.kind == 'select' %}
+      <label class="row set-{{ it.key }}">{{ it.label }} <select name="{{ it.key }}">
+        {%- for c in it.choices %}<option value="{{ c.value }}">{{ c.label }}</option>{% endfor %}
+      </select></label>
+      {%- endif %}
+      {%- endfor %}
+    </fieldset>
+    {%- endfor %}
+    <p class="kept">Kept in this browser only.</p>
+    <div class="actions">
+      <button class="reset" type="button">Restore the defaults</button>
+      <button class="done" value="done">Done</button>
+    </div>
+  </form>
+</dialog>
 {% block body %}{% endblock %}
 <footer>
   {#- The commit each source was built from: which text and which index this is.
@@ -41,5 +97,6 @@ try { var t = localStorage.getItem('ub_theme'); if (t) document.documentElement.
   <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.</p>
 </footer>
 <script src="/static/ub.js" defer></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>

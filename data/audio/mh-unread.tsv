@@ -1,0 +1,10 @@
+# Paragraphs Merritt Horn's recording does not contain.  Each has no segment; the
+# player runs past it, and check_audio requires exactly this set to be missing.
+# Found by tools/align: unheard even by the unbatched second pass (make align-repair)
+# over fifteen seconds either side, and in no transcript of all 1,629 files.
+# Found on the 1.7 GB transcode, 2026-10-07, and the same on the DVD it was made from.
+ref	why
+59:6.13	the [Presented by a Life Carrier ...] attribution: P059_06 ends in silence after 59:6.12; Whisper "hears" only its usual "Thank you." there
+133:9.5	"In India, Ganid grew up ..." is not read: P133_09 ends after 133:9.4 ("... Joshua, their teacher.") with 4.5 s of silence
+133:9.6	"Thus ended that chapter ..." is not read, as 133:9.5
+137:8.9	"Be not deceived by those who come saying here is the kingdom ..." is not read: the reading goes from 137:8.8 straight to 137:8.10

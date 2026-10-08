@@ -1,0 +1,343 @@
+<title>{{TITLE}}</title>
+<style>
+/* A section page of the reader, as the site sets it, with the player fixed at
+   the foot and a way to mark a fault at the moment it is heard.
+   Tokens from ubsite/static/ub.css. */
+@font-face { font-family: "UB Goudy"; src: url(fonts/UBGoudy.woff2) format("woff2");
+             font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "UB Goudy"; src: url(fonts/UBGoudy-Italic.woff2) format("woff2");
+             font-weight: 400; font-style: italic; font-display: swap; }
+:root {
+  --paper: oklch(0.972 0.008 85);
+  --ink:   oklch(0.24 0.012 60);
+  --faint: oklch(0.52 0.010 70);
+  --rule:  oklch(0.88 0.010 80);
+  --jesus: oklch(0.44 0.15 25);
+  --link:  oklch(0.40 0.09 250);
+  --flame: oklch(0.62 0.13 76);
+  --tint:  color-mix(in oklch, var(--link) 11%, transparent);
+  --serif: "UB Goudy", Georgia, "Times New Roman", serif;
+  --ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --size: clamp(1.15rem, 1rem + 0.55vw, 1.4rem);
+  --measure: 60ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85); --faint: oklch(0.64 0.010 75);
+    --rule: oklch(0.30 0.010 75); --jesus: oklch(0.70 0.12 28); --link: oklch(0.74 0.08 250);
+    --flame: oklch(0.80 0.12 82); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85); --faint: oklch(0.64 0.010 75);
+  --rule: oklch(0.30 0.010 75); --jesus: oklch(0.70 0.12 28); --link: oklch(0.74 0.08 250);
+  --flame: oklch(0.80 0.12 82); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--paper); color: var(--ink); font: var(--size)/1.55 var(--serif);
+  font-variant-numeric: lining-nums; font-synthesis: none;
+  padding-inline: 16px; padding-block: 2rem 9rem; }
+.wrap { max-width: calc(var(--measure) + 3rem); margin: 0 auto; padding-left: 3rem; }
+@media (max-width: 40rem) { .wrap { padding-left: 0; } }
+a { color: var(--link); }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+.eyebrow { font: 600 .72rem/1 var(--ui); letter-spacing: .12em; text-transform: uppercase;
+  color: var(--faint); margin: 0 0 .7rem; }
+h1 { font-weight: 400; font-size: 2.1rem; line-height: 1.15; margin: 0 0 .8rem; text-wrap: balance; }
+.lede { font-size: 1rem; max-width: var(--measure); }
+.lede p, .lede ul { margin: 0 0 .7rem; }
+.lede ul { padding-left: 1.2rem; display: grid; gap: .35rem; }
+
+/* What has been marked so far, from the artifact's store. */
+.marks { margin: 1.4rem 0 2rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  padding: .7rem 0; font-size: .98rem; }
+.marks h2 { font: 600 .72rem/1.4 var(--ui); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--faint); margin: 0 0 .4rem; }
+.marks ol { margin: 0; padding: 0; list-style: none; display: grid; gap: .3rem; }
+.marks li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .7rem; align-items: baseline; }
+.marks .at { font: .8rem var(--ui); font-variant-numeric: tabular-nums; color: var(--link); white-space: nowrap; }
+.marks .none { color: var(--faint); font-style: italic; margin: 0; }
+.marks button { font: .78rem var(--ui); color: var(--faint); background: none; border: 0; cursor: pointer;
+  padding: .1rem .3rem; border-radius: 3px; }
+.marks button:hover { color: var(--ink); background: var(--tint); }
+
+.sec h2 { font-weight: 400; font-size: 1.35rem; margin: 2.4rem 0 .9rem; position: relative; text-wrap: balance; }
+p.t { margin: 0 0 .85rem; max-width: var(--measure); position: relative; text-wrap: pretty; }
+.num { float: left; margin-left: -3rem; width: 2.4rem; text-align: right; font: .7rem var(--ui);
+  color: var(--faint); text-decoration: none; position: relative; top: .5rem; font-variant-numeric: tabular-nums; }
+.jesus { color: var(--jesus); }
+.mark { font-variant-numeric: lining-nums; }
+.leader { display: inline-block; width: 3rem; border-bottom: 1px dotted var(--faint); margin: 0 .35rem;
+  transform: translateY(-.28em); }
+a.fn { text-decoration: none; }
+p.t.now, .sec h2.now { background: var(--tint); border-radius: 3px; box-shadow: 0 0 0 .35rem var(--tint); }
+/* Start here: in the gutter under the number, as on the site; always there,
+   faint like the number, since a phone or tablet has no hover. */
+.go { position: absolute; z-index: 1; left: -1.75rem; top: 1.75rem; width: 1.2rem; height: 1.2rem; padding: 0; border: 0;
+  border-radius: 50%; background: var(--link); opacity: .45; cursor: pointer; transition: opacity .15s;
+  -webkit-mask: radial-gradient(circle, #000 98%, transparent 100%); }
+.go::before { content: ""; position: absolute; inset: 0; background: var(--paper);
+  clip-path: polygon(40% 28%, 74% 50%, 40% 72%); }
+p.t:hover .go, .sec h2:hover .go, .go:focus-visible, .now .go { opacity: 1; }
+.sec h2 .go { left: -1.8rem; top: .35rem; }
+/* On a phone, no gutter: the number and the button under it stand at the
+   start of the paragraph, as a drop capital does (as on the site). */
+@media (max-width: 40rem) {
+  .num { float: left; clear: left; width: 3.4rem; margin: 0; text-align: left; position: relative; top: .3rem; }
+  p.t .go { position: relative; left: auto; top: auto; float: left; clear: left; margin: .25rem 2.2rem 0 0; }
+  .sec h2 .go { position: relative; left: auto; top: auto; display: inline-block; vertical-align: -.1em; margin-right: .5rem; } }
+
+/* The player, fixed at the foot as on the site. */
+.player { position: fixed; z-index: 5; left: 50%; transform: translateX(-50%);
+  bottom: calc(.8rem + env(safe-area-inset-bottom, 0px)); width: min(46rem, calc(100vw - 1.2rem));
+  background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 14px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / .18); font: .9rem/1.3 var(--ui); padding: .45rem .55rem; }
+.row { display: flex; align-items: center; gap: .3rem; }
+.player button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; border-radius: 8px;
+  padding: .35rem .5rem; }
+.player button:hover { background: var(--tint); }
+.player .toggle { min-width: 4.6rem; color: var(--paper); background: var(--link); font-weight: 600; }
+.player .toggle:hover { background: color-mix(in oklch, var(--link) 85%, var(--ink)); }
+.where { flex: 1; min-width: 0; padding: 0 .3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--faint); font-variant-numeric: tabular-nums; }
+.rate { color: var(--faint); font-variant-numeric: tabular-nums; }
+.player .flag { color: var(--jesus); border: 1px solid color-mix(in oklch, var(--jesus) 45%, transparent); }
+.player .flag:hover { background: color-mix(in oklch, var(--jesus) 10%, transparent); }
+form.note { display: grid; gap: .45rem; margin-top: .5rem; padding-top: .5rem; border-top: 1px solid var(--rule); }
+form.note label { color: var(--faint); }
+form.note .already { margin: 0; color: var(--jesus); }
+form.note input { font: 1rem var(--ui); color: var(--ink); background: var(--paper); width: 100%;
+  border: 1px solid var(--rule); border-radius: 6px; padding: .4rem .5rem; }
+form.note .row { justify-content: flex-end; }
+.player .save { color: var(--paper); background: var(--jesus); font-weight: 600; }
+.player .save:hover { background: color-mix(in oklch, var(--jesus) 85%, var(--ink)); }
+.saved { color: var(--link); padding: 0 .3rem; white-space: nowrap; }
+@media (max-width: 30rem) { .rate { display: none; } .player .toggle { min-width: 3.6rem; } }
+@media (prefers-reduced-motion: reduce) { .go { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">ubsite · the AI voice · before the whole book</p>
+    <h1>{{TITLE}}</h1>
+    <div class="lede">{{LEDE}}</div>
+  </header>
+  <section class="marks" aria-labelledby="marks-h">
+    <h2 id="marks-h">Your marks</h2>
+    <p class="none" id="marks-none">None yet. While listening, press <strong>Mark a problem here</strong>
+      at the moment you hear one; it records the paragraph and the second, and a note if you add one.</p>
+    <ol id="marks-list"></ol>
+  </section>
+  <main>
+{{BODY}}
+  </main>
+</div>
+
+<div class="player" role="region" aria-label="Listening">
+  <div class="row">
+    <button type="button" class="prev" aria-label="Previous paragraph">⏮</button>
+    <button type="button" class="toggle">▶ Play</button>
+    <button type="button" class="next" aria-label="Next paragraph">⏭</button>
+    <span class="where" aria-live="polite">Press play, or a ▶ beside any paragraph</span>
+    <button type="button" class="rate" aria-label="Speed">1×</button>
+    <button type="button" class="flag" hidden>Mark a problem here</button>
+  </div>
+  <form class="note" hidden>
+    <p class="already" hidden></p>
+    <label for="note-text">At <span class="note-at"></span>. What did you hear? (optional)</label>
+    <input id="note-text" autocomplete="off" placeholder="a click, a wrong word, a strange pause…">
+    <div class="row">
+      <button type="button" class="cancel">Cancel</button>
+      <button type="submit" class="save">Save mark</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  var DATA = {{DATA}};
+  var RATES = [0.9, 1, 1.1, 1.25, 1.5];
+  var KEY = 'ubvoice-sample-place';
+  // Every segment in reading order, across the sections: [section, ref|null, start, end].
+  var queue = [];
+  DATA.forEach(function (s) { s.segs.forEach(function (g) { queue.push({ s: s, ref: g[0], a: g[1], b: g[2] }); }); });
+
+  var audio = new Audio();
+  audio.preload = 'none';
+  var k = -1, file = null, marked = null, touched = 0, rate = 1;
+  var bar = document.querySelector('.player');
+  var tog = bar.querySelector('.toggle'), where = bar.querySelector('.where');
+  var flag = bar.querySelector('.flag'), form = bar.querySelector('form.note');
+
+  function el(q) {
+    return q.ref ? document.querySelector('p.t[data-ref="' + q.ref + '"]')
+                 : document.getElementById(q.s.id + '-h');
+  }
+  function clock(ms) {
+    var s = Math.max(0, Math.round(ms / 1000));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+  function label(q) { return q ? (q.ref || (q.s.paper + ':' + q.s.n + ' heading')) : ''; }
+
+  function go(i, offset) {
+    if (i < 0 || i >= queue.length) return;
+    var q = queue[i], t = (q.a + (offset || 0)) / 1000;
+    k = i;
+    if (file !== q.s.file) { file = q.s.file; audio.src = q.s.file; audio.preload = 'auto'; }
+    audio.playbackRate = audio.defaultPlaybackRate = rate;
+    if (audio.readyState >= 1) audio.currentTime = t;
+    else audio.addEventListener('loadedmetadata', function f() {
+      audio.removeEventListener('loadedmetadata', f); audio.currentTime = t; });
+    var p = audio.play();
+    if (p && p.catch) p.catch(render);
+    mark(); render();
+  }
+  function render() {
+    tog.textContent = audio.paused ? '▶ Play' : '❚❚ Pause';
+    var q = queue[k];
+    where.textContent = q ? label(q) + ' · ' + clock(audio.currentTime * 1000) : where.textContent;
+  }
+  function locate() {
+    var t = audio.currentTime * 1000;
+    for (var i = 0; i < queue.length; i++)
+      if (queue[i].s.file === file && t >= queue[i].a && t < queue[i].b) return i;
+    return k;
+  }
+  function mark() {
+    var e = k >= 0 ? el(queue[k]) : null;
+    if (e === marked) return;
+    if (marked) marked.classList.remove('now');
+    marked = e;
+    if (!e) return;
+    e.classList.add('now');
+    if (Date.now() - touched < 4000) return;
+    var r = e.getBoundingClientRect();
+    if (r.top < 40 || r.bottom > innerHeight - 140)
+      e.scrollIntoView({ block: r.height > innerHeight * 0.6 ? 'start' : 'center', behavior: 'smooth' });
+  }
+  ['wheel', 'touchmove', 'keydown'].forEach(function (e) {
+    addEventListener(e, function () { touched = Date.now(); }, { passive: true });
+  });
+
+  var saved = 0;
+  audio.addEventListener('timeupdate', function () {
+    if (k < 0) return;
+    var i = locate();
+    if (i !== k) { k = i; mark(); }
+    render();
+    if (Date.now() - saved > 3000) {
+      saved = Date.now();
+      try { localStorage.setItem(KEY, JSON.stringify({ k: k, t: audio.currentTime * 1000 - queue[k].a })); } catch (e) {}
+    }
+  });
+  // At the end of a section's file, on into the next section.
+  audio.addEventListener('ended', function () {
+    var i = k + 1;
+    while (i < queue.length && queue[i].s.file === file) i++;
+    if (i < queue.length) go(i); else { k = -1; mark(); render(); where.textContent = 'The end.'; }
+  });
+  audio.addEventListener('play', render);
+  audio.addEventListener('pause', render);
+  audio.addEventListener('error', function () { if (audio.getAttribute('src')) where.textContent = 'This recording could not be loaded.'; });
+
+  tog.addEventListener('click', function () {
+    if (k < 0) {
+      var place = null;
+      try { place = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+      return place && queue[place.k] ? go(place.k, place.t) : go(0);
+    }
+    if (audio.paused) audio.play(); else audio.pause();
+  });
+  bar.querySelector('.prev').addEventListener('click', function () {
+    if (k < 0) return go(0);
+    go(audio.currentTime * 1000 - queue[k].a < 3000 && k > 0 ? k - 1 : k);
+  });
+  bar.querySelector('.next').addEventListener('click', function () { if (k + 1 < queue.length) go(k + 1); });
+  bar.querySelector('.rate').addEventListener('click', function (ev) {
+    rate = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
+    audio.playbackRate = audio.defaultPlaybackRate = rate;
+    ev.currentTarget.textContent = rate + '×';
+  });
+  document.querySelectorAll('.go').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var ref = b.dataset.ref, sec = b.dataset.sec;
+      for (var i = 0; i < queue.length; i++)
+        if (ref ? queue[i].ref === ref : (queue[i].s.id === sec && !queue[i].ref)) return go(i);
+    });
+  });
+  try {
+    var place = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (place && queue[place.k]) where.textContent = 'Play resumes at ' + label(queue[place.k]);
+  } catch (e) {}
+
+  // ---- marks: the artifact's store, read back afterwards ------------------
+  var db = null, at = null, marks = [];
+  function renderMarks(docs) {
+    marks = docs.map(function (d) { return d.data(); });
+    document.getElementById('marks-h').textContent = 'Your marks' + (docs.length ? ' (' + docs.length + ')' : '');
+    var list = document.getElementById('marks-list');
+    list.textContent = '';
+    document.getElementById('marks-none').hidden = docs.length > 0;
+    docs.forEach(function (d) {
+      var m = d.data(), li = document.createElement('li');
+      var a = document.createElement('span'); a.className = 'at';
+      a.textContent = (m.ref || m.section) + ' · ' + clock(m.at_ms);
+      var n = document.createElement('span'); n.textContent = m.note || '(no note)';
+      var acts = document.createElement('span');
+      var play = document.createElement('button'); play.type = 'button'; play.textContent = 'Hear it';
+      play.addEventListener('click', function () {
+        for (var i = 0; i < queue.length; i++)
+          if (queue[i].s.file === m.file && m.at_ms >= queue[i].a && m.at_ms < queue[i].b)
+            return go(i, Math.max(0, m.at_ms - 3000 - queue[i].a));
+      });
+      var del = document.createElement('button'); del.type = 'button'; del.textContent = 'Remove';
+      del.addEventListener('click', function () { db.collection('marks').doc(d.id).delete().catch(function () {}); });
+      acts.appendChild(play); acts.appendChild(del);
+      li.appendChild(a); li.appendChild(n); li.appendChild(acts);
+      list.appendChild(li);
+    });
+  }
+  flag.addEventListener('click', function () {
+    if (k < 0) return;
+    audio.pause();
+    var q = queue[k];
+    at = { ref: q.ref, section: q.s.paper + ':' + q.s.n, file: q.s.file, at_ms: Math.round(audio.currentTime * 1000) };
+    form.querySelector('.note-at').textContent = label(q) + ', ' + clock(at.at_ms) + ' into the section';
+    // What is already marked on this paragraph: saved, and listed at the top too.
+    var here = marks.filter(function (m) { return m.file === at.file && m.ref === at.ref; });
+    var already = form.querySelector('.already');
+    already.hidden = !here.length;
+    already.textContent = here.length ? 'Already marked here: ' + here.map(function (m) {
+      return clock(m.at_ms) + (m.note ? ' "' + m.note + '"' : '');
+    }).join('; ') + '.' : '';
+    form.hidden = false;
+    form.querySelector('input').value = '';
+    form.querySelector('input').focus();
+  });
+  form.querySelector('.cancel').addEventListener('click', function () { form.hidden = true; });
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (!db || !at) return;
+    var doc = Object.assign({}, at, { note: form.querySelector('input').value.trim(), made: new Date().toISOString() });
+    var save = form.querySelector('.save');
+    save.disabled = true;
+    db.collection('marks').add(doc).then(function () {
+      form.hidden = true;
+      where.textContent = 'Marked ' + label(queue[k]) + ' · ' + clock(doc.at_ms) + '. Press play to go on.';
+    }, function (e) {
+      where.textContent = e && e.code === 'invalid_argument'
+        ? 'This view cannot save marks.' : 'The mark was not saved. Try again.';
+    }).then(function () { save.disabled = false; });
+  });
+  if (window.claude && window.claude.use) {
+    window.claude.use('db').then(function (d) {
+      if (!d) return;
+      db = d;
+      flag.hidden = false;
+      db.collection('marks').orderBy('made').onSnapshot(function (snap) { renderMarks(snap.docs); }, function () {});
+    });
+  }
+})();
+</script>

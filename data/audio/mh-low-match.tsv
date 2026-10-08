@@ -1,0 +1,8 @@
+# Paragraphs where Merritt Horn's reading and today's text differ.  Each is read,
+# but less than build/audio.py's LOW_MATCH of it was heard, even unbatched
+# (make align-repair); check_audio requires exactly this set.
+# Found on the 1.7 GB transcode, 2026-10-07, and the same on the DVD it was made from.
+ref	why
+33:6.4	the sentence on Observers is not read: from "... within the confines of the local universe." straight to 33:6.5 "From Salvington"
+118:3.2	a gap in the recording: "truth is time-" then "... understand and of the future you can comprehend"; about a dozen words lost, apparently an editing splice
+120:0.1	the second sentence ("To live such identical lives ... his self-made universe of things and beings.") is not read: from "bestowal experience." straight to 120:0.2

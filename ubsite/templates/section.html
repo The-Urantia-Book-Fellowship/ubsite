@@ -66,3 +66,15 @@
   </article>
 </main>
 {% endblock %}
+{% block scripts %}
+{#- Every voice's segments for this section (app.py section_audio); listen.js
+    builds the controls from it, so with JavaScript off there are none.  On
+    every section page, even one no recording has: the browser's own voice
+    can read any of them. #}
+<script type="application/json" id="ub-audio">{{ {
+  "paper": paper.n, "section": section.n,
+  "title": paper.n ~ ":" ~ section.n ~ " " ~ (section.title or paper.title),
+  "next": onward,
+  "voices": audio}|tojson }}</script>
+<script src="/static/listen.js" defer></script>
+{% endblock %}

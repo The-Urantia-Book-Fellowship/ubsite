@@ -25,6 +25,10 @@
      width of "0", which is narrow in Goudy, so 60ch sets about 68 characters --
      the range this face reads best at. */
   --measure: 60ch;
+  /* The typefaces Settings offers besides UB Goudy: the device's own, so
+     choosing one downloads nothing. */
+  --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -44,6 +48,9 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+/* Hidden means hidden, whatever display a rule gives the element (a label in
+   the dialog is display: block). */
+[hidden] { display: none !important; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
   font-family: "UB Goudy", Georgia, "Times New Roman", serif;
@@ -76,6 +83,14 @@ a:hover { text-decoration-thickness: 2px; }
    than left to the browser's fallback (build/fonts.py ELSEWHERE). */
 .theme { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 1rem;
   font-family: system-ui, sans-serif; }
+/* Settings: drawn, not a glyph -- U+2699 turns into an emoji on some systems. */
+.gear { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer;
+        align-self: center; }
+.gear svg { width: 1.05rem; height: 1.05rem; display: block; }
+.gear path, .gear circle { stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; }
+.gear path { fill: none; }
+.gear circle { fill: var(--paper); }
+.gear:hover, .theme:hover { color: var(--ink); }
 
 footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1rem;
   font-size: .88rem; color: var(--faint); }
@@ -99,6 +114,7 @@ article { min-width: 0; }
 h1 { font-size: 2.1rem; font-weight: 400; line-height: 1.15; margin: .2rem 0 .3rem; }
 h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
      font-variant-caps: small-caps; letter-spacing: .03em; }
+.papertop h2 { max-width: var(--measure); }
 .author { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
 
 /* Each paragraph emits TWO grid cells -- text and apparatus.  The browser
@@ -116,7 +132,7 @@ p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
        -webkit-mask: url(/static/pilcrow.svg) center / contain no-repeat;
                mask: url(/static/pilcrow.svg) center / contain no-repeat; }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
-p.t.hit, .tree li:target { scroll-margin-top: 3rem; }
+p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 .num { float: left; margin-left: -2.2rem; width: 1.7rem; text-align: right;
@@ -125,7 +141,32 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
 .num:hover { color: var(--ink); }
 
 .jesus { color: var(--jesus); }
+
+/* Settings (ubsite/settings.py), set on <html> before first paint. */
 :root[data-redletter="off"] .jesus { color: inherit; }
+:root[data-paranum="off"] .num { display: none; }
+:root[data-pilcrow="off"] p.t .pcm { display: none; }
+:root[data-margin="off"] :is(.chips, .thin, .blanket) { display: none; }
+:root[data-notes="off"] :is(.note, a.fn) { display: none; }
+:root[data-margin="off"][data-notes="off"] .a { display: none; }
+:root[data-margin="off"][data-notes="off"] .grid { grid-template-columns: minmax(0, var(--measure)); }
+/* Text size scales the root, so everything set in rem follows, as with the
+   browser's zoom. */
+:root[data-size="smaller"] { font-size: 90%; }
+:root[data-size="larger"]  { font-size: 112.5%; }
+:root[data-size="largest"] { font-size: 125%; }
+/* A modern face has a larger x-height than Goudy, which --size makes up for:
+   measured at 100px, Goudy's "x" stands 43px, a system serif's 47, a sans's 54.
+   font-size-adjust scales whichever face the device supplies to Goudy's 0.43,
+   so the typeface changes the letters and Text size alone changes the size.
+   Small capitals may be synthesised there: these faces have none of their own. */
+:root[data-face="serif"] body { font-family: var(--serif); font-size-adjust: .43;
+                                font-synthesis: small-caps; }
+:root[data-face="sans"] body  { font-family: var(--sans); font-size-adjust: .43;
+                                font-synthesis: small-caps; }
+/* Their figures are wider for their letters than Goudy's, so 60ch held 64
+   characters to a line where Goudy holds 58: a narrower measure keeps the line. */
+:root:is([data-face="serif"], [data-face="sans"]) { --measure: 54ch; }
 .mark { font-variant-numeric: lining-nums; }
 .sc { font-variant-caps: small-caps; }
 .supplied { font-style: italic; }
@@ -169,6 +210,105 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 
 .pager { display: flex; margin: 2.5rem 0 1rem; max-width: var(--measure); font-size: .95rem; }
 .pager .next { margin-left: auto; }
+
+/* ---- listening (listen.js) --------------------------------------------- */
+button svg { width: 1em; height: 1em; fill: currentColor; display: block; }
+button svg .stroke { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
+.listenrow { display: flex; align-items: center; gap: .7rem; margin: -.1rem 0 1.1rem;
+             font-size: .9rem; color: var(--faint); }
+button.listen { display: inline-flex; align-items: center; gap: .45rem; font: inherit;
+  font-size: .95rem; color: var(--link); background: none; cursor: pointer;
+  border: 1px solid var(--rule); border-radius: 999px; padding: .2rem .85rem .2rem .65rem; }
+button.listen:hover { border-color: var(--link); }
+/* Boson's acknowledgment for the AI voice, which its licence requires beside the audio. */
+.listenrow .credit { color: inherit; text-decoration-color: var(--rule); }
+.listenrow .credit:hover { color: var(--link); }
+button.listen svg { width: .8em; height: .8em; }
+/* A paragraph's own play button sits under its number, always there and faint
+   like the number, full only on hover or while its paragraph is read.  It was
+   once shown on hover alone, which a phone or tablet does not have (Tigran,
+   2026-10-08).  It is outside the stored text and has no text of its own, so
+   copying a paragraph still returns its words. */
+p.t { position: relative; }
+.playp { position: absolute; left: -1.6rem; top: 2.3rem; width: 1.15rem; height: 1.15rem;
+  padding: .22rem; border: 0; border-radius: 50%; background: none; color: var(--link);
+  cursor: pointer; opacity: .45; transition: opacity .15s; }
+p.t:hover .playp, .playp:focus-visible, p.t.now .playp { opacity: 1; }
+.playp:hover { background: color-mix(in oklch, var(--link) 14%, transparent); }
+:root[data-voice="off"] :is(.listenrow, .playp) { display: none; }
+/* What is being read, tinted as a search hit is; listen.js clears .hit when
+   playing starts, so only one thing on the page is marked. */
+p.t.now, .papertop h2.now { background: color-mix(in oklch, var(--link) 11%, transparent);
+  border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 11%, transparent);
+  transition: background .3s, box-shadow .3s; }
+.player { position: fixed; z-index: 10; left: 50%; transform: translateX(-50%);
+  bottom: max(1rem, env(safe-area-inset-bottom)); max-width: calc(100vw - 2rem);
+  display: flex; align-items: center; gap: .15rem; padding: .3rem .45rem;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 999px; box-shadow: 0 6px 24px rgb(0 0 0 / .18); font-size: .92rem; }
+.player button { display: grid; place-items: center; padding: .4rem; border: 0;
+  border-radius: 50%; background: none; color: inherit; cursor: pointer; }
+.player button:hover { background: color-mix(in oklch, var(--link) 12%, transparent); }
+.player .toggle { width: 2.3rem; height: 2.3rem; color: var(--paper); background: var(--link); }
+.player .toggle:hover { background: color-mix(in oklch, var(--link) 85%, var(--ink)); }
+.player .where { min-width: 0; padding: 0 .55rem; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; color: var(--faint); }
+/* × is not in the UB Goudy subset -- it is not in the book -- so the speed is
+   set in the system face, like ◐. */
+.player .rate { min-width: 2.9rem; border-radius: 3px; font: .8rem system-ui, sans-serif;
+  color: var(--faint); }
+.player .onward { white-space: nowrap; text-decoration: none; padding: 0 .5rem; }
+.player .close { color: var(--faint); }
+body.listening footer { padding-bottom: 5.5rem; }
+
+/* ---- Settings ---------------------------------------------------------- */
+dialog.settings { width: min(29rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem);
+  overflow-y: auto; padding: 0; color: var(--ink);
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / .28); }
+dialog.settings::backdrop { background: rgb(0 0 0 / .35); }
+dialog.settings form { display: flex; flex-direction: column; padding: 1.1rem 1.4rem 1rem; }
+dialog.settings h2 { margin: 0 0 .5rem; }
+dialog.settings fieldset { border: 0; border-top: 1px solid var(--rule); margin: 0;
+  padding: .55rem 0 .7rem; }
+dialog.settings legend { padding: 0 .4rem 0 0; font-size: .82rem; letter-spacing: .06em;
+  font-variant-caps: small-caps; color: var(--faint); }
+dialog.settings label { display: block; padding: .16rem 0; font-size: 1.02rem; cursor: pointer; }
+dialog.settings small { color: var(--faint); font-size: .85rem; }
+dialog.settings input { margin: 0 .45rem 0 0; accent-color: var(--link); }
+dialog.settings select { margin-left: .5rem; font: .9rem system-ui, sans-serif; color: inherit;
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 3px; }
+dialog.settings .kept { margin: .3rem 0 .7rem; font-size: .85rem; color: var(--faint); }
+dialog.settings .row { display: flex; align-items: center; justify-content: space-between;
+  gap: .8rem; padding: .2rem 0; font-size: 1.02rem; }
+dialog.settings .sub { margin: .35rem 0 .05rem; font-size: 1.02rem; }
+dialog.settings .face-serif { font-family: var(--serif); font-size-adjust: .43; }
+dialog.settings .face-sans { font-family: var(--sans); font-size-adjust: .43; }
+dialog.settings label.face-serif, dialog.settings label.face-sans { padding-left: 0; }
+dialog.settings :is(.face-goudy, .face-serif, .face-sans) small { font-family: "UB Goudy", Georgia, serif; }
+dialog.settings .pcm { margin: 0 0 0 .1em; }
+/* Which of the browser's voices, only while that voice is chosen. */
+:root:not([data-voice="browser"]) dialog.settings .set-bvoice { display: none; }
+dialog.settings .set-bvoice select { max-width: 16rem; }
+/* A row of radio buttons drawn as one control: Theme, Text size. */
+.seg { display: inline-flex; flex-shrink: 0; border: 1px solid var(--rule); border-radius: 999px;
+  overflow: hidden; }
+dialog.settings .seg label { display: grid; place-items: center; min-width: 2.4rem;
+  padding: .12rem .7rem; font-size: .92rem; line-height: 1.5; }
+.seg label + label { border-left: 1px solid var(--rule); }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.seg label:hover { background: color-mix(in oklch, var(--link) 10%, transparent); }
+.seg label:has(input:checked) { color: var(--paper); background: var(--link); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--link); outline-offset: -3px; }
+.seg .a1 span { font-size: .78rem; } .seg .a2 span { font-size: .92rem; }
+.seg .a3 span { font-size: 1.08rem; } .seg .a4 span { font-size: 1.25rem; }
+dialog.settings .actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+dialog.settings .reset { padding: 0; font: inherit; font-size: .9rem; color: var(--link);
+  background: none; border: 0; cursor: pointer; text-decoration: underline;
+  text-decoration-thickness: 1px; text-underline-offset: 2px; }
+dialog.settings .done { padding: .3rem 1.1rem; font: inherit;
+  font-size: .95rem; color: var(--paper); background: var(--link); border: 0;
+  border-radius: 3px; cursor: pointer; }
 
 /* ---- prose pages ------------------------------------------------------- */
 .prose { max-width: 62ch; margin: 0 auto; padding: 2rem 1rem 0; }
@@ -215,7 +355,12 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
   .rail { position: static; max-height: none; border-bottom: 1px solid var(--rule);
           padding-bottom: .8rem; margin-bottom: 1.4rem; }
   .grid { grid-template-columns: 1fr; }
-  .num { float: none; margin: 0 .4rem 0 0; top: 0; }
+  /* No gutter on a phone: the number and the play button under it stand at
+     the start of the paragraph, as a drop capital does, and the text runs
+     beside them for two lines and then the full width. */
+  .num { float: left; clear: left; width: 1.7rem; margin: 0; text-align: left; top: .2rem; }
+  .playp { position: static; float: left; clear: left; display: grid; place-items: center;
+           margin: .15rem .8rem 0 -.25rem; }          /* as wide as .num: the lines align */
   .a:not(:empty) { margin: -.4rem 0 1rem 1rem; border-left: 2px solid var(--rule);
                    padding-left: .7rem; }
   .blanket ul { columns: 1; }
@@ -224,7 +369,7 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 /* ---- print ------------------------------------------------------------- */
 @media print {
   @page { margin: 22mm 20mm; }
-  .top, footer, .rail, .pager { display: none; }
+  .top, footer, .rail, .pager, .listenrow, .playp, .player, dialog { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }
   .reader, .grid { display: block; }
   p.t { orphans: 3; widows: 3; max-width: none; }
@@ -254,6 +399,8 @@ a.cit:hover { color: var(--link); text-decoration: underline; }
 .masthead > div { min-width: 0; }
 .masthead .logo { flex: none; width: 7.5rem; height: 7.5rem; margin-top: -.4rem; }
 @media (max-width: 34rem) {
+  /* At the end of a section, "Next" needs the room "End of the section" had. */
+  .player:has(.onward:not([hidden])) .where { display: none; }
   .masthead { flex-direction: column; gap: .4rem; }
   .masthead .logo { width: 4.5rem; height: 4.5rem; margin-top: 0; }
 }

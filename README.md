@@ -49,6 +49,13 @@ make venv          # .venv on the pinned Python 3.12, from requirements.txt
 make sources       # the three repos and the commits a build would read
 ```
 
+Merritt Horn's recordings must be at `/Audio/Urantia/Urantia-MH-Audio-DVD`, here **and
+on pi5**: the build lists them, and the site on pi5 serves them from that path. They are
+the Uversa Press DVD's MP3s (128 kbps stereo), copied once with the folder names
+lowercased. `/Audio/Urantia/Urantia-MH-Audio` is a 32 kbps transcode of the same
+recordings and is not used. `sources.toml`
+names it under `[audio.mh]`. They are a master like the repos, and nothing writes to them.
+
 ---
 
 ## Updating the site
@@ -189,12 +196,14 @@ commit. There is no git remote; the history lives here.
 ```
 ./deploy/deploy.sh               # rebuild + check here, ship code and database, restart
 ./deploy/deploy.sh --no-data     # code or templates only; leave pi5's database alone
+./deploy/deploy.sh --audio       # also copy the AI voice first, after `make tts` changed it
 ```
 
 The script:
 
 1. runs `make data` and `make check` again, so a deploy never ships an unchecked
-   database;
+   database, and checks that pi5 holds every recording the database serves, at the
+   path and size it records;
 2. rsyncs the code to `pi5:/home/tigran/ubsite`, without `.git`, `.venv`, `var/`
    or `export/`;
 3. ships `var/ub.db` as `ub.db.new` and `mv`s it into place, so a half-copied file is
@@ -215,6 +224,85 @@ curl -s https://ubsite.ddns.net/2:5.12 | grep -c 'loses sight of love'
 ```
 
 Then look at the page and its footer in a browser.
+
+---
+
+## Listening
+
+Every section can be heard in Merritt Horn's reading, and from any paragraph once his
+reading is aligned. The player and the Settings dialog are `ubsite/static/listen.js` and
+`ub.js`. The build turns the recordings into the tables `audio_source`, `audio_file` and
+`audio_segment`, through `build/audio.py`, from three checked-in files in `data/audio/`:
+
+| file | what | made by |
+|---|---|---|
+| `mh-files.tsv` | every MP3, with its size, duration and SHA-256 | `.venv/bin/python -m tools.audio.manifest mh` |
+| `mh-overrides.tsv` | the three files that break the naming rule, and why | by hand |
+| `mh.tsv` | each paragraph's start and end in its file, and how much of it was heard | `make align` |
+| `mh-unread.tsv` | paragraphs the recording does not contain | by hand, from the review |
+| `mh-low-match.tsv` | paragraphs where the reading and today's text differ | by hand, from the review |
+
+The alignment needs a GPU and runs on this machine only, in its own venv in
+`~/Software/ml` (never in `requirements.txt`):
+
+```
+make align-venv          # once: faster-whisper and its CUDA libraries
+make align-transcribe    # Whisper over all 121 hours on the 3090: about 1.5 h, resumable
+make align               # match words to paragraphs, cut in the pauses: seconds
+make align-repair        # re-hear, unbatched, what came out mostly unheard
+make align               # again
+less var/align/mh-review.tsv   # the paragraphs whose reading differs from the text
+```
+
+`make check` holds the differences to `mh-low-match.tsv` and `mh-unread.tsv`
+**exactly**. A text correction that makes the reading and the text diverge shows up
+there, and the gate fails until the paragraph is recorded. Use the 3090 alone: the 2080 Ti
+drives the display, and under load it reached 88 °C and throttled.
+
+The recordings do not change with the text, so none of this reruns after an ordinary
+correction. Rerun it only when paragraphs are added, removed or renumbered.
+
+### Your browser's voice
+
+Settings also offers the browser's own speech, the Web Speech API. Nothing is recorded:
+`listen.js` fetches a section's spoken text from `/speech/<paper>:<section>` (the `speech`
+table) and the browser reads it. How it sounds depends on the browser: Google's voices
+in desktop Chrome, Microsoft's in Edge, Apple's in Safari. It is offered beside the
+recordings, not instead of the AI voice below, because nobody can check what it says,
+and because a phone stops it when the screen locks. `listen.js` keeps the screen on
+while it speaks.
+
+### The AI voice
+
+The second voice is made here, by Higgs TTS 3 (Boson AI) on the 3090, from the spoken
+text the build derives (`build/speech.py`, table `speech`). Each heading and paragraph is
+read a sentence or two at a time. Every piece is checked for a drone, a dead pause or a
+cut-off end, then heard back by Whisper word by word, and made again at another seed until
+both pass (`tools/tts/higgs3.py`, `tools/tts/listen.py`). The pieces are joined into one
+MP3 per section under `var/audio/ai/`, which `deploy.sh --audio` copies to pi5. Three
+files in `data/audio/` come out of it and are checked in:
+
+| file | what |
+|---|---|
+| `ai.tsv` | each paragraph's start and end in its section's file, and the SHA of the spoken text it was made from |
+| `ai-files.tsv` | every MP3, with its size, duration and SHA-256 |
+| `ai-unsettled.tsv` | pieces used although no try was heard exactly as written, with what Whisper heard instead |
+
+```
+make tts                 # make what is missing, then assemble: ~27 h for the whole book, resumable
+make tts-assemble        # assemble only, from what has been made (no GPU)
+```
+
+**Unlike Merritt Horn's reading, the AI voice follows the text.** After a correction,
+`make check` fails with "an AI reading is of the spoken text as it is now": the voice
+would read words the page no longer says. `make tts` makes only the changed paragraphs,
+in minutes; then deploy with `--audio`. Every piece ever made is kept in
+`var/tts/chunks/`, so nothing is made twice.
+
+Boson's licence requires its acknowledgment, "This audio was created with Boson AI's
+Higgs Audio", beside the audio. `sources.toml` carries it as the source's `credit`, and
+Settings and the player show it. The licence allows the name only as that
+acknowledgment, so the voice is called "AI voice".
 
 ---
 

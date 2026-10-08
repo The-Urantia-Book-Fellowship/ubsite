@@ -5,8 +5,9 @@ with JavaScript disabled -- for archive.org, for a Kindle browser, for curl --
 so JS only enhances.
 
 There is one mode: the study apparatus is always on.  The individual elements
--- red letter, the margin index, paragraph numbers, the 1955 variants -- become
-switches under Settings, rather than one coarse lever that hides them together.
+-- red letter, the margin index, paragraph numbers, the 1955 variants -- are
+switches under Settings (ub.js, kept per browser), rather than one coarse lever
+that hides them together.
 """
 
 from __future__ import annotations
@@ -23,11 +24,13 @@ sys.path.insert(0, str(ROOT / "vendor" / "index"))
 import cite  # noqa: E402
 from fastapi import FastAPI, Query, Request  # noqa: E402
 from fastapi.exception_handlers import http_exception_handler  # noqa: E402
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse  # noqa: E402
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fastapi.templating import Jinja2Templates  # noqa: E402
 from markupsafe import Markup  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
+
+from ubsite import settings  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -110,9 +113,9 @@ def db() -> sqlite3.Connection:
 
 
 # There is one mode, and it is the study apparatus.  What used to be Reading
-# mode becomes a set of switches under Settings later -- red letter on or off,
-# apparatus in the margin or below, paragraph numbers shown or not -- rather
-# than one coarse lever that hides everything at once.
+# mode is now a set of switches under Settings -- red letter, the index in the
+# margin, paragraph numbers, the 1955 readings -- kept in the browser and
+# applied by base.html before first paint, rather than one coarse lever.
 def mode_of(request: Request) -> str:
     return "study"
 
@@ -167,6 +170,28 @@ def sources() -> dict:
 T.env.globals["sources"] = sources
 
 
+@functools.lru_cache(maxsize=4)
+def _voices(mtime_ns: int) -> list[dict]:
+    try:
+        return [dict(r) for r in db().execute(
+            "SELECT key, label, kind, granularity, credit, credit_url FROM audio_source ORDER BY id")]
+    except sqlite3.Error:
+        return []                                  # a database from before 005_audio.sql
+
+
+def voices() -> list[dict]:
+    """The readings this database carries, in the order Settings lists them."""
+    try:
+        return _voices(DB.stat().st_mtime_ns)
+    except OSError:
+        return []
+
+
+T.env.globals["voices"] = voices
+T.env.globals["settings_groups"] = settings.groups
+T.env.globals["settings_defaults"] = settings.defaults()
+
+
 # Asked for by fixed name at the root, with or without a <link>: browsers try
 # /favicon.ico, iOS /apple-touch-icon.png.  Both are drawn from favicon.svg by
 # tools/make_icons.py.  Without these they fell through to the {ref} route and
@@ -179,6 +204,77 @@ def favicon():
 @app.get("/apple-touch-icon.png", include_in_schema=False)
 def touch_icon():
     return FileResponse(ROOT / "ubsite" / "static" / "apple-touch-icon.png")
+
+
+@app.get("/audio/{key}/{name:path}", include_in_schema=False)
+def audio_file(key: str, name: str):
+    """A recording, by the name the database lists -- and only such a name.
+
+    Nothing is resolved from the URL alone: the file must be a row of
+    audio_file, so no path the build did not check can be served.  Starlette
+    answers a Range request with 206, which Safari needs before it will seek.
+    The names never change content (the MH files are pinned by SHA-256 in
+    data/audio/mh-files.tsv, the synthetic ones carry their hash), so a browser
+    may keep them for good.
+    """
+    try:
+        row = db().execute(
+            "SELECT s.root FROM audio_file f JOIN audio_source s ON s.id=f.source_id"
+            " WHERE s.key=? AND f.name=?", (key, name)).fetchone()
+    except sqlite3.Error:
+        row = None
+    if row is None:
+        raise HTTPException(status_code=404)
+    # A relative root is the project's own (the AI voice, under var/).
+    return FileResponse(ROOT / row["root"] / name, media_type="audio/mpeg",
+                        headers={"Cache-Control": "public, max-age=31536000, immutable"})
+
+
+def section_audio(con, section_id: int) -> dict:
+    """Every voice's segments for one section, as listen.js wants them.
+
+    {key: {label, kind, by, files: [url, ...], segs: [[ref, file, start, end], ...]}}
+    A segment's ref is its paragraph's, or null for the spoken heading.
+    """
+    out = {}
+    try:
+        rows = con.execute(
+            "SELECT s.key, s.label, s.kind, s.granularity, s.credit, s.credit_url,"
+            "  f.name, g.start_ms, g.end_ms,"
+            "  p.ref FROM audio_segment g JOIN audio_source s ON s.id=g.source_id"
+            " JOIN audio_file f ON f.id=g.file_id"
+            " LEFT JOIN paragraph p ON p.id=g.paragraph_id"
+            " WHERE g.section_id=? ORDER BY s.id, g.ord", (section_id,)).fetchall()
+    except sqlite3.Error:
+        return {}
+    for r in rows:
+        v = out.setdefault(r["key"], {"label": r["label"], "kind": r["kind"],
+                                      "by": r["granularity"], "credit": r["credit"],
+                                      "credit_url": r["credit_url"], "files": [], "segs": []})
+        url = f"/audio/{r['key']}/{r['name']}"
+        if url not in v["files"]:
+            v["files"].append(url)
+        v["segs"].append([r["ref"], v["files"].index(url), r["start_ms"], r["end_ms"]])
+    return out
+
+
+@app.get("/speech/{ref}", include_in_schema=False)
+def speech(ref: str):
+    """A section's text as a voice reads it (build/speech.py), for the
+    browser's own voice: {"segs": [[ref, text], ...]} in reading order, the
+    heading first with ref null.  listen.js fetches it only when that voice is
+    chosen, so a page carries its text once.
+    """
+    m = re.fullmatch(r"(\d+):(\d+)", ref)
+    rows = db().execute(
+        "SELECT p.ref, x.text FROM speech x JOIN section s ON s.id=x.section_id"
+        " LEFT JOIN paragraph p ON p.id=x.paragraph_id"
+        " WHERE s.paper_n=? AND s.n=? ORDER BY p.para_n IS NOT NULL, p.para_n",
+        (int(m[1]), int(m[2]))).fetchall() if m else []
+    if not rows:
+        raise HTTPException(status_code=404)
+    return JSONResponse({"segs": [[r["ref"], r["text"]] for r in rows]},
+                        headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/healthz")
@@ -416,13 +512,25 @@ def read(request: Request, ref: str):
             "SELECT f.* FROM footnote f JOIN paragraph p ON p.id=f.paragraph_id"
             " WHERE p.paper_n=? AND p.section_n=? ORDER BY f.ord", (paper, sec)):
         notes.setdefault(f["paragraph_id"], []).append(f)
-    nxt = con.execute("SELECT n FROM section WHERE paper_n=? AND n>? ORDER BY n LIMIT 1",
+    nxt = con.execute("SELECT n, title FROM section WHERE paper_n=? AND n>? ORDER BY n LIMIT 1",
                       (paper, sec)).fetchone()
     prv = con.execute("SELECT n FROM section WHERE paper_n=? AND n<? ORDER BY n DESC LIMIT 1",
                       (paper, sec)).fetchone()
+    # Where listening goes on to: the next section, or from a paper's last
+    # section the next paper's first -- the pager stays within the paper.
+    onward = None
+    if nxt:
+        onward = {"href": f"/{paper}:{nxt['n']}", "label": f"{nxt['n']}. {nxt['title']}"}
+    else:
+        np_ = con.execute("SELECT s.paper_n, s.n, p.title FROM section s JOIN paper p"
+                          " ON p.id=s.paper_id WHERE s.paper_n>? ORDER BY s.paper_n, s.n LIMIT 1",
+                          (paper,)).fetchone()
+        if np_:
+            onward = {"href": f"/{np_['paper_n']}:{np_['n']}", "label": f"Paper {np_['paper_n']}. {np_['title']}"}
     return page(request, "section.html", paper=p, section=s, paras=paras,
                 citers=citers, blanket=blanket, notes=notes,
-                focus=focus, last=last, nxt=nxt, prv=prv,
+                focus=focus, last=last, nxt=nxt, prv=prv, onward=onward,
+                audio=section_audio(con, s["id"]),
                 all_sections=con.execute(
                     "SELECT n, title_html FROM section WHERE paper_n=? ORDER BY n",
                     (paper,)).fetchall())

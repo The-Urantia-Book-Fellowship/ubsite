@@ -1,0 +1,6 @@
+# Chatterbox's own environment, for the listening test (tools/tts/bakeoff_chatterbox.py).
+# Separate from requirements.in: it pins its own torch.  In ~/Software/ml/venv-chatterbox.
+chatterbox-tts
+# Its watermarker (resemble-perth) still imports pkg_resources, which
+# setuptools 81 removed.  Without it the model will not load at all.
+setuptools<81

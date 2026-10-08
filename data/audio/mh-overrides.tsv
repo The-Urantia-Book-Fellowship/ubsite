@@ -1,0 +1,8 @@
+# Merritt Horn files that do not follow the naming rule.  The rule: P<ppp>_<ss>.mp3 is
+# section <ppp>:<ss> from its start, spoken heading first; P139_09-10 is the combined
+# 139:9.  Every other file must be named here, with the paragraph it begins at or '-'
+# for a file the site does not use, and why.  Measured 2026-10-07.
+file	starts_at	why
+paper000/P000_13.mp3	0:12.10	the Acknowledgment (0:12.10-14, 155 s) is read as a track of its own, so 0:12 spans two files
+paper040/P040_11.mp3	-	a second encode of P040_10: the same duration to the millisecond, and the difference between them is 16 dB below the speech
+paper041/P041_11.mp3	-	a second encode of P041_10, as P040_11

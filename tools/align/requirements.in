@@ -1,0 +1,6 @@
+# The aligner's own environment -- NOT the site's.  It lives in ~/Software/ml
+# (the Makefile's ML variable) with the model cache, and pi5 never needs any of
+# it: the output is data/audio/mh.tsv, which is checked in.
+faster-whisper
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*

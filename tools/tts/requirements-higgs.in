@@ -1,0 +1,10 @@
+# Higgs Audio v2 (Boson AI) for the listening test: tools/tts/bakeoff_higgs.py.
+# Native in transformers since 5.3 -- the GitHub repo's own code no longer
+# matches the renamed, converted weights (bosonai/higgs-tts-2-3b-base).
+# Its own venv in ~/Software/ml/venv-higgs.
+transformers>=5.3.0
+accelerate
+torch
+torchaudio
+soundfile
+librosa

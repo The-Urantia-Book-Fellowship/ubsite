@@ -37,6 +37,7 @@ module that reads it.
 | `press` | `../urantia-uversa-press-claude` | the authoritative text |
 | `study` | `../urantia-study-edition` | apparatus: footnotes, human sources, KJV, quiz, images *(not yet imported)* |
 | `index` | `../index` | the Uversa Press index, revised for the third edition |
+| `audio.mh` | `/Audio/Urantia/Urantia-MH-Audio-DVD` | Merritt Horn's reading, one MP3 per section, 121 h, as on the Uversa Press DVD (2006): 128 kbps stereo, 44.1 kHz. On pi5 too, same path |
 
 All three share one address space: the `\vs` macro addresses `\vs p133 1:3` (a
 Urantia paragraph) and `\vs Gen 1:1` (a Bible verse) alike.
@@ -68,7 +69,17 @@ make test           the never-write-to-a-master guards
 make paranoid       fingerprint all three trees, build, and prove nothing moved
 make serve          the reader on 127.0.0.1:8130
 make stop           stop it (by pid — never by pattern, see §6)
+
+make align-transcribe   Whisper over the recordings, 3090 only (~1.5 h, resumable)
+make align / align-repair   cut them at the paragraph -> data/audio/mh.tsv
+make tts-bakeoff        the AI-voice listening test -> var/tts/bakeoff/
+make tts                the whole book in the AI voice, 3090 only (~27 h, resumable)
+make tts-assemble       one MP3 per section from what has been made -> data/audio/ai*.tsv
 ```
+
+The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-browser`
+for Playwright) and their caches live in **`~/Software/ml`**, on the NVMe home, never
+in `requirements.txt` and never on `/Audio`.
 
 `make data` never edits in place: it builds `var/ub.db.tmp` and swaps it in, so a
 failed build leaves the previous database untouched.
@@ -93,7 +104,8 @@ failed build leaves the previous database untouched.
   - `render.py` — `(text, spans) → HTML`. **The only renderer.**
   - `load.py`, `derive.py`, `schema/*.sql`, `oracle.py`, `fonts.py`, `slugs.py`
   - `checks/` — the gates
-- `ubsite/` — FastAPI + Jinja2, server-rendered, no build step, ~10 KB CSS, 556 B JS
+- `ubsite/` — FastAPI + Jinja2, server-rendered, no build step, ~20 KB CSS, ~4 KB `ub.js`
+  plus `listen.js` on section pages
 - `vendor/` — copied by value with `UPSTREAM.lock`: press's tokenizer/macros/
   normalize, index's `cite.py`/`xref.py`
 - `.venv/` — `uv venv` + `uv pip sync requirements.txt`, gitignored;
@@ -106,6 +118,27 @@ failed build leaves the previous database untouched.
   uv-managed venvs, and sharing one interpreter saves fetching and storing a
   second. The full gate suite passes on it, with byte-identical output.
 
+- **Listening** (2026-10-07). Every section can be heard in Merritt Horn's reading,
+  and from any paragraph once his reading is aligned:
+  - `build/audio.py` reads `data/audio/` into `audio_source`, `audio_file`,
+    `audio_segment` and `audio_unread`. Each voice is a list of segments,
+    `(file, start_ms, end_ms)`, one per paragraph plus a spoken heading. The
+    player never knows whether a voice is one file per section or one per paragraph.
+  - `build/speech.py` builds the `speech` table: the text as a voice is to read
+    it, with numbers in words, list marks spoken and brackets dropped. It is
+    gated so that no digit or symbol survives.
+  - `tools/align/` turns the recordings into `data/audio/mh.tsv`: Whisper, difflib,
+    and cuts placed in pauses.
+  - `tools/tts/` makes the AI voice: the listening test that chose it, and `make tts` (§12).
+  - `/audio/<key>/<name>` serves only names listed in `audio_file`, with Range
+    support.
+  - **Your browser's voice** (2026-10-08) needs no recording: the browser speaks the
+    `speech` text itself (the Web Speech API), fetched from `/speech/<paper>:<section>`
+    once that voice is chosen. It is a stopgap beside Merritt Horn until the recorded AI
+    reading exists, then a third choice (§8, §12).
+  - The player is `static/listen.js` (~22 KB, section pages only). Settings, the ⚙
+    dialog, are declared in `ubsite/settings.py`, run by `ub.js`, stored in
+    `localStorage` under `ub_settings`, and applied before first paint (§8).
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and
   `deploy.sh`, with a README naming the four steps that need root. All four have
   been run; the site is live at **https://ubsite.ddns.net**. **The database is the
@@ -230,6 +263,33 @@ CSS: markup must not inject characters a reader would copy.
     them.
 12. **The study edition's `extracttext.py` truncates ~2/3 of its footnotes**
     (`[^}]+` against nesting three deep). Do not reuse it when Phase 6 lands.
+13. **Batched Whisper drops whole stretches of speech.** It heard 2 of 52:6.4's 69
+    words, though all 30 seconds are there. `make align-repair` re-hears every
+    mostly-unheard paragraph unbatched; what is still unheard after that was not
+    read (`mh-unread.tsv`).
+14. **Whisper starts the first word after a long pause too early**: 0:1.1's "The"
+    at 2.74 s with the pause running to 4.7 s. The aligner therefore takes a unit's
+    *second* word heard as the end of its window, and trusts word **ends**, not
+    starts.
+15. **`/Audio/Urantia/Urantia-MH-Audio` is a transcode, not the master.** The
+    1.7 GB set is the DVD re-encoded at 32 kbps mono: the same 1,629 files, each
+    lagging the disc by the encoder's delay (50.1 ms; 75.1 ms for 22 of them),
+    with no drift, correlating at 0.95–1.00. `tools/align/rebase.py` moved
+    Whisper's word times across, so nothing was heard twice. Every gap it showed
+    (the unread paragraphs, the 118:3.2 splice, `P105_05` running on into 105:6)
+    is in the original too.
+16. **A breath can fill the pause before a paragraph.** On the disc audio,
+    138:10.9's cut fell after "Eight.", because the pause after the number
+    outlasted the breath-filled one before it. A cut may never come after the
+    unit's first word heard has ended; `make align-spotcheck --lists` checks
+    every list paragraph.
+17. **`P040_11` and `P041_11` are not sections.** They are second encodes of
+    `_10`, the same length to the millisecond, and `P000_13` is the Acknowledgment
+    (0:12.10–14). `data/audio/mh-overrides.tsv` names all three; a file that fits
+    no rule and no override fails the build.
+18. **The 2080 Ti is the display GPU.** Under Whisper it reached 88 °C, against a
+    rated maximum of 89 °C, and throttled to 735 MHz. Compute runs on the 3090:
+    `CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`.
 
 ---
 
@@ -279,6 +339,48 @@ CSS: markup must not inject characters a reader would copy.
   paragraph numbers. It replaced an extra .85rem of space above the paragraph,
   which nobody could see (Tigran, 2026-10-06). The span is empty, so copying a
   paragraph still returns its text exactly.
+- **Settings, per browser, no accounts** (2026-10-07, made a framework 2026-10-08):
+  - Reading: Theme (System, Light, Dark; ◐ in the header stays as the shortcut),
+    Text size (90–125% of the root, like zoom), Typeface (the book's Goudy, or the
+    device's own serif or sans, scaled by `font-size-adjust` to Goudy's x-height and
+    given a measure that keeps Goudy's characters per line).
+  - Show: red letter, paragraph numbers, pilcrows, the index in the margin, the 1955
+    readings.
+  - Listening: Merritt Horn, the AI voice, your browser's voice, or Off (Off hides
+    every listening control); which of the browser's voices (its English ones, best
+    first: online, Natural, Premium); Speed; Follow along; Carry on into the next section.
+  - **Every setting is declared once, in `ubsite/settings.py`.** The dialog is rendered
+    from it; the head script sets `data-<key>` on `<html>` before first paint for each
+    value that is not its default; `ub.css` keys off that. A new setting is one entry
+    there and one CSS rule. Only values that differ from the default are stored
+    (`ub_settings`), so changing a default reaches everyone who never chose otherwise.
+- **Playing stops at the end of a section**, unless Settings' "Carry on into the next
+  section" is on (off by default; added 2026-10-08), when it goes on by itself, across
+  papers, through the whole book. Either way the next section, offered as "Next" or
+  reached by carrying on, is fetched and swapped into the page (`main.reader` and
+  `#ub-audio`, with `pushState`), never loaded as a new page: the same audio element
+  plays on, so no browser asks for another tap, and it works with the screen locked.
+  Back reloads the section it returns to.
+- **The browser's own voice is offered beside the recordings, never instead of the
+  recorded AI reading** (Tigran, 2026-10-08, after a student's site read the book with
+  Chrome's "Google UK English Female" and it sounded nearly as good). It costs nothing
+  and needs no storage, but each listener hears whatever their browser has (Google's
+  voices in desktop Chrome, Microsoft's in Edge, Apple's in Safari, eSpeak in Firefox
+  on Linux); nobody can check what it says; and a phone stops it when the screen
+  locks, so `listen.js` holds a screen wake lock while it speaks. A recording plays
+  like a podcast, the same checked reading for everyone. It reads a sentence or so
+  per utterance (≤160 characters, short sentences joined), because Chrome's online
+  voices fall silent partway through long ones; pausing is cancelling, and resumes
+  at the sentence.
+- **The AI voice is recorded in advance by a local open model on the 3090**, not
+  by a cloud service: corrections then cost seconds, not a bill, and the weights are
+  pinned. It is chosen by ear from a listening test. It is never a clone of Merritt
+  Horn, it gives the words of Jesus no separate voice, and it is labelled "an AI voice".
+- **Bark (Suno) was tried and rejected** (Tigran, 2026-10-07: "horrible"). It reads
+  about 14 seconds per call and then simply stops. Even fed clause by clause, it
+  dropped "in explanation of the meanings" from 0:0.1, paused mid-phrase, and ran
+  at 0.29× real time on the 3090, about 17 days for the book. Its code and its
+  19 GB of models and venv were removed.
 - **UB Goudy is OFL 1.1** — verified in the name table, a correctly renamed Sorts
   Mill Goudy derivative — so the site serves the book's own face, subsetted to
   the corpus with a gate that fails on a missing glyph. **Goudy Handtooled BT is
@@ -353,3 +455,41 @@ and `\tunemarkup` there means the opposite of what it means in press — see §7
 The plan's later phases (human sources, chronology and map, deploy) are
 unchanged; read them in the plan file rather than duplicating them here, and
 `ROADMAP.md` for why each is worth doing.
+
+---
+
+## 12. Listening — where we left off (2026-10-08)
+
+**Live on pi5 since 2026-10-08:** Merritt Horn's reading (the Uversa Press DVD, aligned to
+every paragraph), the Settings framework, "Carry on into the next section", and your
+browser's voice. Every gate passes.
+
+**Not done, and decided: the recorded AI reading.** The browser's voice is a stopgap;
+the AI reading is still to be made, once, carefully (Tigran: "we are doing this only
+once, there is no rush, so we should make sure there are no errors in the final audio").
+
+- **The voice is chosen:** `higgs3_mature`, Higgs TTS 3 through vLLM-Omni, cloned from
+  `var/tts/refs/higgs2_mature_clean.wav` (a Higgs v2 *described* synthetic voice, its
+  mains hum notched out). Never Merritt Horn's voice.
+- **The pipeline is built:** `make tts` → `tools/tts/book.py`, which uses `higgs3.py`,
+  `chunk.py`, `listen.py` and `store.py`. It makes every piece, checks it for faults,
+  has Whisper hear it back, retries up to eight seeds, and assembles one MP3 per section
+  into `var/audio/ai/higgs3_mature/` and `data/audio/ai*.tsv`. About 27 GPU hours on the
+  3090, resumable. The README's "The AI voice" covers it.
+- **The trial is done:** Papers 1, 30 and 144 (`book.py --papers 1 30 144`, written to
+  `var/tts/trial/`, never `data/`). All 1,051 pieces were heard as written.
+- **The user is listening to the trial** on a private page with a mark-a-problem
+  button, https://claude.ai/artifact/9ds9dYRRAgb3fdiSKkiNLY. Read the marks with
+  `ArtifactData list`, collection `marks`. The one mark so far (1:0.2, "could beings")
+  exposed a listener bug, which is fixed.
+- **Next session:**
+  1. Read the marks and fix what they show.
+  2. Ask for the user's verdict on Paper 1. **Do not start the whole-book run before
+     they approve it.**
+  3. `make tts`, watched; then review `data/audio/ai-unsettled.tsv`.
+  4. `make data` and `make check`, which picks up the `ai` source.
+  5. `./deploy/deploy.sh --audio`, only when asked.
+
+  Until `ai.tsv` exists, `make data` warns `audio-ai-unmade`, and the site offers Merritt
+  Horn and the browser's voice. The plan is `~/.claude/plans/have-a-look-at-fancy-sketch.md`;
+  the session-by-session detail is in memory (`audio-feature.md`).

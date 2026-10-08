@@ -28,10 +28,13 @@ def main(argv: list[str]) -> int:
         import hashlib
         import subprocess
 
+        trees = [r["path"] for r in repos.values()]
+        trees += [a["path"] for a in config.audio().values() if a["present"]]
+
         def fingerprint():
             out = {}
-            for r in repos.values():
-                for f in sorted(r["path"].rglob("*")):
+            for tree in trees:
+                for f in sorted(tree.rglob("*")):
                     if f.is_file() and ".git" not in f.parts:
                         try:
                             st = f.stat()
@@ -41,7 +44,8 @@ def main(argv: list[str]) -> int:
             return out
 
         before = fingerprint()
-        print(f"fingerprinted {len(before):,} files in 3 source trees")
+        print(f"fingerprinted {len(before):,} files in {len(trees)} source trees"
+              " (three repos and the recordings)")
         rc = main(["data"])
         after = fingerprint()
         changed = [k for k in before if k in after and before[k] != after[k]]
@@ -105,6 +109,13 @@ def main(argv: list[str]) -> int:
         derive.anchors(con, report)
         n_pairs = derive.cocitation(con)
         derive.fts(con)
+        print("speech ...")
+        from . import speech
+        n_speech = speech.derive(con)
+        print("audio ...")
+        from . import audio
+        audio_stats = audio.load_audio(con, report)
+        audio_stats["speech_units"] = n_speech
         print("fonts ...")
         from . import fonts
         for name, (size, glyphs) in fonts.build(
@@ -139,6 +150,7 @@ def main(argv: list[str]) -> int:
                 ("cocitation_pairs", "SELECT COUNT(*) FROM cocitation")]:
             con.execute("INSERT INTO stat VALUES (?,?)",
                         (k, con.execute(q).fetchone()[0]))
+        con.executemany("INSERT INTO stat VALUES (?,?)", sorted(audio_stats.items()))
         con.commit()
         con.execute("VACUUM")
         con.close()
@@ -224,6 +236,9 @@ def main(argv: list[str]) -> int:
             from .checks.check_db import run as db_run
             print("\n== database ==")
             rc |= db_run(_db.connect(dbf))
+            from .checks.check_audio import run as audio_run
+            print("\n== audio ==")
+            rc |= audio_run(_db.connect(dbf))
 
         print("\n== problems ==")
         rc |= report.emit()
