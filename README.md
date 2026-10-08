@@ -189,7 +189,8 @@ stop it with `make stop`. **Never** use `pkill -f` (see CLAUDE.md §6).
 
 Commit anything that changed in this repository: the vendor adoption, a moved count.
 `deploy.sh` rsyncs the working tree as it stands, and what runs on pi5 should be a
-commit. There is no git remote; the history lives here.
+commit. Then `git push`: the history is kept on GitHub, in the Fellowship's private
+repository `The-Urantia-Book-Fellowship/ubsite`.
 
 ### 6. Deploy
 
