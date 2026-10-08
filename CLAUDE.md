@@ -354,6 +354,8 @@ CSS: markup must not inject characters a reader would copy.
     value that is not its default; `ub.css` keys off that. A new setting is one entry
     there and one CSS rule. Only values that differ from the default are stored
     (`ub_settings`), so changing a default reaches everyone who never chose otherwise.
+    A setting that means nothing while another is off (Speed, Follow along and Carry
+    on, with Listening off) is listed in `NEEDS` there, and shown greyed and disabled.
 - **Playing stops at the end of a section**, unless Settings' "Carry on into the next
   section" is on (off by default; added 2026-10-08), when it goes on by itself, across
   papers, through the whole book. Either way the next section, offered as "Next" or

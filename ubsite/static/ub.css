@@ -287,6 +287,8 @@ dialog.settings .face-sans { font-family: var(--sans); font-size-adjust: .43; }
 dialog.settings label.face-serif, dialog.settings label.face-sans { padding-left: 0; }
 dialog.settings :is(.face-goudy, .face-serif, .face-sans) small { font-family: "UB Goudy", Georgia, serif; }
 dialog.settings .pcm { margin: 0 0 0 .1em; }
+/* Greyed while the setting it needs is off: Speed, with Listening off. */
+dialog.settings .idle { opacity: .45; cursor: default; }
 /* Which of the browser's voices, only while that voice is chosen. */
 :root:not([data-voice="browser"]) dialog.settings .set-bvoice { display: none; }
 dialog.settings .set-bvoice select { max-width: 16rem; }

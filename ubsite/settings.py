@@ -63,8 +63,15 @@ LISTEN = [
 ]
 
 
+# A setting that means nothing while another is 'off': shown, greyed, and not
+# to be changed (ub.js disables it).  With Listening off there is no speed to
+# set (Tigran, 2026-10-08).
+NEEDS = {"bvoice": "voice", "rate": "voice", "follow": "voice", "onward": "voice"}
+
+
 def _item(key, kind, label, default, choices, hint) -> dict:
     return {"key": key, "kind": kind, "label": label, "default": default, "hint": hint,
+            "needs": NEEDS.get(key, ""),
             "choices": [{"value": v, "label": l, "hint": h, "cls": c} for v, l, h, c in choices]}
 
 

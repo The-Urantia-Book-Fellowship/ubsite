@@ -121,6 +121,16 @@
           if (el.selectedIndex < 0) el.selectedIndex = 0;
         }
       });
+      idle(o);
+    };
+    // A setting that means nothing while the one it needs is off (settings.py
+    // NEEDS) is shown, greyed, and cannot be changed.
+    var idle = function (o) {
+      Array.prototype.forEach.call(form.querySelectorAll('[data-needs]'), function (el) {
+        var off = o[el.dataset.needs] === 'off';
+        el.classList.toggle('idle', off);
+        Array.prototype.forEach.call(el.querySelectorAll('input, select'), function (c) { c.disabled = off; });
+      });
     };
     if (synth && synth.addEventListener) synth.addEventListener('voiceschanged', function () {
       if (dlg.open) fill();
@@ -132,6 +142,7 @@
       if (!(el.name in DEF)) return;
       window.ubSettings.set(el.name, typeof d === 'boolean' ? el.checked
                                      : typeof d === 'number' ? parseFloat(el.value) : el.value);
+      idle(load());
     });
     form.querySelector('.reset').addEventListener('click', function () {
       window.ubSettings.reset();
