@@ -109,7 +109,9 @@ if [ "$BUILD" = 1 ]; then
     ssh "$HOST" "mv $DEST/var/ub.db.new $DEST/var/ub.db"
 
     # Prune: an AI file neither the new database nor the one it replaced names.
-    keep=$( { echo "$served"; sqlite3 var/ub.db "$LIST"; } | grep -v '^$' | LC_ALL=C sort -u)
+    # grep exits 1 when it passes nothing, as it does while there are no AI
+    # files at all; under pipefail that would end the script, before the restart.
+    keep=$( { echo "$served"; sqlite3 var/ub.db "$LIST"; } | { grep -v '^$' || true; } | LC_ALL=C sort -u)
     have=$(ssh "$HOST" "cd $DEST && { [ ! -d var/audio/ai ] || find var/audio/ai -name '*.mp3'; }" | LC_ALL=C sort)
     stale=$(LC_ALL=C comm -23 <(echo "$have") <(echo "$keep") | grep -v '^$' || true)
     if [ -n "$stale" ]; then
