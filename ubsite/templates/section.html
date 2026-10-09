@@ -36,11 +36,13 @@
     </aside>
     {% endif %}
 
-    <div class="grid">
+    {#- The longest reference here, in characters: on a phone the reference stands
+        at the start of each paragraph, and the text beside it is set that far in. #}
+    <div class="grid" style="--refw: {{ paras|map(attribute='ref')|map('length')|max }}">
     {% for p in paras %}
       {% set hit = focus and p.para_n >= focus and p.para_n <= last %}
       <p class="t{% if p.gap_before %} pc{% endif %}{% if hit %} hit{% endif %}"
-         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.para_n }}</a>
+         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
          {%- if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}
          {{- p.html|safe }}</p>
       <div class="a">

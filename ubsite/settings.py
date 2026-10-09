@@ -42,7 +42,7 @@ READING = [
 ]
 SHOW = [
     ("redletter", "switch", "The words of Jesus in red", True, [], ""),
-    ("paranum", "switch", "Paragraph numbers", True, [], ""),
+    ("paranum", "switch", "Paragraph references", True, [], "such as 0:1.2, beside each paragraph"),
     ("pilcrow", "switch", "Pilcrows", True, [], "where the 1955 text leaves a blank line"),
     ("margin", "switch", "Index entries beside the text", True, [], ""),
     ("notes", "switch", "The 1955 readings", True, [], ""),

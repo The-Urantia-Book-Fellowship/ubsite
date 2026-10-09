@@ -297,7 +297,7 @@ CSS: markup must not inject characters a reader would copy.
 
 - **One mode.** Reading mode was removed; the study apparatus is always on. The
   individual elements become switches under **Settings** — red letter, the margin
-  index, paragraph numbers, the 1955 variants — rather than one coarse lever.
+  index, paragraph references, the 1955 variants — rather than one coarse lever.
 - **Slugs are data, not a function.** `data/slugs.tsv` is checked in and
   append-only. A headword keeps its slug for ever; collisions get a recorded
   numeric suffix (11 so far). A permalink that moves because someone improved the
@@ -347,7 +347,7 @@ CSS: markup must not inject characters a reader would copy.
     Text size (90–125% of the root, like zoom), Typeface (the book's Goudy, or the
     device's own serif or sans, scaled by `font-size-adjust` to Goudy's x-height and
     given a measure that keeps Goudy's characters per line).
-  - Show: red letter, paragraph numbers, pilcrows, the index in the margin, the 1955
+  - Show: red letter, paragraph references, pilcrows, the index in the margin, the 1955
     readings.
   - Listening: Merritt Horn, the AI voice, your browser's voice, or Off (Off hides
     every listening control); which of the browser's voices (its English ones, best
@@ -366,6 +366,19 @@ CSS: markup must not inject characters a reader would copy.
   `#ub-audio`, with `pushState`), never loaded as a new page: the same audio element
   plays on, so no browser asks for another tap, and it works with the screen locked.
   Back reloads the section it returns to.
+- **Each paragraph is marked with its full reference**, `118:10.13`, not its bare
+  number, so the reader always knows which paragraph this is (Tigran, 2026-10-09). On a
+  desktop it stands in the gutter. On a phone it stands at the start of the paragraph
+  with ▶ under it, like a drop capital, as wide as the section's longest reference
+  (`--refw`, set in `section.html`). Settings' "Paragraph references" (key `paranum`)
+  turns it off.
+- **The player's ⏮ does not look at the playhead.** One press restarts the paragraph;
+  two in quick succession (400 ms) go to the one before, and each further quick press
+  goes back one more. Until 2026-10-09 it went back a paragraph within 3 s of the start
+  and restarted otherwise, which seemed inconsistent. The speed opens a small list
+  rather than cycling. A tap on the reference in the bar brings its paragraph into view.
+  Hover is drawn only under `(hover: hover)`, because a touch screen keeps `:hover` on
+  the last element tapped and left ⏮ and ⏭ lit on Android.
 - **The browser's own voice is offered beside the recordings, never instead of the
   recorded AI reading** (Tigran, 2026-10-08, after a student's site read the book with
   Chrome's "Google UK English Female" and it sounded nearly as good). It costs nothing

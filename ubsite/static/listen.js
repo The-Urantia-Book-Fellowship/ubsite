@@ -54,7 +54,7 @@
   var synth = window.speechSynthesis || null;
   var V = null, key = null;          // the voice in use, and its key
   var k = -1, file = -1;             // the segment being heard, and its file
-  var marked = null, bar = null, controls = [];
+  var marked = null, bar = null, controls = [], shutSpeeds = function () {};
   var head, paras;
   function scan() {
     head = document.querySelector('.papertop h2');
@@ -122,7 +122,7 @@
       // paragraph still returns its words exactly (CLAUDE.md §6).
       var pb = button('playp', 'Listen from ' + s[0], 'play');
       pb.addEventListener('click', function () { go(i); });
-      // After the number: on a phone the two float as a stack, number on top.
+      // After the reference: on a phone the two float as a stack, reference on top.
       var num = p.querySelector('.num');
       p.insertBefore(pb, num ? num.nextSibling : p.firstChild);
       controls.push(pb);
@@ -135,15 +135,28 @@
     bar.className = 'player';
     bar.setAttribute('role', 'region');
     bar.setAttribute('aria-label', 'Listening');
-    var prev = button('prev', 'Previous paragraph', 'prev');
+    var prev = button('prev', 'Back to the start of this paragraph (twice: the one before)', 'prev');
+    prev.title = prev.getAttribute('aria-label');
     var tog = button('toggle', 'Play', 'play');
     var nxt = button('next', 'Next paragraph', 'next');
+    // What is being read, and by whom.  A tap on the reference brings its
+    // paragraph into view.
     var where = document.createElement('span');
     where.className = 'where';
-    var spd = document.createElement('button');
-    spd.type = 'button';
-    spd.className = 'rate';
-    spd.setAttribute('aria-label', 'Speed');
+    var at = document.createElement('button');
+    at.type = 'button';
+    at.className = 'at';
+    at.title = 'Show this paragraph';
+    at.addEventListener('click', function () {
+      var el = reading();
+      touched = 0;                     // and Follow along takes over again
+      if (el) show(el);
+    });
+    var who = document.createElement('span');
+    who.className = 'who';
+    where.appendChild(at);
+    where.appendChild(who);
+    var spd = speeds();
     var on = document.createElement('a');
     on.className = 'onward';
     on.hidden = true;
@@ -158,13 +171,79 @@
     prev.addEventListener('click', back);
     nxt.addEventListener('click', forward);
     tog.addEventListener('click', toggle);
-    spd.addEventListener('click', function () {
-      S.set('rate', RATES[(RATES.indexOf(rate()) + 1) % RATES.length]);
-    });
     x.addEventListener('click', close);
     [prev, tog, nxt, where, spd, on, x].forEach(function (e) { bar.appendChild(e); });
     document.body.appendChild(bar);
     document.body.classList.add('listening');
+  }
+  // The speed, and the list of speeds that a tap on it opens above the bar.
+  function speeds() {
+    var box = document.createElement('span');
+    box.className = 'ratebox';
+    var spd = document.createElement('button');
+    spd.type = 'button';
+    spd.className = 'rate';
+    spd.setAttribute('aria-label', 'Speed');
+    spd.setAttribute('aria-haspopup', 'menu');
+    spd.setAttribute('aria-expanded', 'false');
+    var menu = document.createElement('div');
+    menu.className = 'speeds';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', 'Speed');
+    menu.hidden = true;
+    var items = RATES.map(function (r) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'menuitemradio');
+      b.textContent = r + '×';
+      b.addEventListener('click', function () {
+        shut(true);
+        S.set('rate', r);
+      });
+      menu.appendChild(b);
+      return b;
+    });
+    function open() {
+      var now = rate();
+      items.forEach(function (b, i) { b.setAttribute('aria-checked', String(RATES[i] === now)); });
+      menu.hidden = false;
+      spd.setAttribute('aria-expanded', 'true');
+      items[Math.max(0, RATES.indexOf(now))].focus();
+      document.addEventListener('pointerdown', away, true);
+    }
+    // Closed by a choice, a second tap on the speed, Escape, or a tap elsewhere.
+    function shut(refocus) {
+      if (menu.hidden) return;
+      menu.hidden = true;
+      spd.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('pointerdown', away, true);
+      if (refocus) spd.focus();
+    }
+    function away(ev) { if (!box.contains(ev.target)) shut(false); }
+    spd.addEventListener('click', function () { if (menu.hidden) open(); else shut(true); });
+    shutSpeeds = shut;
+    menu.addEventListener('keydown', function (ev) {
+      var i = items.indexOf(document.activeElement);
+      if (ev.key === 'Escape') { ev.preventDefault(); shut(true); }
+      else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        items[(i + (ev.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+      } else if (ev.key === 'Tab') shut(false);
+    });
+    box.appendChild(spd);
+    box.appendChild(menu);
+    return box;
+  }
+  // The heading or paragraph being read, if this page has it.
+  function reading() {
+    var s = k >= 0 ? V.segs[k] : null;
+    return s ? (s[0] ? paras[s[0]] : head) : null;
+  }
+  // A message in the bar in place of what is being read, until the next render.
+  function tell(msg) {
+    if (!bar) return;
+    bar.querySelector('.at').hidden = true;
+    bar.querySelector('.who').textContent = msg;
   }
   function render() {
     if (!bar) return;
@@ -172,9 +251,10 @@
     tog.replaceChild(icon(paused ? 'play' : 'pause'), tog.firstChild);
     tog.setAttribute('aria-label', paused ? 'Play' : 'Pause');
     bar.querySelector('.rate').textContent = rate() + '×';
-    var s = k >= 0 ? V.segs[k] : null;
-    bar.querySelector('.where').textContent =
-      (s ? (s[0] || D.paper + ':' + D.section) : 'End of the section') + ' · ' + vname();
+    var s = k >= 0 ? V.segs[k] : null, at = bar.querySelector('.at');
+    at.hidden = !s;
+    if (s) at.textContent = s[0] || D.paper + ':' + D.section;
+    bar.querySelector('.who').textContent = (s ? ' · ' : 'End of the section · ') + vname();
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
     if (D.next) { on.href = D.next.href + '#listen'; on.textContent = 'Next: ' + D.next.label + ' ›'; }
@@ -226,12 +306,16 @@
   }
   function pause() { if (V && V.kind === 'browser') hush(); else audio.pause(); }
   function toggle() { if (k >= 0 && playing()) pause(); else play(); }
+  // Once: this paragraph again, from its beginning, wherever in it the reading
+  // is.  Twice in quick succession: the one before -- and each further quick
+  // press one more.  Timed here, since a double tap is not reliably a dblclick
+  // on a touch screen.
+  var lastBack = 0;
   function back() {
+    var now = Date.now(), again = now - lastBack < 400;
+    lastBack = now;
     if (k < 0) return go(V.segs.length - 1);
-    // Three seconds in -- or a sentence, for the browser's voice -- "previous"
-    // means "this one again", as on any player.
-    var into = V.kind === 'browser' ? said.n > 0 : audio.currentTime * 1000 - V.segs[k][2] >= 3000;
-    if (k > 0 && !into) go(k - 1); else go(k);
+    go(again && k > 0 ? k - 1 : k);
   }
   // Ten seconds either way from the headphones; a sentence, for the browser's voice.
   function skip(d) {
@@ -301,6 +385,7 @@
     audio.load();
     file = k = -1;
     mark();
+    shutSpeeds(false);
     if (bar) { bar.remove(); bar = null; }
     document.body.classList.remove('listening');
   }
@@ -337,8 +422,7 @@
   audio.addEventListener('play', render);
   audio.addEventListener('pause', render);
   audio.addEventListener('error', function () {
-    if (!bar || !audio.getAttribute('src')) return;
-    bar.querySelector('.where').textContent = 'The recording could not be loaded.';
+    if (audio.getAttribute('src')) tell('The recording could not be loaded.');
   });
 
   // ---- the browser's own voice -----------------------------------------------
@@ -419,7 +503,7 @@
     said.wait.then(function () { if (gen === said.gen) begin(gen); }, function () {
       if (gen !== said.gen) return;
       hush();
-      if (bar) bar.querySelector('.where').textContent = 'The text could not be loaded.';
+      tell('The text could not be loaded.');
     });
   }
   function begin(gen) {
@@ -450,8 +534,7 @@
       if (gen !== said.gen || e.error === 'interrupted' || e.error === 'canceled') return;
       hush();
       // Refused before a tap (arriving by "#listen"): the bar waits for one.
-      if (bar && e.error !== 'not-allowed')
-        bar.querySelector('.where').textContent = 'Your browser could not speak (' + e.error + ').';
+      if (e.error !== 'not-allowed') tell('Your browser could not speak (' + e.error + ').');
     };
     said.u = u;                     // Chrome drops the events of an utterance nothing holds
     synth.speak(u);
@@ -501,8 +584,7 @@
     addEventListener(e, function () { touched = Date.now(); }, { passive: true });
   });
   function mark() {
-    var s = k >= 0 ? V.segs[k] : null;
-    var el = s ? (s[0] ? paras[s[0]] : head) : null;
+    var el = reading();
     if (el === marked) return;
     if (marked) marked.classList.remove('now');
     marked = el;
@@ -512,11 +594,13 @@
     // actually leaving the screen.
     if (!S.get().follow || Date.now() - touched < 4000) return;
     var r = el.getBoundingClientRect();
-    if (r.top < 40 || r.bottom > innerHeight - 80)
-      // A paragraph taller than most of the screen is brought in by its first
-      // line; centred, its beginning would be off the top.
-      el.scrollIntoView({ block: r.height > innerHeight * 0.6 ? 'start' : 'center',
-                          behavior: 'smooth' });
+    if (r.top < 40 || r.bottom > innerHeight - 80) show(el);
+  }
+  // A paragraph taller than most of the screen is brought in by its first line;
+  // centred, its beginning would be off the top.
+  function show(el) {
+    el.scrollIntoView({ block: el.getBoundingClientRect().height > innerHeight * 0.6 ? 'start' : 'center',
+                        behavior: 'smooth' });
   }
 
   // ---- the lock screen and headphones --------------------------------------

@@ -97,7 +97,8 @@ footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1r
 footer p { margin: .2rem 0; }
 
 /* ---- the reader -------------------------------------------------------- */
-.reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 2.4rem;
+/* The gap is the gutter the paragraph references stand in: 118:10.13 is 3.3rem. */
+.reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 4.4rem;
           padding: 2rem 1.2rem 0; max-width: 92rem; margin: 0 auto; }
 .rail { font-size: .95rem; line-height: 1.45; position: sticky; top: 1rem;
         align-self: start; max-height: 90vh; overflow: auto; }
@@ -135,7 +136,9 @@ p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
 p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
-.num { float: left; margin-left: -2.2rem; width: 1.7rem; text-align: right;
+/* The paragraph's full reference, so the reader always knows which one this is;
+   Settings can turn it off. */
+.num { float: left; margin-left: -4rem; width: 3.5rem; text-align: right; white-space: nowrap;
        font-size: .78rem; color: var(--faint); text-decoration: none;
        position: relative; top: .35rem; }
 .num:hover { color: var(--ink); }
@@ -219,7 +222,7 @@ button svg .stroke { fill: none; stroke: currentColor; stroke-width: 1.7; stroke
 button.listen { display: inline-flex; align-items: center; gap: .45rem; font: inherit;
   font-size: .95rem; color: var(--link); background: none; cursor: pointer;
   border: 1px solid var(--rule); border-radius: 999px; padding: .2rem .85rem .2rem .65rem; }
-button.listen:hover { border-color: var(--link); }
+
 /* Boson's acknowledgment for the AI voice, which its licence requires beside the audio. */
 .listenrow .credit { color: inherit; text-decoration-color: var(--rule); }
 .listenrow .credit:hover { color: var(--link); }
@@ -233,8 +236,7 @@ p.t { position: relative; }
 .playp { position: absolute; left: -1.6rem; top: 2.3rem; width: 1.15rem; height: 1.15rem;
   padding: .22rem; border: 0; border-radius: 50%; background: none; color: var(--link);
   cursor: pointer; opacity: .45; transition: opacity .15s; }
-p.t:hover .playp, .playp:focus-visible, p.t.now .playp { opacity: 1; }
-.playp:hover { background: color-mix(in oklch, var(--link) 14%, transparent); }
+.playp:focus-visible, p.t.now .playp { opacity: 1; }
 :root[data-voice="off"] :is(.listenrow, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
    playing starts, so only one thing on the page is marked. */
@@ -246,19 +248,46 @@ p.t.now, .papertop h2.now { background: color-mix(in oklch, var(--link) 11%, tra
   display: flex; align-items: center; gap: .15rem; padding: .3rem .45rem;
   background: var(--paper); color: var(--ink); border: 1px solid var(--rule);
   border-radius: 999px; box-shadow: 0 6px 24px rgb(0 0 0 / .18); font-size: .92rem; }
+/* No tap highlight and no double-tap zoom: ⏮ is pressed twice for the paragraph
+   before. */
 .player button { display: grid; place-items: center; padding: .4rem; border: 0;
-  border-radius: 50%; background: none; color: inherit; cursor: pointer; }
-.player button:hover { background: color-mix(in oklch, var(--link) 12%, transparent); }
+  border-radius: 50%; background: none; color: inherit; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.player button:active { background: color-mix(in oklch, var(--link) 18%, transparent); }
 .player .toggle { width: 2.3rem; height: 2.3rem; color: var(--paper); background: var(--link); }
-.player .toggle:hover { background: color-mix(in oklch, var(--link) 85%, var(--ink)); }
+.player .toggle:active { background: color-mix(in oklch, var(--link) 80%, var(--ink)); }
 .player .where { min-width: 0; padding: 0 .55rem; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; color: var(--faint); }
+/* The reference being read: a tap brings its paragraph into view. */
+.player .where .at { display: inline; padding: 0; border-radius: 0; font: inherit;
+  color: var(--link); }
+.player .where .at:active { background: none; text-decoration: underline; }
 /* × is not in the UB Goudy subset -- it is not in the book -- so the speed is
    set in the system face, like ◐. */
 .player .rate { min-width: 2.9rem; border-radius: 3px; font: .8rem system-ui, sans-serif;
   color: var(--faint); }
+/* The speeds, a small list rising from the speed. */
+.player .ratebox { position: relative; }
+.player .speeds { position: absolute; bottom: calc(100% + .7rem); left: 50%;
+  transform: translateX(-50%); display: flex; flex-direction: column; padding: .25rem;
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / .18); }
+.player .speeds button { display: block; min-width: 3.6rem; padding: .3rem .7rem;
+  border-radius: 3px; font: .85rem system-ui, sans-serif; color: var(--ink); text-align: center; }
+.player .speeds [aria-checked="true"] { color: var(--paper); background: var(--link); }
 .player .onward { white-space: nowrap; text-decoration: none; padding: 0 .5rem; }
 .player .close { color: var(--faint); }
+/* A touch screen keeps :hover on whatever was tapped last, so ⏮ and ⏭ stayed
+   lit after a tap on Android.  Hover is drawn only where there is a pointer that
+   hovers; a tap shows by :active instead. */
+@media (hover: hover) {
+  button.listen:hover { border-color: var(--link); }
+  p.t:hover .playp { opacity: 1; }
+  .playp:hover { background: color-mix(in oklch, var(--link) 14%, transparent); }
+  .player button:hover { background: color-mix(in oklch, var(--link) 12%, transparent); }
+  .player .toggle:hover { background: color-mix(in oklch, var(--link) 85%, var(--ink)); }
+  .player .where .at:hover { background: none; text-decoration: underline; }
+}
 body.listening footer { padding-bottom: 5.5rem; }
 
 /* ---- Settings ---------------------------------------------------------- */
@@ -357,12 +386,20 @@ dialog.settings .done { padding: .3rem 1.1rem; font: inherit;
   .rail { position: static; max-height: none; border-bottom: 1px solid var(--rule);
           padding-bottom: .8rem; margin-bottom: 1.4rem; }
   .grid { grid-template-columns: 1fr; }
-  /* No gutter on a phone: the number and the play button under it stand at
+  /* No gutter on a phone: the reference and the play button under it stand at
      the start of the paragraph, as a drop capital does, and the text runs
-     beside them for two lines and then the full width. */
-  .num { float: left; clear: left; width: 1.7rem; margin: 0; text-align: left; top: .2rem; }
+     beside them for two lines and then the full width.  The reference is as wide
+     as the section's longest (--refw characters, section.html), so the text
+     stands at one indent all down the page.  The button is set in the
+     reference's font and size, so that 1ch is the same in both. */
+  .num { float: left; clear: left; width: calc(var(--refw, 9) * 1ch + .4rem); margin: 0;
+         text-align: left; top: .2rem; }
   .playp { position: static; float: left; clear: left; display: grid; place-items: center;
-           margin: .15rem .8rem 0 -.25rem; }          /* as wide as .num: the lines align */
+           font-family: inherit; font-size: .78rem;
+           /* as wide as .num: the lines align */
+           margin: .15rem calc(var(--refw, 9) * 1ch + .4rem - .9rem) 0 -.25rem; }
+  .playp svg { width: .83rem; height: .83rem; }
+  :root[data-paranum="off"] .playp { margin-right: .8rem; }
   .a:not(:empty) { margin: -.4rem 0 1rem 1rem; border-left: 2px solid var(--rule);
                    padding-left: .7rem; }
   .blanket ul { columns: 1; }
