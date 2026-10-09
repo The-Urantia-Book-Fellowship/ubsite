@@ -12,7 +12,7 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync data check test paranoid serve serve-bg stop ports clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync data check test paranoid serve serve-bg stop ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
@@ -114,11 +114,25 @@ check:
 
 ## test          unit tests, including the never-write-to-a-master guard
 test:
-	@$(PY) -m pytest -q tests 2>/dev/null || $(PY) -m unittest discover -s tests -q
+	@# UB_VISITS=off: pages rendered by the tests are not visits.  test_visits turns it on.
+	@UB_VISITS=off $(PY) -m pytest -q tests 2>/dev/null || UB_VISITS=off $(PY) -m unittest discover -s tests -q
 
 ## paranoid      prove the three source trees were not modified by a build
 paranoid:
 	@$(PY) -m build paranoid
+
+## geoip         fetch DB-IP's City Lite (CC BY 4.0) -> var/geoip/, for the visit counter
+# Published monthly; early in a month the new one may not be up yet, so last
+# month's is the fallback.  Into a temp name, then mv: a running server keeps
+# its mmap of the old file.  deploy.sh ships it.
+GEOIP := var/geoip/dbip-city-lite.mmdb
+geoip:
+	@mkdir -p var/geoip
+	@for m in $$(date -u +%Y-%m) $$(date -u -d "$$(date -u +%Y-%m-15) -1 month" +%Y-%m); do \
+		url=https://download.db-ip.com/free/dbip-city-lite-$$m.mmdb.gz; \
+		if curl -fsS "$$url" | gunzip > $(GEOIP).tmp 2>/dev/null && [ -s $(GEOIP).tmp ]; then \
+			mv $(GEOIP).tmp $(GEOIP); echo "$(GEOIP): $$m ($$(du -h $(GEOIP) | cut -f1))"; exit 0; fi; \
+	done; rm -f $(GEOIP).tmp; echo "geoip: no DB-IP City Lite for this month or the last" >&2; exit 1
 
 ## clean         remove the derived database (it rebuilds in a couple of minutes)
 clean:

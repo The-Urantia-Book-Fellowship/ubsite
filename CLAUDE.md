@@ -148,6 +148,11 @@ failed build leaves the previous database untouched.
   it names, and so does every B–F name that is an A–Z headword (`appendix_head`,
   1,332 of 1,351): both are `derive.links`. A concept page says which appendices
   list it, and an appendix chip in the margin links to its line (§8).
+- **Visits** (2026-10-09). The site counts its own visitors, server-side:
+  `ubsite/visits.py` (a pure ASGI middleware, a queue, a writer thread per worker) →
+  `var/visits.db` (`ubsite/visits.sql`), and a private `/stats` page (`ubsite/stats.py`,
+  `templates/stats.html`) behind HTTP Basic auth against `var/stats.passwd`. Places come
+  from DB-IP City Lite (`make geoip`, shipped by `deploy.sh`). README, "Visits".
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and
   `deploy.sh`, with a README naming the four steps that need root. All four have
   been run; the site is live at **https://ubsite.ddns.net**. **The database is the
@@ -441,6 +446,17 @@ CSS: markup must not inject characters a reader would copy.
   dropped "in explanation of the meanings" from 0:0.1, paused mid-phrase, and ran
   at 0.29× real time on the 3090, about 17 days for the book. Its code and its
   19 GB of models and venv were removed.
+- **Visits are counted server-side, with no IP address kept and no cookie for readers**
+  (Tigran, 2026-10-09). Not Google Analytics, not a script: a page carries nothing for
+  the counter. Each address is placed (country, region, city) and hashed with a salt
+  replaced every UTC day, then dropped; a test greps the database file for the address.
+  So a reader on two days counts as two visits, by design. Every search is recorded
+  with what it found, because the ones that found nothing are a list for the index.
+  `visits.db` stores facts; `stats.py` classifies at report time (bots, referrers, kinds
+  of page), so a better classifier applies to the whole history. A person's view is one
+  whose visitor-day fetched `/static/ub.css` and whose agent is no known bot. Its styles
+  live in `stats.html`, so no reader downloads them. A footer line says so: "Visits are
+  counted without cookies, and no IP address is kept."
 - **UB Goudy is OFL 1.1** — verified in the name table, a correctly renamed Sorts
   Mill Goudy derivative — so the site serves the book's own face, subsetted to
   the corpus with a gate that fails on a missing glyph. **Goudy Handtooled BT is

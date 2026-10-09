@@ -24,17 +24,20 @@ sys.path.insert(0, str(ROOT / "vendor" / "index"))
 import cite  # noqa: E402
 from fastapi import FastAPI, Query, Request  # noqa: E402
 from fastapi.exception_handlers import http_exception_handler  # noqa: E402
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse  # noqa: E402
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fastapi.templating import Jinja2Templates  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import settings  # noqa: E402
+from ubsite import settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 app = FastAPI(docs_url=None, redoc_url=None)
 app.mount("/static", StaticFiles(directory=ROOT / "ubsite" / "static"), name="static")
+# Who reads what, from where: noted after each response, written by a thread
+# (ubsite/visits.py).  The page carries nothing for it.
+app.add_middleware(visits.Counter)
 T = Jinja2Templates(directory=str(ROOT / "ubsite" / "templates"))
 
 
@@ -361,6 +364,32 @@ def healthz():
         return {"ok": False, "error": str(exc)}
 
 
+@app.get("/stats", include_in_schema=False)
+def stats_page(request: Request, days: str = "30", me: str = ""):
+    """Who visits, from where, and what they read: the owner's page.
+
+    Behind HTTP Basic auth (ubsite/stats.py); without var/stats.passwd it does
+    not exist.  It marks the browser that opens it with the cookie ub_me=1, so
+    that the owner's own reading is not counted; ?me=count says count it after
+    all (ub_me=0), and ?me=skip goes back.
+    """
+    ok = stats.allowed(request.headers.get("authorization"))
+    if ok is None:
+        return missing(request, "There is no page at this address.")
+    if not ok:
+        return Response("The password is wrong, or was not given.", status_code=401,
+                        headers={"WWW-Authenticate": 'Basic realm="ubsite stats", charset="UTF-8"'})
+    period = days if days in stats.PERIODS else "30"
+    skip = {"count": "0", "skip": "1"}.get(me, request.cookies.get("ub_me", "1"))
+    resp = page(request, "stats.html", r=stats.report(db(), stats.PERIODS[period]),
+                period=period, periods=stats.PERIODS, counted=skip == "0")
+    resp.headers["Cache-Control"] = "no-store"
+    resp.headers["X-Robots-Tag"] = "noindex"
+    resp.set_cookie("ub_me", skip, max_age=10 * 365 * 86400, path="/", secure=True,
+                    httponly=True, samesite="lax")
+    return resp
+
+
 # --------------------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
@@ -459,6 +488,9 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             " FROM paragraph_fts f JOIN paragraph p ON p.id=f.rowid"
             " WHERE paragraph_fts MATCH ? ORDER BY p.ord LIMIT ? OFFSET ?",
             (fq, size, off)).fetchall())
+    if q:
+        # For the visit counter: a search that finds nothing is one the index might answer.
+        request.state.hits = (len(heads) + (idx["n"] if idx else 0) + (txt["n"] if txt else 0))
     return page(request, "search.html", q=q, scope=scope, idx=idx, txt=txt, heads=heads,
                 diagnose=cite.diagnose(q) if q else None)
 

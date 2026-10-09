@@ -1,0 +1,304 @@
+{% extends "base.html" %}{% block title %}Visits{% endblock %}
+{#- The owner's page (ubsite/stats.py).  Its styles live here, not in ub.css,
+    so that no reader downloads them. #}
+{% block head %}<meta name="robots" content="noindex">
+<style>
+.stats { max-width: 76rem; margin: 0 auto; padding: 2rem 1rem 0; font-size: .95rem; }
+.stats h1 { margin: 0 0 .3rem; }
+.stats h2 { font-size: 1.15rem; margin: 2.6rem 0 .8rem; padding-top: .8rem; border-top: 1px solid var(--rule); }
+.stats h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--faint);
+            font-weight: normal; margin: 1.2rem 0 .4rem; }
+.stats .fig, .stats .tile b { font-family: var(--sans); font-variant-numeric: tabular-nums; }
+.stats .hint { color: var(--faint); font-size: .85rem; }
+.periods { display: flex; gap: .3rem; flex-wrap: wrap; margin: .8rem 0 .3rem; font-family: var(--sans); font-size: .85rem; }
+.periods a { padding: .2rem .7rem; border: 1px solid var(--rule); border-radius: 999px; text-decoration: none; color: var(--ink); }
+.periods a[aria-current] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .8rem; margin: 1.4rem 0; }
+.tile { border: 1px solid var(--rule); border-radius: 6px; padding: .7rem .9rem; }
+.tile span { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); }
+.tile b { display: block; font-size: 1.7rem; font-weight: 600; line-height: 1.2; }
+.daily { margin: 1rem 0 0; }
+/* Columns at most 24px wide with a 2px gap, rounded at the top and square at
+   the baseline; each day's whole slot is its hover target, with a title. */
+.chart { display: grid; grid-template-columns: auto 1fr; grid-template-rows: 9rem auto; gap: .25rem .5rem;
+         font-family: var(--sans); font-size: .72rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+.chart .yaxis { position: relative; min-width: 1.2rem; }
+.chart .yaxis span { position: absolute; right: 0; transform: translateY(50%); line-height: 1; }
+.chart .plot { position: relative; border-bottom: 1px solid var(--faint); }
+.chart .plot i { position: absolute; left: 0; right: 0; border-top: 1px solid var(--rule); }
+.chart .days { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 2px; }
+.chart .days span { flex: 1 1 0; min-width: 0; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.chart .days b { width: 100%; max-width: 24px; background: var(--link); border-radius: 4px 4px 0 0; }
+@media (hover: hover) { .chart .days span:hover b { background: var(--ink); } }
+.chart .xaxis { grid-column: 2; display: flex; justify-content: space-between; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 0 2.4rem; }
+.stats table { border-collapse: collapse; width: 100%; }
+.stats td, .stats th { padding: .22rem .4rem .22rem 0; vertical-align: top; text-align: left; }
+.stats th { font-weight: normal; color: var(--faint); font-size: .78rem; border-bottom: 1px solid var(--rule); }
+.stats td.fig, .stats th.fig { text-align: right; white-space: nowrap; padding-left: .6rem; }
+.stats tr + tr td { border-top: 1px solid color-mix(in oklch, var(--rule) 55%, transparent); }
+/* A magnitude bar under each row's label: one hue, thin, square at its start. */
+.stats .bar { display: block; height: 3px; margin-top: .15rem; background: var(--link); opacity: .55;
+              border-radius: 0 2px 2px 0; width: var(--w); min-width: 2px; }
+.stats .sub { color: var(--faint); font-size: .85rem; }
+.stats .cities { color: var(--faint); font-size: .85rem; }
+.stats .q { font-family: var(--sans); font-size: .9rem; }
+.stats .recent td { font-size: .88rem; }
+.stats details { margin: .6rem 0; }
+.stats summary { cursor: pointer; color: var(--faint); font-size: .85rem; }
+.stats .wrap { overflow-wrap: anywhere; }
+</style>{% endblock %}
+{%- macro n(x) %}{{ '{:,}'.format(x) }}{% endmacro %}
+{%- macro bar(x, top) %}<span class="bar" style="--w: {{ (100 * x / top)|round(1) if top else 0 }}%"></span>{% endmacro %}
+{% block body %}<main class="stats">
+<h1>Visits</h1>
+<nav class="periods" aria-label="Period">
+  {%- for key, label in [("1", "Today"), ("7", "7 days"), ("30", "30 days"), ("90", "90 days"), ("all", "All")] %}
+  <a href="?days={{ key }}"{% if key == period %} aria-current="page"{% endif %}>{{ label }}</a>
+  {%- endfor %}
+</nav>
+{% if r.empty %}
+<p>Nothing has been counted yet.</p>
+{% else %}
+<p class="hint">{{ r.start }} to {{ r.end }}, in UTC days. People only: a known bot, or a
+browser that never loaded the stylesheet, is counted under <a href="#machines">Machines</a>.</p>
+
+<div class="tiles">
+  <div class="tile"><span>Visits</span><b>{{ n(r.visits) }}</b></div>
+  <div class="tile"><span>A day, on average</span><b>{{ '%.1f'|format(r.per_day) }}</b></div>
+  <div class="tile"><span>Pages read</span><b>{{ n(r.views) }}</b></div>
+  <div class="tile"><span>Countries</span><b>{{ n(r.n_countries) }}</b></div>
+  <div class="tile"><span>Searches</span><b>{{ n(r.searches) }}</b></div>
+  <div class="tile"><span>Sections heard</span><b>{{ n(r.listened) }}</b></div>
+</div>
+
+{%- set c = r.chart %}
+<figure class="daily">
+<h3 id="daily-h">Visits a day</h3>
+<div class="chart" role="img" aria-labelledby="daily-h">
+  <div class="yaxis">{% for t in c.ticks %}<span style="bottom: {{ t.pct }}%">{{ n(t.v) }}</span>{% endfor %}</div>
+  <div class="plot">
+    {%- for t in c.ticks if t.v %}<i style="bottom: {{ t.pct }}%"></i>{% endfor %}
+    <div class="days"{% if c.bars|length > 120 %} style="gap: 0"{% endif %}>
+    {%- for b in c.bars %}<span title="{{ b.day }}: {{ b.visits }} visit{{ '' if b.visits == 1 else 's' }}, {{ b.views }} page{{ '' if b.views == 1 else 's' }}"><b style="height: {{ b.pct }}%"></b></span>{% endfor %}</div>
+  </div>
+  <div class="xaxis">{% for l in c.labels %}<span>{{ l }}</span>{% endfor %}</div>
+</div>
+<details><summary>The numbers</summary>
+<table><tr><th>Day</th><th class="fig">Visits</th><th class="fig">Pages</th></tr>
+{%- for d in r.daily|reverse %}<tr><td>{{ d.day }}</td><td class="fig">{{ d.visits }}</td><td class="fig">{{ d.views }}</td></tr>{% endfor %}
+</table></details>
+</figure>
+
+<h2>Where they come from</h2>
+<div class="cols">
+<div>
+<h3>Countries, and their cities</h3>
+{%- set top = r.countries[0].n if r.countries else 0 %}
+<table>
+{%- for k in r.countries[:40] %}
+<tr><td>{{ k.flag }} {{ k.name }}{{ bar(k.n, top) }}
+  <div class="cities">{% for t in k.cities %}{{ t.city }}{% if t.region and t.region != t.city %} ({{ t.region }}){% endif %} {{ t.n }}{{ ', ' if not loop.last }}{% endfor %}</div></td>
+  <td class="fig">{{ n(k.n) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+{%- if r.unplaced %}<tr><td class="sub">Not placed</td><td class="fig">{{ n(r.unplaced) }}</td></tr>{% endif %}
+</table>
+</div>
+<div>
+<h3>How each visit arrived</h3>
+{%- set top = r.arrived[0][1] if r.arrived else 0 %}
+<table>
+{%- for host, k in r.arrived %}
+<tr><td>{{ 'Directly: typed, bookmarked, or from an app' if host == '(direct)' else host }}{{ bar(k, top) }}</td><td class="fig">{{ n(k) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+<h3>Links from other sites</h3>
+<table>
+{%- for l in r.links %}
+<tr><td class="wrap">{{ l.host }}
+  {%- for url, k in l.urls %}{% if url.rstrip('/') != ('https://' ~ l.host) and url.rstrip('/') != ('https://www.' ~ l.host) %}
+  <div class="sub"><a href="{{ url }}" rel="noreferrer noopener" target="_blank">{{ url }}</a> {{ k }}</div>{% endif %}{% endfor %}</td>
+  <td class="fig">{{ n(l.n) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+</div>
+
+<h2>What they read</h2>
+<div class="cols">
+<div>
+<h3>Sections</h3>
+{%- set top = r.sections[0].views if r.sections else 0 %}
+<table><tr><th>Section</th><th class="fig">Pages</th><th class="fig">Visits</th></tr>
+{%- for s in r.sections %}
+<tr><td><a href="/{{ s.ref }}">{{ s.ref }}</a> <span class="sub">{{ s.title }}</span>{{ bar(s.views, top) }}</td>
+  <td class="fig">{{ n(s.views) }}</td><td class="fig">{{ n(s.n) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+<div>
+<h3>Papers</h3>
+{%- set top = r.papers[0].views if r.papers else 0 %}
+<table>
+{%- for p in r.papers %}
+<tr><td><a href="/{{ p.n }}">{{ p.n }}</a> <span class="sub">{{ p.title }}</span>{{ bar(p.views, top) }}</td><td class="fig">{{ n(p.views) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+<h3>Kinds of page</h3>
+{%- set top = r.kinds[0][1] if r.kinds else 0 %}
+<table>
+{%- for label, k in r.kinds %}<tr><td>{{ label }}{{ bar(k, top) }}</td><td class="fig">{{ n(k) }}</td></tr>{% endfor %}
+</table>
+</div>
+<div>
+<h3>Concepts in the index</h3>
+{%- set top = r.concepts[0].views if r.concepts else 0 %}
+<table>
+{%- for k in r.concepts %}
+<tr><td><a href="/i/{{ k.slug }}">{{ k.head }}</a>{{ bar(k.views, top) }}</td><td class="fig">{{ n(k.views) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+{%- if r.other_pages %}
+<h3>Index letters, appendices, and the rest</h3>
+<table>
+{%- for path, k in r.other_pages %}<tr><td><a href="{{ path }}">{{ path }}</a></td><td class="fig">{{ n(k) }}</td></tr>{% endfor %}
+</table>
+{%- endif %}
+</div>
+</div>
+
+<h2>What they search for</h2>
+<div class="cols">
+<div>
+<h3>Searches</h3>
+{%- set top = r.queries[0][1] if r.queries else 0 %}
+<table><tr><th>Query</th><th class="fig">Times</th><th class="fig">Found</th></tr>
+{%- for text, k, hits in r.queries %}
+<tr><td class="q"><a href="/search?q={{ text|urlencode }}">{{ text }}</a>{{ bar(k, top) }}</td><td class="fig">{{ n(k) }}</td><td class="fig">{{ n(hits) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+<div>
+<h3>Searches that found nothing</h3>
+<p class="hint">What readers expected to find. Some of these may be worth a headword
+or a <i>See</i> reference.</p>
+<table>
+{%- for text, k in r.zero %}<tr><td class="q">{{ text }}</td><td class="fig">{{ n(k) }}</td></tr>
+{%- else %}<tr><td class="sub">None.</td></tr>
+{%- endfor %}
+</table>
+{%- if r.jumps %}
+<h3>Citations typed into the box ({{ n(r.n_jumps) }})</h3>
+<table>
+{%- for text, k in r.jumps %}<tr><td class="q">{{ text }}</td><td class="fig">{{ n(k) }}</td></tr>{% endfor %}
+</table>
+{%- endif %}
+</div>
+</div>
+
+<h2>What they listen to</h2>
+<div class="cols">
+<div>
+<h3>By voice</h3>
+<table><tr><th>Voice</th><th class="fig">Sections</th><th class="fig">Listeners</th></tr>
+{%- for v in r.voices %}<tr><td>{{ v.label }}</td><td class="fig">{{ n(v.sections) }}</td><td class="fig">{{ n(v.listeners) }}</td></tr>
+{%- else %}<tr><td class="sub">Nobody yet.</td></tr>
+{%- endfor %}
+</table>
+<p class="hint">A section counts once a visit, when its recording, or its text for the
+browser's voice, is first fetched.</p>
+</div>
+<div>
+<h3>Sections heard</h3>
+{%- set top = r.heard[0].n if r.heard else 0 %}
+<table>
+{%- for s in r.heard %}<tr><td><a href="/{{ s.ref }}">{{ s.ref }}</a> <span class="sub">{{ s.title }}</span>{{ bar(s.n, top) }}</td><td class="fig">{{ n(s.n) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+</div>
+
+<h2>Shared</h2>
+<p class="hint">When someone pastes a link into a chat or a post, the app fetches the
+page to draw a preview. Each fetch is a share.</p>
+<div class="cols">
+<div>
+<table>
+{%- for app, k in r.previews %}<tr><td>{{ app }}</td><td class="fig">{{ n(k) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+<div>
+<table>
+{%- for app, path, k in r.shared %}<tr><td class="wrap"><a href="{{ path }}">{{ path }}</a> <span class="sub">{{ app }}</span></td><td class="fig">{{ n(k) }}</td></tr>{% endfor %}
+</table>
+</div>
+</div>
+
+<h2>On what</h2>
+<div class="cols">
+{%- for title, rows in [("Devices", r.devices), ("Browsers", r.browsers), ("Systems", r.systems), ("Languages", r.langs)] %}
+<div>
+<h3>{{ title }}</h3>
+{%- set top = rows[0][1] if rows else 0 %}
+<table>
+{%- for label, k in rows %}<tr><td>{{ label }}{{ bar(k, top) }}</td><td class="fig">{{ n(k) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+{%- endfor %}
+</div>
+
+<h2 id="machines">Machines</h2>
+<p class="hint">{{ n(r.bot_views) }} requests from crawlers, scanners and scripts,
+of {{ n(r.all_rows) }} in all. Search engines' crawlers are how the site gets found.</p>
+<div class="cols">
+<div>
+<table><tr><th>Agent</th><th class="fig">Requests</th><th class="fig">Last</th></tr>
+{%- for name, k, last in r.bots %}<tr><td class="wrap">{{ name }}</td><td class="fig">{{ n(k) }}</td><td class="fig sub">{{ last }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+<div>
+<h3 style="margin-top:0">Pages not found, asked for by people</h3>
+<table>
+{%- for m in r.missing %}<tr><td class="wrap">{{ m.path }}{% if m.referrer %}<div class="sub">from {{ m.referrer }}</div>{% endif %}</td><td class="fig">{{ n(m.n) }}</td></tr>
+{%- else %}<tr><td class="sub">None.</td></tr>
+{%- endfor %}
+</table>
+</div>
+</div>
+
+<h2>The latest</h2>
+<table class="recent"><tr><th>When (UTC)</th><th>Where</th><th>Page</th><th>From</th></tr>
+{%- for v in r.recent %}
+<tr><td class="fig sub" style="text-align:left;padding-left:0">{{ v.when }}</td>
+  <td>{{ v.flag }} {{ v.place }}</td>
+  <td class="wrap"><a href="{{ v.path }}{% if v.q %}?q={{ v.q|urlencode }}{% endif %}">{{ v.path }}</a>{% if v.q %} <span class="q">“{{ v.q }}”</span>{% endif %}{% if v.via %} <span class="sub">({{ 'while listening' if v.via == 'swap' else 'next, while listening' }})</span>{% endif %}</td>
+  <td class="wrap sub">{{ v.ref or '' }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+{% endif %}
+
+<h2>How this is counted</h2>
+<p class="hint">A visit is one browser on one day. Each address is placed and then
+discarded; what is kept is the place and a number made from the address with a key
+that is replaced every day, so the same reader on two days counts as two visits.
+No cookie is set on readers.
+{% if counted %}This browser's visits are counted: <a href="?days={{ period }}&amp;me=skip">stop counting them</a>.
+{% else %}This browser's own visits are not counted: <a href="?days={{ period }}&amp;me=count">count them</a>.{% endif %}</p>
+<p class="hint">IP geolocation by <a href="https://db-ip.com">DB-IP</a>, under
+<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>{% if r.geoip %}, as of {{ r.geoip }}{% endif %}.</p>
+</main>{% endblock %}

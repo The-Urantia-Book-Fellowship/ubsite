@@ -361,7 +361,9 @@
     var to = D.next;
     if (!to) return null;
     if (!pending || pending.href !== to.href) {
-      pending = { href: to.href, html: fetch(to.href, { credentials: 'same-origin' }).then(function (r) {
+      // X-UB-Fetch tells the visit counter a page fetched ahead from one loaded.
+      pending = { href: to.href, html: fetch(to.href, { credentials: 'same-origin',
+                                                        headers: { 'X-UB-Fetch': 'next' } }).then(function (r) {
         if (!r.ok) throw new Error(r.status);
         return r.text();
       }) };
@@ -434,7 +436,7 @@
   // `then` runs once it is in.
   function visit(url, isNew, y, then) {
     var n = ++visiting, hash = new URL(url, location.href).hash;
-    fetch(url, { credentials: 'same-origin' }).then(function (r) {
+    fetch(url, { credentials: 'same-origin', headers: { 'X-UB-Fetch': 'swap' } }).then(function (r) {
       if (!/text\/html/.test(r.headers.get('content-type') || '')) throw new Error('not a page');
       return r.text().then(function (html) { return { url: r.url || url, html: html }; });
     }).then(function (got) {

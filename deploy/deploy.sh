@@ -61,6 +61,19 @@ rsync -az --delete \
     --exclude 'export/' \
     "$HERE"/ "$HOST:$DEST"/
 
+# The visit counter's place database (`make geoip`, monthly), which the rsync
+# above skips with the rest of var/.  rsync writes a temporary file and renames
+# it, so a worker that has the old one mapped keeps reading it, and opens the new
+# one when it sees the change of mtime.  Unchanged, nothing is sent.
+GEO=var/geoip/dbip-city-lite.mmdb
+if [ -f "$GEO" ]; then
+    echo "==> $GEO ($(du -h "$GEO" | cut -f1))"
+    ssh "$COPY_HOST" "mkdir -p $DEST/var/geoip"
+    rsync -a "$GEO" "$COPY_HOST:$DEST/$GEO"
+else
+    echo "    (no $GEO here: visits on $HOST are counted without places; make geoip)"
+fi
+
 if [ "$AUDIO" = 1 ]; then
     # The AI voice is made here, under var/, which the rsync above skips.  To
     # the same relative path on pi5, adding and never deleting: a page opened

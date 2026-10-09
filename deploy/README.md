@@ -127,6 +127,18 @@ file is never the one being served.
 `var/ub.db` is **derived** and must never be backed up — it rebuilds in seconds
 from three git repositories, and a restored stale copy is worse than none.
 
-There is no writable state yet. When reader annotations arrive they go in a
-separate `var/user.db`, and that one is the only thing needing a backup — and a
-restore tested once, because an untested backup is a rumour.
+The one piece of writable state is **`var/visits.db`**, the visit counter's record
+(README, "Visits"). Losing it loses the history of who came, and nothing else; the
+site does not read it except on `/stats`. It holds no IP addresses. To keep a copy:
+
+```
+ssh pi5 'sqlite3 ~/ubsite/var/visits.db ".backup /home/tigran/visits-$(date +%F).db"'
+```
+
+`var/stats.passwd` is the scrypt hash of the `/stats` password, and is remade, not
+restored (`python -m ubsite.stats passwd`). The DB-IP database in `var/geoip/` is
+shipped by `deploy.sh`.
+
+When reader annotations arrive they go in a separate `var/user.db`, and that will
+need a real backup, and a restore tested once, because an untested backup is a
+rumour.

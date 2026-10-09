@@ -24,6 +24,7 @@ window.ubDefaults = {{ settings_defaults|tojson }};
   } catch (e) {}
 })(document.documentElement, window.ubDefaults);
 </script>
+{% block head %}{% endblock %}
 </head>
 <body>
 <header class="top">
@@ -99,7 +100,8 @@ window.ubDefaults = {{ settings_defaults|tojson }};
   <p>Text{{ rev(src.press) }}: the Uversa Press edition. Index{{ rev(src.index) }}: the
      Uversa Press index as revised for the third edition.
      Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</p>
-  <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.</p>
+  <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.
+     Visits are counted without cookies, and no IP address is kept.</p>
 </footer>
 <script src="/static/ub.js" defer></script>
 {% block scripts %}{% endblock %}

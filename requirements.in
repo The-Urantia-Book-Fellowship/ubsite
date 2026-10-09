@@ -6,6 +6,9 @@
 fastapi
 uvicorn[standard]
 jinja2
+# The visit counter: DB-IP's City Lite database, read by mmap.  Country and
+# city are looked up as a request is counted, and the IP is then dropped.
+maxminddb
 
 # The build.  fontTools subsets UB Goudy to the corpus; the woff extra brings
 # brotli, without which it cannot write WOFF2.

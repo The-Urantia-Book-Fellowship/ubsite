@@ -210,7 +210,8 @@ The script:
    or `export/`;
 3. ships `var/ub.db` as `ub.db.new` and `mv`s it into place, so a half-copied file is
    never the one being served;
-4. runs `uv pip sync` in pi5's venv;
+4. copies `var/geoip/dbip-city-lite.mmdb` when `make geoip` has changed it (the visit
+   counter's places; see [Visits](#visits)), and runs `uv pip sync` in pi5's venv;
 5. runs `sudo systemctl restart ubsite`. This is password-free: the sudoers drop-in
    from `deploy/README.md` step 4 allows exactly that and nothing else;
 6. polls `/healthz` for 30 s, and prints the unit's status if it never reports ok.
@@ -309,6 +310,49 @@ Boson's licence requires its acknowledgment, "This audio was created with Boson 
 Higgs Audio", beside the audio. `sources.toml` carries it as the source's `credit`, and
 Settings and the player show it. The licence allows the name only as that
 acknowledgment, so the voice is called "AI voice".
+
+---
+
+## Visits
+
+The site counts its visitors itself, server-side, so a page carries nothing for it: no
+script, and no cookie for readers. `ubsite/visits.py` is an ASGI middleware that notes
+each request on a queue and goes on. A thread in each worker writes the queue to
+**`var/visits.db`** every two seconds, kept apart from `ub.db` so that a deploy never
+touches it. Each address is placed (country, region, city) and hashed with a salt that
+is replaced every UTC day, and then dropped. **No IP address is stored.** The cost to a
+page is lost in the noise: on the development machine a section page took a median
+3.75 ms with it on and 3.76 ms with it off.
+
+The numbers are on **`/stats`**, behind a password:
+
+```
+make geoip                                # DB-IP City Lite -> var/geoip/ (monthly; deploy ships it)
+ssh pi5 'cd ~/ubsite && .venv/bin/python -m ubsite.stats passwd'   # prints a password, once
+```
+
+Without `var/stats.passwd`, `/stats` is a 404. The browser that logs in gets the cookie
+`ub_me=1`, and its own visits stop counting; the page has a link to count them again.
+The page shows:
+
+- visits per day;
+- countries and their cities;
+- how each visit arrived, and every link from another site;
+- the sections, papers and concepts read;
+- every search, and **the searches that found nothing**;
+- what is listened to, by voice;
+- links shared into chats and posts (their preview fetches);
+- devices, browsers and languages;
+- crawlers;
+- pages not found;
+- the latest 50 views.
+
+`ubsite/stats.py` derives all of it at report time: which agents are bots, which
+referrers are external, what kind of page a path is. A *visit* is one browser on one UTC
+day, so a reader who comes back tomorrow counts twice. A view counts as a person's only
+if its visitor-day also fetched `/static/ub.css` and its user agent is no known bot.
+
+`UB_VISITS=off` turns the counter off; `make test` sets it.
 
 ---
 
