@@ -13,6 +13,7 @@ import sys
 
 from .chronology import one_line, parse_year
 from .index_macros import render_html
+from . import variants
 from .render import render, title as render_title
 
 VENDOR = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "index"
@@ -74,9 +75,19 @@ def load_text(con, papers, repo, report) -> dict:
                             (spid, qid, s.start, s.end, s.kind, None, i))
             for i, nt in enumerate(q.ex.notes):
                 fid += 1
-                con.execute("INSERT INTO footnote VALUES (?,1,?,?,?,?,?,?)",
+                gloss, marks = None, []
+                if nt.kind == "variant-1955":
+                    same = variants.italics_only(q.ex.text, q.ex.spans, nt.offset,
+                                                 nt.text, nt.spans)
+                    if same == ("", []):
+                        report.hard("variant-says-nothing", q.ref,
+                                    f"the 1955 note {nt.text!r} has the text's words"
+                                    " and its italics")
+                    elif same:
+                        gloss, marks = same
+                con.execute("INSERT INTO footnote VALUES (?,1,?,?,?,?,?,?,?)",
                             (fid, nt.kind, qid, nt.offset, i, nt.text,
-                             render(nt.text, nt.spans)))
+                             render(nt.text, [*nt.spans, *marks]), gloss))
     return para_key
 
 

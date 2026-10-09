@@ -59,7 +59,8 @@ def corpus_codepoints(con) -> set[str]:
               "SELECT path_plain FROM index_entry",     # the chips, with their ›
               "SELECT title FROM appendix",             # an appendix chip's label
               "SELECT label FROM chronology_event",     # its year and month too
-              "SELECT text FROM footnote"):
+              "SELECT text FROM footnote",
+              "SELECT gloss FROM footnote"):
         for (t,) in con.execute(q):
             cps.update(t or "")
     cps.update("0123456789:.,()[]-–—…'’“” /*&%#?!; ")

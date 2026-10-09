@@ -29,6 +29,7 @@ WRAP = {
     "link":      ("a", None),
     "url":       ("a", "url"),
     "nobreak":   ("span", "nobreak"),
+    "chg":       ("mark", "chg"),     # a 1955 note: what differs (build/variants.py)
 }
 POINT = {
     "dotleader": '<span class="leader"></span>',

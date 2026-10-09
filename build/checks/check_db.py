@@ -12,6 +12,9 @@ QUERIES = [
     ("red-letter spans",    "SELECT COUNT(*) FROM span WHERE kind='redletter'", 1267),
     ("em spans",            "SELECT COUNT(*) FROM span WHERE kind='em'", 2295),
     ("1955 variant notes",  "SELECT COUNT(*) FROM footnote WHERE kind='variant-1955'", 180),
+    # The ones that differ in nothing but italics, each told in words
+    # (build/variants.py): 59:4.18, 61:7.18, 102:3.5, 102:3.11, 111:0.4, 112:1.7.
+    ("  in italics only",   "SELECT COUNT(*) FROM footnote WHERE gloss IS NOT NULL", 6),
     ("index entries",       "SELECT COUNT(*) FROM index_entry", None),
     ("citations",           "SELECT COUNT(*) FROM citation", None),
     ("citation targets",    "SELECT COUNT(*) FROM citation_target", None),

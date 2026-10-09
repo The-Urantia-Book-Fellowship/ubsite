@@ -98,6 +98,8 @@ CREATE TABLE footnote (
   anchor INTEGER,                             -- code-point offset in paragraph.text
   ord INTEGER NOT NULL,
   text TEXT NOT NULL,
-  html TEXT NOT NULL                          -- derived cache: render(text, spans)
+  html TEXT NOT NULL,                         -- derived cache: render(text, spans)
+  gloss TEXT                                  -- what changed, when only the italics
+                                              -- did: build/variants.py
 );
 CREATE INDEX footnote_para ON footnote(paragraph_id);

@@ -11,6 +11,10 @@ paper_section_pairs  = 1626      # 1,429 titled sections + 197 untitled introduc
 redletter_spans      = 1267      # \textcolor{ubdarkred} -- the words of Jesus
 variant_1955_notes   = 180       # \fnc; 177 at 5222a215, then press 36927e0 set 0:1.24
                                  # with \fnc and c88b9ea, 25e69af added 80:7.1, 172:5.2
+variant_1955_italics = 6         # of those, the same words with other italics, which
+                                 # build/variants.py explains (measured at de9308f6,
+                                 # 2026-10-09): 59:4.18 61:7.18 102:3.5 102:3.11
+                                 # 111:0.4 112:1.7
 listmark_spans       = 2397      # \ublistelem
 dotleader_spans      = 26        # \bibdf
 em_spans             = 2294      # 2,299 \bibemph less the 5 inside \fnc bodies,
