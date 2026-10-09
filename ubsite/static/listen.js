@@ -18,11 +18,17 @@
 // page rather than loaded as a new one (`carryOn`): a new page would need a
 // tap of its own before a browser lets it play, iOS above all, and with the
 // screen locked it would never load.
+//
+// With Follow along off, the reader may go anywhere on the site while it plays:
+// while the bar is open the site's own links are followed in this page too
+// (`visit`), so the page changes and the reading does not.  This page's section
+// (`P`) and the section being heard (`D`) are then two different things.
 (function () {
   var data = document.getElementById('ub-audio');
   var S = window.ubSettings;
   if (!data || !S) return;
-  var D = JSON.parse(data.textContent);
+  var P = JSON.parse(data.textContent);  // the section the page shows; null on any other page
+  var D = null;                          // the section being heard
   var RATES = [0.8, 0.9, 1, 1.1, 1.25, 1.5];
   var NS = 'http://www.w3.org/2000/svg';
   var ICON = { play: 'M4.5 2.5v11l9-5.5z', pause: 'M4 2.5h3v11H4zM9.5 2.5h3v11h-3z',
@@ -52,7 +58,8 @@
   var audio = new Audio();
   audio.preload = 'none';
   var synth = window.speechSynthesis || null;
-  var V = null, key = null;          // the voice in use, and its key
+  var V = null, key = null;          // the voice being heard, and its key
+  var PV = null, pkey = null;        // the voice the page's own controls start
   var k = -1, file = -1;             // the segment being heard, and its file
   var marked = null, bar = null, controls = [], shutSpeeds = function () {};
   var head, paras;
@@ -64,15 +71,21 @@
   }
   scan();
 
-  // The voice Settings asks for, else the first this section has.
-  function choose() {
+  // The voice Settings asks for, else the first section d has.
+  function choose(d) {
     var want = S.get().voice;
     if (want === 'off') return null;
     if (want === 'browser' && synth) return want;
-    if (want && D.voices[want]) return want;
-    for (var v in D.voices) return v;
+    if (want && d.voices[want]) return want;
+    for (var v in d.voices) return v;
     return null;
   }
+  // Section d's voice kk; the browser's is made from the paragraphs in root.
+  function voiceOf(d, kk, root) {
+    return kk === 'browser' ? spoken(root, href(d)) : kk ? d.voices[kk] : null;
+  }
+  function href(d) { return '/' + d.paper + ':' + d.section; }
+  function same(a, b) { return !!(a && b && a.paper === b.paper && a.section === b.section); }
   function rate() { var r = S.get().rate; return RATES.indexOf(r) < 0 ? 1 : r; }
   // What the bar and the lock screen call the voice: for the browser's, the
   // name of the one it speaks with, once the browser has said.
@@ -90,43 +103,53 @@
   function build() {
     controls.forEach(function (c) { c.remove(); });
     controls = [];
-    key = choose();
-    V = key === 'browser' ? spoken() : key ? D.voices[key] : null;
-    if (!V) return;
+    if (!P) return;
+    pkey = choose(P);
+    PV = voiceOf(P, pkey, document);
+    if (!PV) return;
     var row = document.createElement('p');
     row.className = 'listenrow';
-    var b = button('listen', 'Listen to this section, read by ' + vname(), 'play', 'Listen');
-    b.addEventListener('click', function () { go(0); });
+    var b = button('listen', 'Listen to this section, read by ' +
+                   (PV.kind === 'browser' ? byline() : PV.label), 'play', 'Listen');
+    b.addEventListener('click', function () { start(0); });
     var by = document.createElement('span');
     by.className = 'by';
-    by.textContent = V.kind === 'browser' ? byline() : V.label;
+    by.textContent = PV.kind === 'browser' ? byline() : PV.label;
     // Boson's licence for the AI voice: its acknowledgment, beside the audio.
-    if (V.credit) {
-      var c = document.createElement(V.credit_url ? 'a' : 'span');
+    if (PV.credit) {
+      var c = document.createElement(PV.credit_url ? 'a' : 'span');
       c.className = 'credit';
-      c.textContent = V.credit;
-      if (V.credit_url) { c.href = V.credit_url; c.rel = 'noopener'; c.target = '_blank'; }
+      c.textContent = PV.credit;
+      if (PV.credit_url) { c.href = PV.credit_url; c.rel = 'noopener'; c.target = '_blank'; }
       by.appendChild(document.createTextNode(' · '));
       by.appendChild(c);
-    } else if (V.kind === 'synthetic') by.textContent += ' (an AI voice)';
+    } else if (PV.kind === 'synthetic') by.textContent += ' (an AI voice)';
     row.appendChild(b);
     row.appendChild(by);
     head.after(row);
     controls.push(row);
     // A paragraph can be started only once the reading is aligned to them.
-    if (V.by !== 'paragraph') return;
-    V.segs.forEach(function (s, i) {
+    if (PV.by !== 'paragraph') return;
+    PV.segs.forEach(function (s, i) {
       var p = s[0] && paras[s[0]];
       if (!p) return;
       // Outside the stored text, and with no text of its own: copying the
       // paragraph still returns its words exactly (CLAUDE.md §6).
       var pb = button('playp', 'Listen from ' + s[0], 'play');
-      pb.addEventListener('click', function () { go(i); });
+      pb.addEventListener('click', function () { start(i); });
       // After the reference: on a phone the two float as a stack, reference on top.
       var num = p.querySelector('.num');
       p.insertBefore(pb, num ? num.nextSibling : p.firstChild);
       controls.push(pb);
     });
+  }
+  // A press on the page's own controls: what is heard becomes what the page shows.
+  function start(i) {
+    if (V && V.kind !== PV.kind) { hush(); audio.pause(); }
+    // Another section's files, or another voice's: they are numbered afresh.
+    if (!same(D, P) || key !== pkey) file = -1;
+    D = P; V = PV; key = pkey;
+    go(i);
   }
 
   // ---- the bar ---------------------------------------------------------------
@@ -147,11 +170,7 @@
     at.type = 'button';
     at.className = 'at';
     at.title = 'Show this paragraph';
-    at.addEventListener('click', function () {
-      var el = reading();
-      touched = 0;                     // and Follow along takes over again
-      if (el) show(el);
-    });
+    at.addEventListener('click', function () { toReading(true); });
     var who = document.createElement('span');
     who.className = 'who';
     where.appendChild(at);
@@ -234,10 +253,11 @@
     box.appendChild(menu);
     return box;
   }
-  // The heading or paragraph being read, if this page has it.
+  // The heading or paragraph being read, if this page has it.  A reference is
+  // unique in the book, so on another page paras[ref] is simply not there.
   function reading() {
     var s = k >= 0 ? V.segs[k] : null;
-    return s ? (s[0] ? paras[s[0]] : head) : null;
+    return !s ? null : s[0] ? paras[s[0]] || null : same(P, D) ? head : null;
   }
   // A message in the bar in place of what is being read, until the next render.
   function tell(msg) {
@@ -314,6 +334,7 @@
   function back() {
     var now = Date.now(), again = now - lastBack < 400;
     lastBack = now;
+    if (!V) return;
     if (k < 0) return go(V.segs.length - 1);
     go(again && k > 0 ? k - 1 : k);
   }
@@ -335,16 +356,19 @@
   }
 
   // ---- on into the next section, in this page --------------------------------
-  var pending = null, nextWords = null, moved = false;
+  var pending = null;                // {href, html}: the next section's page, coming
   function fetchNext() {
-    if (!pending && D.next) {
-      pending = fetch(D.next.href, { credentials: 'same-origin' }).then(function (r) {
+    var to = D.next;
+    if (!to) return null;
+    if (!pending || pending.href !== to.href) {
+      pending = { href: to.href, html: fetch(to.href, { credentials: 'same-origin' }).then(function (r) {
         if (!r.ok) throw new Error(r.status);
         return r.text();
-      });
-      if (key === 'browser') nextWords = fetchWords(D.next.href);
+      }) };
+      pending.html.catch(function () {});
+      if (key === 'browser') words(to.href);
     }
-    return pending;
+    return pending.html;
   }
   function carryOn() {
     var to = D.next;
@@ -352,32 +376,122 @@
     k = -1;                            // nothing more to hear here
     fetchNext().then(function (html) {
       var doc = new DOMParser().parseFromString(html, 'text/html');
-      var main = doc.querySelector('main.reader'), json = doc.getElementById('ub-audio');
-      if (!main || !json) throw new Error('not a section page');
-      document.querySelector('main.reader').replaceWith(document.adoptNode(main));
-      data.textContent = json.textContent;
-      D = JSON.parse(json.textContent);
-      if (key === 'browser') words(to.href, nextWords);
-      nextWords = null;
-      document.title = doc.title;
-      history.pushState(null, '', to.href);
-      moved = true;
+      var json = doc.getElementById('ub-audio');
+      if (!doc.querySelector('main.reader') || !json) throw new Error('not a section page');
       pending = null;
-      scrollTo(0, 0);
-      scan();
       // The new section's files are numbered from 0 again: forget the old one.
       file = -1;
-      marked = null;
-      build();
+      if (same(P, D)) {
+        // The page shows the section that has ended: the next one takes its place.
+        push(to.href);
+        swap(doc);
+        scrollTo(0, 0);
+        D = P; V = PV; key = pkey;
+      } else {
+        // The reader is elsewhere: what is heard moves on, and the page stays.
+        D = JSON.parse(json.textContent);
+        key = choose(D);
+        V = voiceOf(D, key, doc);
+      }
       if (V) go(0); else finish();
     }).catch(function () {
       // Offline, or the page changed shape: the link still works.
-      pending = nextWords = null;
+      pending = null;
       finish();
     });
   }
-  // Back after carrying on: the address has gone back, so the page must too.
-  addEventListener('popstate', function () { if (moved) location.reload(); });
+
+  // ---- moving about while listening -------------------------------------------
+  // Leaving the page would stop the reading, so while the bar is open and Follow
+  // along is off, the site's own pages are fetched and swapped in instead
+  // (every page has one <main>).  With Follow along on, a link loads its page
+  // as ever, and playing stops.  Anything that goes wrong falls back to that.
+  var moved = false, visiting = 0, shown = location.pathname + location.search;
+  function roaming() { return !!bar && !S.get().follow; }
+  // The address for what is now to be shown.  The page being left keeps its
+  // scroll position, for Back.
+  function push(url) {
+    history.replaceState({ y: scrollY }, '');
+    history.pushState(null, '', url);
+    history.scrollRestoration = 'manual';
+    moved = true;
+    shown = location.pathname + location.search;
+  }
+  function swap(doc) {
+    document.querySelector('main').replaceWith(document.adoptNode(doc.querySelector('main')));
+    document.title = doc.title;
+    var q = document.querySelector('.find input'), nq = doc.querySelector('.find input');
+    if (q && nq) q.value = nq.value;
+    var json = doc.getElementById('ub-audio');
+    P = json ? JSON.parse(json.textContent) : null;
+    if (json) data.textContent = json.textContent;
+    scan();
+    marked = null;
+    build();
+    mark();
+  }
+  // Show url in this page: pushed as a new address, or (from Back) restored to y.
+  // `then` runs once it is in.
+  function visit(url, isNew, y, then) {
+    var n = ++visiting, hash = new URL(url, location.href).hash;
+    fetch(url, { credentials: 'same-origin' }).then(function (r) {
+      if (!/text\/html/.test(r.headers.get('content-type') || '')) throw new Error('not a page');
+      return r.text().then(function (html) { return { url: r.url || url, html: html }; });
+    }).then(function (got) {
+      if (n !== visiting) return;      // overtaken by a later one
+      var doc = new DOMParser().parseFromString(got.html, 'text/html');
+      if (!doc.querySelector('main')) throw new Error('not a page');
+      // A redirect (/101 to /101:0, a citation searched for) lands at its real address.
+      if (isNew) push(got.url.split('#')[0] + hash);
+      else shown = location.pathname + location.search;
+      swap(doc);
+      if (y != null) scrollTo(0, y);
+      else {
+        scrollTo(0, 0);
+        document.dispatchEvent(new CustomEvent('ub:page'));   // ub.js: to the paragraph cited
+      }
+      if (then) then();
+    }).catch(function () {
+      if (n !== visiting) return;
+      history.scrollRestoration = 'auto';
+      if (isNew) location.href = url; else location.reload();
+    });
+  }
+  var SKIP = /^\/(static|audio|speech|healthz|favicon|apple-touch-icon)\b/;
+  document.addEventListener('click', function (ev) {
+    if (!roaming() || ev.defaultPrevented || ev.button || ev.metaKey || ev.ctrlKey ||
+        ev.shiftKey || ev.altKey) return;
+    var a = ev.target.closest && ev.target.closest('a[href]');
+    if (!a || a.target || a.hasAttribute('download')) return;
+    var u = new URL(a.href, location.href);
+    if (u.origin !== location.origin || SKIP.test(u.pathname)) return;
+    if (u.pathname + u.search === shown && u.hash) return;   // a place on this page
+    ev.preventDefault();
+    visit(u.href, true);
+  });
+  document.addEventListener('submit', function (ev) {
+    var f = ev.target;
+    if (!roaming() || ev.defaultPrevented || !f.matches || !f.matches('form.find')) return;
+    ev.preventDefault();
+    visit(f.action + '?' + new URLSearchParams(new FormData(f)), true);
+  });
+  // Back and Forward: the address has changed, so the page must too -- in the
+  // page while listening, else by loading it.
+  addEventListener('popstate', function (ev) {
+    if (!moved || location.pathname + location.search === shown) return;
+    if (bar) visit(location.href, false, ev.state ? ev.state.y : null);
+    else { history.scrollRestoration = 'auto'; location.reload(); }
+  });
+  // What is being read, into view: from its own page, fetched, if this is
+  // another.  Only if it is leaving the screen, unless `always`.
+  function toReading(always) {
+    touched = 0;                       // and Follow along takes over again
+    if (k < 0) return;
+    var el = reading();
+    if (!el) return visit(href(D), true, null, function () { var e = reading(); if (e) show(e); });
+    var r = el.getBoundingClientRect();
+    if (always || r.top < 40 || r.bottom > innerHeight - 80) show(el);
+  }
   function close() {
     hush();
     audio.pause();
@@ -431,8 +545,7 @@
   // silent partway through a long utterance, and a sentence is where pausing
   // resumes.  Pausing is cancelling -- pause() does nothing on Android -- and
   // `gen` tells a cancelled utterance's late events from the live one's.
-  var said = { href: null, text: null, wait: null, parts: [], n: 0, on: false, gen: 0, u: null };
-  function here() { return '/' + D.paper + ':' + D.section; }
+  var said = { parts: [], n: 0, on: false, gen: 0, u: null };
   function fetchWords(href) {
     var p = fetch('/speech' + href, { credentials: 'same-origin' }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
@@ -445,23 +558,25 @@
     p.catch(function () {});
     return p;
   }
-  // The text for the section in the page, from `p` if it is already coming.
-  function words(href, p) {
-    said.href = href;
-    said.text = null;
-    said.wait = (p || fetchWords(href)).then(function (m) {
-      if (said.href === href) said.text = m;
-      return m;
-    });
-    said.wait.catch(function () {});
+  // A section's spoken text, {map, wait}, kept for the last few sections: the
+  // one being heard, the one on the page, and the next.
+  var texts = {};
+  function words(h) {
+    var t = texts[h];
+    if (t) return t;
+    var old = Object.keys(texts);
+    if (old.length >= 4) delete texts[old[0]];
+    t = texts[h] = { map: null, wait: fetchWords(h) };
+    t.wait.then(function (m) { t.map = m; }, function () { if (texts[h] === t) delete texts[h]; });
+    return t;
   }
-  // The heading, then every paragraph on the page.  Its text is fetched now,
-  // so that a tap starts it at once: iOS speaks only in answer to one.
-  function spoken() {
+  // The heading, then every paragraph in root, section h.  Its text is fetched
+  // now, so that a tap starts it at once: iOS speaks only in answer to one.
+  function spoken(root, h) {
     var segs = [[null]];
-    Array.prototype.forEach.call(document.querySelectorAll('p.t[id]'),
+    Array.prototype.forEach.call(root.querySelectorAll('p.t[id]'),
                                  function (p) { segs.push([p.id]); });
-    if (said.href !== here()) words(here());
+    words(h);
     return { label: 'Your browser\u2019s voice', kind: 'browser', by: 'paragraph', segs: segs };
   }
   // Pieces of a sentence or so, none longer than LONG characters (about ten
@@ -499,16 +614,16 @@
     said.n = n;
     hold(true);
     render();
-    if (said.text) return begin(gen);
-    said.wait.then(function () { if (gen === said.gen) begin(gen); }, function () {
+    var t = words(href(D));
+    if (t.map) return begin(gen, t.map);
+    t.wait.then(function (m) { if (gen === said.gen) begin(gen, m); }, function () {
       if (gen !== said.gen) return;
       hush();
       tell('The text could not be loaded.');
     });
   }
-  function begin(gen) {
-    if (!said.text) return hush();
-    said.parts = pieces(said.text[V.segs[k][0] || ''] || '');
+  function begin(gen, m) {
+    said.parts = pieces(m[V.segs[k][0] || ''] || '');
     if (synth.speaking || synth.pending) {
       // Safari can drop an utterance spoken straight after a cancel.
       synth.cancel();
@@ -571,8 +686,8 @@
   // The browser names its voices only once it has them.
   function relabel() {
     var by = document.querySelector('.listenrow .by');
+    if (by && PV && PV.kind === 'browser') by.textContent = byline();
     if (!V || V.kind !== 'browser') return;
-    if (by) by.textContent = byline();
     render();
     if (k >= 0) meta();
   }
@@ -628,12 +743,14 @@
     }
     if (what === 'bvoice') { relabel(); if (said.on) speakFrom(said.n); }
     if (what === 'voice') { close(); build(); }
+    // Following again, from another page: back to the reading.
+    if (what === 'follow' && S.get().follow) toReading(false);
   });
 
   build();
   // Arrived from "Next" at the end of the previous section: carry on.
   if (location.hash === '#listen') {
     history.replaceState(null, '', location.pathname + location.search);
-    go(0);
+    if (PV) start(0);
   }
 })();

@@ -263,6 +263,10 @@ drives the display, and under load it reached 88 °C and throttled.
 The recordings do not change with the text, so none of this reruns after an ordinary
 correction. Rerun it only when paragraphs are added, removed or renumbered.
 
+With Settings' "Follow along" off, the reader can move anywhere on the site while a
+section plays. `listen.js` follows the site's links inside the page instead of loading a
+new one, so the reading goes on.
+
 ### Your browser's voice
 
 Settings also offers the browser's own speech, the Web Speech API. Nothing is recorded:

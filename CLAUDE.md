@@ -136,7 +136,9 @@ failed build leaves the previous database untouched.
     `speech` text itself (the Web Speech API), fetched from `/speech/<paper>:<section>`
     once that voice is chosen. It is a stopgap beside Merritt Horn until the recorded AI
     reading exists, then a third choice (§8, §12).
-  - The player is `static/listen.js` (~22 KB, section pages only). Settings, the ⚙
+  - The player is `static/listen.js` (~31 KB, section pages only). While it plays with
+    Follow along off, it also follows the site's links inside the page, so the reader
+    can go anywhere and the reading goes on (§8). Settings, the ⚙
     dialog, are declared in `ubsite/settings.py`, run by `ub.js`, stored in
     `localStorage` under `ub_settings`, and applied before first paint (§8).
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and
@@ -365,7 +367,20 @@ CSS: markup must not inject characters a reader would copy.
   reached by carrying on, is fetched and swapped into the page (`main.reader` and
   `#ub-audio`, with `pushState`), never loaded as a new page: the same audio element
   plays on, so no browser asks for another tap, and it works with the screen locked.
-  Back reloads the section it returns to.
+  Back reloads the section it returns to, unless the bar is still open (next point).
+- **With Follow along off, playing goes on wherever the reader goes** (Tigran,
+  2026-10-09). While the bar is open, `listen.js` follows the site's own links, and the
+  search box, inside the page. It fetches the page, swaps its `<main>` (every page has
+  exactly one) and calls `pushState`; Back and Forward work the same way. The document
+  never unloads, so a recording plays on, and so does the browser's voice. The page
+  then shows one section (`P`) while another is heard (`D`).
+  - Carrying on at the end of a section moves the page with it only if the page shows
+    the section that has ended.
+  - A tap on the reference in the bar brings the paragraph back, fetching its section
+    if the page shows another. Turning Follow along back on does the same.
+  - With Follow along on, a link loads a new page and playing stops, as before.
+  - Anything unexpected falls back to an ordinary page load: a fetch failure, a
+    response that isn't HTML, a page without `<main>`.
 - **Each paragraph is marked with its full reference**, `118:10.13`, not its bare
   number, so the reader always knows which paragraph this is (Tigran, 2026-10-09). On a
   desktop it stands in the gutter. On a phone it stands at the start of the paragraph

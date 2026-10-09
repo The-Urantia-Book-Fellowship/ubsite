@@ -158,17 +158,21 @@
   // citation.  A margin chip opens /i/god#e…, which the browser scrolls to
   // itself.  Either way, scroll once more when the fonts are in: UB Goudy
   // loads with font-display: swap, the text reflows, and the first scroll
-  // drifts.  Not if the reader has scrolled meanwhile.
-  var focus = null;
-  try {
-    focus = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1)))
-                          : document.querySelector('.hit');
-  } catch (e) {}
-  if (focus) {
+  // drifts.  Not if the reader has scrolled meanwhile.  Again whenever
+  // listen.js brings a page in while it plays ('ub:page').
+  function arrive() {
+    var focus = null;
+    try {
+      focus = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1)))
+                            : document.querySelector('.hit');
+    } catch (e) {}
+    if (!focus) return;
     focus.scrollIntoView({ block: 'start' });
     var y = window.scrollY;
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
       if (window.scrollY === y) focus.scrollIntoView({ block: 'start' });
     });
   }
+  arrive();
+  document.addEventListener('ub:page', arrive);
 })();
