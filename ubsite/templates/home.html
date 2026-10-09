@@ -45,12 +45,26 @@
       the search box and it opens there.</li>
     <li><a href="/read">The contents</a> — all {{ stats.papers }} papers with
       their authors.</li>
+    {%- if stats.audio_mh_seconds %}
+    <li><a href="/0:0">Listening</a> — Merritt Horn's reading of the whole book,
+      {{ (stats.audio_mh_seconds / 3600)|round|int }} hours, timed to the paragraph:
+      start from any paragraph, and the page follows the voice.</li>
+    {%- endif %}
   </ul>
 
   <h2>About this edition</h2>
   <p>The text is the Uversa Press edition of <i>The Urantia Book</i>, published
-  by the Urantia Book Fellowship. The index is the Uversa Press index, revised
-  with numerous corrections for the third edition, 2026, where it is bound together with the text in a single volume.</p>
+  by the Urantia Book Fellowship: {{ stats.papers }} papers in
+  {{ '{:,}'.format(stats.sections) }} sections and
+  {{ '{:,}'.format(stats.paragraphs) }} paragraphs, each with a reference of its
+  own. The words of Jesus are set in red, in
+  {{ '{:,}'.format(stats.redletter_paragraphs) }} paragraphs. Its textual
+  apparatus notes every place where the text differs from the first printing of
+  1955, {{ stats.variants_1955 }} in all, and gives the 1955 reading beneath
+  each.</p>
+  <p>The index is the Uversa Press index, revised with numerous corrections for
+  the third edition, 2026, where it is bound together with the text in a single
+  volume.</p>
   <p>Its {{ '{:,}'.format(stats.citations) }} references, reaching
   {{ '{:,}'.format(stats.citation_targets) }} places in the text, compiled and
   checked over many years, are what make the margins of this reader possible.

@@ -143,6 +143,13 @@ def main(argv: list[str]) -> int:
                 ("paragraphs", "SELECT COUNT(*) FROM paragraph"),
                 ("spans", "SELECT COUNT(*) FROM span"),
                 ("footnotes", "SELECT COUNT(*) FROM footnote"),
+                # Each \fnc in the press TeX: a place where the text departs
+                # from the 1955 printing, with the 1955 reading.  The home page
+                # counts these, not `footnotes`, which Phase 6's study notes join.
+                ("variants_1955", "SELECT COUNT(*) FROM footnote"
+                                  " WHERE kind='variant-1955'"),
+                ("redletter_paragraphs", "SELECT COUNT(DISTINCT paragraph_id) FROM span"
+                                         " WHERE kind='redletter'"),
                 ("index_entries", "SELECT COUNT(*) FROM index_entry"),
                 ("citations", "SELECT COUNT(*) FROM citation"),
                 ("citation_targets", "SELECT COUNT(*) FROM citation_target"),

@@ -15,6 +15,9 @@
   --jesus: oklch(0.44 0.15 25);
   --link:  oklch(0.40 0.09 250);
   --flame: oklch(0.65 0.13 76);    /* the mark's flame (#b9821f), and nothing else */
+  /* The search box: a cool field on the warm paper, so it is seen at once. */
+  --field: oklch(0.935 0.014 245);
+  --field-edge: oklch(0.70 0.045 250);
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
      modern face and wanted browser zoom to be comfortable. */
@@ -36,6 +39,7 @@
     --faint: oklch(0.62 0.010 75);  --rule: oklch(0.30 0.010 75);
     --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
     --flame: oklch(0.80 0.12 82);
+    --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
   }
 }
 :root[data-theme="dark"] {
@@ -43,6 +47,7 @@
   --faint: oklch(0.62 0.010 75);  --rule: oklch(0.30 0.010 75);
   --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
   --flame: oklch(0.80 0.12 82);
+  --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
 }
 :root[data-theme="dark"] body, @media (prefers-color-scheme: dark) { }
 
@@ -76,9 +81,21 @@ a:hover { text-decoration-thickness: 2px; }
 .top nav { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
 .top nav a { font-size: .92rem; text-decoration: none; color: var(--faint); }
 .top nav a:hover, .top .mode { color: var(--ink); }
-.find { flex: 1 1 14rem; max-width: 26rem; }
-.find input { width: 100%; font: inherit; font-size: 1rem; padding: .3rem .5rem;
-  background: transparent; color: inherit; border: 1px solid var(--rule); border-radius: 3px; }
+/* The search box is the first thing a visitor should find, so it is a field
+   of its own tone with a magnifier, not a hairline on the paper (2026-10-09:
+   it blended into the background).  --field is a token per theme: blue mixed
+   into the warm paper in oklch passes through green on the way. */
+.find { flex: 1 1 14rem; max-width: 26rem; position: relative; }
+.find input { width: 100%; font: inherit; font-size: 1rem; padding: .38rem .9rem .38rem 2.1rem;
+  background: var(--field); color: inherit;
+  border: 1px solid var(--field-edge); border-radius: 999px; }
+.find input::placeholder { color: var(--faint); opacity: 1; }
+.find input:hover { border-color: var(--link); }
+.find input:focus { background: var(--paper); border-color: var(--link); outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--link) 22%, transparent); }
+.find .glass { position: absolute; left: .75rem; top: 50%; width: .95rem; height: .95rem;
+  transform: translateY(-50%); pointer-events: none; color: var(--link); }
+.find .glass * { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
 /* ◐ is not in UB Goudy, so it is set in the system face on purpose rather
    than left to the browser's fallback (build/fonts.py ELSEWHERE). */
 .theme { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 1rem;
