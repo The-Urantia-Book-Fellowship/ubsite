@@ -107,6 +107,8 @@ def main(argv: list[str]) -> int:
         derive.density(con)
         derive.entry_stats(con)
         derive.anchors(con, report)
+        n_links = derive.links(con, report)
+        print(f"  {n_links:,} entries name a headword, now linked")
         n_pairs = derive.cocitation(con)
         derive.fts(con)
         print("speech ...")
@@ -146,6 +148,9 @@ def main(argv: list[str]) -> int:
                 ("citation_targets", "SELECT COUNT(*) FROM citation_target"),
                 ("xrefs", "SELECT COUNT(*) FROM xref"),
                 ("chronology_events", "SELECT COUNT(*) FROM chronology_event"),
+                ("appendix_entries", "SELECT COUNT(*) FROM index_entry"
+                                     " WHERE scope IN ('B','C','D','E','F')"),
+                ("appendix_heads", "SELECT COUNT(*) FROM appendix_head"),
                 ("para_citers", "SELECT COUNT(*) FROM para_citers"),
                 ("cocitation_pairs", "SELECT COUNT(*) FROM cocitation")]:
             con.execute("INSERT INTO stat VALUES (?,?)",

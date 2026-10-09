@@ -45,3 +45,29 @@ def parse_year(label: str) -> tuple[float | None, bool]:
         return (-n if m.group(2).upper() == "B.C." else n), approx
 
     return None, approx
+
+
+# A heading in print stands above its events; a chip or a search hit has none,
+# so the date goes on the line.  Seven events are finished by that heading --
+# "Paul dies prior to" under 82 A.D., "Zacharias dies by" under July of 12 A.D.
+# -- and a date set in front of them reads as nonsense, so for those it follows.
+# Recognised by the last word, from a closed list; data/ has no other signal.
+RE_READS_ON = re.compile(r"\b(?:by|until|till|from|to|since|before|after)$")
+
+
+def one_line(year: str, month: str | None, text: str) -> tuple[str, bool]:
+    """(the event with its date, whether the date follows it).
+
+    A day takes a comma before its year, "January 14, 26 A.D."; a month alone
+    takes "of", because "December, 25 A.D." reads as nothing and "December
+    25 A.D." as a day that is not meant.
+    """
+    if not month:
+        date = year
+    elif re.search(r"\d", month):
+        date = f"{month}, {year}"
+    else:
+        date = f"{month} of {year}"
+    if RE_READS_ON.search(text):
+        return f"{text} {date}", True
+    return f"{date}: {text}", False

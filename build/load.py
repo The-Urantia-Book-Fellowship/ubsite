@@ -11,7 +11,7 @@ from __future__ import annotations
 import pathlib
 import sys
 
-from .chronology import parse_year
+from .chronology import one_line, parse_year
 from .index_macros import render_html
 from .render import render, title as render_title
 
@@ -143,9 +143,10 @@ def load_index(con, az, apps, para_key, report) -> None:
             if ysort is None:
                 report.hard("chron-unparsed-year", v.where, v.year_label)
             evid += 1
-            con.execute("INSERT INTO chronology_event VALUES (?,?,?,?,?,?,?,?)",
+            line, reads_on = one_line(v.year_label, v.month_label, v.label)
+            con.execute("INSERT INTO chronology_event VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (evid, eid, v.ord, v.year_label, ysort, int(approx),
-                         v.month_label, v.text))
+                         v.month_label, v.text, line, int(reads_on)))
             cites_of(eid, v.where, v.cites)
 
     # Cross-references, resolved once the whole tree exists.
@@ -169,6 +170,35 @@ def load_index(con, az, apps, para_key, report) -> None:
             con.execute("INSERT INTO xref VALUES (?,?,?,?,?,?,?,?,?)",
                         (xid, src, kind, i, target, xref.fold(target), route,
                          head_id, paths.get(_path_key_target(target))))
+
+    # A q.v.: the entry's own text names a headword.  The same routes as a See,
+    # and the same failure if it reaches none -- the print gate's `dead q.v.'.
+    qv_head = {}
+    for e in list(az) + [x for a in apps for x in a.entries]:
+        if e.qv_target is None:
+            continue
+        xid += 1
+        route, head_id = _resolve(e.qv_target, heads)
+        if route is None:
+            report.hard("qv-unresolved", e.where, f"{e.qv_target!r} q.v. names no headword")
+        qv_head[e.where] = head_id
+        con.execute("INSERT INTO xref VALUES (?,?,?,?,?,?,?,?,?)",
+                    (xid, by_where[e.where], "qv", len(e.xrefs), e.qv_target,
+                     xref.fold(e.qv_target), route, head_id, None))
+
+    # Which A-Z headword each Appendix B-F row names: by its q.v., or by being
+    # the same name.  Only an exact name counts here -- no list marker to strip,
+    # no conjunction -- because a row with citations of its own is not pointing
+    # anywhere, and a looser match would file it under a headword it is not.
+    for a in apps:
+        for e in a.entries:
+            if e.where in qv_head:
+                head, via = qv_head[e.where], "qv"
+            else:
+                head, via = heads.get(xref.fold(e.headword)), "name"
+            if head is not None:
+                con.execute("INSERT INTO appendix_head VALUES (?,?,?)",
+                            (by_where[e.where], head, via))
 
 
 import re  # noqa: E402

@@ -141,6 +141,13 @@ failed build leaves the previous database untouched.
     can go anywhere and the reading goes on (§8). Settings, the ⚙
     dialog, are declared in `ubsite/settings.py`, run by `ub.js`, stored in
     `localStorage` under `ub_settings`, and applied before first paint (§8).
+- **The appendices** (2026-10-09). `/appendix/A` is the Chronology as printed, each
+  year in a column of its own beside its months and events, with a jump bar by
+  period; `/appendix/B` … `/F` are the five name lists, in two columns as printed.
+  Every *q.v.* in the index, A–Z and appendix alike (1,026), links to the headword
+  it names, and so does every B–F name that is an A–Z headword (`appendix_head`,
+  1,332 of 1,351): both are `derive.links`. A concept page says which appendices
+  list it, and an appendix chip in the margin links to its line (§8).
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and
   `deploy.sh`, with a README naming the four steps that need root. All four have
   been run; the site is live at **https://ubsite.ddns.net**. **The database is the
@@ -148,7 +155,7 @@ failed build leaves the previous database untouched.
   `make data` runs here and `var/ub.db` is shipped.
 
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz,
-figures behind the rights gate), then 7 (human sources), 8 (chronology, map).
+figures behind the rights gate), then 7 (human sources), 8 (the timeline, the map).
 
 ---
 
@@ -161,11 +168,14 @@ and should stay that way.
 ```
 papers 197 · sections 1,626 · paragraphs 14,586
 red-letter spans 1,267 · em spans 2,295 · 1955 variant notes 180
-index entries 34,625 (32,837 A–Z + 1,351 appendix + 437 chronology events)
-citations 39,771 → 50,758 targets {para 47,871, sec 2,254, paper 633}
-cross-references 5,133, 0 dangling · headwords 4,736
-para_citers 113,846 · cocitation pairs 9,721
+index entries 34,751 (32,964 A–Z + 1,351 appendix + 436 chronology events)
+citations 39,885 → 50,842 targets {para 47,954, sec 2,254, paper 634}
+cross-references 5,133 See/See also + 1,026 q.v., 0 dangling · headwords 4,736
+B–F names that are A–Z headwords 1,332 · para_citers 113,992 · cocitation pairs 9,719
 ```
+
+The index lines move as the index is edited (these are at its `224c84d`,
+2026-10-09).
 
 **The best single structural check** is that every one of the 1,626 sections
 numbers its paragraphs 1..N with no gap and no duplicate. It holds in both
@@ -313,6 +323,23 @@ CSS: markup must not inject characters a reader would copy.
 - **Blanket citations appear once** at the section head, never repeated under
   every paragraph. This is `read_pack.py`'s rule and the reason Paper 15's 470
   citations are readable.
+- **Appendices A–F live at `/appendix/A` … `/appendix/F`**, the letters of the printed
+  volume (Tigran, 2026-10-09); `/index/A` was already the A–Z's letter A. An anchor
+  there hashes what a row *is*, a name or an event's date and words, not what it
+  cites, so an added citation moves no link. The three `conjunction of Jupiter and
+  Saturn in Pisces` of 7 B.C. are one text on three dates, and three anchors.
+- **An appendix chip never repeats the A–Z** (Tigran, 2026-10-09). A B–F entry stands
+  beside a paragraph only when no entry of the same headword is already there: 131 of
+  1,865 remain (`CHIP_NEW` in `app.py`). What the other 1,734 carried, the kind of
+  thing a headword names, is on its concept page instead, as "Listed in Appendix C,
+  Celestial Beings, Individuals Named". Every Chronology chip stays, and carries its
+  month: "January 14, 26 A.D.: Jesus baptized by John".
+- **The Chronology is the printed list first** (Tigran, 2026-10-09). The log-scale
+  timeline (ROADMAP item 4) is to be built on that page, never in place of it. In
+  print a heading stands above its events and finishes seven of them ("Paul dies
+  prior to", under 82 A.D.). An event's one line, `chronology_event.label`, therefore
+  puts the date after those seven and before the rest, with "of" for a month without
+  a day: "December of 25 A.D.".
 - **`/101` redirects to `/101:0`.** Every paper opens with an introduction, and
   the section list is always in the left rail.
 - **The footer names its sources** by commit date: `Text (2026-10-03)` and

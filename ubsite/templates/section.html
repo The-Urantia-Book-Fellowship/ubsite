@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {# An index entry beside the text.  A headword or subentry links to its line on
-   the concept page; an appendix entry has no page yet, so it is named instead. #}
+   the concept page; an appendix entry to its line on the appendix page, named
+   with its appendix, and a Chronology event with its date. #}
 {% macro chip(c) -%}
 {% if c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path }}</a>
-{%- else %}<span class="app"><span class="lbl">{{ c.appendix }}</span> {% if c.year %}{{ c.year }}: {% endif %}{{ c.path }}</span>{% endif %}
+{%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ c.event or c.path }}</a>{% endif %}
 {%- endmacro %}
 {% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
 {% block body %}

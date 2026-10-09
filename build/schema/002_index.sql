@@ -60,7 +60,10 @@ CREATE INDEX citation_target_pid ON citation_target(paragraph_id);
 CREATE TABLE xref (
   id INTEGER PRIMARY KEY,
   entry_id INTEGER NOT NULL REFERENCES index_entry(id) ON DELETE CASCADE,
-  kind TEXT NOT NULL CHECK (kind IN ('see','seealso')),
+  -- 'qv' is the entry's own text naming a headword: "Adam q.v.", or
+  -- "1. administrative assistants q.v." in a numbered list.  Resolved by the
+  -- same routes, and the name is made a link to its headword (derive.links).
+  kind TEXT NOT NULL CHECK (kind IN ('see','seealso','qv')),
   ord INTEGER NOT NULL,
   target TEXT NOT NULL,
   target_fold TEXT NOT NULL,
@@ -83,7 +86,13 @@ CREATE TABLE chronology_event (
   year_sort REAL,                             -- signed years relative to A.D. 1; NULL if unparsed
   approximate INTEGER NOT NULL DEFAULT 0,     -- the trailing ±
   month_label TEXT,                           -- NULL for a \chrontext: it hangs off the year
-  text TEXT NOT NULL
+  text TEXT NOT NULL,
+  -- The event on one line, for a margin chip or a search hit, where no heading
+  -- stands above it: 'January 14, 26 A.D.: Jesus baptized by John'.  Seven
+  -- events are finished by their date in print ('Paul dies prior to', under
+  -- 82 A.D.), and for those the date follows: reads_on.  See chronology.one_line.
+  label TEXT NOT NULL,
+  reads_on INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX chronology_sort ON chronology_event(year_sort);
 
@@ -91,3 +100,15 @@ CREATE TABLE appendix (
   letter TEXT PRIMARY KEY, name TEXT NOT NULL, title TEXT NOT NULL,
   n_entries INTEGER NOT NULL, n_events INTEGER NOT NULL
 );
+
+-- The A-Z headword an Appendix B-F row names.  The appendices are, almost
+-- entirely, a classification of the A-Z: 1,332 of their 1,351 names are A-Z
+-- headwords too.  A q.v. row names it by its resolved cross-reference; a row
+-- with citations of its own, by the same name (xref.fold).  The 19 that name no
+-- headword -- 'Sumeria', 'widow in Rome' -- have no row here.
+CREATE TABLE appendix_head (
+  entry_id INTEGER PRIMARY KEY REFERENCES index_entry(id),
+  head_entry_id INTEGER NOT NULL REFERENCES index_entry(id),
+  via TEXT NOT NULL CHECK (via IN ('qv','name'))
+);
+CREATE INDEX appendix_head_head ON appendix_head(head_entry_id);

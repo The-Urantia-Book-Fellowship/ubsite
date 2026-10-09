@@ -46,7 +46,8 @@ entries              = 32837     # levels 1..5 = 4736 16455 10205 1262 179
 headwords            = 4736
 dividers             = 27        # structural: assert this one
 appendix_entries     = 1351      # B 308, C 86, D 429, E 72, F 456; A has none
-chronology_events    = 437       # \chrontext 244 + \chronsubtext 193
+chronology_events    = 436       # \chrontext 244 + \chronsubtext 192; 437 until the
+                                 # index's 6cd4d19 (2026-10-01) dropped `death of Salome'
 citations            = 39771     # A-Z 38266 + appendices 1505
 citation_targets     = 50758     # para 47871, sec 2254, paper 633
 xref_targets         = 5133      # after splitting \see/\seealso args on ";"
@@ -61,3 +62,13 @@ thin_all_scopes    = 1527     # our number: A-Z + Appendices A-F
 thin_read_pack     = 1528     # read_pack's, which excludes Appendix F by default
 orphan_paragraphs  = 10       # cited by nothing at any precision
 combined_headings  = 1        # p139 \usectiontwo{9 and 10}
+
+[appendices]
+# Appendices A-F on the site.  Measured at the index's 224c84d.
+source_commit = "224c84d9"
+measured_on   = "2026-10-09"
+appendix_heads     = 1332     # B-F rows naming an A-Z headword: 522 by q.v., 810 by name
+appendix_own       = 19       # the rest: 'Sumeria', 'widow in Rome', 'Bildad (fictional)'
+qv_xrefs           = 1026     # A-Z 504 (3 of them conjunctions) + B-F 522, 0 unresolved
+reads_on           = 7        # events finished by their date: 'Paul dies prior to'
+bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the same headword

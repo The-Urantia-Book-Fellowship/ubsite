@@ -20,7 +20,7 @@ macro addresses `\vs p133 1:3` and `\vs Gen 1:1` alike.
 | text | 14,586 paragraphs · 197 papers · 1,626 sections |
 | index | 32,837 entries · 4,736 headwords · **50,758 references** |
 | apparatus | 307 study footnotes · 54 human-source records · 24,974 KJV verses · 819 quiz questions · 84 figures |
-| appendices | 437 dated events · 1,351 named beings, persons and places |
+| appendices | 436 dated events · 1,351 named beings, persons and places |
 
 **The differentiator**: urantia.org has text and paragraph search, the
 Fellowship has a reader, Urantiapedia has a wiki and the Paramony's Bible
@@ -48,18 +48,24 @@ beneath, in book order, and you have a topical anthology of the Urantia Papers
 compiled by a careful human. Four thousand seven hundred and thirty-six of them.
 Route `/i/<slug>/read`. Perhaps a day's work on top of what exists.
 
-**4. The chronology as an interactive timeline.**
-Appendix A: **437 dated events**, from *987,000,000,000 years ago* to *1200
+**4. The chronology as an interactive timeline.** `[partly built]`
+Appendix A: **436 dated events**, from *987,000,000,000 years ago* to *1200
 A.D.*, each citing paragraphs. Already parsed, already sortable — `year_sort` is
 in the database and monotone in document order, which is itself the proof the
 parse is right. Log-scale scrub from the Andronover nebula to the crucifixion.
 Exists nowhere, in any form.
+Built: `/appendix/A`, the list as printed, with a jump bar by period, and every
+event a chip beside the paragraphs it cites. Still to do: the timeline itself,
+on top of that page.
 
-**5. Persons, beings and places.**
+**5. Persons, beings and places.** `[partly built]`
 Appendices B–F: 308 types of celestial being, 86 named celestial individuals,
 429 named mortals, 72 celestial places, **456 terrestrial places — real
 geography**. Person pages with every appearance. And F is geocodable, so Jesus's
 Mediterranean journey (Papers 129–134) can be drawn on an actual map.
+Built: `/appendix/B` … `/F` as printed. 1,332 of the 1,351 names are A–Z headwords,
+so the person pages already exist as concept pages, and each now says which
+appendix lists it. Still to do: the map.
 
 **6. What the index does not see.**
 **1,528 paragraphs (10.5%)** carry no citation naming them precisely; 10 are

@@ -1,0 +1,6 @@
+{# The six appendices in the volume's order: on /appendix and under the A-Z on /index. #}
+<ol class="toc apps">
+{% for a in apps %}
+  <li><a href="/appendix/{{ a.letter }}"><b>{{ a.letter }}</b> {{ a.title }}</a><i>{% if a.n_events %}{{ '{:,}'.format(a.n_events) }} events{% else %}{{ '{:,}'.format(a.n_entries) }} entries{% endif %}</i></li>
+{% endfor %}
+</ol>

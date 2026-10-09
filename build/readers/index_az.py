@@ -46,6 +46,10 @@ class Entry:
     raw: str
     src_text: str
     ord: int
+    # What a q.v. names, by the print gate's rule (the index's check_tex.py): the
+    # entry's own text without its citations and the q.v. -- for \iA the
+    # headword argument, for the rest the whole argument.  None without a q.v.
+    qv_target: str | None = None
 
 
 def _expand_ab(text_src: str, headword: str | None) -> str:
@@ -152,5 +156,7 @@ def read_az(texdir: pathlib.Path, report, rev: str = "worktree") -> list[Entry]:
                 path_plain=" \u203a ".join(stack_label[k] for k in sorted(stack_label)),
                 cites=RE_CIT.findall(line), xrefs=xrefs,
                 qv=bool(re.search(r"\\qv\b", line)), raw=line, src_text=src,
-                ord=ordinal))
+                ord=ordinal,
+                qv_target=(label(head if macro == "iA" else src, where, report)
+                           if re.search(r"\\qv\b", line) else None)))
     return out

@@ -14,7 +14,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ubsite.app import fts_query  # noqa: E402
+from ubsite.app import TOKENIZE, fts_query, mark_terms  # noqa: E402
 
 ROWS = ["the self-conscious mind", "Adam and Eve", "the Adamic mission",
         "Jesus’ words", "a Thought Adjuster indwells", "God-knowing men"]
@@ -65,6 +65,48 @@ class FtsQuery(unittest.TestCase):
         # FTS5 reads an empty phrase as matching nothing, which would make the
         # whole AND match nothing.
         self.assertEqual(self.hits("mind -"), {"the self-conscious mind"})
+
+
+
+class MarkTerms(unittest.TestCase):
+    """An index hit shows its chip with the reader's words marked, as a text hit
+    does: by FTS5's own highlight(), over a table with the build's tokenizer."""
+
+    def test_the_tokenizer_is_the_builds(self):
+        sql = (ROOT / "build" / "schema" / "004_fts.sql").read_text()
+        self.assertEqual(sql.count(f"tokenize='{TOKENIZE}'"), 2)
+
+    def m(self, text, q):
+        return str(mark_terms([text], q)[0])
+
+    def test_a_word(self):
+        self.assertEqual(self.m("as Creator, only in conjunction with Eternal Son", "conjunction"),
+                         "as Creator, only in <mark>conjunction</mark> with Eternal Son")
+
+    def test_each_word_and_a_phrase_whole(self):
+        self.assertEqual(self.m("Saturn and Jupiter organized", "jupiter saturn"),
+                         "<mark>Saturn</mark> and <mark>Jupiter</mark> organized")
+        self.assertEqual(self.m("only in conjunction with the Son", '"in conjunction with"'),
+                         "only <mark>in conjunction with</mark> the Son")
+
+    def test_a_prefix_a_possessive_and_diacritics(self):
+        self.assertEqual(self.m("conjunction of Jupiter", "conjunct*"),
+                         "<mark>conjunction</mark> of Jupiter")
+        self.assertEqual(self.m("Jesus’ words", "jesus'"), "<mark>Jesus</mark>’ words")
+        self.assertEqual(self.m("the café", "cafe"), "the <mark>café</mark>")
+
+    def test_a_word_not_shown_marks_the_others(self):
+        # A hit can match one term only in a citation; its chip still shows the rest.
+        self.assertEqual(self.m("Saturn and Jupiter organized", "saturn 57"),
+                         "<mark>Saturn</mark> and Jupiter organized")
+        self.assertEqual(self.m("Saturn and Jupiter organized", "57"),
+                         "Saturn and Jupiter organized")
+
+    def test_the_text_stays_text(self):
+        self.assertEqual(self.m("6. & 7. Secrets of <Greatness>", "secrets"),
+                         "6. &amp; 7. <mark>Secrets</mark> of &lt;Greatness&gt;")
+        self.assertEqual(self.m("a & b", "amp"), "a &amp; b")
+        self.assertEqual([str(x) for x in mark_terms(["a", "b"], "")], ["a", "b"])
 
 
 if __name__ == "__main__":

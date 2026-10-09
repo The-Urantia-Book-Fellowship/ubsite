@@ -193,8 +193,7 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .chips a { color: var(--faint); text-decoration: none; display: block;
   border-left: 2px solid var(--rule); padding-left: .5rem; }
 .chips a:hover { color: var(--ink); border-left-color: var(--link); }
-/* An appendix entry: no page yet, so named rather than linked. */
-.chips .app { display: block; border-left: 2px solid var(--rule); padding-left: .5rem; }
+/* An appendix entry: led by its appendix's name, in small caps. */
 .app .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
 .blanket .app { color: var(--faint); }
 .thin { font-style: italic; opacity: .6; margin: .25rem 0 0; }
@@ -379,6 +378,46 @@ dialog.settings .done { padding: .3rem 1.1rem; font: inherit;
 .more { margin: .6rem 0 0; }
 .results .pager { margin: 1.2rem 0 0; }
 .didyou { color: var(--faint); }
+
+/* ---- appendices -------------------------------------------------------- */
+.listed { color: var(--faint); font-size: 1.02rem; margin: -.2rem 0 .3rem; }
+.listed a { color: inherit; text-decoration: none; }
+.listed a:hover { color: var(--link); text-decoration: underline; }
+.appnav { font-size: .9rem; color: var(--faint); margin: 0 0 1.2rem; }
+.appnav a { color: var(--faint); text-decoration: none; padding: 0 .1rem; }
+.appnav a:hover, .appnav a[aria-current] { color: var(--ink); }
+.appendix { max-width: 80ch; }
+.jump { display: flex; flex-wrap: wrap; gap: .2rem .7rem; margin: 0 0 1.2rem; }
+.jump a { text-decoration: none; }
+/* B-F: short lines, two columns where there is room for them, as printed. */
+.applist { list-style: none; padding: 0; columns: 2 24rem; column-gap: 2.5rem; }
+.applist li { break-inside: avoid; padding: .1rem 0 .1rem 1.2em; text-indent: -1.2em; }
+.applist a.hw, .events a.hw { text-decoration: none; }
+.applist a.hw:hover, .events a.hw:hover { text-decoration: underline; }
+/* A: the date in a column of its own, its months and events beside it. */
+.bands { margin: 0 0 1.8rem; }
+.bands a { padding: .45rem .8rem; }
+.bands b { font-size: 1.05rem; font-weight: 400; }
+.year { display: grid; grid-template-columns: 16.5rem minmax(0, 1fr); column-gap: 1.5rem;
+  border-top: 1px solid var(--rule); padding: .45rem 0 .5rem; }
+/* The year stays in view beside its events, so that an event reached by a link
+   -- 26 A.D. has seventeen -- is never read without its date. */
+.year h2 { margin: 0; font-size: inherit; line-height: inherit; font-variant-caps: normal;
+  letter-spacing: 0; position: sticky; top: 1rem; align-self: start; }
+.events { list-style: none; margin: 0; padding: 0; }
+.events li { padding: .08rem 0 .08rem 1.2em; text-indent: -1.2em; }
+.events li.month { padding: 0; text-indent: 0; }
+.month h3 { margin: .3rem 0 .05rem; font-size: .95rem; font-weight: 400;
+  font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint); }
+.month .events { margin-left: 1em; }
+.applist li:target, .events li:target {
+  background: color-mix(in oklch, var(--link) 12%, transparent); border-radius: 3px;
+  box-shadow: 0 0 0 .3rem color-mix(in oklch, var(--link) 12%, transparent); }
+.applist li, .events li, .year { scroll-margin-top: 3rem; }
+@media (max-width: 40rem) {
+  .year { grid-template-columns: minmax(0, 1fr); }
+  .year h2 { margin-bottom: .2rem; position: static; }
+}
 
 /* ---- phone ------------------------------------------------------------- */
 @media (max-width: 62rem) {

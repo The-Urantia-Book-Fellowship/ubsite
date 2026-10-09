@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% block title %}Appendix A: {{ app.title }}{% endblock %}
+{% block body %}<main class="prose appendix chron">
+{% include "_appnav.html" %}
+<p class="papernum">Appendix A</p>
+<h1>{{ app.title }}</h1>
+<p class="hint">{{ '{:,}'.format(app.n_events) }} events under {{ years|length }} dates, as
+printed. A ± after a date means that it is approximate, and a reference opens the
+text there.</p>
+<nav class="letters bands" aria-label="Periods">
+  {%- for b in bands %}<a href="#{{ b.id }}"><b>{{ b.name }}</b><span>{{ b.events }} events</span></a>{% endfor %}</nav>
+{#- A year's events, then its months, each with its own; y["items"], because
+    y.items is the dict's method. #}
+{% for y in years %}
+<section class="year" id="{{ y.id }}">
+  <h2>{{ y.label }}</h2>
+  <ul class="events">
+  {%- for it in y["items"] %}
+    {%- if it.month is defined %}
+    <li class="month"><h3>{{ it.month }}</h3>
+      <ul class="events">{% for e in it.events %}
+        <li id="{{ e.anchor }}">{{ e.text_html|safe }}</li>{% endfor %}
+      </ul></li>
+    {%- else %}
+    <li id="{{ it.event.anchor }}">{{ it.event.text_html|safe }}</li>
+    {%- endif %}
+  {%- endfor %}
+  </ul>
+</section>
+{% endfor %}
+</main>{% endblock %}

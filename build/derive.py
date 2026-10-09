@@ -10,6 +10,12 @@ from __future__ import annotations
 import hashlib
 import itertools
 import math
+import pathlib
+import re
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "vendor" / "index"))
+import xref  # noqa: E402
 
 
 def reverse_map(con) -> None:
@@ -79,19 +85,126 @@ def anchors(con, report) -> None:
     under one headword takes -2, -3, as slugs take a numeric suffix; each such
     repeat is reported, because two identical subentries under one headword are
     usually one heading split in two.
+
+    An appendix is one page, so its anchors are unique across the appendix
+    rather than under a headword, and they hash what a row is, not what it
+    cites: a B-F row its name, a Chronology event its date and its words.  An
+    added citation then moves no link, and the three `conjunction of Jupiter and
+    Saturn in Pisces' of 7 B.C. -- one text, three dates -- are three anchors.
     """
     con.execute("ALTER TABLE index_entry ADD COLUMN anchor TEXT")
-    seen: dict[tuple[int, str], int] = {}
+    seen: dict[tuple, int] = {}
     rows = []
-    for eid, root, fold, where, line in con.execute(
-            "SELECT id, root_id, path_fold, source_file, source_line"
-            "  FROM index_entry ORDER BY root_id, ord").fetchall():
-        base = "e" + hashlib.sha1(fold.encode("utf-8")).hexdigest()[:8]
-        k = seen[(root, base)] = seen.get((root, base), 0) + 1
+    for eid, scope, root, fold, name, year, month, where, line in con.execute(
+            "SELECT e.id, e.scope, e.root_id, e.path_fold, e.path_plain,"
+            "       v.year_label, v.month_label, e.source_file, e.source_line"
+            "  FROM index_entry e LEFT JOIN chronology_event v ON v.entry_id = e.id"
+            " ORDER BY e.root_id, e.ord").fetchall():
+        if scope == "az":
+            page, key = root, fold
+        elif year is not None:
+            page, key = scope, xref.fold(f"{year} {month or ''} {name}")
+        else:
+            page, key = scope, xref.fold(name)
+        base = "e" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:8]
+        k = seen[(page, base)] = seen.get((page, base), 0) + 1
         if k > 1:
-            report.warn("index-repeated-subentry", f"{where}:{line}", fold)
+            report.warn("index-repeated-subentry", f"{where}:{line}", key)
         rows.append((base if k == 1 else f"{base}-{k}", eid))
     con.executemany("UPDATE index_entry SET anchor=? WHERE id=?", rows)
+
+
+# One target naming several headwords, with what joins them kept, so that each
+# part can be linked on its own and the text between them left as it was.
+RE_CONJ_KEEP = re.compile(r"(\s+and\s+|\s*,\s*)")
+
+
+def links(con, report) -> int:
+    """Make a name a link wherever the index names a headword by it.
+
+    Three places, all in `text_html`, and each wraps text already there, so the
+    round trip still holds:
+
+    * the name before a `q.v.` -- 1,026 of them, A-Z and appendix alike --
+      linked to the headword it names, part by part when it names two
+      ("6. & 7. Secrets of Greatness and Souls of Goodness q.v.");
+    * an Appendix B-F row's own name, when it is an A-Z headword
+      (`appendix_head`, via 'name');
+    * the target of an Appendix B-F `See`.  An A-Z entry's See is not linked
+      here, because its concept page lists its cross-references as links.
+
+    Mirrors the routes of load._resolve, so the part linked is the part that
+    resolved: "1. administrative assistants" links its words, not its number.
+    """
+    slug = dict(con.execute("SELECT id, slug FROM index_entry WHERE slug IS NOT NULL"))
+    heads: dict[str, int] = {}
+    for i, h in con.execute("SELECT id, headword FROM index_entry"
+                            " WHERE scope='az' AND level=1 AND headword IS NOT NULL"
+                            " ORDER BY id"):
+        heads.setdefault(xref.fold(h), i)
+
+    def a(text, href):
+        return f'<a class="hw" href="{href}">{text}</a>'
+
+    def named(name: str, target: str) -> str | None:
+        for reading in xref.readings(target):
+            if not name.endswith(reading):
+                continue
+            lead = name[:len(name) - len(reading)]
+            h = heads.get(xref.fold(reading.split(":")[0]))
+            if h is not None:
+                return lead + a(reading, f"/i/{slug[h]}")
+            bits = RE_CONJ_KEEP.split(reading)
+            parts = bits[0::2]
+            if len(parts) > 1 and all(xref.fold(p) in heads for p in parts):
+                return lead + "".join(
+                    a(b, f"/i/{slug[heads[xref.fold(b)]]}") if k % 2 == 0 else b
+                    for k, b in enumerate(bits))
+        members = xref.expand_range(target)
+        if members and all(xref.fold(m) in heads for m in members):
+            return a(name, f"/i/{slug[heads[xref.fold(members[0])]]}")
+        return None
+
+    html = {}
+    for eid, h, where, line, target in con.execute(
+            "SELECT e.id, e.text_html, e.source_file, e.source_line, x.target"
+            "  FROM xref x JOIN index_entry e ON e.id = x.entry_id WHERE x.kind = 'qv'"):
+        name, sep, tail = h.partition(" <i>q.v.</i>")
+        linked = named(name, target) if sep and not tail.strip() else None
+        if linked is None:
+            report.hard("qv-unlinked", f"{where}:{line}", f"{h!r} names {target!r}")
+            continue
+        html[eid] = linked + sep + tail
+
+    for eid, h, name, head, where, line in con.execute(
+            "SELECT e.id, e.text_html, e.headword, a.head_entry_id,"
+            "       e.source_file, e.source_line"
+            "  FROM appendix_head a JOIN index_entry e ON e.id = a.entry_id"
+            " WHERE a.via = 'name'"):
+        if not h.startswith(name):
+            report.hard("appendix-name-unlinked", f"{where}:{line}", f"{h!r} vs {name!r}")
+            continue
+        html[eid] = a(name, f"/i/{slug[head]}") + h[len(name):]
+
+    for eid, h, kind, target, head, deep, dlevel, danchor, where, line in con.execute(
+            "SELECT e.id, e.text_html, x.kind, x.target, x.head_entry_id,"
+            "       x.deep_entry_id, d.level, d.anchor, e.source_file, e.source_line"
+            "  FROM xref x JOIN index_entry e ON e.id = x.entry_id"
+            "  LEFT JOIN index_entry d ON d.id = x.deep_entry_id"
+            " WHERE e.scope <> 'az' AND x.kind IN ('see', 'seealso')"):
+        h = html.get(eid, h)
+        mark = "<i>See also</i> " if kind == "seealso" else "<i>See</i> "
+        i = h.find(mark)
+        j = h.find(target, i) if i >= 0 else -1
+        if j < 0 or head is None:
+            report.hard("appendix-see-unlinked", f"{where}:{line}", f"{h!r} -> {target!r}")
+            continue
+        href = f"/i/{slug[head]}" + (f"#{danchor}" if deep and dlevel > 1 else "")
+        html[eid] = h[:j] + a(target, href) + h[j + len(target):]
+
+    con.executemany("UPDATE index_entry SET text_html=? WHERE id=?",
+                    [(h, i) for i, h in html.items()])
+    return len(html)
 
 
 def cocitation(con, floor: int = 2) -> int:

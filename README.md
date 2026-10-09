@@ -166,7 +166,8 @@ make paranoid     # optional: fingerprint the three trees, build, prove nothing 
 When a gate fails because a source *legitimately* changed a number:
 
 - **Hard counts** are in `QUERIES` in `build/checks/check_db.py`: papers, sections,
-  paragraphs, red-letter and em spans, 1955 notes, and chronology events. Change the
+  paragraphs, red-letter and em spans, 1955 notes, chronology events, and the entries
+  of each of Appendices B–F (the index's own `check_tex.py` asserts the same). Change the
   number, and add a comment naming the source commit and the reason. The `436` there
   is the model: index `6cd4d19` dropped one chronology event by ruling.
 - **Index counts** (entries, citations, targets) are reported, not asserted, because

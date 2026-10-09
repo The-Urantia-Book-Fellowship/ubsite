@@ -18,6 +18,15 @@ QUERIES = [
     # 436 since the index's 6cd4d19 (2026-10-01): `29 A.D. > May 8 > death of
     # Salome' dropped by ruling -- 154:2.4 sends her to bed, not to her death.
     ("chronology events",   "SELECT COUNT(*) FROM chronology_event", 436),
+    # The index's own check_tex.py asserts these same counts on the master.
+    ("appendix B entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='B'", 308),
+    ("appendix C entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='C'", 86),
+    ("appendix D entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='D'", 429),
+    ("appendix E entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='E'", 72),
+    ("appendix F entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='F'", 456),
+    # Reported, not asserted: they move as the index is edited.
+    ("B-F rows naming an A-Z headword", "SELECT COUNT(*) FROM appendix_head", None),
+    ("events finished by their date",   "SELECT COUNT(*) FROM chronology_event WHERE reads_on", None),
 ]
 
 INVARIANTS = [
@@ -26,8 +35,14 @@ INVARIANTS = [
          WHERE s.start < 0 OR s."end" > LENGTH(p.text)"""),
     ("no paragraph-precision citation is unresolved",
      "SELECT COUNT(*) FROM citation_target WHERE precision='para' AND paragraph_id IS NULL"),
-    ("every See/See also resolves by some route",
+    ("every See, See also and q.v. resolves by some route",
      "SELECT COUNT(*) FROM xref WHERE route IS NULL"),
+    ("every q.v. is recorded as a cross-reference",
+     """SELECT COUNT(*) FROM index_entry e WHERE e.qv = 1 AND NOT EXISTS
+         (SELECT 1 FROM xref x WHERE x.entry_id = e.id AND x.kind = 'qv')"""),
+    ("every q.v. names its headword with a link",
+     """SELECT COUNT(*) FROM index_entry WHERE qv = 1
+         AND text_html NOT LIKE '%<a class="hw" href="/i/%</a> <i>q.v.</i>'"""),
     ("every entry's root is a level-1 entry",
      """SELECT COUNT(*) FROM index_entry e JOIN index_entry r ON r.id = e.root_id
          WHERE r.level <> 1"""),
@@ -35,9 +50,12 @@ INVARIANTS = [
      "SELECT COUNT(*) FROM chronology_event WHERE year_sort IS NULL"),
     ("every index entry has an anchor",
      "SELECT COUNT(*) FROM index_entry WHERE anchor IS NULL"),
-    ("no two entries of one headword share an anchor",
+    # A page's anchors: a concept page holds one headword's tree, an appendix
+    # page the whole appendix.
+    ("no two entries on one page share an anchor",
      """SELECT COUNT(*) FROM (SELECT 1 FROM index_entry
-         GROUP BY root_id, anchor HAVING COUNT(*) > 1)"""),
+         GROUP BY CASE scope WHEN 'az' THEN root_id ELSE scope END, anchor
+         HAVING COUNT(*) > 1)"""),
     # Nothing a reader sees may still be LaTeX.  The 1955 notes were stored
     # raw, and seven of them showed "\bibemph {the}" on the page.
     ("no backslash in any text a reader sees",
@@ -100,7 +118,9 @@ def run(con) -> int:
     # the old chip text dropped them all, and "Adam (village)" became "Adam".
     cits = dict(con.execute("SELECT entry_id, COUNT(*) FROM citation GROUP BY 1"))
     refs = {}
-    for eid, target in con.execute("SELECT entry_id, target FROM xref"):
+    # A q.v.'s target is the entry's own name, already counted in its chip.
+    for eid, target in con.execute("SELECT entry_id, target FROM xref"
+                                   " WHERE kind IN ('see', 'seealso')"):
         refs[eid] = refs.get(eid, 0) + target.count("(")
     j = lost = 0
     for eid, text, path in con.execute("SELECT id, text, path_plain FROM index_entry"):
@@ -121,11 +141,11 @@ def run(con) -> int:
             mark = "  OK" if got == expect else f"  EXPECTED {expect:,}"
             if got != expect:
                 bad += 1
-        print(f"  {name:24} {got:>9,}{mark}")
+        print(f"  {name:32} {got:>9,}{mark}")
     print("\ninvariants (all must be 0)")
     for name, q in INVARIANTS:
         got = con.execute(q).fetchone()[0]
         if got:
             bad += 1
-        print(f"  {name:48} {got}{'' if not got else '   FAIL'}")
+        print(f"  {name:52} {got}{'' if not got else '   FAIL'}")
     return 1 if bad else 0

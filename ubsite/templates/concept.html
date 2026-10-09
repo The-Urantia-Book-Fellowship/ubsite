@@ -1,6 +1,8 @@
 {% extends "base.html" %}{% block title %}{{ root.headword }}{% endblock %}
 {% block body %}<main class="prose concept">
 <h1>{{ root.headword }}</h1>
+{#- What kind of thing this is, when an appendix lists it: a being, a person, a place. #}
+{% if listed %}<p class="listed">Listed in {% for l in listed %}<a href="{{ appendix_href(l.scope, l.anchor) }}">Appendix {{ l.scope }}, {{ l.title }}</a>{% if not loop.last %} and {% endif %}{% endfor %}</p>{% endif %}
 {% set n = tree|length - 1 %}{% if n %}<p class="hint">{{ n }} {{ 'subentry' if n == 1 else 'subentries' }}</p>{% endif %}
 <ul class="tree">
 {% for e in tree %}

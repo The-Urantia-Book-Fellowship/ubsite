@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Appendix {{ app.letter }}: {{ app.title }}{% endblock %}
+{% block body %}<main class="prose appendix">
+{% include "_appnav.html" %}
+<p class="papernum">Appendix {{ app.letter }}</p>
+<h1>{{ app.title }}</h1>
+<p class="hint">{{ '{:,}'.format(rows|length) }} entries, as printed. A name opens its
+entry in the index, and a reference opens the text there.</p>
+{% if initials %}<nav class="jump" aria-label="Initials">
+  {%- for c, a in initials %}<a href="#{{ a }}">{{ c }}</a>{% endfor %}</nav>{% endif %}
+<ul class="applist">
+{% for r in rows %}  <li id="{{ r.anchor }}">{{ r.text_html|safe }}</li>
+{% endfor %}</ul>
+</main>{% endblock %}

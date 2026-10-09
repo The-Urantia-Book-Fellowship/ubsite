@@ -14,6 +14,8 @@ e.g. under ``7 B.C.``  Deriving parentage from "the most recent heading seen"
 silently files those events under a month they do not belong to.
 
 **Appendices B-F are flat**: one level, one ``\\iapp`` per line, no sub-entries.
+They are also, almost entirely, a classification of the A-Z: 1,332 of their
+1,351 names are A-Z headwords too.  `load` records which (``appendix_head``).
 """
 
 from __future__ import annotations
@@ -126,13 +128,18 @@ def read_appendices(texdir: pathlib.Path, report,
                     if t:
                         xrefs.append((kind, t))
             ordinal += 1
+            # The headword is the name alone.  It used to be the whole printed
+            # line less a final period -- "actors (44:2.10)", "abandonters q.v"
+            # -- which no reader would type and no search could match.
+            name = label(src, where, report)
+            qv = bool(re.search(r"\\qv\b", line))
             entries.append(Entry(
                 where=where, scope=letter.upper(), letter=letter.upper(), level=1,
-                headword=text.rstrip("."), text=text, text_expanded=text,
-                chain=[text], path=text, path_plain=label(src, where, report),
+                headword=name, text=text, text_expanded=text,
+                chain=[text], path=text, path_plain=name,
                 cites=RE_CIT.findall(line), xrefs=xrefs,
-                qv=bool(re.search(r"\\qv\b", line)), raw=line, src_text=src,
-                ord=ordinal))
+                qv=qv, raw=line, src_text=src, ord=ordinal,
+                qv_target=name if qv else None))
 
         out.append(Appendix(letter.upper(), name, title, entries, events))
     return out
