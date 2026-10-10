@@ -12,7 +12,7 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync data check test paranoid serve serve-bg stop ports geoip clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync data check epub test paranoid serve serve-bg stop ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
@@ -111,6 +111,14 @@ data: vendor-check
 ## check         run every gate against the built database
 check:
 	@$(PY) -m build check
+
+## epub          the whole site as an EPUB -> var/epub/the-urantia-book.epub, then every gate
+# epubcheck (W3C) is the last gate.  It needs Java -- apt's openjdk-26-jre-headless --
+# and the jar from github.com/w3c/epubcheck/releases, unpacked into ~/Software.
+EPUBCHECK ?= $(HOME)/Software/epubcheck/epubcheck-5.4.0/epubcheck.jar
+epub:
+	@$(PY) -m epub build
+	@EPUBCHECK=$(EPUBCHECK) $(PY) -m epub check
 
 ## test          unit tests, including the never-write-to-a-master guard
 test:

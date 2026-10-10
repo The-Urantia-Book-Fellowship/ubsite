@@ -19,6 +19,7 @@ ALLOWED = {
     "build/slugs.py": "data/slugs.tsv",            # the append-only slug ledger
     "build/vendorlib.py": "vendor/",               # the vendored copies + lock
     "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
+    "epub/pack.py": "var/epub/",                   # the EPUB, by way of a .tmp
 }
 
 WRITE_OPEN = re.compile(r"""\bopen\s*\([^)]*['"][waxr]?\+?[wax]\+?['"]""")
@@ -31,8 +32,11 @@ OWN = ("var/", "export/", "data/", "vendor/", "build/cache/", "tests/fixtures/")
 
 class NoWrites(unittest.TestCase):
     def _sources(self):
-        for p in (ROOT / "build").rglob("*.py"):
-            yield p.relative_to(ROOT).as_posix(), p.read_text()
+        # build/ reads the masters; epub/ only the database, and is held to the
+        # same rule so that it never grows a reason to.
+        for d in ("build", "epub"):
+            for p in (ROOT / d).rglob("*.py"):
+                yield p.relative_to(ROOT).as_posix(), p.read_text()
 
     def test_only_io_opens_for_write(self):
         offenders = []
@@ -59,6 +63,17 @@ class NoWrites(unittest.TestCase):
             here = (ROOT / target).resolve()
             self.assertTrue(str(here).startswith(str(ROOT.resolve()) + "/"),
                             f"{rel} writes outside the project: {here}")
+
+    def test_epub_writes_only_var(self):
+        """The EPUB writes one file, under var/, by way of a temporary name."""
+        src = (ROOT / "epub/pack.py").read_text()
+        writes = re.findall(WRITERS, src)
+        self.assertEqual(sorted(writes), [".write_bytes("], f"epub/pack.py writes: {writes}")
+        self.assertIn('OUT = ROOT / "var" / "epub"', src)
+        for rel, other in self._sources():
+            if rel.startswith("epub/") and rel != "epub/pack.py":
+                self.assertNotRegex(other, WRITERS, f"{rel} must not write; pack.py does")
+                self.assertNotRegex(other, WRITE_OPEN, f"{rel} must not write; pack.py does")
 
     def test_no_writer_names_a_sibling(self):
         """No module may name a sibling repo path in a write context."""

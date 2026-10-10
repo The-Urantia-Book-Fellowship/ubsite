@@ -1,0 +1,29 @@
+{% extends "_base.xhtml" %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+<section epub:type="index" class="index">
+{% if first %}<h1 class="letter">{{ label }}</h1>
+{% endif %}
+{% for h in heads %}
+<section class="hw">
+<h2 class="l1" id="{{ h.head.id }}">{{ h.head.html|safe }}</h2>
+{% if h.listed %}
+<p class="listed">Listed in {% for l in h.listed %}<a href="{{ l.href }}">{{ l.text }}</a>{% if not loop.last %} and {% endif %}{% endfor %}</p>
+{% endif %}
+{% if h.tree %}
+<ul class="tree">
+{% for e in h.tree %}
+<li class="l{{ e.level }}" id="{{ e.id }}">{{ e.html|safe }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+{% if h.xrefs %}
+<p class="xrefs">{% for x in h.xrefs %}<i>{{ x.kind }}</i> {% if x.href %}<a href="{{ x.href }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}{% if not loop.last %}; {% endif %}{% endfor %}</p>
+{% endif %}
+{% if h.near %}
+<p class="near"><span class="lbl">Cited alongside</span> {% for n in h.near %}<a href="{{ n.href }}">{{ n.text }}</a>{% if not loop.last %}<span class="sep"> | </span>{% endif %}{% endfor %}</p>
+{% endif %}
+</section>
+{% endfor %}
+</section>
+{% endblock %}

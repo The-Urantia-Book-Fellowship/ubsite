@@ -1,0 +1,29 @@
+{% extends "_base.xhtml" %}
+{% macro rev(r) %}{% if r %}, as of commit {{ r.short }} of {{ r.date }}{% if r.dirty %}, with uncommitted changes{% endif %}{% endif %}{% endmacro %}
+{% block title %}The Urantia Book{% endblock %}
+{% block body %}
+<section epub:type="titlepage" class="titlepage">
+{{ mark|safe }}
+<h1>The Urantia Book</h1>
+<p class="sub">The Uversa Press text, read together with the Uversa Press index</p>
+</section>
+
+<section epub:type="colophon" class="colophon">
+<h2>Reading the index here</h2>
+<p>Beneath each paragraph stand the index entries that cite it, so that the index
+works in both directions: from a concept into the text, and from any paragraph back
+to everything the index says about it. An entry opens its headword in the Index; a
+citation there opens its paragraph; the reader’s Back returns. Entries that cite a
+whole section stand once, at its head.</p>
+<p>Every paragraph begins with its reference, so a search for 101:4.2 finds it. An
+asterisk marks a word the first printing of 1955 gave otherwise.</p>
+
+<h2>This edition</h2>
+<p>Text: the Uversa Press edition{{ rev(src.press) }}. Index: the Uversa Press index
+as revised for the third edition{{ rev(src.index) }}.</p>
+<p>The text of <i>The Urantia Book</i> is in the public domain. The index is
+protected by US copyright.</p>
+<p>Set in UB Goudy (<a href="ofl.xhtml">OFL 1.1</a>).</p>
+<p>Not affiliated with, or endorsed by, Urantia Foundation.</p>
+</section>
+{% endblock %}

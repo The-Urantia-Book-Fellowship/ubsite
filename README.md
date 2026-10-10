@@ -174,6 +174,30 @@ Then look at the page and its footer in a browser.
 
 ---
 
+## The EPUB
+
+The whole site as one EPUB 3, for reading offline: the text, the index entries beneath each paragraph, the Index A–Z with every headword's concept page, Appendices A–F, and an outline down to every section. Everything but listening. It is built from `var/ub.db` alone, here, and is private for now: nothing ships it.
+
+```
+make data                  # if the database is stale
+make epub                  # -> var/epub/the-urantia-book.epub, then every gate
+```
+
+The last gate is epubcheck, the W3C's validator. It needs Java and the jar, once:
+
+```
+sudo apt install openjdk-26-jre-headless      # any Java 11 or later
+# epubcheck 5.4.0 from github.com/w3c/epubcheck/releases, unpacked into ~/Software/epubcheck/
+```
+
+`EPUBCHECK=/path/to/epubcheck.jar make epub` uses another copy. Without Java, every other gate still runs and the last one fails, naming the package.
+
+The file carries a fixed identifier, so a reader takes a new build for a new version of the same book and keeps its highlights. The same database always builds the same bytes. `tools/make_cover.py` redraws `epub/cover.jpg` when the mark or the wording changes.
+
+For a Kindle, send the EPUB with Send to Kindle, or convert it with Calibre: `ebook-convert var/epub/the-urantia-book.epub book.azw3` (about 3½ minutes).
+
+---
+
 ## Listening
 
 Every section can be heard in Merritt Horn's reading, and from any paragraph once his reading is aligned. The player and the Settings dialog are `ubsite/static/listen.js` and `ub.js`. The build turns the recordings into the tables `audio_source`, `audio_file` and `audio_segment`, through `build/audio.py`, from three checked-in files in `data/audio/`:

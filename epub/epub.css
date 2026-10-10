@@ -1,0 +1,154 @@
+/* The EPUB's one stylesheet.
+
+   Conservative on purpose: e-readers run anything from a current WebKit to
+   Adobe's RMSDK of 2012, and Kindle converts on its own terms.  No flex, no
+   grid, no custom properties, no :has, no oklch -- block flow, margins and
+   font sizes, which every one of them honours.  A reader may override any of
+   it, and the book must still read: so nothing here carries meaning that the
+   markup does not also carry.
+
+   No red letter (Tigran, 2026-10-10): on e-ink it is a muddy grey.  The
+   .jesus spans are in the markup, and nothing here colours them. */
+
+@font-face {
+  font-family: "UB Goudy";
+  font-style: normal;
+  font-weight: normal;
+  src: url(fonts/UBGoudy.otf);
+}
+@font-face {
+  font-family: "UB Goudy";
+  font-style: italic;
+  font-weight: normal;
+  src: url(fonts/UBGoudy-Italic.otf);
+}
+
+body {
+  font-family: "UB Goudy", serif;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+}
+
+/* Goudy has no bold.  Headings are set by size, as in print. */
+h1, h2, h3, h4 {
+  font-weight: normal;
+  line-height: 1.2;
+  page-break-after: avoid;
+}
+h1 { font-size: 1.6em; text-align: center; margin: .4em 0 .2em; }
+h2 { font-size: 1.2em; margin: 1.4em 0 .5em; }
+h3 { font-size: 1.05em; margin: 1em 0 .3em; }
+h4 { font-size: 1em; font-style: italic; margin: .6em 0 .2em; }
+
+a { text-decoration: none; }
+i, em { font-style: italic; }
+
+/* -- the text -------------------------------------------------------------- */
+
+.papertop { margin: 2em 0 1.4em; text-align: center; }
+.papernum {
+  font-size: .85em;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0;
+}
+.author { font-style: italic; text-align: center; margin: .3em 0 0; }
+
+section.paper { page-break-before: always; }
+.sec h2 { text-align: center; }
+
+/* No text-align: justified or ragged is the reader's own setting. */
+p.t {
+  margin: .7em 0 0;
+  text-indent: 0;
+}
+/* The reference: literal text, so that a search for 101:4.2 lands here. */
+.ref { font-size: .7em; color: #666; }
+.pc { color: #888; }
+.mark { font-variant-numeric: lining-nums; }
+/* A dot leader joins the two halves of a row (Foreword, the superuniverses). */
+.leader {
+  display: inline-block;
+  width: 3em;
+  margin: 0 .3em;
+  border-bottom: 1px dotted #888;
+}
+sup { font-size: .7em; vertical-align: super; line-height: 0; }
+
+/* The index entries citing a paragraph: the site's margin, beneath it. */
+p.ix {
+  font-size: .8em;
+  line-height: 1.3;
+  margin: .25em 0 0 1.5em;
+  text-indent: 0;
+  text-align: left;
+  color: #555;
+}
+p.ix a { color: #555; }
+/* The bar between entries, here and in "Cited alongside": not a link, black. */
+.sep { color: #000; }
+.lbl { font-style: italic; }
+
+/* The entries citing the whole section, under its title. */
+.blanket { margin: .4em 0 .8em; }
+
+/* The 1955 readings: a pop-up where the reader offers one, else a small line. */
+a.fn { font-size: .75em; vertical-align: super; line-height: 0; }
+aside.note p {
+  font-size: .8em;
+  margin: .2em 0 0 1.5em;
+  text-indent: 0;
+  color: #555;
+}
+aside.note .lbl { font-style: italic; }
+mark.chg { background: none; color: inherit; text-decoration: underline; }
+
+/* -- the front ------------------------------------------------------------- */
+
+body.cover { text-align: center; }
+body.cover img { max-width: 100%; max-height: 100%; }
+
+.titlepage { text-align: center; margin-top: 18%; }
+.titlepage svg.mark { width: 4em; height: 4em; }
+.titlepage h1 { font-size: 2em; letter-spacing: .04em; }
+.titlepage .sub { font-style: italic; margin: .6em 2em; }
+.colophon { page-break-before: always; font-size: .9em; }
+.colophon h2 { font-size: 1.1em; }
+
+.partpage { text-align: center; margin-top: 25%; page-break-before: always; }
+.partpage h1 { font-size: 1.8em; margin: .6em 0; }
+.sponsor { font-style: italic; margin: 1.5em 2em 0; }
+
+/* -- the index and the appendices ---------------------------------------- */
+
+section.index, section.appendix { page-break-before: always; }
+h1.letter { font-size: 2em; }
+
+.hw { margin: 0 0 .9em; }
+.hw h2.l1 {
+  font-size: 1em;
+  margin: .8em 0 .1em;
+  text-align: left;
+  page-break-after: avoid;
+}
+.hw p, .hw ul { font-size: .9em; }
+ul.tree { list-style: none; margin: 0; padding: 0; }
+ul.tree li { margin: .1em 0; padding-left: 1em; text-indent: -1em; }
+ul.tree li.l2 { margin-left: 1em; }
+ul.tree li.l3 { margin-left: 2em; }
+ul.tree li.l4 { margin-left: 3em; }
+ul.tree li.l5 { margin-left: 4em; }
+.listed, .xrefs, .near { margin: .2em 0 0 1em; }
+.near .lbl { margin-right: .3em; }
+
+ul.applist, ul.events, ul.events ul { list-style: none; margin: 0; padding: 0; }
+ul.applist li, ul.events li { margin: .2em 0; padding-left: 1em; text-indent: -1em; }
+ul.events li.month { padding-left: 0; text-indent: 0; }
+ul.events li.month ul { margin-left: 1em; }
+h2.band { text-align: center; margin-top: 1.6em; }
+
+/* The licence, as plain text: in the reader's monospace, as the site serves
+   OFL.txt.  The glyph gate skips it, as fonts.py excuses ◐. */
+pre { font-family: monospace; white-space: pre-wrap; font-size: .75em; }

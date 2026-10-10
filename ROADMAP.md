@@ -100,4 +100,6 @@ The press text is authoritative American; the British Study Edition is revised, 
 
 ## Offline
 
-The book is the book. `make press` in the press project already imposes text and index into one 2,192-page press file. An EPUB export from `ub.db` is cheap when wanted, but it competes with a printed volume that is better at being a book. The web is for what print cannot do: the reverse index, the timeline, the map, search, and the diff.
+The book is the book. `make press` in the press project already imposes text and index into one 2,192-page press file, and print is better at being a book. The web is for what print cannot do: the reverse index, the timeline, the map, search, and the diff.
+
+**The EPUB** `[built]` (2026-10-10) earns its place by doing one of those things offline: the reverse index. Beneath every paragraph stand the entries that cite it, and every citation in the index opens its paragraph, so the index runs both ways on an e-reader as on the site. `make epub`, from `ub.db` alone. It was cheap, as predicted, because every hard part was already in the database; the work was the index's presentation without a margin, the gates, and trying it on real readers. What it cannot carry: the site's search (a reader's own finds the literal `101:4.2` at every paragraph), the Show switches, listening (EPUB 3 Media Overlays could carry the aligned reading, but even the 32 kbps transcode is 1.7 GB), and freshness: it is a snapshot, dated by its source commits.

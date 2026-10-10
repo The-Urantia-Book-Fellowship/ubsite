@@ -1,0 +1,32 @@
+{% extends "_base.xhtml" %}
+{% from "_chips.xhtml" import chips %}
+{% block title %}{{ paper.title }}{% endblock %}
+{% block body %}
+<section epub:type="chapter" class="paper">
+<header class="papertop">
+{% if paper.n %}<p class="papernum">Paper {{ paper.n }}</p>{% endif %}
+<h1>{{ paper.title }}</h1>
+{% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
+</header>
+{% for s in sections %}
+<section class="sec" id="{{ s.id }}">
+{% if s.n %}<h2>{{ s.n }}{% if s.combined_with %} and {{ s.combined_with }}{% endif %}. {{ s.title_html|safe }}</h2>
+{% endif %}
+{% if s.blanket %}
+{#- No "Cited across this whole section" above them, as the site has: standing
+    under the section's title, before its first paragraph, they say so (Tigran). #}
+<div class="blanket"><p class="ix">{{ chips(s.blanket) }}</p></div>
+{% endif %}
+{% for p in s.paras %}
+<p class="t" id="{{ p.id }}"><span class="ref">{{ p.ref }}</span> {% if p.pc %}<span class="pc">¶</span>{% endif %}{{ p.html|safe }}</p>
+{% if p.chips %}
+<p class="ix">{{ chips(p.chips) }}</p>
+{% endif %}
+{% for n in p.notes %}
+<aside epub:type="footnote" class="note" id="{{ n.id }}"><p><a class="lbl" href="#{{ n.back }}">1955</a> {{ n.html|safe }}{% if n.gloss %}<span class="gloss"> — {{ n.gloss }}</span>{% endif %}</p></aside>
+{% endfor %}
+{% endfor %}
+</section>
+{% endfor %}
+</section>
+{% endblock %}

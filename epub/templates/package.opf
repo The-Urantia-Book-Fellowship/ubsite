@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="uid" xml:lang="en-US">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dc:identifier id="uid">{{ uid }}</dc:identifier>
+<dc:title>The Urantia Book</dc:title>
+<dc:language>en-US</dc:language>
+<dc:description>The Uversa Press text, read together with the Uversa Press index: beneath every paragraph, the index entries that cite it.</dc:description>
+<dc:date>{{ date }}</dc:date>
+{% for s in sources %}
+<dc:source>{{ s }}</dc:source>
+{% endfor %}
+<meta property="dcterms:modified">{{ modified }}</meta>
+<meta name="cover" content="cover-image"/>
+</metadata>
+<manifest>
+{% for i in items %}
+<item id="{{ i.id }}" href="{{ i.href }}" media-type="{{ i.type }}"{% if i.properties %} properties="{{ i.properties }}"{% endif %}/>
+{% endfor %}
+</manifest>
+<spine toc="ncx">
+{% for i in spine %}
+<itemref idref="{{ i.id }}"{% if not i.linear %} linear="no"{% endif %}/>
+{% endfor %}
+</spine>
+</package>
