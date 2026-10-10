@@ -34,6 +34,12 @@ RE_MARK     = re.compile(r"\\vsmark\{(\d+)\}\{(\d+)\}")
 RE_NEWLINE  = re.compile(r"\\\\\*?(?:\[[^\]]*\])?")
 RE_LAYOUT   = re.compile(r"\\hspace\*?\{[^{}]*\}|\\setlength\{[^{}]*\}\{[^{}]*\}"
                          r"|\\par\b|\\parindent|\\relax")
+# A \pc the press source took out for its own page and says so in a comment:
+# "\end{quoting}% The \pc at 48:6.20 has been removed to avoid double-line
+# vskip".  The blank line is the 1955 printing's, not the press layout's, so the
+# web gives it back.  (144:3.13 met the same clash and kept its \pc, cancelling
+# the extra space with \vspace{-\baselineskip} instead.)
+RE_PC_REMOVED = re.compile(r"%.*\\pc at (\d+):(\d+)\.(\d+) has been removed")
 
 
 @dataclasses.dataclass(slots=True)
@@ -105,6 +111,7 @@ def read_paper(path: pathlib.Path, report) -> Paper:
     paras: list[Paragraph] = []
     in_block, counter, cur_sec = False, None, 0
     pending: list[str] = []
+    restore: dict[tuple[int, int, int], int] = {}     # (paper, section, n) -> line
 
     def inline(text: str) -> Expanded:
         return exp.run(text)
@@ -120,6 +127,8 @@ def read_paper(path: pathlib.Path, report) -> Paper:
         line = raw.strip()
         if not line:
             continue
+        for m in RE_PC_REMOVED.finditer(line):
+            restore[tuple(map(int, m.groups()))] = lineno
 
         m = RE_UPAPER.match(line)
         if m:
@@ -205,6 +214,19 @@ def read_paper(path: pathlib.Path, report) -> Paper:
                 "%", "{\\setlength", "}")):
             continue
         pending.append(f"{where}:{lineno}: {line[:70]}")
+
+    for key, at in restore.items():
+        q = next((q for q in paras if (q.paper, q.section, q.n) == key), None)
+        if q is None:
+            report.hard("pc-restore-nowhere", f"{where}:{at}",
+                        "a comment says the \\pc at %d:%d.%d was removed, and there is"
+                        " no such paragraph" % key)
+        elif q.ex.flags.get("gap_before"):
+            report.hard("pc-restore-stale", f"{where}:{at}",
+                        f"{q.ref} has its \\pc again, so the comment saying it was"
+                        " removed is out of date")
+        else:
+            q.ex.flags["gap_before"] = 1.0
 
     for p in pending:
         report.warn("unclaimed-line", p.split(":")[0] + ":" + p.split(":")[1],
