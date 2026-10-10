@@ -30,7 +30,7 @@ from fastapi.templating import Jinja2Templates  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import settings, stats, visits  # noqa: E402
+from ubsite import queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -74,24 +74,6 @@ def appendix_href(scope: str, anchor: str) -> str:
 
 
 T.env.globals["appendix_href"] = appendix_href
-
-# What a margin chip needs.  An appendix entry -- a Chronology event, a named
-# being, person or place -- has no headword of its own and so no slug; it links
-# to its line on the appendix page, named with its appendix, and an event with
-# its date (chronology_event.label).
-CHIP_COLS = ("e.path_plain AS path, e.level, e.anchor, e.scope, r.slug AS rslug,"
-                 " a.title AS appendix, ev.label AS event")
-CHIP_JOIN = (" LEFT JOIN appendix a ON a.letter=e.scope"
-                 " LEFT JOIN chronology_event ev ON ev.entry_id=e.id")
-# An Appendix B-F row beside a paragraph the A-Z already names it at -- by its
-# headword or any subentry, at any precision -- says nothing the margin does not
-# already say.  1,734 of the 1,865 did ("Abaddon" over "Celestial Beings,
-# Individuals Named Abaddon"); the classification they carried is on the
-# concept page instead.  Chronology events have no appendix_head and all stay.
-CHIP_NEW = (" AND NOT EXISTS (SELECT 1 FROM appendix_head h"
-            " JOIN para_citers c2 ON c2.paragraph_id = c.paragraph_id"
-            " JOIN index_entry e2 ON e2.id = c2.entry_id"
-            " WHERE h.entry_id = e.id AND e2.root_id = h.head_entry_id)")
 
 # Search reaches an Appendix B-F row only when no A-Z headword has its name: the
 # other 1,332 would come up twice, once as the headword and once as the row.
@@ -556,7 +538,7 @@ def index_front(request: Request):
     letters = con.execute(
         "SELECT letter, COUNT(*) n FROM index_entry WHERE scope='az' AND level=1"
         " GROUP BY letter ORDER BY letter='NUMBERS' DESC, letter").fetchall()
-    return page(request, "index_front.html", letters=letters, apps=appendices(con))
+    return page(request, "index_front.html", letters=letters, apps=queries.appendices(con))
 
 
 @app.get("/index/{letter}", response_class=HTMLResponse)
@@ -578,64 +560,12 @@ def concept(request: Request, slug: str):
     root = con.execute("SELECT * FROM index_entry WHERE slug=?", (slug,)).fetchone()
     if root is None:
         return missing(request, "No headword in the index has this address.")
-    tree = con.execute(
-        "SELECT e.*, s.n_targets FROM index_entry e"
-        " LEFT JOIN entry_stats s ON s.entry_id=e.id"
-        " WHERE e.root_id=? ORDER BY e.ord", (root["id"],)).fetchall()
-    # A q.v. is linked where it stands, in the tree; this list is See and See also.
-    xrefs = con.execute(
-        "SELECT x.kind, x.target, t.slug FROM xref x"
-        " LEFT JOIN index_entry t ON t.id=x.head_entry_id"
-        " WHERE x.entry_id IN (SELECT id FROM index_entry WHERE root_id=?)"
-        "   AND x.kind IN ('see','seealso')"
-        " ORDER BY x.kind, x.ord", (root["id"],)).fetchall()
-    # The appendices that list this headword: what kind of thing it is -- a
-    # being, a person, a place -- and its line there.
-    listed = con.execute(
-        "SELECT e.scope, e.anchor, a.title FROM appendix_head h"
-        " JOIN index_entry e ON e.id=h.entry_id JOIN appendix a ON a.letter=e.scope"
-        " WHERE h.head_entry_id=? ORDER BY e.scope", (root["id"],)).fetchall()
-    near = con.execute(
-        "SELECT o.slug, o.headword, c.shared,"
-        "  (SELECT n_descendants FROM entry_stats WHERE entry_id=o.id) AS kids"
-        " FROM cocitation c"
-        " JOIN index_entry o ON o.id = CASE WHEN c.a_root_id=? THEN c.b_root_id"
-        "                                   ELSE c.a_root_id END"
-        " WHERE c.a_root_id=? OR c.b_root_id=? ORDER BY c.shared DESC LIMIT 8",
-        (root["id"], root["id"], root["id"])).fetchall()
-    return page(request, "concept.html", root=root, tree=tree, xrefs=xrefs, near=near,
-                listed=listed)
-
-
-def appendices(con) -> list:
-    """The six appendices, for /appendix, /index and each appendix's own page."""
-    return con.execute("SELECT letter, title, n_entries, n_events FROM appendix"
-                       " ORDER BY letter").fetchall()
-
-
-# The Chronology's jump bar.  The printed list has no divisions; these are only
-# for finding one's place among 206 year headings.  The first three follow the
-# book's own unit, which is "years ago" until Adam and B.C. from him on; the
-# life of Jesus, from the announcements of 8 B.C. to 30 A.D., is half the list.
-CHRON_BANDS = ["Billions of years ago", "Millions of years ago",
-               "Thousands of years ago", "B.C.", "The life of Jesus", "A.D."]
-
-
-def _band(label: str, year_sort: float) -> int:
-    if "years ago" in label:
-        n = int(label.split()[0].replace(",", ""))
-        return 0 if n >= 10**9 else 1 if n >= 10**6 else 2
-    return 3 if year_sort < -8 else 4 if year_sort <= 30 else 5
-
-
-def _year_id(label: str) -> str:
-    """'y-7-b-c' for 7 B.C.: from the label, so that it does not move."""
-    return "y-" + re.sub(r"[^0-9a-z]+", "-", label.lower()).strip("-")
+    return page(request, "concept.html", root=root, **queries.concept(con, root["id"]))
 
 
 @app.get("/appendix", response_class=HTMLResponse)
 def appendix_front(request: Request):
-    return page(request, "appendices.html", apps=appendices(db()))
+    return page(request, "appendices.html", apps=queries.appendices(db()))
 
 
 @app.get("/appendix/{letter}", response_class=HTMLResponse)
@@ -647,9 +577,7 @@ def appendix(request: Request, letter: str):
     if app_ is None:
         return missing(request, "The appendices are lettered A to F.")
     if letter != "A":
-        rows = con.execute(
-            "SELECT e.anchor, e.headword, e.text_html FROM index_entry e"
-            " WHERE e.scope=? ORDER BY e.ord", (letter,)).fetchall()
+        rows = queries.appendix_rows(con, letter)
         # Where each initial begins, for the jump bar: the list is in the print's
         # order, which is alphabetical without regard to case.
         initials = []
@@ -658,32 +586,10 @@ def appendix(request: Request, letter: str):
             c = c if c.isalpha() else "#"
             if not initials or initials[-1][0] != c:
                 initials.append((c, r["anchor"]))
-        return page(request, "appendix.html", app=app_, apps=appendices(con),
+        return page(request, "appendix.html", app=app_, apps=queries.appendices(con),
                     rows=rows, initials=initials if len(rows) > 150 else [])
-    # The Chronology: years, the months under some of them, and the events.  A
-    # \chrontext hangs off its year and a \chronsubtext off its month, which is
-    # what month_label records; within a year the former all come first.
-    years, bands = [], []
-    for r in con.execute(
-            "SELECT e.anchor, e.text_html, v.year_label, v.month_label, v.year_sort"
-            " FROM chronology_event v JOIN index_entry e ON e.id=v.entry_id"
-            " ORDER BY v.ord"):
-        if not years or years[-1]["label"] != r["year_label"]:
-            years.append({"label": r["year_label"], "id": _year_id(r["year_label"]),
-                          "items": []})
-            b = _band(r["year_label"], r["year_sort"])
-            if not bands or bands[-1]["n"] != b:
-                bands.append({"n": b, "name": CHRON_BANDS[b], "id": years[-1]["id"],
-                              "events": 0})
-        bands[-1]["events"] += 1
-        items = years[-1]["items"]
-        if r["month_label"] is None:
-            items.append({"event": r})
-        else:
-            if not items or items[-1].get("month") != r["month_label"]:
-                items.append({"month": r["month_label"], "events": []})
-            items[-1]["events"].append(r)
-    return page(request, "chronology.html", app=app_, apps=appendices(con),
+    years, bands = queries.chronology(con)
+    return page(request, "chronology.html", app=app_, apps=queries.appendices(con),
                 years=years, bands=bands)
 
 
@@ -752,33 +658,7 @@ def read(request: Request, ref: str):
                                 " and the papers run to 196.")
     if s is None:
         return missing(request, f"Paper {paper} has no section {sec}.")
-    paras = con.execute(
-        "SELECT p.*, d.precise_citers, d.thin FROM paragraph p"
-        " LEFT JOIN para_density d ON d.paragraph_id=p.id"
-        " WHERE p.paper_n=? AND p.section_n=? ORDER BY p.para_n",
-        (paper, sec)).fetchall()
-    citers = {}
-    for row in con.execute(
-            "SELECT c.paragraph_id, " + CHIP_COLS +
-            " FROM para_citers c JOIN index_entry e ON e.id=c.entry_id"
-            " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
-            " JOIN paragraph p ON p.id=c.paragraph_id"
-            " WHERE p.paper_n=? AND p.section_n=? AND c.precision='para'" + CHIP_NEW +
-            " ORDER BY e.ord", (paper, sec)):
-        citers.setdefault(row["paragraph_id"], []).append(row)
-    blanket = con.execute(
-        "SELECT DISTINCT " + CHIP_COLS +
-        " FROM para_citers c"
-        " JOIN index_entry e ON e.id=c.entry_id"
-        " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
-        " JOIN paragraph p ON p.id=c.paragraph_id"
-        " WHERE p.paper_n=? AND p.section_n=? AND c.precision IN ('sec','paper')" + CHIP_NEW +
-        " ORDER BY e.ord LIMIT 60", (paper, sec)).fetchall()
-    notes = {}
-    for f in con.execute(
-            "SELECT f.* FROM footnote f JOIN paragraph p ON p.id=f.paragraph_id"
-            " WHERE p.paper_n=? AND p.section_n=? ORDER BY f.ord", (paper, sec)):
-        notes.setdefault(f["paragraph_id"], []).append(f)
+    rows = queries.section(con, paper, sec)
     nxt = con.execute("SELECT n, title FROM section WHERE paper_n=? AND n>? ORDER BY n LIMIT 1",
                       (paper, sec)).fetchone()
     prv = con.execute("SELECT n FROM section WHERE paper_n=? AND n<? ORDER BY n DESC LIMIT 1",
@@ -794,7 +674,6 @@ def read(request: Request, ref: str):
                           (paper,)).fetchone()
         if np_:
             onward = {"href": f"/{np_['paper_n']}:{np_['n']}", "label": f"Paper {np_['paper_n']}. {np_['title']}"}
-    return page(request, "section.html", paper=p, section=s, paras=paras,
-                citers=citers, blanket=blanket, notes=notes,
+    return page(request, "section.html", paper=p, section=s, **rows,
                 focus=focus, last=last, nxt=nxt, prv=prv, onward=onward,
                 audio=section_audio(con, s["id"]))
