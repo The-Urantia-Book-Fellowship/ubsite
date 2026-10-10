@@ -158,7 +158,11 @@ def render_html(src: str, where: str = "", report=None) -> str:
         else:
             raise ValueError(f"{where}: {msg}")
     s = s.replace("{", "").replace("}", "")
-    s = unescape(s)
+    # An escaped \& is text, and the only text that needs escaping here: the
+    # markup above writes no entity, and no entry contains < or >.  Browsers
+    # forgave a bare & (in "6. & 7. Secrets of Greatness"); XML does not, and
+    # check_db now holds every stored HTML column to XML.
+    s = unescape(s).replace("&", "&amp;")
     return re.sub(r"\s+", " ", s).strip()
 
 

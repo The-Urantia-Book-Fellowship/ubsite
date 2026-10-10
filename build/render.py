@@ -37,8 +37,13 @@ POINT = {
 }
 
 
-def render(text: str, spans, footnotes=None) -> str:
-    """spans: iterable of objects with .start .end .kind (and optional .attr)."""
+def render(text: str, spans, note_key: str = "") -> str:
+    """spans: iterable of objects with .start .end .kind (and optional .attr).
+
+    note_key names the paragraph, as `101_4_2`, so that a footnote marker's id
+    is unique in the whole book and not only within its paragraph: a section
+    page carries every paragraph's notes, and the EPUB a whole paper's.
+    """
     opens: dict[int, list] = {}
     closes: dict[int, list] = {}
     points: dict[int, list] = {}
@@ -60,7 +65,7 @@ def render(text: str, spans, footnotes=None) -> str:
                 if top.end == i:
                     break
         for s in points.get(i, []):
-            frag = _point(s, footnotes)
+            frag = _point(s, note_key)
             if frag:
                 out.append(frag)
         # open outermost-first: widest span first, so nesting is well-formed
@@ -76,7 +81,7 @@ def render(text: str, spans, footnotes=None) -> str:
     return "".join(out)
 
 
-def _point(s, footnotes) -> str:
+def _point(s, note_key: str) -> str:
     if s.kind == "dotleader":
         return POINT["dotleader"]
     if s.kind == "fnref":
@@ -84,7 +89,8 @@ def _point(s, footnotes) -> str:
         # Empty: the marker is drawn by CSS, for the same reason the dot
         # leaders are.  Anything emitted here would be text the reader copies
         # and the round-trip gate would rightly reject.
-        return f'<a class="fn" href="#fn{n}" id="fnref{n}"></a>'
+        k = f"{note_key}_{n}" if note_key else f"{n}"
+        return f'<a class="fn" href="#fn{k}" id="fnref{k}"></a>'
     return ""
 
 
@@ -106,13 +112,14 @@ def title(lines: str) -> tuple[str, str]:
     Some titles are set on two or three lines, and the reader keeps the breaks
     as "\\n".  The plain title joins the lines with a space -- or with nothing
     after a dash, since "Racial Amalgamation—" breaks after its em dash.  The
-    HTML is that same text with a <br> at each break, placed after the joining
-    space, so stripping its tags returns the plain title byte for byte.
+    HTML is that same text with a <br/> at each break, placed after the joining
+    space, so stripping its tags returns the plain title byte for byte.  The
+    break is self-closed because the EPUB is XML, and HTML reads it the same.
     """
     parts = lines.split("\n")
     plain, out = parts[0], [html.escape(parts[0], quote=False)]
     for prev, line in zip(parts, parts[1:]):
         sep = "" if prev.endswith(("—", "–", "-")) else " "
         plain += sep + line
-        out.append(sep + "<br>" + html.escape(line, quote=False))
+        out.append(sep + "<br/>" + html.escape(line, quote=False))
     return plain, "".join(out)

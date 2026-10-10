@@ -69,7 +69,7 @@ def load_text(con, papers, parts, repo, report) -> dict:
                         (qid, sec_id[q.section], q.paper, q.section, q.n, q.ref,
                          f"U{q.paper}_{q.section}_{q.n}", qid, q.src,
                          q.ex.flags.get("gap_before", 0.0), q.ex.text,
-                         render(q.ex.text, q.ex.spans),
+                         render(q.ex.text, q.ex.spans, f"{q.paper}_{q.section}_{q.n}"),
                          len(q.ex.text.split()), q.line))
             for i, s in enumerate(q.ex.spans):
                 spid += 1

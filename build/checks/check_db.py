@@ -116,6 +116,29 @@ def run(con) -> int:
     if toff:
         bad += 1
 
+    # Every stored fragment is well-formed XML, because the EPUB is XML and
+    # carries these fragments as they are.  A browser forgives a bare & or an
+    # unclosed <br>; an e-reader may refuse the whole file.
+    import xml.etree.ElementTree as ET
+    k = xoff = 0
+    for where, h in con.execute(
+            "SELECT 'paragraph ' || ref, html FROM paragraph"
+            " UNION ALL SELECT 'note ' || id, html FROM footnote"
+            " UNION ALL SELECT 'section ' || paper_n || ':' || n, title_html FROM section"
+            "  WHERE title_html IS NOT NULL"
+            " UNION ALL SELECT 'entry ' || id, text_html FROM index_entry"):
+        k += 1
+        try:
+            ET.fromstring(f"<x>{h}</x>")
+        except ET.ParseError as e:
+            xoff += 1
+            if xoff <= 5:
+                print(f"            not XML: {where}: {e}")
+    print(f"            {k - xoff}/{k} stored HTML fragments are well-formed XML"
+          + ("" if not xoff else f"   {xoff} FAIL"))
+    if xoff:
+        bad += 1
+
     # The chip must keep the editor's words.  Every "(" in an entry's printed
     # text is one of its citations, or inside a See target, or in its chip --
     # the old chip text dropped them all, and "Adam (village)" became "Adam".

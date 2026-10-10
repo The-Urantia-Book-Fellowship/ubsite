@@ -49,7 +49,7 @@
           <p class="thin">no entry cites this paragraph precisely</p>
         {% endif %}
         {% for n in notes.get(p.id, []) %}
-          <p class="note" id="fn{{ n.ord }}"><span class="lbl">1955</span> {{ n.html|safe }}
+          <p class="note" id="fn{{ p.paper_n }}_{{ p.section_n }}_{{ p.para_n }}_{{ n.ord }}"><span class="lbl">1955</span> {{ n.html|safe }}
             {%- if n.gloss %}<span class="gloss"> — {{ n.gloss }}</span>{% endif %}</p>
         {% endfor %}
       </div>
