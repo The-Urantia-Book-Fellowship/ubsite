@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_rail.html" import rail %}
 {# An index entry beside the text.  A headword or subentry links to its line on
    the concept page; an appendix entry to its line on the appendix page, named
    with its appendix, and a Chronology event with its date. #}
@@ -9,15 +10,7 @@
 {% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
 {% block body %}
 <main class="reader">
-  <nav class="rail" aria-label="Sections">
-    <p class="railhead"><a href="/{{ paper.n }}">Paper {{ paper.n }}</a></p>
-    <ol>
-    {% for s in all_sections %}
-      <li{% if s.n == section.n %} class="here"{% endif %}>
-        <a href="/{{ paper.n }}:{{ s.n }}">{% if s.n %}{{ s.n }}. {{ s.title_html|safe }}{% else %}Introduction{% endif %}</a></li>
-    {% endfor %}
-    </ol>
-  </nav>
+  {{ rail(book(), paper.n, section.n, paper.part_n) }}
 
   <article>
     <header class="papertop">

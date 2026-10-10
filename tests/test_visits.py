@@ -149,7 +149,8 @@ class Pages(Counted):
         self.assertEqual(self.rows("SELECT via FROM view ORDER BY id"), [("next",), (None,)])
 
     def test_what_is_not_reading_is_not_a_view(self):
-        for path in ("/healthz", "/favicon.ico", "/static/ub.js", "/static/ub.css", "/stats"):
+        for path in ("/healthz", "/favicon.ico", "/static/ub.js", "/static/ub.css", "/stats",
+                     "/rail/1"):
             call(path)
         self.assertEqual(self.rows("SELECT path FROM view"), [])
 

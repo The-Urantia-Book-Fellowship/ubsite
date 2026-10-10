@@ -39,6 +39,12 @@ READING = [
      [("goudy", "Goudy", "the book's own typeface", "face-goudy"),
       ("serif", "A plainer serif", "", "face-serif"),
       ("sans", "Sans-serif", "", "face-sans")], ""),
+    # Measured keeps the line near 68 characters and the page in a frame of its
+    # own; Full gives the text, the rail and the margin the whole window, for a
+    # reader who minds empty screen more than a long line (Tigran, 2026-10-10).
+    ("width", "segmented", "Width", "measure",
+     [("measure", "Measured", "about 68 characters to a line", ""),
+      ("full", "Full", "the whole width of the window", "")], ""),
 ]
 SHOW = [
     ("redletter", "switch", "The words of Jesus in red", True, [], ""),

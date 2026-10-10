@@ -1,0 +1,43 @@
+{#- The left rail: the whole book, everything closed but the paper being read.
+    Native <details>, so it opens and closes with JavaScript off.  A part's
+    summary only opens it; a paper's holds a link, so its title goes to the
+    paper and the chevron beside it opens it.
+
+    Only the paper being read carries its sections.  Another paper's arrive
+    from /rail/N when it is opened (ub.js), because all 1,626 inline would add
+    111 KB to a page of about 20.  Such a paper is .lazy, and with JavaScript
+    off it is a plain link, its chevron hidden (ub.css). -#}
+
+{% macro sections(paper_n, secs, here_s=None) -%}
+<ol>
+{%- for s in secs %}<li{% if s.n == here_s %} class="here"{% endif %}><a href="/{{ paper_n }}:{{ s.n }}">
+  {%- if s.n %}{{ s.n }}{% if s.combined_with %} and {{ s.combined_with }}{% endif %}. {{ s.title_html|safe }}{% else %}Introduction{% endif %}</a></li>
+{%- endfor %}</ol>
+{%- endmacro %}
+
+{% macro paper_row(p, bk, here_p, here_s) -%}
+{%- if p.n == here_p -%}
+<li class="here"><details open><summary><a href="/{{ p.n }}">{% if p.n %}{{ p.n }}. {% endif %}{{ p.title }}</a></summary>
+  {{- sections(p.n, bk.sections[p.n], here_s) }}</details></li>
+{%- else -%}
+<li class="lazy"><details><summary><a href="/{{ p.n }}">{% if p.n %}{{ p.n }}. {% endif %}{{ p.title }}</a></summary></details></li>
+{%- endif %}
+{%- endmacro %}
+
+{% macro rail(bk, here_p, here_s, here_part) -%}
+<nav class="rail" aria-label="The book" data-v="{{ db_version() }}">
+<ol>
+{%- for p in bk.foreword %}
+{{ paper_row(p, bk, here_p, here_s) }}
+{%- endfor %}
+{%- for part in bk.parts %}
+<li class="part"><details{% if part.n == here_part %} open{% endif %}><summary>Part {{ part.roman }}. {{ part.title }}</summary>
+<ol>
+{%- for p in part.papers %}
+{{ paper_row(p, bk, here_p, here_s) }}
+{%- endfor %}
+</ol></details></li>
+{%- endfor %}
+</ol>
+</nav>
+{%- endmacro %}

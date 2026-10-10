@@ -28,6 +28,15 @@
      width of "0", which is narrow in Goudy, so 60ch sets about 68 characters --
      the range this face reads best at. */
   --measure: 60ch;
+  /* UB Goudy keeps 0.438em under the baseline for its long descenders (hhea
+     960/438), so the middle of its line box stands 0.261em above the baseline,
+     and its capitals' middle 0.356em: a word centred in a box sits 0.095em high.
+     Chrome sets it a further 0.03em high on average, rounding to whole pixels,
+     so a one-line control with a box round it moves its text down by .125em,
+     chosen by measuring the rendered Settings pills, Done and Listen at every
+     text size: 91% of 72 within half a pixel of the middle, against 70% at
+     .095em.  The other typefaces are the device's, near enough centred already. */
+  --lift: .125em;
   /* The typefaces Settings offers besides UB Goudy: the device's own, so
      choosing one downloads nothing. */
   --serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
@@ -117,13 +126,36 @@ footer p { margin: .2rem 0; }
 /* The gap is the gutter the paragraph references stand in: 118:10.13 is 3.3rem. */
 .reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 4.4rem;
           padding: 2rem 1.2rem 0; max-width: 92rem; margin: 0 auto; }
+/* The left rail is the whole book (templates/_rail.html), everything closed but
+   the paper being read.  Each level stands in by the chevron's width, so a
+   title lines up under its parent's and a wrapped one hangs. */
 .rail { font-size: .95rem; line-height: 1.45; position: sticky; top: 1rem;
-        align-self: start; max-height: 90vh; overflow: auto; }
-.rail ol { list-style: none; margin: .4rem 0 0; padding: 0; }
+        align-self: start; max-height: 90vh; overflow: auto; --chev: 1.1em; }
+.rail ol { list-style: none; margin: 0; padding: 0; }
+.rail details > ol { padding-left: var(--chev); }
+/* A section has no chevron, but keeps its place: otherwise section 2 of the
+   paper being read stands level with Paper 2 below it. */
+.rail li:not(.part) > details > ol { padding-left: calc(2 * var(--chev)); }
 .rail li { margin: .18rem 0; }
 .rail a { color: var(--faint); text-decoration: none; }
-.rail .here > a, .rail a:hover { color: var(--ink); }
-.railhead a { color: var(--ink); text-decoration: none; }
+.rail .here > a, .rail .here > details > summary a, .rail a:hover { color: var(--ink); }
+.rail summary { list-style: none; cursor: pointer;
+                padding-left: var(--chev); text-indent: calc(-1 * var(--chev)); }
+.rail summary::-webkit-details-marker { display: none; }
+/* Drawn, not a glyph: two sides of a square, turned to point right, and down
+   when open.  Its box and margins come to --chev. */
+.rail summary::before { content: ""; display: inline-block; width: .34em; height: .34em;
+  margin: 0 .5em .1em .26em; border: solid var(--faint); border-width: 0 1.5px 1.5px 0;
+  transform: rotate(-45deg); transition: transform .12s; }
+.rail details[open] > summary::before { transform: rotate(45deg); }
+.rail summary:hover::before { border-color: var(--ink); }
+/* The top level -- the Foreword and the four parts -- is set in ink. */
+.rail .part > details > summary, .rail > ol > li > details > summary a { color: var(--ink); }
+.rail .part { margin-top: .5rem; }
+/* A paper whose sections come from /rail/N opens only with JavaScript; without
+   it the title is a link and nothing more (base.html sets .js). */
+:root:not(.js) .rail .lazy > details > summary { cursor: auto; }
+:root:not(.js) .rail .lazy > details > summary::before { visibility: hidden; }
 
 article { min-width: 0; }
 .papertop { margin-bottom: 1.6rem; }
@@ -186,7 +218,22 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
                                 font-synthesis: small-caps; }
 /* Their figures are wider for their letters than Goudy's, so 60ch held 64
    characters to a line where Goudy holds 58: a narrower measure keeps the line. */
-:root:is([data-face="serif"], [data-face="sans"]) { --measure: 54ch; }
+:root:is([data-face="serif"], [data-face="sans"]) { --measure: 54ch; --lift: 0em; }
+/* Width: Full.  No frame and no measure: the rail is wide enough that a paper's
+   title stands on one line (the longest, 9's, is 50 characters), the text takes
+   what the margin leaves, and lists take as many columns as fit.  The rail's
+   width is fixed by the window, not by its content, so that opening a paper with
+   a long title never moves the text.  The columns only where the phone layout
+   (max-width: 62rem, below) has not already made one. */
+:root[data-width="full"] .reader { max-width: none; }
+@media (min-width: 62.01rem) {
+  :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
+  :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
+  :root[data-width="full"][data-margin="off"][data-notes="off"] .grid { grid-template-columns: minmax(0, 1fr); }
+}
+:root[data-width="full"] :is(p.t, .papertop h2, .blanket, .pager, .prose) { max-width: none; }
+:root[data-width="full"] .blanket ul { columns: 16rem; }
+:root[data-width="full"] .applist { columns: 24rem; }
 .mark { font-variant-numeric: lining-nums; }
 .sc { font-variant-caps: small-caps; }
 .supplied { font-style: italic; }
@@ -248,6 +295,7 @@ button.listen { display: inline-flex; align-items: center; gap: .45rem; font: in
 .listenrow .credit { color: inherit; text-decoration-color: var(--rule); }
 .listenrow .credit:hover { color: var(--link); }
 button.listen svg { width: .8em; height: .8em; }
+button.listen span { position: relative; top: var(--lift); }
 /* A paragraph's own play button sits under its number, always there and faint
    like the number, full only on hover or while its paragraph is read.  It was
    once shown on hover alone, which a phone or tablet does not have (Tigran,
@@ -352,6 +400,7 @@ dialog.settings .seg label { display: grid; place-items: center; min-width: 2.4r
 .seg label:hover { background: color-mix(in oklch, var(--link) 10%, transparent); }
 .seg label:has(input:checked) { color: var(--paper); background: var(--link); }
 .seg label:has(input:focus-visible) { outline: 2px solid var(--link); outline-offset: -3px; }
+.seg span { position: relative; top: var(--lift); }      /* in its own size: the A's differ */
 .seg .a1 span { font-size: .78rem; } .seg .a2 span { font-size: .92rem; }
 .seg .a3 span { font-size: 1.08rem; } .seg .a4 span { font-size: 1.25rem; }
 dialog.settings .actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
@@ -361,6 +410,7 @@ dialog.settings .reset { padding: 0; font: inherit; font-size: .9rem; color: var
 dialog.settings .done { padding: .3rem 1.1rem; font: inherit;
   font-size: .95rem; color: var(--paper); background: var(--link); border: 0;
   border-radius: 3px; cursor: pointer; }
+dialog.settings .done span { position: relative; top: var(--lift); }
 
 /* ---- prose pages ------------------------------------------------------- */
 .prose { max-width: 62ch; margin: 0 auto; padding: 2rem 1rem 0; }

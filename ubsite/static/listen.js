@@ -51,7 +51,8 @@
     b.className = cls;
     b.setAttribute('aria-label', label);
     b.appendChild(icon(name));
-    if (text) b.appendChild(document.createTextNode(text));
+    // In a span of its own, so ub.css can set it level with its box (--lift).
+    if (text) b.appendChild(document.createElement('span')).textContent = text;
     return b;
   }
 
@@ -431,6 +432,7 @@
     marked = null;
     build();
     mark();
+    document.dispatchEvent(new CustomEvent('ub:swap'));   // ub.js: the rail's place
   }
   // Show url in this page: pushed as a new address, or (from Back) restored to y.
   // `then` runs once it is in.

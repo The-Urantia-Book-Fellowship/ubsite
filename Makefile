@@ -140,19 +140,21 @@ clean:
 	@find . -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
 
 PORT := 8130
+# HOST=0.0.0.0 to reach it from another device on the network (a phone).
+HOST := 127.0.0.1
 PIDFILE := var/serve.pid
 
-## serve         run the reader at http://127.0.0.1:$(PORT), in the foreground
+## serve         run the reader at http://$(HOST):$(PORT), in the foreground
 serve: stop
 	@$(PY) -m uvicorn ubsite.app:app \
-		--host 127.0.0.1 --port $(PORT) --reload
+		--host $(HOST) --port $(PORT) --reload
 
 ## serve-bg      same, in the background, recording its pid
 serve-bg: stop
 	@mkdir -p var
 	@nohup $(PY) -m uvicorn ubsite.app:app \
-		--host 127.0.0.1 --port $(PORT) > var/serve.log 2>&1 & echo $$! > $(PIDFILE)
-	@sleep 2; echo "serving on http://127.0.0.1:$(PORT)  (pid $$(cat $(PIDFILE)))"
+		--host $(HOST) --port $(PORT) > var/serve.log 2>&1 & echo $$! > $(PIDFILE)
+	@sleep 2; echo "serving on http://$(HOST):$(PORT)  (pid $$(cat $(PIDFILE)))"
 
 ## stop          stop the server this project started, and only that one
 # By pid, never by pattern: `pkill -f "uvicorn ubsite.app"` matches the very

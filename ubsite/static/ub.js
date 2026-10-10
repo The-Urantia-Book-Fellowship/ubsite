@@ -175,4 +175,49 @@
   }
   arrive();
   document.addEventListener('ub:page', arrive);
+
+  // The left rail is the whole book (templates/_rail.html), and only the paper
+  // being read comes with its sections.  Another opened there fetches its own
+  // from /rail/N, asked for under the database's version so that the browser
+  // keeps them; if that fails, the paper's link is followed instead.  Listened
+  // for on the document, capturing, because toggle does not bubble -- and so
+  // it holds after listen.js swaps <main>.
+  var railGot = {};
+  document.addEventListener('toggle', function (ev) {
+    var d = ev.target, li = d.parentNode;
+    if (d.tagName !== 'DETAILS' || !d.open || !li || !li.classList || !li.classList.contains('lazy') ||
+        d.querySelector('ol')) return;
+    var rail = li.closest('.rail'), a = d.querySelector('summary a');
+    if (!rail || !a) return;
+    var n = a.getAttribute('href').slice(1);
+    var put = function (html) { if (!d.querySelector('ol')) d.insertAdjacentHTML('beforeend', html); };
+    if (railGot[n]) return put(railGot[n]);
+    fetch('/rail/' + n + '?v=' + encodeURIComponent(rail.dataset.v || ''))
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (html) { railGot[n] = html; put(html); })
+      .catch(function () { location.href = a.href; });
+  }, true);
+
+  // The paper being read, into the rail's view: a sixth of the way down, so
+  // the papers before it show too.  Only while the rail scrolls by itself,
+  // beside the text; on a phone it is a block of the page and is left alone.
+  // By the rail's scrollTop, never scrollIntoView, which would move the page
+  // as well.  Again when the fonts are in, as arrive() does, unless the reader
+  // has scrolled the rail meanwhile; and whenever listen.js swaps <main>.
+  function railView() {
+    var rail = document.querySelector('.rail'), here = rail && rail.querySelector('li.here');
+    if (!here) return;
+    var place = function () {
+      if (rail.scrollHeight <= rail.clientHeight) return;
+      rail.scrollTop += here.getBoundingClientRect().top - rail.getBoundingClientRect().top -
+                        rail.clientHeight / 6;
+    };
+    place();
+    var t = rail.scrollTop;
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+      if (rail.scrollTop === t && rail.isConnected) place();
+    });
+  }
+  railView();
+  document.addEventListener('ub:swap', railView);
 })();

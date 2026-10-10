@@ -14,9 +14,11 @@
 // 'off' for a switch (ubsite/settings.py).  Wrapped because site data can be
 // blocked or cleared, and the page must render correctly without it.  The
 // theme was once kept apart, as ub_theme; it is read from there until ub.js
-// moves it.  ub.js owns the rest.
+// moves it.  ub.js owns the rest.  The class says that scripts run here: a
+// paper in the left rail is only openable with them (ub.css .lazy).
 window.ubDefaults = {{ settings_defaults|tojson }};
 (function (r, D) {
+  r.classList.add('js');
   try {
     var s = JSON.parse(localStorage.getItem('ub_settings') || '{}') || {};
     if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
@@ -83,7 +85,7 @@ window.ubDefaults = {{ settings_defaults|tojson }};
     <p class="kept">Kept in this browser only.</p>
     <div class="actions">
       <button class="reset" type="button">Restore the defaults</button>
-      <button class="done" value="done">Done</button>
+      <button class="done" value="done"><span>Done</span></button>
     </div>
   </form>
 </dialog>

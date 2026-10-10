@@ -291,8 +291,8 @@ class Counter:
             if status != 200:
                 return
             kind, rest = "listen", ("browser", path[len("/speech/"):])
-        elif path in SKIP:
-            return
+        elif path in SKIP or path.startswith("/rail/"):
+            return                                 # /rail/N: a paper opened in the left rail
         else:
             kind = "view"
         headers = dict(scope["headers"])

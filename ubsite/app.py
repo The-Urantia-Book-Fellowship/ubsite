@@ -254,6 +254,47 @@ def voices() -> list[dict]:
 
 
 T.env.globals["voices"] = voices
+
+
+def db_version() -> int:
+    """Which database this is: its mtime, which every cache here keys on.
+
+    The rail asks for a paper's sections under it (/rail/N?v=...), so a browser
+    may keep the answer for good and still never shows a stale one.
+    """
+    try:
+        return DB.stat().st_mtime_ns
+    except OSError:
+        return 0
+
+
+ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV"}
+
+
+@functools.lru_cache(maxsize=4)
+def _book(mtime_ns: int) -> dict:
+    con = db()
+    sections: dict[int, list[dict]] = {}
+    for r in con.execute("SELECT paper_n, n, title_html, combined_with FROM section"
+                         " ORDER BY paper_n, n"):
+        sections.setdefault(r["paper_n"], []).append(dict(r))
+    papers = [dict(r) for r in con.execute("SELECT n, title, part_n FROM paper ORDER BY n")]
+    parts = [dict(r, roman=ROMAN[r["n"]],
+                  papers=[p for p in papers if p["part_n"] == r["n"]])
+             for r in con.execute("SELECT n, title FROM part ORDER BY n")]
+    return {"foreword": [p for p in papers if p["part_n"] is None],
+            "parts": parts, "sections": sections}
+
+
+def book() -> dict:
+    """The whole book as the left rail draws it: the Foreword, the four parts
+    with their papers, and every paper's sections.  Cached on the database's
+    mtime, as sources() is."""
+    return _book(db_version())
+
+
+T.env.globals["db_version"] = db_version
+T.env.globals["book"] = book
 T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
 
@@ -646,6 +687,24 @@ def appendix(request: Request, letter: str):
                 years=years, bands=bands)
 
 
+@app.get("/rail/{paper:int}", include_in_schema=False)
+def rail_sections(request: Request, paper: int, v: str = ""):
+    """One paper's sections, for the left rail when a reader opens that paper.
+
+    A section page carries the tree only down to the papers, and its own
+    paper's sections: all 1,626 inline would add 111 KB to a page of about 20.
+    Asked for under the database's version, the answer is kept for good.
+    """
+    secs = book()["sections"].get(paper)
+    if secs is None:
+        return Response("No such paper.\n", status_code=404, media_type="text/plain")
+    cache = ("public, max-age=31536000, immutable" if v == str(db_version())
+             else "no-cache")
+    return T.TemplateResponse(request, "rail_sections.html",
+                              {"paper_n": paper, "secs": secs},
+                              headers={"Cache-Control": cache})
+
+
 @app.get("/{paper:int}")
 def paper_page(request: Request, paper: int):
     """A paper number opens the paper, not a table of its sections.
@@ -725,7 +784,4 @@ def read(request: Request, ref: str):
     return page(request, "section.html", paper=p, section=s, paras=paras,
                 citers=citers, blanket=blanket, notes=notes,
                 focus=focus, last=last, nxt=nxt, prv=prv, onward=onward,
-                audio=section_audio(con, s["id"]),
-                all_sections=con.execute(
-                    "SELECT n, title_html FROM section WHERE paper_n=? ORDER BY n",
-                    (paper,)).fetchall())
+                audio=section_audio(con, s["id"]))
