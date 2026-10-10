@@ -2,7 +2,8 @@
 
 Every paper is there, once; only the paper being read carries its sections, and
 another's come from /rail/N, kept by the browser when asked for under the
-database's version.  Rendered through the app as ASGI, as test_appendix_pages
+database's version.  A part's title opens its own page, /part/N: the divider,
+and none of the text.  Rendered through the app as ASGI, as test_appendix_pages
 does.  Skipped when var/ub.db has not been built.
 """
 
@@ -15,7 +16,7 @@ from test_appendix_pages import DB, get
 RE_RAIL = re.compile(r'<nav class="rail"[^>]*>.*?</nav>', re.S)
 RE_PAPER = re.compile(r'href="/(\d+)"')
 RE_SECTION = re.compile(r'href="/(\d+):(\d+)"')
-RE_OPEN_PART = re.compile(r'<li class="part"><details open><summary>Part ([IV]+)\.')
+RE_OPEN_PART = re.compile(r'<li class="part[^"]*"><details open><summary><a href="/part/\d">Part ([IV]+)\.')
 
 
 def rail(url: str) -> str:
@@ -70,6 +71,28 @@ class Rail(unittest.TestCase):
 
     def test_no_such_paper(self):
         self.assertEqual(get("/rail/197")[0], 404)
+
+    def test_a_part_title_opens_its_page(self):
+        r = rail("/133:2")
+        self.assertEqual(re.findall(r'<a href="/part/(\d)">Part ([IV]+)\.', r),
+                         [("1", "I"), ("2", "II"), ("3", "III"), ("4", "IV")])
+
+    def test_a_parts_page_is_its_divider(self):
+        status, _, body = get("/part/4")
+        self.assertEqual(status, 200)
+        self.assertIn('<p class="papernum">PART IV</p>', body)
+        self.assertIn("<h1>The Life and Teachings<br>of Jesus</h1>", body)
+        self.assertIn("watchcare of the Apostle Andrew.</p>", body)
+        self.assertNotRegex(body, r'<p class="t[ "]')           # no paragraph of text
+        self.assertIn('<a class="next" href="/120">', body)
+        r = rail("/part/4")
+        self.assertEqual(RE_OPEN_PART.findall(r), ["IV"])
+        self.assertEqual(r.count("<details open>"), 1)          # the part, and no paper
+        self.assertIn('<li class="part here"><details open>', r)
+
+    def test_there_are_four_parts(self):
+        for n in (0, 5):
+            self.assertEqual(get(f"/part/{n}")[0], 404, n)
 
     def test_139_names_its_combined_section(self):
         _, _, body = get("/rail/139")

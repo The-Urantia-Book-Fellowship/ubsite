@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_rail.html" import rail %}
+{#- A part's own page, as the book's divider sets it (\\part in the press style):
+    the part, its title on its printed lines, and the note of who sponsored its
+    papers.  No text: its first paper is the next page. #}
+{% block title %}Part {{ roman }} — {{ part.title }}{% endblock %}
+{% block body %}
+<main class="reader">
+  {{ rail(book(), none, none, part.n) }}
+
+  <article class="partpage">
+    <header>
+      <p class="papernum">{{ part.label }}</p>
+      <h1>{% for line in part.title_lines.split("\n") %}{% if not loop.first %}<br>{% endif %}{{ line }}{% endfor %}</h1>
+      <p class="sponsor">{{ part.sponsor }}</p>
+    </header>
+    <nav class="pager"><a class="next" href="/{{ part.first_paper }}">next ›</a></nav>
+  </article>
+</main>
+{% endblock %}

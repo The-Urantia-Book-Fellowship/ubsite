@@ -21,21 +21,23 @@ sys.path.insert(0, str(VENDOR))
 import cite   # noqa: E402
 import xref   # noqa: E402
 
-PARTS = [(1, "The Central and Superuniverses", 1, 31),
-         (2, "The Local Universe", 32, 56),
-         (3, "The History of Urantia", 57, 119),
-         (4, "The Life and Teachings of Jesus", 120, 196)]
+# The papers each part holds; its words come from the press style (read_parts).
+PARTS = [(1, 1, 31), (2, 32, 56), (3, 57, 119), (4, 120, 196)]
 
 
 def _part_of(n: int):
-    for pn, _t, lo, hi in PARTS:
+    for pn, lo, hi in PARTS:
         if lo <= n <= hi:
             return pn
     return None
 
 
-def load_text(con, papers, repo, report) -> dict:
-    con.executemany("INSERT INTO part VALUES (?,?,?,?)", PARTS)
+def load_text(con, papers, parts, repo, report) -> dict:
+    con.executemany("INSERT INTO part (n, title, first_paper, last_paper, label,"
+                    " title_lines, sponsor) VALUES (?,?,?,?,?,?,?)",
+                    [(n, parts[n]["title"], lo, hi, parts[n]["label"],
+                      parts[n]["title_lines"], parts[n]["sponsor"])
+                     for n, lo, hi in PARTS if n in parts])
     con.execute("INSERT INTO edition (id, code, title, variety, source_repo,"
                 " source_commit, source_dirty) VALUES (1,'press',?,?,?,?,?)",
                 ("The Urantia Book -- Uversa Press", "authoritative",

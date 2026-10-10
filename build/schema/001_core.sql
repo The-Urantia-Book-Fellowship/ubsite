@@ -13,7 +13,11 @@ CREATE TABLE edition (
 
 CREATE TABLE part (
   n INTEGER PRIMARY KEY, title TEXT NOT NULL,
-  first_paper INTEGER NOT NULL, last_paper INTEGER NOT NULL
+  first_paper INTEGER NOT NULL, last_paper INTEGER NOT NULL,
+  -- The part's divider page, as the press style defines it (readers/press.py
+  -- read_parts): 'PART I', the title on its printed lines ("\n" between), and
+  -- the note of who sponsored its papers.
+  label TEXT NOT NULL, title_lines TEXT NOT NULL, sponsor TEXT NOT NULL
 );
 
 CREATE TABLE paper (

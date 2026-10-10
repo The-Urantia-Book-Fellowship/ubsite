@@ -54,6 +54,7 @@ def corpus_codepoints(con) -> set[str]:
               "SELECT title FROM paper",
               "SELECT author FROM paper WHERE author IS NOT NULL",
               "SELECT title FROM part",
+              "SELECT label || title_lines || sponsor FROM part",   # its own page
               "SELECT title FROM section WHERE title IS NOT NULL",
               "SELECT text FROM index_entry",
               "SELECT path_plain FROM index_entry",     # the chips, with their ›

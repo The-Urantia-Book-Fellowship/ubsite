@@ -65,7 +65,7 @@ def main(argv: list[str]) -> int:
         from .problems import Report
         from .readers.index_app import read_appendices
         from .readers.index_az import read_az
-        from .readers.press import read_all
+        from .readers.press import read_all, read_parts
 
         root = pathlib.Path(__file__).resolve().parent.parent
         out = root / "var" / "ub.db"
@@ -79,6 +79,7 @@ def main(argv: list[str]) -> int:
 
         print(f"reading press text, {repos['press']['rev']} at {at(repos['press'])} ...")
         papers = read_all(repos["press"]["tex"], report)
+        parts = read_parts(repos["press"]["path"], report)
         ix = repos["index"]
         print(f"reading index at {at(ix)} ...")
         az = read_az(ix["tex"], report, rev=ix["at"])
@@ -86,7 +87,7 @@ def main(argv: list[str]) -> int:
 
         con = db.create(tmp)
         print("loading ...")
-        para_key = load.load_text(con, papers, repos["press"], report)
+        para_key = load.load_text(con, papers, parts, repos["press"], report)
         load.load_index(con, az, apps, para_key, report)
         print("slugs ...")
         from . import slugs

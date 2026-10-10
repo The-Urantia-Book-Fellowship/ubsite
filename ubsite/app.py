@@ -705,6 +705,19 @@ def rail_sections(request: Request, paper: int, v: str = ""):
                               headers={"Cache-Control": cache})
 
 
+@app.get("/part/{n:int}", response_class=HTMLResponse)
+def part_page(request: Request, n: int):
+    """A part's own page: its divider, as the book prints it, and nothing more.
+
+    The rail's part titles link here, so a part opens on its title page rather
+    than only unfolding in the rail.
+    """
+    part = db().execute("SELECT * FROM part WHERE n=?", (n,)).fetchone()
+    if part is None:
+        return missing(request, "There are four parts, I to IV.")
+    return page(request, "part.html", part=part, roman=ROMAN[n])
+
+
 @app.get("/{paper:int}")
 def paper_page(request: Request, paper: int):
     """A paper number opens the paper, not a table of its sections.

@@ -238,5 +238,41 @@ def read_paper(path: pathlib.Path, report) -> Paper:
     return Paper(paper_n, title, author, sections, paras)
 
 
+# The four parts, from the press style's own definitions, one line each:
+#   \def\partitxt{PART I}   \def\partiup{The Central\\and Superuniverses}
+#   \def\partimix{The Central and Superuniverses}   \def\partisub{Sponsored by ...}
+# txt and up are what its divider page prints (\part{i}), with sub beneath;
+# mix is the title on one line, as the book's page of Parts sets it.
+STYLE = "urantia-uversa-press.sty"
+ROMAN = ("i", "ii", "iii", "iv")
+RE_PARTDEF = re.compile(r"\\def\\part(i|ii|iii|iv)(txt|up|mix|sub)\{(.*)\}$")
+
+
+def read_parts(repo: pathlib.Path, report) -> dict[int, dict]:
+    """{n: {label, title, title_lines, sponsor}} for the four parts."""
+    found: dict[tuple[int, str], tuple[str, int]] = {}
+    for lineno, line in enumerate(read_text(pathlib.Path(repo) / STYLE).splitlines(), 1):
+        m = RE_PARTDEF.match(line.strip())
+        if m:
+            found[(ROMAN.index(m.group(1)) + 1, m.group(2))] = (m.group(3), lineno)
+    parts = {}
+    for n, r in enumerate(ROMAN, 1):
+        lines = {}
+        for field in ("txt", "up", "mix", "sub"):
+            if (n, field) not in found:
+                report.hard("part-undefined", STYLE, f"no \\part{r}{field}")
+                continue
+            value, at = found[(n, field)]
+            # \\ is a printed line break, and nothing else is expected here.
+            lines[field] = [x.strip() for x in RE_NEWLINE.split(value)]
+            if any(c in x for x in lines[field] for c in "\\{}$%&~"):
+                report.hard("part-markup", f"{STYLE}:{at}",
+                            f"\\part{r}{field} holds TeX this reader does not know: {value[:60]}")
+        if len(lines) == 4:
+            parts[n] = {"label": " ".join(lines["txt"]), "title": " ".join(lines["mix"]),
+                        "title_lines": "\n".join(lines["up"]), "sponsor": " ".join(lines["sub"])}
+    return parts
+
+
 def read_all(texdir: pathlib.Path, report) -> list[Paper]:
     return [read_paper(f, report) for f in sorted(texdir.glob("p[0-9][0-9][0-9].tex"))]

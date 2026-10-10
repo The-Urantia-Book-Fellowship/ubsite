@@ -1,7 +1,7 @@
 {#- The left rail: the whole book, everything closed but the paper being read.
     Native <details>, so it opens and closes with JavaScript off.  A part's
-    summary only opens it; a paper's holds a link, so its title goes to the
-    paper and the chevron beside it opens it.
+    summary and a paper's hold a link, so the title goes to the part's page
+    (/part/N, its divider) or to the paper, and the chevron beside it opens it.
 
     Only the paper being read carries its sections.  Another paper's arrive
     from /rail/N when it is opened (ub.js), because all 1,626 inline would add
@@ -24,6 +24,7 @@
 {%- endif %}
 {%- endmacro %}
 
+{#- here_p is None on a part's own page: the part is open, and is the page. -#}
 {% macro rail(bk, here_p, here_s, here_part) -%}
 <nav class="rail" aria-label="The book" data-v="{{ db_version() }}">
 <ol>
@@ -31,7 +32,7 @@
 {{ paper_row(p, bk, here_p, here_s) }}
 {%- endfor %}
 {%- for part in bk.parts %}
-<li class="part"><details{% if part.n == here_part %} open{% endif %}><summary>Part {{ part.roman }}. {{ part.title }}</summary>
+<li class="part{% if here_p is none and part.n == here_part %} here{% endif %}"><details{% if part.n == here_part %} open{% endif %}><summary><a href="/part/{{ part.n }}">Part {{ part.roman }}. {{ part.title }}</a></summary>
 <ol>
 {%- for p in part.papers %}
 {{ paper_row(p, bk, here_p, here_s) }}
