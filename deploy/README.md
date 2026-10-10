@@ -8,18 +8,19 @@ They are **not** in the script on purpose. A deploy script that quietly acquires
 
 ## The shape of it
 
-pi5 already runs two services behind nginx on 443, told apart by name (TLS SNI):
+nginx on pi5 serves two names on 443, told apart by name (TLS SNI):
 
 ```
 ulib.ddns.net, urantia.zapto.org  ->  127.0.0.1:8000   urantia-library
-proxyai.ddns.net                  ->  127.0.0.1:8090   libnodes
-ubsite.ddns.net                   ->  127.0.0.1:8130   ubsite      <- new
+ubsite.ddns.net                   ->  127.0.0.1:8130   ubsite
 _  (no-sni-default)               ->  444
 ```
 
-Adding a third is one more `server` block. The browser sends the hostname in the TLS ClientHello before any certificate is chosen, so nginx picks the block and presents that block's certificate.
+libnodes is the third service on pi5, LAN-only at `http://pi5:8090/` with nothing in front of it, so nginx has no block for it.
 
-**ubsite is public.** The other two sit behind `allow 78.147.193.57; deny all;`. This one cannot, so the nginx block replaces that protection explicitly: a rate limit on `/search`, `client_max_body_size 1k`, and nothing else exposed.
+Each is one `server` block. The browser sends the hostname in the TLS ClientHello before any certificate is chosen, so nginx picks the block and presents that block's certificate.
+
+**ubsite is public**, and so the nginx block gives it limits of its own: a rate limit on `/search`, `client_max_body_size 1k`, and nothing else exposed.
 
 **The database is the artifact.** The three source repositories are not on pi5 and do not need to be. `make data` runs on the development machine, where the LaTeX lives, and `var/ub.db` is rsynced. pi5 needs no TeX and no sources.
 

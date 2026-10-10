@@ -5,7 +5,7 @@
 1600 x 2560, the proportion Kindle and Apple Books ask for.  The mark is
 ubsite/static/favicon.svg in its light colours, and the title is set in UB
 Goudy from the site's own subset, so the cover is the site's face, not a
-lookalike.  Never the Foundation's concentric circles (CLAUDE.md §10.2).
+lookalike.  Never the Foundation's concentric circles (CLAUDE.md §8).
 
 Rendered by headless Chrome and converted by ImageMagick, as tools/make_icons.py
 does.  Neither is a build dependency: run this by hand when the mark or the

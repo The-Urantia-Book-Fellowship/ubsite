@@ -10,9 +10,8 @@
 #   2. ubsite.ddns.net must not also appear in ulib.ddns.net's server_name. Two
 #      blocks claiming one name means the first parsed wins, silently.
 #
-# Unlike ulib and libnodes there is NO allow/deny: this site is meant to be
-# public. That is a deliberate change of posture, so the protections that an IP
-# allowlist was providing are replaced explicitly below.
+# There is NO allow/deny: this site is meant to be public, so it carries its own
+# protections, explicitly, below.
 
 limit_req_zone $binary_remote_addr zone=ubsite_search:10m rate=30r/m;
 
