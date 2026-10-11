@@ -271,7 +271,7 @@ above. Each is named by its User-Agent.{% if r.api.current %} The text is at ver
   {%- if c.places %}<div class="sub">{{ c.places|join(' · ') }}</div>{% endif %}
   {%- if c.errors %}<div class="sub">{{ n(c.errors) }} refused</div>{% endif %}</td>
   <td class="fig">{{ n(c.calls) }}</td><td class="fig">{{ n(c.whole) }}</td>
-  <td class="fig">{% if c.held %}{{ c.held }}{% if c.held == r.api.current %} ✓{% else %} <span class="sub">behind</span>{% endif %}{% else %}<span class="sub">–</span>{% endif %}</td>
+  <td class="fig">{% if c.held %}{{ c.held }} <span class="sub">{{ 'current' if c.held == r.api.current else 'behind' }}</span>{% else %}<span class="sub">–</span>{% endif %}</td>
   <td class="fig sub">{{ c.last }}</td></tr>
 {%- else %}<tr><td class="sub">None yet.</td></tr>
 {%- endfor %}
