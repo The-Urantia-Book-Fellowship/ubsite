@@ -88,16 +88,16 @@ def records(con) -> list[tuple[str, str, dict]]:
         spans[pid].append(_Span(start, end, kind))
     marked = {pid for (pid,) in con.execute(
         "SELECT DISTINCT paragraph_id FROM span WHERE kind = 'fnref'")}
-    for pid, ref, uf, p, s, n, text, html in con.execute(
-            "SELECT p.id, p.ref, u.ref, p.paper_n, p.section_n, p.para_n, p.text, p.html"
+    for pid, ref, uf, page, p, s, n, text, html in con.execute(
+            "SELECT p.id, p.ref, u.ref, u.page, p.paper_n, p.section_n, p.para_n, p.text, p.html"
             " FROM paragraph p JOIN uf_paragraph u ON u.paragraph_id = p.id ORDER BY p.ord"):
         if pid in marked:
             html = render(text, spans.get(pid, []))
         # HTML alone, no plain copy beside it (Tigran, 2026-10-11): stripping its
         # tags gives the text exactly, which check_db holds, and one copy cannot
         # disagree with itself.
-        out.append(("paragraph", ref, {"ref": ref, "uf_ref": uf, "paper": p, "section": s,
-                                       "paragraph": n, "html": html}))
+        out.append(("paragraph", ref, {"ref": ref, "uf_ref": uf, "page_1955": page, "paper": p,
+                                       "section": s, "paragraph": n, "html": html}))
     return out
 
 

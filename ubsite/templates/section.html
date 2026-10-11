@@ -37,6 +37,7 @@
       {% set hit = focus and p.para_n >= focus and p.para_n <= last %}
       <p class="t{% if p.gap_before %} pc{% endif %}{% if hit %} hit{% endif %}"
          id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
+         {%- if p.page_1955 %}<span class="pg" data-pg="{{ p.page_1955 }}"></span>{% endif %}
          {%- if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}
          {{- p.html|safe }}</p>
       <div class="a">

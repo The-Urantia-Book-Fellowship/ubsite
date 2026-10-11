@@ -199,6 +199,18 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
        font-size: .78rem; color: var(--faint); text-decoration: none;
        position: relative; top: .35rem; }
 .num:hover { color: var(--ink); }
+/* The 1955 page, only if a reader asks (Settings): where the paragraph begins
+   in the first printing.  Drawn from data-pg, as the pilcrow is drawn, so
+   copying a paragraph never takes it along.  In the gutter it stands on the
+   reference's second line with the play button beside it, which moves up to
+   meet it: the gutter stays two lines tall, or a one-line paragraph's would run
+   into the next one's. */
+.pg { display: none; }
+.pg::before { content: "(" attr(data-pg) ")"; }
+:root[data-pages="true"] .pg { display: block; position: absolute; right: calc(100% + 1.75rem);
+       top: 1.45rem; white-space: nowrap; font-size: .72rem; color: var(--faint); }
+:root[data-pages="true"] .playp { top: 1.35rem; }
+:root[data-pages="true"][data-paranum="off"] .pg { top: .45rem; }
 
 .jesus { color: var(--jesus); }
 
@@ -525,6 +537,11 @@ dialog.settings .done span { position: relative; top: var(--lift); }
            margin: .15rem calc(var(--refw, 9) * 1ch + .4rem - .9rem) 0 -.25rem; }
   .playp svg { width: .83rem; height: .83rem; }
   :root[data-paranum="off"] .playp { margin-right: .8rem; }
+  /* On a phone it floats under the reference and the play button, a third
+     line of the stack beside the paragraph's first words. */
+  :root[data-pages="true"] .pg { position: relative; right: auto; float: left; clear: left;
+         width: calc(var(--refw, 9) * 1ch + .4rem); top: .2rem; font-size: .78rem; }
+  :root[data-pages="true"][data-paranum="off"] .pg { top: .2rem; }
   .a:not(:empty) { margin: -.4rem 0 1rem 1rem; border-left: 2px solid var(--rule);
                    padding-left: .7rem; }
   .blanket ul { columns: 1; }

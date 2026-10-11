@@ -15,6 +15,10 @@ paragraphs wrongly, so the API carries both.  Theirs is read from the
 Foundation's own HTML (SRT v1.22), which the press repo keeps as a zip, at the
 revision config pins -- never misc/html/, an extraction that may be stale.
 
+Each paragraph's reference there carries its 1955 page as well, "101:4.2
+(1109.3)": the page of the first printing, and the paragraph on that page.  It
+is taken with the reference.
+
 Paragraphs are matched by their words, paper by paper (139:9 and 139:10 cross a
 section), with difflib over a normalisation that keeps letters and digits only.
 The press departs from the SRT in a few accepted places -- a capital after a
@@ -40,6 +44,7 @@ ZIP = "misc/uf-eng-001-1955-1.22-html.zip"
 RE_FILE = re.compile(r"Paper(\d{3})\.html$")
 RE_P = re.compile(r'<p id="U(\d+)_(\d+)_(\d+)"[^>]*>(.*?)</p>', re.S)
 RE_SMALL = re.compile(r"\s*<small>([^<]*)</small>\s*")
+RE_PAGE = re.compile(r" \((\d+\.\d+)\)$")
 RE_TAG = re.compile(r"<[^>]+>")
 SIMILAR = 0.9           # a pair matched despite different words must be this alike
 
@@ -54,8 +59,11 @@ def _norm(t: str) -> str:
     return "".join(c for c in t.casefold() if c.isalnum())
 
 
-def read(repo, report) -> dict[int, list[tuple[Key, str]]]:
-    """{paper: [((paper, section, n), text), ...]} in the Foundation's order."""
+def read(repo, report, pages: dict[Key, str] | None = None) -> dict[int, list[tuple[Key, str]]]:
+    """{paper: [((paper, section, n), text), ...]} in the Foundation's order.
+
+    Each paragraph's 1955 page goes into `pages`, by its key there.
+    """
     data = _io.read_bytes_at_rev(repo["path"], ZIP, repo["at"])
     out = collections.defaultdict(list)
     with zipfile.ZipFile(io.BytesIO(data)) as z:
@@ -70,6 +78,12 @@ def read(repo, report) -> dict[int, list[tuple[Key, str]]]:
                     report.hard("uf-paragraph-unlabelled", fmt(k),
                                 f"{name}: no <small>{fmt(k)} …</small> before the text")
                     continue
+                page = RE_PAGE.search(small.group(1))
+                if not page:
+                    report.hard("uf-paragraph-no-page", fmt(k),
+                                f"{name}: no 1955 page in {small.group(1)!r}")
+                elif pages is not None:
+                    pages[k] = page.group(1)
                 text = html.unescape(RE_TAG.sub("", body[small.end():])).strip()
                 out[k[0]].append((k, text))
     return out
@@ -128,14 +142,15 @@ def load_known(path: pathlib.Path) -> list[tuple[str, str, str, str]]:
 
 
 def load(con, repo, report, known: pathlib.Path) -> int:
-    """Fill uf_paragraph and uf_section.  Returns how many paragraphs differ."""
+    """Fill uf_paragraph and uf_section.  Returns how many paragraphs it numbers otherwise."""
     ours = collections.defaultdict(list)
     ids = {}
     for pid, p, s, n, text in con.execute(
             "SELECT id, paper_n, section_n, para_n, text FROM paragraph ORDER BY ord"):
         ours[p].append(((p, s, n), text))
         ids[(p, s, n)] = pid
-    match = align(ours, read(repo, report), report)
+    pages: dict[Key, str] = {}
+    match = align(ours, read(repo, report, pages), report)
 
     got, want = runs(match), load_known(known)
     for r in sorted(set(got) - set(want)):
@@ -146,8 +161,9 @@ def load(con, repo, report, known: pathlib.Path) -> int:
         report.hard("uf-numbering-gone", r[0],
                     f"{known.name} declares {r[0]}–{r[1]} as {r[2]}–{r[3]}, and it is not")
 
-    con.executemany("INSERT INTO uf_paragraph VALUES (?, ?)",
-                    [(ids[k], None if u is None else fmt(u)) for k, u in match.items()])
+    con.executemany("INSERT INTO uf_paragraph VALUES (?, ?, ?)",
+                    [(ids[k], None if u is None else fmt(u), pages.get(u))
+                     for k, u in match.items()])
     # A section's is the one Foundation section all its paragraphs are in.
     secs = collections.defaultdict(set)
     for (p, s, _), u in match.items():

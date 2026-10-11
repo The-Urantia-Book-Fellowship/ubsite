@@ -41,7 +41,8 @@ BLANKET_MAX = 60
 def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     """One section's paragraphs and everything that stands beside them.
 
-    paras    the paragraphs, in order, with para_density's precise_citers, thin
+    paras    the paragraphs, in order, with para_density's precise_citers, thin,
+             and page_1955, where the paragraph begins in the first printing
     citers   paragraph id -> its chips, the entries citing it precisely
     blanket  the entries citing the whole section or paper -- read_pack's rule:
              listed ONCE at the section's head, never repeated under every
@@ -50,8 +51,9 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     notes    paragraph id -> its 1955 readings
     """
     paras = con.execute(
-        "SELECT p.*, d.precise_citers, d.thin FROM paragraph p"
+        "SELECT p.*, d.precise_citers, d.thin, u.page AS page_1955 FROM paragraph p"
         " LEFT JOIN para_density d ON d.paragraph_id=p.id"
+        " LEFT JOIN uf_paragraph u ON u.paragraph_id=p.id"
         " WHERE p.paper_n=? AND p.section_n=? ORDER BY p.para_n",
         (paper, sec)).fetchall()
     citers: dict[int, list] = {}

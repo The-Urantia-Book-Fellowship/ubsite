@@ -171,6 +171,13 @@ class Whole(Quiet):
         self.assertTrue('"uf_ref": "144:5.12"' in page, "the renumbered example is shown")
         self.assertTrue('BASE = "https://ubsite.test/api/v1"' in page, "the client names this site")
         self.assertTrue(f'"version": {self.current},' in page, "a reply is shown, with its version")
+        self.assertTrue("mailto:tigran.aivazian@urantiabook.org" in page, "a contact")
+
+    def test_a_section_page_carries_the_1955_pages(self):
+        status, _, body = call("/101:4")
+        self.assertEqual(status, 200)
+        self.assertIn('id="101:4.2"><a class="num" href="/101:4.2">101:4.2</a>'
+                      '<span class="pg" data-pg="1109.3"></span>', body.decode())
 
     def test_the_two_numberings(self):
         uf = {x["ref"]: x["uf_ref"] for x in self.reply["paragraphs"]}
@@ -179,6 +186,10 @@ class Whole(Quiet):
         self.assertEqual(uf["144:5.102"], "144:5.108")
         self.assertIsNone(uf["0:12.10"])
         self.assertEqual(sum(1 for r, u in uf.items() if r != u), 107)
+        pages = {x["ref"]: x["page_1955"] for x in self.reply["paragraphs"]}
+        self.assertEqual(pages["101:4.2"], "1109.3")
+        self.assertEqual(pages["144:5.11"], "1622.10")
+        self.assertIsNone(pages["0:12.10"])
         secs = {x["ref"]: x["uf_ref"] for x in self.reply["sections"]}
         self.assertEqual(secs["139:9"], "139:10")
 

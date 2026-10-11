@@ -49,6 +49,9 @@ READING = [
 SHOW = [
     ("redletter", "switch", "The words of Jesus in red", True, [], ""),
     ("paranum", "switch", "Paragraph references", True, [], "such as 0:1.2, beside each paragraph"),
+    # Where each paragraph begins in the 1955 first printing.  Obsolete as a way
+    # to cite the book, so off unless a reader asks (Tigran, 2026-10-11).
+    ("pages", "switch", "1955 page references", False, [], "such as (1109.3): page, and paragraph on it"),
     ("pilcrow", "switch", "Pilcrows", True, [], "where the 1955 text leaves a blank line"),
     ("margin", "switch", "Index entries beside the text", True, [], ""),
     ("notes", "switch", "The 1955 readings", True, [], ""),

@@ -35,6 +35,8 @@ QUERIES = [
     ("  sections renumbered",
      "SELECT COUNT(*) FROM section s JOIN uf_section u ON u.section_id = s.id"
      " WHERE u.ref IS NOT s.paper_n || ':' || s.n", 1),
+    # 0:12.10, which the Foundation does not number.
+    ("  without a 1955 page", "SELECT COUNT(*) FROM uf_paragraph WHERE page IS NULL", 1),
     ("text version",        "SELECT MAX(n) FROM text_version", None),
     # Reported, not asserted: they move as the index is edited.
     ("B-F rows naming an A-Z headword", "SELECT COUNT(*) FROM appendix_head", None),
@@ -169,6 +171,21 @@ def run(con) -> int:
         bad += 1
 
     bad += _text_api(con)
+
+    # The 1955 pages run forward through the book, and no two paragraphs begin
+    # at one place: a paragraph matched to the wrong one of the Foundation's
+    # would break the run.
+    prev, back = None, []
+    for ref, page in con.execute(
+            "SELECT p.ref, u.page FROM paragraph p JOIN uf_paragraph u"
+            " ON u.paragraph_id = p.id WHERE u.page IS NOT NULL ORDER BY p.ord"):
+        at = tuple(map(int, page.split(".")))
+        if prev and at <= prev[1]:
+            back.append(f"{prev[0]} ({'.'.join(map(str, prev[1]))}) then {ref} ({page})")
+        prev = (ref, at)
+    print(f"1955 pages: run forward through the book"
+          + ("" if not back else f"   {len(back)} FAIL: {back[:3]}"))
+    bad += bool(back)
 
     print("counts")
     for name, q, expect in QUERIES:
