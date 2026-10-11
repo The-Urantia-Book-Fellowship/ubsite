@@ -44,7 +44,7 @@ make venv           create .venv (uv) and sync requirements.txt -- run this firs
 make lock           recompile requirements.txt from requirements.in
 make sources        the three repos and the revisions in use
 make vendor-check   re-hash the vendored copies against upstream (fails with a diff)
-make data           build var/ub.db          (~14 s)
+make data           build var/ub.db          (~17 s)
 make check          every gate               (~8 s; rebuilds the oracles first)
 make epub           the whole site as an EPUB -> var/epub/  (~3 s, ~10 s more for its gates)
 make test           the never-write-to-a-master guards
@@ -95,6 +95,13 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-browser`
 - **The appendices** (2026-10-09). `/appendix/A` is the Chronology as printed, each year in a column of its own beside its months and events, with a jump bar by period; `/appendix/B` … `/F` are the five name lists, in two columns as printed. Every *q.v.* in the index, A–Z and appendix alike (1,026), links to the headword it names, and so does every B–F name that is an A–Z headword (`appendix_head`, 1,332 of 1,351): both are `derive.links`. A concept page says which appendices list it, and an appendix chip in the margin links to its line (§8).
 - **Visits** (2026-10-09). The site counts its own visitors, server-side: `ubsite/visits.py` (a pure ASGI middleware, a queue, a writer thread per worker) → `var/visits.db` (`ubsite/visits.sql`), and a private `/stats` page (`ubsite/stats.py`, `templates/stats.html`) behind HTTP Basic auth against `var/stats.passwd`. Places come from DB-IP City Lite (`make geoip`, shipped by `deploy.sh`). README, "Visits".
 - **The EPUB** (2026-10-10). `epub/` is the third view over `var/ub.db`: the whole site as one EPUB 3, offline, except listening. `make epub` builds `var/epub/the-urantia-book.epub` (5.5 MB) and gates it. The Foreword, the four parts with their papers (one file each), the Index A–Z with each headword its whole concept page, then Appendices A–F, as the volume prints them. Beneath every paragraph stand the entries that cite it, as on a phone; every paragraph begins with its reference as literal text, so a reader's own search for `101:4.2` finds it; the 1955 readings are pop-up notes. The entries citing a whole section stand under its title without the site's "Cited across this whole section" (Tigran: where they stand says so; the site keeps it). Entries are separated by a black `|` that is not a link, beneath paragraphs and in "Cited alongside". **No contents page** (Tigran: the reader's built-in outline, `nav.xhtml`, is easier); the outline reaches every section. **No red letter** (Tigran: it looks bad on e-ink): the spans are in the markup, uncoloured. **Private for now**: no download route, no deploy step, no Uversa Press metadata or ISBN until publishing is decided. What stands beside a paragraph and what a concept page lists come from **`ubsite/queries.py`**, which the site's routes call too, so the margin's rules exist once. The gates (`epub/check.py`) read the file back: every link lands, every paragraph and index entry round-trips to the database, counts match, every glyph is in the embedded Goudy, the same database gives the same bytes, and epubcheck (W3C, 5.4.0 in `~/Software/epubcheck`, which needs `openjdk-26-jre-headless`) reports nothing. The cover is `epub/cover.jpg`, drawn by `tools/make_cover.py`; the fonts are the site's own subset, unwrapped to OTF, and `build/fonts.py` scans `epub/templates/` so the subset covers the EPUB's own characters.
+- **The text API** (2026-10-11). `/api/v1` lets other sites keep their copy of the English text in step with ours, and `/api` documents it, with a client in Python. Its first users are Vladislav Pogorelov's Urantia Papers Explorer and Alexander Alyuev's UB_AI_Search.
+  - **The protocol is a text version.** A site keeps the number it was sent and asks `/api/v1/text?since=N`. It gets every record new or changed since N, the keys of any removed, and the new number. From 0 it gets the whole text, 3 MB gzipped.
+  - **A record** is a part, a paper, a section or a paragraph, each with a hash. A paragraph also has `text`, `html` and `uf_ref`. The `html` is `render.py`'s, without the note markers.
+  - **`build/versions.py`** keeps the versions in an append-only ledger, `data/text/`, because `ub.db` remembers no earlier build. The ledger is appended only after a build passes.
+  - **`build/foundation.py`** gives every paragraph and section the Foundation's reference, `uf_ref`. It reads its SRT HTML (the zip in the press repo) and aligns it with ours paper by paper. Its differences must be exactly `tests/known-uf-refs.tsv`.
+  - **`ubsite/api.py`** only concatenates stored records. Each worker gzips a reply once. Replies carry an ETag, so an unchanged one is a 304, and `Access-Control-Allow-Origin: *`.
+  - **Calls are counted apart from views**, in `api_call` in `visits.db`. `/stats` lists each caller by its User-Agent.
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and `deploy.sh`, with a README naming the four steps that need root. All four have been run; the site is live at **https://ubsite.ddns.net**. **The database is the artifact**: the three source repos are not on pi5 and do not need to be, so `make data` runs here and `var/ub.db` is shipped.
 
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz, figures behind the rights gate), then 7 (human sources), 8 (the timeline, the map).
@@ -112,6 +119,7 @@ index entries 34,751 (32,964 A–Z + 1,351 appendix + 436 chronology events)
 citations 39,885 → 50,842 targets {para 47,954, sec 2,254, paper 634}
 cross-references 5,133 See/See also + 1,026 q.v., 0 dangling · headwords 4,736
 B–F names that are A–Z headwords 1,332 · para_citers 113,992 · cocitation pairs 9,719
+paragraphs the Foundation numbers otherwise 107 · text API records 16,413, at version 1 (2026-10-11)
 ```
 
 The index lines move as the index is edited (these are at its `224c84d`, 2026-10-09).
@@ -171,7 +179,12 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 15. **`/Audio/Urantia/Urantia-MH-Audio` is a transcode, not the master.** The 1.7 GB set is the DVD re-encoded at 32 kbps mono: the same 1,629 files, each lagging the disc by the encoder's delay (50.1 ms; 75.1 ms for 22 of them), with no drift, correlating at 0.95–1.00. `tools/align/rebase.py` moved Whisper's word times across, so nothing was heard twice. Every gap it showed (the unread paragraphs, the 118:3.2 splice, `P105_05` running on into 105:6) is in the original too.
 16. **A breath can fill the pause before a paragraph.** On the disc audio, 138:10.9's cut fell after "Eight.", because the pause after the number outlasted the breath-filled one before it. A cut may never come after the unit's first word heard has ended; `make align-spotcheck --lists` checks every list paragraph.
 17. **`P040_11` and `P041_11` are not sections.** They are second encodes of `_10`, the same length to the millisecond, and `P000_13` is the Acknowledgment (0:12.10–14). `data/audio/mh-overrides.tsv` names all three; a file that fits no rule and no override fails the build.
-18. **The 2080 Ti is the display GPU.** Under Whisper it reached 88 °C, against a rated maximum of 89 °C, and throttled to 735 MHz. Compute runs on the 3090: `CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`.
+18. **The Foundation's numbering differs from ours across a section boundary.**
+    - It files 139's combined "9 and 10" under 10, so our 139:9.1–11 are its 139:10.1–11.
+    - In 144:5 it numbers six separators, not one.
+    
+    The first survey, which went section by section, counted 95 differences; there are 107. `build/foundation.py` therefore aligns paper by paper.
+19. **The 2080 Ti is the display GPU.** Under Whisper it reached 88 °C, against a rated maximum of 89 °C, and throttled to 735 MHz. Compute runs on the 3090: `CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`.
 
 ---
 
@@ -208,6 +221,10 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 - **The AI voice is recorded in advance by a local open model on the 3090**, not by a cloud service: corrections then cost seconds, not a bill, and the weights are pinned. It is chosen by ear from a listening test. It is never a clone of Merritt Horn, it gives the words of Jesus no separate voice, and it is labelled "an AI voice".
 - **Bark (Suno) was tried and rejected** (Tigran, 2026-10-07: "horrible"). It reads about 14 seconds per call and then simply stops. Even fed clause by clause, it dropped "in explanation of the meanings" from 0:0.1, paused mid-phrase, and ran at 0.29× real time on the 3090, about 17 days for the book. Its code and its 19 GB of models and venv were removed.
 - **Visits are counted server-side, with no IP address kept and no cookie for readers** (Tigran, 2026-10-09). Not Google Analytics, not a script: a page carries nothing for the counter. Each address is placed (country, region, city) and hashed with a salt replaced every UTC day, then dropped; a test greps the database file for the address. So a reader on two days counts as two visits, by design. Every search is recorded with what it found, because the ones that found nothing are a list for the index. `visits.db` stores facts; `stats.py` classifies at report time (bots, referrers, kinds of page), so a better classifier applies to the whole history. A person's view is one whose visitor-day fetched `/static/ub.css` and whose agent is no known bot. Its styles live in `stats.html`, so no reader downloads them. A footer line says so: "Visits are counted without cookies, and no IP address is kept."
+- **The API's `ref` is ours; the Foundation's is beside it as `uf_ref`** (Tigran, 2026-10-11). The site, the index and every link use ours. Every translation, and so every site joining its translation to our English, uses the Foundation's, so `/api` tells them to join on `uf_ref`. 0:12.10 has none.
+- **The API calls the English text public domain; credit is requested, not required** (Tigran, 2026-10-11). The credit line names the site's own base URL, taken from the request, so it follows the move to urantiabook.org.
+- **A text version moves only when something a site receives changes**, and a number, once it may have reached a site, is never made again for other text. So the ledger is append-only, `tests/test_versions.py` holds it to HEAD's as a prefix, and `deploy.sh` refuses to ship while `data/text/` is uncommitted.
+- **No 1955 page references in the API** (Tigran, 2026-10-11): they are obsolete. Tigran has asked Vladislav whether he can do without them. Should he need them, the page is in the same `<small>` that `foundation.py` already parses. Adding it is a few lines, and one version in which every record changes.
 - **UB Goudy is OFL 1.1** — verified in the name table, a correctly renamed Sorts Mill Goudy derivative — so the site serves the book's own face, subsetted to the corpus with a gate that fails on a missing glyph. **Goudy Handtooled BT is Bitstream proprietary and must never be served.**
 
 ---
@@ -226,7 +243,7 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 Carried from the plan, none blocking:
 
 1. **Index rights** — publishing 32,837 entries as queryable data is a stronger act than quoting from it. The design keeps an `INDEX_MODE` switch so a change of footing is a config edit.
-2. **Site licence** — the press repo is CC BY-NC-SA 4.0, and NC forecloses most of what a public API is for.
+2. **Site licence** — the press repo is CC BY-NC-SA 4.0, and NC forecloses most of what a public API is for. For the text this is settled: the API serves it as public domain (2026-10-11, §8). The index's footing is still open.
 3. **Domain and host**; whether `urantia-library` on this box merges or coexists. Port 80 is reportedly not forwarded, which affects certbot.
 4. **The 58 rights-restricted images** — attribution cards, or seek permission.
 

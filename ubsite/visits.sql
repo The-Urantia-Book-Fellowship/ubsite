@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS place (
 );
 
 -- One row per page asked for: every GET that is not a static file, a
--- recording, the speech text, /healthz, an icon or /stats.
+-- recording, the speech text, the text API, /healthz, an icon or /stats.
 CREATE TABLE IF NOT EXISTS view (
     id       INTEGER PRIMARY KEY,
     ts       INTEGER NOT NULL,             -- unix seconds
@@ -51,6 +51,25 @@ CREATE TABLE IF NOT EXISTS view (
 );
 CREATE INDEX IF NOT EXISTS view_day ON view(day, visitor);
 CREATE INDEX IF NOT EXISTS view_ts ON view(ts);
+
+-- One row per call of the text API (/api/v1/..., ubsite/api.py): a program
+-- keeping another site's copy of the text, not a person reading, so it is kept
+-- apart from `view`.  /api, the page that documents it, is a view.
+CREATE TABLE IF NOT EXISTS api_call (
+    id       INTEGER PRIMARY KEY,
+    ts       INTEGER NOT NULL,             -- unix seconds
+    day      TEXT NOT NULL,
+    visitor  INTEGER NOT NULL,             -- as in view
+    path     TEXT NOT NULL,
+    since    INTEGER,                      -- /text: the version the caller said it held
+    version  INTEGER,                      -- the version current when it asked
+    whole    INTEGER,                      -- /text: 1 if it was sent the whole text
+    status   INTEGER NOT NULL,             -- 304: it already had it
+    referrer TEXT,
+    agent_id INTEGER REFERENCES agent(id), -- its User-Agent, which names the site
+    place_id INTEGER REFERENCES place(id)
+);
+CREATE INDEX IF NOT EXISTS api_call_ts ON api_call(ts);
 
 -- A visitor-day that fetched /static/ub.css: a browser that renders pages.
 -- Every page load revalidates it (Cache-Control: no-cache), so a person always

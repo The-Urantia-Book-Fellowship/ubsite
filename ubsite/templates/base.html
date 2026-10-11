@@ -99,7 +99,8 @@ window.ubDefaults = {{ settings_defaults|tojson }};
     {%- if r.url %}<a href="{{ r.url }}" target="_blank" rel="noopener">{% endif %}{{ r.date or r.commit[:7] }}{% if r.url %}</a>{% endif %}
     {%- if r.dirty %}, dirty{% endif %})</span>{% endif %}{% endmacro %}
   {%- set src = sources() %}
-  <p>Text{{ rev(src.press) }}: the Uversa Press edition. Index{{ rev(src.index) }}: the
+  <p>Text{{ rev(src.press) }}: the Uversa Press edition, which other sites may
+     <a href="/api">sync with their own</a>. Index{{ rev(src.index) }}: the
      Uversa Press index as revised for the third edition.
      Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</p>
   <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.

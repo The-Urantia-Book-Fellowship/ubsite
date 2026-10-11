@@ -27,6 +27,15 @@ QUERIES = [
     ("appendix D entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='D'", 429),
     ("appendix E entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='E'", 72),
     ("appendix F entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='F'", 456),
+    # The Foundation numbers these otherwise (build/foundation.py,
+    # tests/known-uf-refs.tsv): 134:6.14-16, 139:9.1-11, 144:5.11-102, 0:12.10.
+    ("renumbered by the Foundation",
+     "SELECT COUNT(*) FROM paragraph p JOIN uf_paragraph u ON u.paragraph_id = p.id"
+     " WHERE u.ref IS NOT p.ref", 107),
+    ("  sections renumbered",
+     "SELECT COUNT(*) FROM section s JOIN uf_section u ON u.section_id = s.id"
+     " WHERE u.ref IS NOT s.paper_n || ':' || s.n", 1),
+    ("text version",        "SELECT MAX(n) FROM text_version", None),
     # Reported, not asserted: they move as the index is edited.
     ("B-F rows naming an A-Z headword", "SELECT COUNT(*) FROM appendix_head", None),
     ("events finished by their date",   "SELECT COUNT(*) FROM chronology_event WHERE reads_on", None),
@@ -159,6 +168,8 @@ def run(con) -> int:
     if lost:
         bad += 1
 
+    bad += _text_api(con)
+
     print("counts")
     for name, q, expect in QUERIES:
         got = con.execute(q).fetchone()[0]
@@ -175,3 +186,52 @@ def run(con) -> int:
             bad += 1
         print(f"  {name:52} {got}{'' if not got else '   FAIL'}")
     return 1 if bad else 0
+
+
+def _text_api(con) -> int:
+    """What /api/v1/text serves: one record for each thing, each true to the text.
+
+    The route sends these bodies as they are stored, so this is the API's own
+    round-trip gate, and the ledger in data/text/ must describe this database.
+    """
+    import json
+
+    from .. import versions
+    from ..render import strip_tags
+
+    bad = 0
+    want = dict(con.execute(
+        "SELECT 'part', COUNT(*) FROM part UNION ALL SELECT 'paper', COUNT(*) FROM paper"
+        " UNION ALL SELECT 'section', COUNT(*) FROM section"
+        " UNION ALL SELECT 'paragraph', COUNT(*) FROM paragraph"))
+    got = dict(con.execute("SELECT kind, COUNT(*) FROM text_unit GROUP BY kind"))
+    texts = dict(con.execute("SELECT ref, text FROM paragraph"))
+    n = off = 0
+    for kind, key, body, h in con.execute("SELECT kind, key, body, hash FROM text_unit"):
+        n += 1
+        rec = json.loads(body)
+        ok = rec.pop("hash") == h == versions.digest(rec)
+        if kind == "paragraph":
+            ok = (ok and rec["ref"] == key and rec["text"] == texts.get(key)
+                  and strip_tags(rec["html"]) == rec["text"] and 'class="fn"' not in rec["html"])
+        if not ok:
+            off += 1
+            if off <= 5:
+                print(f"            text API record wrong: {kind} {key}")
+    print(f"text API:   {n - off}/{n} records hash true, and every paragraph's is its text"
+          + ("" if not off else f"   {off} FAIL"))
+    if off or got != want:
+        bad += 1
+        if got != want:
+            print(f"            records {got}, expected one for each of {want}   FAIL")
+
+    led = versions.fold()
+    stored = {(k, key): (h, v) for k, key, h, v in con.execute(
+        "SELECT kind, key, hash, version FROM text_unit")}
+    stored.update({(k, key): ("-", v) for k, key, v in con.execute(
+        "SELECT kind, key, version FROM text_removed")})
+    vers = [tuple(r) for r in con.execute("SELECT * FROM text_version ORDER BY n")]
+    same = stored == led.latest and vers == led.versions
+    print(f"            data/text/ is the history this database carries"
+          f" (version {led.n})" + ("" if same else "   FAIL: rebuild, or the ledger was edited"))
+    return bad + (not same)

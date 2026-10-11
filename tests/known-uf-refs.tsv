@@ -1,0 +1,17 @@
+# Where our paragraph numbers differ from the Urantia Foundation's (SRT v1.22),
+# as build/foundation.py finds them in its HTML: our first, our last, its first,
+# its last; "-" where it has no number.  The build requires exactly these runs.
+#
+# It does not number the ACKNOWLEDGMENT; the press does (study edition 8af25c5).
+0:12.10	0:12.10	-	-
+# It numbers the `* * *` separator in 134:6 as 134:6.14.
+134:6.14	134:6.16	134:6.15	134:6.17
+# It files the one heading over sections 9 and 10 under 10 (CLAUDE.md §7.9).
+139:9.1	139:9.11	139:10.1	139:10.11
+# It numbers each of the six separators between the prayers of 144:5.
+144:5.11	144:5.23	144:5.12	144:5.24
+144:5.24	144:5.35	144:5.26	144:5.37
+144:5.36	144:5.50	144:5.39	144:5.53
+144:5.51	144:5.68	144:5.55	144:5.72
+144:5.69	144:5.81	144:5.74	144:5.86
+144:5.82	144:5.102	144:5.88	144:5.108

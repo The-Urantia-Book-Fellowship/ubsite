@@ -259,6 +259,35 @@ page to draw a preview. Each fetch is a share.</p>
 {%- endfor %}
 </div>
 
+<h2 id="api">Other sites, through the API</h2>
+<p class="hint">{{ n(r.api.calls) }} calls to <a href="/api">the text API</a>, by
+programs keeping another site's copy of the text in step with this one; none is counted
+above. Each is named by its User-Agent.{% if r.api.current %} The text is at version
+{{ r.api.current }}.{% endif %}</p>
+<div class="cols">
+<div>
+<table><tr><th>Caller</th><th class="fig">Calls</th><th class="fig">Whole text</th><th class="fig">Holds</th><th class="fig">Last</th></tr>
+{%- for c in r.api.clients %}<tr><td class="wrap" title="{{ c.ua or '' }}">{{ c.name }}
+  {%- if c.places %}<div class="sub">{{ c.places|join(' · ') }}</div>{% endif %}
+  {%- if c.errors %}<div class="sub">{{ n(c.errors) }} refused</div>{% endif %}</td>
+  <td class="fig">{{ n(c.calls) }}</td><td class="fig">{{ n(c.whole) }}</td>
+  <td class="fig">{% if c.held %}{{ c.held }}{% if c.held == r.api.current %} ✓{% else %} <span class="sub">behind</span>{% endif %}{% else %}<span class="sub">–</span>{% endif %}</td>
+  <td class="fig sub">{{ c.last }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+<div>
+<h3 style="margin-top:0">Calls by day</h3>
+<table>
+{%- set top = r.api.days|map(attribute=1)|max if r.api.days else 0 %}
+{%- for day, k in r.api.days %}<tr><td>{{ day }}{{ bar(k, top) }}</td><td class="fig">{{ n(k) }}</td></tr>
+{%- else %}<tr><td class="sub">None yet.</td></tr>
+{%- endfor %}
+</table>
+</div>
+</div>
+
 <h2 id="machines">Machines</h2>
 <p class="hint">{{ n(r.bot_views) }} requests from crawlers, scanners and scripts,
 of {{ n(r.all_rows) }} in all. Search engines' crawlers are how the site gets found.</p>

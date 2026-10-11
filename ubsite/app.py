@@ -13,6 +13,7 @@ that hides them together.
 from __future__ import annotations
 
 import functools
+import json
 import pathlib
 import re
 import sqlite3
@@ -30,11 +31,15 @@ from fastapi.templating import Jinja2Templates  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import queries, settings, stats, visits  # noqa: E402
+from ubsite import api, queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
-app = FastAPI(docs_url=None, redoc_url=None)
+# No /openapi.json: it described every HTML route by accident, and a site
+# looking for the text API would have taken it for that.  /api documents it.
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 app.mount("/static", StaticFiles(directory=ROOT / "ubsite" / "static"), name="static")
+# The text API, /api/v1 (ubsite/api.py): before the catch-all /{ref} below.
+app.include_router(api.router)
 # Who reads what, from where: noted after each response, written by a thread
 # (ubsite/visits.py).  The page carries nothing for it.
 app.add_middleware(visits.Counter)
@@ -182,10 +187,19 @@ def missing(request, msg: str):
 @app.exception_handler(HTTPException)
 async def http_error(request: Request, exc: HTTPException):
     # Routes nothing matches, such as /i/foo/bar, would otherwise get FastAPI's
-    # JSON {"detail": "Not Found"}.
+    # JSON {"detail": "Not Found"}.  Under /api/ a program is asking, and JSON
+    # is what it can read.
+    if request.url.path.startswith("/api/"):
+        return api.error(exc.status_code, "There is no such endpoint." if exc.status_code == 404
+                         else str(exc.detail))
     if exc.status_code == 404:
         return missing(request, "There is no page at this address.")
     return await http_exception_handler(request, exc)
+
+
+@app.exception_handler(api.Unbuilt)
+async def api_unbuilt(request: Request, exc: api.Unbuilt):
+    return api.error(503, "This database was built before the text API.")
 
 
 @functools.lru_cache(maxsize=4)
@@ -379,8 +393,10 @@ def healthz():
         con = db()
         n = con.execute("SELECT value FROM stat WHERE key='paragraphs'").fetchone()
         built = con.execute("SELECT built_at FROM build").fetchone()
+        tv = con.execute("SELECT value FROM stat WHERE key='text_version'").fetchone()
         return {"ok": bool(n and n[0] == 14586), "paragraphs": n[0] if n else 0,
                 "built_at": built[0] if built else None,
+                "text_version": tv[0] if tv else None,
                 "sources": {k: {"commit": v["commit"], "dirty": v["dirty"]}
                             for k, v in sources().items()}}
     except Exception as exc:                       # noqa: BLE001
@@ -591,6 +607,24 @@ def appendix(request: Request, letter: str):
     years, bands = queries.chronology(con)
     return page(request, "chronology.html", app=app_, apps=queries.appendices(con),
                 years=years, bands=bands)
+
+
+@app.get("/api", response_class=HTMLResponse)
+def api_docs(request: Request):
+    """How another site keeps its copy of the text in step with ours (ubsite/api.py)."""
+    meta = api.about_meta()
+    con = db()
+    # The red letter, an italic and a list mark; a paragraph and a section the
+    # Foundation numbers otherwise.
+    example = {}
+    for kind, key in (("paragraph", "147:4.4"), ("paragraph", "144:5.11"), ("section", "139:9")):
+        row = con.execute("SELECT body FROM text_unit WHERE kind=? AND key=?",
+                          (kind, key)).fetchone()
+        if row:
+            example[key] = json.dumps(json.loads(row[0]), ensure_ascii=False, indent=1)
+    base = str(request.base_url)
+    return page(request, "api.html", base=base, meta=meta, example=example,
+                api_licence=api.licence(base))
 
 
 @app.get("/rail/{paper:int}", include_in_schema=False)

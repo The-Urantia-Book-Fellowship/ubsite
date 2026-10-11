@@ -54,8 +54,7 @@ CREATE TABLE paragraph (
   edition_id INTEGER NOT NULL REFERENCES edition(id),
   section_id INTEGER NOT NULL REFERENCES section(id),
   paper_n INTEGER NOT NULL, section_n INTEGER NOT NULL, para_n INTEGER NOT NULL,
-  ref TEXT NOT NULL,                          -- '133:2.1'
-  srt_id TEXT NOT NULL,                       -- 'U133_2_1', the SRT anchor
+  ref TEXT NOT NULL,                          -- '133:2.1'; the Foundation's is in uf_paragraph
   ord INTEGER NOT NULL,                       -- reading order within the edition
   src TEXT NOT NULL CHECK (src IN ('vs','poetry','vsmark')),
   gap_before REAL NOT NULL DEFAULT 0,         -- \pc: a 1955 blank-line group start

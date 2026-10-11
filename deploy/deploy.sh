@@ -50,6 +50,17 @@ if [ "$BUILD" = 1 ]; then
     make check
 fi
 
+# The text API's versions (data/text/, build/versions.py).  A site syncing with
+# it keeps the number it was sent, so a number that reaches pi5 must never be
+# made again for other text.  An uncommitted ledger can be: a checkout or a
+# reset throws it away, and the next build hands out the same number.
+if [ -n "$(git status --porcelain -- data/text)" ]; then
+    echo "refusing: data/text/ holds a text version that is not committed." >&2
+    echo "          Commit it with the change that made it, then deploy." >&2
+    git status --short -- data/text >&2
+    exit 1
+fi
+
 echo "==> rsync to $HOST:$DEST"
 # Excluded: .venv (per-architecture, the target builds its own), var/ except the
 # database, and everything only the build needs.

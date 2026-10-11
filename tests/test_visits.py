@@ -154,6 +154,29 @@ class Pages(Counted):
             call(path)
         self.assertEqual(self.rows("SELECT path FROM view"), [])
 
+    def test_an_api_call_is_not_a_view(self):
+        site = {"user-agent": "UPExplorer/1.0 (+https://upexplorer.example)"}
+        call("/api/v1/text", "since=0", headers=site)
+        (version,), = self.rows("SELECT MAX(version) FROM api_call")
+        call("/api/v1/text", f"since={version}", headers=site)
+        call("/api/v1/text", "since=abc", headers=site)
+        call("/api/v1/nope", headers=site)
+        call("/api/v1", headers=site)
+        self.assertEqual(self.rows("SELECT path FROM view"), [])
+        got = self.rows("SELECT a.ua, c.path, c.since, c.version, c.whole, c.status"
+                        " FROM api_call c JOIN agent a ON a.id = c.agent_id ORDER BY c.id")
+        ua = site["user-agent"]
+        self.assertEqual(got, [(ua, "/api/v1/text", 0, version, 1, 200),
+                               (ua, "/api/v1/text", version, version, 0, 200),
+                               (ua, "/api/v1/text", None, None, None, 400),
+                               (ua, "/api/v1/nope", None, None, None, 404),
+                               (ua, "/api/v1", None, version, 0, 200)])
+
+    def test_the_page_documenting_the_api_is_a_view(self):
+        call("/api")
+        self.assertEqual(self.rows("SELECT path FROM view"), [("/api",)])
+        self.assertEqual(self.rows("SELECT * FROM api_call"), [])
+
     def test_the_browser_voice_is_a_listen(self):
         call("/speech/102:3")
         call("/speech/102:3")
@@ -248,6 +271,8 @@ class StatsPage(Counted):
         call("/static/ub.css", client="8.8.8.8")
         call("/search", "q=xyzzyplugh", client="8.8.8.8")
         call("/102:3", headers={"user-agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"})
+        call("/api/v1/text", "since=0", headers={"user-agent": "UPExplorer/1.0 (+https://x)"},
+             client="8.8.8.8")
         visits.RECORDER.flush()
         for days in ("1", "30", "all"):
             status, headers, body = call("/stats", f"days={days}", headers=self.auth("right horse battery"))
@@ -257,6 +282,7 @@ class StatsPage(Counted):
             html = body.decode()
             self.assertIn("xyzzyplugh", html)                 # a search that found nothing
             self.assertIn("Googlebot", html)
+            self.assertIn("UPExplorer/1.0", html)             # an API caller, by its name
         self.assertEqual(len(self.rows("SELECT * FROM view WHERE path = '/stats'")), 0)
 
 

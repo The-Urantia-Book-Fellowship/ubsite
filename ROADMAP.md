@@ -82,8 +82,8 @@ The press text is authoritative American; the British Study Edition is revised, 
 **15. Parallel translations.**
 ~15 translations sit in sibling directories, all `\vs`-addressed, so the address space is already language-independent — the hard part is done. The index stays English; a Russian reader gets Russian text with English index chips, clearly labelled. That is honest, and still more than anyone else offers.
 
-**16. A public API and stable permalinks.** `[partly built]`
-`/101:4.2` resolves. `/api/v1/reverse/101:4.2` — the entries citing a paragraph — and `cite.parse` as a service would make the data a commons. Blocked on the licence question: CC BY-NC-SA forecloses most of what an API is for.
+**16. A public API and stable permalinks.** `[text built]`
+`/101:4.2` resolves. **`/api/v1/text`** (2026-10-11) is built: a versioned sync of the whole text, which other sites use to keep their copies in step. It serves the text as public domain, and gives each paragraph the Foundation's numbering beside ours. Still to come: `/api/v1/reverse/101:4.2`, the entries citing a paragraph, and `cite.parse` as a service. Together they would make the data a commons. They are blocked on the index's licence question, since CC BY-NC-SA forecloses most of what an API is for.
 
 **17. Reader-proposed index entries** for the thin paragraphs, feeding the next printing. The website becomes an instrument for editing the book.
 

@@ -88,6 +88,11 @@ def main(argv: list[str]) -> int:
         con = db.create(tmp)
         print("loading ...")
         para_key = load.load_text(con, papers, parts, repos["press"], report)
+        print("the Foundation's numbering ...")
+        from . import foundation
+        n_uf = foundation.load(con, repos["press"], report,
+                               root / "tests" / "known-uf-refs.tsv")
+        print(f"  {n_uf} paragraphs it numbers otherwise")
         load.load_index(con, az, apps, para_key, report)
         print("slugs ...")
         from . import slugs
@@ -124,6 +129,15 @@ def main(argv: list[str]) -> int:
         for name, (size, glyphs) in fonts.build(
                 con, repos["press"]["path"] / "fonts", root / "ubsite", report).items():
             print(f"  {name:22} {size:>7,} bytes  {glyphs} glyphs")
+        print("text versions ...")
+        from . import versions
+        text_version, pending = versions.assign(con, repos["press"])
+        if pending:
+            v = pending.version
+            print(f"  version {v[0]}: {v[3]:,} records new or changed, {v[4]} removed"
+                  f" -- data/text/ is appended to if the build passes; commit it")
+        else:
+            print(f"  unchanged at version {text_version}")
         con.execute("INSERT INTO build VALUES (1, ?, 3, 0)",
                     (time.strftime("%Y-%m-%dT%H:%M:%S"),))
         # The commits this database was read from: the footer and /healthz show
@@ -164,6 +178,7 @@ def main(argv: list[str]) -> int:
             con.execute("INSERT INTO stat VALUES (?,?)",
                         (k, con.execute(q).fetchone()[0]))
         con.executemany("INSERT INTO stat VALUES (?,?)", sorted(audio_stats.items()))
+        con.execute("INSERT INTO stat VALUES ('text_version', ?)", (text_version,))
         con.commit()
         con.execute("VACUUM")
         con.close()
@@ -171,6 +186,10 @@ def main(argv: list[str]) -> int:
         if rc:
             tmp.unlink(missing_ok=True)
             return rc
+        # The ledger only after everything has passed: a failed build must not
+        # leave a version behind that no database carries.
+        if pending:
+            pending.append()
         tmp.replace(out)
         mb = out.stat().st_size / 1e6
         print(f"\n{out}  {mb:.1f} MB  in {time.time()-t0:.1f}s")

@@ -221,7 +221,7 @@ class Recorder:
         day = today()
         with con:
             salt = self._salt(con, day)
-            views, browsers, listens = [], [], []
+            views, browsers, listens, calls = [], [], [], []
             for item in batch:
                 kind, ts, ip, ua = item[:4]
                 who = visitor(salt, ip, ua)
@@ -230,6 +230,13 @@ class Recorder:
                 elif kind == "listen":
                     voice, it = item[4:]
                     listens.append((day, who, voice, it, ts, self._place(con, ip)))
+                elif kind == "api":
+                    path, status, ref, host, api = item[4:]
+                    since, version, whole = api or (None, None, None)
+                    calls.append((ts, day, who, path, since, version,
+                                  None if whole is None else int(whole), status,
+                                  referrer(ref, host), self._agent(con, ua),
+                                  self._place(con, ip)))
                 else:
                     path, query, status, ref, host, accept, via, hits = item[4:]
                     views.append((ts, day, who, path, query or None, status, referrer(ref, host),
@@ -240,6 +247,9 @@ class Recorder:
                 " agent_id, place_id, lang, via, hits) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", views)
             con.executemany("INSERT OR IGNORE INTO browser VALUES (?, ?)", browsers)
             con.executemany("INSERT OR IGNORE INTO listen VALUES (?, ?, ?, ?, ?, ?)", listens)
+            con.executemany(
+                "INSERT INTO api_call(ts, day, visitor, path, since, version, whole, status,"
+                " referrer, agent_id, place_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)", calls)
 
 
 RECORDER = Recorder()
@@ -293,6 +303,8 @@ class Counter:
             kind, rest = "listen", ("browser", path[len("/speech/"):])
         elif path in SKIP or path.startswith("/rail/"):
             return                                 # /rail/N: a paper opened in the left rail
+        elif path.startswith("/api/"):
+            kind = "api"                           # another site's program, not a reader
         else:
             kind = "view"
         headers = dict(scope["headers"])
@@ -308,4 +320,8 @@ class Counter:
                     headers.get(b"host", b"").decode("latin-1"),
                     headers.get(b"accept-language", b"").decode("latin-1"),
                     via if via in VIA else None, state.get("hits"))
+        elif kind == "api":
+            # (since, version, whole), as the route set them; None for a 404.
+            rest = (path[:300], status, headers.get(b"referer", b"").decode("latin-1"),
+                    headers.get(b"host", b"").decode("latin-1"), state.get("api"))
         self.recorder.put((kind, int(time.time()), ip, ua, *rest))

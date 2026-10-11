@@ -17,6 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 ALLOWED = {
     "build/readers/_io.py": None,                  # reads only; asserted below
     "build/slugs.py": "data/slugs.tsv",            # the append-only slug ledger
+    "build/versions.py": "data/text/",             # the append-only text-version ledger
     "build/vendorlib.py": "vendor/",               # the vendored copies + lock
     "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
     "epub/pack.py": "var/epub/",                   # the EPUB, by way of a .tmp

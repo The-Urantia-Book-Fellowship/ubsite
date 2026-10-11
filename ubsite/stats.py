@@ -149,6 +149,59 @@ KIND_LABEL = {"section": "Sections of the text", "concept": "Concept pages",
 
 
 # ---- the report --------------------------------------------------------------------
+def client_name(ua: str, kind: dict) -> str:
+    """Who is calling the API: the User-Agent's first product, "UPExplorer/1.0"."""
+    if kind.get("kind") == "person":
+        return f"a browser ({kind['browser']}, {kind['os']})"
+    return (ua.split()[0] if ua.strip() else "(no User-Agent)")[:60]
+
+
+def api_report(con: sqlite3.Connection, ub: sqlite3.Connection, start: str,
+               agents: dict) -> dict:
+    """The text API's callers: other sites keeping their copy of the text in step.
+
+    Each is told apart by its User-Agent, which /api asks them to make their
+    site's name.  `held` is the version a caller has after its latest call to
+    /text that succeeded: 200 sent it, 304 confirmed it.
+    """
+    try:
+        current = ub.execute("SELECT MAX(n) FROM text_version").fetchone()[0]
+    except sqlite3.Error:
+        current = None
+    try:
+        rows = con.execute(
+            "SELECT c.*, a.ua, p.city, p.country, p.country_name FROM api_call c"
+            " LEFT JOIN agent a ON a.id = c.agent_id LEFT JOIN place p ON p.id = c.place_id"
+            " WHERE c.day >= ? ORDER BY c.id", (start,)).fetchall()
+    except sqlite3.OperationalError:
+        rows = []                                  # no API call yet since api_call was added
+    clients: dict[str, dict] = {}
+    days = Counter()
+    for row in rows:
+        name = client_name(row["ua"] or "", agents.get(row["agent_id"], {}))
+        c = clients.setdefault(name, {"name": name, "ua": row["ua"], "calls": 0, "whole": 0,
+                                      "current": 0, "errors": 0, "held": None, "last": 0,
+                                      "places": Counter()})
+        c["calls"] += 1
+        text = row["path"] == "/api/v1/text"
+        c["whole"] += text and row["status"] == 200 and row["whole"] == 1
+        c["current"] += text and (row["status"] == 304 or row["since"] == row["version"])
+        c["errors"] += row["status"] >= 400
+        if text and row["status"] in (200, 304):
+            c["held"] = row["version"]
+        c["last"] = row["ts"]
+        place = ", ".join(x for x in (row["city"], row["country_name"]) if x)
+        if place:
+            c["places"][(flag(row["country"]), place)] += 1
+        days[row["day"]] += 1
+    out = sorted(clients.values(), key=lambda c: -c["last"])
+    for c in out:
+        c["last"] = when(c["last"])
+        c["places"] = [f"{f} {p}" for (f, p), _ in c["places"].most_common(3)]
+    return {"current": current, "clients": out, "calls": len(rows),
+            "days": sorted(days.items(), reverse=True)[:14]}
+
+
 def connect() -> sqlite3.Connection | None:
     if not VISITS.exists():
         return None
@@ -323,6 +376,8 @@ def report(ub: sqlite3.Connection, days: int, recent: int = 50) -> dict:
     r["bot_views"] = sum(bots.values())
     r["previews"] = previews.most_common()
     r["shared"] = [(app, path, n) for (app, path), n in shared.most_common(20)]
+
+    r["api"] = api_report(con, ub, start, agents)
 
     # -- broken links: pages a person asked for that do not exist
     r["missing"] = [dict(row) for row in q(

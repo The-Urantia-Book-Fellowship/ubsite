@@ -46,6 +46,18 @@ def read_at_rev(repo: pathlib.Path, rel: str, rev: str) -> str:
     return out.stdout
 
 
+def read_bytes_at_rev(repo: pathlib.Path, rel: str, rev: str) -> bytes:
+    """A binary file at a git revision -- the Foundation's HTML, zipped -- read-only."""
+    if rev == "worktree":
+        return read_bytes(pathlib.Path(repo) / rel)
+    out = subprocess.run(["git", "-C", str(repo), "show", f"{rev}:{rel}"], capture_output=True)
+    if out.returncode != 0:
+        raise SystemExit(f"_io: cannot read {rel} at {rev} in {repo}:\n"
+                         f"{out.stderr.decode('utf-8', 'replace')}")
+    _READ[f"{repo}:{rev}:{rel}"] = 1
+    return out.stdout
+
+
 def read_tex(texdir: pathlib.Path, name: str, rev: str = "worktree") -> str | None:
     """One file of a source's tex/ directory, at the revision config pins.
 

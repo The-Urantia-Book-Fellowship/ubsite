@@ -109,7 +109,7 @@ Keep the message form: `vendor: adopt <repo> <file> at <short sha> (<what change
 
 ### 2. `make data`
 
-Builds `var/ub.db` in about 14 seconds. The first two lines say what it is reading:
+Builds `var/ub.db` in about 17 seconds. The first two lines say what it is reading:
 
 ```
 reading press text, worktree at 3983645 ...
@@ -117,6 +117,8 @@ reading index at b12500f ...
 ```
 
 The build writes `var/ub.db.tmp` and moves it into place only on success, so a failed build leaves the previous database untouched. Failures are loud by design. An unknown macro, an unparseable citation, or a source line that nothing claimed is a hard error, listed under `problems`. A macro that is new to the press TeX must first be taught to press's own `tools/text-verify/macros.py`, and then adopted as in step 1.
+
+Near the end it says where the [text API](#the-text-api) stands: `unchanged at version N`, or, when anything a syncing site receives has changed, `version N+1: … records new or changed`. In that case it has appended the new version to `data/text/`, which must be committed with the change that made it (step 5).
 
 ### 3. `make check` and `make test`
 
@@ -142,7 +144,7 @@ Open the paragraph that prompted the update, for example `http://127.0.0.1:8130/
 
 ### 5. Commit
 
-Commit anything that changed in this repository: the vendor adoption, a moved count. `deploy.sh` rsyncs the working tree as it stands, and what runs on pi5 should be a commit. Then `git push`: the history is kept on GitHub, in the Fellowship's private repository `The-Urantia-Book-Fellowship/ubsite`.
+Commit anything that changed in this repository: the vendor adoption, a moved count, and above all a new text version in `data/text/`. `deploy.sh` refuses to ship while `data/text/` is uncommitted, because a version number a site has been sent must never be made again for other text. `deploy.sh` rsyncs the working tree as it stands, and what runs on pi5 should be a commit. Then `git push`: the history is kept on GitHub, in the Fellowship's private repository `The-Urantia-Book-Fellowship/ubsite`.
 
 ### 6. Deploy
 
@@ -273,6 +275,7 @@ Without `var/stats.passwd`, `/stats` is a 404. The browser that logs in gets the
 - what is listened to, by voice;
 - links shared into chats and posts (their preview fetches);
 - devices, browsers and languages;
+- the text API's callers, each by the name its User-Agent gives, with the version it holds;
 - crawlers;
 - pages not found;
 - the latest 50 views.
@@ -283,6 +286,23 @@ Without `var/stats.passwd`, `/stats` is a 404. The browser that logs in gets the
 
 ---
 
+## The text API
+
+Other sites keep their own copies of the English text, and **`/api/v1`** lets them keep those copies in step with this one. **`/api`** documents it for them, with a client in Python. The first two users are Vladislav Pogorelov's Urantia Papers Explorer and Alexander Alyuev's UB_AI_Search.
+
+The protocol is a **text version**. A site keeps the number it was last sent, and asks `/api/v1/text?since=N`. It gets every record new or changed since N, the keys of any removed, and the new number. Asked from 0, the reply is the whole text: 3 MB gzipped. A record is a part, a paper, a section or a paragraph, each with `text`, `html` (the red letter included), and a hash for checking a copy.
+
+- **`build/versions.py`** makes the versions. `ub.db` remembers no earlier build, so the history is a ledger in **`data/text/`**, checked in and append-only like `data/slugs.tsv`. A build that changes anything a site receives appends a version; one that changes nothing, which is almost every press commit, does not. The ledger is written only after the build passes, and `check_db` requires that it describes the database.
+- **`build/foundation.py`** gives every paragraph and section the Urantia Foundation's reference, `uf_ref`, beside ours. It reads them from the Foundation's own HTML (SRT v1.22, a zip in the press repo). The two numberings differ in 107 paragraphs, and sites join their translations by the Foundation's. The differences must be exactly the runs in `tests/known-uf-refs.tsv`, or the build fails.
+- **`ubsite/api.py`** only selects the stored records and concatenates them. Each worker keeps each reply gzipped, so the whole text is compressed once per deploy. Replies carry an ETag (a site that is up to date gets a 304) and `Access-Control-Allow-Origin: *`.
+- **Calls are counted apart from page views**, in `api_call` in `var/visits.db`. `/stats` lists each caller by its User-Agent, which `/api` asks every site to set to its own name.
+- **The licence:** the English text is public domain; credit is requested, not required (Tigran, 2026-10-11).
+- **nginx** rate-limits `/api/` (60 a minute per address, burst 30), as it does `/search`.
+
+`tests/test_api.py` builds a second database with one paragraph edited and one removed, and checks that the version after sends exactly those. `tests/test_versions.py` checks, on synthetic states, that a site at any version reaches the newest.
+
+---
+
 ## The short form
 
 ```
@@ -290,7 +310,7 @@ make sources                         # what a build would read
 make vendor-check                    # fails? review the diff, make vendor-sync, commit
 make data && make check && make test
 make serve                           # look; Ctrl-C
-git status                           # commit anything here first
+git status                           # commit anything here first, data/text/ above all
 ./deploy/deploy.sh
 curl -s https://ubsite.ddns.net/healthz
 ```

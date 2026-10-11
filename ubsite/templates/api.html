@@ -1,0 +1,181 @@
+{% extends "base.html" %}{% block title %}The text API{% endblock %}
+{% block head %}
+{#- Only this page uses these, so they live here rather than in ub.css, which
+    every reader downloads. #}
+<style>
+.api pre { font-size: .8rem; line-height: 1.45; overflow-x: auto; padding: .7rem .9rem;
+  border: 1px solid var(--rule); border-radius: 3px;
+  background: color-mix(in oklch, var(--rule) 30%, transparent); }
+.api code { font-size: .88em; }
+.api pre code { font-size: inherit; }
+/* A record wraps, so its text can be read; code keeps its lines, and scrolls. */
+.api pre.json { white-space: pre-wrap; overflow-wrap: anywhere; }
+.api dt { font-weight: 600; margin-top: .5rem; }
+.api dd { margin: 0 0 0 1.4rem; }
+.api table { border-collapse: collapse; font-size: .9rem; }
+.api th, .api td { text-align: left; padding: .15rem 1rem .15rem 0; border-bottom: 1px solid var(--rule); }
+.api th { font-weight: 600; }
+.api td.fig { text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+{% endblock %}
+{% block body %}<main class="prose api">
+{%- set v = meta.current %}
+<h1>The text API</h1>
+
+<p>Any site may keep its copy of the English text in step with this one.
+The text is the Uversa Press edition, with its numerous corrections and the words of
+Jesus marked, and it is in the public domain.</p>
+
+<p>It is at <b>version {{ v.version }}</b>, made on {{ v.made }}: {{ '{:,}'.format(meta.counts.parts) }}
+parts, {{ '{:,}'.format(meta.counts.papers) }} papers, {{ '{:,}'.format(meta.counts.sections) }}
+sections and {{ '{:,}'.format(meta.counts.paragraphs) }} paragraphs.</p>
+
+<h2>In short</h2>
+<pre><code>GET {{ base }}api/v1/text?since=0     the whole text, and its version
+GET {{ base }}api/v1/text?since=N     what has changed since version N</code></pre>
+
+<p>Keep the version you are sent, and ask with it next time. A version changes only
+when something in the text does: a correction, an italic, the red letter. When nothing
+has, the reply is empty, so asking once a day costs nothing. The whole text is about
+3&nbsp;MB compressed, and a reply is compressed whenever your client accepts gzip, as
+every common one does.</p>
+
+<h2>Applying a reply</h2>
+<ol>
+  <li>For each record in <code>parts</code>, <code>papers</code>, <code>sections</code>
+    and <code>paragraphs</code>, replace yours with the same key, or add it. The key is
+    <code>ref</code> for a section or a paragraph, and the number for a part or a paper.</li>
+  <li>Delete each key listed under <code>removed</code>.</li>
+  <li>If <code>full</code> is <code>true</code>, the reply is the whole text, so delete
+    anything it does not contain. A reply is full when you ask from 0, or from a version
+    this site has not made.</li>
+  <li>Keep <code>version</code>.</li>
+</ol>
+
+<p>Every reply also carries <code>since</code> (what it is relative to, 0 when full),
+<code>made</code> (the version's date), <code>source</code> (the commit of the Uversa
+Press text it was made from) and <code>licence</code>.</p>
+
+<h2>The records</h2>
+{%- if example['147:4.4'] %}
+<p>A paragraph:</p>
+<pre class="json"><code>{{ example['147:4.4'] }}</code></pre>
+{%- endif %}
+<dl>
+  <dt><code>ref</code></dt>
+  <dd>Paper, section and paragraph, as this site numbers them: <a href="/147:4.4"><code>/147:4.4</code></a>
+    opens it here. The Foreword is paper 0, and each paper's introduction is section 0.</dd>
+  <dt><code>uf_ref</code></dt>
+  <dd>The same paragraph as the Urantia Foundation numbers it: see below.</dd>
+  <dt><code>paper</code>, <code>section</code>, <code>paragraph</code></dt>
+  <dd>The three numbers of <code>ref</code>.</dd>
+  <dt><code>text</code></dt>
+  <dd>Plain text, in Unicode: curly quotes, em dashes.</dd>
+  <dt><code>html</code></dt>
+  <dd>The same text with its markup, and nothing else: <code>&lt;em&gt;</code> for
+    italics, <code>&lt;sup&gt;</code> for an exponent, <code>&lt;span class="jesus"&gt;</code>
+    for the words of Jesus, <code>&lt;span class="mark"&gt;</code> around a list's
+    number, and an empty <code>&lt;span class="leader"&gt;&lt;/span&gt;</code> where the
+    book prints a dot leader. Stripping the tags gives <code>text</code> exactly.</dd>
+  <dt><code>hash</code></dt>
+  <dd>For checking your copy: see below.</dd>
+</dl>
+
+{%- if example['139:9'] %}
+<p>A section. Section 0, a paper's introduction, has no title.</p>
+<pre class="json"><code>{{ example['139:9'] }}</code></pre>
+{%- endif %}
+<p>A paper has <code>paper</code>, <code>part</code> (<code>null</code> for the Foreword),
+<code>title</code> and <code>author</code>. A part has <code>part</code>, <code>label</code>,
+<code>title</code>, <code>sponsor</code> and <code>papers</code>, its first and last.</p>
+
+<h2>Two numberings</h2>
+<p>This site numbers 107 paragraphs differently from the Urantia Foundation, and every
+translation follows the Foundation. If you join this text to other data by reference,
+join on <code>uf_ref</code>, not <code>ref</code>.</p>
+<ul>
+  <li>The Foundation counts the <i>* * *</i> separator in 134:6, and the six between the
+    prayers of 144:5, as paragraphs, so its numbers there run ahead of ours.</li>
+  <li>It files the one heading over sections 9 and 10 of Paper 139 under 10: our 139:9.1–11
+    are its 139:10.1–11.</li>
+  <li>It does not number the Foreword's closing ACKNOWLEDGMENT, our 0:12.10, so that
+    paragraph's <code>uf_ref</code> is <code>null</code>.</li>
+</ul>
+{%- if example['144:5.11'] %}
+<pre class="json"><code>{{ example['144:5.11'] }}</code></pre>
+{%- endif %}
+
+<h2>A client in Python</h2>
+<p>With nothing but the standard library. It keeps the text in one JSON file.</p>
+<pre><code>import gzip, json, pathlib, urllib.request
+
+BASE = "{{ base }}api/v1"
+AGENT = "MySite/1.0 (+https://example.org)"       # your site's name, please
+STORE = pathlib.Path("urantia-book-en.json")
+KEY = {"parts": "part", "papers": "paper", "sections": "ref", "paragraphs": "ref"}
+
+have = json.loads(STORE.read_text()) if STORE.exists() else {"version": 0, "records": {}}
+req = urllib.request.Request(f"{BASE}/text?since={have['version']}",
+                             headers={"User-Agent": AGENT, "Accept-Encoding": "gzip"})
+with urllib.request.urlopen(req) as r:
+    body = r.read()
+    if r.headers.get("Content-Encoding") == "gzip":
+        body = gzip.decompress(body)
+reply = json.loads(body)
+if reply["full"]:
+    have["records"] = {}
+for kind, key in KEY.items():
+    for rec in reply[kind]:
+        have["records"][f"{kind}/{rec[key]}"] = rec
+    for gone in reply["removed"][kind]:
+        have["records"].pop(f"{kind}/{gone}", None)
+have["version"] = reply["version"]
+STORE.write_text(json.dumps(have, ensure_ascii=False))
+print(f"version {reply['version']}: {sum(len(reply[k]) for k in KEY)} records")</code></pre>
+
+<h2>Checking your copy</h2>
+<p>A record's <code>hash</code> is the first 16 hex digits of the SHA-256 of the record
+without its hash, as JSON with its keys sorted and no spaces, in UTF-8. Recompute it over
+what you store, and a record that has gone wrong in your copy shows itself:</p>
+<pre><code># Python
+rec = dict(record); del rec["hash"]
+hashlib.sha256(json.dumps(rec, ensure_ascii=False, sort_keys=True,
+               separators=(",", ":")).encode()).hexdigest()[:16]
+
+// JavaScript
+const {hash, ...rec} = record;
+const json = JSON.stringify(Object.fromEntries(Object.entries(rec).sort(([a], [b]) => a &lt; b ? -1 : 1)));
+const hex = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(json)))]
+  .map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 16);</code></pre>
+
+<h2>Please</h2>
+<ul>
+  <li>Send a User-Agent that names your site, as above. It is how this site sees who
+    keeps a copy, and whether it is current.</li>
+  <li>Once a day is plenty: the text changes rarely. Send back the <code>ETag</code> as
+    <code>If-None-Match</code> and an unchanged reply is a bodiless 304.</li>
+  <li>Keep the address in your settings. The site will move to urantiabook.org.</li>
+  <li>Credit is welcome, not required: <i>“{{ api_licence.credit_line }}”</i>.</li>
+</ul>
+
+<h2>Other endpoints</h2>
+<dl>
+  <dt><a href="/api/v1"><code>GET /api/v1</code></a></dt>
+  <dd>The current version, the counts, the Uversa Press commit this database was built from,
+    and these links.</dd>
+  <dt><a href="/api/v1/versions"><code>GET /api/v1/versions</code></a></dt>
+  <dd>Every version: when it was made, from which commit, and how many records it changed.</dd>
+</dl>
+<p>Errors come back as JSON with a status: 400 for a <code>since</code> that is not a
+version number, 404 for an address that is not an endpoint. Every reply may be read from
+a page on another site (<code>Access-Control-Allow-Origin: *</code>).</p>
+
+<h2>Versions</h2>
+<table>
+<tr><th>Version</th><th>Made</th><th>Text commit</th><th class="fig">Changed</th><th class="fig">Removed</th></tr>
+{%- for x in meta.versions|reverse %}
+<tr><td>{{ x.version }}</td><td>{{ x.made }}</td><td><code>{{ x.press_commit[:7] }}{{ '+dirty' if x.press_commit.endswith('+dirty') }}</code></td>
+  <td class="fig">{{ '{:,}'.format(x.changed) }}</td><td class="fig">{{ '{:,}'.format(x.removed) }}</td></tr>
+{%- endfor %}
+</table>
+</main>{% endblock %}
