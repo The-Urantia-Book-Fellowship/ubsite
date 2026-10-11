@@ -155,7 +155,7 @@ class Pages(Counted):
         self.assertEqual(self.rows("SELECT path FROM view"), [])
 
     def test_an_api_call_is_not_a_view(self):
-        site = {"user-agent": "UPExplorer/1.0 (+https://upexplorer.example)"}
+        site = {"user-agent": "ExampleSite/1.0 (+https://example.org)"}
         call("/api/v1/text", "since=0", headers=site)
         (version,), = self.rows("SELECT MAX(version) FROM api_call")
         call("/api/v1/text", f"since={version}", headers=site)
@@ -271,7 +271,7 @@ class StatsPage(Counted):
         call("/static/ub.css", client="8.8.8.8")
         call("/search", "q=xyzzyplugh", client="8.8.8.8")
         call("/102:3", headers={"user-agent": "Mozilla/5.0 (compatible; Googlebot/2.1)"})
-        call("/api/v1/text", "since=0", headers={"user-agent": "UPExplorer/1.0 (+https://x)"},
+        call("/api/v1/text", "since=0", headers={"user-agent": "ExampleSite/1.0 (+https://x)"},
              client="8.8.8.8")
         visits.RECORDER.flush()
         for days in ("1", "30", "all"):
@@ -282,7 +282,7 @@ class StatsPage(Counted):
             html = body.decode()
             self.assertIn("xyzzyplugh", html)                 # a search that found nothing
             self.assertIn("Googlebot", html)
-            self.assertIn("UPExplorer/1.0", html)             # an API caller, by its name
+            self.assertIn("ExampleSite/1.0", html)             # an API caller, by its name
         self.assertEqual(len(self.rows("SELECT * FROM view WHERE path = '/stats'")), 0)
 
 

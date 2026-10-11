@@ -150,7 +150,7 @@ KIND_LABEL = {"section": "Sections of the text", "concept": "Concept pages",
 
 # ---- the report --------------------------------------------------------------------
 def client_name(ua: str, kind: dict) -> str:
-    """Who is calling the API: the User-Agent's first product, "UPExplorer/1.0"."""
+    """Who is calling the API: the User-Agent's first product, "ExampleSite/1.0"."""
     if kind.get("kind") == "person":
         return f"a browser ({kind['browser']}, {kind['os']})"
     return (ua.split()[0] if ua.strip() else "(no User-Agent)")[:60]

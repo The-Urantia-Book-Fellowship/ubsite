@@ -288,7 +288,7 @@ Without `var/stats.passwd`, `/stats` is a 404. The browser that logs in gets the
 
 ## The text API
 
-Other sites keep their own copies of the English text, and **`/api/v1`** lets them keep those copies in step with this one. **`/api`** documents it for them, with a client in Python. The first two users are Vladislav Pogorelov's Urantia Papers Explorer and Alexander Alyuev's UB_AI_Search.
+Other sites keep their own copies of the English text, and **`/api/v1`** lets them keep those copies in step with this one. **`/api`** documents it for them, with a client in Python.
 
 The protocol is a **text version**. A site keeps the number it was last sent, and asks `/api/v1/text?since=N`. It gets every record new or changed since N, the keys of any removed, and the new number. Asked from 0, the reply is the whole text: 3 MB gzipped. A record is a part, a paper, a section or a paragraph, each with a hash for checking a copy. A paragraph is sent as HTML alone, the red letter and italics included; stripping its tags gives the plain text exactly.
 
