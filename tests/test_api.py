@@ -170,6 +170,7 @@ class Whole(Quiet):
         page = html.unescape(body.decode())
         self.assertTrue('"uf_ref": "144:5.12"' in page, "the renumbered example is shown")
         self.assertTrue('BASE = "https://ubsite.test/api/v1"' in page, "the client names this site")
+        self.assertTrue(f'"version": {self.current},' in page, "a reply is shown, with its version")
 
     def test_the_two_numberings(self):
         uf = {x["ref"]: x["uf_ref"] for x in self.reply["paragraphs"]}

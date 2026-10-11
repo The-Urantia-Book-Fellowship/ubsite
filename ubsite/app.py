@@ -623,8 +623,9 @@ def api_docs(request: Request):
         if row:
             example[key] = json.dumps(json.loads(row[0]), ensure_ascii=False, indent=1)
     base = str(request.base_url)
+    since, reply = api.example(base)
     return page(request, "api.html", base=base, meta=meta, example=example,
-                api_licence=api.licence(base))
+                api_licence=api.licence(base), reply=reply, reply_since=since)
 
 
 @app.get("/rail/{paper:int}", include_in_schema=False)

@@ -75,6 +75,28 @@ def _meta(mtime_ns: int) -> dict:
             "press": press and {"commit": press[0], "date": press[1], "dirty": bool(press[2])}}
 
 
+def head(cur: dict, since: int, base: str) -> dict:
+    """What a reply to /text says before its records: /api shows it as it is."""
+    return {"api": 1, "version": cur["version"], "since": since, "full": since == 0,
+            "made": cur["made"], "source": {"press": cur["press_commit"]},
+            "licence": licence(base)}
+
+
+def example(base: str) -> tuple[int, str]:
+    """(since, reply): the reply to a site one version behind, its records counted
+    rather than listed, for /api.  From 0 while there is only one version."""
+    meta = _meta(_db_version())
+    cur = meta["versions"][-1]
+    since = cur["version"] - 1
+    n = dict(_con().execute("SELECT kind, COUNT(*) FROM text_unit WHERE version > ?"
+                            " GROUP BY kind", (since,)))
+    out = json.dumps(head(cur, since, base), ensure_ascii=False, indent=1)[:-2]
+    for k in KINDS:
+        out += f',\n "{PLURAL[k]}": ' + (f"[ {n[k]:,} records ]" if n.get(k) else "[]")
+    empty = ", ".join(f'"{PLURAL[k]}": []' for k in KINDS)
+    return since, out + f',\n "removed": {{{empty}}}\n}}'
+
+
 @functools.lru_cache(maxsize=8)
 def _text(mtime_ns: int, since: int, base: str) -> bytes:
     """The reply to /text?since=..., gzipped.  `since` is 0 for the whole text."""
@@ -90,10 +112,7 @@ def _text(mtime_ns: int, since: int, base: str) -> bytes:
     for kind, key in con.execute("SELECT kind, key FROM text_removed WHERE version > ?"
                                  " AND ? > 0 ORDER BY version, kind, key", (since, since)):
         removed[PLURAL[kind]].append(key)
-    head = {"api": 1, "version": cur["version"], "since": since, "full": since == 0,
-            "made": cur["made"], "source": {"press": cur["press_commit"]},
-            "licence": licence(base)}
-    out = [json.dumps(head, ensure_ascii=False, separators=(",", ":"))[:-1]]
+    out = [json.dumps(head(cur, since, base), ensure_ascii=False, separators=(",", ":"))[:-1]]
     for k in KINDS:
         out.append(f',"{PLURAL[k]}":[' + ",".join(bodies[k]) + "]")
     out.append(',"removed":' + json.dumps(removed, separators=(",", ":")) + "}")

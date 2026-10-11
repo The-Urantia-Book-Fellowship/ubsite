@@ -40,6 +40,11 @@ has, the reply is empty, so asking once a day costs nothing. The whole text is a
 3&nbsp;MB compressed, and a reply is compressed whenever your client accepts gzip, as
 every common one does.</p>
 
+<h2>A reply</h2>
+<p>This is the reply to a site holding version {{ reply_since }}, as it would come today.
+The lists hold whole records, shown below; here they are only counted.</p>
+<pre class="json"><code>{{ reply }}</code></pre>
+
 <h2>Applying a reply</h2>
 <ol>
   <li>For each record in <code>parts</code>, <code>papers</code>, <code>sections</code>
@@ -49,12 +54,13 @@ every common one does.</p>
   <li>If <code>full</code> is <code>true</code>, the reply is the whole text, so delete
     anything it does not contain. A reply is full when you ask from 0, or from a version
     this site has not made.</li>
-  <li>Keep <code>version</code>.</li>
+  <li>Keep <code>version</code>, and send it as <code>since</code> next time.</li>
 </ol>
 
-<p>Every reply also carries <code>since</code> (what it is relative to, 0 when full),
-<code>made</code> (the version's date), <code>source</code> (the commit of the Uversa
-Press text it was made from) and <code>licence</code>.</p>
+<p>The rest of a reply: <code>since</code> is the version it is relative to, 0 when it is
+full; <code>made</code> is the date of <code>version</code>; <code>source</code> is the
+commit of the Uversa Press text it was made from; and <code>licence</code> says what you
+may do with it.</p>
 
 <h2>The records</h2>
 {%- if example['147:4.4'] %}
