@@ -12,6 +12,7 @@ import gzip
 import html
 import json
 import pathlib
+import re
 import shutil
 import sqlite3
 import sys
@@ -180,6 +181,14 @@ class Whole(Quiet):
         secs = {x["ref"]: x["uf_ref"] for x in self.reply["sections"]}
         self.assertEqual(secs["139:9"], "139:10")
 
+    def test_html_alone_and_it_strips_to_the_text(self):
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        texts = dict(con.execute("SELECT ref, text FROM paragraph"))
+        for x in self.reply["paragraphs"]:
+            self.assertNotIn("text", x)
+            # The recipe /api gives.
+            self.assertEqual(html.unescape(re.sub(r"<[^>]+>", "", x["html"])), texts[x["ref"]])
+
     def test_html_carries_no_note_marker(self):
         self.assertFalse([x["ref"] for x in self.reply["paragraphs"] if 'class="fn"' in x["html"]])
 
@@ -234,7 +243,7 @@ class Delta(Quiet):
         status, _, r = text(str(self.before))
         self.assertEqual((r["version"], r["since"], r["full"]), (self.after, self.before, False))
         self.assertEqual([x["ref"] for x in r["paragraphs"]], ["101:4.2"])
-        self.assertTrue(r["paragraphs"][0]["text"].endswith(" (edited)"))
+        self.assertTrue(r["paragraphs"][0]["html"].endswith(" (edited)"))
         self.assertEqual([len(r[k]) for k in ("parts", "papers", "sections")], [0, 0, 0])
         self.assertEqual(r["removed"]["paragraphs"], [self.gone])
 

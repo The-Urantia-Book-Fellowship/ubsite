@@ -93,8 +93,11 @@ def records(con) -> list[tuple[str, str, dict]]:
             " FROM paragraph p JOIN uf_paragraph u ON u.paragraph_id = p.id ORDER BY p.ord"):
         if pid in marked:
             html = render(text, spans.get(pid, []))
+        # HTML alone, no plain copy beside it (Tigran, 2026-10-11): stripping its
+        # tags gives the text exactly, which check_db holds, and one copy cannot
+        # disagree with itself.
         out.append(("paragraph", ref, {"ref": ref, "uf_ref": uf, "paper": p, "section": s,
-                                       "paragraph": n, "text": text, "html": html}))
+                                       "paragraph": n, "html": html}))
     return out
 
 

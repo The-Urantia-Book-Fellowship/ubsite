@@ -212,13 +212,13 @@ def _text_api(con) -> int:
         rec = json.loads(body)
         ok = rec.pop("hash") == h == versions.digest(rec)
         if kind == "paragraph":
-            ok = (ok and rec["ref"] == key and rec["text"] == texts.get(key)
-                  and strip_tags(rec["html"]) == rec["text"] and 'class="fn"' not in rec["html"])
+            ok = (ok and rec["ref"] == key and strip_tags(rec["html"]) == texts.get(key)
+                  and 'class="fn"' not in rec["html"])
         if not ok:
             off += 1
             if off <= 5:
                 print(f"            text API record wrong: {kind} {key}")
-    print(f"text API:   {n - off}/{n} records hash true, and every paragraph's is its text"
+    print(f"text API:   {n - off}/{n} records hash true, and every paragraph's HTML strips to its text"
           + ("" if not off else f"   {off} FAIL"))
     if off or got != want:
         bad += 1
