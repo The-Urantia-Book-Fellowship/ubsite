@@ -161,8 +161,8 @@ const hex = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEnc
   <li>Send a User-Agent that names your site, as above. It is how this site sees who
     keeps a copy, and whether it is current.</li>
   <li>Once a day is plenty: the text changes rarely. Send back the <code>ETag</code> as
-    <code>If-None-Match</code> and an unchanged reply is a bodiless 304. More than
-    10 requests a minute from one address are refused with a 429.</li>
+    <code>If-None-Match</code> and an unchanged reply is a bodiless 304. An address
+    that asks many times a minute is refused for a while with a 429.</li>
   <li>Keep the address in your settings. The site will move to urantiabook.org.</li>
   <li>Credit is welcome, not required: <i>“{{ api_licence.credit_line }}”</i>.</li>
 </ul>

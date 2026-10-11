@@ -297,7 +297,7 @@ The protocol is a **text version**. A site keeps the number it was last sent, an
 - **`ubsite/api.py`** only selects the stored records and concatenates them. Each worker keeps each reply gzipped, so the whole text is compressed once per deploy. Replies carry an ETag (a site that is up to date gets a 304) and `Access-Control-Allow-Origin: *`.
 - **Calls are counted apart from page views**, in `api_call` in `var/visits.db`. `/stats` lists each caller by its User-Agent, which `/api` asks every site to set to its own name.
 - **The licence:** the English text is public domain; credit is requested, not required (Tigran, 2026-10-11).
-- **nginx** rate-limits `/api/` to 10 requests a minute per address, with a burst of 5: a third of `/search`'s rate, because a syncing site needs one request a day.
+- **nginx** rate-limits `/api/` per address, with a burst of 5. The limit is 40 a minute while the first sites are built against the API, and is to come down to 10, since a syncing site needs one request a day. Every machine on this LAN shares one public address, and so one bucket.
 
 `tests/test_api.py` builds a second database with one paragraph edited and one removed, and checks that the version after sends exactly those. `tests/test_versions.py` checks, on synthetic states, that a site at any version reaches the newest.
 
