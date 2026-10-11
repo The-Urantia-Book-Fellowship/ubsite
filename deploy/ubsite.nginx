@@ -14,7 +14,7 @@
 # protections, explicitly, below.
 
 limit_req_zone $binary_remote_addr zone=ubsite_search:10m rate=30r/m;
-limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=60r/m;
+limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=10r/m;
 
 server {
     listen 80;
@@ -46,11 +46,13 @@ server {
     }
 
     # The text API (ubsite/api.py).  A site keeping its copy in step asks once a
-    # day, and an unchanged reply is a 304; the whole text is 3 MB, so what this
-    # stops is a program asking for it from version 0 in a loop.  /api, the page
-    # that documents it, is not under /api/ and stays with the rest.
+    # day, one request, and an unchanged reply is a 304: far less than a person
+    # searching, hence a third of /search's rate.  The whole text is 3 MB, so
+    # what this stops is a program asking for it from version 0 in a loop, and
+    # the burst is small for the same reason.  /api, the page that documents it,
+    # is not under /api/ and stays with the rest.
     location /api/ {
-        limit_req zone=ubsite_api burst=30 nodelay;
+        limit_req zone=ubsite_api burst=5 nodelay;
         limit_req_status 429;
         proxy_pass http://127.0.0.1:8130;
         include /etc/nginx/proxy_params;
