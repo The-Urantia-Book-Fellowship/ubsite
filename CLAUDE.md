@@ -184,7 +184,8 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
     - In 144:5 it numbers six separators, not one.
     
     The first survey, which went section by section, counted 95 differences; there are 107. `build/foundation.py` therefore aligns paper by paper.
-19. **The 2080 Ti is the display GPU.** Under Whisper it reached 88 °C, against a rated maximum of 89 °C, and throttled to 735 MHz. Compute runs on the 3090: `CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`.
+19. **nginx's `location /api/` answers `/api` with a 301 to `/api/`.** It does that for any prefix location that ends in a slash and has `proxy_pass`. The app redirects `/api/` back to `/api` with a 307, so the docs page was a redirect loop that the rate limit ended with a 429, and no test of the app can see it. `location = /api` in `deploy/ubsite.nginx` is the fix. Try a page through nginx itself after changing a location.
+20. **The 2080 Ti is the display GPU.** Under Whisper it reached 88 °C, against a rated maximum of 89 °C, and throttled to 735 MHz. Compute runs on the 3090: `CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`.
 
 ---
 
