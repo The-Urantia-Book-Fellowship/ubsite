@@ -47,8 +47,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key == "audio":
-            continue                                # not a repository: see audio()
+        if key in ("audio", "srt"):
+            continue                                # not repositories: see audio(), srt()
         path = (ROOT / cfg["path"]).resolve()
         if not path.is_dir():
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
@@ -99,6 +99,18 @@ def audio() -> dict:
                     "kind": cfg["kind"], "credit": cfg.get("credit"),
                     "credit_url": cfg.get("credit_url"), "present": path.is_dir()}
     return out
+
+
+def srt() -> dict:
+    """Return {url, path} for the SRT Committee's page and its snapshot here.
+
+    The page is the Fellowship's; the snapshot of its two tables, under data/,
+    is what the build reads (build/srt.py), and only tools/srt/snapshot.py
+    writes it.
+    """
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["srt"]
+    return {"url": cfg["url"], "path": ROOT / cfg["path"]}
 
 
 def describe(repos: dict) -> str:

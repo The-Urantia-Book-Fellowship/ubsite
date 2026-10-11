@@ -11,10 +11,10 @@ paper_section_pairs  = 1626      # 1,429 titled sections + 197 untitled introduc
 redletter_spans      = 1267      # \textcolor{ubdarkred} -- the words of Jesus
 variant_1955_notes   = 180       # \fnc; 177 at 5222a215, then press 36927e0 set 0:1.24
                                  # with \fnc and c88b9ea, 25e69af added 80:7.1, 172:5.2
-variant_1955_italics = 6         # of those, the same words with other italics, which
-                                 # build/variants.py explains (measured at de9308f6,
-                                 # 2026-10-09): 59:4.18 61:7.18 102:3.5 102:3.11
-                                 # 111:0.4 112:1.7
+variant_1955_explained = 167     # of those, with the SRT Committee's reason (build/srt.py);
+                                 # the 13 without are in tests/known-srt-deltas.tsv.
+                                 # 6 differ in italics only (59:4.18 61:7.18 102:3.5
+                                 # 102:3.11 111:0.4 112:1.7), all explained by the committee
 listmark_spans       = 2397      # \ublistelem
 dotleader_spans      = 26        # \bibdf
 em_spans             = 2294      # 2,299 \bibemph less the 5 inside \fnc bodies,
@@ -22,6 +22,19 @@ em_spans             = 2294      # 2,299 \bibemph less the 5 inside \fnc bodies,
                                  # they are the 1955 notes' own italics, in footnote.html
 gap_before_flags     = 4185      # 4,186 \pc less one occurrence inside a comment
                                  # at p048.tex:114
+[srt]
+source_sha256 = "a5dd319ae58e7646a9099e34ef1ace1abe500b57e1e1a6b16046e29b4de85472"   # data/srt/considerations.html
+fetched       = "2026-10-11T22:46:57Z"
+measured_on   = "2026-10-11"
+rows          = 303       # the page's entries, less its two tables' heads
+changes       = 319       # srt_item: a row holds one change or several (134:3.3 three)
+adopted       = 178       # 170 so labelled, and 8 bare "See SRT note for ..." taking their target's
+rejected      = 100
+no_action     = 32
+informational = 7
+no_decision   = 2
+notes_paired  = 167       # 1955 notes given their reason, of 180
+
 [study]
 source_commit = "8af25c5"
 measured_on   = "2026-09-21"

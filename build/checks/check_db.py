@@ -12,9 +12,11 @@ QUERIES = [
     ("red-letter spans",    "SELECT COUNT(*) FROM span WHERE kind='redletter'", 1267),
     ("em spans",            "SELECT COUNT(*) FROM span WHERE kind='em'", 2295),
     ("1955 variant notes",  "SELECT COUNT(*) FROM footnote WHERE kind='variant-1955'", 180),
-    # The ones that differ in nothing but italics, each told in words
-    # (build/variants.py): 59:4.18, 61:7.18, 102:3.5, 102:3.11, 111:0.4, 112:1.7.
-    ("  in italics only",   "SELECT COUNT(*) FROM footnote WHERE gloss IS NOT NULL", 6),
+    # The SRT Committee's page (build/srt.py): every change it considered, and the
+    # notes it gives a reason; the 13 without are in tests/known-srt-deltas.tsv.
+    ("SRT changes considered", "SELECT COUNT(*) FROM srt_item", 319),
+    ("  1955 notes with their reason",
+     "SELECT COUNT(*) FROM footnote WHERE srt_item_id IS NOT NULL", 167),
     ("index entries",       "SELECT COUNT(*) FROM index_entry", None),
     ("citations",           "SELECT COUNT(*) FROM citation", None),
     ("citation targets",    "SELECT COUNT(*) FROM citation_target", None),
@@ -82,6 +84,19 @@ INVARIANTS = [
     # The footer and /healthz name these commits; a build that cannot is not shipped.
     ("press and index commits recorded (missing)",
      "SELECT 2 - COUNT(*) FROM build_source WHERE repo IN ('press','index')"),
+    ("the SRT snapshot recorded (missing)",
+     "SELECT 1 - COUNT(*) FROM build_source WHERE repo = 'srt'"),
+    # A note's marker stands in its paragraph, and each marker has its note.
+    ("every note's anchor lies inside its paragraph",
+     """SELECT COUNT(*) FROM footnote f JOIN paragraph p ON p.id = f.paragraph_id
+         WHERE f.anchor < 0 OR f.anchor > LENGTH(p.text)"""),
+    ("paragraphs whose markers and notes differ in number",
+     """SELECT COUNT(*) FROM paragraph p
+         WHERE (SELECT COUNT(*) FROM span s WHERE s.paragraph_id = p.id AND s.kind = 'fnref')
+            <> (SELECT COUNT(*) FROM footnote f WHERE f.paragraph_id = p.id)"""),
+    ("a 1955 note's reason is about its own paragraph",
+     """SELECT COUNT(*) FROM footnote f JOIN srt_item s ON s.id = f.srt_item_id
+         WHERE s.paragraph_id IS NOT f.paragraph_id"""),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]
@@ -117,6 +132,32 @@ def run(con) -> int:
           + ("" if not foff else f"   {foff} FAIL"))
     if foff:
         bad += 1
+    k = soff = 0
+    for text, h in con.execute("SELECT then_text, then_html FROM srt_item"
+                               " UNION ALL SELECT why_text, why_html FROM srt_item"):
+        k += 1
+        if strip_tags(h) != text:
+            soff += 1
+    print(f"            {k - soff}/{k} SRT texts round-trip"
+          + ("" if not soff else f"   {soff} FAIL"))
+    if soff:
+        bad += 1
+    # Every link the build rewrote to the book lands on a place in it.
+    import re
+    places = {r for (r,) in con.execute("SELECT ref FROM paragraph")}
+    places |= {f"{p}:{n}" for p, n in con.execute("SELECT paper_n, n FROM section")}
+    places |= {str(n) for (n,) in con.execute("SELECT n FROM paper")}
+    k = loff = 0
+    for (h,) in con.execute("SELECT then_html || why_html FROM srt_item"):
+        for to in re.findall(r'href="/([^"]*)"', h):
+            k += 1
+            if to not in places:
+                loff += 1
+                print(f"            SRT link to nowhere: /{to}")
+    print(f"            {k - loff}/{k} SRT links into the book land"
+          + ("" if not loff else f"   {loff} FAIL"))
+    if loff:
+        bad += 1
     k = toff = 0
     for text, h in con.execute("SELECT title, title_html FROM section WHERE n > 0"):
         k += 1
@@ -135,6 +176,7 @@ def run(con) -> int:
     for where, h in con.execute(
             "SELECT 'paragraph ' || ref, html FROM paragraph"
             " UNION ALL SELECT 'note ' || id, html FROM footnote"
+            " UNION ALL SELECT 'SRT ' || name, then_html || why_html FROM srt_item"
             " UNION ALL SELECT 'section ' || paper_n || ':' || n, title_html FROM section"
             "  WHERE title_html IS NOT NULL"
             " UNION ALL SELECT 'entry ' || id, text_html FROM index_entry"):

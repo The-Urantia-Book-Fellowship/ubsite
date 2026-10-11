@@ -23,7 +23,14 @@
 <p class="ix">{{ chips(p.chips) }}</p>
 {% endif %}
 {% for n in p.notes %}
-<aside epub:type="footnote" class="note" id="{{ n.id }}"><p><a class="lbl" href="#{{ n.back }}">1955</a> {{ n.html|safe }}{% if n.gloss %}<span class="gloss"> — {{ n.gloss }}</span>{% endif %}</p></aside>
+<aside epub:type="footnote" class="note" id="{{ n.id }}"><p><a class="lbl" href="#{{ n.back }}">1955</a> {{ n.then|safe }}</p>
+{% if n.verdict %}
+<p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.why|safe }}</p>
+{% if n.see_why %}<p class="why"><a href="{{ n.see_href }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>
+{% endif %}
+<p class="src">SRT Committee, urantiabook.org/SRT</p>
+{% endif %}
+</aside>
 {% endfor %}
 {% endfor %}
 </section>

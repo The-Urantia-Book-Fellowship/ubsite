@@ -286,6 +286,32 @@ Without `var/stats.passwd`, `/stats` is a 404. The browser that logs in gets the
 
 ---
 
+## The 1955 readings and their reasons
+
+Wherever the text departs from the 1955 first printing, the press TeX carries the 1955 reading (`\fnc`, 180 of them). On the site each is a small ring above the words that changed. A click opens a card under the line, with the 1955 reading as the press gives it, and the **SRT Committee's decision and its reasons**. The committee's page has errors of its own, and misquotes the 1955 text in places, so the card takes from it only its reasons, under its name. What 1955 printed is the press's to say. Without JavaScript, and in print, the same words are the section's endnotes. The EPUB has them as pop-up notes. Settings → "The 1955 readings" turns them off.
+
+The reasons are the joint Fellowship–Foundation committee's, published by the Fellowship at https://members.urantiabook.org/text-standardization-Urantia-Book, the page the printed preface sends readers to as `urantiabook.org/SRT`.
+
+- **`data/srt/considerations.html`** is a snapshot of the page's two tables of entries, exactly as served, with a header naming the URL, when it was fetched and the page's SHA-256. `make data` reads only the snapshot, never the network.
+- **`build/srt.py`** reads it into `srt_item`, one row per change considered (319): its 1955 text, the verdict and the reasons, with links rewritten to our paragraphs. It then pairs each 1955 note with the change it shows (`footnote.srt_item_id`). An entry's reference is the Foundation's, mapped to ours through `uf_paragraph`.
+- **`tests/known-srt-deltas.tsv`** lists, exactly, what does not pair one to one:
+  - the 13 notes the page has no entry for;
+  - the 5 whose entry is not "Adopted" though the text changed;
+  - entries labelled "Adopted" that no note pairs with: in every case the 1955 printing already reads as our text does (the page swaps its columns at 85:4.1, and lists five places *Caesarea-Philippi* occurs as if they were changes);
+  - the page's own slips, in its links and in quoting the 1955 text.
+
+  A disagreement between the page and the press is settled by the 1955 printing itself, the Guardian plates in the press repo, never by the page alone.
+
+To refresh it:
+
+```
+make srt-snapshot                       # fetches the page, keeps its two tables
+git diff data/srt/                      # what the Fellowship changed
+make data && make check                 # srt-undeclared / srt-declared-gone name what moved
+```
+
+Then update `tests/known-srt-deltas.tsv` and the SRT counts in `check_db.py` and `verify/expectations.toml`, and commit them all together.
+
 ## The text API
 
 Other sites keep their own copies of the English text, and **`/api/v1`** lets them keep those copies in step with this one. **`/api`** documents it for them, with a client in Python.

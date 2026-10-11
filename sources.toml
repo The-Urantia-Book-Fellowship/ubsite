@@ -33,6 +33,16 @@ tex  = "tex"
 rev  = "HEAD"
 url  = "https://github.com/The-Urantia-Book-Fellowship/index"   # PRIVATE, as above
 
+# The SRT Committee's reasons for each change to the 1955 text, which the
+# Fellowship publishes and the printed preface sends readers to
+# ("urantiabook.org/SRT" redirects to an essay that links here).  Not a
+# repository: a web page, kept as a SNAPSHOT of its two tables, checked in at
+# `path` and made only by `make srt-snapshot` (tools/srt/snapshot.py).  The
+# build reads the snapshot, never the network; refreshing it is a reviewed diff.
+[srt]
+url  = "https://members.urantiabook.org/text-standardization-Urantia-Book"
+path = "data/srt/considerations.html"
+
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
 # directory against that list.

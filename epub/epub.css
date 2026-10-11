@@ -103,6 +103,9 @@ aside.note p {
   color: #555;
 }
 aside.note .lbl { font-style: italic; }
+aside.note .dec { font-variant: small-caps; }
+aside.note .src { font-size: .7em; }
+/* The words the SRT Committee changed, underlined as it underlines them. */
 mark.chg { background: none; color: inherit; text-decoration: underline; }
 
 /* -- the front ------------------------------------------------------------- */

@@ -40,6 +40,10 @@ FORBIDDEN = "Goudy-Handtooled-BT.ttf"
 # excuses these and nothing else.
 ELSEWHERE = {
     "◐": "the theme button, set in the system UI face (ub.css .theme)",
+    "↗": "a 1955 card's link to the committee's entry, set in the system UI face"
+         " (ub.css :is(.note, .pop) .src)",
+    "γ": "42:5.1's SRT note names the Greek letter that became the 1955 'Y';"
+         " UB Goudy has no Greek, and the serif behind it in the stack draws it",
 }
 
 RE_JINJA = re.compile(r"\{[%#{].*?[%#}]\}", re.S)
@@ -61,7 +65,11 @@ def corpus_codepoints(con) -> set[str]:
               "SELECT title FROM appendix",             # an appendix chip's label
               "SELECT label FROM chronology_event",     # its year and month too
               "SELECT text FROM footnote",
-              "SELECT gloss FROM footnote"):
+              # The SRT Committee's reasons a 1955 note shows, and those of the
+              # note it refers to.
+              "SELECT verdict || why_text FROM srt_item WHERE id IN"
+              " (SELECT srt_item_id FROM footnote UNION SELECT s.see_id FROM srt_item s"
+              "  JOIN footnote f ON f.srt_item_id = s.id)"):
         for (t,) in con.execute(q):
             cps.update(t or "")
     cps.update("0123456789:.,()[]-–—…'’“” /*&%#?!; ")

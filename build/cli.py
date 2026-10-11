@@ -93,6 +93,13 @@ def main(argv: list[str]) -> int:
         n_uf = foundation.load(con, repos["press"], report,
                                root / "tests" / "known-uf-refs.tsv")
         print(f"  {n_uf} paragraphs it numbers otherwise")
+        print("the SRT Committee's reasons ...")
+        from . import srt
+        srt_src = config.srt()
+        srt_stats = srt.load(con, srt_src, report, root / "tests" / "known-srt-deltas.tsv")
+        if srt_stats:
+            print(f"  {srt_stats['srt_items']} changes considered;"
+                  f" {srt_stats['srt_notes']} of the 1955 notes have their reason")
         load.load_index(con, az, apps, para_key, report)
         print("slugs ...")
         from . import slugs
@@ -147,6 +154,13 @@ def main(argv: list[str]) -> int:
         con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
                         [(k, repos[k]["commit"], int(repos[k]["dirty"]), repos[k]["rev"],
                           repos[k]["date"], repos[k]["commit_url"]) for k in ("press", "index")])
+        # The SRT snapshot is no repository: its "commit" is the file's SHA-256,
+        # its date the day it was fetched, its page the committee's.
+        if srt_stats:
+            import hashlib
+            con.execute("INSERT INTO build_source VALUES ('srt', ?, 0, 'snapshot', ?, ?)",
+                        (hashlib.sha256(srt_src["path"].read_bytes()).hexdigest(),
+                         srt_stats["srt_fetched"][:10], srt_src["url"]))
         for k in ("press", "index"):
             if repos[k]["commit_url"] and not repos[k]["pushed"]:
                 report.warn("source-not-pushed", f"{k} {repos[k]['commit'][:7]}",
@@ -163,6 +177,9 @@ def main(argv: list[str]) -> int:
                 # counts these, not `footnotes`, which Phase 6's study notes join.
                 ("variants_1955", "SELECT COUNT(*) FROM footnote"
                                   " WHERE kind='variant-1955'"),
+                ("srt_items", "SELECT COUNT(*) FROM srt_item"),
+                ("variants_1955_explained", "SELECT COUNT(*) FROM footnote"
+                                            " WHERE srt_item_id IS NOT NULL"),
                 ("redletter_paragraphs", "SELECT COUNT(DISTINCT paragraph_id) FROM span"
                                          " WHERE kind='redletter'"),
                 ("index_entries", "SELECT COUNT(*) FROM index_entry"),

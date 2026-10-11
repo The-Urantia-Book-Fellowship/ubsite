@@ -77,19 +77,17 @@ def load_text(con, papers, parts, repo, report) -> dict:
                             (spid, qid, s.start, s.end, s.kind, None, i))
             for i, nt in enumerate(q.ex.notes):
                 fid += 1
-                gloss, marks = None, []
-                if nt.kind == "variant-1955":
-                    same = variants.italics_only(q.ex.text, q.ex.spans, nt.offset,
-                                                 nt.text, nt.spans)
-                    if same == ("", []):
-                        report.hard("variant-says-nothing", q.ref,
-                                    f"the 1955 note {nt.text!r} has the text's words"
-                                    " and its italics")
-                    elif same:
-                        gloss, marks = same
-                con.execute("INSERT INTO footnote VALUES (?,1,?,?,?,?,?,?,?)",
+                if nt.kind == "variant-1955" and variants.says_nothing(
+                        q.ex.text, q.ex.spans, nt.offset, nt.text, nt.spans):
+                    report.hard("variant-says-nothing", q.ref,
+                                f"the 1955 note {nt.text!r} has the text's words"
+                                " and its italics")
+                # srt_item_id is filled by build/srt.py, once the Foundation's
+                # numbering is in.
+                con.execute("INSERT INTO footnote (id, edition_id, kind, paragraph_id,"
+                            " anchor, ord, text, html) VALUES (?,1,?,?,?,?,?,?)",
                             (fid, nt.kind, qid, nt.offset, i, nt.text,
-                             render(nt.text, [*nt.spans, *marks]), gloss))
+                             render(nt.text, nt.spans)))
     return para_key
 
 

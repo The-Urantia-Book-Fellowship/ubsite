@@ -12,7 +12,7 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync data check epub test paranoid serve serve-bg stop ports geoip clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot data check epub test paranoid serve serve-bg stop ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
@@ -103,6 +103,10 @@ vendor-check:
 ## vendor-sync   adopt upstream changes into vendor/ -- a reviewed commit, not a build step
 vendor-sync:
 	@$(PY) -m build vendor-sync
+
+## srt-snapshot  fetch the SRT Committee's page into data/srt/ -- review the diff, then commit
+srt-snapshot:
+	@$(PY) -m tools.srt.snapshot
 
 ## data          build var/ub.db from the three sources
 data: vendor-check

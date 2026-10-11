@@ -220,4 +220,64 @@
   }
   railView();
   document.addEventListener('ub:swap', railView);
+
+  // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
+  // endnote's words (section.html), which are hidden while this runs.  One
+  // card at a time, under the line and scrolling with it; the ring again, its
+  // ×, Escape or a click elsewhere closes it.  Listened for on the document,
+  // so it holds after listen.js swaps <main>.
+  var card = null;
+  function shut(back) {
+    if (!card) return;
+    card.el.remove();
+    card.mark.classList.remove('on');
+    card.mark.setAttribute('aria-expanded', 'false');
+    if (back) card.mark.focus();
+    card = null;
+  }
+  function place() {
+    if (!card) return;
+    var H = card.host.getBoundingClientRect(), M = card.mark.getBoundingClientRect();
+    var x = M.left + M.width / 2 - H.left;
+    var left = Math.min(Math.max(x - 36, 8), H.width - card.el.offsetWidth - 8);
+    card.el.style.left = left + 'px';
+    card.el.style.top = (M.bottom - H.top + 6) + 'px';
+    card.el.querySelector('.arrow').style.left = (x - left - 6) + 'px';
+  }
+  function open(mark) {
+    var note = document.getElementById(mark.getAttribute('href').slice(1)),
+        host = mark.closest('article');
+    if (!note || !host) return false;
+    var el = document.createElement('div');
+    el.className = 'pop';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', '1955 reading');
+    el.tabIndex = -1;
+    el.innerHTML = '<span class="arrow"></span>' +
+      '<button type="button" class="x" aria-label="Close">×</button>' +
+      '<div class="body">' + note.innerHTML + '</div>';
+    host.appendChild(el);
+    card = { mark: mark, el: el, host: host };
+    mark.classList.add('on');
+    mark.setAttribute('aria-expanded', 'true');
+    place();
+    el.focus({ preventScroll: true });
+  }
+  document.addEventListener('click', function (ev) {
+    var t = ev.target, mark = t.closest && t.closest('a.fn');
+    if (mark) {
+      var again = card && card.mark === mark;
+      shut(false);
+      if (again || open(mark) !== false) ev.preventDefault();
+      return;
+    }
+    if (!card) return;
+    if (card.el.contains(t)) { if (t.closest('.x')) shut(true); return; }
+    shut(false);
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && card) shut(true);
+  });
+  window.addEventListener('resize', place);
+  document.addEventListener('ub:swap', function () { card = null; });
 })();

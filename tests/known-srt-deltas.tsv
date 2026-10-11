@@ -1,0 +1,72 @@
+# What the SRT Committee's page (data/srt/, build/srt.py) and the press's 1955
+# notes do not agree on, one per line: kind, our reference, the words, and why.
+# The build requires exactly these: a new one fails, and so does one that goes.
+#
+#   no-entry           a 1955 note the page has no change for: shown alone
+#   not-adopted        a note paired with a change the committee did not adopt,
+#                      though the text changed; shown, with its decision
+#   spelt-otherwise    paired, though the note and the page spell the 1955 words apart
+#   ambiguous          two changes fit the note; it takes the first
+#   unclaimed          an entry the page labels "Adopted" that no 1955 note pairs with
+#   link-words-differ  a link on the page goes elsewhere than its words say; the
+#                      words are followed
+#   bad-link           a link to no place in the book; shown as plain text
+#
+# Measured 2026-10-11, snapshot fetched 2026-10-11T22:46:57Z, press 806c7ac.
+
+# Changes in the press text the committee's page does not list.
+no-entry	101:6.13	mind	Supreme Mind, capitalised; no entry
+no-entry	106:5.2	mind	Supreme Mind, capitalised; no entry
+no-entry	114:3.1	designate	designates; no entry
+no-entry	11:7.3	maltese	Maltese; no entry
+no-entry	140:8.30	bighearted	big-hearted; no entry
+no-entry	172:3.4	prophesies	prophecies; no entry
+no-entry	187:5.1	desert	Arabian Desert; no entry
+no-entry	55:4.15	quartette	quartet; no entry
+no-entry	55:4.16	quartettes	quartets; no entry
+no-entry	55:4.17	the	no entry
+no-entry	92:6.14	Judaism and Hinduism	Hinduism and Judaism; no entry
+no-entry	95:7.1	desert	Arabian Desert; no entry
+no-entry	98:3.8	twoscore	two-score; no entry
+
+# The text changed, and the committee's entry is its reason, though its verdict
+# is not "Adopted": the printers had already set it right, or the 2015 committee did.
+not-adopted	101:3.5	ani malistic	No action required: the line break mended in the 16th printing
+not-adopted	117:7.4	Ultimate	No action required: a period worn off the plates, restored by the 6th printing
+not-adopted	79:3.5	commerical	No action required: a typesetting error
+not-adopted	80:2.4	Atlantic Ocean Presently	No action required: a period lost at the end of a page
+not-adopted	97:5.6	God.	Rejected in 2009, "may require further attention"; the press prints the question mark
+
+# The 1955 printing reads "Teuskwatowa" (Guardian plates, p. 988), as the press note
+# has it; the committee's quotation, "Teuskwatawa", is the slip.
+spelt-otherwise	90:2.9	Teuskwatowa	the committee misquotes the 1955 spelling
+
+# The page lists this change twice, the second time with its whole sentence.
+ambiguous	133:1.5	any one	two entries for the one "any one"; the note takes the first
+unclaimed	133:1.5	In the first place very seldom would any normal human being want to attack such a kindly person as you, and even if any one should be so unthinking as to do such a thing,	the second of the two
+
+# NOT gaps in the press apparatus: in each the 1955 printing already reads as the
+# text does, so there is nothing for a note to give.  Checked against the
+# Guardian plates (press repo, The-Urantia-Book-1955-Guardian-Plates-600dpi.djvu).
+#
+# The page has its two columns the wrong way round: the 1955 printing reads
+# "Greeks" (p. 947), "Creeks" was the proposal (Hopkins' source names the tribe),
+# and the committee's reasons keep "Greeks".
+unclaimed	85:4.1	Baptism became a religious ceremonial in Babylon, and the Creeks practiced the annual ritual bath.	1955 and Review swapped on the page; 1955 reads Greeks
+# The main entry, 134:7.5, says the unhyphenated form is in the 1955 text twice
+# only, at 134:7.5 and 134:8.1, and the press notes both.  These rows list the
+# name's other places; the 1955 printing has the hyphen at each (pp. 1698, 1723,
+# 1726, 1758), and p. 1702, 152:3.2's page, does not have the name at all.
+unclaimed	152:0.3	Caesarea Philippi	a place the name occurs; hyphenated in 1955
+unclaimed	152:3.2	Caesarea Philippi	listed, though the name is not in this paragraph
+unclaimed	154:7.3	Caesarea Philippi	a place the name occurs; hyphenated in 1955
+unclaimed	155:2.1	Caesarea Philippi	a place the name occurs; hyphenated in 1955
+unclaimed	158:5.5	Caesarea Philippi	a place the name occurs; hyphenated in 1955
+# Filed under 120:1.1 on the page, but about the Part IV sponsors' note, which is no paragraph.
+unclaimed	120:1.1	The basis of this narrative was supplied by a secondary Midwayer	the Part IV sponsors' note
+
+# The page's own slips in its links.
+link-words-differ	136:3.5	24:1.11 #U24_1_1	"See SRT note for 24:1.11" links to 24:1.1
+link-words-differ	190:3.3	133:1.5 #U133_3_1	"See SRT note for 133:1.5" links to 133:3.1
+link-words-differ	46:5.24	73:7.4 #U73_0_4	"73:7.4" links to 73:0.4, which there is not
+bad-link	168:5.1	174:0.1175 https://www.urantia.org/urantia-book-standardized/paper-174-tuesday-morning-in-temple#U174_0_1175	"174:0.1175:3.1", two references run together

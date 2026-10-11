@@ -58,8 +58,9 @@ Still to do: scopes (`index:` `bible:` `jesus:`), filters, `NEAR/n`, and sentenc
 **9. The quiz.**
 819 questions, already written, already tagged by paper, at zero authoring cost. **83 are multi-answer** (1,002 correct flags) — a single-answer model marks correct responses wrong. Spaced repetition; per-paper self-test.
 
-**10. The variorum layer.**
+**10. The variorum layer.** `[partly built]`
 180 `\fnc` first-edition readings `[imported]` + 84 study-edition variant notes + the index errata. "What the 1955 printing said here", as a toggle.
+Built (2026-10-12): each 1955 reading is a ring in the text whose card carries the SRT Committee's decision and reasons (167 of the 180). Still to come: the study edition's variant notes, the index errata.
 
 **11. Two editions, diffed.**
 The press text is authoritative American; the British Study Edition is revised, metricated, Oxford-spelled and science-corrected. Both now hold at 14,586 paragraphs with identical numbering, so a paragraph-level diff is a join — and a genuinely novel scholarly object.

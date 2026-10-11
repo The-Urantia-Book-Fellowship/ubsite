@@ -31,7 +31,10 @@ ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV"}
 # whole, and older ones (Adobe's RMSDK) slow badly, or refuse, past 300 KB.
 INDEX_SPLIT = 110_000
 
-RE_FNREF = re.compile(r'<a class="fn" href="#(fn[0-9_]+)" id="(fnref[0-9_]+)"></a>')
+RE_FNREF = re.compile(r'<a class="fn" href="#(fn[0-9_]+)" id="(fnref[0-9_]+)"[^>]*></a>')
+# A link out of the book, in the SRT Committee's reasons: the book is read
+# offline, and every link in it lands inside it (check.py), so it is its words.
+RE_OUT = re.compile(r'<a href="https?://[^"]*">(.*?)</a>', re.S)
 
 
 @dataclasses.dataclass
@@ -94,15 +97,25 @@ def _chip(links: H.Hrefs, c) -> dict:
             "text": c["event"] or c["path"]}
 
 
+def _offline(links: H.Hrefs, html: str) -> str:
+    return links.rewrite(RE_OUT.sub(r"\1", html))
+
+
 def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
     secs = []
     for s in con.execute("SELECT * FROM section WHERE paper_n=? ORDER BY n", (p["n"],)):
         rows = queries.section(con, p["n"], s["n"])
         paras = []
         for q in rows["paras"]:
+            # As on the site: the 1955 reading as the press gives it, and the SRT
+            # Committee's decision and reasons, and the note it refers to.
             notes = [{"id": f"fn{q['paper_n']}_{q['section_n']}_{q['para_n']}_{f['ord']}",
                       "back": f"fnref{q['paper_n']}_{q['section_n']}_{q['para_n']}_{f['ord']}",
-                      "html": f["html"], "gloss": f["gloss"]}
+                      "then": f["html"],
+                      "verdict": f["verdict"], "why": _offline(links, f["srt_why"] or ""),
+                      "see_ref": f["see_ref"], "see_href": f["see_ref"] and links.site(f"/{f['see_ref']}"),
+                      "see_verdict": f["see_verdict"],
+                      "see_why": f["see_why"] and _offline(links, f["see_why"])}
                      for f in rows["notes"].get(q["id"], [])]
             html, n = RE_FNREF.subn(
                 r'<a class="fn" epub:type="noteref" href="#\1" id="\2">*</a>', q["html"])

@@ -49,13 +49,31 @@
         {% elif p.thin %}
           <p class="thin">no entry cites this paragraph precisely</p>
         {% endif %}
-        {% for n in notes.get(p.id, []) %}
-          <p class="note" id="fn{{ p.paper_n }}_{{ p.section_n }}_{{ p.para_n }}_{{ n.ord }}"><span class="lbl">1955</span> {{ n.html|safe }}
-            {%- if n.gloss %}<span class="gloss"> — {{ n.gloss }}</span>{% endif %}</p>
-        {% endfor %}
       </div>
     {% endfor %}
     </div>
+
+    {#- The 1955 readings: each where the text departs from the first printing,
+        as the press gives it, with the SRT Committee's reason for the change
+        where it gives one.  With
+        JavaScript each opens as a card at its ring (ub.js) and this block is
+        hidden; without it, and in print, they are the section's endnotes. #}
+    {% if notes %}
+    <section class="notes" aria-label="The 1955 readings">
+      <h3>The 1955 readings</h3>
+      {% for p in paras %}{% for n in notes.get(p.id, []) %}
+      {% set k = p.paper_n ~ "_" ~ p.section_n ~ "_" ~ p.para_n ~ "_" ~ n.ord %}
+      <aside class="note" id="fn{{ k }}">
+        <p class="then"><a class="lbl" href="#fnref{{ k }}"><span class="at">{{ p.ref }} </span>1955</a> {{ n.html|safe }}</p>
+        {% if n.verdict %}
+        <p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.srt_why|safe }}</p>
+        {% if n.see_why %}<p class="why see"><a href="/{{ n.see_ref }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>{% endif %}
+        <p class="src">SRT Committee · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">the full entry ↗</a></p>
+        {% endif %}
+      </aside>
+      {% endfor %}{% endfor %}
+    </section>
+    {% endif %}
 
     <nav class="pager">
       {% if prv %}<a href="/{{ paper.n }}:{{ prv.n }}">‹ previous</a>{% endif %}

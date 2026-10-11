@@ -102,7 +102,8 @@ CREATE TABLE footnote (
   ord INTEGER NOT NULL,
   text TEXT NOT NULL,
   html TEXT NOT NULL,                         -- derived cache: render(text, spans)
-  gloss TEXT                                  -- what changed, when only the italics
-                                              -- did: build/variants.py
+  -- A 1955 note's reason: the SRT Committee's decision on the change it shows
+  -- (007_srt.sql, build/srt.py).  NULL where the committee's page has none.
+  srt_item_id INTEGER REFERENCES srt_item(id)
 );
 CREATE INDEX footnote_para ON footnote(paragraph_id);

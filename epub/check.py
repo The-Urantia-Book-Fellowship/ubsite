@@ -34,6 +34,7 @@ import zipfile
 
 from fontTools.ttLib import TTFont
 
+from build.fonts import ELSEWHERE
 from ubsite import queries
 
 from . import pack
@@ -242,7 +243,9 @@ def run(con, path: pathlib.Path) -> int:
     for face in ("fonts/UBGoudy.otf", "fonts/UBGoudy-Italic.otf"):
         font = TTFont(io.BytesIO(z.read(f"OEBPS/{face}")))
         have = {chr(c) for t in font["cmap"].tables for c in t.cmap}
-        miss = sorted(drawn - have)
+        # What the site draws in another face on purpose (build/fonts.py), as
+        # 42:5.1's γ, which the reader's own serif draws here.
+        miss = sorted(drawn - have - set(ELSEWHERE))
         g.line(not miss, f"{face}: every one of the {len(drawn)} characters drawn",
                " ".join(f"{c} U+{ord(c):04X}" for c in miss[:12]))
 

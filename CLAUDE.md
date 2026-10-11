@@ -49,6 +49,7 @@ make check          every gate               (~8 s; rebuilds the oracles first)
 make epub           the whole site as an EPUB -> var/epub/  (~3 s, ~10 s more for its gates)
 make test           the never-write-to-a-master guards
 make paranoid       fingerprint all three trees, build, and prove nothing moved
+make srt-snapshot   refetch the SRT Committee's page into data/srt/ (review the diff)
 make serve          the reader on 127.0.0.1:8130 (HOST=0.0.0.0 to reach it from a phone)
 make stop           stop it (by pid — never by pattern, see §6)
 
@@ -102,6 +103,10 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-browser`
   - **`build/foundation.py`** gives every paragraph and section the Foundation's reference, `uf_ref`. It reads its SRT HTML (the zip in the press repo) and aligns it with ours paper by paper. Its differences must be exactly `tests/known-uf-refs.tsv`.
   - **`ubsite/api.py`** only concatenates stored records. Each worker gzips a reply once. Replies carry an ETag, so an unchanged one is a 304, and `Access-Control-Allow-Origin: *`.
   - **Calls are counted apart from views**, in `api_call` in `visits.db`. `/stats` lists each caller by its User-Agent.
+- **The 1955 readings and their reasons** (2026-10-12). Each `\fnc` is a small ring above the words that changed; a click opens a card under the line with the 1955 reading **as the press gives it** and the **SRT Committee's decision and reasons**. The margin holds the index alone. **Only the press says what 1955 printed** (Tigran, 2026-10-12): the committee's page has errors of its own, in quoting 1955 among them (trap 21), so it supplies its reasons, under its name, and nothing else. Its quotation of the 1955 text pairs a note with its entry and is never shown.
+  - `tools/srt/snapshot.py` (`make srt-snapshot`) keeps the two tables of the Fellowship's page (`sources.toml [srt]`) in `data/srt/considerations.html`, verbatim, with the URL, fetch time and page hash in its header. The build reads the snapshot, never the network, and records it in `build_source` as `srt`.
+  - `build/srt.py` reads it into `srt_item`, one row per change (an entry may hold several: 134:3.3 has three), maps the page's references (the Foundation's numbering) to ours through `uf_paragraph`, rewrites its links to our paragraphs, and pairs each note with its change (`footnote.srt_item_id`). What does not pair one to one is exactly `tests/known-srt-deltas.tsv`.
+  - `section.html` puts the notes after the text as endnotes (what a reader sees without JavaScript, and in print); `ub.js` opens each as a card at its ring, positioned in `<article>` so it scrolls with the text. `ubsite/queries.py` decides what a note shows, for the site and the EPUB alike.
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and `deploy.sh`, with a README naming the four steps that need root. All four have been run; the site is live at **https://ubsite.ddns.net**. **The database is the artifact**: the three source repos are not on pi5 and do not need to be, so `make data` runs here and `var/ub.db` is shipped.
 
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz, figures behind the rights gate), then 7 (human sources), 8 (the timeline, the map).
@@ -120,6 +125,7 @@ citations 39,885 → 50,842 targets {para 47,954, sec 2,254, paper 634}
 cross-references 5,133 See/See also + 1,026 q.v., 0 dangling · headwords 4,736
 B–F names that are A–Z headwords 1,332 · para_citers 113,992 · cocitation pairs 9,719
 paragraphs the Foundation numbers otherwise 107 · text API records 16,413, at version 1 (2026-10-11)
+SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 ```
 
 The index lines move as the index is edited (these are at its `224c84d`, 2026-10-09).
@@ -186,6 +192,13 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
     The first survey, which went section by section, counted 95 differences; there are 107. `build/foundation.py` therefore aligns paper by paper.
 19. **nginx's `location /api/` answers `/api` with a 301 to `/api/`.** It does that for any prefix location that ends in a slash and has `proxy_pass`. The app redirects `/api/` back to `/api` with a 307, so the docs page was a redirect loop that the rate limit ended with a 429, and no test of the app can see it. `location = /api` in `deploy/ubsite.nginx` is the fix. Try a page through nginx itself after changing a location.
 20. **The 2080 Ti is the display GPU.** Under Whisper it reached 88 °C, against a rated maximum of 89 °C, and throttled to 735 MHz. Compute runs on the 3090: `CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`.
+21. **The SRT Committee's page has slips of its own, and the build trusts none of them silently.**
+    - A link's words and its anchor can disagree: 136:3.5's "See SRT note for 24:1.11" points at 24:1.1, and 46:5.24's "73:7.4" points at a 73:0.4 that does not exist. The words are followed.
+    - Its "120:1.1" entry is the Part IV sponsors' note.
+    - It misquotes the 1955 text. 85:4.1 has its "1955 text" and "Review" swapped: the printing reads "Greeks", and "Creeks" was only proposed. Its 90:2.9 quotes *Teuskwatawa* where the printing, and the press note, have *Teuskwatowa*.
+    - It lists places a name occurs as if each were a change: five *Caesarea Philippi* rows, where the 1955 printing already has the hyphen.
+
+    Each of these is a line in `tests/known-srt-deltas.tsv`. **Never call a disagreement between the page and the press a press error without the 1955 printing itself:** the Guardian plates are in the press repo (`The-Urantia-Book-1955-Guardian-Plates-600dpi.djvu`, no text layer; book page N is djvu page N+66, `ddjvu` and `tesseract` read it). On 2026-10-12 three such "press gaps" were reported to Tigran from the page alone, and all three were the page's errors.
 
 ---
 
@@ -226,6 +239,14 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 - **The API calls the English text public domain; credit is requested, not required** (Tigran, 2026-10-11). The credit line names the site's own base URL, taken from the request, so it follows the move to urantiabook.org.
 - **A paragraph is sent as HTML alone, with no plain copy beside it** (Tigran, 2026-10-11). Stripping its tags gives the text exactly, which `check_db` holds, and the text has no `&`, `<` or `>` to unescape. A second copy saved consumers one regex, cost 0.33 MB gzipped, and could in principle disagree with the first. Dropping it made version 2.
 - **A text version moves only when something a site receives changes**, and a number, once it may have reached a site, is never made again for other text. So the ledger is append-only, `tests/test_versions.py` holds it to HEAD's as a prefix, and `deploy.sh` refuses to ship while `data/text/` is uncommitted.
+- **A 1955 reading is a ring and a card, with the committee's reasons** (Tigran, 2026-10-11 and 12). He chose them from a mockup (https://claude.ai/artifact/8mCnzY2KhkrjqL5JqEuCi4):
+  - **The card** opens at the ring: style A. Others offered were a column-wide card, a bottom sheet and inline.
+  - **The ring** is "Smallest", in link blue, drawn by CSS (`a.fn::after`) so copying never takes it.
+  - **The reasons** come in full from the SRT Committee's page, as a snapshot, and **only the reasons**: the page has errors of its own (trap 21), so the 1955 reading in the card is the press's note, never the page's quotation of 1955.
+  - **What is left out:** the committee's entries where the text was kept as printed. They have no note here.
+  - **The six italics-only notes** lost the site's own wording ("the semicolon is upright in 1955, italic here", `footnote.gloss`), because the committee explains each of them. `build/variants.py` now only checks that a note differs from the text.
+  - **The EPUB** carries the same words, offline: links out of the book become text, and the credit reads "SRT Committee, urantiabook.org/SRT".
+  - **Study-edition notes**, numbered, will use the same mechanism (Phase 6).
 - **The 1955 page references are in the API and on the site, and off on the site unless a reader asks** (Tigran, 2026-10-11). They are obsolete as a way to cite the book, but other sites and older literature still use them. `foundation.py` takes each from the Foundation's HTML with its reference, as `uf_paragraph.page` (`"1109.3"`, page then paragraph on it). `check_db` requires them to run forward through the book. The API sends `page_1955`, which made text version 3. Settings' "1955 page references" (key `pages`, default off) shows them in the gutter, on the reference's second line with the play button beside it, or third in the stack on a phone. They are drawn from `data-pg`, like the pilcrow, so copying never takes them along.
 - **UB Goudy is OFL 1.1** — verified in the name table, a correctly renamed Sorts Mill Goudy derivative — so the site serves the book's own face, subsetted to the corpus with a gate that fails on a missing glyph. **Goudy Handtooled BT is Bitstream proprietary and must never be served.**
 

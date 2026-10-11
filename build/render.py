@@ -29,7 +29,7 @@ WRAP = {
     "link":      ("a", None),
     "url":       ("a", "url"),
     "nobreak":   ("span", "nobreak"),
-    "chg":       ("mark", "chg"),     # a 1955 note: what differs (build/variants.py)
+    "chg":       ("mark", "chg"),     # the SRT Committee's 1955 text: the changed words
 }
 POINT = {
     "dotleader": '<span class="leader"></span>',
@@ -72,6 +72,10 @@ def render(text: str, spans, note_key: str = "") -> str:
         for s in sorted(opens.get(i, []), key=lambda x: (-(x.end - x.start), x.kind)):
             tag, cls = WRAP[s.kind]
             attrs = f' class="{cls}"' if cls else ""
+            # A link that knows where it goes (build/srt.py); a paragraph's own
+            # \bibref spans carry a citation instead, and no href.
+            if s.kind == "link" and isinstance(s.attr, dict) and s.attr.get("href"):
+                attrs += f' href="{html.escape(s.attr["href"])}"'
             out.append(f"<{tag}{attrs}>")
             stack.append(s)
         if i < len(text):
@@ -90,6 +94,10 @@ def _point(s, note_key: str) -> str:
         # leaders are.  Anything emitted here would be text the reader copies
         # and the round-trip gate would rightly reject.
         k = f"{note_key}_{n}" if note_key else f"{n}"
+        kind = (s.attr or {}).get("kind") if isinstance(s.attr, dict) else None
+        if kind == "variant-1955":
+            return (f'<a class="fn" href="#fn{k}" id="fnref{k}" data-k="1955"'
+                    f' aria-label="1955 reading"></a>')
         return f'<a class="fn" href="#fn{k}" id="fnref{k}"></a>'
     return ""
 

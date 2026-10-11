@@ -18,6 +18,9 @@
   /* The search box: a cool field on the warm paper, so it is seen at once. */
   --field: oklch(0.935 0.014 245);
   --field-edge: oklch(0.70 0.045 250);
+  /* A card raised over the page: a 1955 reading's (ub.js). */
+  --card: oklch(0.995 0.004 85);
+  --shade: oklch(0.30 0.02 70 / .16);
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
      modern face and wanted browser zoom to be comfortable. */
@@ -49,6 +52,7 @@
     --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
     --flame: oklch(0.80 0.12 82);
     --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
+    --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
   }
 }
 :root[data-theme="dark"] {
@@ -57,6 +61,7 @@
   --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
   --flame: oklch(0.80 0.12 82);
   --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
+  --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
 }
 :root[data-theme="dark"] body, @media (prefers-color-scheme: dark) { }
 
@@ -157,7 +162,7 @@ footer p { margin: .2rem 0; }
 :root:not(.js) .rail .lazy > details > summary { cursor: auto; }
 :root:not(.js) .rail .lazy > details > summary::before { visibility: hidden; }
 
-article { min-width: 0; }
+article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 /* A part's own page (part.html), as the book's divider sets it: centred, the
    title larger than a paper's, the sponsors' note in italic beneath. */
 .partpage { width: 100%; max-width: 40rem; margin: 0 auto; padding-top: 3rem; }
@@ -219,9 +224,9 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
 :root[data-paranum="off"] .num { display: none; }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
 :root[data-margin="off"] :is(.chips, .thin, .blanket) { display: none; }
-:root[data-notes="off"] :is(.note, a.fn) { display: none; }
-:root[data-margin="off"][data-notes="off"] .a { display: none; }
-:root[data-margin="off"][data-notes="off"] .grid { grid-template-columns: minmax(0, var(--measure)); }
+:root[data-notes="off"] :is(a.fn, .notes, .pop) { display: none; }
+:root[data-margin="off"] .a { display: none; }
+:root[data-margin="off"] .grid { grid-template-columns: minmax(0, var(--measure)); }
 /* Text size scales the root, so everything set in rem follows, as with the
    browser's zoom. */
 :root[data-size="smaller"] { font-size: 90%; }
@@ -249,7 +254,7 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
 @media (min-width: 62.01rem) {
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
-  :root[data-width="full"][data-margin="off"][data-notes="off"] .grid { grid-template-columns: minmax(0, 1fr); }
+  :root[data-width="full"][data-margin="off"] .grid { grid-template-columns: minmax(0, 1fr); }
 }
 :root[data-width="full"] :is(p.t, .papertop h2, .blanket, .pager, .prose) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
@@ -267,9 +272,17 @@ p.t:has(.leader) { display: flex; align-items: baseline; }
 .leader { display: inline-block; flex: 1; min-width: 2rem; margin: 0 .35rem;
   border-bottom: 1px dotted var(--faint); transform: translateY(-.28em); }
 
-/* Footnote markers are drawn, for the same reason. */
-a.fn { text-decoration: none; }
-a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(--link); }
+/* A 1955 reading's mark is drawn, for the same reason: a small ring above the
+   words that changed.  The link is padded to a finger's size and pulled back
+   by as much, so the words around it do not move.  Filled while its card is
+   open. */
+a.fn { display: inline-block; padding: .45em .3em; margin: -.45em -.3em; line-height: 0;
+       text-decoration: none; color: var(--link); }
+a.fn::after { content: ""; display: inline-block; position: relative; top: -.68em;
+              width: .22em; height: .22em; margin-left: .05em; border-radius: 50%;
+              border: .065em solid currentColor; }
+a.fn.on::after { background: currentColor; }
+@media (hover: hover) { a.fn:hover::after { background: currentColor; } }
 
 .a { font-size: 1rem; line-height: 1.45; color: var(--faint); }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
@@ -281,13 +294,47 @@ a.fn::after { content: "*"; font-size: .7em; vertical-align: super; color: var(-
 .app .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
 .blanket .app { color: var(--faint); }
 .thin { font-style: italic; opacity: .6; margin: .25rem 0 0; }
-.note { margin: .4rem 0 0; }
-.note .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--link); }
-/* A note that differs only in italics marks what changed and says it in words:
-   an upright semicolon beside a slanted one is otherwise invisible. */
-.note .chg { color: inherit; background: color-mix(in oklch, var(--flame) 32%, transparent);
-  border-radius: 2px; padding: 0 .1em; }
-.note .gloss { color: var(--faint); }
+/* The 1955 readings (section.html): the section's endnotes without JavaScript
+   and in print; with it, hidden, and each opened as a card at its ring (ub.js),
+   which carries the same words. */
+.notes { border-top: 1px solid var(--rule); margin: 2rem 0 0; padding-top: .7rem;
+         max-width: var(--measure); font-size: 1rem; line-height: 1.5; }
+.notes h3 { margin: 0 0 .6rem; font-size: .82rem; font-weight: 400; font-variant-caps: small-caps;
+            letter-spacing: .06em; color: var(--faint); }
+.js .notes { display: none; }
+.note { margin: 0 0 1rem; }
+:is(.note, .pop) p { margin: 0; }
+:is(.note, .pop) p + p { margin-top: .5rem; }
+:is(.note, .pop) .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--link);
+                        text-decoration: none; margin-right: .3em; }
+/* The words the committee changed, as it underlines them. */
+:is(.note, .pop) .chg { color: inherit; background: color-mix(in oklch, var(--flame) 32%, transparent);
+                        border-radius: 2px; padding: 0 .1em; }
+:is(.note, .pop) .dec { font-variant-caps: small-caps; letter-spacing: .04em; }
+:is(.note, .pop) .why { font-size: .95em; }
+:is(.note, .pop) .src { font-family: var(--sans); font-size: .78rem; color: var(--faint); }
+:is(.note, .pop) .src a { color: var(--faint); }
+/* The card: under the line, a pointer to the ring, scrolling with the text. */
+.pop { position: absolute; z-index: 5; width: min(25rem, calc(100% - 1rem));
+       font-size: 1.05rem; line-height: 1.5; color: var(--ink); font-variant-numeric: lining-nums;
+       background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+       border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
+.pop:focus { outline: none; }
+.pop .body { padding: .85rem 1rem .8rem; max-height: min(55vh, 28rem); overflow-y: auto;
+             overscroll-behavior: contain; }
+.pop .then { padding-right: 1.6rem; }
+.pop .at { display: none; }                     /* the card stands at its paragraph */
+.pop .lbl { pointer-events: none; }
+.pop .src { border-top: 1px solid var(--rule); padding-top: .45rem; margin-top: .7rem; }
+.pop .arrow { position: absolute; top: -7px; width: 12px; height: 12px; background: var(--card);
+              border: solid color-mix(in oklch, var(--ink) 22%, transparent); border-width: 1px 0 0 1px;
+              transform: rotate(45deg); }
+.pop .x { position: absolute; top: .35rem; right: .35rem; width: 1.9rem; height: 1.9rem; border: 0;
+          border-radius: 50%; background: transparent; color: var(--faint); cursor: pointer;
+          font: 1.2rem/1 var(--sans); }
+@media (hover: hover) {
+  .pop .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
+}
 
 .blanket { border: 1px solid var(--rule); border-radius: 4px; padding: .7rem .9rem;
   margin: 0 0 1.6rem; font-size: .9rem; max-width: var(--measure); }
@@ -558,6 +605,8 @@ dialog.settings .done span { position: relative; top: var(--lift); }
      notes after its paragraph instead. */
   .a { font-size: 8.5pt; margin: .2rem 0 .8rem 1.5rem; color: #444; }
   .jesus { print-color-adjust: exact; }
+  .js .notes { display: block; }
+  .pop { display: none; }
   a { color: inherit; text-decoration: none; }
 }
 
