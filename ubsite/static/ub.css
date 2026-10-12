@@ -259,6 +259,17 @@ p.t.head { text-align: center; }
 /* The 1955 page stands under the reference, so with it shown the lines part a
    little, or it would run into the next line's reference. */
 :root[data-pages="true"] .verse p.t { margin-bottom: .6rem; }
+/* A range of lines in a block, /144:3.9-10.  A paragraph's tint reaches past it
+   by a shadow, which the space between paragraphs takes up; lines of verse
+   touch, so two shadows would lie over each other and darken the strip between
+   them (Tigran, 2026-10-13).  So a run of lines is one band, drawn behind each
+   line edge to edge, which only its first line takes up and its last down. */
+.verse p.t.hit { background: none; box-shadow: none; border-radius: 0; isolation: isolate; }
+.verse p.t.hit::before { content: ""; position: absolute; z-index: -1; inset: 0 -.35rem;
+  background: color-mix(in oklch, var(--link) 12%, transparent); }
+.verse p.t.hit:not(.hit + .hit)::before { top: -.35rem; border-radius: 3px 3px 0 0; }
+.verse p.t.hit:not(:has(+ .hit))::before { bottom: -.35rem; border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px; }
 /* The entries citing a block's lines, each line's under its reference. */
 .a .at { margin: .7rem 0 0; font-size: .78rem; line-height: 1.2; }
 .a .at:first-child { margin-top: .3rem; }
