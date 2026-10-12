@@ -82,6 +82,14 @@ may do with it.</p>
     0:12.11 (16.8).</dd>
   <dt><code>paper</code>, <code>section</code>, <code>paragraph</code></dt>
   <dd>The three numbers of <code>ref</code>.</dd>
+  <dt><code>separator_before</code></dt>
+  <dd>The separator the book prints before the paragraph, as its stars:
+    <code>"* * *"</code>, or <code>"* * * * *"</code> before the closing notes of Parts I,
+    II and III; <code>null</code> where there is none. A separator is not a paragraph, and
+    has no number of its own.</dd>
+  <dt><code>group_before</code></dt>
+  <dd><code>true</code> where the paragraph begins a new group, as the 1955 printing sets
+    one off; this site marks it ¶. <code>false</code> otherwise.</dd>
   <dt><code>html</code></dt>
   <dd>The text, in Unicode (curly quotes, em dashes), with its markup and nothing else:
     <code>&lt;em&gt;</code> for italics, <code>&lt;sup&gt;</code> for an exponent,
@@ -118,7 +126,8 @@ join this text to other data by reference, join on <code>uf_ref</code>, not
 <ul>
   <li>The Foundation gives the <i>* * *</i> separator in 134:6, and each of the six between
     the prayers of 144:5, a number of its own, though it prints none beside them, so its
-    numbers there run ahead of ours. The Uversa Press numbers no separator.</li>
+    numbers there run ahead of ours. The Uversa Press numbers no separator: each is sent
+    as <code>separator_before</code> on the paragraph after it.</li>
   <li>It files the one heading over sections 9 and 10 of Paper 139 under 10: our 139:9.1–11
     are its 139:10.1–11.</li>
 </ul>

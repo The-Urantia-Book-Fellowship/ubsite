@@ -204,6 +204,24 @@ class Whole(Quiet):
     def test_html_carries_no_note_marker(self):
         self.assertFalse([x["ref"] for x in self.reply["paragraphs"] if 'class="fn"' in x["html"]])
 
+    def test_what_stands_before_a_paragraph(self):
+        """The separators and the 1955 groups, on every record (version 5)."""
+        ps = self.reply["paragraphs"]
+        self.assertTrue(all("separator_before" in x and isinstance(x["group_before"], bool)
+                            for x in ps))
+        five, three = "* * * * *", "* * *"
+        self.assertEqual({x["ref"]: x["separator_before"] for x in ps if x["separator_before"]}, {
+            "31:10.22": five, "56:10.23": five, "119:8.9": five,
+            "120:3.12": three, "134:6.14": three,
+            **{f"144:5.{n}": three for n in (11, 24, 36, 51, 69, 82)}})
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        groups = {r for (r,) in con.execute("SELECT ref FROM paragraph WHERE gap_before > 0")}
+        self.assertEqual({x["ref"] for x in ps if x["group_before"]}, groups)
+        self.assertIn("101:1.2", groups)
+        page = html.unescape(call("/api")[2].decode())
+        for field in ("separator_before", "group_before"):
+            self.assertIn(f"<code>{field}</code>", page)
+
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
 class Delta(Quiet):

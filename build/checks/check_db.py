@@ -301,6 +301,8 @@ def _text_api(con) -> int:
         " UNION ALL SELECT 'paragraph', COUNT(*) FROM paragraph"))
     got = dict(con.execute("SELECT kind, COUNT(*) FROM text_unit GROUP BY kind"))
     texts = dict(con.execute("SELECT ref, text FROM paragraph"))
+    before = {ref: (sep, bool(gap)) for ref, sep, gap in con.execute(
+        "SELECT ref, sep_before, gap_before FROM paragraph")}
     n = off = 0
     for kind, key, body, h in con.execute("SELECT kind, key, body, hash FROM text_unit"):
         n += 1
@@ -308,12 +310,15 @@ def _text_api(con) -> int:
         ok = rec.pop("hash") == h == versions.digest(rec)
         if kind == "paragraph":
             ok = (ok and rec["ref"] == key and strip_tags(rec["html"]) == texts.get(key)
-                  and 'class="fn"' not in rec["html"])
+                  and 'class="fn"' not in rec["html"]
+                  and (rec.get("separator_before", "?"), rec.get("group_before"))
+                  == before.get(key))
         if not ok:
             off += 1
             if off <= 5:
                 print(f"            text API record wrong: {kind} {key}")
-    print(f"text API:   {n - off}/{n} records hash true, and every paragraph's HTML strips to its text"
+    print(f"text API:   {n - off}/{n} records hash true, and every paragraph's HTML strips to its text,"
+          " with what stands before it"
           + ("" if not off else f"   {off} FAIL"))
     if off or got != want:
         bad += 1
