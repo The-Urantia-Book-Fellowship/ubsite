@@ -36,7 +36,6 @@
 {% if old and old.rows %}<section{% if not scope %} class="by1955"{% endif %}><h2>In the 1955 readings {{ count(old) }}</h2>
 <ul class="hits old">{% for o in old.rows %}{{ old_hit(o) }}{% endfor %}</ul>
 {{ more(old, 'notes', 'readings') }}
-<p class="more"><a href="/lists/1955">List of all 1955 readings</a></p>
 {{ notes_after(old.rows) }}
 </section>{% elif scope == 'notes' %}<section><h2>In the 1955 readings <span>(0)</span></h2><p class="none">nothing</p></section>{% endif %}
 </main>{% endblock %}
