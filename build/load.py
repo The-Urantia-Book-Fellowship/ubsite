@@ -32,7 +32,7 @@ def _part_of(n: int):
     return None
 
 
-def load_text(con, papers, parts, repo, report) -> dict:
+def load_text(con, papers, parts, repo, hyphenator, report) -> dict:
     con.executemany("INSERT INTO part (n, title, first_paper, last_paper, label,"
                     " title_lines, sponsor) VALUES (?,?,?,?,?,?,?)",
                     [(n, parts[n]["title"], lo, hi, parts[n]["label"],
@@ -65,11 +65,18 @@ def load_text(con, papers, parts, repo, report) -> dict:
         for q in p.paragraphs:
             qid += 1
             para_key[(q.paper, q.section, q.n)] = qid
-            con.execute("INSERT INTO paragraph VALUES (?,1,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            # Rendered once, with a soft hyphen wherever the book lets a word
+            # break; `html` is that without them, which is render() without
+            # `shy` as long as the text holds no U+00AD of its own.
+            if "\u00ad" in q.ex.text:
+                report.hard("soft-hyphen-in-text", q.ref, "the text itself has a U+00AD")
+            hy = render(q.ex.text, q.ex.spans, f"{q.paper}_{q.section}_{q.n}",
+                        shy=hyphenator.points(q.ex.text, q.ex.spans))
+            con.execute("INSERT INTO paragraph VALUES (?,1,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (qid, sec_id[q.section], q.paper, q.section, q.n, q.ref,
                          qid, q.src,
                          q.ex.flags.get("gap_before", 0.0), int(q.heading), q.ex.text,
-                         render(q.ex.text, q.ex.spans, f"{q.paper}_{q.section}_{q.n}"),
+                         hy.replace("\u00ad", ""), hy,
                          len(q.ex.text.split()), q.line))
             for i, s in enumerate(q.ex.spans):
                 spid += 1

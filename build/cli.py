@@ -19,9 +19,9 @@ def main(argv: list[str]) -> int:
         print(config.describe(repos))
         return 0
     if cmd == "vendor-sync":
-        return vendorlib.sync(repos)
+        return vendorlib.sync({**repos, "texlive": config.texlive()})
     if cmd == "vendor-check":
-        return vendorlib.check(repos)
+        return vendorlib.check({**repos, "texlive": config.texlive()})
 
     if cmd == "paranoid":
         # Prove, rather than assert, that a build leaves the source repos alone.
@@ -65,7 +65,7 @@ def main(argv: list[str]) -> int:
         from .problems import Report
         from .readers.index_app import read_appendices
         from .readers.index_az import read_az
-        from .readers.press import read_all, read_parts
+        from .readers.press import read_all, read_hyphenation, read_parts
 
         root = pathlib.Path(__file__).resolve().parent.parent
         out = root / "var" / "ub.db"
@@ -80,6 +80,8 @@ def main(argv: list[str]) -> int:
         print(f"reading press text, {repos['press']['rev']} at {at(repos['press'])} ...")
         papers = read_all(repos["press"]["tex"], report)
         parts = read_parts(repos["press"]["path"], report)
+        from .hyphen import Hyphenator
+        hyphenator = Hyphenator(read_hyphenation(repos["press"]["tex"], report))
         ix = repos["index"]
         print(f"reading index at {at(ix)} ...")
         az = read_az(ix["tex"], report, rev=ix["at"])
@@ -87,7 +89,7 @@ def main(argv: list[str]) -> int:
 
         con = db.create(tmp)
         print("loading ...")
-        para_key = load.load_text(con, papers, parts, repos["press"], report)
+        para_key = load.load_text(con, papers, parts, repos["press"], hyphenator, report)
         print("the Foundation's numbering ...")
         from . import foundation
         n_uf = foundation.load(con, repos["press"], report,
@@ -285,6 +287,10 @@ def main(argv: list[str]) -> int:
             from .checks.check_db import run as db_run
             print("\n== database ==")
             rc |= db_run(_db.connect(dbf))
+            from .checks.check_hyphen import run as hyphen_run
+            from .readers.press import read_hyphenation
+            print("\n== hyphenation ==")
+            rc |= hyphen_run(_db.connect(dbf), read_hyphenation(repos["press"]["tex"], report))
             from .checks.check_audio import run as audio_run
             print("\n== audio ==")
             rc |= audio_run(_db.connect(dbf))

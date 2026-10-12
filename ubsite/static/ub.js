@@ -302,4 +302,31 @@
   }
   arriveNote();
   document.addEventListener('ub:page', arriveNote);
+
+  // The soft hyphens that let a line break where the book breaks (ub.css p.t)
+  // are not text, but Chrome copies them, and a pasted paragraph would carry
+  // an invisible character in every long word.  So they leave the selected
+  // text while the browser copies it, and come back before the next paint.
+  // The copy is then the browser's own, as plain text and as HTML with its
+  // styles (the red letter, the face), exactly as from a page without them.
+  // One deleteData per hyphen, which a selection's ends follow; put back in
+  // reverse, so each goes where it was.
+  document.addEventListener('copy', function () {
+    var sel = getSelection(), gone = [], i, r, root, w, n, k;
+    for (i = 0; i < sel.rangeCount; i++) {
+      r = sel.getRangeAt(i);
+      root = r.commonAncestorContainer;
+      w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (n = root.nodeType === 3 ? root : w.nextNode(); n; n = w.nextNode()) {
+        if (!r.intersectsNode(n)) continue;
+        for (k = n.data.indexOf('­'); k >= 0; k = n.data.indexOf('­', k)) {
+          n.deleteData(k, 1);
+          gone.push([n, k]);
+        }
+      }
+    }
+    if (gone.length) requestAnimationFrame(function () {
+      for (var j = gone.length - 1; j >= 0; j--) gone[j][0].insertData(gone[j][1], '­');
+    });
+  });
 })();

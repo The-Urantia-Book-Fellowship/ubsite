@@ -73,10 +73,11 @@ sqlite3 var/ub.db "SELECT COUNT(*) FROM citation_target ct JOIN paragraph p
 
 ### 1. `make vendor-check`, and when it fails
 
-Five files are copied by value from the sources into `vendor/`, and their hashes are recorded in `vendor/UPSTREAM.lock`:
+Six files are copied by value into `vendor/`, and their hashes are recorded in `vendor/UPSTREAM.lock`:
 
 - `latex_tokenizer.py`, `macros.py` and `normalize.py` from press's `tools/text-verify/`;
-- `cite.py` and `xref.py` from the index.
+- `cite.py` and `xref.py` from the index;
+- `hyphen.tex`, Knuth's hyphenation patterns, from TeX Live (`[texlive]` in `sources.toml`). It is "NOT TO BE CHANGED IN ANY WAY", so a difference there means `sources.toml` names the wrong TeX Live tree.
 
 `make data` runs `vendor-check` first. If upstream has moved, the build stops and prints a unified diff:
 
@@ -94,13 +95,13 @@ This is deliberate. Adopting upstream code is a reviewed commit, never a side ef
 | a `note=` or a comment only | adopt; nothing in `build/` reads `Spec.note` |
 | a new `STRIP`, `EMIT_TEXT`, `EMIT_ARG`, `EMIT_SUP`, `EMIT_ARG_ITALIC` or `STRUCTURAL` macro | adopt; `build/press_macros.py` translates these automatically |
 | a new action name | adopt, then `make data` fails with "has no translation": add it to `_TRANSLATE` in `build/press_macros.py` |
-| a change to a macro named in `OVERRIDES` (`textcolor`, `fnc`, `pc`, `ublistelem`, `bibdf`) | think: our override hides upstream's change, which may be what is wanted, or may not |
+| a change to a macro named in `OVERRIDES` (`textcolor`, `fnc`, `pc`, `ublistelem`, `bibdf`, `-`) | think: our override hides upstream's change, which may be what is wanted, or may not |
 | anything in `cite.py` or `xref.py` | adopt, and expect `make check`'s citation and cross-reference counts to move; explain any change |
 
 To adopt:
 
 ```
-make vendor-sync          # copies all five files and rewrites the lock
+make vendor-sync          # copies all six files and rewrites the lock
 git diff vendor/          # only what you reviewed, plus the lock's commit fields
 git commit -am 'vendor: adopt press macros.py at 3983645 (\fill, stripped)'
 ```
@@ -109,7 +110,7 @@ Keep the message form: `vendor: adopt <repo> <file> at <short sha> (<what change
 
 ### 2. `make data`
 
-Builds `var/ub.db` in about 17 seconds. The first two lines say what it is reading:
+Builds `var/ub.db` in about 20 seconds. The first two lines say what it is reading:
 
 ```
 reading press text, worktree at 3983645 ...
@@ -130,7 +131,7 @@ make paranoid     # optional: fingerprint the three trees, build, prove nothing 
 
 When a gate fails because a source *legitimately* changed a number:
 
-- **Hard counts** are in `QUERIES` in `build/checks/check_db.py`: papers, sections, paragraphs, red-letter and em spans, 1955 notes, chronology events, and the entries of each of Appendices B–F (the index's own `check_tex.py` asserts the same). Change the number, and add a comment naming the source commit and the reason. The `436` there is the model: index `6cd4d19` dropped one chronology event by ruling.
+- **Hard counts** are in `QUERIES` in `build/checks/check_db.py`: papers, sections, paragraphs, red-letter and em spans, 1955 notes, chronology events, and the entries of each of Appendices B–F (the index's own `check_tex.py` asserts the same). Also the source's `\-` and the soft hyphens: these move whenever press edits `tex/urantia-hyphen-en.tex` or adds a `\-`. Before changing them, run `tools/hyphen_print.py` against a fresh build of the book: every printed break must still be offered. Change the number, and add a comment naming the source commit and the reason. The `436` there is the model: index `6cd4d19` dropped one chronology event by ruling.
 - **Index counts** (entries, citations, targets) are reported, not asserted, because the index is under daily editorial work.
 - **The `tests/known-*-deltas.tsv` files** list the places where an oracle is wrong and we are right, and must match *exactly*. A new disagreement, or one that silently disappears, fails the gate. Decide it against the SRT HTML before changing the list.
 

@@ -50,6 +50,10 @@ OVERRIDES: dict[str, Spec] = {
                   note="dot leader in a pseudo-table row. Emits the single space "
                        "that LaTeX's control-word scan swallows, and marks the "
                        "point so the row can be set as label/leader/value."),
+    "-": Spec(MARK, kind="shy", text="",
+              note="discretionary hyphen: where the press lets this one occurrence "
+                   "break, and nowhere else in the word (to pre\\-sent against the "
+                   "pres-ent age). Emits no text; build/hyphen.py reads the point."),
 }
 
 

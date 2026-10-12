@@ -29,6 +29,8 @@ MANIFEST = [
     ("press", "tools/text-verify/normalize.py",       "press/normalize.py"),
     ("index", "cite.py",                              "index/cite.py"),
     ("index", "xref.py",                              "index/xref.py"),
+    # Data, not code: the patterns the book is hyphenated with (build/hyphen.py).
+    ("texlive", "tex/generic/hyphen/hyphen.tex",      "tex/hyphen.tex"),
 ]
 
 

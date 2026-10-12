@@ -43,6 +43,14 @@ url  = "https://github.com/The-Urantia-Book-Fellowship/index"   # PRIVATE, as ab
 url  = "https://members.urantiabook.org/text-standardization-Urantia-Book"
 path = "data/srt/considerations.html"
 
+# TeX Live, for one file: Knuth's hyphen.tex, the patterns the press sets the
+# book with (polyglossia `english` loads them, not hyph-en-us).  Not a
+# repository and not read by the build: vendor/tex/hyphen.tex is a copy by
+# value, and `make vendor-check` compares it with this tree's.  The file says
+# of itself "NOT TO BE CHANGED IN ANY WAY", so a difference means a wrong tree.
+[texlive]
+path = "/usr/local/texlive/2026/texmf-dist"
+
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
 # directory against that list.

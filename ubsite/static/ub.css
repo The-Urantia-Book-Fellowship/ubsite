@@ -191,6 +191,21 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
 .grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch);
         gap: 0 2rem; }
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
+/* Justified, as the book is set, and hyphenated where the book hyphenates: the
+   paragraph carries a soft hyphen (U+00AD) at every break the press allows
+   (build/hyphen.py), and `manual` breaks there and nowhere else.  The hyphen
+   drawn is the hyphen-minus, as TeX's.  A browser fills each line greedily and
+   has no penalty for two hyphens running; Safari alone can be told so. */
+p.t { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
+      hyphenate-character: "-"; -webkit-hyphenate-character: "-";
+      -webkit-hyphenate-limit-lines: 1; }
+/* A verse, one to a line (48:6, 122:9, 144:5), is a line, not a paragraph to
+   fill: when one wraps, its first line keeps its own spaces. */
+p.t.verse { text-align: start; }
+/* Ragged right.  The soft hyphens are in the page either way: `none` is what
+   silences them, and `manual`, the initial value, would break at them still.
+   Not the heading, which this would outrank and un-centre. */
+:root[data-align="ragged"] p.t:not(.head) { text-align: start; hyphens: none; -webkit-hyphens: none; }
 /* A heading within the text, 0:12.10 ACKNOWLEDGMENT, centred as a section's
    title is (paragraph.heading). */
 p.t.head { text-align: center; }

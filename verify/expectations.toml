@@ -23,6 +23,10 @@ em_spans             = 2294      # 2,299 \bibemph less the 5 inside \fnc bodies,
                                  # they are the 1955 notes' own italics, in footnote.html
 gap_before_flags     = 4185      # 4,186 \pc less one occurrence inside a comment
                                  # at p048.tex:114
+# Hyphenation (build/hyphen.py), measured at press 806c7ac on 2026-10-12: Knuth's
+# hyphen.tex, hyphenmins 2/3, the 523 entries of tex/urantia-hyphen-en.tex, and \-.
+discretionary_hyphens = 1392     # \- in the source, each a `shy` span; all inside \vs lines
+soft_hyphens         = 530865    # U+00AD in paragraph.html_hy, those 1,392 included
 [srt]
 source_sha256 = "a5dd319ae58e7646a9099e34ef1ace1abe500b57e1e1a6b16046e29b4de85472"   # data/srt/considerations.html
 fetched       = "2026-10-11T22:46:57Z"

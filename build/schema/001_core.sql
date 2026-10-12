@@ -64,6 +64,11 @@ CREATE TABLE paragraph (
   -- renderer and they cannot drift; check_roundtrip regenerates it and
   -- asserts stripping its tags returns `text` byte for byte.
   html TEXT NOT NULL,
+  -- The same with a soft hyphen (U+00AD) wherever the book lets a word break
+  -- (build/hyphen.py): what the site sets, justified.  Removing every U+00AD
+  -- gives `html` byte for byte (check_hyphen).  The API and the EPUB take
+  -- `html`.
+  html_hy TEXT NOT NULL,
   word_count INTEGER NOT NULL,
   source_line INTEGER NOT NULL,
   UNIQUE (edition_id, paper_n, section_n, para_n),
@@ -86,7 +91,7 @@ CREATE TABLE span (
   "end" INTEGER NOT NULL,
   kind TEXT NOT NULL CHECK (kind IN
     ('em','redletter','supplied','sup','sc','ul','listmark','dotleader',
-     'lang','link','fnref','url','nobreak')),
+     'lang','link','fnref','url','nobreak','shy')),
   attr TEXT,
   ord INTEGER NOT NULL,
   CHECK ("end" >= start)

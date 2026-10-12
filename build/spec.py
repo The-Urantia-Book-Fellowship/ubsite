@@ -43,6 +43,7 @@ SPAN_KINDS = {
     "fnref",       # zero width; a footnote anchor
     "url",         # \myurl
     "nobreak",
+    "shy",         # \-                     -- zero width; where the press lets this word break
 }
 
 

@@ -37,13 +37,20 @@ POINT = {
 }
 
 
-def render(text: str, spans, note_key: str = "") -> str:
+def render(text: str, spans, note_key: str = "", shy=()) -> str:
     """spans: iterable of objects with .start .end .kind (and optional .attr).
 
     note_key names the paragraph, as `101_4_2`, so that a footnote marker's id
     is unique in the whole book and not only within its paragraph: a section
     page carries every paragraph's notes, and the EPUB a whole paper's.
+
+    shy: offsets before which to put a soft hyphen, U+00AD -- where the book
+    lets a word break (build/hyphen.py).  The one character render() may add
+    to the text, and only into paragraph.html_hy, the copy the site sets
+    justified; every other consumer, and the round-trip gate, takes `html`,
+    rendered without.  A raw character, never `&shy;`, which is no XML entity.
     """
+    shy = set(shy)
     opens: dict[int, list] = {}
     closes: dict[int, list] = {}
     points: dict[int, list] = {}
@@ -79,6 +86,8 @@ def render(text: str, spans, note_key: str = "") -> str:
             out.append(f"<{tag}{attrs}>")
             stack.append(s)
         if i < len(text):
+            if i in shy:
+                out.append("\u00ad")
             out.append(html.escape(text[i], quote=False))
     while stack:
         out.append(f"</{WRAP[stack.pop().kind][0]}>")

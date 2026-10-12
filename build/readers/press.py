@@ -283,3 +283,47 @@ def read_parts(repo: pathlib.Path, report) -> dict[int, dict]:
 
 def read_all(texdir: pathlib.Path, report) -> list[Paper]:
     return [read_paper(f, report) for f in sorted(texdir.glob("p[0-9][0-9][0-9].tex"))]
+
+
+HYPHENATION = "urantia-hyphen-en.tex"
+RE_HYPH_ENTRY = re.compile(r"[A-Za-z]+(?:-[A-Za-z]+)*")
+
+
+def read_hyphenation(texdir: pathlib.Path, report) -> list[str]:
+    """The press's \\hyphenation list, its entries as written, in file order.
+
+    The press style inputs this one file (urantia-uversa-press.sty); build/hyphen.py
+    applies it.  The whole file is a single \\hyphenation{%...} group of one or
+    more entries to a line, with % comments between: anything else is a hard
+    failure, since TeX would have read it differently from us.
+    """
+    src = read_text(pathlib.Path(texdir) / HYPHENATION)
+    out: list[str] = []
+    state = "before"
+    for lineno, line in enumerate(src.splitlines(), 1):
+        t = re.sub(r"(?<!\\)%.*", "", line).strip()
+        if state == "before":
+            if not t:
+                continue
+            if not t.startswith("\\hyphenation{"):
+                report.hard("hyphenation-unread", f"{HYPHENATION}:{lineno}", t[:60])
+                return out
+            state, t = "in", t[len("\\hyphenation{"):].strip()
+        if state == "after":
+            if t:
+                report.hard("hyphenation-unread", f"{HYPHENATION}:{lineno}",
+                            f"after the list closed: {t[:60]}")
+            continue
+        if t.endswith("}"):
+            state, t = "after", t[:-1].strip()
+        for raw in t.split():
+            if not RE_HYPH_ENTRY.fullmatch(raw):
+                report.hard("hyphenation-entry", f"{HYPHENATION}:{lineno}",
+                            f"{raw!r} is not letters and hyphens")
+                continue
+            out.append(raw)
+    if state != "after":
+        report.hard("hyphenation-unread", HYPHENATION, "the list never closes")
+    if not out:
+        report.hard("hyphenation-unread", HYPHENATION, "no entries")
+    return out

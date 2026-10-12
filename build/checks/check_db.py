@@ -13,6 +13,11 @@ QUERIES = [
     ("  headings in the text", "SELECT COUNT(*) FROM paragraph WHERE heading", 1),
     ("red-letter spans",    "SELECT COUNT(*) FROM span WHERE kind='redletter'", 1267),
     ("em spans",            "SELECT COUNT(*) FROM span WHERE kind='em'", 2295),
+    # Where a word may break at a line's end, as the book lets it (build/hyphen.py):
+    # the source's own \- and, in paragraph.html_hy, every soft hyphen.
+    ("discretionary hyphens (\\-)", "SELECT COUNT(*) FROM span WHERE kind='shy'", 1392),
+    ("soft hyphens",        "SELECT SUM(LENGTH(html_hy) - LENGTH(REPLACE(html_hy, char(173), '')))"
+                            " FROM paragraph", 530865),
     ("1955 variant notes",  "SELECT COUNT(*) FROM footnote WHERE kind='variant-1955'", 180),
     # The SRT Committee's page (build/srt.py): every change it considered, and the
     # notes it gives a reason; the 13 without are in tests/known-srt-deltas.tsv.
@@ -190,6 +195,7 @@ def run(con) -> int:
     k = xoff = 0
     for where, h in con.execute(
             "SELECT 'paragraph ' || ref, html FROM paragraph"
+            " UNION ALL SELECT 'hyphenated ' || ref, html_hy FROM paragraph"
             " UNION ALL SELECT 'note ' || id, html FROM footnote"
             " UNION ALL SELECT 'SRT ' || name, then_html || why_html FROM srt_item"
             " UNION ALL SELECT 'section ' || paper_n || ':' || n, title_html FROM section"

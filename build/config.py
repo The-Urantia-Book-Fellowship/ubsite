@@ -47,8 +47,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt"):
-            continue                                # not repositories: see audio(), srt()
+        if key in ("audio", "srt", "texlive"):
+            continue                                # not repositories: see audio(), srt(), texlive()
         path = (ROOT / cfg["path"]).resolve()
         if not path.is_dir():
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
@@ -111,6 +111,18 @@ def srt() -> dict:
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["srt"]
     return {"url": cfg["url"], "path": ROOT / cfg["path"]}
+
+
+def texlive() -> dict:
+    """Return {key, path} for the TeX Live tree that hyphen.tex is vendored from.
+
+    Shaped like a repository entry so that vendorlib can take it beside them;
+    it has no commit, and `make paranoid` does not fingerprint it, because the
+    build never reads it.
+    """
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["texlive"]
+    return {"key": "texlive", "path": pathlib.Path(cfg["path"]), "commit": None}
 
 
 def describe(repos: dict) -> str:

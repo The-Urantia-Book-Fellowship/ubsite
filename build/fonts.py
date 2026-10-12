@@ -73,6 +73,10 @@ def corpus_codepoints(con) -> set[str]:
         for (t,) in con.execute(q):
             cps.update(t or "")
     cps.update("0123456789:.,()[]-–—…'’“” /*&%#?!; ")
+    # The soft hyphens of paragraph.html_hy, and the hyphen a browser may draw
+    # for one at a line's end when the page does not name its own: in the
+    # book's face, never a fallback's.  The press's fonts have both.
+    cps.update("­‐")
     return cps
 
 

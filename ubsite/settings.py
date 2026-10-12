@@ -45,6 +45,12 @@ READING = [
     ("width", "segmented", "Width", "measure",
      [("measure", "Measured", "about 68 characters to a line", ""),
       ("full", "Full", "the whole width of the window", "")], ""),
+    # Justified, as the book is, breaking a word only where the book lets it
+    # (build/hyphen.py, paragraph.html_hy).  Ragged right for a reader who reads
+    # better with even spaces: WCAG 1.4.8 asks that there be a way to it.
+    ("align", "segmented", "Alignment", "justify",
+     [("justify", "Justified", "hyphenated where the book hyphenates", ""),
+      ("ragged", "Ragged right", "even spaces, no hyphens", "")], ""),
 ]
 SHOW = [
     ("redletter", "switch", "Words of Jesus in red", True, [], ""),
