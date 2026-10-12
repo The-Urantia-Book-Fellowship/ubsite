@@ -38,6 +38,11 @@ from .render import render
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 LEDGER = ROOT / "data" / "text"
 KINDS = ("part", "paper", "section", "paragraph")
+# A paragraph's kind, as the section page sets it: the one heading within the
+# text (0:12.10), a line of verse set one to a line and not filled (48:6, 122:9,
+# 144:3, 144:5), or prose.
+KIND_SQL = ("CASE WHEN p.heading THEN 'heading'"
+            " WHEN p.src IN ('poetry', 'vsmark') THEN 'verse' ELSE 'prose' END")
 
 
 def canonical(rec: dict) -> str:
@@ -88,20 +93,21 @@ def records(con) -> list[tuple[str, str, dict]]:
         spans[pid].append(_Span(start, end, kind))
     marked = {pid for (pid,) in con.execute(
         "SELECT DISTINCT paragraph_id FROM span WHERE kind = 'fnref'")}
-    for pid, ref, uf, page, p, s, n, sep, gap, text, html in con.execute(
+    for pid, ref, uf, page, p, s, n, sep, gap, kind, text, html in con.execute(
             "SELECT p.id, p.ref, u.ref, u.page, p.paper_n, p.section_n, p.para_n,"
-            " p.sep_before, p.gap_before, p.text, p.html"
+            " p.sep_before, p.gap_before, " + KIND_SQL + ", p.text, p.html"
             " FROM paragraph p JOIN uf_paragraph u ON u.paragraph_id = p.id ORDER BY p.ord"):
         if pid in marked:
             html = render(text, spans.get(pid, []))
         # HTML alone, no plain copy beside it (Tigran, 2026-10-11): stripping its
         # tags gives the text exactly, which check_db holds, and one copy cannot
         # disagree with itself.  What stands before it, a separator or the start
-        # of a 1955 group (\pc), is on every record, null or false where there is
-        # none, so that every record has one shape (Tigran, 2026-10-12).
+        # of a 1955 group (\pc), and what kind of paragraph it is, are on every
+        # record, null or false where there is none, so that every record has one
+        # shape (Tigran, 2026-10-12).
         out.append(("paragraph", ref, {"ref": ref, "uf_ref": uf, "page_1955": page, "paper": p,
                                        "section": s, "paragraph": n, "separator_before": sep,
-                                       "group_before": bool(gap), "html": html}))
+                                       "group_before": bool(gap), "kind": kind, "html": html}))
     return out
 
 

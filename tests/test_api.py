@@ -219,8 +219,20 @@ class Whole(Quiet):
         self.assertEqual({x["ref"] for x in ps if x["group_before"]}, groups)
         self.assertIn("101:1.2", groups)
         page = html.unescape(call("/api")[2].decode())
-        for field in ("separator_before", "group_before"):
+        for field in ("separator_before", "group_before", "kind"):
             self.assertIn(f"<code>{field}</code>", page)
+
+    def test_the_kind_of_paragraph(self):
+        """Prose, a line of verse, or the one heading within the text (version 6)."""
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        verse = {r for (r,) in con.execute("SELECT ref FROM paragraph WHERE src <> 'vs'")}
+        self.assertEqual(len(verse), 144)
+        kinds = {x["ref"]: x["kind"] for x in self.reply["paragraphs"]}
+        self.assertEqual({r for r, k in kinds.items() if k == "heading"}, {"0:12.10"})
+        self.assertEqual({r for r, k in kinds.items() if k == "verse"}, verse)
+        self.assertEqual(set(kinds.values()), {"prose", "verse", "heading"})
+        self.assertEqual((kinds["144:5.11"], kinds["48:6.9"], kinds["101:1.2"]),
+                         ("verse", "verse", "prose"))
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
