@@ -68,7 +68,7 @@
         {% if n.verdict %}
         <p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.srt_why|safe }}</p>
         {% if n.see_why %}<p class="why see"><a href="/{{ n.see_ref }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>{% endif %}
-        <p class="src">SRT Committee · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">the full entry ↗</a></p>
+        <p class="src">Source · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">SRT Committee table ↗</a></p>
         {% endif %}
       </aside>
       {% endfor %}{% endfor %}

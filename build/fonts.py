@@ -40,7 +40,7 @@ FORBIDDEN = "Goudy-Handtooled-BT.ttf"
 # excuses these and nothing else.
 ELSEWHERE = {
     "◐": "the theme button, set in the system UI face (ub.css .theme)",
-    "↗": "a 1955 card's link to the committee's entry, set in the system UI face"
+    "↗": "a 1955 card's link to the committee's table, set in the system UI face"
          " (ub.css :is(.note, .pop) .src)",
     "γ": "42:5.1's SRT note names the Greek letter that became the 1955 'Y';"
          " UB Goudy has no Greek, and the serif behind it in the stack draws it",
