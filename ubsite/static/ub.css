@@ -291,11 +291,19 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
 .supplied { font-style: italic; }
 .nobreak { white-space: nowrap; }
 
-/* A dot-leader row is the book's pseudo-table: "Superuniverses .... 7".  The
-   row becomes a flex line only when it actually contains a leader, so ordinary
-   paragraphs are untouched.  The leader is DRAWN, never typed -- the text is
-   "Superuniverses 7", and literal dots copy-paste as garbage. */
-p.t:has(.leader) { display: flex; align-items: baseline; }
+/* A dot-leader row is the book's pseudo-table: "Superuniverses .... 7".  Its
+   words (.lab) and its figure (.fig, which begins with the leader) are a flex
+   line of their own, .leadrow (section.html), and the paragraph around it is a
+   paragraph like any other: its reference and play button stand where every
+   other paragraph's do.  A row too long for its line breaks before the figure,
+   which takes its dots along: "One universe (100 constellations)", then
+   ".... 10,000,000 worlds".  A label squeezed beside its figure would wrap,
+   and leave a gap the width of its longest line.  Words that do wrap are a
+   table's: ragged, unhyphenated.  The leader is DRAWN, never typed -- the text
+   is "Superuniverses 7", and literal dots copy-paste as garbage. */
+.leadrow { display: flex; flex-wrap: wrap; align-items: baseline;
+           text-align: start; hyphens: none; -webkit-hyphens: none; }
+.leadrow > .fig { display: flex; align-items: baseline; flex: 1 0 auto; white-space: nowrap; }
 .leader { display: inline-block; flex: 1; min-width: 2rem; margin: 0 .35rem;
   border-bottom: 1px dotted var(--faint); transform: translateY(-.28em); }
 
@@ -621,7 +629,10 @@ main.results { position: relative; }
   .reader { grid-template-columns: 1fr; gap: 0; }
   .rail { position: static; max-height: none; border-bottom: 1px solid var(--rule);
           padding-bottom: .8rem; margin-bottom: 1.4rem; }
-  .grid { grid-template-columns: 1fr; }
+  /* Never wider than the screen, whatever one paragraph asks: a `1fr` track
+     grows to its widest item's least width, and one long dot-leader row once
+     pushed all of 15:2 off the side. */
+  .grid { grid-template-columns: minmax(0, 1fr); }
   /* No gutter on a phone: the reference and the play button under it stand at
      the start of the paragraph, as a drop capital does, and the text runs
      beside them for two lines and then the full width.  The reference is as wide

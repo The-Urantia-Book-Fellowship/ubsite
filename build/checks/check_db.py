@@ -117,6 +117,14 @@ INVARIANTS = [
             OR (x.reasons <> '') <> (COALESCE(s.why_text, '') || COALESCE(t.why_text, '') <> '')"""),
     ("search rows without their note",
      "SELECT COUNT(*) FROM footnote_fts x LEFT JOIN footnote f ON f.id = x.rowid WHERE f.id IS NULL"),
+    # The section page splits a dot-leader row at its leader (section.html), and
+    # each half is whole HTML only if no other span is open there.
+    ("a dot leader inside another span, or two in a paragraph",
+     """SELECT (SELECT COUNT(*) FROM span d JOIN span s ON s.paragraph_id = d.paragraph_id
+                 WHERE d.kind = 'dotleader' AND s.kind NOT IN ('dotleader', 'fnref', 'shy')
+                   AND s.start < d.start AND s."end" > d.start)
+            + (SELECT COUNT(*) FROM (SELECT paragraph_id FROM span WHERE kind = 'dotleader'
+                                      GROUP BY 1 HAVING COUNT(*) > 1))"""),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]

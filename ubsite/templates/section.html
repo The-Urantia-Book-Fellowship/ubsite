@@ -39,11 +39,19 @@
     <div class="grid" style="--refw: {{ paras|map(attribute='ref')|map('length')|max }}">
     {% for p in paras %}
       {% set hit = focus and p.para_n >= focus and p.para_n <= last %}
+      {#- A dot-leader row's words and its figure, split at the leader, stand in a
+          flex line of their own, so that the paragraph around them is a
+          paragraph like any other, and a row too long for a phone's line can
+          break before its figure.  The leader goes with the figure.  check_db
+          holds every leader outside all other markup, one to a paragraph, so
+          each half is whole. #}
+      {% set row = p.html_hy.split('<span class="leader"></span>') %}
+      {% set pcm %}{% if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}{% endset %}
       <p class="t{% if p.gap_before %} pc{% endif %}{% if p.heading %} head{% endif %}{% if p.src != 'vs' %} verse{% endif %}{% if hit %} hit{% endif %}"
          id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
          {%- if p.page_1955 %}<span class="pg" data-pg="{{ p.page_1955 }}"></span>{% endif %}
-         {%- if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}
-         {{- p.html_hy|safe }}</p>
+         {%- if row|length == 2 %}<span class="leadrow"><span class="lab">{{ pcm }}{{ row[0]|safe }}</span><span class="fig"><span class="leader"></span>{{ row[1]|safe }}</span></span>
+         {%- else %}{{ pcm }}{{ p.html_hy|safe }}{% endif %}</p>
       <div class="a">
       {% set cs = citers.get(p.id, []) %}
         {% if cs %}
