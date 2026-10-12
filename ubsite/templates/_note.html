@@ -1,0 +1,12 @@
+{#- A 1955 reading's note (queries.notes): the reading as the press gives it,
+    with the SRT Committee's reason for the change where it gives one.  With
+    JavaScript each opens as a card at its ring (ub.js), carrying these words,
+    and the notes are hidden; without it, and in print, they are endnotes. #}
+{% macro note(n) %}<aside class="note" id="fn{{ n.key }}">
+        <p class="then"><a class="lbl" href="#fnref{{ n.key }}"><span class="at">{{ n.para_ref }} </span>1955</a> {{ n.html|safe }}</p>
+        {% if n.verdict %}
+        <p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.srt_why|safe }}</p>
+        {% if n.see_why %}<p class="why see"><a href="/{{ n.see_ref }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>{% endif %}
+        <p class="src">Source · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">SRT Committee table ↗</a></p>
+        {% endif %}
+      </aside>{% endmacro %}

@@ -124,10 +124,10 @@
       idle(o);
     };
     // A setting that means nothing while the one it needs is off (settings.py
-    // NEEDS) is shown, greyed, and cannot be changed.
+    // NEEDS) is shown, greyed, and cannot be changed: 'off', or a switch's false.
     var idle = function (o) {
       Array.prototype.forEach.call(form.querySelectorAll('[data-needs]'), function (el) {
-        var off = o[el.dataset.needs] === 'off';
+        var v = o[el.dataset.needs], off = v === 'off' || v === false;
         el.classList.toggle('idle', off);
         Array.prototype.forEach.call(el.querySelectorAll('input, select'), function (c) { c.disabled = off; });
       });
@@ -159,12 +159,14 @@
   // itself.  Either way, scroll once more when the fonts are in: UB Goudy
   // loads with font-display: swap, the text reflows, and the first scroll
   // drifts.  Not if the reader has scrolled meanwhile.  Again whenever
-  // listen.js brings a page in while it plays ('ub:page').
+  // listen.js brings a page in while it plays ('ub:page').  A fragment that
+  // names no element -- #note…, a 1955 reading found by search -- leaves the
+  // paragraph marked .hit as the focus.
   function arrive() {
     var focus = null;
     try {
-      focus = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1)))
-                            : document.querySelector('.hit');
+      focus = (location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)))) ||
+              document.querySelector('.hit');
     } catch (e) {}
     if (!focus) return;
     focus.scrollIntoView({ block: 'start' });
@@ -246,7 +248,7 @@
   }
   function open(mark) {
     var note = document.getElementById(mark.getAttribute('href').slice(1)),
-        host = mark.closest('article');
+        host = mark.closest('article') || mark.closest('main.results');
     if (!note || !host) return false;
     var el = document.createElement('div');
     el.className = 'pop';
@@ -280,4 +282,24 @@
   });
   window.addEventListener('resize', place);
   document.addEventListener('ub:swap', function () { card = null; });
+
+  // A search hit among the 1955 readings opens /93:5.8#note93_5_8_0, and
+  // arrive() brings its paragraph into view: its card opens too -- if the ring
+  // shows, which it does not with the readings turned off.  Not #fnref…, the
+  // ring's own id, or the browser scrolls the ring's line to the top as the
+  // page loads, over arrive(), and the paragraph's first lines are lost.  Here,
+  // after the card's own code, which sets `card` after arrive() has run.
+  // Placed again when the fonts are in and the text has reflowed.
+  function arriveNote() {
+    var m = /^#note(\d+_\d+_\d+_\d+)$/.exec(location.hash),
+        mark = m && document.getElementById('fnref' + m[1]);
+    if (!mark || !mark.matches('a.fn') || !mark.offsetParent) return;
+    shut(false);
+    open(mark);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+      if (card && card.mark === mark) place();
+    });
+  }
+  arriveNote();
+  document.addEventListener('ub:page', arriveNote);
 })();

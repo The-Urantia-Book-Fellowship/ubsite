@@ -47,14 +47,19 @@ READING = [
       ("full", "Full", "the whole width of the window", "")], ""),
 ]
 SHOW = [
-    ("redletter", "switch", "The words of Jesus in red", True, [], ""),
+    ("redletter", "switch", "Words of Jesus in red", True, [], ""),
     ("paranum", "switch", "Paragraph references", True, [], "such as 0:1.2, beside each paragraph"),
     # Where each paragraph begins in the 1955 first printing.  Obsolete as a way
     # to cite the book, so off unless a reader asks (Tigran, 2026-10-11).
     ("pages", "switch", "1955 page references", False, [], "such as (1109.3): page, and paragraph on it"),
     ("pilcrow", "switch", "Pilcrows", True, [], "where the 1955 text leaves a blank line"),
     ("margin", "switch", "Index entries beside the text", True, [], ""),
-    ("notes", "switch", "The 1955 readings", True, [], ""),
+    ("notes", "switch", "1955 readings", True, [], ""),
+    # What the 1955 cards say, listed among the search results: the reading,
+    # and the SRT Committee's reasons beneath it.  Off unless a reader asks
+    # (Tigran, 2026-10-12).
+    ("notesearch", "switch", "1955 readings in search results", False, [],
+     "their wording, such as Badanon, and the committee\u2019s reasons"),
 ]
 SPEEDS = (0.8, 0.9, 1, 1.1, 1.25, 1.5)
 LISTEN = [
@@ -72,10 +77,12 @@ LISTEN = [
 ]
 
 
-# A setting that means nothing while another is 'off': shown, greyed, and not
-# to be changed (ub.js disables it).  With Listening off there is no speed to
-# set (Tigran, 2026-10-08).
-NEEDS = {"bvoice": "voice", "rate": "voice", "follow": "voice", "onward": "voice"}
+# A setting that means nothing while another is off ('off', or a switch turned
+# off): shown, greyed, and not to be changed (ub.js disables it).  With
+# Listening off there is no speed to set (Tigran, 2026-10-08), and with the 1955
+# readings off no reading to search for.
+NEEDS = {"bvoice": "voice", "rate": "voice", "follow": "voice", "onward": "voice",
+         "notesearch": "notes"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:

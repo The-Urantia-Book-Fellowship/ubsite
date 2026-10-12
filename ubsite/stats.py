@@ -139,12 +139,14 @@ def page_kind(path: str) -> tuple[str, str]:
         return "index", path[7:]
     if path == "/appendix" or path.startswith("/appendix/"):
         return "appendix", path[10:]
+    if path == "/lists" or path.startswith("/lists/"):
+        return "lists", path[7:]
     return "other", path
 
 
 KIND_LABEL = {"section": "Sections of the text", "concept": "Concept pages",
               "index": "The index, by letter", "appendix": "Appendices",
-              "search": "Search", "home": "Home page", "contents": "Contents",
+              "search": "Search", "home": "Home page", "contents": "Contents", "lists": "Lists",
               "other": "Other"}
 
 

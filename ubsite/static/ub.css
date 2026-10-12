@@ -517,6 +517,27 @@ dialog.settings .done span { position: relative; top: var(--lift); }
 .more { margin: .6rem 0 0; }
 .results .pager { margin: 1.2rem 0 0; }
 .didyou { color: var(--faint); }
+/* The 1955 readings among the results: only when Settings asks (off by
+   default), and never while the readings themselves are off.  Each hit is its
+   reading, today's words around its ring, and the committee's reasons where
+   the search found something in them. */
+.by1955 { display: none; }
+:root[data-notesearch="true"]:not([data-notes="off"]) .by1955 { display: block; }
+.old .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint); margin-right: .2em; }
+.old .then { margin: 0 .6rem 0 .3rem; }
+.old .today { color: var(--faint); }
+.old .dec { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint);
+            font-size: .92em; margin-left: .4rem; }
+.lists h2 a { color: inherit; text-decoration: none; }
+.lists h2 a:hover { color: var(--link); text-decoration: underline; }
+.old .reason { display: block; font-size: .92em; color: var(--faint); margin: .1rem 0 .1rem 1.2rem; }
+.old .nw { white-space: nowrap; }
+/* A list's rings are the text's (a.fn) and open the same card, framed by the
+   list's <main> (ub.js).  The List of 1955 readings keeps them, and their
+   cards, with the readings turned off in the text: it was asked for. */
+main.results { position: relative; }
+:root[data-notes="off"] .lists a.fn { display: inline-block; }
+:root[data-notes="off"] .lists .pop { display: block; }
 
 /* ---- appendices -------------------------------------------------------- */
 .listed { color: var(--faint); font-size: 1.02rem; margin: -.2rem 0 .3rem; }

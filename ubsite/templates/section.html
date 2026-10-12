@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% from "_note.html" import note %}
 {% from "_rail.html" import rail %}
 {# An index entry beside the text.  A headword or subentry links to its line on
    the concept page; an appendix entry to its line on the appendix page, named
@@ -60,17 +60,9 @@
         hidden; without it, and in print, they are the section's endnotes. #}
     {% if notes %}
     <section class="notes" aria-label="The 1955 readings">
-      <h3>The 1955 readings</h3>
+      <h3><a href="/lists/1955">The 1955 readings</a></h3>
       {% for p in paras %}{% for n in notes.get(p.id, []) %}
-      {% set k = p.paper_n ~ "_" ~ p.section_n ~ "_" ~ p.para_n ~ "_" ~ n.ord %}
-      <aside class="note" id="fn{{ k }}">
-        <p class="then"><a class="lbl" href="#fnref{{ k }}"><span class="at">{{ p.ref }} </span>1955</a> {{ n.html|safe }}</p>
-        {% if n.verdict %}
-        <p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.srt_why|safe }}</p>
-        {% if n.see_why %}<p class="why see"><a href="/{{ n.see_ref }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>{% endif %}
-        <p class="src">Source · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">SRT Committee table ↗</a></p>
-        {% endif %}
-      </aside>
+      {{ note(n) }}
       {% endfor %}{% endfor %}
     </section>
     {% endif %}

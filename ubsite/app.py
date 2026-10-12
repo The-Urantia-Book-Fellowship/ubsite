@@ -89,8 +89,8 @@ RE_REF = re.compile(r"^(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?$")
 RE_TERM = re.compile(r'"([^"]*)"?|(\S+)')
 
 # How many hits each list shows on the overview, and per page once a list is
-# opened on its own with ?in=index or ?in=text.
-OVERVIEW = {"index": 25, "text": 40}
+# opened on its own with ?in=index, ?in=text or ?in=notes.
+OVERVIEW = {"index": 25, "text": 40, "notes": 10}
 PER_PAGE = 100
 
 
@@ -153,9 +153,35 @@ def mark_terms(texts: list[str], q: str) -> list[Markup]:
     marked = dict(con.execute(
         "SELECT rowid, highlight(t, 0, char(2), char(3)) FROM t WHERE t MATCH ?", (anyq,)))
     con.close()
-    return [Markup(str(escape(marked.get(i, t)))
-                   .replace("\x02", "<mark>").replace("\x03", "</mark>"))
-            for i, t in enumerate(texts)]
+    return [_marked(marked.get(i, t)) for i, t in enumerate(texts)]
+
+
+def _marked(s: str) -> Markup:
+    """Text with FTS5's marks, \\x02 and \\x03, as <mark> tags, escaped first."""
+    return Markup(str(escape(s)).replace("\x02", "<mark>").replace("\x03", "</mark>"))
+
+
+RE_WORD = re.compile(r"\S+")
+RE_GLUE = re.compile(r"(.*?)(\S*)\Z", re.S)
+
+
+def _around(text: str, at: int, before: int = 8, after: int = 6) -> tuple[str, str, str, str]:
+    """Today's words on either side of a 1955 note's ring, `at` in `text`.
+
+    The ring stands after the words that changed, so what shows is what
+    replaced the 1955 reading, and enough on each side to read it by: so many
+    words, cut where a word ends, with an ellipsis only where something was cut.
+    As (lead, word, glue, rest): `word` and `glue` touch the ring on either
+    side -- "forgo" and "", "mussels" and "," -- and the page keeps them on
+    one line with it, which the browser would otherwise break around it.
+    """
+    head, tail = text[:at], text[at:]
+    hw, tw = list(RE_WORD.finditer(head)), list(RE_WORD.finditer(tail))
+    left = "…" + head[hw[-before].start():] if len(hw) > before else head
+    right = tail[:tw[after - 1].end()] + "…" if len(tw) > after else tail
+    lead, word = RE_GLUE.match(left).groups()
+    glue = re.match(r"\S*", right).group(0)
+    return lead, word, glue, right[len(glue):]
 
 
 def db() -> sqlite3.Connection:
@@ -458,12 +484,12 @@ def contents(request: Request):
 @app.get("/search", response_class=HTMLResponse)
 def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
            page_no: str = Query("1", alias="page")):
-    """Index hits and text hits, kept apart.
+    """Index hits, text hits and the 1955 readings, kept apart.
 
-    With no `in`, an overview: the first few of each list.  `in=index` or
-    `in=text` opens that one list whole, a hundred to a page.  Either way the
-    number beside a heading counts exactly what its list holds, so "Show all"
-    always delivers the number it promised.
+    With no `in`, an overview: the first few of each list.  `in=index`,
+    `in=text` or `in=notes` opens that one list whole, a hundred to a page.
+    Either way the number beside a heading counts exactly what its list holds,
+    so "Show all" always delivers the number it promised.
     """
     q = q.strip()
     con = db()
@@ -474,11 +500,11 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             p, s, n = tg[0]
             return RedirectResponse(
                 f"/{p}:{s}" + (f".{n}" if n is not None else ""), status_code=303)
-    scope = scope if scope in ("index", "text") else ""
+    scope = scope if scope in ("index", "text", "notes") else ""
     number = int(page_no) if page_no.isdigit() and int(page_no) > 0 else 1
     fq = fts_query(q)
-    heads, idx, txt = [], None, None
-    if q and scope != "text":
+    heads, idx, txt, old = [], None, None, None
+    if q and scope in ("", "index"):
         # An exact headword match must win.  Full-text rank cannot deliver that
         # -- bm25 scores term statistics and has no notion that the query names
         # an entry -- so searching "Jesus" put Joshua, parables and Amos above
@@ -498,7 +524,7 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             "          e.scope<>'az', e.ord"
             " LIMIT 12",
             (q, q, q)).fetchall()
-    if fq and scope != "text":
+    if fq and scope in ("", "index"):
         # The headwords listed above are left out of this list, by entry id.
         # Not by slug: a subentry links through its headword's slug, so that
         # would drop every subentry of a headword already shown.
@@ -518,7 +544,7 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
         # What each hit shows, with the reader's words marked as in the text hits.
         marked = mark_terms([r["event"] or r["path"] for r in rows], q)
         idx = _hits(n, off, [dict(r, marked=m) for r, m in zip(rows, marked)])
-    if fq and scope != "index":
+    if fq and scope in ("", "text"):
         n = con.execute("SELECT COUNT(*) FROM paragraph_fts WHERE paragraph_fts MATCH ?",
                         (fq,)).fetchone()[0]
         size, off = _window(scope == "text", "text", number, n)
@@ -527,11 +553,44 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             " FROM paragraph_fts f JOIN paragraph p ON p.id=f.rowid"
             " WHERE paragraph_fts MATCH ? ORDER BY p.ord LIMIT ? OFFSET ?",
             (fq, size, off)).fetchall())
+    if fq and scope in ("", "notes"):
+        # What the 1955 cards say: the reading, and the committee's reasons beneath
+        # it.  Always looked up, and shown only when Settings asks (ub.css
+        # .by1955, off by default), for settings never reach the server.
+        where = (" FROM footnote_fts x JOIN footnote f ON f.id=x.rowid"
+                 " JOIN paragraph p ON p.id=f.paragraph_id"
+                 " WHERE footnote_fts MATCH ? AND f.kind='variant-1955'")
+        n = con.execute("SELECT COUNT(*)" + where, (fq,)).fetchone()[0]
+        size, off = _window(scope == "notes", "notes", number, n)
+        hits = con.execute(
+            "SELECT f.id, highlight(footnote_fts, 0, char(2), char(3)) AS reading,"
+            "  snippet(footnote_fts, 1, char(2), char(3), '…', 20) AS reasons"
+            + where + " ORDER BY p.ord, f.ord LIMIT ? OFFSET ?", (fq, size, off)).fetchall()
+        found = {n["id"]: n for n in queries.notes(
+            con, f"f.id IN ({','.join('?' * len(hits))})", tuple(h["id"] for h in hits))}
+        old = _hits(n, off, [
+            _old_hit(found[h["id"]], _marked(h["reading"]),
+                     # Only where the search found something in them.
+                     reasons=_marked(h["reasons"]) if "\x02" in h["reasons"] else None)
+            for h in hits])
     if q:
-        # For the visit counter: a search that finds nothing is one the index might answer.
-        request.state.hits = (len(heads) + (idx["n"] if idx else 0) + (txt["n"] if txt else 0))
-    return page(request, "search.html", q=q, scope=scope, idx=idx, txt=txt, heads=heads,
-                diagnose=cite.diagnose(q) if q else None)
+        # For the visit counter: a search that finds nothing is one the index might
+        # answer.  So the 1955 readings, which most readers never see, count only
+        # where a reader asked for them alone.
+        request.state.hits = (len(heads) + (idx["n"] if idx else 0) + (txt["n"] if txt else 0)
+                              + (old["n"] if old and scope == "notes" else 0))
+    return page(request, "search.html", q=q, scope=scope, idx=idx, txt=txt, old=old,
+                heads=heads, diagnose=cite.diagnose(q) if q else None)
+
+
+def _old_hit(n: dict, reading: Markup, **more) -> dict:
+    """One 1955 reading for a list (templates/_old.html), on the List of 1955
+    readings and among the search results: its note (queries.notes), the
+    reading as that list shows it, and today's words around its ring.  `more`
+    is what that list alone shows -- `dec`, the verdict on the line, and
+    `reasons`, a search's snippet -- under keys of their own: the note's
+    columns are what its card is made from."""
+    return {**n, "reading": reading, "now": _around(n["para_text"], n["anchor"]), **more}
 
 
 def _window(whole: bool, kind: str, number: int, n: int) -> tuple[int, int]:
@@ -607,6 +666,31 @@ def appendix(request: Request, letter: str):
     years, bands = queries.chronology(con)
     return page(request, "chronology.html", app=app_, apps=queries.appendices(con),
                 years=years, bands=bands)
+
+
+# The edition's lists, as a book's front matter names them: the 1955 readings
+# now, the illustrations and the study notes with Phase 6 (Tigran, 2026-10-12).
+@app.get("/lists", response_class=HTMLResponse)
+def lists(request: Request):
+    stats = dict(db().execute("SELECT key, value FROM stat").fetchall())
+    return page(request, "lists.html", stats=stats)
+
+
+@app.get("/lists/1955", response_class=HTMLResponse)
+def list_1955(request: Request):
+    """Every 1955 reading in one list, by paper, in the order of the book.
+
+    The reading as the press gives it (footnote.html, which keeps its italics),
+    today's words around the ring, and the committee's verdict.  The ring opens
+    the card in place, as in the text; the reference opens the paragraph.
+    """
+    groups: list[dict] = []
+    for n in queries.notes(db()):
+        if not groups or groups[-1]["n"] != n["paper_n"]:
+            groups.append({"n": n["paper_n"], "title": n["paper_title"], "rows": []})
+        groups[-1]["rows"].append(_old_hit(n, Markup(n["html"]), dec=n["verdict"]))
+    return page(request, "list_1955.html", groups=groups,
+                n=sum(len(g["rows"]) for g in groups))
 
 
 @app.get("/api", response_class=HTMLResponse)

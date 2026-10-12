@@ -1,0 +1,19 @@
+{#- One 1955 reading in a list (queries.notes): on the List of 1955 readings,
+    and among the search results.  The reference opens its paragraph with its
+    card: #note… names no element, so the browser leaves the scrolling to ub.js.
+    "now" is today's words around the ring, the text's own ring, which opens
+    the same card here (its note is in notes_after); CSS draws it, so copying
+    never takes it.  The committee's verdict on the list, its words where a
+    search found something in them. #}
+{% from "_note.html" import note %}
+{% macro old_hit(o) %}<li><a href="/{{ o.para_ref }}#note{{ o.key }}">{{ o.para_ref }}</a>
+  <span class="then"><span class="lbl">1955</span> {{ o.reading }}</span>
+  <span class="today"><span class="lbl">now</span> {{ o.now[0] }}<span class="nw">{{ o.now[1] }}<a class="fn" href="#fn{{ o.key }}" id="fnref{{ o.key }}" data-k="1955" aria-label="1955 reading"></a>{{ o.now[2] }}</span>{{ o.now[3] }}</span>
+  {%- if o.dec %} <span class="dec">{{ o.dec }}</span>{% endif %}
+  {%- if o.reasons %}<span class="reason"><span class="lbl">SRT Committee</span> {{ o.reasons }}</span>{% endif %}</li>{% endmacro %}
+{#- The notes the rings above open, as section.html keeps its own. #}
+{% macro notes_after(rows) %}<section class="notes" aria-label="The 1955 readings">
+      <h3>The 1955 readings</h3>
+      {% for o in rows %}{{ note(o) }}
+      {% endfor %}
+    </section>{% endmacro %}

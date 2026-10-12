@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Lists{% endblock %}
+{#- Every list the edition keeps, as a book's front matter names them; the
+    illustrations and the study notes join with Phase 6. #}
+{% block body %}<main class="prose lists"><h1>Lists</h1>
+<ul class="ways">
+  <li><a href="/lists/1955">List of 1955 readings</a> — the {{ stats.variants_1955 }} places
+    where the text departs from the first printing of 1955, with the SRT Committee’s
+    reasons where it gives them.</li>
+</ul>
+</main>{% endblock %}

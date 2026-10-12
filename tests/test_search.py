@@ -14,7 +14,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ubsite.app import TOKENIZE, fts_query, mark_terms  # noqa: E402
+from ubsite.app import TOKENIZE, _around, _marked, fts_query, mark_terms  # noqa: E402
 
 ROWS = ["the self-conscious mind", "Adam and Eve", "the Adamic mission",
         "Jesus’ words", "a Thought Adjuster indwells", "God-knowing men"]
@@ -74,7 +74,7 @@ class MarkTerms(unittest.TestCase):
 
     def test_the_tokenizer_is_the_builds(self):
         sql = (ROOT / "build" / "schema" / "004_fts.sql").read_text()
-        self.assertEqual(sql.count(f"tokenize='{TOKENIZE}'"), 2)
+        self.assertEqual(sql.count(f"tokenize='{TOKENIZE}'"), 3)
 
     def m(self, text, q):
         return str(mark_terms([text], q)[0])
@@ -107,6 +107,33 @@ class MarkTerms(unittest.TestCase):
                          "6. &amp; 7. <mark>Secrets</mark> of &lt;Greatness&gt;")
         self.assertEqual(self.m("a & b", "amp"), "a &amp; b")
         self.assertEqual([str(x) for x in mark_terms(["a", "b"], "")], ["a", "b"])
+
+
+class NoteHit(unittest.TestCase):
+    """A 1955 reading found by search shows today's words around its ring."""
+
+    TEXT = "It required great determination for Abraham to forgo the honors of the Egyptian court"
+
+    def test_words_either_side_cut_where_a_word_ends(self):
+        at = self.TEXT.index("forgo") + len("forgo")
+        self.assertEqual(_around(self.TEXT, at),
+                         ("It required great determination for Abraham to ", "forgo", "",
+                          " the honors of the Egyptian court"))
+        self.assertEqual(_around(self.TEXT, at, before=3, after=2),
+                         ("…Abraham to ", "forgo", "", " the honors…"))
+
+    def test_what_touches_the_ring_stays_with_it(self):
+        text = "embrace the mussels, clams, oysters"
+        self.assertEqual(_around(text, text.index(",")),
+                         ("embrace the ", "mussels", ",", " clams, oysters"))
+
+    def test_at_either_end(self):
+        self.assertEqual(_around("one two", 0), ("", "", "one", " two"))
+        self.assertEqual(_around("one two", 7), ("one ", "two", "", ""))
+
+    def test_the_marks_after_escaping(self):
+        self.assertEqual(str(_marked("Webster\u2019s & <b> \x02forego\x03")),
+                         "Webster\u2019s &amp; &lt;b&gt; <mark>forego</mark>")
 
 
 if __name__ == "__main__":

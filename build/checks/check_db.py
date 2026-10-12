@@ -97,6 +97,17 @@ INVARIANTS = [
     ("a 1955 note's reason is about its own paragraph",
      """SELECT COUNT(*) FROM footnote f JOIN srt_item s ON s.id = f.srt_item_id
          WHERE s.paragraph_id IS NOT f.paragraph_id"""),
+    # Search finds a note by what its card says: the reading, and the reasons
+    # exactly when the card gives some.
+    ("notes without their search row, or with another's words",
+     """SELECT COUNT(*) FROM footnote f
+         LEFT JOIN footnote_fts x ON x.rowid = f.id
+         LEFT JOIN srt_item s ON s.id = f.srt_item_id
+         LEFT JOIN srt_item t ON t.id = s.see_id
+         WHERE x.rowid IS NULL OR x.reading IS NOT f.text
+            OR (x.reasons <> '') <> (COALESCE(s.why_text, '') || COALESCE(t.why_text, '') <> '')"""),
+    ("search rows without their note",
+     "SELECT COUNT(*) FROM footnote_fts x LEFT JOIN footnote f ON f.id = x.rowid WHERE f.id IS NULL"),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]

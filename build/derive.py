@@ -246,3 +246,11 @@ def fts(con) -> None:
     con.execute("INSERT INTO index_entry_fts(rowid, text_expanded, path) "
                 "SELECT id, text_expanded, path FROM index_entry")
     con.execute("INSERT INTO index_entry_fts(index_entry_fts) VALUES('optimize')")
+    # The reasons are what the card shows (queries.section), whichever place in
+    # it each stands; the verdict is left out, or "adopted" finds every note.
+    con.execute("INSERT INTO footnote_fts(rowid, reading, reasons) "
+                "SELECT f.id, f.text,"
+                "  TRIM(COALESCE(s.why_text, '') || ' ' || COALESCE(t.why_text, ''))"
+                " FROM footnote f LEFT JOIN srt_item s ON s.id = f.srt_item_id"
+                " LEFT JOIN srt_item t ON t.id = s.see_id")
+    con.execute("INSERT INTO footnote_fts(footnote_fts) VALUES('optimize')")

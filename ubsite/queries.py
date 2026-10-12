@@ -48,12 +48,7 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
              listed ONCE at the section's head, never repeated under every
              paragraph, or Paper 15's 470 citations print some entries forty
              times over and the eye stops reading
-    notes    paragraph id -> its 1955 readings, each as the press gives it, with
-             the SRT Committee's reasons for the change where it gives them
-             (verdict, srt_why, srt_href) and the note it refers to (see_*).
-             Never the committee's quotation of the 1955 text: its page
-             misquotes it in places, and what 1955 said is the press's to say
-             (Tigran)
+    notes    paragraph id -> its 1955 readings, as notes() gives them
     """
     paras = con.execute(
         "SELECT p.*, d.precise_citers, d.thin, u.page AS page_1955 FROM paragraph p"
@@ -78,25 +73,46 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
         " JOIN paragraph p ON p.id=c.paragraph_id"
         " WHERE p.paper_n=? AND p.section_n=? AND c.precision IN ('sec','paper')" + CHIP_NEW +
         f" ORDER BY e.ord LIMIT {BLANKET_MAX}", (paper, sec)).fetchall()
-    notes: dict[int, list] = {}
+    by_para: dict[int, list] = {}
+    for n in notes(con, "p.paper_n=? AND p.section_n=?", (paper, sec)):
+        by_para.setdefault(n["paragraph_id"], []).append(n)
+    return {"paras": paras, "citers": citers, "blanket": blanket, "notes": by_para}
+
+
+def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:
+    """The 1955 readings `where` selects, in the order of the book.
+
+    Each as the press gives it (the footnote's own columns), in its paragraph
+    (para_ref, para_text, paper_n, section_n, para_n, paper_title), with the
+    SRT Committee's reasons for the change where it gives them (verdict,
+    srt_why, srt_href) and the note it refers to (see_*).  `key` is the note's
+    in section.html, fn<key> and fnref<key>.  Never the committee's quotation
+    of the 1955 text: its page misquotes it in places, and what 1955 said is
+    the press's to say (Tigran).  A section, the List of 1955 readings and a
+    search's hits all show a note through this, and the EPUB too.
+    """
+    out = []
     for f in con.execute(
-            "SELECT f.*, p.ref AS para_ref, s.verdict, s.why_html AS srt_why,"
+            "SELECT f.*, p.ref AS para_ref, p.text AS para_text, p.paper_n, p.section_n,"
+            " p.para_n, pa.title AS paper_title, s.verdict, s.why_html AS srt_why,"
             " (SELECT commit_url FROM build_source WHERE repo='srt') || '#' || s.name AS srt_href,"
             " t.verdict AS see_verdict, t.why_html AS see_why, tp.ref AS see_ref"
             " FROM footnote f JOIN paragraph p ON p.id=f.paragraph_id"
+            " JOIN paper pa ON pa.n=p.paper_n"
             " LEFT JOIN srt_item s ON s.id=f.srt_item_id"
             " LEFT JOIN srt_item t ON t.id=s.see_id"
             " LEFT JOIN paragraph tp ON tp.id=t.paragraph_id"
-            " WHERE p.paper_n=? AND p.section_n=? AND f.kind='variant-1955'"
-            " ORDER BY f.ord", (paper, sec)):
+            " WHERE f.kind='variant-1955' AND (" + where + ")"
+            " ORDER BY p.ord, f.ord", params):
         n = dict(f)
         # A change that says only "Adopted" shares the reasons given for the
         # first under its anchor, in the same paragraph (134:3.3): they are its
         # own.  A note referred to elsewhere stays apart, named by its paragraph.
         if n["see_why"] and not n["srt_why"] and n["see_ref"] == n["para_ref"]:
             n["srt_why"], n["see_why"] = n["see_why"], None
-        notes.setdefault(f["paragraph_id"], []).append(n)
-    return {"paras": paras, "citers": citers, "blanket": blanket, "notes": notes}
+        n["key"] = f'{n["paper_n"]}_{n["section_n"]}_{n["para_n"]}_{n["ord"]}'
+        out.append(n)
+    return out
 
 
 def concept(con: sqlite3.Connection, root_id: int) -> dict:
