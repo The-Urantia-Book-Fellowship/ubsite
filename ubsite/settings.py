@@ -32,6 +32,17 @@ READING = [
       ("standard", "A", "Standard", "a2"),
       ("larger", "A", "Larger", "a3"),
       ("largest", "A", "Largest", "a4")], ""),
+    # The leading: 1.05, 1.1 (the printed book's), 1.25 and 1.45 (ub.css).  It
+    # was 1.55 for everyone, which Tigran found too open, worst on a phone; he
+    # chose these steps and 1.25 for the default (2026-10-12).  A 1955 reading's
+    # ring comes down as the lines close up, or it would run into the line
+    # above.  Each choice is drawn, three bars as far apart as its lines (ub.css
+    # .sp1 to .sp4), so its hint is its name.
+    ("lead", "segmented", "Line spacing", "standard",
+     [("tightest", "", "Tightest", "sp1"),
+      ("tighter", "", "Tighter", "sp2"),
+      ("standard", "", "Standard", "sp3"),
+      ("looser", "", "Looser", "sp4")], ""),
     # UB Goudy is the book's own face.  Its x-height is small, and some readers
     # will want one that reads larger at the same size; the other two are the
     # device's own, so nothing more is downloaded.

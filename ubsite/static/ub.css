@@ -25,7 +25,13 @@
      full step smaller than its nominal size.  19px here looked like 16px of a
      modern face and wanted browser zoom to be comfortable. */
   --size: clamp(1.3rem, 1.1rem + 0.6vw, 1.55rem);
-  --lead: 1.55;
+  /* The site is set 1.4 to the line, and the book's text (p.t) at --lead,
+     which Settings' Line spacing sets: 1.25 unless a reader chooses otherwise.
+     Both were 1.55, which Tigran found too open, worst on a phone (2026-10-12).
+     --dl is how far it is from the 1.55 the gutter was placed for, and moves
+     the gutter with the lines. */
+  --lead: 1.25;
+  --dl: calc(var(--lead) - 1.55);
   /* In ch, so the measure follows the type size instead of staying fixed at a
      pixel width and losing characters per line as the text grows.  `ch` is the
      width of "0", which is narrow in Goudy, so 60ch sets about 68 characters --
@@ -73,7 +79,9 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--paper); color: var(--ink);
   font-family: "UB Goudy", Georgia, "Times New Roman", serif;
-  font-size: var(--size); line-height: var(--lead);
+  /* --line is the leading of the text in hand, which a 1955 ring reads
+     (a.fn::after): this, or the book's own (p.t). */
+  font-size: var(--size); --line: 1.4; line-height: var(--line);
   font-variant-ligatures: common-ligatures contextual;
   font-variant-numeric: lining-nums;
   font-synthesis: none;             /* never fake a weight or a slant */
@@ -190,7 +198,8 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
    taller, and there is no JS position-syncing to break on resize. */
 .grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch);
         gap: 0 2rem; }
-p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
+p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure);
+      --line: var(--lead); line-height: var(--line); }
 /* Justified, as the book is set, and hyphenated where the book hyphenates: the
    paragraph carries a soft hyphen (U+00AD) at every break the press allows
    (build/hyphen.py), and `manual` breaks there and nowhere else.  The hyphen
@@ -222,23 +231,30 @@ p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 /* The paragraph's full reference, so the reader always knows which one this is;
-   Settings can turn it off. */
+   Settings can turn it off.  The gutter was placed for a line spacing of 1.55.
+   At another, the first baseline moves by half the change in a text line, and
+   the reference's own by half the change in its smaller one: --ref is the
+   difference, which keeps the reference on the first line. */
+p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 .num { float: left; margin-left: -4rem; width: 3.5rem; text-align: right; white-space: nowrap;
        font-size: .78rem; color: var(--faint); text-decoration: none;
-       position: relative; top: .35rem; }
+       position: relative; top: calc(.35rem + var(--ref)); }
 .num:hover { color: var(--ink); }
 /* The 1955 page, only if a reader asks (Settings): where the paragraph begins
    in the first printing.  Drawn from data-pg, as the pilcrow is drawn, so
    copying a paragraph never takes it along.  In the gutter it stands on the
    reference's second line with the play button beside it, which moves up to
    meet it: the gutter stays two lines tall, or a one-line paragraph's would run
-   into the next one's. */
+   into the next one's.  Both move with the reference, and its second line with
+   the line spacing; without the reference the page stands on the first line. */
 .pg { display: none; }
 .pg::before { content: "(" attr(data-pg) ")"; }
 :root[data-pages="true"] .pg { display: block; position: absolute; right: calc(100% + 1.75rem);
-       top: 1.45rem; white-space: nowrap; font-size: .72rem; color: var(--faint); }
-:root[data-pages="true"] .playp { top: 1.35rem; }
-:root[data-pages="true"][data-paranum="off"] .pg { top: .45rem; }
+       top: calc(1.45rem + var(--ref) + var(--dl) * .78rem);
+       white-space: nowrap; font-size: .72rem; color: var(--faint); }
+:root[data-pages="true"] .playp { top: calc(1.35rem + var(--ref) + var(--dl) * .78rem); }
+:root[data-pages="true"][data-paranum="off"] .pg {
+       top: calc(.45rem + var(--dl) * (var(--size) - .72rem) / 2); }
 
 .jesus { color: var(--jesus); }
 
@@ -255,6 +271,17 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
 :root[data-size="smaller"] { font-size: 90%; }
 :root[data-size="larger"]  { font-size: 112.5%; }
 :root[data-size="largest"] { font-size: 125%; }
+/* Line spacing: the book's text (p.t) and a 1955 reading's card and endnote,
+   which are read as the text is, wherever they open; never the site around
+   them, the lists, search or the margin (Tigran, 2026-10-12: "only to the text,
+   not to the whole site's UI").  The space between paragraphs stays too.
+   Tighter is the printed book's own, 10 on 11 points.  At 1.05 the closest
+   letters of two lines, a parenthesis under a parenthesis, still keep .06em
+   apart; a 1955 reading's ring comes down to keep clear of the line above
+   (a.fn::after). */
+:root[data-lead="tightest"] { --lead: 1.05; }
+:root[data-lead="tighter"]  { --lead: 1.1; }
+:root[data-lead="looser"]   { --lead: 1.45; }
 /* A modern face has a larger x-height than Goudy, which --size makes up for:
    measured at 100px, Goudy's "x" stands 43px, a system serif's 47, a sans's 54.
    font-size-adjust scales whichever face the device supplies to Goudy's 0.43,
@@ -286,6 +313,10 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
 :root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .prose) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
 :root[data-width="full"] .applist { columns: 24rem; }
+/* A superscript (28,012th, a card's "11th edition") raised above its line's
+   box pushed that line apart from the one above when the lines were close: of
+   no height, it cannot. */
+sup, sub { line-height: 0; }
 .mark { font-variant-numeric: lining-nums; }
 .sc { font-variant-caps: small-caps; }
 .supplied { font-style: italic; }
@@ -310,12 +341,29 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
 /* A 1955 reading's mark is drawn, for the same reason: a small ring above the
    words that changed.  The link is padded to a finger's size and pulled back
    by as much, so the words around it do not move.  Filled while its card is
-   open. */
-a.fn { display: inline-block; padding: .45em .3em; margin: -.45em -.3em; line-height: 0;
+   open.
+   The ring's top stands 1.03em above its baseline, in the line above's
+   descenders, which reach .207em below that line's (UB Goudy's g).  So when the
+   lines are close it comes down, as far as keeps it .05em, about a pixel, clear
+   of the deepest of them: not at all at 1.45, by .24em at 1.05, where its foot
+   stands about at the height of a lowercase letter (Tigran, 2026-10-12).
+   It is no box in the line.  A browser may break a line before an inline-block
+   wherever it stands, and eight rings stood alone at the start of a line, apart
+   from the words they mark ("en route", 30:3.12).  So the ring is an inline of
+   no font size, a word joiner (U+2060) that draws nothing and that no line may
+   break beside, and its padding and border make the circle; it keeps to its
+   word, and the line breaks before the word instead.  Its sizes are in --ring,
+   the text's em, kept as a length (@property) because the ring's own em is 0.
+   The link is an inline too, with no padding below, so that its box ends where
+   the inline-block it was ended and the card (ub.js place()) opens where it did.
+   A copy takes neither: both are drawn by CSS. */
+@property --ring { syntax: "<length>"; inherits: true; initial-value: 0px; }
+a.fn { display: inline; padding: .45em .3em 0; margin: 0 -.3em; line-height: 0; --ring: 1em;
        text-decoration: none; color: var(--link); }
-a.fn::after { content: ""; display: inline-block; position: relative; top: -.68em;
-              width: .22em; height: .22em; margin-left: .05em; border-radius: 50%;
-              border: .065em solid currentColor; }
+a.fn::after { content: "\2060"; position: relative; font-size: 0;
+              top: calc(var(--ring) * (-.855 + max(0, 1.29 - var(--line))));
+              padding: calc(var(--ring) * .11); margin-left: calc(var(--ring) * .05);
+              border: calc(var(--ring) * .065) solid currentColor; border-radius: 50%; }
 a.fn.on::after { background: currentColor; }
 @media (hover: hover) { a.fn:hover::after { background: currentColor; } }
 
@@ -333,7 +381,7 @@ a.fn.on::after { background: currentColor; }
    and in print; with it, hidden, and each opened as a card at its ring (ub.js),
    which carries the same words. */
 .notes { border-top: 1px solid var(--rule); margin: 2rem 0 0; padding-top: .7rem;
-         max-width: var(--measure); font-size: 1rem; line-height: 1.5; }
+         max-width: var(--measure); font-size: 1rem; line-height: var(--lead); }
 .notes h3 { margin: 0 0 .6rem; font-size: .82rem; font-weight: 400; font-variant-caps: small-caps;
             letter-spacing: .06em; color: var(--faint); }
 .js .notes { display: none; }
@@ -351,7 +399,7 @@ a.fn.on::after { background: currentColor; }
 :is(.note, .pop) .src a { color: var(--faint); }
 /* The card: under the line, a pointer to the ring, scrolling with the text. */
 .pop { position: absolute; z-index: 5; width: min(25rem, calc(100% - 1rem));
-       font-size: 1.05rem; line-height: 1.5; color: var(--ink); font-variant-numeric: lining-nums;
+       font-size: 1.05rem; line-height: var(--lead); color: var(--ink); font-variant-numeric: lining-nums;
        background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
        border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
 .pop:focus { outline: none; }
@@ -402,9 +450,12 @@ button.listen span { position: relative; top: var(--lift); }
    like the number, full only on hover or while its paragraph is read.  It was
    once shown on hover alone, which a phone or tablet does not have (Tigran,
    2026-10-08).  It is outside the stored text and has no text of its own, so
-   copying a paragraph still returns its words. */
+   copying a paragraph still returns its words.  At another line spacing it moves
+   as far as the next paragraph's reference does after a paragraph of one line,
+   a verse or a leader row: a text line's change, and the reference's. */
 p.t { position: relative; }
-.playp { position: absolute; left: -1.6rem; top: 2.3rem; width: 1.15rem; height: 1.15rem;
+.playp { position: absolute; left: -1.6rem; width: 1.15rem; height: 1.15rem;
+  top: calc(2.3rem + var(--dl) * var(--size) + var(--ref));
   padding: .22rem; border: 0; border-radius: 50%; background: none; color: var(--link);
   cursor: pointer; opacity: .45; transition: opacity .15s; }
 .playp:focus-visible, p.t.now .playp { opacity: 1; }
@@ -505,6 +556,17 @@ dialog.settings .seg label { display: grid; place-items: center; min-width: 2.4r
 .seg span { position: relative; top: var(--lift); }      /* in its own size: the A's differ */
 .seg .a1 span { font-size: .78rem; } .seg .a2 span { font-size: .92rem; }
 .seg .a3 span { font-size: 1.08rem; } .seg .a4 span { font-size: 1.25rem; }
+/* Line spacing: three bars as far apart as the choice's lines, the gaps drawn
+   wider than the leadings differ, or the four would look alike.  A drawing, so
+   not lifted as a letter is. */
+.seg :is(.sp1, .sp2, .sp3, .sp4) span { top: 0; width: 1.1rem; height: .8rem;
+  background: linear-gradient(currentColor 0 0) top / 100% 1.5px no-repeat,
+              linear-gradient(currentColor 0 0) center / 100% 1.5px no-repeat,
+              linear-gradient(currentColor 0 0) bottom / 100% 1.5px no-repeat; }
+.seg .sp1 span { height: .5rem; } .seg .sp2 span { height: .65rem; }
+.seg .sp4 span { height: .95rem; }
+/* As tall as a row of words, Theme's: a drawing has no line of its own. */
+dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5 + .24rem); }
 dialog.settings .actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 dialog.settings .reset { padding: 0; font: inherit; font-size: .9rem; color: var(--link);
   background: none; border: 0; cursor: pointer; text-decoration: underline;
@@ -571,7 +633,7 @@ dialog.settings .done span { position: relative; top: var(--lift); }
    list's <main> (ub.js).  The List of 1955 readings keeps them, and their
    cards, with the readings turned off in the text: it was asked for. */
 main.results { position: relative; }
-:root[data-notes="off"] .lists a.fn { display: inline-block; }
+:root[data-notes="off"] .lists a.fn { display: inline; }
 :root[data-notes="off"] .lists .pop { display: block; }
 
 /* ---- appendices -------------------------------------------------------- */
@@ -640,11 +702,14 @@ main.results { position: relative; }
      stands at one indent all down the page.  The button is set in the
      reference's font and size, so that 1ch is the same in both. */
   .num { float: left; clear: left; width: calc(var(--refw, 9) * 1ch + .4rem); margin: 0;
-         text-align: left; top: .2rem; }
+         text-align: left; top: calc(.2rem + var(--ref)); }
+  /* At another line spacing the button keeps its place against the end of the
+     first line: the reference above it moves by its own line's change, and the
+     margin by the rest of a text line's, which is twice --ref. */
   .playp { position: static; float: left; clear: left; display: grid; place-items: center;
            font-family: inherit; font-size: .78rem;
            /* as wide as .num: the lines align */
-           margin: .15rem calc(var(--refw, 9) * 1ch + .4rem - .9rem) 0 -.25rem; }
+           margin: calc(.15rem + 2 * var(--ref)) calc(var(--refw, 9) * 1ch + .4rem - .9rem) 0 -.25rem; }
   .playp svg { width: .83rem; height: .83rem; }
   :root[data-paranum="off"] .playp { margin-right: .8rem; }
   /* On a phone it floats under the reference and the play button, a third

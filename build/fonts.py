@@ -44,12 +44,15 @@ ELSEWHERE = {
          " (ub.css :is(.note, .pop) .src)",
     "γ": "42:5.1's SRT note names the Greek letter that became the 1955 'Y';"
          " UB Goudy has no Greek, and the serif behind it in the stack draws it",
+    "\u2060": "the word joiner that holds a 1955 ring to its word (ub.css"
+              " a.fn::before); it draws nothing",
 }
 
 RE_JINJA = re.compile(r"\{[%#{].*?[%#}]\}", re.S)
 RE_CODE = re.compile(r"<(script|style)\b.*?</\1>", re.S | re.I)
 RE_TAG = re.compile(r"<[^>]+>")
 RE_CSS_CONTENT = re.compile(r'content:\s*"([^"]*)"')
+RE_CSS_ESCAPE = re.compile(r"\\([0-9a-fA-F]{1,6})\s?")
 
 
 def corpus_codepoints(con) -> set[str]:
@@ -97,7 +100,8 @@ def chrome_codepoints(site: pathlib.Path) -> set[str]:
         cps.update(html.unescape(RE_TAG.sub(" ", src)))
     for f in sorted([*(site / "static").glob("*.css"), *epub.glob("*.css")]):
         for s in RE_CSS_CONTENT.findall(f.read_text(encoding="utf-8")):
-            cps.update(s)
+            # "\2060" is the one character it stands for, not five.
+            cps.update(RE_CSS_ESCAPE.sub(lambda m: chr(int(m[1], 16)), s))
     return cps
 
 

@@ -65,7 +65,7 @@ window.ubDefaults = {{ settings_defaults|tojson }};
         <div class="seg" role="radiogroup" aria-labelledby="set-{{ it.key }}">
         {%- for c in it.choices %}
           <label class="{{ c.cls }}"{% if c.hint %} title="{{ c.hint }}"{% endif %}><input type="radio"
-            name="{{ it.key }}" value="{{ c.value }}"{% if c.label == 'A' %} aria-label="{{ c.hint }}"{% endif %}><span>{{ c.label }}</span></label>
+            name="{{ it.key }}" value="{{ c.value }}"{% if c.label == 'A' or not c.label %} aria-label="{{ c.hint }}"{% endif %}><span>{{ c.label }}</span></label>
         {%- endfor %}
         </div></div>
       {%- elif it.kind == 'radio' %}
