@@ -49,6 +49,9 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
              paragraph, or Paper 15's 470 citations print some entries forty
              times over and the eye stops reading
     notes    paragraph id -> its 1955 readings, as notes() gives them
+    rows     the paragraphs as the page sets them: {"p": a paragraph}, or
+             {"lines": [...]} for a block of verse, set as one (paragraph.verse_start),
+             with the entries citing its lines gathered beside it
     """
     paras = con.execute(
         "SELECT p.*, d.precise_citers, d.thin, u.page AS page_1955 FROM paragraph p"
@@ -76,7 +79,16 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     by_para: dict[int, list] = {}
     for n in notes(con, "p.paper_n=? AND p.section_n=?", (paper, sec)):
         by_para.setdefault(n["paragraph_id"], []).append(n)
-    return {"paras": paras, "citers": citers, "blanket": blanket, "notes": by_para}
+    rows: list[dict] = []
+    for q in paras:
+        if q["src"] == "vs":
+            rows.append({"p": q})
+        elif q["verse_start"] or not rows or "lines" not in rows[-1]:
+            rows.append({"lines": [q]})
+        else:
+            rows[-1]["lines"].append(q)
+    return {"paras": paras, "rows": rows, "citers": citers, "blanket": blanket,
+            "notes": by_para}
 
 
 def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:

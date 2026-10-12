@@ -94,7 +94,13 @@ may do with it.</p>
   <dd><code>"prose"</code>; or <code>"verse"</code>, a line of verse, which the book sets
     one to a line and does not fill: the psalm in 48:6, the song in 122:9, and the prayers
     of 144:3 and 144:5; or <code>"heading"</code>, the one heading within the text, the
-    Foreword's ACKNOWLEDGMENT, 0:12.10, which the book sets apart.</dd>
+    Foreword's ACKNOWLEDGMENT, 0:12.10, which the book sets apart. The book indents each
+    block of verse as one; a block begins with a line of verse that follows prose, or that
+    has a separator before it.</dd>
+  <dt><code>setoff</code></dt>
+  <dd><code>true</code> for a line of verse the book sets in further than the lines around
+    it: the second line of each couplet of the Lord's Prayer, 144:3.4, 3.6, 3.8 and 3.10.
+    <code>false</code> otherwise.</dd>
   <dt><code>html</code></dt>
   <dd>The text, in Unicode (curly quotes, em dashes), with its markup and nothing else:
     <code>&lt;em&gt;</code> for italics, <code>&lt;sup&gt;</code> for an exponent,

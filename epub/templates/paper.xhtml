@@ -1,5 +1,21 @@
 {% extends "_base.xhtml" %}
 {% from "_chips.xhtml" import chips %}
+{#- A paragraph, or a line of verse; and the 1955 readings that follow it. #}
+{% macro para(p) -%}
+<p class="t{% if p.head %} head{% endif %}{% if p.setoff %} setoff{% endif %}" id="{{ p.id }}"><span class="ref">{{ p.ref }}</span> {% if p.pc %}<span class="pc">¶</span>{% endif %}{{ p.html|safe }}</p>
+{%- endmacro %}
+{% macro notes(p) -%}
+{% for n in p.notes %}
+<aside epub:type="footnote" class="note" id="{{ n.id }}"><p><a class="lbl" href="#{{ n.back }}">1955</a> {{ n.then|safe }}</p>
+{% if n.verdict %}
+<p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.why|safe }}</p>
+{% if n.see_why %}<p class="why"><a href="{{ n.see_href }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>
+{% endif %}
+<p class="src">SRT Committee, urantiabook.org/SRT</p>
+{% endif %}
+</aside>
+{% endfor %}
+{%- endmacro %}
 {% block title %}{{ paper.title }}{% endblock %}
 {% block body %}
 <section epub:type="chapter" class="paper">
@@ -17,23 +33,30 @@
     under the section's title, before its first paragraph, they say so (Tigran). #}
 <div class="blanket"><p class="ix">{{ chips(s.blanket) }}</p></div>
 {% endif %}
-{% for p in s.paras %}
-{% if p.stars %}<p class="stars{% if p.stars == '* * * * *' %} line{% endif %}">{{ p.stars }}</p>
+{% for r in s.rows %}
+{% set first = r.p if 'p' in r else r.lines[0] %}
+{% if first.stars %}<p class="stars{% if first.stars == '* * * * *' %} line{% endif %}">{{ first.stars }}</p>
 {% endif %}
-<p class="t{% if p.head %} head{% endif %}" id="{{ p.id }}"><span class="ref">{{ p.ref }}</span> {% if p.pc %}<span class="pc">¶</span>{% endif %}{{ p.html|safe }}</p>
-{% if p.chips %}
-<p class="ix">{{ chips(p.chips) }}</p>
+{% if 'p' in r %}
+{{ para(r.p) }}
+{% if r.p.chips %}
+<p class="ix">{{ chips(r.p.chips) }}</p>
 {% endif %}
-{% for n in p.notes %}
-<aside epub:type="footnote" class="note" id="{{ n.id }}"><p><a class="lbl" href="#{{ n.back }}">1955</a> {{ n.then|safe }}</p>
-{% if n.verdict %}
-<p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.why|safe }}</p>
-{% if n.see_why %}<p class="why"><a href="{{ n.see_href }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>
-{% endif %}
-<p class="src">SRT Committee, urantiabook.org/SRT</p>
-{% endif %}
-</aside>
+{{ notes(r.p) }}
+{% else %}
+{#- A block of verse, as the book sets it: indented as one, its lines close.
+    The entries citing its lines follow the block, each line's after its
+    reference, so that none breaks into the verse. #}
+<div class="verse">
+{% for q in r.lines %}
+{{ para(q) }}
 {% endfor %}
+</div>
+{% for q in r.lines if q.chips %}
+<p class="ix"><span class="at">{{ q.ref }}</span> {{ chips(q.chips) }}</p>
+{% endfor %}
+{% for q in r.lines %}{{ notes(q) }}{% endfor %}
+{% endif %}
 {% endfor %}
 </section>
 {% endfor %}

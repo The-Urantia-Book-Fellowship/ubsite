@@ -52,6 +52,12 @@ RE_HEADING  = re.compile(r"\{\\hspace\*\{[\d.]+\\columnwidth\}")
 # reader skipped it as layout, and the site showed none of the eleven.
 RE_SEPARATOR = re.compile(r"\\separator(short|line)(?:\[[^\]]*\])?")
 STARS = {"short": "* * *", "line": "* * * * *"}
+# Verse is set in a quoting block, one line to a paragraph: the press indents the
+# block and hangs each line's wrapped part.  The first line of each block is kept
+# (verse_start), and so is a line the press sets in further with a leading
+# \hsetoff (setoff: the Lord's Prayer's second lines, 144:3).  Anywhere else an
+# \hsetoff would be dropped unseen, so it fails.
+HSETOFF = "\\hsetoff"
 
 
 @dataclasses.dataclass(slots=True)
@@ -64,6 +70,8 @@ class Paragraph:
     ex: Expanded
     heading: bool = False
     sep_before: str | None = None   # the stars of a separator standing before it
+    verse_start: bool = False       # the first line of a block of verse
+    setoff: bool = False            # a verse line set in further (\hsetoff)
 
     @property
     def ref(self) -> str:
@@ -127,12 +135,15 @@ def read_paper(path: pathlib.Path, report) -> Paper:
     pending: list[str] = []
     restore: dict[tuple[int, int, int], int] = {}     # (paper, section, n) -> line
     sep: tuple[str, int] | None = None                # a separator awaiting its paragraph
+    block = False                                     # a block of verse awaiting its first line
 
     def place(q: Paragraph) -> None:
-        nonlocal sep
+        nonlocal sep, block
         paras.append(q)
         if sep:
             q.sep_before, sep = sep[0], None
+        if block and q.src != "vs":
+            q.verse_start, block = True, False
 
     def inline(text: str) -> Expanded:
         return exp.run(text)
@@ -150,6 +161,11 @@ def read_paper(path: pathlib.Path, report) -> Paper:
             continue
         for m in RE_PC_REMOVED.finditer(line):
             restore[tuple(map(int, m.groups()))] = lineno
+
+        if HSETOFF in line and not (in_block and line.startswith(HSETOFF)
+                                    and HSETOFF not in line[len(HSETOFF):]):
+            report.hard("hsetoff-unplaced", f"{where}:{lineno}",
+                        "an \\hsetoff that does not begin a line of verse")
 
         if line.startswith("\\separator"):
             m = RE_SEPARATOR.fullmatch(line)
@@ -209,7 +225,7 @@ def read_paper(path: pathlib.Path, report) -> Paper:
                 report.hard("unknown-environment", f"{where}:{lineno}",
                             f"\\{m.group(1)}{{{env}}} not in the table")
             elif env == "quoting":
-                in_block = (m.group(1) == "begin")
+                in_block = block = (m.group(1) == "begin")
                 if in_block:
                     counter = None
             continue
@@ -218,7 +234,9 @@ def read_paper(path: pathlib.Path, report) -> Paper:
             continue
 
         if in_block:
-            body = line
+            body, setoff = line, line.startswith(HSETOFF)
+            if setoff:
+                body = body[len(HSETOFF):]
             mm = RE_SUPER.search(body)
             if mm:
                 counter = int(mm.group(1))
@@ -236,7 +254,7 @@ def read_paper(path: pathlib.Path, report) -> Paper:
                 report.hard("verse-unnumbered", f"{where}:{lineno}",
                             "verse text with no number in scope")
                 continue
-            place(Paragraph(paper_n, sec, num, kind, lineno, inline(body)))
+            place(Paragraph(paper_n, sec, num, kind, lineno, inline(body), setoff=setoff))
             counter = num + 1
             continue
 

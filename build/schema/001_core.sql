@@ -62,6 +62,11 @@ CREATE TABLE paragraph (
   -- A separator before the paragraph, the stars as printed: '* * *'
   -- (\separatorshort) or '* * * * *' (\separatorline).  Eleven; NULL elsewhere.
   sep_before TEXT CHECK (sep_before IN ('* * *', '* * * * *')),
+  -- Verse (src 'poetry' or 'vsmark'), set as the book sets it: the first line of
+  -- each block, which the site and the EPUB indent as one, and a line set in
+  -- further (\hsetoff), the Lord's Prayer's second lines.
+  verse_start INTEGER NOT NULL DEFAULT 0,
+  setoff INTEGER NOT NULL DEFAULT 0,
   text TEXT NOT NULL,
   -- A DERIVED CACHE: render(text, spans).  Stored so no consumer needs a
   -- renderer and they cannot drift; check_roundtrip regenerates it and

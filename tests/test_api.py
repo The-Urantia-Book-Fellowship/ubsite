@@ -234,6 +234,13 @@ class Whole(Quiet):
         self.assertEqual((kinds["144:5.11"], kinds["48:6.9"], kinds["101:1.2"]),
                          ("verse", "verse", "prose"))
 
+    def test_the_lines_set_in(self):
+        """The Lord's Prayer's second lines (version 7)."""
+        self.assertEqual({x["ref"] for x in self.reply["paragraphs"] if x["setoff"]},
+                         {"144:3.4", "144:3.6", "144:3.8", "144:3.10"})
+        self.assertTrue(all(isinstance(x["setoff"], bool) for x in self.reply["paragraphs"]))
+        self.assertIn("<code>setoff</code>", html.unescape(call("/api")[2].decode()))
+
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
 class Delta(Quiet):

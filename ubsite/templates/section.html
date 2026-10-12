@@ -7,6 +7,22 @@
 {% if c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path }}</a>
 {%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ c.event or c.path }}</a>{% endif %}
 {%- endmacro %}
+{#- A paragraph of the text, or a line of verse.  A dot-leader row's words and its
+    figure, split at the leader, stand in a flex line of their own, so that the
+    paragraph around them is a paragraph like any other, and a row too long for a
+    phone's line can break before its figure.  The leader goes with the figure.
+    check_db holds every leader outside all other markup, one to a paragraph, so
+    each half is whole. #}
+{% macro para(p) -%}
+{%- set hit = focus and p.para_n >= focus and p.para_n <= last %}
+{%- set row = p.html_hy.split('<span class="leader"></span>') %}
+{%- set pcm %}{% if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}{% endset %}
+<p class="t{% if p.gap_before %} pc{% endif %}{% if p.heading %} head{% endif %}{% if p.src != 'vs' %} verse{% endif %}{% if p.setoff %} setoff{% endif %}{% if hit %} hit{% endif %}"
+         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
+         {%- if p.page_1955 %}<span class="pg" data-pg="{{ p.page_1955 }}"></span>{% endif %}
+         {%- if row|length == 2 %}<span class="leadrow"><span class="lab">{{ pcm }}{{ row[0]|safe }}</span><span class="fig"><span class="leader"></span>{{ row[1]|safe }}</span></span>
+         {%- else %}{{ pcm }}{{ p.html_hy|safe }}{% endif %}</p>
+{%- endmacro %}
 {% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
 {% block body %}
 <main class="reader">
@@ -37,36 +53,48 @@
     {#- The longest reference here, in characters: on a phone the reference stands
         at the start of each paragraph, and the text beside it is set that far in. #}
     <div class="grid" style="--refw: {{ paras|map(attribute='ref')|map('length')|max }}">
-    {% for p in paras %}
-      {% set hit = focus and p.para_n >= focus and p.para_n <= last %}
-      {#- A dot-leader row's words and its figure, split at the leader, stand in a
-          flex line of their own, so that the paragraph around them is a
-          paragraph like any other, and a row too long for a phone's line can
-          break before its figure.  The leader goes with the figure.  check_db
-          holds every leader outside all other markup, one to a paragraph, so
-          each half is whole. #}
-      {% set row = p.html_hy.split('<span class="leader"></span>') %}
-      {% set pcm %}{% if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}{% endset %}
+    {% for r in rows %}
+      {%- set first = r.p if 'p' in r else r.lines[0] %}
       {#- A separator before the paragraph, its stars as printed: a row of its own
           across both columns, drawn in CSS (ub.css .stars). #}
-      {%- if p.sep_before %}
-      <div class="stars" role="separator" data-stars="{{ p.sep_before }}"></div>
+      {%- if first.sep_before %}
+      <div class="stars" role="separator" data-stars="{{ first.sep_before }}"></div>
       {%- endif %}
-      <p class="t{% if p.gap_before %} pc{% endif %}{% if p.heading %} head{% endif %}{% if p.src != 'vs' %} verse{% endif %}{% if hit %} hit{% endif %}"
-         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
-         {%- if p.page_1955 %}<span class="pg" data-pg="{{ p.page_1955 }}"></span>{% endif %}
-         {%- if row|length == 2 %}<span class="leadrow"><span class="lab">{{ pcm }}{{ row[0]|safe }}</span><span class="fig"><span class="leader"></span>{{ row[1]|safe }}</span></span>
-         {%- else %}{{ pcm }}{{ p.html_hy|safe }}{% endif %}</p>
+      {%- if 'p' in r %}
+      {{ para(r.p) }}
       <div class="a">
-      {% set cs = citers.get(p.id, []) %}
+      {% set cs = citers.get(r.p.id, []) %}
         {% if cs %}
           <ul class="chips">
           {% for c in cs %}<li>{{ chip(c) }}</li>{% endfor %}
           </ul>
-        {% elif p.thin %}
+        {% elif r.p.thin %}
           <p class="thin">no entry cites this paragraph precisely</p>
         {% endif %}
       </div>
+      {%- else %}
+      {#- A block of verse, as the book sets it: indented as one, its lines close,
+          a wrapped line hanging (ub.css .verse).  The entries citing its lines
+          stand beside the block, each line's under its reference, so that a
+          line cited many times opens no gap in the verse. #}
+      <div class="verse">
+      {%- for q in r.lines %}
+      {{ para(q) }}
+      {%- endfor %}
+      </div>
+      <div class="a">
+      {%- for q in r.lines if citers.get(q.id) %}
+        <p class="at"><a href="/{{ q.ref }}">{{ q.ref }}</a></p>
+        <ul class="chips">
+        {% for c in citers[q.id] %}<li>{{ chip(c) }}</li>{% endfor %}
+        </ul>
+      {%- else %}
+        {% if r.lines|selectattr('thin')|list|length == r.lines|length %}
+        <p class="thin">no entry cites these lines precisely</p>
+        {% endif %}
+      {%- endfor %}
+      </div>
+      {%- endif %}
     {% endfor %}
     </div>
 

@@ -237,6 +237,33 @@ p.t.head { text-align: center; }
 .stars::before { content: attr(data-stars); content: attr(data-stars) / "";
                  grid-column: 1; text-align: center; line-height: var(--lead); }
 .stars[data-stars="* * * * *"]::before { word-spacing: .45em; }
+/* A block of verse (paragraph.verse_start): the psalm in 48:6, the song in 122:9,
+   the prayers of 144:3 and 144:5.  Set as the book sets it: indented as one,
+   a blank line above and below, its lines close, a line's wrapped part hanging
+   further in, and a line the press sets in (\hsetoff, the Lord's Prayer's
+   second lines) further still -- measured off the press's own page, in --size,
+   not em, so that the gutter's smaller face keeps the same lengths.  Ragged,
+   not justified: a browser justifies one short line at a time, and badly.
+   Each line keeps its reference in the gutter, which has no second line to
+   hold the play button, so the button stands in the indent, before the line. */
+.verse { --vin: calc(var(--size) * 1.05); --hang: calc(var(--size) * .7);
+         margin: .6rem 0 1.45rem; }
+.verse + .a { margin-top: .6rem; }
+.verse p.t { margin: 0; padding: 0 calc(var(--size) * .5) 0 calc(var(--vin) + var(--hang));
+             text-indent: calc(-1 * var(--hang)); }
+.verse p.t.setoff { text-indent: calc(var(--size) * .6 - var(--hang)); }
+.verse .num { margin-left: calc(-4rem - var(--vin) - var(--hang)); }
+.verse :is(.num, .playp, .pg) { text-indent: 0; }     /* not the line's hang */
+.verse p.t > .playp { left: calc(var(--vin) - 1.3rem);
+                      top: calc((var(--line) * var(--size) - 1.15rem) / 2); }
+/* The 1955 page stands under the reference, so with it shown the lines part a
+   little, or it would run into the next line's reference. */
+:root[data-pages="true"] .verse p.t { margin-bottom: .6rem; }
+/* The entries citing a block's lines, each line's under its reference. */
+.a .at { margin: .7rem 0 0; font-size: .78rem; line-height: 1.2; }
+.a .at:first-child { margin-top: .3rem; }
+.a .at a { color: var(--faint); text-decoration: none; }
+.a .at a:hover { color: var(--ink); }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
 p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
@@ -738,6 +765,22 @@ main.results { position: relative; }
   :root[data-paranum="off"]:not([data-voice="off"]) p.t.head:has(> .playp)::before { width: 1.7rem; }
   .a:not(:empty) { margin: -.4rem 0 1rem 1rem; border-left: 2px solid var(--rule);
                    padding-left: .7rem; }
+  /* A line of verse would carry its reference as a drop capital, two lines
+     tall.  So only a block's first line shows it, as the book numbers only a
+     block's first line: with its play button and its 1955 page, in a line of
+     their own above the block.  The other lines are still there to land on. */
+  .verse p.t:not(:first-child) :is(.num, .playp, .pg) { display: none; }
+  .verse .num { margin: 0; }
+  :root:not([data-paranum="off"]) .verse p.t:first-child { margin-top: 1.5rem; }
+  :root:not([data-paranum="off"]) .verse p.t:first-child :is(.num, .playp, .pg) {
+         position: absolute; float: none; margin: 0; width: auto; right: auto; }
+  :root:not([data-paranum="off"]) .verse p.t:first-child .num { top: -1.25rem; left: var(--vin); }
+  :root:not([data-paranum="off"]) .verse p.t:first-child > .playp {
+         top: -1.45rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch); }
+  :root:not([data-paranum="off"])[data-pages="true"] .verse p.t:first-child .pg {
+         top: -1.25rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch + 1.6rem); }
+  :root[data-pages="true"] .verse p.t { margin-bottom: 0; }
+  .verse + .a:not(:empty) { margin-top: -.4rem; }
   .blanket ul { columns: 1; }
 }
 

@@ -93,9 +93,9 @@ def records(con) -> list[tuple[str, str, dict]]:
         spans[pid].append(_Span(start, end, kind))
     marked = {pid for (pid,) in con.execute(
         "SELECT DISTINCT paragraph_id FROM span WHERE kind = 'fnref'")}
-    for pid, ref, uf, page, p, s, n, sep, gap, kind, text, html in con.execute(
+    for pid, ref, uf, page, p, s, n, sep, gap, kind, setoff, text, html in con.execute(
             "SELECT p.id, p.ref, u.ref, u.page, p.paper_n, p.section_n, p.para_n,"
-            " p.sep_before, p.gap_before, " + KIND_SQL + ", p.text, p.html"
+            " p.sep_before, p.gap_before, " + KIND_SQL + ", p.setoff, p.text, p.html"
             " FROM paragraph p JOIN uf_paragraph u ON u.paragraph_id = p.id ORDER BY p.ord"):
         if pid in marked:
             html = render(text, spans.get(pid, []))
@@ -107,7 +107,8 @@ def records(con) -> list[tuple[str, str, dict]]:
         # shape (Tigran, 2026-10-12).
         out.append(("paragraph", ref, {"ref": ref, "uf_ref": uf, "page_1955": page, "paper": p,
                                        "section": s, "paragraph": n, "separator_before": sep,
-                                       "group_before": bool(gap), "kind": kind, "html": html}))
+                                       "group_before": bool(gap), "kind": kind,
+                                       "setoff": bool(setoff), "html": html}))
     return out
 
 

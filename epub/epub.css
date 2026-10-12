@@ -71,6 +71,14 @@ p.t.head { text-align: center; }
    generated content. */
 p.stars { margin: .7em 0 0; text-indent: 0; text-align: center; }
 p.stars.line { word-spacing: .45em; }
+/* A block of verse, as the book sets it: indented as one, its lines close, a
+   line's wrapped part hanging further in, a set-in line (\hsetoff, the Lord's
+   Prayer's second lines) further still, and ragged, not justified. */
+div.verse { margin: .7em 0 0 1.05em; }
+div.verse p.t { margin: 0; padding-left: .7em; text-indent: -.7em; text-align: left; }
+div.verse p.t.setoff { text-indent: -.1em; }
+/* After a block, the line that the entries cite. */
+p.ix .at { color: #000; }
 /* The reference: literal text, so that a search for 101:4.2 lands here. */
 .ref { font-size: .7em; color: #666; }
 .pc { color: #888; }
