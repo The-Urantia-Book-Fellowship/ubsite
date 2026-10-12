@@ -84,10 +84,17 @@ class Built(unittest.TestCase):
                          [f"144:3.{n}" for n in range(3, 13)])
         self.assertEqual(len(re.findall(r'class="t verse setoff', blocks[0])), 4)
         # Its lines' entries beside it, each line's under its reference, and no
-        # "no entry cites" for a line.
+        # "no entry cites" for a line.  Which lines are cited is the index's, and
+        # it is edited daily (2026-10-13 moved 144:3.6's to 3.9-10), so asked of
+        # the database.
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        cited = [r for (r,) in con.execute(
+            "SELECT DISTINCT p.ref FROM para_citers c JOIN paragraph p ON p.id = c.paragraph_id"
+            " WHERE p.paper_n = 144 AND p.section_n = 3 AND p.para_n BETWEEN 3 AND 12"
+            " AND c.precision = 'para' ORDER BY p.para_n")]
+        self.assertTrue(cited)
         side = body[body.index('<div class="verse">'):body.index('id="144:3.13"')]
-        self.assertEqual(re.findall(r'<p class="at"><a href="/(144:3\.\d+)">', side),
-                         ["144:3.6", "144:3.9", "144:3.10"])
+        self.assertEqual(re.findall(r'<p class="at"><a href="/(144:3\.\d+)">', side), cited)
         self.assertNotIn("no entry cites this paragraph", side)
         status, _, body = get("/144:5")
         self.assertEqual(len(re.findall(r'<div class="verse">', body)), 7)
