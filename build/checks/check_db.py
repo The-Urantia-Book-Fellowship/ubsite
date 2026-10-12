@@ -11,6 +11,11 @@ QUERIES = [
     ("paragraphs",          "SELECT COUNT(*) FROM paragraph", 14586),
     # 0:12.10 ACKNOWLEDGMENT, centred like a section's title (readers/press.py).
     ("  headings in the text", "SELECT COUNT(*) FROM paragraph WHERE heading", 1),
+    # \separatorline before the closing notes of Parts I-III, \separatorshort in
+    # 120:3, 134:6 and six times in 144:5 (readers/press.py; the Foundation's ten
+    # are held against them in build/foundation.py).
+    ("  separators before", "SELECT COUNT(*) FROM paragraph WHERE sep_before IS NOT NULL", 11),
+    ("    of five stars", "SELECT COUNT(*) FROM paragraph WHERE sep_before = '* * * * *'", 3),
     ("red-letter spans",    "SELECT COUNT(*) FROM span WHERE kind='redletter'", 1267),
     ("em spans",            "SELECT COUNT(*) FROM span WHERE kind='em'", 2295),
     # Where a word may break at a line's end, as the book lets it (build/hyphen.py):

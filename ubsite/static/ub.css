@@ -226,6 +226,17 @@ p.t.head { text-align: center; }
    text, so copying the paragraph still returns it exactly, and the "" after the
    slash keeps a screen reader from reading it out. */
 .pcm::before { content: "¶"; content: "¶" / ""; color: var(--faint); margin-right: .3em; }
+/* A separator between two paragraphs, its stars as printed: `* * *`, or the five
+   of \separatorline set wider, as the press sets them (paragraph.sep_before).  A
+   row of its own across the grid, laid on the grid's own columns, so the stars
+   stand centred over the text, not over the text and the margin.  Generated
+   content, like the pilcrow: copying the paragraphs around it never takes the
+   stars, and the "" after the slash keeps a screen reader to the role. */
+.stars { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid;
+         margin: 0 0 .85rem; }
+.stars::before { content: attr(data-stars); content: attr(data-stars) / "";
+                 grid-column: 1; text-align: center; line-height: var(--lead); }
+.stars[data-stars="* * * * *"]::before { word-spacing: .45em; }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
 p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);

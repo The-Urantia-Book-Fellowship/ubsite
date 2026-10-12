@@ -22,8 +22,10 @@ Eleven entries there are printed without a reference, each marked by an F after
 its id (`U0_12_10F`): the SRT's ten separators, and 0:12.10 ACKNOWLEDGMENT.
 Seven of the separators take a number of their own (those above); the other
 three, after 31:10.21, 56:10.22 and 120:3.11, repeat the number before them.
-All ten are skipped.  The ACKNOWLEDGMENT is 0:12.10 there as it is here, so it
-is read as a paragraph.  Its page, which is not printed either, is the one place
+None is a paragraph.  Each is kept with the paragraph after it, and must stand
+before the same paragraph as one of the press's (paragraph.sep_before), with the
+same stars, but where tests/known-separator-deltas.tsv says otherwise.  The
+ACKNOWLEDGMENT is 0:12.10 there as it is here, so it is read as a paragraph.  Its page, which is not printed either, is the one place
 its neighbours leave: 0:12.9 is (16.6) and 0:12.11 is (16.8), so 16.7, as the
 1955 printing itself shows (the Guardian plates, page 16).  Until 2026-10-12 all
 eleven were skipped, and the API said the Foundation did not number it.
@@ -69,27 +71,34 @@ def _norm(t: str) -> str:
     return "".join(c for c in t.casefold() if c.isalnum())
 
 
-def read(repo, report, pages: dict[Key, str] | None = None) -> dict[int, list[tuple[Key, str]]]:
+def read(repo, report, pages: dict[Key, str] | None = None,
+         seps: list[tuple[Key, str]] | None = None) -> dict[int, list[tuple[Key, str]]]:
     """{paper: [((paper, section, n), text), ...]} in the Foundation's order.
 
-    Each paragraph's 1955 page goes into `pages`, by its key there.
+    Each paragraph's 1955 page goes into `pages`, by its key there, and each
+    separator into `seps`, as the key of the paragraph after it and its stars.
     """
     data = _io.read_bytes_at_rev(repo["path"], ZIP, repo["at"])
     out = collections.defaultdict(list)
     found: dict[Key, str] = {}
     seen: set[Key] = set()
     bare: list[tuple[str, Key]] = []        # numbered, but printed without the number
+    stars: list[tuple[Key, str]] = []
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         for name in sorted(z.namelist()):
             if not RE_FILE.search(name):
                 continue
+            star = None                         # a separator awaiting its paragraph
             for m in RE_P.finditer(z.read(name).decode("utf-8")):
                 k = tuple(map(int, m.group(1, 2, 3)))
                 unlabelled, body = m.group(4), m.group(5)
                 if unlabelled:
                     text = html.unescape(RE_TAG.sub("", body)).strip()
                     if RE_STARS.fullmatch(text):
-                        continue            # a separator: see above
+                        if star:
+                            report.hard("uf-separator-twice", fmt(k), f"{name}: two in a row")
+                        star = text         # a separator: see above
+                        continue
                 else:
                     small = RE_SMALL.match(body)
                     if not small or not small.group(1).startswith(fmt(k) + " "):
@@ -110,6 +119,11 @@ def read(repo, report, pages: dict[Key, str] | None = None) -> dict[int, list[tu
                 out[k[0]].append((k, text))
                 if unlabelled:
                     bare.append((name, k))
+                if star:
+                    stars.append((k, star))
+                    star = None
+            if star:
+                report.hard("uf-separator-at-end", name, "a separator with no paragraph after it")
     # A paragraph printed without its number has no page beside it either.  It
     # takes the one place its neighbours leave on their page, or none.
     for name, k in bare:
@@ -126,6 +140,8 @@ def read(repo, report, pages: dict[Key, str] | None = None) -> dict[int, list[tu
                     f" {near[1]}, which leave no one place for it")
     if pages is not None:
         pages.update(found)
+    if seps is not None:
+        seps.extend(stars)
     return out
 
 
@@ -181,7 +197,7 @@ def load_known(path: pathlib.Path) -> list[tuple[str, str, str, str]]:
     return out
 
 
-def load(con, repo, report, known: pathlib.Path) -> int:
+def load(con, repo, report, known: pathlib.Path, known_seps: pathlib.Path) -> int:
     """Fill uf_paragraph and uf_section.  Returns how many paragraphs it numbers otherwise."""
     ours = collections.defaultdict(list)
     ids = {}
@@ -190,7 +206,8 @@ def load(con, repo, report, known: pathlib.Path) -> int:
         ours[p].append(((p, s, n), text))
         ids[(p, s, n)] = pid
     pages: dict[Key, str] = {}
-    match = align(ours, read(repo, report, pages), report)
+    seps: list[tuple[Key, str]] = []
+    match = align(ours, read(repo, report, pages, seps), report)
 
     got, want = runs(match), load_known(known)
     for r in sorted(set(got) - set(want)):
@@ -200,6 +217,28 @@ def load(con, repo, report, known: pathlib.Path) -> int:
     for r in sorted(set(want) - set(got)):
         report.hard("uf-numbering-gone", r[0],
                     f"{known.name} declares {r[0]}–{r[1]} as {r[2]}–{r[3]}, and it is not")
+
+    # The Foundation's separators, on our paragraphs, against the press's.
+    back = {u: o for o, u in match.items() if u is not None}
+    theirs: dict[str, str] = {}
+    for u, stars in seps:
+        if u in back:
+            theirs[fmt(back[u])] = stars
+        else:
+            report.hard("uf-separator-unplaced", fmt(u),
+                        "the Foundation's separator stands before a paragraph we do not have")
+    press = dict(con.execute("SELECT ref, sep_before FROM paragraph WHERE sep_before IS NOT NULL"))
+    got = {(r, press.get(r, "-"), theirs.get(r, "-")) for r in press.keys() | theirs.keys()
+           if press.get(r) != theirs.get(r)}
+    want = set(load_known(known_seps))
+    for r in sorted(got - want):
+        report.hard("uf-separator-undeclared", r[0],
+                    f"the press has {r[1]!r} before {r[0]}, the Foundation {r[2]!r}:"
+                    f" not in {known_seps.name}")
+    for r in sorted(want - got):
+        report.hard("uf-separator-gone", r[0],
+                    f"{known_seps.name} declares {r[1]!r} against {r[2]!r} before {r[0]},"
+                    " and it is not")
 
     con.executemany("INSERT INTO uf_paragraph VALUES (?, ?, ?)",
                     [(ids[k], None if u is None else fmt(u), pages.get(u))

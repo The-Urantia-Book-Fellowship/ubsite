@@ -45,6 +45,13 @@ RE_PC_REMOVED = re.compile(r"%.*\\pc at (\d+):(\d+)\.(\d+) has been removed")
 # ACKNOWLEDGMENT}", which heads the Acknowledgment.  The press indents it; the
 # site and the EPUB centre it, as they do a section's title.
 RE_HEADING  = re.compile(r"\{\\hspace\*\{[\d.]+\\columnwidth\}")
+# A separator, on a line of its own between two paragraphs: the stars as the
+# press style prints them, `\separatorshort` three and `\separatorline` five,
+# the line's set wider.  Its optional argument is the press's spacing.  It is
+# kept on the paragraph after it (paragraph.sep_before).  Until 2026-10-12 the
+# reader skipped it as layout, and the site showed none of the eleven.
+RE_SEPARATOR = re.compile(r"\\separator(short|line)(?:\[[^\]]*\])?")
+STARS = {"short": "* * *", "line": "* * * * *"}
 
 
 @dataclasses.dataclass(slots=True)
@@ -56,6 +63,7 @@ class Paragraph:
     line: int
     ex: Expanded
     heading: bool = False
+    sep_before: str | None = None   # the stars of a separator standing before it
 
     @property
     def ref(self) -> str:
@@ -118,6 +126,13 @@ def read_paper(path: pathlib.Path, report) -> Paper:
     in_block, counter, cur_sec = False, None, 0
     pending: list[str] = []
     restore: dict[tuple[int, int, int], int] = {}     # (paper, section, n) -> line
+    sep: tuple[str, int] | None = None                # a separator awaiting its paragraph
+
+    def place(q: Paragraph) -> None:
+        nonlocal sep
+        paras.append(q)
+        if sep:
+            q.sep_before, sep = sep[0], None
 
     def inline(text: str) -> Expanded:
         return exp.run(text)
@@ -135,6 +150,18 @@ def read_paper(path: pathlib.Path, report) -> Paper:
             continue
         for m in RE_PC_REMOVED.finditer(line):
             restore[tuple(map(int, m.groups()))] = lineno
+
+        if line.startswith("\\separator"):
+            m = RE_SEPARATOR.fullmatch(line)
+            if not m:
+                report.hard("unknown-separator", f"{where}:{lineno}", line[:70])
+            elif sep:
+                report.hard("separator-twice", f"{where}:{lineno}",
+                            f"a second separator, with the one on line {sep[1]} still"
+                            " waiting for its paragraph")
+            else:
+                sep = (STARS[m.group(1)], lineno)
+            continue
 
         m = RE_UPAPER.match(line)
         if m:
@@ -172,8 +199,7 @@ def read_paper(path: pathlib.Path, report) -> Paper:
             ex = inline(body)
             if prefix.strip():
                 ex.flags.update(inline(prefix).flags)
-            paras.append(Paragraph(p, s, n, "vs", lineno, ex,
-                                   bool(RE_HEADING.match(body))))
+            place(Paragraph(p, s, n, "vs", lineno, ex, bool(RE_HEADING.match(body))))
             continue
 
         m = re.match(r"\\(begin|end)\{(\w+)\}", line)
@@ -210,17 +236,21 @@ def read_paper(path: pathlib.Path, report) -> Paper:
                 report.hard("verse-unnumbered", f"{where}:{lineno}",
                             "verse text with no number in scope")
                 continue
-            paras.append(Paragraph(paper_n, sec, num, kind, lineno, inline(body)))
+            place(Paragraph(paper_n, sec, num, kind, lineno, inline(body)))
             counter = num + 1
             continue
 
         # Anything else is a layout line.  Nothing may be silently dropped.
         if RE_LAYOUT.fullmatch(line) or line.startswith((
-                "\\vsetoff", "\\vspace", "\\clp", "\\need", "\\separator",
+                "\\vsetoff", "\\vspace", "\\clp", "\\need",
                 "\\makeatletter", "\\makeatother", "\\write", "\\hsetoff",
                 "%", "{\\setlength", "}")):
             continue
         pending.append(f"{where}:{lineno}: {line[:70]}")
+
+    if sep:
+        report.hard("separator-at-end", f"{where}:{sep[1]}",
+                    "a separator with no paragraph after it")
 
     for key, at in restore.items():
         q = next((q for q in paras if (q.paper, q.section, q.n) == key), None)

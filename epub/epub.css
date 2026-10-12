@@ -66,6 +66,11 @@ p.t {
 }
 /* A heading within the text, 0:12.10 ACKNOWLEDGMENT, centred as a section's title is. */
 p.t.head { text-align: center; }
+/* A separator between two paragraphs, its stars as printed, \separatorline's five
+   set wider.  Real text here, as the pilcrow is: a reading system may not draw
+   generated content. */
+p.stars { margin: .7em 0 0; text-indent: 0; text-align: center; }
+p.stars.line { word-spacing: .45em; }
 /* The reference: literal text, so that a search for 101:4.2 lands here. */
 .ref { font-size: .7em; color: #666; }
 .pc { color: #888; }

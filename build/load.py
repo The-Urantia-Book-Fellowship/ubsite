@@ -72,10 +72,11 @@ def load_text(con, papers, parts, repo, hyphenator, report) -> dict:
                 report.hard("soft-hyphen-in-text", q.ref, "the text itself has a U+00AD")
             hy = render(q.ex.text, q.ex.spans, f"{q.paper}_{q.section}_{q.n}",
                         shy=hyphenator.points(q.ex.text, q.ex.spans))
-            con.execute("INSERT INTO paragraph VALUES (?,1,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            con.execute("INSERT INTO paragraph VALUES (?,1,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (qid, sec_id[q.section], q.paper, q.section, q.n, q.ref,
                          qid, q.src,
-                         q.ex.flags.get("gap_before", 0.0), int(q.heading), q.ex.text,
+                         q.ex.flags.get("gap_before", 0.0), int(q.heading), q.sep_before,
+                         q.ex.text,
                          hy.replace("\u00ad", ""), hy,
                          len(q.ex.text.split()), q.line))
             for i, s in enumerate(q.ex.spans):

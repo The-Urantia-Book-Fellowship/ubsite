@@ -1,0 +1,10 @@
+# Where the press's separators differ from the Urantia Foundation's (SRT v1.22),
+# as build/foundation.py finds them: before our paragraph, the press's stars,
+# the Foundation's; "-" where there is none.  The build requires exactly these.
+#
+# Both texts have the same separators before the same paragraphs, with the same
+# stars, but one.
+
+# The press's own: Part III's closing note set off as Parts I and II's are
+# (31:10.22, 56:10.23), with the brackets that the Foundation keeps removed.
+119:8.9	* * * * *	-

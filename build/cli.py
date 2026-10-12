@@ -93,7 +93,8 @@ def main(argv: list[str]) -> int:
         print("the Foundation's numbering ...")
         from . import foundation
         n_uf = foundation.load(con, repos["press"], report,
-                               root / "tests" / "known-uf-refs.tsv")
+                               root / "tests" / "known-uf-refs.tsv",
+                               root / "tests" / "known-separator-deltas.tsv")
         print(f"  {n_uf} paragraphs it numbers otherwise")
         print("the SRT Committee's reasons ...")
         from . import srt

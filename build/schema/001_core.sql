@@ -59,6 +59,9 @@ CREATE TABLE paragraph (
   src TEXT NOT NULL CHECK (src IN ('vs','poetry','vsmark')),
   gap_before REAL NOT NULL DEFAULT 0,         -- \pc: a 1955 blank-line group start
   heading INTEGER NOT NULL DEFAULT 0,         -- a heading within the text: 0:12.10
+  -- A separator before the paragraph, the stars as printed: '* * *'
+  -- (\separatorshort) or '* * * * *' (\separatorline).  Eleven; NULL elsewhere.
+  sep_before TEXT CHECK (sep_before IN ('* * *', '* * * * *')),
   text TEXT NOT NULL,
   -- A DERIVED CACHE: render(text, spans).  Stored so no consumer needs a
   -- renderer and they cannot drift; check_roundtrip regenerates it and
