@@ -36,7 +36,7 @@ sections and {{ '{:,}'.format(meta.counts.paragraphs) }} paragraphs.</p>
 GET {{ base }}api/v1/text?since=N     what has changed since version N</code></pre>
 
 <p>Keep the version you are sent, and ask with it next time. A version changes only
-when something in the text does: a correction, an italic, the red letter. When nothing
+when a record does: a correction, an italic, the red letter, a reference. When nothing
 has, the reply is empty, so asking once a day costs nothing. The whole text is about
 3&nbsp;MB compressed, and a reply is compressed whenever your client accepts gzip, as
 every common one does.</p>
@@ -77,7 +77,9 @@ may do with it.</p>
   <dt><code>page_1955</code></dt>
   <dd>Where the paragraph begins in the 1955 first printing, whose pages the Foundation's
     printings keep: the page, then the paragraph on that page, <code>"1109.3"</code>.
-    <code>null</code> for 0:12.10, which the Foundation does not number.</dd>
+    The Foundation prints none beside 0:12.10, the Foreword's closing ACKNOWLEDGMENT; its
+    <code>"16.7"</code> is where the 1955 printing has it, between 0:12.9 (16.6) and
+    0:12.11 (16.8).</dd>
   <dt><code>paper</code>, <code>section</code>, <code>paragraph</code></dt>
   <dd>The three numbers of <code>ref</code>.</dd>
   <dt><code>html</code></dt>
@@ -109,20 +111,22 @@ const text = record.html.replace(/&lt;[^&gt;]+&gt;/g, "")
 <code>title</code>, <code>sponsor</code> and <code>papers</code>, its first and last.</p>
 
 <h2>Two numberings</h2>
-<p>This site numbers 107 paragraphs differently from the Urantia Foundation, and every
-translation follows the Foundation. If you join this text to other data by reference,
-join on <code>uf_ref</code>, not <code>ref</code>.</p>
+<p>This site numbers paragraphs as the Uversa Press edition does. 106 of them have other
+references in the Urantia Foundation's numbering, which every translation follows. If you
+join this text to other data by reference, join on <code>uf_ref</code>, not
+<code>ref</code>.</p>
 <ul>
-  <li>The Foundation counts the <i>* * *</i> separator in 134:6, and the six between the
-    prayers of 144:5, as paragraphs, so its numbers there run ahead of ours.</li>
+  <li>The Foundation gives the <i>* * *</i> separator in 134:6, and each of the six between
+    the prayers of 144:5, a number of its own, though it prints none beside them, so its
+    numbers there run ahead of ours. The Uversa Press numbers no separator.</li>
   <li>It files the one heading over sections 9 and 10 of Paper 139 under 10: our 139:9.1–11
     are its 139:10.1–11.</li>
-  <li>It does not number the Foreword's closing ACKNOWLEDGMENT, our 0:12.10, so that
-    paragraph's <code>uf_ref</code> is <code>null</code>.</li>
 </ul>
 {%- if example['144:5.11'] %}
 <pre class="json"><code>{{ example['144:5.11'] }}</code></pre>
 {%- endif %}
+<p>Both number the Foreword's closing ACKNOWLEDGMENT 0:12.10, though the Foundation prints
+no number beside it.</p>
 
 <h2>A client in Python</h2>
 <p>With nothing but the standard library. It keeps the text in one JSON file.</p>
@@ -193,8 +197,10 @@ version number, 404 for an address that is not an endpoint. Every reply may be r
 a page on another site (<code>Access-Control-Allow-Origin: *</code>).</p>
 
 <h2>Versions</h2>
+<p>The counts are of records: parts, papers, sections and paragraphs. Version 1 is the
+whole text, so it counts every one of them.</p>
 <table>
-<tr><th>Version</th><th>Made</th><th>Text commit</th><th class="fig">Changed</th><th class="fig">Removed</th></tr>
+<tr><th>Version</th><th>Made</th><th>Text commit</th><th class="fig">New or changed</th><th class="fig">Removed</th></tr>
 {%- for x in meta.versions|reverse %}
 <tr><td>{{ x.version }}</td><td>{{ x.made }}</td><td><code>{{ x.press_commit[:7] }}{{ '+dirty' if x.press_commit.endswith('+dirty') }}</code></td>
   <td class="fig">{{ '{:,}'.format(x.changed) }}</td><td class="fig">{{ '{:,}'.format(x.removed) }}</td></tr>

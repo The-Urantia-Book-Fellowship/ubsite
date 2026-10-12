@@ -1,14 +1,13 @@
 """The Foundation's numbering beside ours.
 
 Every other site, and every translation, numbers paragraphs as the Urantia
-Foundation's SRT does.  The press numbers 107 of them differently:
+Foundation's SRT does.  The press numbers 106 of them differently:
 
-  - the SRT numbers each `* * *` separator in 134:6 and 144:5 as a paragraph,
-    and the press does not, so 134:6.14 here is 134:6.15 there, and 144:5 runs
-    up to six ahead by its end;
+  - the SRT gives the `* * *` separator in 134:6, and each of the six in 144:5,
+    a number of its own, and the press numbers no separator, so 134:6.14 here is
+    134:6.15 there, and 144:5 runs up to six ahead by its end;
   - it files 139's one heading over sections 9 and 10 under 10, so 139:9.1 here
-    is 139:10.1 there;
-  - and it does not number 0:12.10 ACKNOWLEDGMENT at all.
+    is 139:10.1 there.
 
 A site that joins our English to its Russian by reference would pair those
 paragraphs wrongly, so the API carries both.  Theirs is read from the
@@ -18,6 +17,16 @@ revision config pins -- never misc/html/, an extraction that may be stale.
 Each paragraph's reference there carries its 1955 page as well, "101:4.2
 (1109.3)": the page of the first printing, and the paragraph on that page.  It
 is taken with the reference.
+
+Eleven entries there are printed without a reference, each marked by an F after
+its id (`U0_12_10F`): the SRT's ten separators, and 0:12.10 ACKNOWLEDGMENT.
+Seven of the separators take a number of their own (those above); the other
+three, after 31:10.21, 56:10.22 and 120:3.11, repeat the number before them.
+All ten are skipped.  The ACKNOWLEDGMENT is 0:12.10 there as it is here, so it
+is read as a paragraph.  Its page, which is not printed either, is the one place
+its neighbours leave: 0:12.9 is (16.6) and 0:12.11 is (16.8), so 16.7, as the
+1955 printing itself shows (the Guardian plates, page 16).  Until 2026-10-12 all
+eleven were skipped, and the API said the Foundation did not number it.
 
 Paragraphs are matched by their words, paper by paper (139:9 and 139:10 cross a
 section), with difflib over a normalisation that keeps letters and digits only.
@@ -42,7 +51,8 @@ from .readers import _io
 
 ZIP = "misc/uf-eng-001-1955-1.22-html.zip"
 RE_FILE = re.compile(r"Paper(\d{3})\.html$")
-RE_P = re.compile(r'<p id="U(\d+)_(\d+)_(\d+)"[^>]*>(.*?)</p>', re.S)
+RE_P = re.compile(r'<p id="U(\d+)_(\d+)_(\d+)(F?)"[^>]*>(.*?)</p>', re.S)
+RE_STARS = re.compile(r"\*(?: \*)+")
 RE_SMALL = re.compile(r"\s*<small>([^<]*)</small>\s*")
 RE_PAGE = re.compile(r" \((\d+\.\d+)\)$")
 RE_TAG = re.compile(r"<[^>]+>")
@@ -66,26 +76,56 @@ def read(repo, report, pages: dict[Key, str] | None = None) -> dict[int, list[tu
     """
     data = _io.read_bytes_at_rev(repo["path"], ZIP, repo["at"])
     out = collections.defaultdict(list)
+    found: dict[Key, str] = {}
+    seen: set[Key] = set()
+    bare: list[tuple[str, Key]] = []        # numbered, but printed without the number
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         for name in sorted(z.namelist()):
             if not RE_FILE.search(name):
                 continue
             for m in RE_P.finditer(z.read(name).decode("utf-8")):
                 k = tuple(map(int, m.group(1, 2, 3)))
-                body = m.group(4)
-                small = RE_SMALL.match(body)
-                if not small or not small.group(1).startswith(fmt(k) + " "):
-                    report.hard("uf-paragraph-unlabelled", fmt(k),
-                                f"{name}: no <small>{fmt(k)} …</small> before the text")
+                unlabelled, body = m.group(4), m.group(5)
+                if unlabelled:
+                    text = html.unescape(RE_TAG.sub("", body)).strip()
+                    if RE_STARS.fullmatch(text):
+                        continue            # a separator: see above
+                else:
+                    small = RE_SMALL.match(body)
+                    if not small or not small.group(1).startswith(fmt(k) + " "):
+                        report.hard("uf-paragraph-unlabelled", fmt(k),
+                                    f"{name}: no <small>{fmt(k)} …</small> before the text")
+                        continue
+                    page = RE_PAGE.search(small.group(1))
+                    if not page:
+                        report.hard("uf-paragraph-no-page", fmt(k),
+                                    f"{name}: no 1955 page in {small.group(1)!r}")
+                    else:
+                        found[k] = page.group(1)
+                    text = html.unescape(RE_TAG.sub("", body[small.end():])).strip()
+                if k in seen:
+                    report.hard("uf-paragraph-duplicate", fmt(k), f"{name}: {fmt(k)} twice")
                     continue
-                page = RE_PAGE.search(small.group(1))
-                if not page:
-                    report.hard("uf-paragraph-no-page", fmt(k),
-                                f"{name}: no 1955 page in {small.group(1)!r}")
-                elif pages is not None:
-                    pages[k] = page.group(1)
-                text = html.unescape(RE_TAG.sub("", body[small.end():])).strip()
+                seen.add(k)
                 out[k[0]].append((k, text))
+                if unlabelled:
+                    bare.append((name, k))
+    # A paragraph printed without its number has no page beside it either.  It
+    # takes the one place its neighbours leave on their page, or none.
+    for name, k in bare:
+        keys = [key for key, _ in out[k[0]]]
+        i = keys.index(k)
+        near = [found.get(keys[j]) if 0 <= j < len(keys) else None for j in (i - 1, i + 1)]
+        if None not in near:
+            (pb, nb), (pa, na) = (tuple(map(int, x.split("."))) for x in near)
+            if pb == pa and na == nb + 2:
+                found[k] = f"{pb}.{nb + 1}"
+                continue
+        report.hard("uf-paragraph-no-page", fmt(k),
+                    f"{name}: printed without a number, between pages {near[0]} and"
+                    f" {near[1]}, which leave no one place for it")
+    if pages is not None:
+        pages.update(found)
     return out
 
 

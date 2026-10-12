@@ -37,15 +37,17 @@ QUERIES = [
     ("appendix E entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='E'", 72),
     ("appendix F entries",  "SELECT COUNT(*) FROM index_entry WHERE scope='F'", 456),
     # The Foundation numbers these otherwise (build/foundation.py,
-    # tests/known-uf-refs.tsv): 134:6.14-16, 139:9.1-11, 144:5.11-102, 0:12.10.
+    # tests/known-uf-refs.tsv): 134:6.14-16, 139:9.1-11, 144:5.11-102.  It was
+    # 107, with 0:12.10, until 2026-10-12: the Foundation numbers it too.
     ("renumbered by the Foundation",
      "SELECT COUNT(*) FROM paragraph p JOIN uf_paragraph u ON u.paragraph_id = p.id"
-     " WHERE u.ref IS NOT p.ref", 107),
+     " WHERE u.ref IS NOT p.ref", 106),
     ("  sections renumbered",
      "SELECT COUNT(*) FROM section s JOIN uf_section u ON u.section_id = s.id"
      " WHERE u.ref IS NOT s.paper_n || ':' || s.n", 1),
-    # 0:12.10, which the Foundation does not number.
-    ("  without a 1955 page", "SELECT COUNT(*) FROM uf_paragraph WHERE page IS NULL", 1),
+    ("  without a Foundation reference", "SELECT COUNT(*) FROM uf_paragraph WHERE ref IS NULL", 0),
+    # 0:12.10's, 16.7, is not printed: it is the place its neighbours leave.
+    ("  without a 1955 page", "SELECT COUNT(*) FROM uf_paragraph WHERE page IS NULL", 0),
     ("text version",        "SELECT MAX(n) FROM text_version", None),
     # Reported, not asserted: they move as the index is edited.
     ("B-F rows naming an A-Z headword", "SELECT COUNT(*) FROM appendix_head", None),

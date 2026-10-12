@@ -130,7 +130,7 @@ index entries 34,751 (32,964 A–Z + 1,351 appendix + 436 chronology events)
 citations 39,885 → 50,842 targets {para 47,954, sec 2,254, paper 634}
 cross-references 5,133 See/See also + 1,026 q.v., 0 dangling · headwords 4,736
 B–F names that are A–Z headwords 1,332 · para_citers 113,992 · cocitation pairs 9,719
-paragraphs the Foundation numbers otherwise 107 · text API records 16,413, at version 1 (2026-10-11)
+paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at version 4 (2026-10-12)
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
 ```
@@ -195,8 +195,9 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 18. **The Foundation's numbering differs from ours across a section boundary.**
     - It files 139's combined "9 and 10" under 10, so our 139:9.1–11 are its 139:10.1–11.
     - In 144:5 it numbers six separators, not one.
-    
-    The first survey, which went section by section, counted 95 differences; there are 107. `build/foundation.py` therefore aligns paper by paper.
+    - Its HTML marks the eleven entries it prints without a reference with an F after the id (`U0_12_10F`): ten `* * *` separators and the ACKNOWLEDGMENT. Seven separators take a number of their own (134:6, and six in 144:5), three repeat the number before them (after 31:10.21, 56:10.22 and 120:3.11), and the ACKNOWLEDGMENT takes 0:12.10, as ours does. Its page, 16.7, is the place its neighbours leave, and the 1955 plates (page 16) confirm it. Until 2026-10-12 the reader skipped all eleven, and `/api` said the Foundation did not number the ACKNOWLEDGMENT.
+
+    The first survey, which went section by section, counted 95 differences; there are 106. `build/foundation.py` therefore aligns paper by paper.
 19. **nginx's `location /api/` answers `/api` with a 301 to `/api/`.** It does that for any prefix location that ends in a slash and has `proxy_pass`. The app redirects `/api/` back to `/api` with a 307, so the docs page was a redirect loop that the rate limit ended with a 429, and no test of the app can see it. `location = /api` in `deploy/ubsite.nginx` is the fix. Try a page through nginx itself after changing a location.
 20. **The 2080 Ti is the display GPU.** Under Whisper it reached 88 °C, against a rated maximum of 89 °C, and throttled to 735 MHz. Compute runs on the 3090: `CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1`.
 21. **The SRT Committee's page has slips of its own, and the build trusts none of them silently.**
@@ -255,7 +256,7 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 - **The AI voice is recorded in advance by a local open model on the 3090**, not by a cloud service: corrections then cost seconds, not a bill, and the weights are pinned. It is chosen by ear from a listening test. It is never a clone of Merritt Horn, it gives the words of Jesus no separate voice, and it is labelled "an AI voice".
 - **Bark (Suno) was tried and rejected** (Tigran, 2026-10-07: "horrible"). It reads about 14 seconds per call and then simply stops. Even fed clause by clause, it dropped "in explanation of the meanings" from 0:0.1, paused mid-phrase, and ran at 0.29× real time on the 3090, about 17 days for the book. Its code and its 19 GB of models and venv were removed.
 - **Visits are counted server-side, with no IP address kept and no cookie for readers** (Tigran, 2026-10-09). Not Google Analytics, not a script: a page carries nothing for the counter. Each address is placed (country, region, city) and hashed with a salt replaced every UTC day, then dropped; a test greps the database file for the address. So a reader on two days counts as two visits, by design. Every search is recorded with what it found, because the ones that found nothing are a list for the index. `visits.db` stores facts; `stats.py` classifies at report time (bots, referrers, kinds of page), so a better classifier applies to the whole history. A person's view is one whose visitor-day fetched `/static/ub.css` and whose agent is no known bot. Its styles live in `stats.html`, so no reader downloads them. A footer line says so: "Visits are counted without cookies, and no IP address is kept."
-- **The API's `ref` is ours; the Foundation's is beside it as `uf_ref`** (Tigran, 2026-10-11). The site, the index and every link use ours. Every translation, and so every site joining its translation to our English, uses the Foundation's, so `/api` tells them to join on `uf_ref`. 0:12.10 has none.
+- **The API's `ref` is ours; the Foundation's is beside it as `uf_ref`** (Tigran, 2026-10-11). The site, the index and every link use ours. Every translation, and so every site joining its translation to our English, uses the Foundation's, so `/api` tells them to join on `uf_ref`. 0:12.10 is 0:12.10 in both: the Foundation prints no number beside it, and its 1955 page, 16.7, is the place its neighbours leave (text version 4, 2026-10-12).
 - **The API calls the English text public domain; credit is requested, not required** (Tigran, 2026-10-11). The credit line names the site's own base URL, taken from the request, so it follows the move to urantiabook.org.
 - **A paragraph is sent as HTML alone, with no plain copy beside it** (Tigran, 2026-10-11). Stripping its tags gives the text exactly, which `check_db` holds, and the text has no `&`, `<` or `>` to unescape. A second copy saved consumers one regex, cost 0.33 MB gzipped, and could in principle disagree with the first. Dropping it made version 2.
 - **A text version moves only when something a site receives changes**, and a number, once it may have reached a site, is never made again for other text. So the ledger is append-only, `tests/test_versions.py` holds it to HEAD's as a prefix, and `deploy.sh` refuses to ship while `data/text/` is uncommitted.

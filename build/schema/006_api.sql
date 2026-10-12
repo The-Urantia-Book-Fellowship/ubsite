@@ -2,17 +2,18 @@
 -- at build time, so the route only selects and concatenates.
 
 -- The Foundation's numbering beside ours (build/foundation.py), read from its
--- own HTML of the SRT.  The two differ in 107 paragraphs: it numbers the
--- `* * *` separators of 134:6 and 144:5, files 139's combined "9 and 10" under
--- 10, and does not number 0:12.10 ACKNOWLEDGMENT.  Its other data -- every
--- translation -- uses its numbers, so a site joining ours to it needs both.
+-- own HTML of the SRT.  The two differ in 106 paragraphs: it numbers the
+-- `* * *` separators of 134:6 and 144:5, and files 139's combined "9 and 10"
+-- under 10.  Its other data -- every translation -- uses its numbers, so a site
+-- joining ours to it needs both.
 CREATE TABLE uf_paragraph (
   paragraph_id INTEGER PRIMARY KEY REFERENCES paragraph(id),
-  ref TEXT,                                   -- '134:6.15'; NULL where it has none
+  ref TEXT,                                   -- '134:6.15'
   -- Where the paragraph begins in the 1955 first printing, whose pages every
   -- printing of the Foundation's keeps: page, then paragraph on that page,
-  -- '1491.8'.  NULL where it has no number.  Shown on the site only if a
-  -- reader asks (Settings), and sent by the API (Tigran, 2026-10-11).
+  -- '1491.8'.  0:12.10's, 16.7, is not printed beside it: it is the place its
+  -- neighbours leave.  Shown on the site only if a reader asks (Settings), and
+  -- sent by the API (Tigran, 2026-10-11).
   page TEXT
 );
 CREATE TABLE uf_section (

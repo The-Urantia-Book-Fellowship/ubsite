@@ -184,12 +184,12 @@ class Whole(Quiet):
         self.assertEqual(uf["134:6.14"], "134:6.15")
         self.assertEqual(uf["139:9.1"], "139:10.1")
         self.assertEqual(uf["144:5.102"], "144:5.108")
-        self.assertIsNone(uf["0:12.10"])
-        self.assertEqual(sum(1 for r, u in uf.items() if r != u), 107)
+        self.assertEqual(uf["0:12.10"], "0:12.10")
+        self.assertEqual(sum(1 for r, u in uf.items() if r != u), 106)
         pages = {x["ref"]: x["page_1955"] for x in self.reply["paragraphs"]}
         self.assertEqual(pages["101:4.2"], "1109.3")
         self.assertEqual(pages["144:5.11"], "1622.10")
-        self.assertIsNone(pages["0:12.10"])
+        self.assertEqual(pages["0:12.10"], "16.7")
         secs = {x["ref"]: x["uf_ref"] for x in self.reply["sections"]}
         self.assertEqual(secs["139:9"], "139:10")
 

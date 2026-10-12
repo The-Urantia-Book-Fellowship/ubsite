@@ -2,8 +2,9 @@
 # as build/foundation.py finds them in its HTML: our first, our last, its first,
 # its last; "-" where it has no number.  The build requires exactly these runs.
 #
-# It does not number the ACKNOWLEDGMENT; the press does (study edition 8af25c5).
-0:12.10	0:12.10	-	-
+# Both number the ACKNOWLEDGMENT 0:12.10, though the Foundation prints no number
+# beside it: not a difference (build/foundation.py, 2026-10-12).
+
 # It numbers the `* * *` separator in 134:6 as 134:6.14.
 134:6.14	134:6.16	134:6.15	134:6.17
 # It files the one heading over sections 9 and 10 under 10 (CLAUDE.md §7.9).
