@@ -122,7 +122,8 @@ def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
             if n != len(notes) or q["html"].count('class="fn"') != n:
                 raise ValueError(f"{q['ref']}: {n} note markers for {len(notes)} notes")
             paras.append({"id": H.para_id(q["paper_n"], q["section_n"], q["para_n"]),
-                          "ref": q["ref"], "pc": bool(q["gap_before"]), "html": html,
+                          "ref": q["ref"], "pc": bool(q["gap_before"]), "head": bool(q["heading"]),
+                          "html": html,
                           "chips": [_chip(links, c) for c in rows["citers"].get(q["id"], [])],
                           "notes": notes})
         secs.append({"id": H.section_id(p["n"], s["n"]), "n": s["n"],

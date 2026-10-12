@@ -65,7 +65,9 @@
   var marked = null, bar = null, controls = [], shutSpeeds = function () {};
   var head, paras;
   function scan() {
-    head = document.querySelector('.papertop h2');
+    // The section's title, or over an introduction, which has none, the
+    // paper's: what its spoken heading reads.
+    head = document.querySelector('.papertop h2') || document.querySelector('.papertop h1');
     paras = {};
     Array.prototype.forEach.call(document.querySelectorAll('p.t[id]'),
                                  function (p) { paras[p.id] = p; });
@@ -127,7 +129,7 @@
     } else if (PV.kind === 'synthetic') by.textContent += ' (an AI voice)';
     row.appendChild(b);
     row.appendChild(by);
-    head.after(row);
+    head.parentNode.appendChild(row);
     controls.push(row);
     // A paragraph can be started only once the reading is aligned to them.
     if (PV.by !== 'paragraph') return;

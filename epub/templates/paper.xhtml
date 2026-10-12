@@ -18,7 +18,7 @@
 <div class="blanket"><p class="ix">{{ chips(s.blanket) }}</p></div>
 {% endif %}
 {% for p in s.paras %}
-<p class="t" id="{{ p.id }}"><span class="ref">{{ p.ref }}</span> {% if p.pc %}<span class="pc">¶</span>{% endif %}{{ p.html|safe }}</p>
+<p class="t{% if p.head %} head{% endif %}" id="{{ p.id }}"><span class="ref">{{ p.ref }}</span> {% if p.pc %}<span class="pc">¶</span>{% endif %}{{ p.html|safe }}</p>
 {% if p.chips %}
 <p class="ix">{{ chips(p.chips) }}</p>
 {% endif %}

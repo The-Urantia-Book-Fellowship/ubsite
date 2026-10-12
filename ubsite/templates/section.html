@@ -17,7 +17,11 @@
       <p class="papernum">Paper {{ paper.n }}</p>
       <h1>{{ paper.title }}</h1>
       {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
-      <h2>{% if section.n %}{{ section.n }}{% if section.combined_with %} and {{ section.combined_with }}{% endif %}. {{ section.title_html|safe }}{% else %}Introduction{% endif %}</h2>
+      {#- An introduction has no title of its own: the paper's stands over it, and
+          "0. Introduction" is the rail's name for it, not the book's. #}
+      {%- if section.n %}
+      <h2>{{ section.n }}{% if section.combined_with %} and {{ section.combined_with }}{% endif %}. {{ section.title_html|safe }}</h2>
+      {%- endif %}
     </header>
 
     {% if blanket %}
@@ -35,7 +39,7 @@
     <div class="grid" style="--refw: {{ paras|map(attribute='ref')|map('length')|max }}">
     {% for p in paras %}
       {% set hit = focus and p.para_n >= focus and p.para_n <= last %}
-      <p class="t{% if p.gap_before %} pc{% endif %}{% if hit %} hit{% endif %}"
+      <p class="t{% if p.gap_before %} pc{% endif %}{% if p.heading %} head{% endif %}{% if hit %} hit{% endif %}"
          id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
          {%- if p.page_1955 %}<span class="pg" data-pg="{{ p.page_1955 }}"></span>{% endif %}
          {%- if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}

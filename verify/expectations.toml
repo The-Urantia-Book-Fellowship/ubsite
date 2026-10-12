@@ -7,6 +7,7 @@ measured_on   = "2026-09-21"
 papers               = 197
 paragraphs           = 14586     # 14,442 \vs + 144 verse lines
 vs_paragraphs        = 14442
+heading_lines        = 1         # 0:12.10 ACKNOWLEDGMENT, {\hspace*{0.15\columnwidth}...}
 paper_section_pairs  = 1626      # 1,429 titled sections + 197 untitled introductions
 redletter_spans      = 1267      # \textcolor{ubdarkred} -- the words of Jesus
 variant_1955_notes   = 180       # \fnc; 177 at 5222a215, then press 36927e0 set 0:1.24

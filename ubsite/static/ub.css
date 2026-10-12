@@ -171,13 +171,18 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage .papernum { font-size: 1.25rem; }       /* as PAPER N is to its title */
 .partpage .sponsor { font-style: italic; margin: 0 auto; max-width: 32em; text-wrap: balance; }
 .partpage .pager { max-width: none; margin-top: 3.5rem; }
-.papertop { margin-bottom: 1.6rem; }
+/* A paper's head is centred over the text column, as the book sets it: the
+   paper's number, title and author, the section's title, and the Listen button
+   under them.  It is as wide as the column: the measure here, and on a wide
+   screen what the margin leaves, if less (below). */
+.papertop { margin-bottom: 1.6rem; max-width: var(--measure); text-align: center; }
+.papertop :is(h1, h2) { text-wrap: balance; }
+.papertop .listenrow { justify-content: center; }
 .papernum { font-size: 1rem; letter-spacing: .12em; text-transform: uppercase;
             color: var(--faint); margin: 0; }
 h1 { font-size: 2.1rem; font-weight: 400; line-height: 1.15; margin: .2rem 0 .3rem; }
 h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
      font-variant-caps: small-caps; letter-spacing: .03em; }
-.papertop h2 { max-width: var(--measure); }
 .author { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
 
 /* Each paragraph emits TWO grid cells -- text and apparatus.  The browser
@@ -186,6 +191,9 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
 .grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch);
         gap: 0 2rem; }
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); }
+/* A heading within the text, 0:12.10 ACKNOWLEDGMENT, centred as a section's
+   title is (paragraph.heading). */
+p.t.head { text-align: center; }
 /* \pc: a 1955 blank-line group starts here.  It was extra space above the
    paragraph, which nobody could see; now a pilcrow before the first word, as the
    British edition prints it.  The typeface's own ¶ (U+00B6), so it is UB Goudy's
@@ -252,11 +260,15 @@ p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
    (max-width: 62rem, below) has not already made one. */
 :root[data-width="full"] .reader { max-width: none; }
 @media (min-width: 62.01rem) {
+  /* The text column is the measure, or what the margin's 26ch and the gap leave;
+     the head above it is as wide, so that it is centred over the text. */
+  :root:not([data-margin="off"]) .papertop { max-width: min(var(--measure), 100% - 26ch - 2rem); }
+  :root[data-width="full"]:not([data-margin="off"]) .papertop { max-width: calc(100% - 26ch - 2rem); }
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
   :root[data-width="full"][data-margin="off"] .grid { grid-template-columns: minmax(0, 1fr); }
 }
-:root[data-width="full"] :is(p.t, .papertop h2, .blanket, .pager, .prose) { max-width: none; }
+:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .prose) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
 :root[data-width="full"] .applist { columns: 24rem; }
 .mark { font-variant-numeric: lining-nums; }
@@ -376,7 +388,7 @@ p.t { position: relative; }
 :root[data-voice="off"] :is(.listenrow, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
    playing starts, so only one thing on the page is marked. */
-p.t.now, .papertop h2.now { background: color-mix(in oklch, var(--link) 11%, transparent);
+p.t.now, .papertop :is(h1, h2).now { background: color-mix(in oklch, var(--link) 11%, transparent);
   border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 11%, transparent);
   transition: background .3s, box-shadow .3s; }
 .player { position: fixed; z-index: 10; left: 50%; transform: translateX(-50%);
@@ -614,6 +626,14 @@ main.results { position: relative; }
   :root[data-pages="true"] .pg { position: relative; right: auto; float: left; clear: left;
          width: calc(var(--refw, 9) * 1ch + .4rem); top: .2rem; font-size: .78rem; }
   :root[data-pages="true"][data-paranum="off"] .pg { top: .2rem; }
+  /* The heading in the text is centred on the column, not on what the stack of
+     reference and play button floated beside it leaves: an empty float as wide
+     as that stack balances it on the right.  Without references the stack is
+     the button alone, if there is one. */
+  p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
+                     width: calc(var(--refw, 9) * 1ch + .4rem); }
+  :root[data-paranum="off"] p.t.head::before { width: 0; }
+  :root[data-paranum="off"]:not([data-voice="off"]) p.t.head:has(> .playp)::before { width: 1.7rem; }
   .a:not(:empty) { margin: -.4rem 0 1rem 1rem; border-left: 2px solid var(--rule);
                    padding-left: .7rem; }
   .blanket ul { columns: 1; }

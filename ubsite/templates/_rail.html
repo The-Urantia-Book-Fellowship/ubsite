@@ -11,7 +11,7 @@
 {% macro sections(paper_n, secs, here_s=None) -%}
 <ol>
 {%- for s in secs %}<li{% if s.n == here_s %} class="here"{% endif %}><a href="/{{ paper_n }}:{{ s.n }}">
-  {%- if s.n %}{{ s.n }}{% if s.combined_with %} and {{ s.combined_with }}{% endif %}. {{ s.title_html|safe }}{% else %}Introduction{% endif %}</a></li>
+  {%- if s.n %}{{ s.n }}{% if s.combined_with %} and {{ s.combined_with }}{% endif %}. {{ s.title_html|safe }}{% else %}0. Introduction{% endif %}</a></li>
 {%- endfor %}</ol>
 {%- endmacro %}
 

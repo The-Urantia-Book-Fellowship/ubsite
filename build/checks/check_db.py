@@ -9,6 +9,8 @@ QUERIES = [
     ("sections",            "SELECT COUNT(*) FROM section", 1626),
     ("combined headings",   "SELECT COUNT(*) FROM section WHERE combined_with IS NOT NULL", 1),
     ("paragraphs",          "SELECT COUNT(*) FROM paragraph", 14586),
+    # 0:12.10 ACKNOWLEDGMENT, centred like a section's title (readers/press.py).
+    ("  headings in the text", "SELECT COUNT(*) FROM paragraph WHERE heading", 1),
     ("red-letter spans",    "SELECT COUNT(*) FROM span WHERE kind='redletter'", 1267),
     ("em spans",            "SELECT COUNT(*) FROM span WHERE kind='em'", 2295),
     ("1955 variant notes",  "SELECT COUNT(*) FROM footnote WHERE kind='variant-1955'", 180),
@@ -46,6 +48,8 @@ QUERIES = [
 ]
 
 INVARIANTS = [
+    ("the one heading in the text is 0:12.10",
+     "SELECT COUNT(*) FROM paragraph WHERE heading AND ref <> '0:12.10'"),
     ("every span lies inside its paragraph",
      """SELECT COUNT(*) FROM span s JOIN paragraph p ON p.id = s.paragraph_id
          WHERE s.start < 0 OR s."end" > LENGTH(p.text)"""),

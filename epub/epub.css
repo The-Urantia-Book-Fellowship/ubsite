@@ -64,6 +64,8 @@ p.t {
   margin: .7em 0 0;
   text-indent: 0;
 }
+/* A heading within the text, 0:12.10 ACKNOWLEDGMENT, centred as a section's title is. */
+p.t.head { text-align: center; }
 /* The reference: literal text, so that a search for 101:4.2 lands here. */
 .ref { font-size: .7em; color: #666; }
 .pc { color: #888; }

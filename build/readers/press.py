@@ -40,6 +40,11 @@ RE_LAYOUT   = re.compile(r"\\hspace\*?\{[^{}]*\}|\\setlength\{[^{}]*\}\{[^{}]*\}
 # web gives it back.  (144:3.13 met the same clash and kept its \pc, cancelling
 # the extra space with \vspace{-\baselineskip} instead.)
 RE_PC_REMOVED = re.compile(r"%.*\\pc at (\d+):(\d+)\.(\d+) has been removed")
+# A \vs whose body is one group pushed in by a fraction of the column is a
+# heading within the text, not prose: 0:12.10 "{\hspace*{0.15\columnwidth}\itshape
+# ACKNOWLEDGMENT}", which heads the Acknowledgment.  The press indents it; the
+# site and the EPUB centre it, as they do a section's title.
+RE_HEADING  = re.compile(r"\{\\hspace\*\{[\d.]+\\columnwidth\}")
 
 
 @dataclasses.dataclass(slots=True)
@@ -50,6 +55,7 @@ class Paragraph:
     src: str                # 'vs' | 'poetry' | 'vsmark'
     line: int
     ex: Expanded
+    heading: bool = False
 
     @property
     def ref(self) -> str:
@@ -166,7 +172,8 @@ def read_paper(path: pathlib.Path, report) -> Paper:
             ex = inline(body)
             if prefix.strip():
                 ex.flags.update(inline(prefix).flags)
-            paras.append(Paragraph(p, s, n, "vs", lineno, ex))
+            paras.append(Paragraph(p, s, n, "vs", lineno, ex,
+                                   bool(RE_HEADING.match(body))))
             continue
 
         m = re.match(r"\\(begin|end)\{(\w+)\}", line)
