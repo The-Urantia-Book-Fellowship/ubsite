@@ -6,7 +6,12 @@
     Only the paper being read carries its sections.  Another paper's arrive
     from /rail/N when it is opened (ub.js), because all 1,626 inline would add
     111 KB to a page of about 20.  Such a paper is .lazy, and with JavaScript
-    off it is a plain link, its chevron hidden (ub.css). -#}
+    off it is a plain link, its chevron hidden (ub.css).
+
+    The button at its head folds it: away to the left on a wide screen, where
+    the browser remembers it (settings.py KEPT), and up to that one line on a
+    phone, where every page starts folded (ub.js, ub.css .railfold).  With
+    JavaScript off it is not drawn, and the rail is always open. -#}
 
 {% macro sections(paper_n, secs, here_s=None) -%}
 <ol>
@@ -27,7 +32,8 @@
 {#- here_p is None on a part's own page: the part is open, and is the page. -#}
 {% macro rail(bk, here_p, here_s, here_part) -%}
 <nav class="rail" aria-label="The book" data-v="{{ db_version() }}">
-<ol>
+<button class="railfold" type="button" aria-controls="rail-tree" aria-expanded="true"><span>Contents</span></button>
+<ol id="rail-tree">
 {%- for p in bk.foreword %}
 {{ paper_row(p, bk, here_p, here_s) }}
 {%- endfor %}

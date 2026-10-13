@@ -173,6 +173,53 @@ footer p { margin: .2rem 0; }
    it the title is a link and nothing more (base.html sets .js). */
 :root:not(.js) .rail .lazy > details > summary { cursor: auto; }
 :root:not(.js) .rail .lazy > details > summary::before { visibility: hidden; }
+/* The button at the rail's head folds it (templates/_rail.html, ub.js): away to
+   the left on a wide screen, up to this one line on a phone (below, and the
+   phone's block).  Its chevron is drawn as the summaries' are, at their size,
+   so on a phone it stands in their column.  It stays at the top of the rail as
+   the rail scrolls, on the paper, and is not drawn without JavaScript, which
+   alone can work it. */
+.railfold { display: flex; align-items: baseline; width: 100%; padding: 0 0 .3rem;
+  font: inherit; color: var(--faint); background: var(--paper); border: 0; cursor: pointer;
+  position: sticky; top: 0; z-index: 1; text-align: left;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.railfold span { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; }
+/* The chevron of every fold button (the rail's, the index's, a box's), pointing
+   down: the way an open summary's does. */
+:is(.railfold, .indexfold, .afold)::before { content: ""; display: inline-block; flex: none;
+  width: .34em; height: .34em; margin: 0 .5em .1em .26em; border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); transition: transform .12s; }
+@media (hover: hover) { .railfold:hover { color: var(--ink); } }
+:root:not(.js) .railfold { display: none; }
+@media (min-width: 62.01rem) {
+  /* Open: the word, and the chevron at the row's end pointing left, the way
+     the rail goes. */
+  .railfold { justify-content: space-between; }
+  .railfold::before { order: 1; transform: rotate(135deg); margin: 0 .3em .1em .5em; }
+}
+/* The index folds as the rail does, to the right (templates/_fold.html): the
+   margin, the box of what a whole section cites, and a reading path's captions.
+   Its button is its only control, kept as data-margin (settings.py KEPT).  On a
+   wide screen it stands at the margin's head, level with the rail's, and stays
+   there as the page scrolls, on the paper, which hides the entries passing
+   under it as the rail's hides the rail's: the paper reaches up to the top of
+   the window.  On a phone it is a line at the page's head, and each box of
+   entries folds to a line of its own, opened by itself for that page (.shown).
+   Neither is drawn without JavaScript. */
+.marginhead, .afold { display: none; }
+:root.js .marginhead { display: block; }
+.indexfold, .afold { align-items: baseline; font: inherit; color: var(--faint);
+  background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.indexfold { display: flex; font-size: .95rem; background: var(--paper); padding: 0 0 .3rem; }
+.indexfold span { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; }
+@media (hover: hover) { :is(.indexfold, .afold):hover { color: var(--ink); } }
+@media (min-width: 62.01rem) {
+  :root.js .marginhead { position: sticky; top: 1rem; z-index: 3; height: 0; }
+  .indexfold { position: absolute; top: 0; right: -.2rem; padding-left: .6rem;
+               box-shadow: 0 -1rem 0 var(--paper); }
+  .indexfold::before { order: 1; transform: rotate(-45deg); margin: 0 0 .1em .5em; }
+}
 
 article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 /* A part's own page (part.html), as the book's divider sets it: centred, the
@@ -327,9 +374,7 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 :root[data-redletter="off"] .jesus { color: inherit; }
 :root[data-paranum="off"] .num { display: none; }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
-:root[data-margin="off"] :is(.chips, .blanket) { display: none; }
 :root[data-notes="off"] :is(a.fn, .notes, .pop) { display: none; }
-:root[data-margin="off"] .a { display: none; }
 :root[data-margin="off"] .grid { grid-template-columns: minmax(0, var(--measure)); }
 /* Text size scales the root, so everything set in rem follows, as with the
    browser's zoom. */
@@ -374,6 +419,50 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
   :root[data-width="full"][data-margin="off"] .grid { grid-template-columns: minmax(0, 1fr); }
+}
+/* The rail folded away: no column at all, and the text takes the rest.  The
+   gap stays, being the gutter the references stand in, and the chevron, which
+   points back the way the rail went, stands at its outer edge, level with the
+   header's mark: the widest reference (118:10.10) reaches 3.8rem into it of
+   4.4.  A 1955 page, if shown, can be wider than the gutter (2094.10 is 4.7rem),
+   so then the chevron is given .9rem of its own.  Its box is no wider than it,
+   and clear, so that nothing is hidden as it scrolls past.  Measured, the frame
+   gives up what the rail did, so the page stays centred in the window.  After
+   Full's columns, so as to win over them. */
+@media (min-width: 62.01rem) {
+  :root[data-rail="folded"] .reader { grid-template-columns: 0 minmax(0, 1fr);
+                                      max-width: calc(92rem - 16rem); }
+  :root[data-rail="folded"][data-pages="true"] .reader { grid-template-columns: .9rem minmax(0, 1fr); }
+  :root[data-rail="folded"][data-width="full"] .reader { max-width: none; }
+  :root[data-rail="folded"] .rail { overflow: visible; }
+  :root[data-rail="folded"] .rail > ol, :root[data-rail="folded"] .railfold span { display: none; }
+  :root[data-rail="folded"] .railfold { width: .8rem; margin-left: -.2rem; padding: 0 0 .9rem;
+                                        background: none; }
+  :root[data-rail="folded"] .railfold::before { transform: rotate(-45deg); margin: 0 0 .1em; }
+}
+/* The index folded away: the margin and what stands with it are gone, and the
+   text takes their room but for 2rem kept at its right, where the chevron
+   stands, pointing back the way the index went, level with the header's gear.
+   Measured, the frame gives up what the index did, as for the rail, so the page
+   stays centred.  A section page's frame is .reader, a reading path's .path. */
+@media (min-width: 62.01rem) {
+  :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
+  :root[data-margin="off"] .indexfold { right: -2.2rem; width: .8rem; padding: 0 0 .9rem;
+                                        justify-content: flex-end; background: none; box-shadow: none; }
+  :root[data-margin="off"] .indexfold span { display: none; }
+  :root[data-margin="off"] .indexfold::before { transform: rotate(135deg); margin: 0 0 .1em; }
+  :root[data-margin="off"] .reader > article:has(> .marginhead) { padding-right: 2rem; }
+  :root[data-margin="off"]:not([data-width="full"]) .reader:has(> article > .marginhead) {
+         max-width: calc(92rem - 26ch); }
+  :root[data-margin="off"][data-rail="folded"]:not([data-width="full"]) .reader:has(> article > .marginhead) {
+         max-width: calc(92rem - 16rem - 26ch); }
+  :root[data-margin="off"] .path { max-width: calc(4.4rem + var(--measure) + 2rem + 2.4rem);
+                                   padding-right: 3.2rem; }
+  :root[data-margin="off"][data-width="full"] .path { max-width: none; }
+  :root[data-margin="off"] :is(.path .row, details.gap > summary, button.foldup) {
+         grid-template-columns: minmax(0, var(--measure)); }
+  :root[data-margin="off"][data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
+         grid-template-columns: minmax(0, 1fr); }
 }
 :root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .prose) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
@@ -762,6 +851,24 @@ main.results { position: relative; }
   .reader { grid-template-columns: 1fr; gap: 0; }
   .rail { position: static; max-height: none; border-bottom: 1px solid var(--rule);
           padding-bottom: .8rem; margin-bottom: 1.4rem; }
+  /* Folded on every page, to its one line, a tap's height: opened, for that
+     page only (ub.js .shown), its chevron points down, as an open summary's. */
+  .railfold { position: static; padding: .35rem 0; }
+  :root.js .rail:not(.shown) > ol { display: none; }
+  :root.js .rail:not(.shown) { padding-bottom: .2rem; }
+  .rail:not(.shown) .railfold::before { transform: rotate(-45deg); }
+  /* The index's line, and each box of entries folded to a line saying how many
+     it holds, its chevron pointing right until it is opened. */
+  :root.js .marginhead { margin: 0 0 1rem; }
+  .indexfold { width: 100%; padding: .35rem 0; }
+  :root[data-margin="off"] .indexfold::before { transform: rotate(-45deg); }
+  :root[data-margin="off"] .afold { display: flex; width: 100%; font-size: .9rem; padding: .15rem 0; }
+  :root[data-margin="off"] :is(.a, .blanket):not(.shown) > :not(.afold),
+  :root[data-margin="off"] .path .row:not(.shown) > .cites { display: none; }
+  :is(.a, .blanket, .path .row):not(.shown) > .afold::before { transform: rotate(-45deg); }
+  :root[data-margin="off"] .blanket:not(.shown) { padding-block: .35rem; }
+  :root[data-margin="off"] .path .afold { border-left: 2px solid var(--rule); padding-left: .5rem;
+                                          margin-bottom: .3rem; }
   /* Never wider than the screen, whatever one paragraph asks: a `1fr` track
      grows to its widest item's least width, and one long dot-leader row once
      pushed all of 15:2 off the side. */
@@ -836,6 +943,8 @@ main.results { position: relative; }
 @media print {
   @page { margin: 22mm 20mm; }
   .top, footer, .rail, .pager, .listenrow, .playp, .player, dialog { display: none; }
+  :root.js .marginhead, :root[data-margin="off"] .afold,
+  :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }
   .reader, .grid { display: block; }
   p.t { orphans: 3; widows: 3; max-width: none; }

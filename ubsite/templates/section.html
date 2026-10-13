@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% from "_note.html" import note %}
 {% from "_para.html" import para %}
 {% from "_rail.html" import rail %}
+{% from "_fold.html" import indexfold, afold %}
 {# An index entry beside the text.  A headword or subentry links to its line on
    the concept page; an appendix entry to its line on the appendix page, named
    with its appendix, and a Chronology event with its date. #}
@@ -14,6 +15,7 @@
   {{ rail(book(), paper.n, section.n, paper.part_n) }}
 
   <article>
+    {{ indexfold() }}
     <header class="papertop">
       <p class="papernum">Paper {{ paper.n }}</p>
       <h1>{{ paper.title }}</h1>
@@ -27,6 +29,7 @@
 
     {% if blanket %}
     <aside class="blanket">
+      {{ afold(blanket|length, ' across this whole section') }}
       <h3>Cited across this whole section</h3>
       {# read_pack's rule: a blanket citation is listed ONCE here, never repeated
          under every paragraph -- otherwise Paper 15's 470 citations print some
@@ -52,6 +55,7 @@
       {%- set cs = citers.get(r.p.id, []) %}
       <div class="a">
         {%- if cs %}
+          {{ afold(cs|length) }}
           <ul class="chips">
           {% for c in cs %}<li>{{ chip(c) }}</li>{% endfor %}
           </ul>
@@ -67,7 +71,9 @@
       {{ para(q, focus and q.para_n >= focus and q.para_n <= last) }}
       {%- endfor %}
       </div>
+      {%- set nv = namespace(n=0) %}{% for q in r.lines %}{% set nv.n = nv.n + citers.get(q.id, [])|length %}{% endfor %}
       <div class="a">
+      {%- if nv.n %}{{ afold(nv.n) }}{% endif %}
       {%- for q in r.lines if citers.get(q.id) %}
         <p class="at"><a href="/{{ q.ref }}">{{ q.ref }}</a></p>
         <ul class="chips">

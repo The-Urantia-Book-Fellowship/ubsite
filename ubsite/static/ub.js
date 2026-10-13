@@ -223,6 +223,69 @@
   railView();
   document.addEventListener('ub:swap', railView);
 
+  // The button at the rail's head folds it (ub.css .railfold).  On a wide
+  // screen away to the left, kept as the setting 'rail' (settings.py KEPT); on
+  // a phone up to its one line, which every page starts as, so a class on the
+  // rail opens it for this page only.  The button says which it would do.
+  var phone = matchMedia('(max-width: 62rem)');
+  function railShut(rail) {
+    return phone.matches ? !rail.classList.contains('shown') : load().rail === 'folded';
+  }
+  function railSync() {
+    var b = document.querySelector('.railfold'), shut;
+    if (!b) return;
+    shut = railShut(b.parentNode);
+    b.setAttribute('aria-expanded', String(!shut));
+    b.title = shut ? 'Show the contents' : 'Fold the contents away';
+    b.setAttribute('aria-label', b.title);
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('.railfold'), rail, shut;
+    if (!b) return;
+    rail = b.parentNode;
+    shut = railShut(rail);
+    if (phone.matches) rail.classList.toggle('shown', shut);
+    else window.ubSettings.set('rail', shut ? 'open' : 'folded');
+    railSync();
+    if (shut) railView();
+  });
+  railSync();
+  if (phone.addEventListener) phone.addEventListener('change', railSync);
+
+  // The index folds (templates/_fold.html, ub.css .indexfold): its button,
+  // kept as the setting 'margin' (settings.py KEPT), folds the margin to the
+  // right on a wide screen, and on a phone every box of entries to its line.
+  // A box's own line opens it, or folds it again, for this page only.  Folding
+  // them all folds those opened too.
+  function indexSync() {
+    var on = load().margin !== false, b = document.querySelector('.indexfold');
+    if (b) {
+      b.setAttribute('aria-expanded', String(on));
+      b.title = on ? 'Fold the index away' : 'Show the index';
+      b.setAttribute('aria-label', b.title);
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.afold'), function (x) {
+      x.setAttribute('aria-expanded', String(on || x.parentNode.classList.contains('shown')));
+    });
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('.indexfold, .afold');
+    if (!b) return;
+    if (b.classList.contains('indexfold')) return window.ubSettings.set('margin', load().margin === false);
+    b.parentNode.classList.toggle('shown');
+    indexSync();
+  });
+  indexSync();
+  function swapped() { railSync(); indexSync(); }
+  document.addEventListener('ub:swap', swapped);
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail.key === 'margin')
+      Array.prototype.forEach.call(document.querySelectorAll('.afold'), function (x) {
+        x.parentNode.classList.remove('shown');
+      });
+    swapped();
+  });
+
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
   // endnote's words (section.html), which are hidden while this runs.  One
   // card at a time, under the line and scrolling with it; the ring again, its

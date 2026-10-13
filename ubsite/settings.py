@@ -12,7 +12,9 @@ Every setting is declared here, once:
     listen.js follows.
 
 So a new setting is an entry here and its rule in ub.css.  A value's type is
-its default's: a switch is a bool, the speed a number, the rest strings.
+its default's: a switch is a bool, the speed a number, the rest strings.  A
+setting in KEPT is remembered the same way but has no place in the dialog: it
+is set where it is used.
 """
 
 from __future__ import annotations
@@ -70,7 +72,6 @@ SHOW = [
     # to cite the book, so off unless a reader asks (Tigran, 2026-10-11).
     ("pages", "switch", "1955 page references", False, [], "such as (1109.3): page, and paragraph on it"),
     ("pilcrow", "switch", "Pilcrows", True, [], "where the 1955 text leaves a blank line"),
-    ("margin", "switch", "Index entries beside the text", True, [], ""),
     ("notes", "switch", "1955 readings", True, [], ""),
     # What the 1955 cards say, listed among the search results: the reading,
     # and the SRT Committee's reasons beneath it.  Off unless a reader asks
@@ -91,6 +92,22 @@ LISTEN = [
     # Off, playing stops at the end of a section (Tigran, 2026-10-07); on, it
     # carries on, across papers, through the whole book (2026-10-08).
     ("onward", "switch", "Carry on into the next section", False, [], "and so on through the book"),
+]
+
+
+# Remembered like the rest, but set where it is used, not in the dialog.  The
+# left rail folded away to the left on a wide screen, by the button at its head
+# (templates/_rail.html); open by default.  A phone's rail is folded on every
+# page and is not remembered (Tigran, 2026-10-13).  The index folded, by the
+# button at the head of a section page and of a reading path
+# (templates/_fold.html): away to the right on a wide screen, each box of
+# entries to one line on a phone.  It was the dialog's "Index entries beside
+# the text", which hid the index, until the button made it one more way to
+# the same thing on every page that has an index (Tigran, 2026-10-13); its key
+# and its values stay, so a reader who had it off finds the index folded.
+KEPT = [
+    ("rail", "kept", "Contents", "open", [], ""),
+    ("margin", "kept", "Index", True, [], ""),
 ]
 
 
@@ -130,4 +147,4 @@ def groups(voices: list[dict]) -> list[dict]:
 
 def defaults() -> dict:
     """{key: default} for every setting, for the head script and ub.js."""
-    return {s[0]: s[3] for s in READING + SHOW + LISTEN}
+    return {s[0]: s[3] for s in READING + SHOW + LISTEN + KEPT}

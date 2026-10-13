@@ -1,0 +1,17 @@
+{#- The index folds, as the left rail does, and stays folded on every page
+    (settings.py KEPT `margin`, not in the dialog: these buttons are its only
+    control; Tigran, 2026-10-13).  On a wide screen the margin, the
+    box of what a whole section cites, and a reading path's captions fold away
+    to the right, and the button at the margin's head stays there as a chevron.
+    On a phone each paragraph's entries fold to one line, which opens them for
+    that page, and the button at the page's head folds or opens them all.  Not
+    drawn without JavaScript, which alone can work them (ub.js, ub.css). -#}
+
+{% macro indexfold() -%}
+<div class="marginhead"><button class="indexfold" type="button" aria-expanded="true"><span>Index</span></button></div>
+{%- endmacro %}
+
+{#- A box of entries, folded on a phone: how many it holds. -#}
+{% macro afold(n, tail='') -%}
+<button class="afold" type="button" aria-expanded="false">{{ n }} index entr{{ 'y' if n == 1 else 'ies' }}{{ tail }}</button>
+{%- endmacro %}

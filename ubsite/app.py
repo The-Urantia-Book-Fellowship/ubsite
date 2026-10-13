@@ -5,9 +5,9 @@ with JavaScript disabled -- for archive.org, for a Kindle browser, for curl --
 so JS only enhances.
 
 There is one mode: the study apparatus is always on.  The individual elements
--- red letter, the margin index, paragraph numbers, the 1955 variants -- are
-switches under Settings (ub.js, kept per browser), rather than one coarse lever
-that hides them together.
+-- red letter, paragraph numbers, the 1955 variants -- are switches under
+Settings (ub.js, kept per browser), rather than one coarse lever that hides
+them together; the margin index folds where it stands (templates/_fold.html).
 """
 
 from __future__ import annotations
