@@ -10,6 +10,10 @@
 :root {
   --paper: oklch(0.972 0.008 85);
   --ink:   oklch(0.24 0.012 60);
+  /* The book's own words, black (Tigran, 2026-10-13): its paragraphs, a
+     paper's and a section's titles, a part's page, a 1955 reading.  --ink,
+     a very dark brown, stays for everything round them. */
+  --text:  #000;
   --faint: oklch(0.55 0.010 70);
   --rule:  oklch(0.88 0.010 80);
   --jesus: oklch(0.44 0.15 25);
@@ -53,7 +57,7 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85);
+    --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85); --text: var(--ink);
     --faint: oklch(0.62 0.010 75);  --rule: oklch(0.30 0.010 75);
     --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
     --flame: oklch(0.80 0.12 82);
@@ -62,7 +66,7 @@
   }
 }
 :root[data-theme="dark"] {
-  --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85);
+  --paper: oklch(0.185 0.008 70); --ink: oklch(0.90 0.010 85); --text: var(--ink);
   --faint: oklch(0.62 0.010 75);  --rule: oklch(0.30 0.010 75);
   --jesus: oklch(0.70 0.12 28);   --link: oklch(0.74 0.08 250);
   --flame: oklch(0.80 0.12 82);
@@ -175,6 +179,7 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
    title larger than a paper's, the sponsors' note in italic beneath. */
 .partpage { width: 100%; max-width: 40rem; margin: 0 auto; padding-top: 3rem; }
 .partpage header { text-align: center; }
+.partpage :is(h1, .sponsor) { color: var(--text); }
 .partpage h1 { font-size: 2.6rem; margin: .5rem 0 1.6rem; }
 .partpage .papernum { font-size: 1.25rem; }       /* as PAPER N is to its title */
 .partpage .sponsor { font-style: italic; margin: 0 auto; max-width: 32em; text-wrap: balance; }
@@ -184,7 +189,7 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
    under them.  It is as wide as the column: the measure here, and on a wide
    screen what the margin leaves, if less (below). */
 .papertop { margin-bottom: 1.6rem; max-width: var(--measure); text-align: center; }
-.papertop :is(h1, h2) { text-wrap: balance; }
+.papertop :is(h1, h2) { text-wrap: balance; color: var(--text); }
 .papertop .listenrow { justify-content: center; }
 .papernum { font-size: 1rem; letter-spacing: .12em; text-transform: uppercase;
             color: var(--faint); margin: 0; }
@@ -198,7 +203,7 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
    taller, and there is no JS position-syncing to break on resize. */
 .grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch);
         gap: 0 2rem; }
-p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure);
+p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); color: var(--text);
       --line: var(--lead); line-height: var(--line); }
 /* Justified, as the book is set, and hyphenated where the book hyphenates: the
    paragraph carries a soft hyphen (U+00AD) at every break the press allows
@@ -444,7 +449,7 @@ a.fn.on::after { background: currentColor; }
 .notes h3 { margin: 0 0 .6rem; font-size: .82rem; font-weight: 400; font-variant-caps: small-caps;
             letter-spacing: .06em; color: var(--faint); }
 .js .notes { display: none; }
-.note { margin: 0 0 1rem; }
+.note { margin: 0 0 1rem; color: var(--text); }
 :is(.note, .pop) p { margin: 0; }
 :is(.note, .pop) p + p { margin-top: .5rem; }
 :is(.note, .pop) .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--link);
@@ -458,7 +463,7 @@ a.fn.on::after { background: currentColor; }
 :is(.note, .pop) .src a { color: var(--faint); }
 /* The card: under the line, a pointer to the ring, scrolling with the text. */
 .pop { position: absolute; z-index: 5; width: min(25rem, calc(100% - 1rem));
-       font-size: 1.05rem; line-height: var(--lead); color: var(--ink); font-variant-numeric: lining-nums;
+       font-size: 1.05rem; line-height: var(--lead); color: var(--text); font-variant-numeric: lining-nums;
        background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
        border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
 .pop:focus { outline: none; }
