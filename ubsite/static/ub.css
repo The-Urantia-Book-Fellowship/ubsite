@@ -650,8 +650,14 @@ dialog.settings .done span { position: relative; top: var(--lift); }
 .counts dd { margin: 0; font-size: 1.3rem; }
 .toc, .parts, .heads { list-style: none; padding: 0; }
 .toc li { display: flex; gap: .8rem; padding: .18rem 0; border-bottom: 1px solid var(--rule); }
-.toc a { flex: 1; text-decoration: none; }
-.toc b { display: inline-block; width: 2.2rem; color: var(--faint); font-weight: 400; }
+/* The number in a column of its own, set to the right as a book's contents
+   sets it: 3ch holds 196 in any face, the book's lining figures being
+   tabular. A title too long for its line hangs clear of the number. */
+.toc a { flex: 1; text-decoration: none; display: grid;
+  grid-template-columns: 3ch 1fr; column-gap: .65em; }
+.toc b { text-align: right; color: var(--faint); font-weight: 400; }
+.apps a { grid-template-columns: 1em 1fr; }
+.apps b { text-align: left; }
 .toc i { color: var(--faint); font-size: .9rem; }
 .letters { display: flex; flex-wrap: wrap; gap: .5rem; }
 .letters a { border: 1px solid var(--rule); border-radius: 3px; padding: .5rem .7rem;
