@@ -10,10 +10,12 @@ import pathlib
 import sqlite3
 import sys
 import unittest
+from urllib.parse import quote
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from test_appendix_pages import DB, get  # noqa: E402
 from ubsite.app import TOKENIZE, _around, _marked, fts_query, mark_terms  # noqa: E402
 
 ROWS = ["the self-conscious mind", "Adam and Eve", "the Adamic mission",
@@ -134,6 +136,43 @@ class NoteHit(unittest.TestCase):
     def test_the_marks_after_escaping(self):
         self.assertEqual(str(_marked("Webster\u2019s & <b> \x02forego\x03")),
                          "Webster\u2019s &amp; &lt;b&gt; <mark>forego</mark>")
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class Jump(unittest.TestCase):
+    """A citation typed into the box opens where it points, a range whole."""
+
+    def test_where_each_citation_opens(self):
+        for q, to in [("86:5.14", "/86:5.14"),
+                      ("86:5.14-15", "/86:5.14-15"),
+                      ("86:5.14\u201315", "/86:5.14-15"),     # an en dash
+                      ("86:5.14-15,17", "/86:5.14-15"),       # one range to an address
+                      ("86:5.14,16", "/86:5.14"),             # a list is no range
+                      ("86:5.15-14", "/86:5.15-14"),          # the page says what is wrong
+                      ("0:0.0-1", "/0:0.0-1"),
+                      ("76:2sec", "/76:2"),
+                      ("Paper 100", "/100")]:
+            with self.subTest(q=q):
+                status, headers, _ = get("/search?q=" + quote(q))
+                self.assertEqual((status, headers.get("location")), (303, to))
+
+    def test_an_address_names_paragraphs_that_exist(self):
+        for url in ["/86:5.1", "/86:5.17", "/86:5.14-15", "/86:5.1-17"]:
+            with self.subTest(url=url):
+                self.assertEqual(get(url)[0], 200)
+        for url, says in [
+                ("/0:0.0-1", 'There is no paragraph 0:0.0: 0:0 runs from'
+                             ' <a href="/0:0.1">0:0.1</a> to <a href="/0:0.6">0:0.6</a>.'),
+                ("/0:0.0", "There is no paragraph 0:0.0:"),
+                ("/86:5.18", 'There is no paragraph 86:5.18: 86:5 runs from'
+                             ' <a href="/86:5.1">86:5.1</a> to <a href="/86:5.17">86:5.17</a>.'),
+                ("/86:5.14-99", "There is no paragraph 86:5.99:"),
+                ("/86:5.15-14", "A range runs forwards, in the order of the book:"
+                                ' <a href="/86:5.14-15">86:5.14-15</a>, not 86:5.15-14.')]:
+            with self.subTest(url=url):
+                status, _, body = get(url)
+                self.assertEqual(status, 404)
+                self.assertIn(says, body)
 
 
 if __name__ == "__main__":

@@ -510,8 +510,15 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
         tg = list(jump.expand())
         if tg:
             p, s, n = tg[0]
-            return RedirectResponse(
-                f"/{p}:{s}" + (f".{n}" if n is not None else ""), status_code=303)
+            # A range of paragraphs opens whole, /86:5.14-15, as the address
+            # takes it, and the address says what is wrong with one that
+            # cannot be.  Only the first span: an address holds one range, not
+            # a list, so 86:5.14,16 opens at 14 as before.
+            if jump.kind == "para" and jump.spans[0][1] != n:
+                n = f"{n}-{jump.spans[0][1]}"
+            to = (f"/{p}" if s is None else f"/{p}:{s}"
+                  + (f".{n}" if n is not None else ""))
+            return RedirectResponse(to, status_code=303)
     scope = scope if scope in ("index", "text", "notes") else ""
     number = int(page_no) if page_no.isdigit() and int(page_no) > 0 else 1
     fq = fts_query(q)
@@ -824,6 +831,23 @@ def read(request: Request, ref: str):
                                 " and the papers run to 196.")
     if s is None:
         return missing(request, f"Paper {paper} has no section {sec}.")
+    # The paragraphs named must exist and a range run forwards, as the API
+    # requires: /0:0.0-1 or /86:5.15-14 once opened the section with nothing
+    # marked and nothing said.  Every section numbers its paragraphs 1..N.
+    if focus is not None:
+        here = f"{paper}:{sec}"
+        n = con.execute("SELECT MAX(para_n) FROM paragraph WHERE paper_n=? AND section_n=?",
+                        (paper, sec)).fetchone()[0]
+        # What the message offers instead is a link to it.
+        go = Markup('<a href="/{0}">{0}</a>').format
+        for k in (focus, last):
+            if not 1 <= k <= n:
+                return missing(request, Markup("There is no paragraph {}: {} runs from {} to {}.")
+                               .format(f"{here}.{k}", here, go(f"{here}.1"), go(f"{here}.{n}")))
+        if last < focus:
+            return missing(request, Markup("A range runs forwards, in the order of the book:"
+                                           " {}, not {}.")
+                           .format(go(f"{here}.{last}-{focus}"), f"{here}.{focus}-{last}"))
     rows = queries.section(con, paper, sec)
     nxt = con.execute("SELECT n, title FROM section WHERE paper_n=? AND n>? ORDER BY n LIMIT 1",
                       (paper, sec)).fetchone()

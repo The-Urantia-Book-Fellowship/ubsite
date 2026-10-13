@@ -217,6 +217,22 @@ def run(con) -> int:
           + ("" if not loff else f"   {loff} FAIL"))
     if loff:
         bad += 1
+    # An index citation may link a range, /48:6.2-4, which the page opens only
+    # when both ends are there and it runs forwards.
+    k = loff = 0
+    for (h,) in con.execute("SELECT text_html FROM index_entry"):
+        for to in re.findall(r'<a class="cit" href="/([^"]*)"', h):
+            k += 1
+            m = re.fullmatch(r"(\d+:\d+)\.(\d+)-(\d+)", to)
+            if not (to in places if m is None else
+                    f"{m[1]}.{m[2]}" in places and f"{m[1]}.{m[3]}" in places
+                    and int(m[2]) < int(m[3])):
+                loff += 1
+                print(f"            index link to nowhere: /{to}")
+    print(f"            {k - loff}/{k} index links into the book land"
+          + ("" if not loff else f"   {loff} FAIL"))
+    if loff:
+        bad += 1
     k = toff = 0
     for text, h in con.execute("SELECT title, title_html FROM section WHERE n > 0"):
         k += 1

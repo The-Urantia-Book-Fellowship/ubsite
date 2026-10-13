@@ -111,11 +111,12 @@ def _cit_href(raw: str) -> str | None:
     Uses the printed form directly when it is already a valid URL reference, so
     `48:6.2-4` links to the whole range and the reader arrives with all three
     paragraphs marked.  Otherwise the first expanded target: a comma list goes
-    to its first paragraph, `76:2sec` to the section, `Paper 61` to the paper.
+    to its first paragraph, `76:2sec` to the section, `Paper 61` to the paper,
+    and so does a range printed backwards (`39:3.9-8`), which the page refuses.
     """
-    if RE_URLREF.match(raw):
-        return "/" + raw
     c = cite.parse(raw)
+    if RE_URLREF.match(raw) and not (c and "inverted-range" in c.flags):
+        return "/" + raw
     if c is None:
         return None
     for paper, sec, n in c.expand():
