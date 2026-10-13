@@ -4,6 +4,9 @@
 {#- What kind of thing this is, when an appendix lists it: a being, a person, a place. #}
 {% if listed %}<p class="listed">Listed in {% for l in listed %}<a href="{{ appendix_href(l.scope, l.anchor) }}">Appendix {{ l.scope }}, {{ l.title }}</a>{% if not loop.last %} and {% endif %}{% endfor %}</p>{% endif %}
 {% set n = tree|length - 1 %}{% if n %}<p class="hint">{{ n }} {{ 'subentry' if n == 1 else 'subentries' }}</p>{% endif %}
+{#- Its reading path: every paragraph it cites, read as one text (path.html). #}
+{% if path %}<p class="readpath"><a href="/i/{{ root.slug }}/read">Read it through</a> —
+  {{ path.n_paragraphs }} paragraphs, {{ reading_time(path.n_words) }}</p>{% endif %}
 <ul class="tree">
 {% for e in tree %}
   <li class="l{{ e.level }}" id="{{ e.anchor }}">{{ e.text_html|safe }}</li>

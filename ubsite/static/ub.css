@@ -659,6 +659,7 @@ dialog.settings .done span { position: relative; top: var(--lift); }
 .letters span { display: block; font-size: .82rem; color: var(--faint); }
 .heads li { padding: .12rem 0; }
 .heads span { color: var(--faint); font-size: .85rem; }
+.readpath { margin: -.6rem 0 1.2rem; font-size: 1.05rem; color: var(--faint); }
 .tree { list-style: none; padding: 0; }
 .tree li { padding: .1rem 0; }
 .tree li { padding: .12rem 0; text-indent: -1.4em; padding-left: 1.4em; }
@@ -850,6 +851,115 @@ main.results { position: relative; }
 a.cit { color: var(--faint); text-decoration: none; white-space: nowrap; }
 a.cit:hover { color: var(--link); text-decoration: underline; }
 .tree i, .hits i { font-style: italic; }
+
+/* ---- reading paths (path.html) ----------------------------------------- */
+/* A headword's citations read as one text, /i/<slug>/read.  The paragraphs are
+   the reader's own (p.t, .num, .verse), so every Setting holds for them; each
+   stands in a row with what brings it in beside it, in the margin's column on
+   a wide screen and above it on a phone.  The gutter is the reader's. */
+.path { max-width: calc(4.4rem + var(--measure) + 2rem + 26ch + 2.4rem); margin: 0 auto;
+        padding: 2rem 1.2rem 0 calc(1.2rem + 4.4rem); }
+.path .row, details.gap > summary, button.foldup {
+        display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch); gap: 0 2rem; }
+.path .row > :not(.cites) { grid-column: 1; grid-row: 1; min-width: 0; }
+.path .row > .cites { grid-column: 2; grid-row: 1; }
+.pathtop { max-width: var(--measure); margin-bottom: 1.6rem; }
+.pathtop .kicker { font-size: 1rem; letter-spacing: .12em; text-transform: uppercase;
+                   color: var(--faint); margin: 0; }
+.pathtop h1 a { color: inherit; text-decoration: none; }
+.pathtop h1 a:hover { color: var(--link); }
+.pathtop .stat { color: var(--faint); font-size: .95rem; margin: 0 0 .9rem; }
+.pathtop .desc { font-size: 1.02rem; margin: .9rem 0 0; }
+/* Book order or By theme: two links, the one being read on the field. */
+.orders { display: inline-flex; border: 1px solid var(--field-edge); border-radius: 999px;
+          overflow: hidden; font-size: .95rem; line-height: 1.2; }
+.orders a { padding: .35rem 1rem .3rem; text-decoration: none; }
+.orders a + a { border-left: 1px solid var(--field-edge); }
+.orders a[aria-current] { background: var(--field); color: var(--ink); }
+.orders a:not([aria-current]):hover { text-decoration: underline; }
+.orders span { position: relative; top: var(--lift); }
+/* The entries bringing a paragraph in, as the margin index draws its chips. */
+.path .cites { list-style: none; margin: .25rem 0 0; padding: 0; font-size: 1rem;
+               line-height: 1.45; color: var(--faint); }
+.path .cites li { margin: 0 0 .3rem; }
+.path .cites a { color: var(--faint); text-decoration: none; display: block;
+                 border-left: 2px solid var(--rule); padding-left: .5rem; }
+.path .cites a:hover { color: var(--ink); border-left-color: var(--link); }
+.path .cites .at { margin: .5rem 0 .15rem; font-size: .78rem; line-height: 1.2; }
+.path .cites .at:first-child { margin-top: .3rem; }
+.path .cites .cites { margin: 0; }
+/* Running heads: where in the book the next paragraphs stand. */
+.path .rh { margin-top: 2.1rem; }
+.path .rh p { margin: 0; }
+.path .rh a { color: inherit; text-decoration: none; }
+.path .rh a:hover { color: var(--link); text-decoration: underline; }
+.rh-paper { font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.path .rh .rh-sec { font-size: 1.2rem; font-variant-caps: small-caps; letter-spacing: .03em;
+                    margin: .1rem 0 .7rem; color: var(--text); }
+/* A paragraph drawn above, in one line, and a paper cited whole. */
+.path .again p.t { text-align: start; color: var(--faint); font-size: .95rem; }
+.path .again .num { font-size: .82rem; top: .1rem; }
+.signpost { margin: 0 0 1rem; padding: .5rem .8rem; border: 1px solid var(--rule);
+            border-radius: 4px; font-size: 1.02rem; }
+.path p.t[id] { scroll-margin-top: 3rem; }
+.path p.t:target { background: color-mix(in oklch, var(--link) 12%, transparent); border-radius: 3px;
+                   box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
+/* What a section has between two paragraphs drawn, folded.  Its rows are the
+   text's own; the line that shows or folds them stands in the text column,
+   above them and, once they are open, below them too (ub.js).  Set off from
+   the path by measure alone, a tenth narrower, never by tone (Tigran,
+   2026-10-13: "I hate reading greyed out text"). */
+details.gap { margin: -.25rem 0 .9rem; }
+details.gap > summary { list-style: none; cursor: pointer; }
+details.gap > summary::-webkit-details-marker { display: none; }
+details.gap[open] > summary { margin-bottom: .7rem; }
+.gl { display: flex; align-items: center; gap: .7rem; color: var(--faint); min-width: 0; }
+.gl::before, .gl::after { content: ""; flex: 1 1 1rem; border-top: 1px dashed var(--rule); }
+.gl .lbl { font-size: .86rem; text-align: center; }
+.gl .act { color: var(--link); }
+.gl .act::after { content: "show"; }
+details.gap[open] .gl .act::after { content: "fold away"; }
+summary:hover .gl, .foldup:hover .gl { color: var(--ink); }
+summary:hover .act, .foldup:hover .act { text-decoration: underline; }
+button.foldup { width: 100%; font: inherit; line-height: inherit; color: inherit; text-align: inherit;
+                background: none; border: 0; padding: 0; margin: .15rem 0 .2rem; cursor: pointer; }
+:root:not(.js) button.foldup { display: none; }
+.gap .row:not(.again) > :is(p.t, .verse) { width: 90%; }
+/* By theme: its chapters, listed and headed. */
+.chapters { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+            padding: .6rem 0 .4rem; margin: 0 0 1rem; max-width: calc(var(--measure) + 2rem + 26ch); }
+.chapters ol { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 2rem; font-size: 1rem; }
+.chapters li { break-inside: avoid; margin: 0 0 .2rem; }
+.chapters a { text-decoration: none; }
+.chapters a:hover { text-decoration: underline; }
+.path .count { color: var(--faint); font-size: .85rem; font-variant-numeric: lining-nums tabular-nums;
+               white-space: nowrap; }
+h2.chap { font-size: 1.9rem; line-height: 1.2; font-variant-caps: normal; letter-spacing: 0;
+          margin: 3rem 0 0; padding-top: 1rem; border-top: 1px solid var(--rule);
+          max-width: var(--measure); text-wrap: balance; }
+h2.chap a { color: inherit; text-decoration: none; }
+h2.chap a:hover { color: var(--link); }
+h2.chap .own { color: var(--faint); font-size: .9rem; font-style: italic; }
+h2.chap .count { font-size: .95rem; }
+.chapters + h2.chap { border-top: 0; padding-top: 0; margin-top: 1.6rem; }
+h2.chap + .rh { margin-top: 1rem; }
+.path .onward { margin-top: 3.5rem; border-top: 1px solid var(--rule); max-width: var(--measure); }
+.path .onward h2 { margin: 1rem 0 .4rem; }
+.path .onward p { margin: 0 0 .4rem; }
+:root[data-width="full"] .path { max-width: none; }
+:root[data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
+@media (max-width: 62rem) {
+  .path { padding: 1.4rem 1.2rem 0; }
+  .path .row, details.gap > summary, button.foldup { display: block; }
+  .path .row > .cites { margin: 0 0 .3rem; font-size: .92rem; }
+  .path .again .num { top: .05rem; }
+  .chapters ol { columns: 1; }
+}
+@media print {
+  .path .row, details.gap > summary { display: block; }
+  .orders, button.foldup { display: none; }
+}
 
 /* ---- front page -------------------------------------------------------- */
 /* The mark, inline from static/favicon.svg (app.py _mark), coloured by the theme. */

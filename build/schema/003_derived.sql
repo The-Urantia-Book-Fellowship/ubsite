@@ -31,6 +31,20 @@ CREATE TABLE entry_stats (
   n_descendants INTEGER NOT NULL
 );
 
+-- A headword's reading path (/i/<slug>/read): every paragraph it cites, read
+-- as one text.  A row for each A-Z headword that has one -- that cites
+-- PATH_MIN paragraphs or more (derive.py) -- and for no other.  Paragraphs
+-- are those cited precisely and every paragraph of a section cited whole; a
+-- paper cited whole is a signpost on the page, and counts none.  Chapters are
+-- what By theme reads it in: the headword's own citations, and each
+-- level-2 subtree that cites anything.
+CREATE TABLE reading_path (
+  root_id INTEGER PRIMARY KEY REFERENCES index_entry(id),
+  n_paragraphs INTEGER NOT NULL,
+  n_words INTEGER NOT NULL,
+  n_chapters INTEGER NOT NULL
+);
+
 -- The concept graph, at LEVEL-1 HEADWORD grain and paragraph precision only.
 -- Over all 32,837 entries this explodes; over 4,736 roots it does not.  A
 -- section- or paper-wide citation would make one paper emit a clique of its

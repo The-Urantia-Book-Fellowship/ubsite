@@ -329,4 +329,17 @@
       for (var j = gone.length - 1; j >= 0; j--) gone[j][0].insertData(gone[j][1], '­');
     });
   });
+
+  // A reading path's fold, folded from the line below it (path.html): its
+  // line above then stands where this one stood, so the paragraph after it
+  // stays where the reader was.  On the document, as listen.js swaps <main>.
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('button.foldup'), d, y;
+    if (!b) return;
+    d = b.closest('details');
+    y = b.getBoundingClientRect().top;
+    d.open = false;
+    window.scrollBy({ top: d.querySelector('summary').getBoundingClientRect().top - y,
+                      behavior: 'instant' });
+  });
 })();

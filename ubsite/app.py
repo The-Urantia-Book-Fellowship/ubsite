@@ -80,6 +80,18 @@ def appendix_href(scope: str, anchor: str) -> str:
 
 T.env.globals["appendix_href"] = appendix_href
 
+
+def reading_time(words: int) -> str:
+    """How long a reading path takes, at 230 words a minute: "about 12
+    minutes", and in hours from an hour and a half."""
+    minutes = max(1, round(words / 230))
+    if minutes < 90:
+        return f"about {minutes} minute{'s' if minutes > 1 else ''}"
+    return f"about {round(minutes / 60)} hours"
+
+
+T.env.globals["reading_time"] = reading_time
+
 # Search reaches an Appendix B-F row only when no A-Z headword has its name: the
 # other 1,332 would come up twice, once as the headword and once as the row.
 APP_OWN = (" OR (e.scope IN ('B','C','D','E','F')"
@@ -636,6 +648,34 @@ def concept(request: Request, slug: str):
     if root is None:
         return missing(request, "No headword in the index has this address.")
     return page(request, "concept.html", root=root, **queries.concept(con, root["id"]))
+
+
+# A headword's reading path: every paragraph it cites, read as one text, in the
+# order of the book or by the index's own groups (queries.reading_path).  A
+# headword citing too few paragraphs to have one goes to its concept page, and
+# one whose citations all fall in one group has nothing to read by theme.
+@app.get("/i/{slug}/read", response_class=HTMLResponse)
+def reading_path(request: Request, slug: str):
+    return _reading_path(request, slug, "book")
+
+
+@app.get("/i/{slug}/read/theme", response_class=HTMLResponse)
+def reading_path_theme(request: Request, slug: str):
+    return _reading_path(request, slug, "theme")
+
+
+def _reading_path(request: Request, slug: str, by: str):
+    con = db()
+    root = con.execute("SELECT * FROM index_entry WHERE slug=?", (slug,)).fetchone()
+    if root is None:
+        return missing(request, "No headword in the index has this address.")
+    c = queries.concept(con, root["id"])
+    if c["path"] is None:
+        return RedirectResponse(f"/i/{slug}", status_code=307)
+    if by == "theme" and c["path"]["n_chapters"] < 2:
+        return RedirectResponse(f"/i/{slug}/read", status_code=307)
+    return page(request, "path.html", path=c["path"], xrefs=c["xrefs"], near=c["near"],
+                **queries.reading_path(con, root["id"], by))
 
 
 @app.get("/appendix", response_class=HTMLResponse)

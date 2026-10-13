@@ -164,7 +164,220 @@ def concept(con: sqlite3.Connection, root_id: int) -> dict:
         "                                   ELSE c.a_root_id END"
         " WHERE c.a_root_id=? OR c.b_root_id=? ORDER BY c.shared DESC LIMIT 8",
         (root_id, root_id, root_id)).fetchall()
-    return {"tree": tree, "xrefs": xrefs, "listed": listed, "near": near}
+    # Its reading path, if it cites enough paragraphs to have one (derive.py).
+    path = con.execute("SELECT * FROM reading_path WHERE root_id=?", (root_id,)).fetchone()
+    return {"tree": tree, "xrefs": xrefs, "listed": listed, "near": near, "path": path}
+
+
+# ---- reading paths -----------------------------------------------------------
+
+# A 1955 reading's ring, which is empty.  A path is read for its topic, and the
+# reader keeps the readings; By theme can also draw a paragraph twice, folded
+# and cited, and the ring's id would repeat.
+RING = re.compile(r'<a class="fn"[^>]*></a>')
+BR = re.compile(r"\s*<br\s*/?>\s*")
+SEP = " › "
+
+
+def _label(e, depth: int) -> str:
+    """An entry named from where it stands: its path less the first `depth`
+    parts.  Under prayer, "prayer › private prayer" is "private prayer"."""
+    return SEP.join(e["path_plain"].split(SEP)[depth:])
+
+
+def _add(d: dict, k, e) -> None:
+    lst = d.setdefault(k, [])
+    if e not in lst:
+        lst.append(e)
+
+
+class _Sel:
+    """What a set of citations draws: paragraphs cited precisely (`cited`), and
+    the entries opening a citation at each (`opens`); sections cited whole
+    (`secs`) and papers cited whole (`papers`), with their entries."""
+
+    def __init__(self, targets, by_id):
+        self.cited: set = set()
+        self.opens: dict = {}
+        self.secs: dict = {}
+        self.papers: dict = {}
+        for t in targets:
+            e = by_id[t["entry_id"]]
+            if t["precision"] == "para":
+                self.cited.add(t["paragraph_id"])
+                if t["opens"]:
+                    _add(self.opens, t["paragraph_id"], e)
+            elif t["precision"] == "sec":
+                _add(self.secs, (t["paper"], t["section"]), e)
+            else:
+                _add(self.papers, t["paper"], e)
+
+
+def reading_path(con: sqlite3.Connection, root_id: int, by: str = "book") -> dict:
+    """A headword's citations, read as one text: /i/<slug>/read.
+
+    by        "book", one run in the order of the book; or "theme", the
+              headword's own citations and then each level-2 subentry's
+              subtree, in the index's order, each in the order of the book
+    chapters  each {id, entry, name, own, n_full, n_again, rows}; book order
+              is one chapter with no name
+    rows      in the order of the book, each a dict with a `kind`:
+              head   where the section changes: its paper's and its own title,
+                     and the entries citing it whole (`why`)
+              sign   a paper cited whole: a pointer into the reader, not its text
+              stars  a separator the book prints between two paragraphs drawn
+              p      a paragraph, and the entries whose citation opens there
+                     (`why`): a range beside its first paragraph only, the
+                     margin's rule (CHIP_OPENS)
+              lines  lines of one block of verse, drawn as one, each line's
+                     entries under its reference (`why`, [(ref, entries)])
+              again  a paragraph drawn in full above: one line, with the
+                     `anchor` it was drawn at and `where`, its chapter
+              fold   what a section has between two paragraphs drawn and does
+                     not cite here: `rows` as above, without entries
+    A paragraph is drawn in full once on the page, `id` true, where it takes
+    its reference as its id; a fold's copy of one cited elsewhere has none.
+    An entry in `why` is {label, whole, level, anchor}, named from where it
+    stands.  Also: n_full and n_words (what reading_path counts), n_again,
+    n_folds, and refw, the longest reference drawn.
+    """
+    root = con.execute("SELECT * FROM index_entry WHERE id=?", (root_id,)).fetchone()
+    entries = con.execute(
+        "SELECT id, parent_id, level, anchor, path_plain FROM index_entry"
+        " WHERE root_id=? ORDER BY ord", (root_id,)).fetchall()
+    by_id = {e["id"]: e for e in entries}
+    level2: dict[int, int] = {}                     # in print order, a parent first
+    for e in entries:
+        level2[e["id"]] = e["id"] if e["level"] <= 2 else level2[e["parent_id"]]
+    targets = con.execute(
+        "SELECT t.entry_id, t.precision, t.paragraph_id, t.paper, t.section, t.opens"
+        " FROM citation_target t JOIN citation c ON c.id=t.citation_id"
+        " JOIN index_entry e ON e.id=t.entry_id"
+        " WHERE e.root_id=? ORDER BY e.ord, c.ord, t.id", (root_id,)).fetchall()
+    # Every paragraph of every section the headword touches, for the folds.
+    P: dict[int, dict] = {}
+    by_sec: dict[tuple, list] = {}
+    for r in con.execute(
+            "WITH s(pn, sn) AS ("
+            "  SELECT q.paper_n, q.section_n FROM citation_target t"
+            "  JOIN index_entry e ON e.id=t.entry_id JOIN paragraph q ON q.id=t.paragraph_id"
+            "  WHERE e.root_id=:r AND t.precision='para'"
+            "  UNION SELECT t.paper, t.section FROM citation_target t"
+            "  JOIN index_entry e ON e.id=t.entry_id WHERE e.root_id=:r AND t.precision='sec')"
+            " SELECT p.id, p.ref, p.paper_n, p.section_n, p.para_n, p.ord, p.src, p.gap_before,"
+            "  p.heading, p.sep_before, p.verse_start, p.setoff, p.html_hy, p.word_count,"
+            "  u.page AS page_1955"
+            " FROM paragraph p JOIN s ON s.pn=p.paper_n AND s.sn=p.section_n"
+            " LEFT JOIN uf_paragraph u ON u.paragraph_id=p.id ORDER BY p.ord", {"r": root_id}):
+        q = dict(r)
+        q["html_hy"] = RING.sub("", q["html_hy"])
+        sec = by_sec.setdefault((q["paper_n"], q["section_n"]), [])
+        q["pos"] = len(sec)
+        sec.append(q)
+        P[q["id"]] = q
+    papers = dict(con.execute("SELECT n, title FROM paper").fetchall())
+    titles = {(r["paper_n"], r["n"]): r for r in con.execute(
+        "SELECT paper_n, n, title_html, combined_with FROM section")}
+    first_ord = {}
+    if any(t["precision"] == "paper" for t in targets):
+        first_ord = dict(con.execute(
+            "SELECT paper_n, MIN(ord) FROM paragraph GROUP BY paper_n").fetchall())
+
+    seen: dict[int, tuple] = {}                     # paragraph id -> (anchor, where)
+    tally = {"n_full": 0, "n_words": 0, "n_again": 0, "n_folds": 0, "refw": 1}
+
+    def why(es, depth, whole=""):
+        out = []
+        for e in es:
+            label = _label(e, depth) or (e["path_plain"] if e["level"] == 1 else "")
+            if label or whole:
+                out.append({"label": label, "whole": whole, "level": e["level"],
+                            "anchor": e["anchor"]})
+        return out
+
+    def head(p, whole):
+        t = titles[(p["paper_n"], p["section_n"])]
+        return {"kind": "head", "paper": p["paper_n"], "paper_title": papers[p["paper_n"]],
+                "section": p["section_n"], "combined": t["combined_with"],
+                "title": BR.sub(" ", t["title_html"] or ""), "why": whole}
+
+    def draw(items, p, es, prev, where, fold):
+        tally["refw"] = max(tally["refw"], len(p["ref"]))
+        if p["sep_before"] and prev is not None and p["pos"] == prev["pos"] + 1:
+            items.append({"kind": "stars", "stars": p["sep_before"]})
+        if p["id"] in seen:
+            anchor, w = seen[p["id"]]
+            items.append({"kind": "again", "p": p, "anchor": anchor, "where": w})
+            tally["n_again"] += not fold
+            return
+        line = {"p": p, "id": not fold}
+        last = items[-1] if items else None
+        if p["src"] == "vs":
+            items.append({"kind": "p", **line, "why": es})
+        elif (last and last["kind"] == "lines" and not p["verse_start"]
+              and last["lines"][-1]["p"]["pos"] + 1 == p["pos"]
+              and last["lines"][-1]["p"]["section_n"] == p["section_n"]):
+            last["lines"].append(line)
+            if es:
+                last["why"].append((p["ref"], es))
+        else:
+            items.append({"kind": "lines", "lines": [line],
+                          "why": [(p["ref"], es)] if es else []})
+        if not fold:
+            seen[p["id"]] = (p["ref"], where)
+            tally["n_full"] += 1
+            tally["n_words"] += p["word_count"]
+
+    def run(sel, depth, where):
+        shown = set(sel.cited)
+        for k in sel.secs:
+            shown.update(q["id"] for q in by_sec[k])
+        events = sorted([(P[i]["ord"], 1, P[i]) for i in shown]
+                        + [(first_ord[n], 0, n) for n in sel.papers],
+                        key=lambda x: (x[0], x[1]))
+        items: list = []
+        last = prev = None
+        for _, kind, x in events:
+            if kind == 0:
+                items.append({"kind": "sign", "paper": x, "title": papers[x],
+                              "why": why(sel.papers[x], depth, "the whole paper")})
+                last = prev = None
+                continue
+            p, k = x, (x["paper_n"], x["section_n"])
+            if k != last:
+                items.append(head(p, why(sel.secs.get(k, []), depth, "the whole section")))
+                last, prev = k, None
+            elif p["pos"] > prev["pos"] + 1:
+                between = by_sec[k][prev["pos"] + 1:p["pos"]]
+                inner: list = []
+                for q in between:
+                    draw(inner, q, [], prev, where, True)
+                    prev = q
+                items.append({"kind": "fold", "first": between[0], "last": between[-1],
+                              "n": len(between), "rows": inner})
+                tally["n_folds"] += 1
+            draw(items, p, why(sel.opens.get(p["id"], []), depth), prev, where, False)
+            prev = p
+        return items
+
+    if by == "theme":
+        groups = [(root, [t for t in targets if t["entry_id"] == root_id])]
+        groups += [(e, [t for t in targets if t["entry_id"] != root_id
+                        and level2[t["entry_id"]] == e["id"]])
+                   for e in entries if e["level"] == 2]
+        groups = [g for g in groups if g[1]]
+    else:
+        groups = [(None, targets)]
+    chapters = []
+    for i, (e, ts) in enumerate(groups):
+        own = e is None or e["id"] == root_id
+        name = "" if e is None else root["headword"] if own else _label(e, 1)
+        full, again = tally["n_full"], tally["n_again"]
+        items = run(_Sel(ts, by_id), 1 if own else 2, name)
+        chapters.append({"id": f"ch{i + 1}", "entry": e, "name": name, "own": own,
+                         "n_full": tally["n_full"] - full,
+                         "n_again": tally["n_again"] - again, "rows": items})
+    return {"root": root, "by": by, "chapters": chapters, **tally}
 
 
 def appendices(con: sqlite3.Connection) -> list:

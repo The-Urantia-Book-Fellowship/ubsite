@@ -122,6 +122,7 @@ def main(argv: list[str]) -> int:
         derive.reverse_map(con)
         derive.density(con)
         derive.entry_stats(con)
+        print(f"  {derive.reading_path(con):,} headwords have a reading path")
         derive.anchors(con, report)
         n_links = derive.links(con, report)
         print(f"  {n_links:,} entries name a headword, now linked")
@@ -194,7 +195,8 @@ def main(argv: list[str]) -> int:
                                      " WHERE scope IN ('B','C','D','E','F')"),
                 ("appendix_heads", "SELECT COUNT(*) FROM appendix_head"),
                 ("para_citers", "SELECT COUNT(*) FROM para_citers"),
-                ("cocitation_pairs", "SELECT COUNT(*) FROM cocitation")]:
+                ("cocitation_pairs", "SELECT COUNT(*) FROM cocitation"),
+                ("reading_paths", "SELECT COUNT(*) FROM reading_path")]:
             con.execute("INSERT INTO stat VALUES (?,?)",
                         (k, con.execute(q).fetchone()[0]))
         con.executemany("INSERT INTO stat VALUES (?,?)", sorted(audio_stats.items()))

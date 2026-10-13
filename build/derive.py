@@ -73,6 +73,36 @@ def entry_stats(con) -> None:
         FROM index_entry e""")
 
 
+
+# A headword citing fewer paragraphs than this has no reading path: two read
+# as well from its concept page (Tigran, 2026-10-13).
+PATH_MIN = 3
+
+
+def reading_path(con) -> int:
+    """reading_path: which headwords have one, and how long it is."""
+    level2: dict[int, int] = {}        # entry -> its level-2 ancestor, or itself at level 1
+    for i, parent, level in con.execute(
+            "SELECT id, parent_id, level FROM index_entry WHERE scope = 'az' ORDER BY level"):
+        level2[i] = i if level <= 2 else level2[parent]
+    paras: dict[int, set[int]] = {}
+    chapters: dict[int, set[int]] = {}
+    for root, entry in con.execute(
+            "SELECT DISTINCT e.root_id, e.id FROM citation_target t"
+            " JOIN index_entry e ON e.id = t.entry_id WHERE e.scope = 'az'"):
+        chapters.setdefault(root, set()).add(level2[entry])
+    for root, pid in con.execute(
+            "SELECT DISTINCT e.root_id, c.paragraph_id FROM para_citers c"
+            " JOIN index_entry e ON e.id = c.entry_id"
+            " WHERE e.scope = 'az' AND c.precision IN ('para', 'sec')"):
+        paras.setdefault(root, set()).add(pid)
+    words = dict(con.execute("SELECT id, word_count FROM paragraph"))
+    rows = [(root, len(ps), sum(words[p] for p in ps), len(chapters[root]))
+            for root, ps in sorted(paras.items()) if len(ps) >= PATH_MIN]
+    con.executemany("INSERT INTO reading_path VALUES (?,?,?,?)", rows)
+    return len(rows)
+
+
 def anchors(con, report) -> None:
     """A fragment id for every entry, so that a link can land on a subentry.
 

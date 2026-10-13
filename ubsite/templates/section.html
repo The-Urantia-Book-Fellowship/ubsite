@@ -1,4 +1,5 @@
 {% extends "base.html" %}{% from "_note.html" import note %}
+{% from "_para.html" import para %}
 {% from "_rail.html" import rail %}
 {# An index entry beside the text.  A headword or subentry links to its line on
    the concept page; an appendix entry to its line on the appendix page, named
@@ -6,22 +7,6 @@
 {% macro chip(c) -%}
 {% if c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path }}</a>
 {%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ c.event or c.path }}</a>{% endif %}
-{%- endmacro %}
-{#- A paragraph of the text, or a line of verse.  A dot-leader row's words and its
-    figure, split at the leader, stand in a flex line of their own, so that the
-    paragraph around them is a paragraph like any other, and a row too long for a
-    phone's line can break before its figure.  The leader goes with the figure.
-    check_db holds every leader outside all other markup, one to a paragraph, so
-    each half is whole. #}
-{% macro para(p) -%}
-{%- set hit = focus and p.para_n >= focus and p.para_n <= last %}
-{%- set row = p.html_hy.split('<span class="leader"></span>') %}
-{%- set pcm %}{% if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}{% endset %}
-<p class="t{% if p.section_n == 0 and p.para_n == 1 %} opening{% endif %}{% if p.gap_before %} pc{% endif %}{% if p.heading %} head{% endif %}{% if p.src != 'vs' %} verse{% endif %}{% if p.setoff %} setoff{% endif %}{% if hit %} hit{% endif %}"
-         id="{{ p.ref }}"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
-         {%- if p.page_1955 %}<span class="pg" data-pg="{{ p.page_1955 }}"></span>{% endif %}
-         {%- if row|length == 2 %}<span class="leadrow"><span class="lab">{{ pcm }}{{ row[0]|safe }}</span><span class="fig"><span class="leader"></span>{{ row[1]|safe }}</span></span>
-         {%- else %}{{ pcm }}{{ p.html_hy|safe }}{% endif %}</p>
 {%- endmacro %}
 {% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
 {% block body %}
@@ -61,7 +46,7 @@
       <div class="stars" role="separator" data-stars="{{ first.sep_before }}"></div>
       {%- endif %}
       {%- if 'p' in r %}
-      {{ para(r.p) }}
+      {{ para(r.p, focus and r.p.para_n >= focus and r.p.para_n <= last) }}
       {#- Nothing at all inside when nothing stands beside the paragraph, so
           that .a:empty holds and a phone draws no box for it. #}
       {%- set cs = citers.get(r.p.id, []) %}
@@ -79,7 +64,7 @@
           line cited many times opens no gap in the verse. #}
       <div class="verse">
       {%- for q in r.lines %}
-      {{ para(q) }}
+      {{ para(q, focus and q.para_n >= focus and q.para_n <= last) }}
       {%- endfor %}
       </div>
       <div class="a">

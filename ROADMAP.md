@@ -30,8 +30,9 @@ Every paragraph carries the index entries that cite it. On paper the index runs 
 **2. Concept pages for all 4,736 headwords.** `[built]`
 Each headword's subtree, its cited paragraphs, its cross-references resolved to links. An encyclopedia of the revelation that nobody had to write, because it was already written — editorially vetted, not machine-derived.
 
-**3. The reading path.** *(not built — the best idea here and nearly free)*
+**3. The reading path.** `[built]`
 A headword's subentry list is a hand-written outline of a topic across the whole book. Render each subentry as a heading with its cited paragraph verbatim beneath, in book order, and you have a topical anthology of the Urantia Papers compiled by a careful human. Four thousand seven hundred and thirty-six of them. Route `/i/<slug>/read`. Perhaps a day's work on top of what exists.
+Built (2026-10-13): `/i/<slug>/read` for the 2,058 headwords citing three paragraphs or more, every one drawn once, in the order of the book, with the entries citing it beside it; `/i/<slug>/read/theme` reads the same paragraphs in the index's own groups, one chapter to each level-2 subentry, wherever there are two or more. Not the outline as printed, one heading to each subentry: most headwords are alphabetical lists, and read in that order the book jumps about.
 
 **4. The chronology as an interactive timeline.** `[partly built]`
 Appendix A: **436 dated events**, from *987,000,000,000 years ago* to *1200 A.D.*, each citing paragraphs. Already parsed, already sortable — `year_sort` is in the database and monotone in document order, which is itself the proof the parse is right. Log-scale scrub from the Andronover nebula to the crucifixion. Exists nowhere, in any form.
