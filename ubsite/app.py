@@ -733,6 +733,11 @@ def list_1955(request: Request):
                 n=sum(len(g["rows"]) for g in groups))
 
 
+# The passage /api shows a reply for: across a section's end, so that the reply
+# has two sections in it.
+PASSAGE = "101:4.7-5.2"
+
+
 @app.get("/api", response_class=HTMLResponse)
 def api_docs(request: Request):
     """How another site keeps its copy of the text in step with ours (ubsite/api.py)."""
@@ -750,7 +755,8 @@ def api_docs(request: Request):
     base = str(request.base_url)
     since, reply = api.example(base)
     return page(request, "api.html", base=base, meta=meta, example=example,
-                api_licence=api.licence(base), reply=reply, reply_since=since)
+                api_licence=api.licence(base), reply=reply, reply_since=since,
+                passage=api.example_selection(base, PASSAGE), passage_refs=PASSAGE)
 
 
 @app.get("/rail/{paper:int}", include_in_schema=False)

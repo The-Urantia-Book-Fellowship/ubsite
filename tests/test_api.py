@@ -60,6 +60,15 @@ def text(since: str = "", headers: dict | None = None) -> tuple[int, dict, dict 
     return status, hs, json.loads(body) if body else None
 
 
+def select(path: str, query: str = "", headers: dict | None = None
+           ) -> tuple[int, dict, dict | None]:
+    """/api/v1/paragraphs/<sel> or /api/v1/papers/<sel>, `path` from paragraphs/ on."""
+    status, hs, body = call(f"/api/v1/{path}", query, headers)
+    if hs.get("content-encoding") == "gzip":
+        body = gzip.decompress(body)
+    return status, hs, json.loads(body) if body else None
+
+
 class Quiet(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -143,7 +152,8 @@ class Whole(Quiet):
             self.assertEqual(hs["access-control-allow-origin"], "*")
 
     def test_not_an_endpoint_is_a_json_404(self):
-        for path in ("/api/v1/nope", "/api/v2/text", "/api/v1/text/101:4.2"):
+        for path in ("/api/v1/nope", "/api/v2/text", "/api/v1/text/101:4.2",
+                     "/api/v1/paragraphs", "/api/v1/papers/"):
             status, hs, body = call(path)
             self.assertEqual(status, 404, path)
             self.assertEqual(json.loads(body)["docs"], "/api")
@@ -159,6 +169,9 @@ class Whole(Quiet):
         self.assertEqual(about["version"], self.current)
         self.assertEqual(about["counts"]["paragraphs"], 14586)
         self.assertTrue(about["links"]["text"].startswith("https://ubsite.test/api/v1/text"))
+        self.assertEqual((about["links"]["paragraphs"], about["links"]["papers"]),
+                         ("https://ubsite.test/api/v1/paragraphs/{refs}",
+                          "https://ubsite.test/api/v1/papers/{numbers}"))
         status, hs, body = call("/api/v1/versions")
         vs = json.loads(body)["versions"]
         self.assertEqual([v["version"] for v in vs], list(range(1, self.current + 1)))
@@ -261,6 +274,153 @@ class Whole(Quiet):
         self.assertIn("<code>setoff</code>", html.unescape(call("/api")[2].decode()))
 
 
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class Select(Quiet):
+    """A passage or a paper by reference: the stored records, and those around them."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        cls.current = con.execute("SELECT MAX(n) FROM text_version").fetchone()[0]
+        cls.body = {(k, key): b for k, key, b in con.execute(
+            "SELECT kind, key, body FROM text_unit")}
+        cls.order = [r for (r,) in con.execute(
+            "SELECT key FROM text_unit WHERE kind = 'paragraph' ORDER BY ord")]
+
+    def refs(self, r: dict) -> list[str]:
+        return [x["ref"] for x in r["paragraphs"]]
+
+    def between(self, a: str, b: str) -> list[str]:
+        return self.order[self.order.index(a):self.order.index(b) + 1]
+
+    def bad(self, path: str, query: str = "") -> str:
+        status, hs, r = select(path, query)
+        self.assertEqual(status, 400, path)
+        self.assertEqual(hs["access-control-allow-origin"], "*")
+        self.assertEqual(r["docs"], "/api")
+        return r["error"]
+
+    def test_one_paragraph_and_what_it_stands_in(self):
+        status, hs, r = select("paragraphs/101:4.2")
+        self.assertEqual(status, 200)
+        self.assertEqual((r["api"], r["version"]), (1, self.current))
+        self.assertEqual(r["licence"]["text"], "public domain")
+        for k in ("since", "full", "removed"):
+            self.assertNotIn(k, r, "a selection is not a step in keeping a copy")
+        self.assertEqual({k: [json.dumps(x, ensure_ascii=False, separators=(",", ":"))
+                              for x in r[k]] for k in KINDS},
+                         {"parts": [self.body[("part", "3")]],
+                          "papers": [self.body[("paper", "101")]],
+                          "sections": [self.body[("section", "101:4")]],
+                          "paragraphs": [self.body[("paragraph", "101:4.2")]]})
+
+    def test_ranges(self):
+        r = select("paragraphs/101:4.2-7")[2]
+        self.assertEqual(self.refs(r), [f"101:4.{n}" for n in range(2, 8)])
+        self.assertEqual(select("paragraphs/101:4.2\u20137")[2], r, "an en dash will do")
+        r = select("paragraphs/101:4.7-5.2")[2]
+        self.assertEqual(self.refs(r), self.between("101:4.7", "101:5.2"))
+        self.assertEqual([x["ref"] for x in r["sections"]], ["101:4", "101:5"])
+        r = select("paragraphs/101:4.7-102:1.3")[2]
+        self.assertEqual(self.refs(r), self.between("101:4.7", "102:1.3"))
+        self.assertEqual([x["paper"] for x in r["papers"]], [101, 102])
+        r = select("paragraphs/101:4-6")[2]
+        self.assertEqual(self.refs(r), [x for x in self.order
+                                        if x.split(".")[0] in ("101:4", "101:5", "101:6")])
+        r = select("paragraphs/31:10-32:0")[2]
+        self.assertEqual([x["part"] for x in r["parts"]], [1, 2], "across a part")
+
+    def test_reading_order_each_once(self):
+        r = select("paragraphs/101:4.2, 5:1.3,101:4")[2]
+        self.assertEqual(self.refs(r), ["5:1.3"] + self.between("101:4.1", "101:4.10"))
+        self.assertEqual([x["ref"] for x in r["sections"]], ["5:1", "101:4"])
+        self.assertEqual([x["part"] for x in r["parts"]], [1, 3])
+
+    def test_a_bare_number_is_not_a_paragraph(self):
+        msg = self.bad("paragraphs/61:4.3,4")
+        self.assertIn("61:4.3-4", msg)
+        self.assertIn("/api/v1/papers/4", msg)
+        self.assertIn("/api/v1/papers/4-5", self.bad("paragraphs/4-5"))
+
+    def test_what_cannot_be_read_is_a_400(self):
+        for sel in ("abc", "101:", "101:4.2-", "101:4.2,,5:1", "101:4.2,", "101:4.7-2",
+                    "101:5-4", "101:4.2-101:5", "101:4-5.2", "1e3", "101:4.2.1",
+                    ",".join(["1:1.1"] * 101)):
+            self.bad(f"paragraphs/{sel}")
+        self.assertIn("forwards", self.bad("paragraphs/101:4.7-2"))
+        self.assertIn('"uf"', self.bad("paragraphs/101:4.2", "numbering=foundation"))
+
+    def test_what_is_not_in_the_text_is_one_404(self):
+        status, hs, r = select("paragraphs/101:4.99,197:0.1,1:1.1,139:10")
+        self.assertEqual(status, 404)
+        self.assertEqual(r["missing"], ["101:4.99", "197:0.1", "139:10"])
+        self.assertEqual(hs["access-control-allow-origin"], "*")
+        self.assertEqual(select("paragraphs/101:4.2-99")[2]["missing"], ["101:4.99"])
+
+    def test_the_foundations_numbering(self):
+        r = select("paragraphs/144:5.108", "numbering=uf")[2]
+        self.assertEqual([(x["ref"], x["uf_ref"]) for x in r["paragraphs"]],
+                         [("144:5.102", "144:5.108")])
+        r = select("paragraphs/139:10", "numbering=uf")[2]
+        self.assertEqual(self.refs(r), [f"139:9.{n}" for n in range(1, 12)])
+        self.assertEqual([x["uf_ref"] for x in r["sections"]], ["139:10"])
+        r = select("paragraphs/134:6.13-16", "numbering=uf")[2]
+        self.assertEqual(self.refs(r), ["134:6.13", "134:6.14", "134:6.15"])
+        status, _, r = select("paragraphs/134:6.14,139:9", "numbering=uf")
+        self.assertEqual((status, r["missing"]), (404, ["134:6.14", "139:9"]),
+                         "a separator the Foundation numbers, and its 139:9")
+        self.assertEqual(select("paragraphs/101:4.2", "numbering=uf")[2],
+                         select("paragraphs/101:4.2")[2], "where the two agree")
+
+    def test_papers(self):
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        r = select("papers/0")[2]
+        self.assertEqual(r["parts"], [], "the Foreword is in no part")
+        self.assertEqual(len(r["paragraphs"]), con.execute(
+            "SELECT COUNT(*) FROM paragraph WHERE paper_n = 0").fetchone()[0])
+        r = select("papers/105, 101,103-105")[2]
+        self.assertEqual([x["paper"] for x in r["papers"]], [101, 103, 104, 105])
+        self.assertEqual(self.refs(r), [p for (p,) in con.execute(
+            "SELECT ref FROM paragraph WHERE paper_n IN (101, 103, 104, 105) ORDER BY ord")])
+        self.assertEqual(len(r["sections"]), con.execute(
+            "SELECT COUNT(*) FROM section WHERE paper_n IN (101, 103, 104, 105)").fetchone()[0])
+        self.assertEqual(select("papers/101", "numbering=uf")[2], select("papers/101")[2])
+        status, _, r = select("papers/197,0,200")
+        self.assertEqual((status, r["missing"]), (404, ["197", "200"]))
+        for sel in ("5-3", "abc", "1,,2", "-1"):
+            self.bad(f"papers/{sel}")
+        self.assertIn("/api/v1/paragraphs/101:4", self.bad("papers/101:4"))
+
+    def test_etag(self):
+        status, hs, _ = select("paragraphs/101:4.2-3")
+        etag = hs["etag"]
+        self.assertTrue(etag.startswith(f'W/"v{self.current}-r'))
+        self.assertEqual(select("paragraphs/101:4.3,101:4.2", "", {"if-none-match": etag})[0],
+                         304, "the same paragraphs however written")
+        self.assertEqual(select("paragraphs/101:4.2-4", "", {"if-none-match": etag})[0], 200)
+        self.assertEqual(select("papers/101", "", {"if-none-match": etag})[0], 200)
+
+    def test_http(self):
+        status, hs, body = call("/api/v1/papers/101", "", {"accept-encoding": "gzip"})
+        self.assertEqual(hs["content-encoding"], "gzip")
+        status, plain, raw = call("/api/v1/papers/101", "", {"accept-encoding": "identity"})
+        self.assertNotIn("content-encoding", plain)
+        self.assertEqual(json.loads(gzip.decompress(body)), json.loads(raw))
+        self.assertEqual((plain["access-control-allow-origin"], plain["cache-control"]),
+                         ("*", "no-cache"))
+        for path in ("/api/v1/paragraphs/101:4.2", "/api/v1/papers/101"):
+            status, hs, _ = call(path, method="OPTIONS")
+            self.assertEqual(status, 204, path)
+
+    def test_the_page_that_documents_it(self):
+        page = html.unescape(call("/api")[2].decode())
+        self.assertIn("GET https://ubsite.test/api/v1/paragraphs/101:4.2-7", page)
+        self.assertIn("?numbering=uf", page)
+        self.assertIn('"paragraphs": [ 6 records ]', page, "the reply to 101:4.7-5.2")
+        self.assertIn('"parts": [ 1 record ]', page)
+
+
 class Render(unittest.TestCase):
     def test_the_1955_marker_is_empty_and_round_trips(self):
         from build.render import render, strip_tags
@@ -302,14 +462,17 @@ class Delta(Quiet):
         dst.close()
         pending.append()
         cls.saved_db, api.DB = api.DB, copy
-        api._meta.cache_clear()
-        api._text.cache_clear()
+        cls.clear()
+
+    @staticmethod
+    def clear():
+        for cache in (api._meta, api._text, api._book, api._select):
+            cache.cache_clear()
 
     @classmethod
     def tearDownClass(cls):
         api.DB = cls.saved_db
-        api._meta.cache_clear()
-        api._text.cache_clear()
+        cls.clear()
         cls.tmp.cleanup()
         super().tearDownClass()
 
@@ -335,6 +498,13 @@ class Delta(Quiet):
         status, _, r = text(str(self.after))
         self.assertEqual(r["removed"]["paragraphs"], [])
         self.assertEqual(len(r["paragraphs"]), 0)
+
+    def test_a_passage_is_the_current_text(self):
+        status, _, r = select("paragraphs/101:4.2")
+        self.assertEqual(r["version"], self.after)
+        self.assertTrue(r["paragraphs"][0]["html"].endswith(" (edited)"))
+        status, _, r = select(f"paragraphs/{self.gone}")
+        self.assertEqual((status, r["missing"]), (404, [self.gone]))
 
 
 if __name__ == "__main__":

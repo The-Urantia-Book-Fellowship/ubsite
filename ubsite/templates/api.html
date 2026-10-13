@@ -22,8 +22,8 @@
 {%- set v = meta.current %}
 <h1>The text API</h1>
 
-<p>Any site may keep its copy of the English text in step with this one.
-The text is the Uversa Press edition, with its numerous corrections, and it is in the
+<p>Any site may keep its copy of the English text in step with this one, or fetch a
+passage or a paper from it by reference. The text is the Uversa Press edition, with its numerous corrections, and it is in the
 public domain. Its HTML marks the words of Jesus, which this site shows in red; the
 printed book does not.</p>
 
@@ -32,8 +32,10 @@ parts, {{ '{:,}'.format(meta.counts.papers) }} papers, {{ '{:,}'.format(meta.cou
 sections and {{ '{:,}'.format(meta.counts.paragraphs) }} paragraphs.</p>
 
 <h2>In short</h2>
-<pre><code>GET {{ base }}api/v1/text?since=0     the whole text, and its version
-GET {{ base }}api/v1/text?since=N     what has changed since version N</code></pre>
+<pre><code>GET {{ base }}api/v1/text?since=0           the whole text, and its version
+GET {{ base }}api/v1/text?since=N           what has changed since version N
+GET {{ base }}api/v1/paragraphs/101:4.2-7   a passage, by reference
+GET {{ base }}api/v1/papers/101             a paper</code></pre>
 
 <p>Keep the version you are sent, and ask with it next time. A version changes only
 when a record does: a correction, an italic, the red letter, a reference. When nothing
@@ -164,6 +166,52 @@ join this text to other data by reference, join on <code>uf_ref</code>, not
 <p>Both number the Foreword's closing ACKNOWLEDGMENT 0:12.10, though the Foundation prints
 no number beside it.</p>
 
+<h2 id="passages">A passage, or a paper</h2>
+<p>To quote a paragraph, or to show a passage or a paper, ask for it by reference. Write
+each reference whole, as this site numbers it, with commas between them:</p>
+<pre><code>GET {{ base }}api/v1/paragraphs/101:4.2              a paragraph
+GET {{ base }}api/v1/paragraphs/101:4                a section
+GET {{ base }}api/v1/paragraphs/101:4.2-7            paragraphs 2 to 7 of 101:4
+GET {{ base }}api/v1/paragraphs/101:4.7-5.2          from 101:4.7 to 101:5.2
+GET {{ base }}api/v1/paragraphs/101:4-6,5:1.3,61:4   several, from anywhere in the book
+GET {{ base }}api/v1/papers/101                      a paper
+GET {{ base }}api/v1/papers/0,101-103                several; the Foreword is Paper 0</code></pre>
+
+<p>A range runs in the order of the book from its first reference to its last, across
+sections and papers if need be, <code>101:4.7-102:1.3</code>. Its end is written like its
+start, with as much as changes: <code>101:4.2-7</code>, <code>101:4.7-5.2</code>,
+<code>101:4-6</code>, <code>101:4-102:1</code>. An en dash will do for the hyphen. At most
+100 references are taken at a time.</p>
+
+<p>The reply holds the records <code>/text</code> sends, the same to the byte, hashes and
+all. The paragraphs come in the order of the book, each once, however the references
+overlap. With them come the section, the paper and the part each stands in, so that a
+quotation can be headed without a second request. This is the reply to
+<code>/paragraphs/{{ passage_refs }}</code>, its records counted:</p>
+<pre class="json"><code>{{ passage }}</code></pre>
+<p>It has no <code>since</code>, <code>full</code> or <code>removed</code>: it is not a step
+in keeping a copy, and its <code>version</code> is only the version its records are from.
+Never keep it as the version of a copy.</p>
+
+<p>The index writes <code>61:4.3,4</code> for two paragraphs of one section. Here that
+would mean 61:4.3 and the whole of Paper 4, so <code>/paragraphs/</code> refuses a bare
+number with a 400 that says so. Write <code>61:4.3,61:4.4</code> or <code>61:4.3-4</code>,
+and ask <code>/papers/4</code> for the paper.</p>
+
+<p>To ask by the Foundation's numbering, add <code>?numbering=uf</code>: <a
+href="/api/v1/paragraphs/144:5.108?numbering=uf"><code>/paragraphs/144:5.108?numbering=uf</code></a>
+is this site's 144:5.102, and <code>/paragraphs/139:10?numbering=uf</code> is its 139:9.
+The records are the same either way, and each carries both references. The numbers the
+Foundation gives the separators of 134:6 and 144:5 name no paragraph. Asking for one is a
+404, as is any reference not in the text, and the reply lists every such reference under
+<code>missing</code>. Papers are numbered alike, so <code>/papers/</code> takes the
+switch and changes nothing.</p>
+
+<p>From a page on any site:</p>
+<pre><code>const r = await fetch("{{ base }}api/v1/paragraphs/101:4.2");
+const {papers, sections, paragraphs} = await r.json();
+// papers[0].title, sections[0].title, paragraphs[0].html</code></pre>
+
 <h2>A client in Python</h2>
 <p>With nothing but the standard library. It keeps the text in one JSON file.</p>
 <pre><code>import gzip, json, pathlib, urllib.request
@@ -214,6 +262,8 @@ const hex = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEnc
   <li>Once a day is plenty: the text changes rarely. Send back the <code>ETag</code> as
     <code>If-None-Match</code> and an unchanged reply is a bodiless 304. An address
     that asks many times a minute is refused for a while with a 429.</li>
+  <li>A passage changes only when the version does. Keep what you are sent, rather than
+    asking again each time a page of yours is viewed.</li>
   <li>Keep the address in your settings. The site will move to urantiabook.org.</li>
   <li>Credit is welcome, not required: <i>“{{ api_licence.credit_line }}”</i>.</li>
 </ul>
@@ -228,8 +278,10 @@ const hex = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEnc
   <dt><a href="/api/v1/versions"><code>GET /api/v1/versions</code></a></dt>
   <dd>Every version: when it was made, from which commit, and how many records it changed.</dd>
 </dl>
-<p>Errors come back as JSON with a status: 400 for a <code>since</code> that is not a
-version number, 404 for an address that is not an endpoint. Every reply may be read from
+<p>Errors come back as JSON with a status, and a message in <code>error</code>. A 400 is
+for a <code>since</code> that is not a version number, or a reference that cannot be read.
+A 404 is for an address that is not an endpoint, or for references not in the text, listed
+under <code>missing</code>. Every reply may be read from
 a page on another site (<code>Access-Control-Allow-Origin: *</code>).</p>
 
 <h2>Versions</h2>
