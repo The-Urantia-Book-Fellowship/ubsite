@@ -177,17 +177,22 @@ stop:
 	@rm -f $(PIDFILE)
 	@# Verify the port actually freed.  Killing the recorded pid and deleting the
 	@# pidfile is not enough: if the pid was stale the process survives AND the only
-	@# record of it is gone.  So fall back to whoever holds the port.
+	@# record of it is gone.  So fall back to whoever holds the port, on any
+	@# address: `make serve` writes no pidfile, and with HOST=0.0.0.0 it listens
+	@# on 0.0.0.0, which a match on 127.0.0.1 never found.
 	@for i in 1 2 3 4 5; do \
-		ss -ltn 2>/dev/null | grep -q "127.0.0.1:$(PORT)" || exit 0; sleep 1; done; \
-	held=$$(ss -ltnp 2>/dev/null | grep -oE "127.0.0.1:$(PORT).*pid=[0-9]+" \
-		| grep -oE "pid=[0-9]+" | cut -d= -f2 | sort -u); \
+		ss -Hltn "sport = :$(PORT)" 2>/dev/null | grep -q . || exit 0; sleep 1; done; \
+	held=$$(ss -Hltnp "sport = :$(PORT)" 2>/dev/null \
+		| grep -oE "pid=[0-9]+" | cut -d= -f2 | sort -u | tr '\n' ' '); \
 	if [ -n "$$held" ]; then \
-		echo "stop: pidfile was stale; $(PORT) still held by $$held -- killing"; \
+		echo "stop: $(PORT) held by $${held% }, which no pidfile records -- killing"; \
 		kill $$held 2>/dev/null || true; \
+		for i in 1 2 3 4 5 6 7 8 9 10; do \
+			ss -Hltn "sport = :$(PORT)" 2>/dev/null | grep -q . || exit 0; sleep 1; done; \
+		echo "stop: $(PORT) is still held"; exit 1; \
 	fi
 	@exit 0
 
 ## ports         show anything this project has left listening
 ports:
-	@ss -ltnp 2>/dev/null | grep -E "127.0.0.1:$(PORT)" || echo "nothing on $(PORT)"
+	@ss -Hltnp "sport = :$(PORT)" 2>/dev/null | grep . || echo "nothing on $(PORT)"
