@@ -62,6 +62,7 @@ QUERIES = [
     # Reported, not asserted: they move as the index is edited.
     ("B-F rows naming an A-Z headword", "SELECT COUNT(*) FROM appendix_head", None),
     ("events finished by their date",   "SELECT COUNT(*) FROM chronology_event WHERE reads_on", None),
+    ("paragraphs continuing a range",   "SELECT COUNT(*) FROM citation_target WHERE NOT opens", None),
 ]
 
 INVARIANTS = [
@@ -82,6 +83,14 @@ INVARIANTS = [
          WHERE s.start < 0 OR s."end" > LENGTH(p.text)"""),
     ("no paragraph-precision citation is unresolved",
      "SELECT COUNT(*) FROM citation_target WHERE precision='para' AND paragraph_id IS NULL"),
+    # A range stands once in the margin, beside its first paragraph
+    # (queries.CHIP_OPENS): what continues one is the next paragraph of it.
+    ("a paragraph continuing a range follows the one before, in its citation",
+     """SELECT COUNT(*) FROM citation_target t WHERE NOT t.opens AND NOT EXISTS
+         (SELECT 1 FROM citation_target u WHERE u.citation_id = t.citation_id
+           AND u.para = t.para - 1)"""),
+    ("only a paragraph continues a range",
+     "SELECT COUNT(*) FROM citation_target WHERE NOT opens AND precision <> 'para'"),
     ("every See, See also and q.v. resolves by some route",
      "SELECT COUNT(*) FROM xref WHERE route IS NULL"),
     ("every q.v. is recorded as a cross-reference",

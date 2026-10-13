@@ -32,6 +32,14 @@ CHIP_NEW = (" AND NOT EXISTS (SELECT 1 FROM appendix_head h"
             " JOIN para_citers c2 ON c2.paragraph_id = c.paragraph_id"
             " JOIN index_entry e2 ON e2.id = c2.entry_id"
             " WHERE h.entry_id = e.id AND e2.root_id = h.head_entry_id)")
+# An entry citing a range stands beside its first paragraph only: 44:0.20-21
+# beside 44:0.20, not 44:0.21 too, and 0:0.1-4 once, not four times (Tigran,
+# 2026-10-13).  Its citation on the concept page still opens /44:0.20-21, with
+# both tinted.  A comma list is not a range: 61:4.3,4 stands beside both.
+# citation_target.opens is the parser's, set at load.
+CHIP_OPENS = (" AND EXISTS (SELECT 1 FROM citation_target t"
+              " WHERE t.paragraph_id = c.paragraph_id AND t.entry_id = c.entry_id"
+              " AND t.opens)")
 
 # A section names at most this many blanket citations at its head.  None has
 # more today; the cap is there so that a change upstream cannot bury the text.
@@ -41,9 +49,10 @@ BLANKET_MAX = 60
 def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     """One section's paragraphs and everything that stands beside them.
 
-    paras    the paragraphs, in order, with para_density's precise_citers, thin,
+    paras    the paragraphs, in order, with para_density's precise_citers,
              and page_1955, where the paragraph begins in the first printing
-    citers   paragraph id -> its chips, the entries citing it precisely
+    citers   paragraph id -> its chips, the entries citing it precisely, a
+             range beside its first paragraph only (CHIP_OPENS)
     blanket  the entries citing the whole section or paper -- read_pack's rule:
              listed ONCE at the section's head, never repeated under every
              paragraph, or Paper 15's 470 citations print some entries forty
@@ -54,7 +63,7 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
              with the entries citing its lines gathered beside it
     """
     paras = con.execute(
-        "SELECT p.*, d.precise_citers, d.thin, u.page AS page_1955 FROM paragraph p"
+        "SELECT p.*, d.precise_citers, u.page AS page_1955 FROM paragraph p"
         " LEFT JOIN para_density d ON d.paragraph_id=p.id"
         " LEFT JOIN uf_paragraph u ON u.paragraph_id=p.id"
         " WHERE p.paper_n=? AND p.section_n=? ORDER BY p.para_n",
@@ -65,7 +74,7 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
             " FROM para_citers c JOIN index_entry e ON e.id=c.entry_id"
             " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
             " JOIN paragraph p ON p.id=c.paragraph_id"
-            " WHERE p.paper_n=? AND p.section_n=? AND c.precision='para'" + CHIP_NEW +
+            " WHERE p.paper_n=? AND p.section_n=? AND c.precision='para'" + CHIP_NEW + CHIP_OPENS +
             " ORDER BY e.ord", (paper, sec)):
         citers.setdefault(row["paragraph_id"], []).append(row)
     blanket = con.execute(

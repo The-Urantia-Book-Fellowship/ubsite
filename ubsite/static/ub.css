@@ -311,7 +311,7 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 :root[data-redletter="off"] .jesus { color: inherit; }
 :root[data-paranum="off"] .num { display: none; }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
-:root[data-margin="off"] :is(.chips, .thin, .blanket) { display: none; }
+:root[data-margin="off"] :is(.chips, .blanket) { display: none; }
 :root[data-notes="off"] :is(a.fn, .notes, .pop) { display: none; }
 :root[data-margin="off"] .a { display: none; }
 :root[data-margin="off"] .grid { grid-template-columns: minmax(0, var(--measure)); }
@@ -425,7 +425,6 @@ a.fn.on::after { background: currentColor; }
 /* An appendix entry: led by its appendix's name, in small caps. */
 .app .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
 .blanket .app { color: var(--faint); }
-.thin { font-style: italic; opacity: .6; margin: .25rem 0 0; }
 /* The 1955 readings (section.html): the section's endnotes without JavaScript
    and in print; with it, hidden, and each opened as a card at its ring (ub.js),
    which carries the same words. */

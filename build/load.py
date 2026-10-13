@@ -131,15 +131,21 @@ def load_index(con, az, apps, para_key, report) -> None:
             if c is None:
                 continue
             targets = list(c.expand())
+            # The paragraphs that open a printed span: a range's first, or a
+            # single number.  The rest of a range only continues it, and the
+            # margin shows the entry at its first paragraph alone.  Both ends
+            # of an inverted span (39:3.9-8, a defect) stay visible.
+            opens = ({lo for lo, hi in c.spans} | {hi for lo, hi in c.spans if hi < lo}
+                     if c.kind == "para" else None)
             cid += 1
             con.execute("INSERT INTO citation VALUES (?,?,?,?,?,?,?)",
                         (cid, entry_id, i, raw, cite.fmt(c), c.kind, len(targets)))
             for p, s, n in targets:
                 tid += 1
                 prec = "para" if n is not None else ("sec" if s is not None else "paper")
-                con.execute("INSERT INTO citation_target VALUES (?,?,?,?,?,?,?,?)",
+                con.execute("INSERT INTO citation_target VALUES (?,?,?,?,?,?,?,?,?)",
                             (tid, cid, entry_id, p, s, n, prec,
-                             para_key.get((p, s, n))))
+                             para_key.get((p, s, n)), int(opens is None or n in opens)))
 
     for e in az:
         i = insert(e, "az")

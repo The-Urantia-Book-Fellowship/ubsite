@@ -62,15 +62,15 @@
       {%- endif %}
       {%- if 'p' in r %}
       {{ para(r.p) }}
+      {#- Nothing at all inside when nothing stands beside the paragraph, so
+          that .a:empty holds and a phone draws no box for it. #}
+      {%- set cs = citers.get(r.p.id, []) %}
       <div class="a">
-      {% set cs = citers.get(r.p.id, []) %}
-        {% if cs %}
+        {%- if cs %}
           <ul class="chips">
           {% for c in cs %}<li>{{ chip(c) }}</li>{% endfor %}
           </ul>
-        {% elif r.p.thin %}
-          <p class="thin">no entry cites this paragraph precisely</p>
-        {% endif %}
+        {%- endif -%}
       </div>
       {%- else %}
       {#- A block of verse, as the book sets it: indented as one, its lines close,
@@ -88,11 +88,7 @@
         <ul class="chips">
         {% for c in citers[q.id] %}<li>{{ chip(c) }}</li>{% endfor %}
         </ul>
-      {%- else %}
-        {% if r.lines|selectattr('thin')|list|length == r.lines|length %}
-        <p class="thin">no entry cites these lines precisely</p>
-        {% endif %}
-      {%- endfor %}
+      {%- endfor -%}
       </div>
       {%- endif %}
     {% endfor %}

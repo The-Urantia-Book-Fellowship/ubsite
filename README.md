@@ -8,7 +8,7 @@ This file is the operating manual: how to bring the site up to date when its sou
 
 ## The one idea
 
-**The site shows `var/ub.db`, and nothing else.** That file is built on this machine from three sibling repositories and shipped to pi5. Nothing updates by itself. When the index session commits a correction, the site carries it only after someone rebuilds and deploys. Until then, a paragraph can say "no entry cites this paragraph precisely" while the index plainly cites it.
+**The site shows `var/ub.db`, and nothing else.** That file is built on this machine from three sibling repositories and shipped to pi5. Nothing updates by itself. When the index session commits a correction, the site carries it only after someone rebuilds and deploys. Until then, a paragraph can stand with nothing beside it while the index plainly cites it.
 
 The footer of every page gives the date of each commit the database was built from:
 
