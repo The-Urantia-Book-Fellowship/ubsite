@@ -234,12 +234,40 @@ class Whole(Quiet):
         self.assertEqual((kinds["144:5.11"], kinds["48:6.9"], kinds["101:1.2"]),
                          ("verse", "verse", "prose"))
 
+    def test_the_1955_readings(self):
+        """An empty marker where each stands, its reading in readings_1955 (version 8)."""
+        ps = self.reply["paragraphs"]
+        mark = '<span class="v1955"></span>'
+        self.assertTrue(all(isinstance(x["readings_1955"], list) for x in ps))
+        self.assertEqual(sum(x["html"].count(mark) for x in ps), 180)
+        self.assertEqual(sum(len(x["readings_1955"]) for x in ps), 180)
+        self.assertEqual(sum(1 for x in ps if x["readings_1955"]), 172)
+        self.assertTrue(all(x["html"].count(mark) == len(x["readings_1955"]) for x in ps))
+        by = {x["ref"]: x for x in ps}
+        self.assertEqual(by["134:3.3"]["readings_1955"], ["10:00", "3:00", "8:00"])
+        self.assertEqual(by["112:1.7"]["readings_1955"], ["<em>Vertical</em> depth"])
+        self.assertTrue(by["112:1.7"]["html"].startswith(
+            '<span class="mark">2.</span> <em>Vertical depth</em>' + mark + " embraces"))
+        self.assertEqual(by["101:1.2"]["readings_1955"], [])
+        page = html.unescape(call("/api")[2].decode())
+        self.assertIn("<code>readings_1955</code>", page)
+        self.assertIn('"readings_1955": [\n  "<em>Vertical</em> depth"', page)
+
     def test_the_lines_set_in(self):
         """The Lord's Prayer's second lines (version 7)."""
         self.assertEqual({x["ref"] for x in self.reply["paragraphs"] if x["setoff"]},
                          {"144:3.4", "144:3.6", "144:3.8", "144:3.10"})
         self.assertTrue(all(isinstance(x["setoff"], bool) for x in self.reply["paragraphs"]))
         self.assertIn("<code>setoff</code>", html.unescape(call("/api")[2].decode()))
+
+
+class Render(unittest.TestCase):
+    def test_the_1955_marker_is_empty_and_round_trips(self):
+        from build.render import render, strip_tags
+        from build.versions import _Span
+        out = render("Vertical depth embraces", [_Span(14, 14, "v1955"), _Span(0, 8, "em")])
+        self.assertEqual(out, '<em>Vertical</em> depth<span class="v1955"></span> embraces')
+        self.assertEqual(strip_tags(out), "Vertical depth embraces")
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")

@@ -34,6 +34,9 @@ WRAP = {
 POINT = {
     "dotleader": '<span class="leader"></span>',
     "fnref":     None,      # rendered by the caller; carries a note id
+    # The text API's mark for a 1955 reading (build/versions.py), where the
+    # site's is the fnref link: empty, and the reading in readings_1955.
+    "v1955":     '<span class="v1955"></span>',
 }
 
 
@@ -95,8 +98,8 @@ def render(text: str, spans, note_key: str = "", shy=()) -> str:
 
 
 def _point(s, note_key: str) -> str:
-    if s.kind == "dotleader":
-        return POINT["dotleader"]
+    if s.kind in ("dotleader", "v1955"):
+        return POINT[s.kind]
     if s.kind == "fnref":
         n = (s.attr or {}).get("i", 0) if isinstance(s.attr, dict) else 0
         # Empty: the marker is drawn by CSS, for the same reason the dot

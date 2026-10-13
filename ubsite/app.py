@@ -699,9 +699,10 @@ def api_docs(request: Request):
     meta = api.about_meta()
     con = db()
     # The red letter, an italic and a list mark; a paragraph and a section the
-    # Foundation numbers otherwise.
+    # Foundation numbers otherwise; a 1955 reading.
     example = {}
-    for kind, key in (("paragraph", "147:4.4"), ("paragraph", "144:5.11"), ("section", "139:9")):
+    for kind, key in (("paragraph", "147:4.4"), ("paragraph", "144:5.11"), ("section", "139:9"),
+                      ("paragraph", "112:1.7")):
         row = con.execute("SELECT body FROM text_unit WHERE kind=? AND key=?",
                           (kind, key)).fetchone()
         if row:

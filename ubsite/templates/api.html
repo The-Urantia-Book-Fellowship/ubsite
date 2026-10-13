@@ -68,6 +68,10 @@ may do with it.</p>
 <p>A paragraph:</p>
 <pre class="json"><code>{{ example['147:4.4'] }}</code></pre>
 {%- endif %}
+{%- if example['112:1.7'] %}
+<p>And one where the 1955 printing reads otherwise: it set only <i>Vertical</i> in italics.</p>
+<pre class="json"><code>{{ example['112:1.7'] }}</code></pre>
+{%- endif %}
 <dl>
   <dt><code>ref</code></dt>
   <dd>Paper, section and paragraph, as this site numbers them: <a href="/147:4.4"><code>/147:4.4</code></a>
@@ -101,13 +105,24 @@ may do with it.</p>
   <dd><code>true</code> for a line of verse the book sets in further than the lines around
     it: the second line of each couplet of the Lord's Prayer, 144:3.4, 3.6, 3.8 and 3.10.
     <code>false</code> otherwise.</dd>
+  <dt><code>readings_1955</code></dt>
+  <dd>What the 1955 first printing reads where today's text departs from it, as the Uversa
+    Press gives it, in HTML: one for each <code>&lt;span class="v1955"&gt;&lt;/span&gt;</code>
+    in <code>html</code>, in the same order, and <code>[]</code> for most paragraphs. A
+    marker stands just after the words that changed. Which of today's words a reading
+    replaces is not recorded, and a long one is shortened with “…”, so show a reading beside
+    the text, as this site does in a card at a small ring, and never in place of it. The SRT
+    Committee's reasons for each change, which this site shows with it, are not part of the
+    text and are not sent.</dd>
   <dt><code>html</code></dt>
   <dd>The text, in Unicode (curly quotes, em dashes), with its markup and nothing else:
     <code>&lt;em&gt;</code> for italics, <code>&lt;sup&gt;</code> for an exponent,
     <code>&lt;span class="jesus"&gt;</code> for the words of Jesus,
-    <code>&lt;span class="mark"&gt;</code> around a list's number, and an empty
+    <code>&lt;span class="mark"&gt;</code> around a list's number, an empty
     <code>&lt;span class="leader"&gt;&lt;/span&gt;</code> where the book prints a dot
-    leader. For plain text, strip the tags: what is left is the text exactly. The only
+    leader, and an empty <code>&lt;span class="v1955"&gt;&lt;/span&gt;</code> where the
+    1955 printing reads otherwise (see <code>readings_1955</code>). For plain text, strip
+    the tags: what is left is the text exactly. The only
     entities there can be are <code>&amp;amp;</code>, <code>&amp;lt;</code> and
     <code>&amp;gt;</code>, and the text holds none of those characters today, but
     unescape them all the same:
@@ -120,6 +135,7 @@ const text = record.html.replace(/&lt;[^&gt;]+&gt;/g, "")
   <dt><code>hash</code></dt>
   <dd>For checking your copy: see below.</dd>
 </dl>
+
 
 {%- if example['139:9'] %}
 <p>A section. Section 0, a paper's introduction, has no title.</p>

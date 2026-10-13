@@ -319,6 +319,15 @@ def _text_api(con) -> int:
     before = {ref: (sep, bool(gap), kind, bool(setoff)) for ref, sep, gap, kind, setoff in con.execute(
         "SELECT ref, sep_before, gap_before, CASE WHEN heading THEN 'heading'"
         " WHEN src = 'vs' THEN 'prose' ELSE 'verse' END, setoff FROM paragraph")}
+    # Each 1955 reading: an empty marker at its note's offset, its reading in
+    # readings_1955, in the same order (build/versions.py).
+    readings = {}
+    for ref, anchor, html in con.execute(
+            "SELECT p.ref, f.anchor, f.html FROM footnote f JOIN paragraph p ON p.id = f.paragraph_id"
+            " WHERE f.kind = 'variant-1955' ORDER BY p.ref, f.anchor, f.ord"):
+        readings.setdefault(ref, []).append((anchor, html))
+    mark = '<span class="v1955"></span>'
+    marks = 0
     n = off = 0
     for kind, key, body, h in con.execute("SELECT kind, key, body, hash FROM text_unit"):
         n += 1
@@ -329,17 +338,27 @@ def _text_api(con) -> int:
                   and 'class="fn"' not in rec["html"]
                   and (rec.get("separator_before", "?"), rec.get("group_before"),
                        rec.get("kind"), rec.get("setoff")) == before.get(key))
+            notes = readings.get(key, [])
+            pieces = rec["html"].split(mark)
+            marks += len(pieces) - 1
+            ok = (ok and rec.get("readings_1955") == [r for _, r in notes]
+                  and len(pieces) - 1 == len(notes)
+                  and all(len(strip_tags(mark.join(pieces[:i + 1]).replace(mark, ""))) == a
+                          for i, (a, _) in enumerate(notes)))
         if not ok:
             off += 1
             if off <= 5:
                 print(f"            text API record wrong: {kind} {key}")
     print(f"text API:   {n - off}/{n} records hash true, and every paragraph's HTML strips to its text,"
-          " with how the book sets it"
+          f" with how the book sets it, and {marks} 1955 readings each in its place"
           + ("" if not off else f"   {off} FAIL"))
-    if off or got != want:
+    nreadings = sum(len(v) for v in readings.values())
+    if off or got != want or marks != nreadings:
         bad += 1
         if got != want:
             print(f"            records {got}, expected one for each of {want}   FAIL")
+        if marks != nreadings:
+            print(f"            {marks} 1955 markers sent, for {nreadings} readings   FAIL")
 
     led = versions.fold()
     stored = {(k, key): (h, v) for k, key, h, v in con.execute(

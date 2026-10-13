@@ -82,9 +82,17 @@ def records(con) -> list[tuple[str, str, dict]]:
         out.append(("section", f"{p}:{n}", {"ref": f"{p}:{n}", "uf_ref": uf, "paper": p,
                                             "section": n, "title": title,
                                             "combined_with": combined}))
-    # A footnote marker points at a 1955 reading the API does not send, so the
-    # paragraphs that have one are rendered again without it.  The rest are
-    # already stored as render() made them: rendering all 14,586 took 5 s.
+    # A paragraph with a note is rendered again: the site's marker links to a
+    # note on the page, so the API's is an empty <span class="v1955"> where
+    # each 1955 reading stands, its reading in readings_1955, in the same order
+    # (Tigran, 2026-10-13).  Only a 1955 reading is marked, by its note at the
+    # marker's offset: any other note is dropped.  The rest are already stored
+    # as render() made them: rendering all 14,586 took 5 s.
+    readings = collections.defaultdict(list)
+    for pid, anchor, html in con.execute(
+            "SELECT paragraph_id, anchor, html FROM footnote WHERE kind = 'variant-1955'"
+            " ORDER BY paragraph_id, anchor, ord"):
+        readings[pid].append((anchor, html))
     spans = collections.defaultdict(list)
     for pid, start, end, kind in con.execute(
             "SELECT paragraph_id, start, \"end\", kind FROM span WHERE paragraph_id IN"
@@ -98,7 +106,8 @@ def records(con) -> list[tuple[str, str, dict]]:
             " p.sep_before, p.gap_before, " + KIND_SQL + ", p.setoff, p.text, p.html"
             " FROM paragraph p JOIN uf_paragraph u ON u.paragraph_id = p.id ORDER BY p.ord"):
         if pid in marked:
-            html = render(text, spans.get(pid, []))
+            html = render(text, spans.get(pid, [])
+                          + [_Span(a, a, "v1955") for a, _ in readings.get(pid, [])])
         # HTML alone, no plain copy beside it (Tigran, 2026-10-11): stripping its
         # tags gives the text exactly, which check_db holds, and one copy cannot
         # disagree with itself.  What stands before it, a separator or the start
@@ -108,7 +117,9 @@ def records(con) -> list[tuple[str, str, dict]]:
         out.append(("paragraph", ref, {"ref": ref, "uf_ref": uf, "page_1955": page, "paper": p,
                                        "section": s, "paragraph": n, "separator_before": sep,
                                        "group_before": bool(gap), "kind": kind,
-                                       "setoff": bool(setoff), "html": html}))
+                                       "setoff": bool(setoff),
+                                       "readings_1955": [h for _, h in readings.get(pid, [])],
+                                       "html": html}))
     return out
 
 
