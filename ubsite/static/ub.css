@@ -208,6 +208,17 @@ p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure);
 p.t { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
       hyphenate-character: "-"; -webkit-hyphenate-character: "-";
       -webkit-hyphenate-limit-lines: 1; }
+/* A paper opens as the book opens it, the Foreword too: its first letter
+   dropped two lines, and nothing after it set otherwise (the press's
+   \lettrine{T}{}, ubook.sty).  A pseudo-element, so a copy takes the letter
+   as text.  Chrome, Edge and Safari; Firefox sets it as the rest.  Not the
+   device faces' font-size-adjust: under it Chrome (154) sets the letter at
+   the text's size, at the start of the second line.  The bottom margin lets
+   Goudy's J (ten papers) hang its tail into the space above the third line,
+   as the press does, instead of pushing that line in; at -.3em every letter
+   still clears the second line, and the tail the third, at every spacing. */
+p.t.opening::first-letter { -webkit-initial-letter: 2; initial-letter: 2;
+      font-size-adjust: none; margin: 0 .06em -.3em 0; }
 /* A verse, one to a line (48:6, 122:9, 144:5), is a line, not a paragraph to
    fill: when one wraps, its first line keeps its own spaces. */
 p.t.verse { text-align: start; }
@@ -791,6 +802,21 @@ main.results { position: relative; }
          top: -1.25rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch + 1.6rem); }
   :root[data-pages="true"] .verse p.t { margin-bottom: 0; }
   .verse + .a:not(:empty) { margin-top: -.4rem; }
+  /* A paper's opening paragraph gives its corner to the dropped letter: the
+     stack floated there would take the first two lines' start, and the second
+     line would run into the letter.  So its reference, play button and 1955
+     page stand in a line of their own above it, as a verse block's do; the
+     book prints no number at a paper's first paragraph either. */
+  p.t.opening { margin-top: 1.5rem; }
+  p.t.opening :is(.num, .playp, .pg) { position: absolute; float: none; margin: 0;
+         width: auto; right: auto; }
+  p.t.opening .num { top: -1.25rem; left: 0; }
+  p.t.opening > .playp { top: -1.45rem; left: calc((var(--refw, 9) + 1) * 1ch); }
+  :root[data-pages="true"] p.t.opening .pg { top: -1.25rem;
+         left: calc((var(--refw, 9) + 1) * 1ch + 1.6rem); }
+  :root[data-paranum="off"] p.t.opening > .playp { left: -.25rem; }
+  :root[data-paranum="off"][data-pages="true"] p.t.opening .pg { left: 1.6rem; }
+  :root[data-paranum="off"][data-voice="off"][data-pages="true"] p.t.opening .pg { left: 0; }
   .blanket ul { columns: 1; }
 }
 
