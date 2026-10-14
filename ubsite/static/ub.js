@@ -186,7 +186,7 @@
 
   // The left rail is the whole book (templates/_rail.html), and only the paper
   // being read comes with its sections.  Another opened there fetches its own
-  // from /rail/N, asked for under the database's version so that the browser
+  // from /rail/N, asked for under the rail's version so that the browser
   // keeps them; if that fails, the paper's link is followed instead.  Listened
   // for on the document, capturing, because toggle does not bubble -- and so
   // it holds after listen.js swaps <main>.
@@ -399,7 +399,7 @@
     });
   });
 
-  // Read offline (static/offline.js), in Settings where a service worker can
+  // Work offline (static/offline.js), in Settings where a service worker can
   // run: loaded when Settings opens, or at once on a page the worker answers
   // for, to say whether its copy is still the site's.  The browser's own offer
   // to install the site waits there too, rather than in a banner of its own.

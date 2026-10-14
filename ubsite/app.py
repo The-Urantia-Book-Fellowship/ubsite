@@ -314,11 +314,7 @@ T.env.globals["voices"] = voices
 
 
 def db_version() -> int:
-    """Which database this is: its mtime, which every cache here keys on.
-
-    The rail asks for a paper's sections under it (/rail/N?v=...), so a browser
-    may keep the answer for good and still never shows a stale one.
-    """
+    """Which database this is: its mtime, which every cache here keys on."""
     try:
         return DB.stat().st_mtime_ns
     except OSError:
@@ -339,8 +335,14 @@ def _book(mtime_ns: int) -> dict:
     parts = [dict(r, roman=ROMAN[r["n"]],
                   papers=[p for p in papers if p["part_n"] == r["n"]])
              for r in con.execute("SELECT n, title FROM part ORDER BY n")]
+    # What the rail draws, hashed: the rail asks for a paper's sections under
+    # it (/rail/N?v=...), so a browser may keep the answer for good and still
+    # never show a stale one.  Not the database's mtime, which every build
+    # moves: every section page carries it, and the offline copy would change
+    # every paper's chunk with each deploy, the book unchanged.
+    v = hashlib.sha256(json.dumps([papers, sections], sort_keys=True).encode()).hexdigest()[:12]
     return {"foreword": [p for p in papers if p["part_n"] is None],
-            "parts": parts, "sections": sections}
+            "parts": parts, "sections": sections, "v": v}
 
 
 def book() -> dict:
@@ -350,7 +352,6 @@ def book() -> dict:
     return _book(db_version())
 
 
-T.env.globals["db_version"] = db_version
 T.env.globals["book"] = book
 T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
@@ -442,7 +443,7 @@ def speech(ref: str):
 
 
 # --------------------------------------------------------------------------
-# Read offline.  A reader who turns it on in Settings registers /sw.js, which
+# Work offline.  A reader who turns it on in Settings registers /sw.js, which
 # downloads the copy that `make offline` built (offline/, var/offline/) and
 # answers from it when the network does not.  Nobody else runs the worker.
 
@@ -464,7 +465,7 @@ def engine(name: str) -> tuple[bytes, str]:
 
 def _etagged(request: Request, body: bytes, media_type: str, salt: str = "", **headers) -> Response:
     """`body`, or a bodiless 304 when the browser holds it already.  A browser
-    with Read offline on asks again for the worker and the scripts it imports
+    with Work offline on asks again for the worker and the scripts it imports
     after every page it loads, to see whether the worker has changed."""
     tag = '"' + hashlib.sha256(body).hexdigest()[:16] + salt + '"'
     headers = {"ETag": tag, "Cache-Control": "no-cache", **headers}
@@ -890,13 +891,12 @@ def rail_sections(request: Request, paper: int, v: str = ""):
 
     A section page carries the tree only down to the papers, and its own
     paper's sections: all 1,626 inline would add 111 KB to a page of about 20.
-    Asked for under the database's version, the answer is kept for good.
+    Asked for under the rail's version (book()["v"]), the answer is kept for good.
     """
     secs = book()["sections"].get(paper)
     if secs is None:
         return Response("No such paper.\n", status_code=404, media_type="text/plain")
-    cache = ("public, max-age=31536000, immutable" if v == str(db_version())
-             else "no-cache")
+    cache = "public, max-age=31536000, immutable" if v == book()["v"] else "no-cache"
     return T.TemplateResponse(request, "rail_sections.html",
                               {"paper_n": paper, "secs": secs},
                               headers={"Cache-Control": cache})

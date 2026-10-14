@@ -1,4 +1,4 @@
-// Read offline, the page's side: the switch in Settings, what it says about
+// Work offline, the page's side: the switch in Settings, what it says about
 // the copy, the line under the header when the copy is stale, and the offer
 // to install the site as an app.  ub.js loads this when Settings opens, or at
 // once on a page the worker controls.  The worker (static/sw.js) does the
@@ -77,7 +77,7 @@
                        (err ? '<br>The last update stopped: ' + err + '.' : '');
     } else {
       line.textContent = 'Up to date: the text of ' + day(have.text.date) + ' and the index of ' +
-                         day(have.index.date) + ', ' + mb(have.raw) + ' in this browser.';
+                         day(have.index.date) + ', ' + mb(have.bytes) + ' in this browser.';
     }
     notice(s);
   }
@@ -127,7 +127,7 @@
       if (!r.ok) throw new Error(r.status);
       return r.json();
     }).then(function (m) {
-      if (!input.checked) line.textContent = 'About ' + mb(m.bytes) + ' to download, kept in this browser.';
+      if (!input.checked) line.textContent = 'About ' + mb(m.bytes) + ' to download and keep in this browser.';
     }, function () {
       if (!input.checked) line.textContent = navigator.onLine === false ? 'It can be turned on only online.'
                                                                         : 'This site has no offline copy yet.';

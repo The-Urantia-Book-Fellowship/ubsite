@@ -1,4 +1,4 @@
-"""Read offline, end to end, in Chrome: turn it on, read and search with the
+"""Work offline, end to end, in Chrome: turn it on, read and search with the
 network off, learn of a newer copy and take it, survive an update that fails,
 and turn it off.
 
@@ -71,6 +71,29 @@ def change(copy: pathlib.Path, edit, names=("misc",)) -> dict:
     return changed
 
 
+# A copy as a worker before 2026-10-14 kept it: each chunk unpacked, under
+# have/ in place of gz/.  Returns how many chunks it unpacked.
+UNPACK = """async () => { let n = 0;
+  for (const name of (await caches.keys()).filter(k => k.startsWith('ub-copy-'))) {
+    const c = await caches.open(name);
+    for (const req of await c.keys()) {
+      const u = new URL(req.url);
+      if (!u.pathname.startsWith('/offline/gz/')) continue;
+      const r = await c.match(req);
+      const raw = await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+      await c.put(u.pathname.replace('/gz/', '/have/'), new Response(raw));
+      await c.delete(req);
+      n++;
+    } }
+  return n; }"""
+# How the copy in use keeps its chunks: {gz: n, have: n}.
+KEPT = """async () => { const out = {gz: 0, have: 0};
+  for (const name of (await caches.keys()).filter(k => k.startsWith('ub-copy-')))
+    for (const req of await (await caches.open(name)).keys()) {
+      const m = /^\/offline\/(gz|have)\//.exec(new URL(req.url).pathname);
+      if (m) out[m[1]]++; }
+  return out; }"""
+
 # What the page shows while an update runs, each line once, as it changes.
 WATCH = """() => { window.shown = [];
   const keep = () => { for (const el of document.querySelectorAll('fieldset.offline .state, .offnote')) {
@@ -119,12 +142,17 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.startsWith('Up to date')",
                              timeout=120000)
         print(f"  downloaded in {time.time() - t:.1f} s: " + pg.inner_text("fieldset.offline .state"))
+        m = json.loads((copy / "manifest.json").read_text())
+        used = pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
+        print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
+        ok(used < m["bytes"] * 1.25, "it keeps the copy gzipped, as it came")
         pg.keyboard.press("Escape")
 
         # What the server sends, to hold the worker's answers to.
         want = {}
         urls = ["/101:4", "/101:4.2-3", "/i/god", "/appendix/A", "/lists/1955", "/index/G", "/", "/read",
                 "/part/2", "/search?q=prayer", "/search?q=self-conscious&in=text", "/search?q=Badanon&in=notes",
+                "/i/jesus/read", "/i/prayer/read/theme",
                 "/rail/120?v=1", "/static/fonts/UBGoudy.woff2", "/speech/101:4", "/speech/0:0"]
         for u in urls:
             with urllib.request.urlopen(BASE + u) as r:
@@ -154,8 +182,10 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         ok(pg.url.endswith("/101:4.2"), f"a citation typed into the box opens it ({pg.url})")
         pg.goto(BASE + "/101")
         ok(pg.url.endswith("/101:0"), "/101 opens 101:0")
-        pg.goto(BASE + "/i/jesus/read")
-        ok("Not in the offline copy" in pg.inner_text("main"), "a reading path says it is read online")
+        pg.goto(BASE + "/i/humor/read")
+        ok(pg.title().startswith("humor") and pg.locator("main p.t").count() > 3, "a reading path reads offline")
+        pg.goto(BASE + "/i/humor/read/theme")
+        ok("theme" in pg.title(), "and by theme")
         pg.goto(BASE + "/i/no-such-headword")
         ok("No headword" in pg.inner_text("main"), "an address the index lacks says so")
         pg.goto(BASE + "/101:4")
@@ -173,6 +203,31 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         pg.wait_for_selector("nav.rail li.lazy details[open] ol a", state="attached", timeout=5000)
         ok(True, "the rail opens another paper from the copy")
         ok(not errors, f"no script errors ({errors[:2]})")
+
+        print("A copy kept unpacked, as before 2026-10-14")
+        n = pg.evaluate(UNPACK)
+        ok(n == len(m["chunks"]), f"{n} chunks unpacked under have/")
+        for u, words in (("/150:1", "Evangelistic Corps"), ("/i/love/read", "love")):
+            pg.goto(BASE + u)
+            ok(words in pg.title() or words in pg.inner_text("main"), f"offline, {u} reads from it")
+        ctx.set_offline(False)
+        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, packed"), d)[1])
+        pg.goto(BASE + "/read")
+        pg.click(".gear")
+        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('changed since')")
+        print("  " + pg.inner_text("fieldset.offline .state"))
+        before = log.read_text().count("/offline/c/")
+        pg.click("fieldset.offline .get")
+        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.startsWith('Up to date')",
+                             timeout=60000)
+        fetched = log.read_text().count("/offline/c/") - before
+        ok(fetched == 1, f"an update packs what it has rather than fetch it ({fetched} chunk fetched)")
+        kept = pg.evaluate(KEPT)
+        ok(kept == {"gz": len(m["chunks"]), "have": 0}, f"and keeps the new copy gzipped ({kept})")
+        pg.keyboard.press("Escape")
+        ctx.set_offline(True)
+        pg.goto(BASE + "/")
+        ok(pg.title() == "The Urantia Book, packed", "offline, the copy is the newer one")
 
         print("A newer copy")
         ctx.set_offline(False)

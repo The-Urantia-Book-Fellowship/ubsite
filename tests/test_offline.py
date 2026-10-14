@@ -1,4 +1,4 @@
-"""Read offline: the server's side, and how the copy cuts the site's pages.
+"""Work offline: the server's side, and how the copy cuts the site's pages.
 
 The gate that holds every page of the copy to the server's is
 `python -m offline check` (offline/check.py), which needs Node and takes half
@@ -73,7 +73,7 @@ class Worker(unittest.TestCase):
         self.assertEqual(call("/offline/sqlite3.mjs")[0], 404)
 
     def test_what_a_browser_asks_again_after_every_page_is_a_304(self):
-        # With Read offline on, a browser asks for the worker and each script it
+        # With Work offline on, a browser asks for the worker and each script it
         # imports after every page it loads, to see whether they have changed.
         for path, enc in (("/sw.js", ""), ("/offline/sqlite3.js", "gzip"), ("/offline/sqlite3.js", "")):
             hs = {"accept-encoding": enc} if enc else {}

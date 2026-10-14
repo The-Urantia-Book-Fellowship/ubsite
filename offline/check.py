@@ -12,7 +12,7 @@ Node runs static/offline-core.js on the copy, as the service worker does
     one paragraph each, which puts back each section's rail and marks;
   - addresses the server explains or redirects: a paragraph that is not there,
     a range that runs backwards, a paper or section there is none of, a
-    headword's reading path that is not kept in the copy;
+    reading path a headword does not have, or not by theme;
   - search: every query in tests/fixtures/offline-queries.txt and every one a
     reader has typed into this machine's dev server (var/visits.db), in each of
     its lists and a page past the first, byte for byte with app.search();
@@ -70,7 +70,7 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
         jobs.append((f"/{here}.{rng.randint(1, lasts[here])}", "", False))
     slugs, paths = shell["slugs"], shell["paths"]
     no_path = next(s for s in slugs if s not in paths)
-    one_chapter = next(s for s, n in paths.items() if n < 2)
+    one_chapter = next(s for s, (n, _) in paths.items() if n < 2)
     for p in ["/0:0.0-1", "/86:5.18", "/86:5.15-14", "/39:3.9-8", "/300:1", "/1:99", "/300", "/101",
               "/0", "/007:1", "/i/no-such-headword", f"/i/{no_path}/read", f"/i/{one_chapter}/read/theme",
               "/index/q", "/index/QQ", "/index/a", "/appendix/a", "/appendix/G", "/appendix/AB",
@@ -118,11 +118,11 @@ def consistent(copy: pathlib.Path, manifest: dict) -> list[str]:
 def bands(manifest: dict) -> list[str]:
     exp = tomllib.loads((ROOT / "verify" / "expectations.toml").read_text())["offline"]
     bad = []
-    for key, val in (("pages", manifest["counts"]["pages"]), ("spoken", manifest["counts"]["spoken"]),
-                     ("chunks", len(manifest["chunks"]))):
+    for key, val in (("pages", manifest["counts"]["pages"]), ("paths", manifest["counts"]["paths"]),
+                     ("spoken", manifest["counts"]["spoken"]), ("chunks", len(manifest["chunks"]))):
         if val != exp[key]:
             bad.append(f"{key}: {val:,}, expected {exp[key]:,}")
-    for key, val in (("download_mb", manifest["bytes"] / 1e6), ("kept_mb", manifest["raw"] / 1e6)):
+    for key, val in (("download_mb", manifest["bytes"] / 1e6), ("raw_mb", manifest["raw"] / 1e6)):
         lo, hi = exp[key]
         if not lo <= val <= hi:
             bad.append(f"{key}: {val:.2f}, expected {lo} to {hi}")

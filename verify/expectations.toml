@@ -102,9 +102,10 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # shell, two databases and 13 files.  The sizes are bands, since the index
 # grows as it is edited.
 [offline]
-measured_on = "2026-10-13"
-pages       = 6405       # 1,626 sections, 4,736 headwords, 27 index letters, 16 more
+measured_on = "2026-10-14"
+pages       = 10283      # 1,626 sections, 4,736 headwords, 27 index letters, 16 more, 3,878 reading paths
+paths       = 3878       # 2,058 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
-chunks      = 251
-download_mb = [13.0, 20.0]   # gzipped: 16.8 at measurement
-kept_mb     = [48.0, 68.0]   # as the browser keeps it: 59.2 at measurement
+chunks      = 394
+download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 44.0 at measurement
+raw_mb      = [160.0, 220.0] # unpacked: 191.0 at measurement

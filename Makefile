@@ -124,7 +124,7 @@ epub:
 	@$(PY) -m epub build
 	@EPUBCHECK=$(EPUBCHECK) $(PY) -m epub check
 
-## offline       the offline copy that Read offline keeps -> var/offline/, then every gate (needs Node)
+## offline       the offline copy that Work offline keeps -> var/offline/, then every gate (needs Node)
 offline:
 	@$(PY) -m offline build
 	@$(PY) -m offline check

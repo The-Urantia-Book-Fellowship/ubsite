@@ -83,14 +83,15 @@ window.ubDefaults = {{ settings_defaults|tojson }};
       {%- endfor %}
     </fieldset>
     {%- endfor %}
-    {#- Read offline: the whole site but the recordings, kept in this browser by
+    {#- Work offline: the whole site but the recordings, kept in this browser by
         a service worker (static/sw.js, offline/).  Not a setting kept in
         ub_settings, but an act: offline.js runs it, and shows it only where a
         service worker can run. #}
     <fieldset class="offline" hidden data-src="{{ asset('offline.js') }}">
       <legend>Offline</legend>
-      <label><input type="checkbox" name="offline"> Read offline
-        <small>the book, its index and the 1955 readings, but not the recordings</small></label>
+      <label><input type="checkbox" name="offline"> Work offline
+        <small>the book, its index, every headword read through, the 1955 readings, and search:
+        all but the recordings</small></label>
       <p class="state" aria-live="polite"></p>
       <p class="install" hidden></p>
     </fieldset>
@@ -116,7 +117,7 @@ window.ubDefaults = {{ settings_defaults|tojson }};
      Uversa Press index as revised for the third edition.
      Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</p>
   {#- What the site's terms say: the text is public domain, the edition as a whole
-      is not (Tigran, 2026-10-14, after Harry's condition for Read offline). #}
+      is not (Tigran, 2026-10-14, after Harry's condition for Work offline). #}
   <p>The text of <i>The Urantia Book</i> is in the public domain. The Uversa Press
      edition as a whole, with its index, is licensed under
      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">CC&nbsp;BY-NC-SA&nbsp;4.0</a>.</p>

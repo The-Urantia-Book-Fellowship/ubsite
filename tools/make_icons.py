@@ -11,7 +11,7 @@ requested by fixed name, without any <link>:
                           a transparent icon on black and rounds the corners itself
 
 and two more are named by /manifest.webmanifest, for a reader who installs the
-site as an app (Read offline, in Settings):
+site as an app (Work offline, in Settings):
 
     icon-192.png, icon-512.png   the touch icon's tile, at the sizes the
                                  manifest asks for

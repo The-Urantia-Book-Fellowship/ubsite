@@ -39,7 +39,7 @@ SCHEMA = pathlib.Path(__file__).with_name("visits.sql")
 
 OFF = os.environ.get("UB_VISITS", "").lower() in ("off", "0", "no")
 # Pages that are not reading: what deploy.sh polls, the icons, the report itself,
-# and what Read offline asks for (the worker, the app manifest; /offline/ below).
+# and what Work offline asks for (the worker, the app manifest; /offline/ below).
 SKIP = frozenset({"/healthz", "/favicon.ico", "/apple-touch-icon.png", "/stats",
                   "/sw.js", "/manifest.webmanifest"})
 # Set by /stats on the owner's browser, so that their own reading is not counted.

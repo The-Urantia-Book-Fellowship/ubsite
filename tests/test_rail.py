@@ -38,7 +38,9 @@ class Rail(unittest.TestCase):
         cls.sections = {}
         for p, s in con.execute("SELECT paper_n, n FROM section ORDER BY paper_n, n"):
             cls.sections.setdefault(p, []).append(s)
-        cls.version = str(DB.stat().st_mtime_ns)
+        # The version a page asks for its rail's sections under: a hash of what
+        # the rail draws, so that a build that changes none of it keeps it.
+        cls.version = re.search(r'data-v="([0-9a-f]{12})"', rail("/101:1")).group(1)
 
     def test_every_paper_once_and_only_its_own_sections(self):
         r = rail("/133:2")

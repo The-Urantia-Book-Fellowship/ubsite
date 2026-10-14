@@ -1,4 +1,4 @@
-// Read offline: the service worker a reader registers by turning it on in
+// Work offline: the service worker a reader registers by turning it on in
 // Settings (static/offline.js), and nobody else.  It keeps the copy that
 // `make offline` builds (offline/), and answers the site's addresses from it
 // when the network does not.
@@ -13,7 +13,9 @@
 // The copy is kept in the Cache API, one cache per build, each chunk under
 // its hash, so an update fetches only the chunks that changed, carries the
 // rest over, checks each against its hash, and becomes the copy only when it
-// is whole.  A copy knows its build; asking for /offline/manifest.json, at
+// is whole.  A chunk is kept gzipped, as it came, and unpacked when it is
+// read, so the copy takes the room it took to download: unpacked, it is
+// three and a half times that.  A copy knows its build; asking for /offline/manifest.json, at
 // most once an hour while online, says whether the site's is another, and by
 // how many bytes.  offline.js tells the reader, and updates when asked.
 //
@@ -64,7 +66,13 @@ function updateMeta(change) {
   metaQ = p.catch(function () {});
   return p;
 }
-function key(hash) { return '/offline/have/' + hash; }
+// Where a chunk is kept, gzipped.  A copy kept before 2026-10-14 has its
+// chunks unpacked, under have/: they are read as they are, and an update
+// packs them again rather than fetch them.
+function key(hash) { return '/offline/gz/' + hash; }
+function unpackedKey(hash) { return '/offline/have/' + hash; }
+function unpack(r) { return new Response(r.body.pipeThrough(new DecompressionStream('gzip'))); }
+function pack(r) { return new Response(r.body.pipeThrough(new CompressionStream('gzip'))); }
 
 // The copy in use, read once per worker: its manifest, its shell, the chunks
 // lately used, and its databases once a search wants them.
@@ -94,9 +102,12 @@ function copy() {
   return held;
 }
 function bytes(c, name) {
-  return c.cache.match(key(c.byName[name].hash)).then(function (r) {
-    if (!r) throw new Error('the copy has lost ' + name);
-    return r;
+  var h = c.byName[name].hash;
+  return c.cache.match(key(h)).then(function (r) {
+    return r ? unpack(r) : c.cache.match(unpackedKey(h)).then(function (r) {
+      if (!r) throw new Error('the copy has lost ' + name);
+      return r;
+    });
   });
 }
 // A chunk of pages, parsed, the last eight kept in memory.
@@ -286,8 +297,11 @@ function download() {
             if (here) return;
             return caches.match(key(x.hash)).then(function (had) {
               if (had) return target.put(key(x.hash), had);
-              todo.push(x);
-              busy.total += x.bytes;
+              return caches.match(unpackedKey(x.hash)).then(function (old) {
+                if (old) return target.put(key(x.hash), pack(old));
+                todo.push(x);
+                busy.total += x.bytes;
+              });
             });
           });
         });
@@ -297,16 +311,20 @@ function download() {
         var next = function () {
           if (i >= todo.length) return Promise.resolve();
           var x = todo[i++];
+          var gz;
           return fetch('/offline/' + x.file).then(function (r) {
             if (!r.ok) throw new Error(x.name + ' could not be fetched (' + r.status + ')');
-            return new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+            return r.arrayBuffer();
+          }).then(function (got) {
+            gz = got;
+            return unpack(new Response(gz)).arrayBuffer();
           }).then(function (data) {
             return crypto.subtle.digest('SHA-256', data).then(function (d) {
               var h = Array.prototype.map.call(new Uint8Array(d), function (b) {
                 return (b < 16 ? '0' : '') + b.toString(16);
               }).join('').slice(0, 16);
               if (h !== x.hash) throw new Error(x.name + ' arrived damaged');
-              return target.put(key(x.hash), new Response(data));
+              return target.put(key(x.hash), new Response(gz));
             });
           }).then(function () {
             busy.done += x.bytes;
@@ -345,7 +363,7 @@ function download() {
   return running;
 }
 
-// Everything this worker keeps, for a reader who turns Read offline off.
+// Everything this worker keeps, for a reader who turns Work offline off.
 function remove() {
   held = null;
   return caches.keys().then(function (ks) {

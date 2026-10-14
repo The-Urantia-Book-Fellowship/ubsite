@@ -31,7 +31,7 @@
 
 {#- here_p is None on a part's own page: the part is open, and is the page. -#}
 {% macro rail(bk, here_p, here_s, here_part) -%}
-<nav class="rail" aria-label="The book" data-v="{{ db_version() }}">
+<nav class="rail" aria-label="The book" data-v="{{ book().v }}">
 <button class="railfold" type="button" aria-controls="rail-tree" aria-expanded="true"><span>Contents</span></button>
 <ol id="rail-tree">
 {%- for p in bk.foreword %}

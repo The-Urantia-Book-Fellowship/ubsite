@@ -112,12 +112,17 @@
       if (!Object.prototype.hasOwnProperty.call(sh.slugs, slug))
         return { res: missing(sh, esc('No headword in the index has this address.'), path) };
       if (!m[2]) return { chunk: 'index-' + sh.slugs[slug], make: function (d) { return html(200, stored(sh, d.heads[slug])); } };
-      // A reading path: app.py _reading_path's redirects, then not in the copy.
-      var nch = sh.paths[slug];
-      if (nch === undefined) return { res: redirect('/i/' + slug, 307) };
+      // A reading path: app.py _reading_path's redirects, then the page, from
+      // the chunk the shell names: [chapters, chunk].  A copy made before
+      // 2026-10-14 has the chapters alone, and no paths.
+      var pth = sh.paths[slug], nch = typeof pth === 'number' ? pth : pth && pth[0];
+      if (pth === undefined) return { res: redirect('/i/' + slug, 307) };
       if (m[3] && nch < 2) return { res: redirect('/i/' + slug + '/read', 307) };
-      return { res: away(sh, 'A reading path is read online: it is made of paragraphs this copy has, read in another order. ' +
-                             'The headword’s <a href="/i/' + esc(slug) + '">page in the index</a> is here.') };
+      if (typeof pth === 'number')
+        return { res: away(sh, 'A reading path is read online: it is made of paragraphs this copy has, read in another order. ' +
+                               'The headword’s <a href="/i/' + esc(slug) + '">page in the index</a> is here.') };
+      var key = '/i/' + slug + (m[3] ? '/read/theme' : '/read');
+      return { chunk: pth[1], make: function (d) { return html(200, stored(sh, d[key])); } };
     }
     if ((m = /^\/appendix\/([^\/]+)$/.exec(path))) {
       var a = m[1];

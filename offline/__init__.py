@@ -1,12 +1,11 @@
-"""Read offline: the site, kept in a reader's browser.
+"""Work offline: the site, kept in a reader's browser.
 
-A reader who turns on "Read offline" in Settings registers a service worker
+A reader who turns on "Work offline" in Settings registers a service worker
 (ubsite/static/sw.js) that downloads what this package builds, and answers the
 site's addresses from it when the network does not.  It holds the book with
-its margin index and 1955 readings, the index's concept pages, the appendices
-and the lists, and a database to search them by; not the recordings, and not
-the reading paths, which are long and made from paragraphs the copy already
-has.
+its margin index and 1955 readings, the index's concept pages, every
+headword's reading path, the appendices and the lists, and a database to
+search them by; not the recordings.
 
 **The copy is the site's own pages.**  `python -m offline build` asks the app
 for every page it will hold (offline/site.py), as a browser would, and cuts
@@ -30,7 +29,9 @@ query in its list, byte for byte.
 **What is built** goes into var/offline/: manifest.json, which lists every
 chunk by the hash of its bytes, and c/<hash>.gz, each chunk gzipped.  A copy
 knows which build it is, so a worker learns that its copy is stale by asking
-for the manifest, and fetches only the chunks that changed.
+for the manifest, and fetches only the chunks that changed.  The browser keeps
+each chunk gzipped, as it came, so the copy takes the room it took to
+download.
 
 pack.py is the only module here that writes, and only under var/offline/.
 """

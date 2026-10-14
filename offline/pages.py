@@ -18,6 +18,11 @@ paper open and its section marked `here`.  It is two thirds of the page, and
 the same for every section of a paper but for that mark, so it is lifted out
 of the body, where a NUL stands in for it, and kept once for the paper with
 no section marked.  The worker marks the section again.
+
+A headword's reading path (/i/<slug>/read, and /read/theme) is a page like any
+other, and the largest part of the copy: 132 MB of the 191 unpacked, though
+it is made of paragraphs the copy has already, because each paragraph comes
+with its captions and the folds around it.
 """
 
 from __future__ import annotations
@@ -38,6 +43,10 @@ RE_RAIL = re.compile(r'<nav class="rail".*?</nav>', re.S)
 RAIL = "\x00"
 # Papers to a chunk of spoken text (offline-core.js knows it too).
 SPOKEN = 20
+# About how much of the reading paths a chunk holds, as JSON: what the worker
+# unpacks and parses to show one of them.  A headword whose paths are longer
+# has a chunk of its own (Jesus: 2.7 MB in each order).
+PATHS = 1_000_000
 
 # The not-found page's words, to cut it at: its message and the path it names.
 PROBE = "/offline-missing-probe"
@@ -104,10 +113,11 @@ def universe(con: sqlite3.Connection) -> dict:
     slugs = {slug: letter for slug, letter in con.execute(
         "SELECT slug, letter FROM index_entry WHERE scope='az' AND level=1 AND slug IS NOT NULL"
         " ORDER BY ord")}
-    # A headword's reading path is not in the copy, but whether it has one, and
-    # in two orders, says where its address goes (app.py _reading_path).
+    # The headwords with a reading path, in the index's order, and in how many
+    # chapters: with two or more it is read by theme too (app.py _reading_path).
     paths = {slug: n for slug, n in con.execute(
-        "SELECT e.slug, r.n_chapters FROM reading_path r JOIN index_entry e ON e.id=r.root_id")}
+        "SELECT e.slug, r.n_chapters FROM reading_path r JOIN index_entry e ON e.id=r.root_id"
+        " ORDER BY e.ord")}
     lasts = {f"{p}:{s}": n for p, s, n in con.execute(
         "SELECT paper_n, section_n, MAX(para_n) FROM paragraph GROUP BY paper_n, section_n")}
     misc = (["/", "/read", "/index", "/appendix"]
@@ -191,6 +201,34 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
             "page": own(f"/index/{letter}", pages[0]),
             "heads": {s: own(f"/i/{s}", pg) for s, pg in zip(slugs, pages[1:])}}
 
+    # The reading paths, each headword's in both its orders, a letter's in
+    # chunks of about PATHS in the index's order.  The shell names each one's
+    # chunk, so a path that grows moves only its own letter's chunks.
+    where: dict[str, list] = {}
+    for letter in u["letters"]:
+        mine = [s for s in by_letter.get(letter, []) if s in u["paths"]]
+        addrs = [(s, f"/i/{s}/read") for s in mine]
+        addrs += [(s, f"/i/{s}/read/theme") for s in mine if u["paths"][s] >= 2]
+        got: dict[str, dict] = {}
+        for (s, path), pg in zip(addrs, site.get_many([(p, "") for _, p in addrs])):
+            got.setdefault(s, {})[path] = own(path, pg)
+        k, size, name = 0, 0, None
+        for s in mine:
+            n = sum(len(r["t"]) + len(r["h"]) + len(r["b"]) + len(r["s"]) for r in got[s].values())
+            if n > PATHS:
+                chunks[f"read-{s}"] = got[s]
+                where[s] = [u["paths"][s], f"read-{s}"]
+                continue
+            if name is None or size + n > PATHS:
+                name, size = f"read-{letter}-{k}", 0
+                k += 1
+                chunks[name] = {}
+            chunks[name].update(got[s])
+            size += n
+            where[s] = [u["paths"][s], name]
+    if where.keys() != u["paths"].keys():
+        raise Shape("a headword's reading path is in no letter of the index")
+
     # Everything else that is a page of its own.
     chunks["misc"] = {"pages": {path: own(path, pg)
                                 for path, pg in zip(u["misc"], site.get_many([(m, "") for m in u["misc"]]))}}
@@ -226,10 +264,11 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
         "shell": list(shell), "missing": missing, "away": away,
         "search": {"h": srch["h"], "s": srch["s"]},
         "papers": {str(p): secs for p, secs in u["papers"].items()},
-        "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": u["paths"],
+        "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
         "misc": u["misc"],
     }
     counts = {"sections": sum(len(s) for s in u["papers"].values()), "papers": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
+              "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
               "pages": len(expect) - spoken, "spoken": spoken}
     return chunks, expect, counts
