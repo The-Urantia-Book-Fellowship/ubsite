@@ -80,7 +80,8 @@
       mark('none', 'Online; the offline copy did not finish downloading');
     } else if (up) {
       line.innerHTML = 'Out of date: kept as the site was on ' + day(have.made) + ', which has changed since. ' +
-                       (online() ? '<br><button type="button" class="get">Update now (' + mb(up.fetch) + ')</button>'
+                       (online() ? '<br><button type="button" class="get">Update now (' + mb(up.fetch) + ')</button>' +
+                                   ' <button type="button" class="newsbtn" popovertarget="offnews">What’s new</button>'
                                  : 'It can be updated once online.') +
                        (err ? '<br>The last update stopped: ' + err + '.' : '');
       mark('stale', 'An update to the offline copy is waiting (' + mb(up.fetch) + ')');
@@ -111,6 +112,55 @@
     }, function () {
       if (!kept) line.textContent = !online() ? 'It can be downloaded only online.'
                                               : 'This site has no offline copy yet.';
+    });
+  }
+
+  // What's new: what changed on the site after this copy was made, from the
+  // manifest an update would fetch (offline/news.py), newest first, by day; and
+  // a line where the text or the index is newer than the copy's, never their
+  // own commits (Tigran, 2026-10-14).  A popup over the menu, which stays open
+  // beneath it with its Update button: a popover inside the menu's, so the
+  // browser counts it the menu's own.
+  var news = document.createElement('div');
+  news.id = 'offnews';
+  news.className = 'offnews';
+  news.setAttribute('popover', '');
+  news.setAttribute('role', 'dialog');
+  news.setAttribute('aria-labelledby', 'offnews-title');
+  box.appendChild(news);
+  news.addEventListener('beforetoggle', function (ev) { if (ev.newState === 'open') whatsNew(); });
+  function whatsNew() {
+    var have = last && last.have;
+    news.innerHTML = '<div class="bar"><h2 id="offnews-title">What’s new</h2>' +
+      '<button type="button" class="x" popovertarget="offnews" popovertargetaction="hide" aria-label="Close" ' +
+      'title="Close"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>' +
+      '</svg></button></div><p class="since">' + (have ? 'Since your copy, kept as the site was on ' + day(have.made) + ':'
+                                                       : '') + '</p><div class="days">…</div>';
+    var out = news.querySelector('.days');
+    if (!have) { out.textContent = ''; return; }
+    fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function (m) {
+      var days = {}, order = [], n = m.news || { items: [] };
+      function put(d, html, first) {
+        if (!days[d]) { days[d] = []; order.push(d); }
+        days[d][first ? 'unshift' : 'push'](html);
+      }
+      // The times are UTC, written alike, so they compare as strings.
+      n.items.forEach(function (x) { if (x.t > have.made) put(x.d, esc(x.s)); });
+      if (m.index && have.index && m.index.commit !== have.index.commit)
+        put(m.index.date, 'The index as of ' + day(m.index.date), true);
+      if (m.text && have.text && m.text.commit !== have.text.commit)
+        put(m.text.date, 'The text as of ' + day(m.text.date), true);
+      order.sort().reverse();
+      var oldest = n.items[n.items.length - 1];
+      out.innerHTML = order.length ? order.map(function (d) {
+        return '<h3>' + day(d) + '</h3><ul><li>' + days[d].join('</li><li>') + '</li></ul>';
+      }).join('') + (n.earlier && oldest && have.made < oldest.t ? '<p class="earlier">And earlier changes.</p>' : '')
+        : '<p>Nothing is listed for this update.</p>';
+    }, function () {
+      out.textContent = 'The list could not be fetched just now.';
     });
   }
 

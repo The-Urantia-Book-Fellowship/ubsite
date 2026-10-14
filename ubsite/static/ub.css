@@ -791,6 +791,29 @@ dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5
 .offmenu .remove { margin: .5rem 0 0; }
 .offmenu button.drop { padding: 0; border: 0; color: var(--faint); text-decoration: underline;
   text-decoration-thickness: 1px; text-underline-offset: 2px; }
+/* What's new (static/offline.js): a popup over the menu, which stays open
+   beneath it, centred where the browser puts a popover, and scrolling within
+   with its title row in view, as Settings does. */
+.offnews { width: min(30rem, calc(100vw - 2rem)); max-height: min(38rem, calc(100dvh - 3rem));
+  overflow-y: auto; padding: 0 1.2rem 1rem; color: var(--ink); font-size: .95rem; line-height: 1.4;
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  box-shadow: 0 12px 40px rgb(0 0 0 / .28); }
+.offnews .bar { position: sticky; top: 0; display: flex; align-items: center; margin: 0 -1.2rem;
+  padding: .7rem .6rem .3rem 1.2rem; background: var(--paper); }
+.offnews h2 { margin: 0 auto 0 0; font-size: 1.15rem; }
+.offnews .x { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; padding: 0; border: 0;
+  border-radius: 50%; color: var(--faint); }
+.offnews .x svg { width: 1.1rem; height: 1.1rem; }
+.offnews .x path { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+@media (hover: hover) {
+  .offnews .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
+}
+.offnews .since { margin: 0 0 .2rem; color: var(--faint); font-size: .88rem; }
+.offnews h3 { margin: .8rem 0 .2rem; font-size: .82rem; font-weight: 400; letter-spacing: .06em;
+  font-variant-caps: small-caps; color: var(--faint); }
+.offnews ul { margin: 0; padding-left: 1.1rem; }
+.offnews li { margin: .2rem 0; }
+.offnews .earlier, .offnews .days > p { margin: .8rem 0 0; color: var(--faint); font-size: .88rem; }
 /* A page the offline copy answered (static/sw.js) says so, and of when. */
 footer[data-copy]::before { content: "This page is from the offline copy of " attr(data-copy) ".";
   display: block; margin-bottom: .3rem; }

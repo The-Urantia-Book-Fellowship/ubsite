@@ -160,6 +160,26 @@ class Copy(unittest.TestCase):
         self.assertEqual((status, h["cache-control"]), (200, "public, max-age=31536000, immutable"))
         self.assertEqual(hashlib.sha256(gzip.decompress(body)).hexdigest()[:16], c["hash"])
 
+    def test_its_news_is_the_sites_own_changes(self):
+        # What's new (offline/news.py): newest first, a UTC time to compare with
+        # a copy's `made`, the date as git gives it, and the subject alone; only
+        # the commits that touch what a reader is sent, and never a commit's id.
+        from offline import news
+        n = json.loads((COPY / "manifest.json").read_text())["news"]
+        items = n["items"]
+        self.assertTrue(items)
+        self.assertLessEqual(len(items), news.LIMIT)
+        self.assertEqual([x["t"] for x in items], sorted((x["t"] for x in items), reverse=True))
+        for x in items:
+            self.assertEqual(set(x), {"t", "d", "s"})
+            self.assertRegex(x["t"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+            self.assertRegex(x["d"], r"^\d{4}-\d\d-\d\d$")
+            self.assertTrue(x["s"].strip())
+            self.assertNotRegex(x["s"], r"\b[0-9a-f]{40}\b")
+        subjects = {x["s"] for x in items}
+        self.assertNotIn("Ignore .obsidian", subjects)           # .gitignore alone
+        self.assertNotIn("make stop frees the port however the server was started", subjects)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -70,7 +70,13 @@ def change(copy: pathlib.Path, edit, names=("misc",)) -> dict:
         c.update(file=f"c/{h}.gz", hash=h, bytes=len(gz), raw=len(raw))
         m["build"] = hashlib.sha256(m["build"].encode() + h.encode()).hexdigest()[:16]
         changed = c
-    m["made"] = "2026-12-25T12:00:00Z"
+    # Each newer build a day after the last, from Christmas, with one change
+    # made that morning, after any copy before it, for What's new to list.
+    change.n = getattr(change, "n", 0) + 1
+    d = f"2026-12-{24 + change.n}"
+    m["made"] = f"{d}T12:00:00Z"
+    m.setdefault("news", {"items": [], "earlier": False})["items"].insert(
+        0, {"t": f"{d}T11:00:00Z", "d": d, "s": f"A change made for this test, number {change.n}"})
     m["bytes"] = sum(x["bytes"] for x in m["chunks"])
     (copy / "manifest.json").write_text(json.dumps(m))
     return changed
@@ -273,6 +279,17 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         menu(pg)
         wait_state(pg, "t.includes('changed since')")
         print("  " + pg.inner_text(STATE))
+        # What's new: the change made after this copy, and none before it.
+        pg.click("#offmenu .newsbtn")
+        pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=5000)
+        said = pg.inner_text("#offnews")
+        print("  " + " | ".join(said.split("\n")))
+        ok(f"A change made for this test, number {change.n}" in said and f"{24 + change.n} December" in said
+           and pg.locator("#offnews li").count() == 1,
+           "What's new lists the change made after the copy, and nothing older")
+        ok(pg.is_visible("#offmenu .get"), "with the menu and its Update button still open beneath it")
+        pg.click("#offnews .x")
+        ok(pg.is_hidden("#offnews") and pg.is_visible("#offmenu"), "its × closes it, and only it")
         pg.keyboard.press("Escape")
         pg.reload()
         pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=5000)

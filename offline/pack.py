@@ -9,7 +9,8 @@ chunk that did not change keeps its name from build to build, and a browser
 that has it need not fetch it again.  The manifest lists them all, and its
 `build` is a hash of their names and hashes: it moves only when something the
 copy holds does.  `format` is the shape of the chunks; a worker that cannot
-read a copy's format fetches the whole of a new one.
+read a copy's format fetches the whole of a new one.  `news` is what changed
+on the site, for the cloud's "What's new" (news.py), and not in `build`.
 """
 
 from __future__ import annotations
@@ -23,7 +24,7 @@ import pathlib
 import shutil
 import sqlite3
 
-from . import pages, searchdb, site
+from . import news, pages, searchdb, site
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "var" / "offline"
@@ -80,7 +81,7 @@ def build(con: sqlite3.Connection) -> dict:
         "made": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "text": src.get("press", {}), "index": src.get("index", {}),
         "bytes": sum(e["bytes"] for e in entries), "raw": sum(e["raw"] for e in entries),
-        "counts": counts, "chunks": entries,
+        "counts": counts, "news": news.news(), "chunks": entries,
     }
     write(files, json.dumps(manifest, ensure_ascii=False, indent=1).encode("utf-8"), _json(expect))
     return manifest
