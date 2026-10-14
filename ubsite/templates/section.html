@@ -99,9 +99,24 @@
     </section>
     {% endif %}
 
-    <nav class="pager">
-      {% if prv %}<a href="/{{ paper.n }}:{{ prv.n }}">‹ previous</a>{% endif %}
-      {% if nxt %}<a class="next" href="/{{ paper.n }}:{{ nxt.n }}">next ›</a>{% endif %}
+    {#- The transport bar: ⏪ a paper back, ⏮ a section back, ⏭ a section on,
+        ⏩ a paper on, across papers in the order of the book (app.py
+        transport).  Icons alone, each named by its tooltip; at the book's
+        ends a greyed icon in its place, so the four never move (Tigran,
+        2026-10-14).  Drawn, not characters, as the player's are. #}
+    {%- set icons = {'fb': 'M8 2.5v11L1 8zM15 2.5v11L8 8z',
+                     'prev': 'M3 2.5h2v11H3zM13.5 2.5v11L5.5 8z',
+                     'next': 'M11 2.5h2v11h-2zM2.5 2.5v11l8-5.5z',
+                     'ff': 'M1 2.5v11L8 8zM8 2.5v11L15 8z'} %}
+    <nav class="transport" aria-label="Papers and sections">
+      {%- for k in ('fb', 'prev', 'next', 'ff') %}{% set g = go[k] %}
+      {%- set ico %}<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="{{ icons[k] }}"/></svg>{% endset %}
+      {%- if g %}
+      <a class="{{ k }}" href="{{ g.href }}"{% if k in ('prev', 'next') %} rel="{{ k }}"{% endif %} aria-label="{{ g.label }}" title="{{ g.label }}">{{ ico }}</a>
+      {%- else %}
+      <span class="{{ k }} off" aria-hidden="true">{{ ico }}</span>
+      {%- endif %}
+      {%- endfor %}
     </nav>
   </article>
 </main>

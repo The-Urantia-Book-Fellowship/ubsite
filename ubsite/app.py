@@ -967,21 +967,44 @@ def read(request: Request, ref: str):
                                            " {}, not {}.")
                            .format(go(f"{here}.{last}-{focus}"), f"{here}.{focus}-{last}"))
     rows = queries.section(con, paper, sec)
-    nxt = con.execute("SELECT n, title FROM section WHERE paper_n=? AND n>? ORDER BY n LIMIT 1",
-                      (paper, sec)).fetchone()
-    prv = con.execute("SELECT n FROM section WHERE paper_n=? AND n<? ORDER BY n DESC LIMIT 1",
-                      (paper, sec)).fetchone()
+    go = transport(con, paper, sec)
     # Where listening goes on to: the next section, or from a paper's last
-    # section the next paper's first -- the pager stays within the paper.
+    # section the next paper's first, as the transport bar's ⏭ does.
     onward = None
-    if nxt:
-        onward = {"href": f"/{paper}:{nxt['n']}", "label": f"{nxt['n']}. {nxt['title']}"}
-    else:
-        np_ = con.execute("SELECT s.paper_n, s.n, p.title FROM section s JOIN paper p"
-                          " ON p.id=s.paper_id WHERE s.paper_n>? ORDER BY s.paper_n, s.n LIMIT 1",
-                          (paper,)).fetchone()
-        if np_:
-            onward = {"href": f"/{np_['paper_n']}:{np_['n']}", "label": f"Paper {np_['paper_n']}. {np_['title']}"}
+    if go["next"]:
+        n = go["next"]
+        onward = {"href": n["href"], "label": f"{n['n']}. {n['title']}" if n["paper_n"] == paper
+                  else f"Paper {n['paper_n']}. {n['ptitle']}"}
     return page(request, "section.html", paper=p, section=s, **rows,
-                focus=focus, last=last, nxt=nxt, prv=prv, onward=onward,
+                focus=focus, last=last, go=go, onward=onward,
                 audio=section_audio(con, s["id"]))
+
+
+def transport(con, paper: int, sec: int) -> dict:
+    """The transport bar at a section's end: a paper back (fb), a section back
+    (prev), a section on (next), a paper on (ff), in the order of the book.
+
+    A section steps across a paper's edge, 101:0 back to 100's last section;
+    a paper goes to its first section, never the /N redirect.  Part pages are
+    not stops.  None at the book's ends.  The label is the tooltip and the
+    accessible name alike (Tigran, 2026-10-14).
+    """
+    def paper_name(n):
+        return "the Foreword" if n == 0 else str(n)
+
+    def at(row, label):
+        return row and {**dict(row), "href": f"/{row['paper_n']}:{row['n']}", "label": label}
+    here = (paper, sec)
+    prev = con.execute("SELECT paper_n, n FROM section WHERE (paper_n, n) < (?, ?)"
+                       " ORDER BY paper_n DESC, n DESC LIMIT 1", here).fetchone()
+    nxt = con.execute("SELECT s.paper_n, s.n, s.title, p.title AS ptitle FROM section s"
+                      " JOIN paper p ON p.id=s.paper_id WHERE (s.paper_n, s.n) > (?, ?)"
+                      " ORDER BY s.paper_n, s.n LIMIT 1", here).fetchone()
+    fb = con.execute("SELECT paper_n, MIN(n) AS n FROM section WHERE paper_n < ?"
+                     " GROUP BY paper_n ORDER BY paper_n DESC LIMIT 1", (paper,)).fetchone()
+    ff = con.execute("SELECT paper_n, MIN(n) AS n FROM section WHERE paper_n > ?"
+                     " GROUP BY paper_n ORDER BY paper_n LIMIT 1", (paper,)).fetchone()
+    return {"fb": at(fb, fb and f"Previous paper: {paper_name(fb['paper_n'])}"),
+            "prev": at(prev, prev and f"Previous section: {prev['paper_n']}:{prev['n']}"),
+            "next": at(nxt, nxt and f"Next section: {nxt['paper_n']}:{nxt['n']}"),
+            "ff": at(ff, ff and f"Next paper: {paper_name(ff['paper_n'])}")}

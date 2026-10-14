@@ -12,6 +12,8 @@
       s = JSON.parse(localStorage.getItem(KEY) || '{}') || {};
       // The theme was once kept on its own.
       if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
+      // The text size's steps moved up one (settings.py): Largest is Larger.
+      if (s.size === 'largest') s.size = 'larger';
     } catch (e) {}
     return s;
   }
@@ -298,6 +300,45 @@
       });
     swapped();
   });
+
+  // Tooltips off (Settings): the browser draws one from a title, and no
+  // stylesheet can hide it, so every title on the page is moved to data-tip,
+  // where none is drawn, and back when they are turned on.  A watcher moves
+  // those set later: the player's, a <main> listen.js swaps in, a paper the
+  // rail fetches, the folds' and the cloud's labels as they change.  Every
+  // icon keeps its aria-label, so nothing goes unnamed.
+  var tipWatch = null;
+  function untip(el) {
+    if (!el.hasAttribute('title')) return;
+    el.setAttribute('data-tip', el.getAttribute('title'));
+    el.removeAttribute('title');
+  }
+  function tips() {
+    var r = document.documentElement, each = Array.prototype.forEach;
+    if (load().tips === false) {
+      each.call(r.querySelectorAll('[title]'), untip);
+      if (tipWatch || !window.MutationObserver) return;
+      tipWatch = new MutationObserver(function (ms) {
+        ms.forEach(function (m) {
+          if (m.type === 'attributes') return untip(m.target);
+          each.call(m.addedNodes, function (n) {
+            if (n.nodeType !== 1) return;
+            untip(n);
+            each.call(n.querySelectorAll('[title]'), untip);
+          });
+        });
+      });
+      tipWatch.observe(r, { subtree: true, childList: true, attributes: true, attributeFilter: ['title'] });
+    } else {
+      if (tipWatch) { tipWatch.disconnect(); tipWatch = null; }
+      each.call(r.querySelectorAll('[data-tip]'), function (el) {
+        el.setAttribute('title', el.getAttribute('data-tip'));
+        el.removeAttribute('data-tip');
+      });
+    }
+  }
+  tips();
+  document.addEventListener('ub:settings', function (ev) { if (ev.detail.key === 'tips') tips(); });
 
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
   // endnote's words (section.html), which are hidden while this runs.  One

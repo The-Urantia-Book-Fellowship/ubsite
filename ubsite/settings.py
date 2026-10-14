@@ -27,13 +27,15 @@ READING = [
      [("system", "System", "as this device is set", ""),
       ("light", "Light", "", ""),
       ("dark", "Dark", "", "")], ""),
-    # 90% to 125% of the root size: everything set in rem follows, the margin
-    # and the header too, as with the browser's zoom.
+    # 100% to 125% of the root size: everything set in rem follows, the margin
+    # and the header too, as with the browser's zoom.  Until 2026-10-14 the
+    # steps were 90%, 100% (Standard), 112.5% and 125% (Largest); Tigran found
+    # 90% too small, and moved every name up a step, so Standard is 112.5%.
+    # A stored 'largest' is read as 'larger' (ub.js stored(), ub.css).
     ("size", "segmented", "Text size", "standard",
-     [("smaller", "A", "Smaller", "a1"),
-      ("standard", "A", "Standard", "a2"),
-      ("larger", "A", "Larger", "a3"),
-      ("largest", "A", "Largest", "a4")], ""),
+     [("smaller", "A", "Smaller", "a2"),
+      ("standard", "A", "Standard", "a3"),
+      ("larger", "A", "Larger", "a4")], ""),
     # The leading: 1.05, 1.1 (the printed book's), 1.25 and 1.45 (ub.css).  It
     # was 1.55 for everyone, which Tigran found too open, worst on a phone; he
     # chose these steps and 1.25 for the default (2026-10-12).  A 1955 reading's
@@ -78,6 +80,10 @@ SHOW = [
     # (Tigran, 2026-10-12).
     ("notesearch", "switch", "1955 readings in search results", False, [],
      "their wording, such as Badanon, and the committee\u2019s reasons"),
+    # The browser's own, drawn from a title="", which no stylesheet can hide:
+    # ub.js takes every title off the page while this is off, and puts them
+    # back (Tigran, 2026-10-14).  The icons keep their aria-labels.
+    ("tips", "switch", "Tooltips", True, [], "a few words on a button or a link, where the pointer rests"),
 ]
 SPEEDS = (0.8, 0.9, 1, 1.1, 1.25, 1.5)
 LISTEN = [

@@ -394,10 +394,11 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 :root[data-notes="off"] :is(a.fn, .notes, .pop) { display: none; }
 :root[data-margin="off"] .grid { grid-template-columns: minmax(0, var(--measure)); }
 /* Text size scales the root, so everything set in rem follows, as with the
-   browser's zoom. */
-:root[data-size="smaller"] { font-size: 90%; }
-:root[data-size="larger"]  { font-size: 112.5%; }
-:root[data-size="largest"] { font-size: 125%; }
+   browser's zoom.  Standard is 112.5% (settings.py); "largest" was the step
+   above "larger" until 2026-10-14, and is its size still. */
+:root { font-size: 112.5%; }
+:root[data-size="smaller"] { font-size: 100%; }
+:root:is([data-size="larger"], [data-size="largest"]) { font-size: 125%; }
 /* Line spacing: the book's text (p.t) and a 1955 reading's card and endnote,
    which are read as the text is, wherever they open; never the site around
    them, the lists, search or the margin (Tigran, 2026-10-12: "only to the text,
@@ -482,7 +483,7 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
   :root[data-margin="off"][data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
          grid-template-columns: minmax(0, 1fr); }
 }
-:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .prose) { max-width: none; }
+:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .transport, .prose) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
 :root[data-width="full"] .applist { columns: 24rem; }
 /* A superscript (28,012th, a card's "11th edition") raised above its line's
@@ -602,6 +603,19 @@ a.fn.on::after { background: currentColor; }
 
 .pager { display: flex; margin: 2.5rem 0 1rem; max-width: var(--measure); font-size: .95rem; }
 .pager .next { margin-left: auto; }
+/* A section's transport bar: ⏪ ⏮ ⏭ ⏩, centred over the text column, each
+   a round target a thumb's width, blue as a link that goes somewhere is
+   (section.html).  At the book's ends an icon stands greyed in its place. */
+.transport { display: flex; justify-content: center; gap: .5rem; margin: 2.5rem 0 1rem;
+  max-width: var(--measure); }
+.transport :is(a, .off) { display: grid; place-items: center; width: 2.6rem; height: 2.6rem;
+  border-radius: 50%; color: var(--link); -webkit-tap-highlight-color: transparent; }
+.transport svg { width: 1.15rem; height: 1.15rem; fill: currentColor; display: block; }
+.transport .off { color: var(--rule); }
+.transport a:active { background: color-mix(in oklch, var(--link) 18%, transparent); }
+@media (hover: hover) {
+  .transport a:hover { background: color-mix(in oklch, var(--link) 10%, transparent); }
+}
 
 /* ---- listening (listen.js) --------------------------------------------- */
 button svg { width: 1em; height: 1em; fill: currentColor; display: block; }
@@ -741,7 +755,7 @@ dialog.settings .seg label { display: grid; place-items: center; min-width: 2.4r
 .seg label:has(input:checked) { color: var(--paper); background: var(--link); }
 .seg label:has(input:focus-visible) { outline: 2px solid var(--link); outline-offset: -3px; }
 .seg span { position: relative; top: var(--lift); }      /* in its own size: the A's differ */
-.seg .a1 span { font-size: .78rem; } .seg .a2 span { font-size: .92rem; }
+.seg .a2 span { font-size: .92rem; }
 .seg .a3 span { font-size: 1.08rem; } .seg .a4 span { font-size: 1.25rem; }
 /* Line spacing: three bars as far apart as the choice's lines, the gaps drawn
    wider than the leadings differ, or the four would look alike.  A drawing, so
@@ -994,7 +1008,7 @@ main.results { position: relative; }
 /* ---- print ------------------------------------------------------------- */
 @media print {
   @page { margin: 22mm 20mm; }
-  .top, footer, .rail, .pager, .listenrow, .playp, .player, dialog, .offmenu { display: none; }
+  .top, footer, .rail, .pager, .transport, .listenrow, .playp, .player, dialog, .offmenu { display: none; }
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }
