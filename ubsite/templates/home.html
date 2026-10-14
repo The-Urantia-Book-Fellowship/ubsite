@@ -53,8 +53,8 @@
       {{ (stats.audio_mh_seconds / 3600)|round|int }} hours, timed to the paragraph:
       start from any paragraph, and the page follows the voice.</li>
     {%- endif %}
-    <li><a href="/api">The text API</a> — for other sites: keep your own copy of the
-      text in step with this one, with the Foundation's paragraph numbers beside ours.</li>
+    <li><a href="/api">The text API</a> — for other sites and AI: keep your own copy of the
+      text in step with the most up to date SRT text, used for the Uversa Press edition.</li>
   </ul>
 
   <h2>About this edition</h2>
@@ -70,8 +70,7 @@
   each.</p>
   <p>The index is the Uversa Press index, revised with numerous corrections for
   the third edition, 2026, where it is bound together with the text in a single
-  volume.</p>
-  <p>Its {{ '{:,}'.format(stats.citations) }} references, reaching
+  volume. Its {{ '{:,}'.format(stats.citations) }} references, reaching
   {{ '{:,}'.format(stats.citation_targets) }} places in the text, compiled and
   checked over many years, are what make the margins of this reader possible.
   The printed volume remains the book; this is an additional way to move
