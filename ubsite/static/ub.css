@@ -247,7 +247,7 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage h1 { font-size: 2.6rem; margin: .5rem 0 1.6rem; }
 .partpage .papernum { font-size: 1.25rem; }       /* as PAPER N is to its title */
 .partpage .sponsor { font-style: italic; margin: 0 auto; max-width: 32em; text-wrap: balance; }
-.partpage .pager { max-width: none; margin-top: 3.5rem; }
+.partpage .transport { justify-content: flex-end; max-width: none; margin-top: 3.5rem; }
 /* A paper's head is centred over the text column, as the book sets it: the
    paper's number, title and author, the section's title, and the Listen button
    under them.  It is as wide as the column: the measure here, and on a wide

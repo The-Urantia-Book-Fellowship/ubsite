@@ -2,7 +2,8 @@
 on, ⏩ a paper on, in the order of the book and across papers' edges.
 
 Every section's four targets are held to its neighbours in the list of all
-sections; a few pages are rendered through the app as ASGI, as
+sections, and a part's page has the one, ⏭ to its first paper's first
+section; a few pages are rendered through the app as ASGI, as
 test_appendix_pages does, for the bar itself and its greyed ends.  The
 Tooltips switch is a setting, on by default.  Skipped when var/ub.db has not
 been built.
@@ -38,6 +39,7 @@ class Transport(unittest.TestCase):
         cls.first = {}
         for p, s in cls.sections:
             cls.first.setdefault(p, s)
+        cls.parts = list(con.execute("SELECT n, first_paper FROM part ORDER BY n"))
 
     def test_every_section_steps_to_its_neighbours(self):
         from ubsite.app import db, transport
@@ -77,6 +79,14 @@ class Transport(unittest.TestCase):
         links, off = bar(f"/{p}:{s}")
         self.assertEqual(off, ["next", "ff"])
         self.assertEqual(list(links), ["fb", "prev"])
+
+    def test_a_parts_page_goes_on_to_its_first_section(self):
+        self.assertEqual(len(self.parts), 4)
+        for n, fp in self.parts:
+            links, off = bar(f"/part/{n}")
+            here = f"{fp}:{self.first[fp]}"
+            self.assertEqual(links, {"next": (here, f"Next section: {here}")}, n)
+            self.assertEqual(off, [], n)
 
     def test_tooltips_are_on_by_default(self):
         self.assertIs(settings.defaults()["tips"], True)

@@ -88,7 +88,7 @@ class Rail(unittest.TestCase):
         self.assertIn("<h1>The Life and Teachings<br>of Jesus</h1>", body)
         self.assertIn("watchcare of the Apostle Andrew.</p>", body)
         self.assertNotRegex(body, r'<p class="t[ "]')           # no paragraph of text
-        self.assertIn('<a class="next" href="/120">', body)
+        self.assertIn('<a class="next" href="/120:0" rel="next" aria-label="Next section: 120:0"', body)
         r = rail("/part/4")
         self.assertEqual(RE_OPEN_PART.findall(r), ["IV"])
         self.assertEqual(r.count("<details open>"), 1)          # the part, and no paper

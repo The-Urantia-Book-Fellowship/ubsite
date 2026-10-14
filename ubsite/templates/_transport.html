@@ -1,0 +1,14 @@
+{#- The transport bar's buttons (ub.css .transport): ⏪ a paper back (fb),
+    ⏮ a section back (prev), ⏭ a section on (next), ⏩ a paper on (ff).
+    Icons alone, each named by its tooltip; where there is nowhere to go, a
+    greyed icon in its place, so the others never move (Tigran, 2026-10-14).
+    Drawn, not characters, as the player's are: ⏮ and ⏭ are its paths. #}
+{% set paths = {'fb': 'M8 2.5v11L1 8zM15 2.5v11L8 8z',
+                'prev': 'M3 2.5h2v11H3zM13.5 2.5v11L5.5 8z',
+                'next': 'M11 2.5h2v11h-2zM2.5 2.5v11l8-5.5z',
+                'ff': 'M1 2.5v11L8 8zM8 2.5v11L15 8z'} %}
+{% macro step(k, g) -%}
+{%- set ico %}<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="{{ paths[k] }}"/></svg>{% endset %}
+{%- if g %}<a class="{{ k }}" href="{{ g.href }}"{% if k in ('prev', 'next') %} rel="{{ k }}"{% endif %} aria-label="{{ g.label }}" title="{{ g.label }}">{{ ico }}</a>
+{%- else %}<span class="{{ k }} off" aria-hidden="true">{{ ico }}</span>{% endif %}
+{%- endmacro %}

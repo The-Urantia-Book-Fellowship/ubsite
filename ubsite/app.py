@@ -909,10 +909,16 @@ def part_page(request: Request, n: int):
     The rail's part titles link here, so a part opens on its title page rather
     than only unfolding in the rail.
     """
-    part = db().execute("SELECT * FROM part WHERE n=?", (n,)).fetchone()
+    con = db()
+    part = con.execute("SELECT * FROM part WHERE n=?", (n,)).fetchone()
     if part is None:
         return missing(request, "There are four parts, I to IV.")
-    return page(request, "part.html", part=part, roman=ROMAN[n])
+    # Its one way on is the transport bar's ⏭, to its first paper's first
+    # section (Tigran, 2026-10-14).
+    fp = part["first_paper"]
+    first = con.execute("SELECT MIN(n) FROM section WHERE paper_n=?", (fp,)).fetchone()[0]
+    nxt = {"href": f"/{fp}:{first}", "label": f"Next section: {fp}:{first}"}
+    return page(request, "part.html", part=part, roman=ROMAN[n], nxt=nxt)
 
 
 @app.get("/{paper:int}")
