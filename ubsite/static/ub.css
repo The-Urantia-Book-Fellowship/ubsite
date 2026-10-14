@@ -126,14 +126,31 @@ a:hover { text-decoration-thickness: 2px; }
    than left to the browser's fallback (build/fonts.py ELSEWHERE). */
 .theme { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 1rem;
   font-family: system-ui, sans-serif; }
-/* Settings: drawn, not a glyph -- U+2699 turns into an emoji on some systems. */
+/* Settings: a gear, drawn, not a glyph -- U+2699 turns into an emoji on some
+   systems.  It was a row of three sliders until Tigran asked for the usual
+   gear (2026-10-14). */
 .gear { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer;
         align-self: center; }
-.gear svg { width: 1.05rem; height: 1.05rem; display: block; }
-.gear path, .gear circle { stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; }
-.gear path { fill: none; }
-.gear circle { fill: var(--paper); }
-.gear:hover, .theme:hover { color: var(--ink); }
+.gear svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
+.gear path, .gear circle { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
+.gear:hover, .theme:hover, .top .offline:hover { color: var(--ink); }
+/* Work offline's icon, at the header's corner: a cloud, struck through while
+   offline; a check in it while a copy is kept, an arrow while one downloads,
+   and the flame's dot when an update is waiting.  One drawing, its parts shown
+   by data-net and data-have (ub.js, static/offline.js). */
+.top .offline { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer;
+                align-self: center; }
+.top .offline svg { width: 1.3rem; height: 1.04rem; display: block; overflow: visible; }
+.top .offline path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round;
+                     stroke-linejoin: round; }
+.top .offline .cloud { fill: var(--paper); }
+.top .offline :is(.tick, .down, .slash, .dot) { display: none; }
+.top .offline[data-net="on"]:is([data-have="kept"], [data-have="stale"]) .tick,
+.top .offline[data-net="on"][data-have="busy"] .down,
+.top .offline[data-net="off"] .slash { display: inline; }
+/* The dot offline too: the copy being read is out of date (Tigran, 2026-10-14). */
+.top .offline[data-have="stale"] .dot { display: inline; fill: var(--flame);
+                                        stroke: var(--paper); stroke-width: 1.2; }
 
 footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1rem;
   font-size: .88rem; color: var(--faint); }
@@ -442,7 +459,8 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 }
 /* The index folded away: the margin and what stands with it are gone, and the
    text takes their room but for 2rem kept at its right, where the chevron
-   stands, pointing back the way the index went, level with the header's gear.
+   stands, pointing back the way the index went, level with the header's last
+   icon.
    Measured, the frame gives up what the index did, as for the rail, so the page
    stays centred.  A section page's frame is .reader, a reading path's .path. */
 @media (min-width: 62.01rem) {
@@ -671,8 +689,24 @@ dialog.settings { width: min(29rem, calc(100vw - 2rem)); max-height: calc(100dvh
   background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
   box-shadow: 0 12px 40px rgb(0 0 0 / .28); }
 dialog.settings::backdrop { background: rgb(0 0 0 / .35); }
-dialog.settings form { display: flex; flex-direction: column; padding: 1.1rem 1.4rem 1rem; }
-dialog.settings h2 { margin: 0 0 .5rem; }
+dialog.settings form { display: flex; flex-direction: column; padding: 0 1.4rem 1rem; }
+/* The title, ↺ and ×, in view however far the dialog scrolls: the dialog is
+   the scroll box, and on a phone it is taller than the screen. */
+dialog.settings .bar { position: sticky; top: 0; z-index: 1; display: flex; align-items: center;
+  gap: .6rem; margin: 0 -1.4rem; padding: .75rem .8rem .45rem 1.4rem; background: var(--paper); }
+dialog.settings h2 { margin: 0 auto 0 0; }
+dialog.settings .bar button { display: grid; place-items: center; width: 2.2rem; height: 2.2rem;
+  padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--faint);
+  cursor: pointer; }
+dialog.settings .bar svg { width: 1.1rem; height: 1.1rem; overflow: visible; }
+dialog.settings .bar path { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round;
+  stroke-linejoin: round; }
+/* Greyed while every setting is its default: there is nothing to restore. */
+dialog.settings .reset:disabled { opacity: .35; cursor: default; }
+@media (hover: hover) {
+  dialog.settings .bar button:not(:disabled):hover {
+    background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
+}
 dialog.settings fieldset { border: 0; border-top: 1px solid var(--rule); margin: 0;
   padding: .55rem 0 .7rem; }
 dialog.settings legend { padding: 0 .4rem 0 0; font-size: .82rem; letter-spacing: .06em;
@@ -720,25 +754,29 @@ dialog.settings .seg label { display: grid; place-items: center; min-width: 2.4r
 .seg .sp4 span { height: .95rem; }
 /* As tall as a row of words, Theme's: a drawing has no line of its own. */
 dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5 + .24rem); }
-dialog.settings .actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-dialog.settings .reset { padding: 0; font: inherit; font-size: .9rem; color: var(--link);
-  background: none; border: 0; cursor: pointer; text-decoration: underline;
-  text-decoration-thickness: 1px; text-underline-offset: 2px; }
-dialog.settings .done { padding: .3rem 1.1rem; font: inherit;
-  font-size: .95rem; color: var(--paper); background: var(--link); border: 0;
-  border-radius: 3px; cursor: pointer; }
-dialog.settings .done span { position: relative; top: var(--lift); }
 
-/* Work offline (static/offline.js): what the copy is, and its buttons. */
-dialog.settings .offline .state { margin: .15rem 0 0 1.55rem; font-size: .85rem; color: var(--faint); }
-dialog.settings .offline .state:empty { display: none; }
-dialog.settings .offline .install { margin: .5rem 0 0; }
-:is(dialog.settings .offline, .offnote) button { padding: .05rem .55rem; font: inherit; font-size: .85rem;
+/* Work offline's menu, opened by its icon (static/offline.js): online or
+   offline, the switch, what the copy is, and installing the site as an app.
+   A popover, in the top layer, placed by ub.js under the icon in the page's
+   coordinates, so that it scrolls away with the header. */
+.offmenu { position: absolute; inset: auto; margin: 0; width: min(22rem, calc(100vw - 2rem));
+  padding: .7rem 1rem .85rem; color: var(--ink); font-size: 1rem; line-height: 1.4;
+  background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+  border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
+.offmenu .net { margin: 0 0 .45rem; font-size: .82rem; letter-spacing: .06em;
+  font-variant-caps: small-caps; color: var(--faint); }
+.offmenu .what { margin: 0; font-size: 1.02rem; }
+.offmenu small { color: var(--faint); font-size: .85rem; }
+.offmenu .state { margin: .45rem 0 0; font-size: .85rem; color: var(--faint); }
+.offmenu .state:empty { display: none; }
+.offmenu .state button { margin-top: .3rem; }
+.offmenu .install { margin: .65rem 0 0; padding-top: .6rem; border-top: 1px solid var(--rule); }
+.offmenu button { padding: .05rem .55rem; font: inherit; font-size: .85rem;
   color: var(--link); background: none; border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; }
-/* The line under the header when the offline copy is stale, or updating. */
-.offnote { border-bottom: 1px solid var(--rule);
-  background: color-mix(in oklch, var(--link) 7%, var(--paper)); }
-.offnote p { max-width: 62rem; margin: 0 auto; padding: .45rem 1rem; font-size: .9rem; }
+/* Removing the copy is apart from the rest, and quieter. */
+.offmenu .remove { margin: .5rem 0 0; }
+.offmenu button.drop { padding: 0; border: 0; color: var(--faint); text-decoration: underline;
+  text-decoration-thickness: 1px; text-underline-offset: 2px; }
 /* A page the offline copy answered (static/sw.js) says so, and of when. */
 footer[data-copy]::before { content: "This page is from the offline copy of " attr(data-copy) ".";
   display: block; margin-bottom: .3rem; }
@@ -956,7 +994,7 @@ main.results { position: relative; }
 /* ---- print ------------------------------------------------------------- */
 @media print {
   @page { margin: 22mm 20mm; }
-  .top, footer, .rail, .pager, .listenrow, .playp, .player, dialog { display: none; }
+  .top, footer, .rail, .pager, .listenrow, .playp, .player, dialog, .offmenu { display: none; }
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }

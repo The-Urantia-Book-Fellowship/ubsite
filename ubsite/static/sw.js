@@ -1,7 +1,7 @@
-// Work offline: the service worker a reader registers by turning it on in
-// Settings (static/offline.js), and nobody else.  It keeps the copy that
-// `make offline` builds (offline/), and answers the site's addresses from it
-// when the network does not.
+// Work offline: the service worker a reader registers by downloading the copy
+// from the menu of the icon at the header's corner (static/offline.js), and
+// nobody else.  It keeps the copy that `make offline` builds (offline/), and
+// answers the site's addresses from it when the network does not.
 //
 // Network first.  Online, every request goes to the server as if this were
 // not here, so a reader sees the live site and the visit counter counts them.

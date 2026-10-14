@@ -1,25 +1,33 @@
-// Work offline, the page's side: the switch in Settings, what it says about
-// the copy, the line under the header when the copy is stale, and the offer
-// to install the site as an app.  ub.js loads this when Settings opens, or at
-// once on a page the worker controls.  The worker (static/sw.js) does the
-// work, and answers {cmd} on a message port with its state:
+// Work offline, the page's side: the menu that the icon at the header's corner
+// opens (#offmenu in base.html), with the switch, what it says about the copy,
+// and the offer to install the site as an app; and what the icon shows of the
+// copy, data-have: none, kept, stale (an update is waiting: the flame's dot)
+// or busy.  ub.js shows the icon, says online or offline, and loads this when
+// the menu opens, or at once on a page the worker controls.  The worker
+// (static/sw.js) does the work, and answers {cmd} on a message port with its
+// state:
 //
 //   have    the copy kept: {build, made, text, index, bytes, raw}, or null
 //   latest  the site's, when it is another: {made, fetch, full, ...}, or null
 //   busy    {done, total} in bytes while downloading
 //   error   why the last download stopped
 //
-// The switch is the registration: on, the worker is registered and fetches
-// the copy; off, it removes the copy and is unregistered.
+// Downloading registers the worker, which fetches the copy; removing it
+// removes the copy and unregisters the worker.  Nothing else does: the copy
+// stays through going offline and online again, and the worker answers from
+// it whenever the network does not.  An out-of-date copy is said, with what
+// the update costs, whenever the menu shows it, and the icon has the flame's
+// dot.  Until 2026-10-14 all this was in Settings, a switch turned on or off,
+// and a reader who turned it off to be "online" again lost the copy; a stale
+// copy was announced by a line under the header too (Tigran).
 (function () {
-  var box = document.querySelector('fieldset.offline');
-  if (!box || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
+  var box = document.getElementById('offmenu'), icon = document.querySelector('.top .offline');
+  if (!box || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
   window.ubOfflineUI = true;
-  var sw = navigator.serviceWorker, input = box.querySelector('input[name="offline"]'),
-      line = box.querySelector('.state'), inst = box.querySelector('.install');
+  var sw = navigator.serviceWorker, line = box.querySelector('.state'), drop = box.querySelector('p.remove'),
+      inst = box.querySelector('.install'), kept = false;
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
                 'October', 'November', 'December'];
-  box.hidden = false;
 
   function mb(n) { return Math.max(0.1, n / 1e6).toFixed(1) + ' MB'; }
   function day(iso) {
@@ -38,79 +46,50 @@
       });
     });
   }
-  function later() { try { return localStorage.getItem('ub_offline_later'); } catch (e) { return null; } }
 
-  // The line under the header: the copy is stale, or being updated.
-  var note = null;
-  function noted(html) {
-    if (!html) { if (note) { note.remove(); note = null; } return; }
-    if (!note) {
-      note = document.createElement('div');
-      note.className = 'offnote';
-      note.setAttribute('role', 'status');
-      var top = document.querySelector('header.top');
-      top.parentNode.insertBefore(note, top.nextSibling);
-    }
-    note.innerHTML = '<p>' + html + '</p>';
+  // The icon: what the copy is, and while online, what it would say of it.
+  // ub.js words the rest of its label, by whether this page is online.
+  function mark(have, say) {
+    icon.dataset.have = have;
+    if (say) icon.dataset.say = say; else delete icon.dataset.say;
+    document.dispatchEvent(new Event('ub:offline'));
   }
 
+  // An update can be had only online; offline, the menu says so instead.
+  function online() { return navigator.onLine !== false; }
   var last = null;
   function show(s) {
     last = s;
     watch(s);
-    if (!s || s.removed) {
-      input.checked = false;
-      notice(null);
+    kept = !!s && !s.removed;
+    // Not while it downloads, nor offline, when it is all the site there is.
+    drop.hidden = !kept || !!(s && s.busy) || !online();
+    if (!kept) {
+      mark('none');
       return sized();
     }
-    input.checked = true;
     var have = s.have, up = s.latest, err = s.error ? esc(s.error) : '';
     if (s.busy) {
       line.textContent = (have ? 'Updating' : 'Downloading') + (s.busy.total
         ? ': ' + mb(s.busy.done) + ' of ' + mb(s.busy.total) : '…');
+      mark('busy', (have ? 'Updating the offline copy' : 'Downloading the offline copy') + (s.busy.total
+        ? ': ' + mb(s.busy.done) + ' of ' + mb(s.busy.total) : '…'));
     } else if (!have) {
       line.innerHTML = (err ? 'The download stopped: ' + err + '.' : 'The download did not finish.') +
-                       ' <button type="button" class="get">Try again</button>';
+                       (online() ? ' <button type="button" class="get">Try again</button>' : '');
+      mark('none', 'Online; the offline copy did not finish downloading');
     } else if (up) {
-      line.innerHTML = 'Kept as the site was on ' + day(have.made) + ', which has changed since. ' +
-                       '<button type="button" class="get">Update now (' + mb(up.fetch) + ')</button>' +
+      line.innerHTML = 'Out of date: kept as the site was on ' + day(have.made) + ', which has changed since. ' +
+                       (online() ? '<br><button type="button" class="get">Update now (' + mb(up.fetch) + ')</button>'
+                                 : 'It can be updated once online.') +
                        (err ? '<br>The last update stopped: ' + err + '.' : '');
+      mark('stale', 'An update to the offline copy is waiting (' + mb(up.fetch) + ')');
     } else {
       line.textContent = 'Up to date: the text of ' + day(have.text.date) + ' and the index of ' +
-                         day(have.index.date) + ', ' + mb(have.bytes) + ' in this browser.';
+                         day(have.index.date) + ', ' + mb(have.bytes) + ' in this browser. ' +
+                         'Without a connection, the site reads from it by itself.';
+      mark('kept');
     }
-    notice(s);
-  }
-  // The line under the header, while a copy is kept: stale, an update going
-  // on, how it ended.  "Up to date" stands for a few seconds; an update that
-  // stopped says why, with a button to try again.
-  var updating = false, ended = null;
-  function notice(s) {
-    var have = s && s.have, up = s && s.latest;
-    if (!have) return noted(null);
-    if (s.busy) {
-      updating = true;
-      return noted('Updating the offline copy' + (s.busy.total
-        ? ': ' + mb(s.busy.done) + ' of ' + mb(s.busy.total) : '…'));
-    }
-    var just = updating;
-    updating = false;
-    if (just) {
-      clearTimeout(ended);
-      ended = null;
-      if (!up) {
-        noted('The offline copy is up to date.');
-        ended = setTimeout(function () { ended = null; notice(last); }, 5000);
-        return;
-      }
-    }
-    if (ended) return;
-    if (up && navigator.onLine !== false && (just || later() !== up.build))
-      noted((s.error ? 'The update stopped: ' + esc(s.error) + '. '
-                     : 'Your offline copy is from ' + day(have.made) + ', and the site has changed since. ') +
-            '<button type="button" class="get">' + (s.error ? 'Try again' : 'Update it (' + mb(up.fetch) + ')') +
-            '</button> <button type="button" class="later">Later</button>');
-    else noted(null);
   }
   // While a download goes on, the worker says how far it is.  A worker can be
   // stopped by the browser mid-way and say nothing more; if it is quiet for a
@@ -120,17 +99,18 @@
     clearTimeout(quiet);
     if (s && s.busy) quiet = setTimeout(function () { ask('state').then(show); }, 20000);
   }
-  // Before it is on: what it would cost.
+  // Before there is a copy: what it would cost, and the button.
   function sized() {
     line.textContent = '';
     fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
       return r.json();
     }).then(function (m) {
-      if (!input.checked) line.textContent = 'About ' + mb(m.bytes) + ' to download and keep in this browser.';
+      if (!kept) line.innerHTML = 'About ' + mb(m.bytes) + ' to download and keep in this browser.' +
+                                  '<br><button type="button" class="keep">Download it</button>';
     }, function () {
-      if (!input.checked) line.textContent = navigator.onLine === false ? 'It can be turned on only online.'
-                                                                        : 'This site has no offline copy yet.';
+      if (!kept) line.textContent = !online() ? 'It can be downloaded only online.'
+                                              : 'This site has no offline copy yet.';
     });
   }
 
@@ -143,29 +123,25 @@
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
       return get();
     }).catch(function (e) {
-      input.checked = false;
       line.textContent = 'This browser would not keep it: ' + (e && e.message || e);
     });
   }
   function off() {
-    if (!window.confirm('Remove the offline copy from this browser?')) { input.checked = true; return; }
+    if (!window.confirm('Remove the offline copy from this browser? It can be downloaded again at any time.')) return;
     ask('remove').then(function () {
       return sw.getRegistration('/');
     }).then(function (reg) { return reg && reg.unregister(); }).then(function () { show(null); });
   }
-  input.addEventListener('change', function () { if (input.checked) on(); else off(); });
-  document.addEventListener('click', function (ev) {
-    var b = ev.target.closest && ev.target.closest('.offnote button, fieldset.offline button');
+  box.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('button');
     if (!b) return;
-    if (b.classList.contains('get')) {
-      // Said here at once, in both places, not left to the worker: the button
-      // goes, so a second tap cannot look as if it did nothing.
+    if (b.classList.contains('keep')) on();
+    else if (b.classList.contains('drop')) off();
+    else if (b.classList.contains('get')) {
+      // Said here at once, not left to the worker: the button goes, so a
+      // second tap cannot look as if it did nothing.
       show(Object.assign({}, last || {}, { busy: { done: 0, total: 0 }, removed: false }));
       get();
-    }
-    else if (b.classList.contains('later')) {
-      try { localStorage.setItem('ub_offline_later', last && last.latest ? last.latest.build : ''); } catch (e) {}
-      noted(null);
     } else if (b.classList.contains('app') && window.ubInstall) {
       window.ubInstall.prompt();
       window.ubInstall.userChoice.then(function () { window.ubInstall = null; installed(); });
@@ -194,11 +170,13 @@
 
   sw.getRegistration('/').then(function (reg) {
     if (!reg) return show(null);
-    input.checked = true;
+    kept = true;
     return ask('check').then(show);
   });
-  // Opening Settings asks the site afresh: a 304 of a few hundred bytes.
-  document.querySelector('.gear').addEventListener('click', function () {
-    if (input.checked) ask('check', { force: true }).then(show);
-  });
+  // Opening the menu asks the site afresh, and so does coming back online: a
+  // 304 of a few hundred bytes.  Going offline only takes the buttons away.
+  function fresh() { if (kept && online()) ask('check', { force: true }).then(show); }
+  box.addEventListener('toggle', function (ev) { if (ev.newState === 'open') fresh(); });
+  window.addEventListener('online', fresh);
+  window.addEventListener('offline', function () { if (last) show(last); });
 })();

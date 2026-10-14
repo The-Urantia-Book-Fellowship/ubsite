@@ -9,7 +9,8 @@ from a server of its own, on 127.0.0.1:8131 with the visit counter off, so that
 it can make a "newer build" by changing that copy, and leaves var/offline/ and
 the dev server alone.  localhost is a secure context, so the worker runs there
 as on the live site.  Not a gate: offline/check.py is, for every page; this
-shows that the worker, the switch and the notices do what they say.
+shows that the worker, the icon at the header's corner and its menu do what
+they say.
 """
 
 from __future__ import annotations
@@ -41,6 +42,10 @@ uvicorn.run(A.app, host="127.0.0.1", port=8131, log_level="info")
 """
 
 fails: list[str] = []
+
+# Work offline's icon, and the line in its menu that says what the copy is.
+ICON = ".top .offline"
+STATE = "#offmenu .state"
 
 
 def ok(cond, what):
@@ -94,11 +99,31 @@ KEPT = """async () => { const out = {gz: 0, have: 0};
       if (m) out[m[1]]++; }
   return out; }"""
 
-# What the page shows while an update runs, each line once, as it changes.
+# What the page shows while an update runs, in the menu and on the icon's
+# label, each line once, as it changes.
 WATCH = """() => { window.shown = [];
-  const keep = () => { for (const el of document.querySelectorAll('fieldset.offline .state, .offnote')) {
-    const t = el.textContent; if (window.shown[window.shown.length - 1] !== t) window.shown.push(t); } };
-  new MutationObserver(keep).observe(document.body, {subtree: true, childList: true, characterData: true}); }"""
+  const keep = () => { for (const t of [document.querySelector('#offmenu .state').textContent,
+                                        document.querySelector('.top .offline').title])
+    if (!window.shown.includes(t)) window.shown.push(t); };
+  new MutationObserver(keep).observe(document.body, {subtree: true, childList: true, characterData: true,
+                                                     attributes: true, attributeFilter: ['title']}); }"""
+
+
+def wait_state(pg, test: str, timeout: int = 30000) -> None:
+    """Until the menu's line passes `test`, a JavaScript expression in t."""
+    pg.wait_for_function(f"(t => {test})(document.querySelector('{STATE}').textContent)", timeout=timeout)
+
+
+def menu(pg) -> None:
+    """Open the icon's menu, unless it is open."""
+    if not pg.is_visible("#offmenu"):
+        pg.click(ICON)
+    pg.wait_for_selector("#offmenu", state="visible")
+
+
+def icon(pg) -> dict:
+    return pg.evaluate(f"(c => ({{net: c.dataset.net, have: c.dataset.have, title: c.title,"
+                       f" shown: !c.hidden}}))(document.querySelector('{ICON}'))")
 
 
 def main() -> int:
@@ -133,20 +158,26 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         print("Turning it on")
         pg.goto(BASE + "/101:4")
         ok("Merritt Horn" in pg.inner_text(".listenrow .by"), "online, Listen reads with Merritt Horn")
-        pg.click(".gear")
-        ok(pg.is_visible("fieldset.offline"), "Settings has an Offline section")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('MB to download')")
-        print("  " + pg.inner_text("fieldset.offline .state"))
+        i = icon(pg)
+        ok(i["shown"] and i["net"] == "on" and i["have"] == "none" and i["title"] == "Online",
+           f"the icon at the header's corner says online, with no copy ({i})")
+        ok(not pg.locator("dialog.settings input[name=offline]").count(), "Settings has no Offline section")
+        ok(not pg.locator("#offmenu input").count(), "and the menu has no switch to turn off")
+        pg.click(ICON)
+        ok(pg.is_visible("#offmenu"), "the icon opens its menu")
+        wait_state(pg, "t.includes('MB to download')")
+        print("  " + pg.inner_text(STATE))
         t = time.time()
-        pg.check("input[name=offline]")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.startsWith('Up to date')",
-                             timeout=120000)
-        print(f"  downloaded in {time.time() - t:.1f} s: " + pg.inner_text("fieldset.offline .state"))
+        pg.click("#offmenu .keep")
+        wait_state(pg, "t.startsWith('Up to date')", 120000)
+        print(f"  downloaded in {time.time() - t:.1f} s: " + pg.inner_text(STATE))
+        ok(icon(pg)["have"] == "kept", f"the icon says a copy is kept ({icon(pg)['title']!r})")
+        pg.click(ICON)
+        ok(not pg.is_visible("#offmenu"), "the icon closes its menu again")
         m = json.loads((copy / "manifest.json").read_text())
         used = pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
         print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
         ok(used < m["bytes"] * 1.25, "it keeps the copy gzipped, as it came")
-        pg.keyboard.press("Escape")
 
         # What the server sends, to hold the worker's answers to.
         want = {}
@@ -176,6 +207,13 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         print(f"  a second: {(time.time() - t) * 1000:.0f} ms")
         pg.goto(BASE + "/101:4.2-3")
         ok(pg.locator("p.t.hit").count() == 2, "/101:4.2-3 marks two paragraphs")
+        i = icon(pg)
+        ok(i["net"] == "off" and i["have"] == "kept", f"the icon says offline ({i['title']!r})")
+        pg.click(ICON)
+        print("  " + pg.inner_text("#offmenu .net"))
+        ok(pg.inner_text("#offmenu .net").lower().startswith("offline"), "and so does its menu")
+        pg.keyboard.press("Escape")
+        ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),
            "the footer says the page is from the offline copy")
         pg.goto(BASE + "/search?q=101:4.2")
@@ -213,13 +251,12 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         ctx.set_offline(False)
         change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, packed"), d)[1])
         pg.goto(BASE + "/read")
-        pg.click(".gear")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('changed since')")
-        print("  " + pg.inner_text("fieldset.offline .state"))
+        menu(pg)
+        wait_state(pg, "t.includes('changed since')")
+        print("  " + pg.inner_text(STATE))
         before = log.read_text().count("/offline/c/")
-        pg.click("fieldset.offline .get")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.startsWith('Up to date')",
-                             timeout=60000)
+        pg.click("#offmenu .get")
+        wait_state(pg, "t.startsWith('Up to date')", 60000)
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == 1, f"an update packs what it has rather than fetch it ({fetched} chunk fetched)")
         kept = pg.evaluate(KEPT)
@@ -233,43 +270,58 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         ctx.set_offline(False)
         changed = change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, changed"), d)[1])
         pg.goto(BASE + "/read")
-        pg.click(".gear")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('changed since')")
-        print("  " + pg.inner_text("fieldset.offline .state"))
+        menu(pg)
+        wait_state(pg, "t.includes('changed since')")
+        print("  " + pg.inner_text(STATE))
         pg.keyboard.press("Escape")
         pg.reload()
-        pg.wait_for_selector(".offnote", timeout=5000)
-        print("  " + pg.inner_text(".offnote"))
-        ok("Update it" in pg.inner_text(".offnote"), "a line under the header says the copy is stale")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=5000)
+        print("  " + icon(pg)["title"])
+        ok(pg.evaluate(f"getComputedStyle(document.querySelector('{ICON} .dot')).display") != "none",
+           "after a reload, the icon's dot says an update is waiting")
+        ok(not pg.is_visible("#offmenu") and not pg.locator(".offnote").count(),
+           "and nothing else does until the menu is opened")
+        # Offline and online again: the copy stays, out of date, and says so.
+        ctx.set_offline(True)
+        menu(pg)
+        wait_state(pg, "t.includes('once online')", 5000)
+        print("  offline: " + pg.inner_text(STATE))
+        ok(not pg.locator("#offmenu .get").count() and icon(pg)["have"] == "stale",
+           "offline, the copy is still kept and still out of date, with no button to update it")
+        ok(pg.is_hidden("#offmenu p.remove"), "nor one to remove it, while it is all the site there is")
+        ctx.set_offline(False)
+        pg.wait_for_selector("#offmenu .get", timeout=10000)
+        ok(pg.evaluate("caches.keys().then(k => k.some(n => n.startsWith('ub-copy-')))"),
+           "online again, the copy is still kept, and the Update button is back")
         before = log.read_text().count("/offline/c/")
-        pg.click(".offnote .get")
-        pg.wait_for_function("document.querySelector('.offnote') && document.querySelector('.offnote').textContent.includes('up to date')",
-                             timeout=30000)
+        pg.click("#offmenu .get")
+        wait_state(pg, "t.startsWith('Up to date')")
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == 1, f"the update fetched only what changed ({fetched} chunk)")
+        ok(icon(pg)["have"] == "kept", "and the dot goes")
+        pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.goto(BASE + "/")
         ok(pg.title() == "The Urantia Book, changed", "offline, the copy is the newer one")
 
-        print("A larger update, from Settings")
+        print("A larger update")
         ctx.set_offline(False)
         papers = [f"paper-{n}" for n in range(197)]
         change(copy, lambda d: (d.update(x=1), d)[1], papers)
         pg.goto(BASE + "/read")
-        pg.click(".gear")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('changed since')")
-        print("  " + pg.inner_text("fieldset.offline .state"))
+        menu(pg)
+        wait_state(pg, "t.includes('changed since')")
+        print("  " + pg.inner_text(STATE))
         pg.evaluate(WATCH)
         before = log.read_text().count("/offline/c/")
-        pg.click("fieldset.offline .get")
-        ok(not pg.locator("fieldset.offline .get").count(), "the button goes as soon as it is pressed")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.startsWith('Up to date')",
-                             timeout=60000)
+        pg.click("#offmenu .get")
+        ok(not pg.locator("#offmenu .get").count(), "the button goes as soon as it is pressed")
+        wait_state(pg, "t.startsWith('Up to date')", 60000)
         shown = pg.evaluate("window.shown")
         steps = [t for t in shown if t.startswith("Updating: ")]
         print(f"  {len(steps)} steps shown: {steps[:2]} … {steps[-1:]}")
-        ok(len(steps) >= 3, "Settings shows the update going on")
-        ok(any(t.startswith("Updating the offline copy: ") for t in shown), "and so does the line under the header")
+        ok(len(steps) >= 3, "the menu shows the update going on")
+        ok(any(t.startswith("Updating the offline copy: ") for t in shown), "and so does the icon's label")
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == len(papers), f"it fetched only what changed ({fetched} chunks)")
         pg.keyboard.press("Escape")
@@ -280,12 +332,12 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         kept = (copy / gone["file"]).read_bytes()
         (copy / gone["file"]).unlink()
         pg.goto(BASE + "/read")
-        pg.click(".gear")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('changed since')")
-        pg.click("fieldset.offline .get")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('stopped')",
-                             timeout=30000)
-        print("  " + pg.inner_text("fieldset.offline .state"))
+        menu(pg)
+        wait_state(pg, "t.includes('changed since')")
+        pg.click("#offmenu .get")
+        wait_state(pg, "t.includes('stopped')")
+        print("  " + pg.inner_text(STATE))
+        ok(icon(pg)["have"] == "stale", "the icon still says an update is waiting")
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.goto(BASE + "/")
@@ -294,24 +346,25 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         print("Turning it off")
         ctx.set_offline(False)
         pg.goto(BASE + "/read")
-        pg.click(".gear")
-        pg.uncheck("input[name=offline]")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('MB to download')")
+        menu(pg)
+        pg.click("#offmenu .drop")
+        wait_state(pg, "t.includes('MB to download')")
         ok(pg.evaluate("caches.keys().then(k => k.length)") == 0, "nothing is kept")
+        ok(icon(pg)["have"] == "none", "and the icon says so")
 
         print("On again in the same page, which keeps its worker")
         (copy / gone["file"]).write_bytes(kept)
-        pg.check("input[name=offline]")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.startsWith('Up to date')",
-                             timeout=120000)
+        menu(pg)
+        pg.click("#offmenu .keep")
+        wait_state(pg, "t.startsWith('Up to date')", 120000)
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.goto(BASE + "/search?q=thought+adjuster")
         ok("In the text" in pg.inner_text("main"), "a search answers offline")
         ctx.set_offline(False)
-        pg.click(".gear")
-        pg.uncheck("input[name=offline]")
-        pg.wait_for_function("document.querySelector('fieldset.offline .state').textContent.includes('MB to download')")
+        menu(pg)
+        pg.click("#offmenu .drop")
+        wait_state(pg, "t.includes('MB to download')")
         ok(pg.evaluate("caches.keys().then(k => k.length)") == 0, "off: nothing is kept")
         pg.goto(BASE + "/read")
         ok(pg.evaluate("navigator.serviceWorker.getRegistration('/').then(r => !r)"), "the worker is gone")

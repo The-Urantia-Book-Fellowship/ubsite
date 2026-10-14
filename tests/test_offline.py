@@ -107,7 +107,12 @@ class Pages(unittest.TestCase):
             h = hashlib.sha256((STATIC / name).read_bytes()).hexdigest()[:10]
             self.assertIn(f"/static/{name}?v={h}", body)
         self.assertIn('<link rel="manifest" href="/manifest.webmanifest">', body)
-        self.assertRegex(body, r'<fieldset class="offline" hidden data-src="/static/offline\.js\?v=')
+        # Work offline's icon, at the header's corner, which ub.js shows, and
+        # its menu (Settings until 2026-10-14).
+        self.assertRegex(body, r'<button class="offline" type="button" popovertarget="offmenu"[^>]*\n?[^>]*'
+                               r'data-src="/static/offline\.js\?v=')
+        self.assertIn('<div id="offmenu" class="offmenu" popover hidden>', body)
+        self.assertNotIn('fieldset class="offline"', body)
 
     def test_every_kind_of_page_cuts_and_joins_again(self):
         from offline import pages, site

@@ -129,6 +129,9 @@
       });
       idle(o);
     };
+    // ↺ is greyed while every setting is its default: only what differs is kept.
+    var reset = form.querySelector('.reset');
+    var resettable = function () { reset.disabled = !Object.keys(stored()).length; };
     // A setting that means nothing while the one it needs is off (settings.py
     // NEEDS) is shown, greyed, and cannot be changed: 'off', or a switch's false.
     var idle = function (o) {
@@ -141,7 +144,7 @@
     if (synth && synth.addEventListener) synth.addEventListener('voiceschanged', function () {
       if (dlg.open) fill();
     });
-    gear.addEventListener('click', function () { fill(); dlg.showModal(); });
+    gear.addEventListener('click', function () { fill(); resettable(); dlg.showModal(); });
     // A value takes its default's type: a switch is true or false, the speed a number.
     form.addEventListener('change', function (ev) {
       var el = ev.target, d = DEF[el.name];
@@ -149,10 +152,14 @@
       window.ubSettings.set(el.name, typeof d === 'boolean' ? el.checked
                                      : typeof d === 'number' ? parseFloat(el.value) : el.value);
       idle(load());
+      resettable();
     });
-    form.querySelector('.reset').addEventListener('click', function () {
+    // It stands beside ×, so it asks first (Tigran, 2026-10-14).
+    reset.addEventListener('click', function () {
+      if (!window.confirm('Restore every setting to its default?')) return;
       window.ubSettings.reset();
       fill();
+      resettable();
     });
     // A click on the backdrop closes it, as Escape does.
     dlg.addEventListener('click', function (ev) { if (ev.target === dlg) dlg.close(); });
@@ -399,22 +406,53 @@
     });
   });
 
-  // Work offline (static/offline.js), in Settings where a service worker can
-  // run: loaded when Settings opens, or at once on a page the worker answers
-  // for, to say whether its copy is still the site's.  The browser's own offer
-  // to install the site waits there too, rather than in a banner of its own.
-  var off = document.querySelector('fieldset.offline');
-  if (off && 'serviceWorker' in navigator && window.isSecureContext) {
-    off.hidden = false;
-    var offline = function () {
-      if (off.dataset.on) return;
-      off.dataset.on = '1';
+  // Work offline, at the header's corner where a service worker can run: an
+  // icon that says whether this page is online or offline, and whether a copy
+  // is kept (ub.css .top .offline), and opens its menu (#offmenu, a popover).
+  // static/offline.js runs the menu, and says what the copy is on the icon,
+  // then 'ub:offline'.  It is loaded when the menu opens, or at once on a page
+  // the worker answers for, to say whether its copy is still the site's.  The
+  // browser's own offer to install the site waits in the menu too, rather than
+  // in a banner of its own.  Until 2026-10-14 all this was in Settings.
+  var cloud = document.querySelector('.top .offline'), menu = document.getElementById('offmenu');
+  if (cloud && menu && 'serviceWorker' in navigator && window.isSecureContext &&
+      'popover' in HTMLElement.prototype) {
+    cloud.hidden = menu.hidden = false;
+    // Offline: the browser says so, or the worker answered for this page from
+    // its copy, which sw.js writes on the footer; after that, as the browser says.
+    var fromCopy = document.querySelector('footer[data-copy]'), loaded = false;
+    var label = function () {
+      var on = cloud.dataset.net === 'on', none = cloud.dataset.have === 'none';
+      var t = !on ? (none ? 'Offline' : 'Offline: reading the copy kept in this browser')
+            : cloud.dataset.say || (none ? 'Online' : 'Online, with a copy kept for working offline');
+      cloud.title = t;
+      cloud.setAttribute('aria-label', t);
+      menu.querySelector('.net').textContent = on ? 'Online' : 'Offline' +
+        (fromCopy ? ' · the copy of ' + fromCopy.dataset.copy : '');
+    };
+    var net = function (on) { cloud.dataset.net = on ? 'on' : 'off'; label(); };
+    var script = function () {
+      if (loaded) return;
+      loaded = true;
       var sc = document.createElement('script');
-      sc.src = off.dataset.src;
+      sc.src = cloud.dataset.src;
       document.head.appendChild(sc);
     };
-    if (navigator.serviceWorker.controller) offline();
-    if (gear) gear.addEventListener('click', offline);
+    cloud.dataset.have = navigator.serviceWorker.controller ? 'kept' : 'none';
+    net(navigator.onLine !== false && !fromCopy);
+    window.addEventListener('online', function () { net(true); });
+    window.addEventListener('offline', function () { net(false); });
+    document.addEventListener('ub:offline', label);
+    if (navigator.serviceWorker.controller) script();
+    // Under the icon, its right edge a little past the icon's, in the page's
+    // coordinates: a popover is in the top layer, absolute to the document.
+    menu.addEventListener('beforetoggle', function (ev) {
+      if (ev.newState !== 'open') return;
+      script();
+      var r = cloud.getBoundingClientRect();
+      menu.style.top = (r.bottom + window.scrollY + 8) + 'px';
+      menu.style.right = Math.max(8, document.documentElement.clientWidth - r.right - 8) + 'px';
+    });
   }
   window.addEventListener('beforeinstallprompt', function (ev) {
     ev.preventDefault();

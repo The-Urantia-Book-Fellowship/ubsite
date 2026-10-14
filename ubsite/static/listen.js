@@ -644,7 +644,7 @@
     t.wait.then(function (m) { if (gen === said.gen) begin(gen, m); }, function () {
       if (gen !== said.gen) return;
       hush();
-      tell(navigator.onLine === false ? 'Offline, this needs Work offline, in Settings.' : 'The text could not be loaded.');
+      tell(navigator.onLine === false ? 'Offline, this needs Work offline: the cloud at the top of the page.' : 'The text could not be loaded.');
     });
   }
   function begin(gen, m) {
