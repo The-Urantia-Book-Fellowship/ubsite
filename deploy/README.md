@@ -60,6 +60,8 @@ sudo ln -s /etc/nginx/sites-available/ubsite.ddns.net /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
+The installed file is world-readable (0644), so checking it against this one needs no root: `ssh pi5 cat /etc/nginx/sites-available/ubsite.ddns.net | diff - deploy/ubsite.nginx`.
+
 Two things that will break it silently if ignored:
 
 * `no-sni-default` must remain the **only** `default_server` on 443.
