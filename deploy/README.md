@@ -1,12 +1,12 @@
-# Deploying ubsite to pi5
+# Deploying ubsite
 
-`./deploy/deploy.sh` does everything that does not need root. This file names the four things that do, so they can be read before they are run.
+ubsite runs on two hosts, from the same build: **pi5**, at home, as `ubsite.ddns.net`, and the **VPS** that serves sigmaai.au, as `ubsite.sigmaai.au`. `./deploy/deploy.sh` does everything that does not need root, on both. This file names the four things on each host that do, so they can be read before they are run.
 
 They are **not** in the script on purpose. A deploy script that quietly acquires root is a deploy script nobody reads twice.
 
 ---
 
-## The shape of it
+## pi5: ubsite.ddns.net
 
 nginx on pi5 serves two names on 443, told apart by name (TLS SNI):
 
@@ -22,15 +22,15 @@ Each is one `server` block. The browser sends the hostname in the TLS ClientHell
 
 **ubsite is public**, and so the nginx block gives it limits of its own: a rate limit on `/search`, `client_max_body_size 1k`, and nothing else exposed.
 
-**The database is the artifact.** The three source repositories are not on pi5 and do not need to be. `make data` runs on the development machine, where the LaTeX lives, and `var/ub.db` is rsynced. pi5 needs no TeX and no sources.
+**The database is the artifact.** The three source repositories are not on the hosts and do not need to be. `make data` runs on the development machine, where the LaTeX lives, and `var/ub.db` is rsynced. The hosts need no TeX and no sources.
 
 ---
 
-## The four privileged steps
+### The four privileged steps on pi5
 
 Run these by hand, once each. Step 4 is what makes every later deploy password-free.
 
-### 1. The systemd unit
+#### 1. The systemd unit
 
 ```
 sudo cp deploy/ubsite.service /etc/systemd/system/
@@ -38,7 +38,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now ubsite
 ```
 
-### 2. The certificate
+#### 2. The certificate
 
 `ubsite.ddns.net` must resolve to this box first. The existing certificate renews with `authenticator = nginx`, i.e. the HTTP-01 challenge over port 80 — which is therefore forwarded on the router, and must stay so.
 
@@ -52,7 +52,7 @@ This comes **before** step 3, and the site must not be linked into `sites-enable
 
 Take a **separate** certificate rather than adding the name to `ulib.ddns.net`'s: independent renewal, and one name failing cannot take the other down. `certbot.timer` already runs twice daily and will pick it up.
 
-### 3. The nginx site
+#### 3. The nginx site
 
 ```
 sudo install -m0644 -o root -g root deploy/ubsite.nginx /etc/nginx/sites-available/ubsite.ddns.net
@@ -67,7 +67,7 @@ Two things that will break it silently if ignored:
 * `no-sni-default` must remain the **only** `default_server` on 443.
 * `ubsite.ddns.net` must not also appear in `ulib.ddns.net`'s `server_name`. Two blocks claiming one name means the first parsed wins.
 
-### 4. The sudoers drop-in
+#### 4. The sudoers drop-in
 
 ```
 sudo install -m0440 -o root -g root deploy/ubsite.sudoers /etc/sudoers.d/ubsite
@@ -81,16 +81,64 @@ sudo -n systemctl restart ubsite && echo AUTHORISED
 
 ---
 
+## The VPS: ubsite.sigmaai.au
+
+The VPS is the machine that serves sigmaai.au, and `deploy.sh` reaches it by that name (x86_64, 8 cores, 31 GB, Ubuntu 26.04). ubsite runs there exactly as on pi5: the same unit, the same tree at `/home/tigran/ubsite`, port 8130, and the same build from every deploy. It went live on 2026-10-14.
+
+nginx there serves one other site, `sigmaai.au`, by path: Open WebUI at `/`, urantia-library at `/library/`, TAIR at `/tair/`, CashReconAI at `/cashreconai/`. ubsite has a name of its own instead of a path. It assumes it lives at `/`: its links, its service worker's scope and the links stored in `ub.db` all do. And under a name of its own its offline copy and settings live in an origin of their own, apart from those apps.
+
+```
+sigmaai.au         ->  Open WebUI, /library/, /tair/, /cashreconai/   (the default, implicitly)
+ubsite.sigmaai.au  ->  127.0.0.1:8130   ubsite
+```
+
+* **No `default_server`.** The VPS declares none: `sigmaai.au` is the default on 80 and 443 only because `sites-enabled/` is read in name order and it comes first. `ubsite-sigmaai.nginx` must never claim it.
+* **The name is an A record at GoDaddy**, which holds sigmaai.au's DNS (`ns43`/`ns44.domaincontrol.com`): `ubsite` → `187.77.167.246`. No AAAA: nginx there listens on IPv4 only.
+* **Port 80 is open** (a VPS has no router to forget it), and sigmaai.au's own certificate renews over HTTP-01 through it, as this one does.
+* Merritt Horn's recordings are at `/Audio/Urantia/Urantia-MH-Audio-DVD`, as on pi5.
+* sudo asks for a password there.
+
+### The four privileged steps on the VPS
+
+Run from `~/ubsite` on the VPS, after `./deploy/deploy.sh --no-restart sigmaai.au` has put the tree there:
+
+```
+# 1. the unit: the same file as pi5's
+sudo cp deploy/ubsite.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now ubsite
+curl -s 127.0.0.1:8130/healthz
+
+# 2. the certificate, before the site is enabled (pi5's step 2 says why)
+sudo certbot certonly --nginx -d ubsite.sigmaai.au --deploy-hook "systemctl reload nginx"
+
+# 3. the nginx site
+sudo install -m0644 -o root -g root deploy/ubsite-sigmaai.nginx /etc/nginx/sites-available/ubsite.sigmaai.au
+sudo ln -s /etc/nginx/sites-available/ubsite.sigmaai.au /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# 4. the sudoers drop-in: the same file as pi5's
+sudo install -m0440 -o root -g root deploy/ubsite.sudoers /etc/sudoers.d/ubsite
+sudo -n systemctl restart ubsite && echo AUTHORISED
+```
+
+`deploy/ubsite-sigmaai.nginx` is pi5's block with the other name and certificate, and `tests/test_nginx.py` fails if the two differ in anything else. Check the installed file as pi5's is checked: `ssh sigmaai.au cat /etc/nginx/sites-available/ubsite.sigmaai.au | diff - deploy/ubsite-sigmaai.nginx`.
+
+The `/stats` password is pi5's: its hash was copied, so one password opens both. Each host counts its own visitors in its own `var/visits.db`.
+
+---
+
 ## After that
 
 ```
-./deploy/deploy.sh              # build here, ship, restart, poll /healthz
+./deploy/deploy.sh              # build here, ship to pi5 and then sigmaai.au, restart each, poll /healthz
+./deploy/deploy.sh sigmaai.au   # to one host (pi5 or sigmaai.au)
 ./deploy/deploy.sh --no-data    # code only; leave the database in place
 ```
 
-Everything in it is unprivileged except the one `sudo systemctl restart ubsite` that step 4 authorised.
+Everything in it is unprivileged except the one `sudo systemctl restart ubsite` on each host that its step 4 authorised.
 
-`/healthz` reports `{"ok":true,"paragraphs":14586}`. It queries the database rather than merely returning 200, so a deploy that ships a missing or truncated `ub.db` fails at the push instead of at a reader. The script polls it for 30s and prints the unit's status if it never comes up.
+`/healthz` reports `{"ok":true,"paragraphs":14586}`. It queries the database rather than merely returning 200, so a deploy that ships a missing or truncated `ub.db` fails at the push instead of at a reader. The script polls it for 30s and prints the unit's status if it never comes up, and then stops, before the next host.
 
 The database is shipped to `var/ub.db.new` and then `mv`d, so a half-transferred file is never the one being served.
 
@@ -104,7 +152,10 @@ The one piece of writable state is **`var/visits.db`**, the visit counter's reco
 
 ```
 ssh pi5 'sqlite3 ~/ubsite/var/visits.db ".backup /home/tigran/visits-$(date +%F).db"'
+ssh sigmaai.au 'cd ~/ubsite && .venv/bin/python -c "import sqlite3; sqlite3.connect(\"var/visits.db\").backup(sqlite3.connect(\"/home/tigran/visits-$(date +%F).db\"))"'
 ```
+
+The VPS has no `sqlite3` command, so its copy goes through Python. The two hosts' records are separate, and both are worth keeping.
 
 `var/stats.passwd` is the scrypt hash of the `/stats` password, and is remade, not restored (`python -m ubsite.stats passwd`). The DB-IP database in `var/geoip/` is shipped by `deploy.sh`.
 

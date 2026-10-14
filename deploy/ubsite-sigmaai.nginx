@@ -1,0 +1,84 @@
+# The server block on the VPS behind sigmaai.au. Install as root:root 0644
+# at /etc/nginx/sites-available/ubsite.sigmaai.au, then:
+#
+#     sudo ln -s /etc/nginx/sites-available/ubsite.sigmaai.au /etc/nginx/sites-enabled/
+#     sudo nginx -t && sudo systemctl reload nginx
+#
+# It is deploy/ubsite.nginx, pi5's, but for the name and the certificate;
+# tests/test_nginx.py holds the two to that. Change both or neither.
+#
+# Two rules this file must not break:
+#
+#   1. No default_server here. The VPS declares none: the sigmaai.au site is the
+#      default on 80 and 443 because it is parsed first (sites-enabled/ is read
+#      in name order, and "sigmaai.au" sorts before "ubsite.sigmaai.au"). Made
+#      the default, this block would answer every name it does not know.
+#   2. IPv4 only, as sigmaai.au's own block is. The name has an A record and no
+#      AAAA; one added later would reach nothing.
+#
+# There is NO allow/deny: this site is meant to be public, so it carries its own
+# protections, explicitly, below.
+
+limit_req_zone $binary_remote_addr zone=ubsite_search:10m rate=30r/m;
+limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=40r/m;
+
+server {
+    listen 80;
+    server_name ubsite.sigmaai.au;
+    # Certbot's HTTP-01 challenge needs this to stay reachable; sigmaai.au's
+    # certificate renews the same way.
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ubsite.sigmaai.au;
+
+    ssl_certificate     /etc/letsencrypt/live/ubsite.sigmaai.au/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ubsite.sigmaai.au/privkey.pem;
+
+    # The site accepts no uploads of any kind.
+    client_max_body_size 1k;
+
+    # Search is the only route that can cost real work; everything else is an
+    # indexed SELECT. 30/min with a burst is generous for a reader and useless
+    # for a scraper.
+    location /search {
+        limit_req zone=ubsite_search burst=10 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+
+    # The text API (ubsite/api.py). See deploy/ubsite.nginx for the limit's reasons.
+    location /api/ {
+        limit_req zone=ubsite_api burst=5 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+    # Without this, nginx answers /api with a 301 to /api/, and the app sends
+    # /api/ back to /api: a loop (CLAUDE.md trap 19).
+    location = /api {
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+
+    location /static/ {
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    location = /healthz {
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+        access_log off;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+}

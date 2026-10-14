@@ -1,14 +1,14 @@
 # ubsite
 
-The Uversa Press text of *The Urantia Book* read together with the Uversa Press index, live at **https://ubsite.ddns.net**.
+The Uversa Press text of *The Urantia Book* read together with the Uversa Press index, live at **https://ubsite.ddns.net** (pi5) and **https://ubsite.sigmaai.au** (the VPS behind sigmaai.au), the same build on both.
 
-This file is the operating manual: how to bring the site up to date when its sources change, and how to deploy it. For how it is built and why, read [`CLAUDE.md`](CLAUDE.md). For where it is going, read [`ROADMAP.md`](ROADMAP.md). The one-time root setup on pi5 (the unit, the certificate, nginx, sudoers) is in [`deploy/README.md`](deploy/README.md). It is done and need not be repeated.
+This file is the operating manual: how to bring the site up to date when its sources change, and how to deploy it. For how it is built and why, read [`CLAUDE.md`](CLAUDE.md). For where it is going, read [`ROADMAP.md`](ROADMAP.md). The one-time root setup on each host (the unit, the certificate, nginx, sudoers) is in [`deploy/README.md`](deploy/README.md). It is done on both and need not be repeated.
 
 ---
 
 ## The one idea
 
-**The site shows `var/ub.db`, and nothing else.** That file is built on this machine from three sibling repositories and shipped to pi5. Nothing updates by itself. When the index session commits a correction, the site carries it only after someone rebuilds and deploys. Until then, a paragraph can stand with nothing beside it while the index plainly cites it.
+**The site shows `var/ub.db`, and nothing else.** That file is built on this machine from three sibling repositories and shipped to the two hosts, pi5 and the VPS behind sigmaai.au. Nothing updates by itself. When the index session commits a correction, the site carries it only after someone rebuilds and deploys. Until then, a paragraph can stand with nothing beside it while the index plainly cites it.
 
 The footer of every page gives the date of each commit the database was built from:
 
@@ -35,7 +35,7 @@ make venv          # .venv on the pinned Python 3.12, from requirements.txt
 make sources       # the three repos and the commits a build would read
 ```
 
-Merritt Horn's recordings must be at `/Audio/Urantia/Urantia-MH-Audio-DVD`, here **and on pi5**: the build lists them, and the site on pi5 serves them from that path. They are the Uversa Press DVD's MP3s (128 kbps stereo), copied once with the folder names lowercased. `/Audio/Urantia/Urantia-MH-Audio` is a 32 kbps transcode of the same recordings and is not used. `sources.toml` names it under `[audio.mh]`. They are a master like the repos, and nothing writes to them.
+Merritt Horn's recordings must be at `/Audio/Urantia/Urantia-MH-Audio-DVD`, here **and on both hosts**: the build lists them, and each host serves them from that path. They are the Uversa Press DVD's MP3s (128 kbps stereo), copied once with the folder names lowercased. `/Audio/Urantia/Urantia-MH-Audio` is a 32 kbps transcode of the same recordings and is not used. `sources.toml` names it under `[audio.mh]`. They are a master like the repos, and nothing writes to them.
 
 ---
 
@@ -45,10 +45,11 @@ Merritt Horn's recordings must be at `/Audio/Urantia/Urantia-MH-Audio-DVD`, here
 
 ```
 curl -s https://ubsite.ddns.net/healthz
+curl -s https://ubsite.sigmaai.au/healthz
 make sources
 ```
 
-`/healthz` returns the full commit of each source the live database was built from:
+Every deploy gives both hosts the same build, so the two should agree; if they do not, a deploy stopped partway. `/healthz` returns the full commit of each source the live database was built from:
 
 ```
 {"ok":true,"paragraphs":14586,"built_at":"2026-10-06T14:28:35",
@@ -146,31 +147,33 @@ Open the paragraph that prompted the update, for example `http://127.0.0.1:8130/
 
 ### 5. Commit
 
-Commit anything that changed in this repository: the vendor adoption, a moved count, and above all a new text version in `data/text/`. `deploy.sh` refuses to ship while `data/text/` is uncommitted, because a version number a site has been sent must never be made again for other text. `deploy.sh` rsyncs the working tree as it stands, and what runs on pi5 should be a commit. Then `git push`: the history is kept on GitHub, in the Fellowship's private repository `The-Urantia-Book-Fellowship/ubsite`.
+Commit anything that changed in this repository: the vendor adoption, a moved count, and above all a new text version in `data/text/`. `deploy.sh` refuses to ship while `data/text/` is uncommitted, because a version number a site has been sent must never be made again for other text. `deploy.sh` rsyncs the working tree as it stands, and what runs on the hosts should be a commit. Then `git push`: the history is kept on GitHub, in the Fellowship's private repository `The-Urantia-Book-Fellowship/ubsite`.
 
 ### 6. Deploy
 
 ```
-./deploy/deploy.sh               # rebuild + check here, ship code and database, restart
-./deploy/deploy.sh --no-data     # code or templates only; leave pi5's database alone
+./deploy/deploy.sh               # rebuild + check here, ship code and database to both hosts, restart each
+./deploy/deploy.sh sigmaai.au    # the same, to one host (pi5 or sigmaai.au)
+./deploy/deploy.sh --no-data     # code or templates only; leave the hosts' databases alone
 ./deploy/deploy.sh --audio       # also copy the AI voice first, after `make tts` changed it
 ```
 
-The script:
+The script builds once, then does the rest for each host in turn, pi5 then sigmaai.au, and stops at the first that fails:
 
-1. runs `make data`, `make check` and `make offline` again, so a deploy never ships an unchecked database or offline copy, and checks that pi5 holds every recording the database serves, at the path and size it records;
-2. rsyncs the code to `pi5:/home/tigran/ubsite`, without `.git`, `.venv`, `var/` or `export/`;
+1. runs `make data`, `make check` and `make offline` again, so a deploy never ships an unchecked database or offline copy, and checks that the host holds every recording the database serves, at the path and size it records;
+2. rsyncs the code to `<host>:/home/tigran/ubsite`, without `.git`, `.venv`, `var/` or `export/`;
 3. ships `var/ub.db` as `ub.db.new` and `mv`s it into place, so a half-copied file is never the one being served; then the offline copy, its chunks before the manifest that names them, pruning chunks that neither it nor the manifest before it names (see [Work offline](#work-offline));
-4. copies `var/geoip/dbip-city-lite.mmdb` when `make geoip` has changed it (the visit counter's places; see [Visits](#visits)), and runs `uv pip sync` in pi5's venv;
+4. copies `var/geoip/dbip-city-lite.mmdb` when `make geoip` has changed it (the visit counter's places; see [Visits](#visits)), and runs `uv pip sync` in the host's venv;
 5. runs `sudo systemctl restart ubsite`. This is password-free: the sudoers drop-in from `deploy/README.md` step 4 allows exactly that and nothing else;
 6. polls `/healthz` for 30 s, and prints the unit's status if it never reports ok.
 
-It takes about 30 s, mostly the rebuild and the gates. The script refuses to run on pi5 against its own live tree.
+It takes about a minute and a half, mostly the rebuild and the gates. The big copies to pi5 go over its fast link, `pi5f`; to sigmaai.au, over the internet. The script refuses to run on a host against its own live tree.
 
 ### 7. Verify live
 
 ```
 curl -s https://ubsite.ddns.net/healthz      # ok:true, and the commits from `make sources`
+curl -s https://ubsite.sigmaai.au/healthz    # the same
 curl -s https://ubsite.ddns.net/2:5.12 | grep -c 'loses sight of love'
 ```
 
@@ -188,7 +191,7 @@ A reader can keep the whole site in their browser and use it with no connection:
 - **Search** runs on SQLite's own WebAssembly build (`vendor/sqlite-wasm/`), on two databases cut from `ub.db`, the text's and the index's, with the same FTS5 tables, tokenizer and queries as `app.py`.
 - **The gates** (`python -m offline check`, run by `make offline`) have Node run `offline-core.js` on the copy and hold every page it makes to the page the server sends, byte for byte: all 10,283 stored pages, every section with all its paragraphs marked, the not-found pages and redirects, and every query in `tests/fixtures/offline-queries.txt` and in this machine's `var/visits.db`, in each list. Every link in every page must land.
 - **Stale copies.** The manifest's `build` is a hash of what the copy holds, so it moves only when something in the copy does. While online, the worker asks for the manifest at most once an hour, and whenever the cloud's menu opens; when it differs, the cloud shows the flame's dot, and its menu says the copy is from such a date, and what the update costs ("Update now (0.1 MB)"); the reader taps it (Tigran, 2026-10-13). Until 2026-10-14 a line under the header said so too. The update fetches only the chunks whose hashes are new, carrying over any this browser holds in any copy, checks each, and becomes the copy only when it is whole; one that fails leaves the copy before it, and says why, in the menu. The menu and the cloud's tooltip show it going on, in MB. The worker and the SQLite script it imports carry ETags, because a browser asks for them again after every page it loads. A build that changes nothing in the copy must leave its manifest as it was: until 2026-10-14 the rail carried `ub.db`'s mtime, and every deploy cost every reader 5.5 MB (CLAUDE.md trap 29).
-- **What's new.** Beside Update now, "What's new" opens a popup over the menu, which stays open beneath it: what changed on the site after the copy was made, newest first, by day, and a line where the text or the index is newer than the copy's, with its date. The list is this repository's commit subjects, the 200 newest of those that touch `ubsite/`, `offline/`, `build/` or `data/`, each with its time, written into the manifest as `news` by `offline/news.py` when the copy is built (pi5 has no `.git`); it is not in `build`, so a commit that changes nothing in the copy offers no update. The index's and the press's own commits are never listed: their subjects are editorial notes. So a commit's subject is what a reader reads: write it for them.
+- **What's new.** Beside Update now, "What's new" opens a popup over the menu, which stays open beneath it: what changed on the site after the copy was made, newest first, by day, and a line where the text or the index is newer than the copy's, with its date. The list is this repository's commit subjects, the 200 newest of those that touch `ubsite/`, `offline/`, `build/` or `data/`, each with its time, written into the manifest as `news` by `offline/news.py` when the copy is built (the hosts have no `.git`); it is not in `build`, so a commit that changes nothing in the copy offers no update. The index's and the press's own commits are never listed: their subjects are editorial notes. So a commit's subject is what a reader reads: write it for them.
 - **Install as an app.** `/manifest.webmanifest` and `ubsite/static/icon-192.png`, `icon-512.png` (`tools/make_icons.py`) let a browser install the site. Chrome's own banner is held back; the cloud's menu offers the button, and on an iPhone says how, because Safari deletes what a site keeps after seven days without a visit, except for a Home Screen app.
 - **To see it work**, end to end in Chrome: `~/Software/ml/venv-browser/bin/python tools/offline_e2e.py`. It serves a scratch copy of `var/offline/` on port 8131, turns it on, reads and searches offline, unpacks the copy as the worker before 2026-10-14 kept it and updates from that, makes a newer build and takes it, fails an update, and turns it off. On this machine the dev server works too, at `http://localhost:8130` (a secure context); a phone needs the HTTPS site.
 
@@ -253,7 +256,7 @@ Settings also offers the browser's own speech, the Web Speech API. Nothing is re
 
 ### The AI voice
 
-The second voice is made here, by Higgs TTS 3 (Boson AI) on the 3090, from the spoken text the build derives (`build/speech.py`, table `speech`). Each heading and paragraph is read a sentence or two at a time. Every piece is checked for a drone, a dead pause or a cut-off end, then heard back by Whisper word by word, and made again at another seed until both pass (`tools/tts/higgs3.py`, `tools/tts/listen.py`). The pieces are joined into one MP3 per section under `var/audio/ai/`, which `deploy.sh --audio` copies to pi5. Three files in `data/audio/` come out of it and are checked in:
+The second voice is made here, by Higgs TTS 3 (Boson AI) on the 3090, from the spoken text the build derives (`build/speech.py`, table `speech`). Each heading and paragraph is read a sentence or two at a time. Every piece is checked for a drone, a dead pause or a cut-off end, then heard back by Whisper word by word, and made again at another seed until both pass (`tools/tts/higgs3.py`, `tools/tts/listen.py`). The pieces are joined into one MP3 per section under `var/audio/ai/`, which `deploy.sh --audio` copies to the hosts. Three files in `data/audio/` come out of it and are checked in:
 
 | file | what |
 |---|---|
@@ -283,7 +286,7 @@ make geoip                                # DB-IP City Lite -> var/geoip/ (month
 ssh pi5 'cd ~/ubsite && .venv/bin/python -m ubsite.stats passwd'   # prints a password, once
 ```
 
-Without `var/stats.passwd`, `/stats` is a 404. The browser that logs in gets the cookie `ub_me=1`, and its own visits stop counting; the page has a link to count them again. The page shows:
+Each host counts its own visitors, in its own `var/visits.db`, and has its own `/stats`. The VPS has a copy of pi5's `var/stats.passwd`, so one password opens both. Without `var/stats.passwd`, `/stats` is a 404. The browser that logs in gets the cookie `ub_me=1`, and its own visits stop counting; the page has a link to count them again. The page shows:
 
 - visits per day;
 - countries and their cities;
@@ -358,7 +361,7 @@ make data && make check && make offline && make test
 make serve                           # look; Ctrl-C
 git status                           # commit anything here first, data/text/ above all
 ./deploy/deploy.sh
-curl -s https://ubsite.ddns.net/healthz
+curl -s https://ubsite.ddns.net/healthz https://ubsite.sigmaai.au/healthz
 ```
 
 ---
@@ -367,12 +370,12 @@ curl -s https://ubsite.ddns.net/healthz
 
 - **The code:** check out the previous commit here and run `./deploy/deploy.sh --no-data`.
 - **The index:** because the index is read at a revision, a bad index commit can be stepped round. Set `rev = "<good sha>"` under `[index]` in `sources.toml`, deploy, and put `HEAD` back once the index is fixed.
-- **The database** on pi5 is derived and is never backed up. Rebuilding is the restore.
+- **The database** on the hosts is derived and is never backed up. Rebuilding is the restore.
 
 ---
 
 ## Towards automation
 
 - `make sources` against `/healthz` is the whole "is the site behind?" test, so a scheduled job can ask it without a person.
-- The build must run on this machine: pi5 has no sources and needs none.
+- The build must run on this machine: the hosts have no sources and need none.
 - A changed vendored file stops the build **on purpose**. An automated update should stop there, report the diff, and wait for a person, rather than run `vendor-sync` itself.
