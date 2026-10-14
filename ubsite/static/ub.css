@@ -787,6 +787,9 @@ dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5
 .offmenu .install { margin: .65rem 0 0; padding-top: .6rem; border-top: 1px solid var(--rule); }
 .offmenu button { padding: .05rem .55rem; font: inherit; font-size: .85rem;
   color: var(--link); background: none; border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; }
+/* Each label in a span of its own (offline.js), set level with its box as
+   the Settings pills are (--lift): Goudy, centred, sits high. */
+.offmenu button > span { position: relative; top: var(--lift); }
 /* Removing the copy is apart from the rest, and quieter. */
 .offmenu .remove { margin: .5rem 0 0; }
 .offmenu button.drop { padding: 0; border: 0; color: var(--faint); text-decoration: underline;

@@ -76,12 +76,12 @@
         ? ': ' + mb(s.busy.done) + ' of ' + mb(s.busy.total) : '…'));
     } else if (!have) {
       line.innerHTML = (err ? 'The download stopped: ' + err + '.' : 'The download did not finish.') +
-                       (online() ? ' <button type="button" class="get">Try again</button>' : '');
+                       (online() ? ' <button type="button" class="get"><span>Try again</span></button>' : '');
       mark('none', 'Online; the offline copy did not finish downloading');
     } else if (up) {
       line.innerHTML = 'Out of date: kept as the site was on ' + day(have.made) + ', which has changed since. ' +
-                       (online() ? '<br><button type="button" class="get">Update now (' + mb(up.fetch) + ')</button>' +
-                                   ' <button type="button" class="newsbtn" popovertarget="offnews">What’s new</button>'
+                       (online() ? '<br><button type="button" class="get"><span>Update now (' + mb(up.fetch) + ')</span></button>' +
+                                   ' <button type="button" class="newsbtn" popovertarget="offnews"><span>What’s new</span></button>'
                                  : 'It can be updated once online.') +
                        (err ? '<br>The last update stopped: ' + err + '.' : '');
       mark('stale', 'An update to the offline copy is waiting (' + mb(up.fetch) + ')');
@@ -108,7 +108,7 @@
       return r.json();
     }).then(function (m) {
       if (!kept) line.innerHTML = 'About ' + mb(m.bytes) + ' to download and keep in this browser.' +
-                                  '<br><button type="button" class="keep">Download it</button>';
+                                  '<br><button type="button" class="keep"><span>Download it</span></button>';
     }, function () {
       if (!kept) line.textContent = !online() ? 'It can be downloaded only online.'
                                               : 'This site has no offline copy yet.';
@@ -207,7 +207,7 @@
     var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     if (app) inst.innerHTML = '';
-    else if (window.ubInstall) inst.innerHTML = '<button type="button" class="app">Install as an app</button> ' +
+    else if (window.ubInstall) inst.innerHTML = '<button type="button" class="app"><span>Install as an app</span></button> ' +
       '<small>it opens on its own, from the home screen or the dock</small>';
     else if (ios) inst.innerHTML = '<small>On an iPhone or iPad, add it to the Home Screen too (Share, then Add to ' +
       'Home Screen): Safari deletes what a site keeps after seven days without a visit, but not for an app ' +
