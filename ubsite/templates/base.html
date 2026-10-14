@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}The Urantia Book{% endblock %}</title>
-<link rel="stylesheet" href="/static/ub.css">
+<link rel="stylesheet" href="{{ asset('ub.css') }}">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <script>
 // Settings before first paint, so there is no flash of the wrong state: each
 // stored value that differs from its default becomes data-<key> on <html>,
@@ -82,6 +83,17 @@ window.ubDefaults = {{ settings_defaults|tojson }};
       {%- endfor %}
     </fieldset>
     {%- endfor %}
+    {#- Read offline: the whole site but the recordings, kept in this browser by
+        a service worker (static/sw.js, offline/).  Not a setting kept in
+        ub_settings, but an act: offline.js runs it, and shows it only where a
+        service worker can run. #}
+    <fieldset class="offline" hidden data-src="{{ asset('offline.js') }}">
+      <legend>Offline</legend>
+      <label><input type="checkbox" name="offline"> Read offline
+        <small>the book, its index and the 1955 readings, but not the recordings</small></label>
+      <p class="state" aria-live="polite"></p>
+      <p class="install" hidden></p>
+    </fieldset>
     <p class="kept">Kept in this browser only.</p>
     <div class="actions">
       <button class="reset" type="button">Restore the defaults</button>
@@ -106,7 +118,7 @@ window.ubDefaults = {{ settings_defaults|tojson }};
   <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.
      Visits are counted without cookies, and no IP address is kept.</p>
 </footer>
-<script src="/static/ub.js" defer></script>
+<script src="{{ asset('ub.js') }}" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

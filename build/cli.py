@@ -19,9 +19,11 @@ def main(argv: list[str]) -> int:
         print(config.describe(repos))
         return 0
     if cmd == "vendor-sync":
-        return vendorlib.sync({**repos, "texlive": config.texlive()})
+        return vendorlib.sync({**repos, "texlive": config.texlive(),
+                            "sqlite_wasm": config.sqlite_wasm()})
     if cmd == "vendor-check":
-        return vendorlib.check({**repos, "texlive": config.texlive()})
+        return vendorlib.check({**repos, "texlive": config.texlive(),
+                             "sqlite_wasm": config.sqlite_wasm()})
 
     if cmd == "paranoid":
         # Prove, rather than assert, that a build leaves the source repos alone.

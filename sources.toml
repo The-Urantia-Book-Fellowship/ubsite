@@ -51,6 +51,16 @@ path = "data/srt/considerations.html"
 [texlive]
 path = "/usr/local/texlive/2026/texmf-dist"
 
+# SQLite's own WebAssembly build, for one thing: searching the offline copy in
+# the reader's browser (offline/, ubsite/static/sw.js), with the same FTS5,
+# tokenizer and bm25 as the site.  The release zip from sqlite.org, unpacked;
+# not a repository and not read by the build.  vendor/sqlite-wasm/ holds its
+# two files by value, and `make vendor-check` compares them with this tree's.
+# 3.53.4 of 2026-07-24, https://sqlite.org/2026/sqlite-wasm-3530400.zip,
+# sha256 b38d042be415af040679804dbf66264c6e6ec324d79840c284f673c4f2a63c4d.
+[sqlite_wasm]
+path = "/home/tigran/Software/sqlite-wasm/sqlite-wasm-3530400"
+
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
 # directory against that list.

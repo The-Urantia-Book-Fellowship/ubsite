@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Not in the offline copy{% endblock %}
+{#- What the offline copy shows for an address it does not hold, while the
+    network does not answer (static/sw.js): a reading path, the API's page.
+    Rendered once, by offline/pages.py, with a NUL for the message. #}
+{% block body %}<main class="prose">
+<h1>Not in the offline copy</h1>
+<p>{{ msg }}</p>
+<p>The <a href="/read">contents</a>, the <a href="/index">index</a> and the
+search box above all work offline.</p>
+</main>{% endblock %}

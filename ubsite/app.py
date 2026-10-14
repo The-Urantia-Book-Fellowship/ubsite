@@ -13,6 +13,8 @@ them together; the margin index folds where it stands (templates/_fold.html).
 from __future__ import annotations
 
 import functools
+import gzip
+import hashlib
 import json
 import pathlib
 import re
@@ -34,6 +36,9 @@ from starlette.exceptions import HTTPException  # noqa: E402
 from ubsite import api, queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
+STATIC = ROOT / "ubsite" / "static"
+# The offline copy (offline/, `make offline`): its manifest and its chunks.
+OFFLINE = ROOT / "var" / "offline"
 # No /openapi.json: it described every HTML route by accident, and a site
 # looking for the text API would have taken it for that.  /api documents it.
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
@@ -56,6 +61,24 @@ def entry_href(rslug: str, level: int, anchor: str) -> str:
 
 
 T.env.globals["entry_href"] = entry_href
+
+
+@functools.lru_cache(maxsize=64)
+def _asset(name: str, mtime_ns: int) -> str:
+    return f"/static/{name}?v={hashlib.sha256((STATIC / name).read_bytes()).hexdigest()[:10]}"
+
+
+def asset(name: str) -> str:
+    """A static file's URL with a hash of its content: /static/ub.css?v=3f2a....
+
+    So a page names the stylesheet and scripts it was made with.  An offline
+    copy (sw.js) then always draws a page with its own build's, and a deploy
+    reaches a browser that kept the old ones.  The server ignores the query.
+    """
+    return _asset(name, (STATIC / name).stat().st_mtime_ns)
+
+
+T.env.globals["asset"] = asset
 
 
 def _mark() -> Markup:
@@ -416,6 +439,101 @@ def speech(ref: str):
         raise HTTPException(status_code=404)
     return JSONResponse({"segs": [[r["ref"], r["text"]] for r in rows]},
                         headers={"Cache-Control": "no-cache"})
+
+
+# --------------------------------------------------------------------------
+# Read offline.  A reader who turns it on in Settings registers /sw.js, which
+# downloads the copy that `make offline` built (offline/, var/offline/) and
+# answers from it when the network does not.  Nobody else runs the worker.
+
+# SQLite's WebAssembly build (vendor/sqlite-wasm/), which searches the copy.
+ENGINE = {"sqlite3.js": "text/javascript", "sqlite3.wasm": "application/wasm"}
+RE_CHUNK = re.compile(r"[0-9a-f]{16}\.gz")
+
+
+@functools.lru_cache(maxsize=4)
+def _engine(name: str, mtime_ns: int) -> tuple[bytes, str]:
+    data = (ROOT / "vendor" / "sqlite-wasm" / name).read_bytes()
+    return gzip.compress(data, 9, mtime=0), hashlib.sha256(data).hexdigest()[:10]
+
+
+def engine(name: str) -> tuple[bytes, str]:
+    """A file of the engine, gzipped once, and the hash its URL carries."""
+    return _engine(name, (ROOT / "vendor" / "sqlite-wasm" / name).stat().st_mtime_ns)
+
+
+def _etagged(request: Request, body: bytes, media_type: str, salt: str = "", **headers) -> Response:
+    """`body`, or a bodiless 304 when the browser holds it already.  A browser
+    with Read offline on asks again for the worker and the scripts it imports
+    after every page it loads, to see whether the worker has changed."""
+    tag = '"' + hashlib.sha256(body).hexdigest()[:16] + salt + '"'
+    headers = {"ETag": tag, "Cache-Control": "no-cache", **headers}
+    if tag in request.headers.get("if-none-match", ""):
+        return Response(status_code=304, headers=headers)
+    return Response(body, media_type=media_type, headers=headers)
+
+
+@app.get("/sw.js", include_in_schema=False)
+def service_worker(request: Request):
+    """The offline copy's service worker, at the root so that its scope is the
+    whole site.  The scripts it loads are named with their hashes, put in place
+    of __VERSIONS__ here, so that a change to any of them is a change to this
+    file, which is what makes a browser install the worker again."""
+    v = {"core": asset("offline-core.js"),
+         **{k.split(".")[1]: f"/offline/{k}?v={engine(k)[1]}" for k in ENGINE}}
+    src = (STATIC / "sw.js").read_text()
+    if src.count("var V = __VERSIONS__;") != 1:
+        raise RuntimeError("static/sw.js has lost its `var V = __VERSIONS__;`")
+    body = src.replace("var V = __VERSIONS__;", f"var V = {json.dumps(v)};")
+    return _etagged(request, body.encode(), "text/javascript")
+
+
+@app.get("/offline/manifest.json", include_in_schema=False)
+def offline_manifest(request: Request):
+    """What the copy holds: every chunk, by the hash of its bytes.  A worker
+    asks for it to learn whether its copy is still the site's, and its ETag
+    makes the usual answer a 304 of a few hundred bytes."""
+    try:
+        body = (OFFLINE / "manifest.json").read_bytes()
+    except OSError:
+        return Response("No offline copy has been built.\n", status_code=404, media_type="text/plain")
+    return _etagged(request, body, "application/json")
+
+
+@app.get("/offline/c/{name}", include_in_schema=False)
+def offline_chunk(name: str):
+    """A chunk of the copy, gzipped, named by its hash, so kept for good."""
+    f = OFFLINE / "c" / name
+    if not RE_CHUNK.fullmatch(name) or not f.is_file():
+        return Response("No such chunk.\n", status_code=404, media_type="text/plain")
+    return FileResponse(f, media_type="application/octet-stream",
+                        headers={"Cache-Control": "public, max-age=31536000, immutable"})
+
+
+@app.get("/offline/{name}", include_in_schema=False)
+def offline_engine(name: str, request: Request):
+    if name not in ENGINE:
+        return Response("No such file.\n", status_code=404, media_type="text/plain")
+    body, _ = engine(name)
+    if "gzip" not in request.headers.get("accept-encoding", ""):
+        return _etagged(request, gzip.decompress(body), ENGINE[name], Vary="Accept-Encoding")
+    return _etagged(request, body, ENGINE[name], "-gz", Vary="Accept-Encoding", **{"Content-Encoding": "gzip"})
+
+
+@app.get("/manifest.webmanifest", include_in_schema=False)
+def web_manifest():
+    """What lets a reader install the site as an app: a Home Screen icon, and on
+    an iPhone the only way an offline copy is kept for good (Safari deletes a
+    site's stored data after seven days of use without a visit)."""
+    return JSONResponse({
+        "name": "The Urantia Book", "short_name": "Urantia Book",
+        "description": "The Uversa Press text read together with its index.",
+        "start_url": "/", "scope": "/", "display": "standalone",
+        "background_color": "#f8f5f0", "theme_color": "#f8f5f0",  # --paper
+        "icons": [{"src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png"},
+                  {"src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png"},
+                  {"src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml"}],
+    }, media_type="application/manifest+json", headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/healthz")

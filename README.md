@@ -125,6 +125,7 @@ Near the end it says where the [text API](#the-text-api) stands: `unchanged at v
 
 ```
 make check        # every gate, about 8 s, after rebuilding the oracles from the sources
+make offline      # the copy Read offline keeps, and its gates, about 45 s (needs Node)
 make test         # unit tests, including the never-write-to-a-master guard
 make paranoid     # optional: fingerprint the three trees, build, prove nothing moved
 ```
@@ -157,9 +158,9 @@ Commit anything that changed in this repository: the vendor adoption, a moved co
 
 The script:
 
-1. runs `make data` and `make check` again, so a deploy never ships an unchecked database, and checks that pi5 holds every recording the database serves, at the path and size it records;
+1. runs `make data`, `make check` and `make offline` again, so a deploy never ships an unchecked database or offline copy, and checks that pi5 holds every recording the database serves, at the path and size it records;
 2. rsyncs the code to `pi5:/home/tigran/ubsite`, without `.git`, `.venv`, `var/` or `export/`;
-3. ships `var/ub.db` as `ub.db.new` and `mv`s it into place, so a half-copied file is never the one being served;
+3. ships `var/ub.db` as `ub.db.new` and `mv`s it into place, so a half-copied file is never the one being served; then the offline copy, its chunks before the manifest that names them, pruning chunks that neither it nor the manifest before it names (see [Read offline](#read-offline));
 4. copies `var/geoip/dbip-city-lite.mmdb` when `make geoip` has changed it (the visit counter's places; see [Visits](#visits)), and runs `uv pip sync` in pi5's venv;
 5. runs `sudo systemctl restart ubsite`. This is password-free: the sudoers drop-in from `deploy/README.md` step 4 allows exactly that and nothing else;
 6. polls `/healthz` for 30 s, and prints the unit's status if it never reports ok.
@@ -174,6 +175,21 @@ curl -s https://ubsite.ddns.net/2:5.12 | grep -c 'loses sight of love'
 ```
 
 Then look at the page and its footer in a browser.
+
+---
+
+## Read offline
+
+A reader can keep the whole site in their browser and read it with no connection: Settings, Offline, "Read offline". It holds the book with its margin index and 1955 readings, every concept page, the appendices and the lists, search, and the text your browser's voice reads, so that listening works offline in that voice. Not the recordings, and not the reading paths, which are long and made of paragraphs the copy already has: offline, one says it is read online and links its headword's page. About 16.8 MB to download and 59 MB kept, at 2026-10-13.
+
+- **The copy is the site's own pages.** `make offline` (`offline/`) asks the app for every page it will hold, in-process, cuts each into the build's shell, which every page shares, and what is the page's own, and writes them as gzipped chunks named by their hashes into `var/offline/`, with `manifest.json` listing them. A section's left rail is kept once for its paper.
+- **The worker** (`ubsite/static/sw.js`) is registered only by a reader who turns it on. It goes to the network first, so online nothing changes and visits are counted as before. The copy answers when the network fails, takes over 4 s, or the server answers 5xx. `ubsite/static/offline-core.js` joins the pages again and runs search.
+- **Listening offline** is in the browser's voice: each section's spoken text (`/speech/`) is in the copy, and offline `ub.js` picks one of the device's own voices, since Chrome's Google voices and Edge's Natural ones are spoken by a server. Offline, with a recording chosen in Settings, Listen does not play and says why: the voice Settings names is never swapped for another. On Linux, Chrome has no voice of its own unless started with `--enable-speech-dispatcher`; Firefox uses speech-dispatcher. DevTools' Offline does not stop Chrome's Google voices, which the browser fetches itself.
+- **Search** runs on SQLite's own WebAssembly build (`vendor/sqlite-wasm/`), on two databases cut from `ub.db`, the text's and the index's, with the same FTS5 tables, tokenizer and queries as `app.py`.
+- **The gates** (`python -m offline check`, run by `make offline`) have Node run `offline-core.js` on the copy and hold every page it makes to the page the server sends, byte for byte: all 6,405 stored pages, every section with all its paragraphs marked, the not-found pages and redirects, and every query in `tests/fixtures/offline-queries.txt` and in this machine's `var/visits.db`, in each list. Every link in every page must land.
+- **Stale copies.** The manifest's `build` is a hash of what the copy holds, so it moves only when something in the copy does. While online, the worker asks for the manifest at most once an hour, and whenever Settings opens; when it differs, a line under the header says the copy is from such a date, and what the update costs ("Update it (0.1 MB) · Later"); the reader taps it (Tigran, 2026-10-13). The update fetches only the chunks whose hashes are new, carrying over any this browser holds in any copy, checks each, and becomes the copy only when it is whole; one that fails leaves the copy before it, and says why, in Settings and under the header. Settings and the line under the header show it going on, in MB. The worker and the SQLite script it imports carry ETags, because a browser asks for them again after every page it loads.
+- **Install as an app.** `/manifest.webmanifest` and `ubsite/static/icon-192.png`, `icon-512.png` (`tools/make_icons.py`) let a browser install the site. Chrome's own banner is held back; Settings offers the button, and on an iPhone says how, because Safari deletes what a site keeps after seven days without a visit, except for a Home Screen app.
+- **To see it work**, end to end in Chrome: `~/Software/ml/venv-browser/bin/python tools/offline_e2e.py`. It serves a scratch copy of `var/offline/` on port 8131, turns it on, reads and searches offline, makes a newer build and takes it, fails an update, and turns it off. On this machine the dev server works too, at `http://localhost:8130` (a secure context); a phone needs the HTTPS site.
 
 ---
 
@@ -337,7 +353,7 @@ A site may also ask for **a passage or a paper by reference**: `/api/v1/paragrap
 ```
 make sources                         # what a build would read
 make vendor-check                    # fails? review the diff, make vendor-sync, commit
-make data && make check && make test
+make data && make check && make offline && make test
 make serve                           # look; Ctrl-C
 git status                           # commit anything here first, data/text/ above all
 ./deploy/deploy.sh

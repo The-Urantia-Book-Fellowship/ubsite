@@ -57,9 +57,15 @@
 
   window.ubSettings = {
     // The browser voice Settings names, else the best there is; null with none.
+    // Offline, one of this device's own: Chrome's Google voices and Edge's
+    // Natural ones are spoken by a server, and fall silent without it.
     voices: voices,
     voice: function () {
       var all = voices(), want = load().bvoice;
+      if (navigator.onLine === false) {
+        var here = all.filter(function (v) { return v.localService; });
+        if (here.length) all = here;
+      }
       return all.filter(function (v) { return v.name === want; })[0] || all[0] || null;
     },
     get: load,
@@ -391,6 +397,29 @@
     if (gone.length) requestAnimationFrame(function () {
       for (var j = gone.length - 1; j >= 0; j--) gone[j][0].insertData(gone[j][1], '­');
     });
+  });
+
+  // Read offline (static/offline.js), in Settings where a service worker can
+  // run: loaded when Settings opens, or at once on a page the worker answers
+  // for, to say whether its copy is still the site's.  The browser's own offer
+  // to install the site waits there too, rather than in a banner of its own.
+  var off = document.querySelector('fieldset.offline');
+  if (off && 'serviceWorker' in navigator && window.isSecureContext) {
+    off.hidden = false;
+    var offline = function () {
+      if (off.dataset.on) return;
+      off.dataset.on = '1';
+      var sc = document.createElement('script');
+      sc.src = off.dataset.src;
+      document.head.appendChild(sc);
+    };
+    if (navigator.serviceWorker.controller) offline();
+    if (gear) gear.addEventListener('click', offline);
+  }
+  window.addEventListener('beforeinstallprompt', function (ev) {
+    ev.preventDefault();
+    window.ubInstall = ev;
+    document.dispatchEvent(new Event('ub:installable'));
   });
 
   // A reading path's fold, folded from the line below it (path.html): its

@@ -38,8 +38,10 @@ GEOIP = ROOT / "var" / "geoip" / "dbip-city-lite.mmdb"
 SCHEMA = pathlib.Path(__file__).with_name("visits.sql")
 
 OFF = os.environ.get("UB_VISITS", "").lower() in ("off", "0", "no")
-# Pages that are not reading: what deploy.sh polls, the icons, the report itself.
-SKIP = frozenset({"/healthz", "/favicon.ico", "/apple-touch-icon.png", "/stats"})
+# Pages that are not reading: what deploy.sh polls, the icons, the report itself,
+# and what Read offline asks for (the worker, the app manifest; /offline/ below).
+SKIP = frozenset({"/healthz", "/favicon.ico", "/apple-touch-icon.png", "/stats",
+                  "/sw.js", "/manifest.webmanifest"})
 # Set by /stats on the owner's browser, so that their own reading is not counted.
 OWNER = re.compile(rb"(?:^|;\s*)ub_me=1(?:;|$)")
 VIA = frozenset({"swap", "next"})              # listen.js's X-UB-Fetch
@@ -301,8 +303,9 @@ class Counter:
             if status != 200:
                 return
             kind, rest = "listen", ("browser", path[len("/speech/"):])
-        elif path in SKIP or path.startswith("/rail/"):
-            return                                 # /rail/N: a paper opened in the left rail
+        elif path in SKIP or path.startswith(("/rail/", "/offline/")):
+            return                                 # /rail/N: a paper opened in the left rail;
+                                                   # /offline/: a copy downloading (sw.js)
         elif path.startswith("/api/"):
             kind = "api"                           # another site's program, not a reader
         else:

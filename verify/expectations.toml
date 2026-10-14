@@ -94,3 +94,17 @@ appendix_own       = 19       # the rest: 'Sumeria', 'widow in Rome', 'Bildad (f
 qv_xrefs           = 1026     # A-Z 504 (3 of them conjunctions) + B-F 522, 0 unresolved
 reads_on           = 7        # events finished by their date: 'Paul dies prior to'
 bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the same headword
+
+# The offline copy (offline/, `make offline`), measured 2026-10-13 at press
+# 5f95c31 and index 40cc439.  The counts are exact: every page the copy stores,
+# every section's spoken text (the browser's voice reads offline), and the
+# chunks: 197 papers, 27 index letters, 10 of spoken text, the misc pages, the
+# shell, two databases and 13 files.  The sizes are bands, since the index
+# grows as it is edited.
+[offline]
+measured_on = "2026-10-13"
+pages       = 6405       # 1,626 sections, 4,736 headwords, 27 index letters, 16 more
+spoken      = 1626       # one to a section
+chunks      = 251
+download_mb = [13.0, 20.0]   # gzipped: 16.8 at measurement
+kept_mb     = [48.0, 68.0]   # as the browser keeps it: 59.2 at measurement

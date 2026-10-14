@@ -47,8 +47,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive"):
-            continue                                # not repositories: see audio(), srt(), texlive()
+        if key in ("audio", "srt", "texlive", "sqlite_wasm"):
+            continue                                # not repositories: see audio(), srt(), texlive(), sqlite_wasm()
         path = (ROOT / cfg["path"]).resolve()
         if not path.is_dir():
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
@@ -123,6 +123,16 @@ def texlive() -> dict:
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["texlive"]
     return {"key": "texlive", "path": pathlib.Path(cfg["path"]), "commit": None}
+
+
+def sqlite_wasm() -> dict:
+    """Return {key, path} for the unpacked SQLite WASM release that
+    vendor/sqlite-wasm/ is copied from, shaped like texlive()'s entry and for
+    the same reason: vendorlib takes it beside the repositories, and the build
+    never reads it."""
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["sqlite_wasm"]
+    return {"key": "sqlite_wasm", "path": pathlib.Path(cfg["path"]), "commit": None}
 
 
 def describe(repos: dict) -> str:

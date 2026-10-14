@@ -47,6 +47,7 @@ make vendor-check   re-hash the vendored copies against upstream (fails with a d
 make data           build var/ub.db          (~20 s)
 make check          every gate               (~8 s; rebuilds the oracles first)
 make epub           the whole site as an EPUB -> var/epub/  (~3 s, ~10 s more for its gates)
+make offline        the copy Read offline keeps -> var/offline/  (~22 s, ~20 s more for its gates; needs Node)
 make test           the never-write-to-a-master guards
 make paranoid       fingerprint all three trees, build, and prove nothing moved
 make srt-snapshot   refetch the SRT Committee's page into data/srt/ (review the diff)
@@ -81,7 +82,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-browser`
   - `load.py`, `derive.py`, `schema/*.sql`, `oracle.py`, `fonts.py`, `slugs.py`
   - `checks/` — the gates
 - `ubsite/` — FastAPI + Jinja2, server-rendered, no build step, ~70 KB CSS, ~18 KB `ub.js` plus `listen.js` on section pages
-- `vendor/` — copied by value with `UPSTREAM.lock`: press's tokenizer/macros/normalize, index's `cite.py`/`xref.py`
+- `vendor/` — copied by value with `UPSTREAM.lock`: press's tokenizer/macros/normalize, index's `cite.py`/`xref.py`, TeX Live's `hyphen.tex`, and SQLite 3.53.4's WebAssembly build (`sqlite-wasm/`, from the release zip unpacked in `~/Software/sqlite-wasm/`, named in `sources.toml`)
 - `.venv/` — `uv venv` + `uv pip sync requirements.txt`, gitignored; `requirements.txt` is compiled from `requirements.in` with `uv pip compile`. Same arrangement as `../libnodes`. **Everything runs under it** — `make` sets `PY := .venv/bin/python`, so the build gets fontTools and the server gets uvicorn from one place.
   **Python 3.12**, pinned in `.python-version` to match `../libnodes` and `urantia-library`: all three will be hosted on the same Raspberry Pi 5 with uv-managed venvs, and sharing one interpreter saves fetching and storing a second. The full gate suite passes on it, with byte-identical output.
 
@@ -119,6 +120,12 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-browser`
   - **`queries.reading_path()`** arranges it, ported from the mockup's generator: running heads where the section changes, a fold for what a section has between two paragraphs drawn, a one-line pointer back for a paragraph drawn above (By theme only), a signpost for a paper cited whole, verse grouped as `queries.section` groups it. Captions follow the margin's rule: a range at its first paragraph only (`opens`).
   - `templates/path.html` draws it with the section page's own paragraph, `templates/_para.html`'s `para()`, moved out of `section.html` (every section page byte-identical after, checked 2026-10-13). A fold's copy of a paragraph drawn elsewhere has no id, so each paragraph's reference is its id once.
   - `tests/test_reading_path.py`. Jesus is the largest: 1,960 paragraphs, 2.45 MB (650 KB gzipped), 0.19 s to render here, about a second for Chrome to lay out.
+- **Read offline** (2026-10-13; deployed 2026-10-14, once Harry had answered, §10). A reader keeps the whole site in their browser, but the recordings and the reading paths: Settings, Offline. README, "Read offline".
+  - **The copy is the site's own pages**, so there is no second renderer. `offline/` asks the app for every page in-process (`offline/site.py`), cuts each at fixed places in `base.html` into the build's shell and the page's own pieces (`offline/pages.py`), keeps a section's rail once per paper, and writes gzipped chunks named by their hashes, with `manifest.json`, into `var/offline/` (`offline/pack.py`, the only writer). Two search databases are cut from `ub.db` (`offline/searchdb.py`), their FTS5 tables declared as `ub.db` declares them.
+  - **The worker** (`ubsite/static/sw.js`) is registered only by a reader who turns it on, and goes to the network first: online nothing changes, and `/stats` still counts them. `ubsite/static/offline-core.js` joins pages, routes every address as `app.py` does, and runs `search()` again on SQLite's WebAssembly build; `offline.js` is the switch, the stale-copy line and the install offer, loaded only when Settings opens or the worker controls the page.
+  - **Listening offline** is in the browser's voice: every section's `/speech/` text is in the copy (ten chunks of twenty papers, apart from the pages, which move with every index edit), and offline `ub.js` `voice()` takes one of the device's own voices (`localService`). Offline, a recording chosen in Settings does not play: `listen.js` says why (`NEEDS_NET`).
+  - **The gate** (`python -m offline check`) runs that same `offline-core.js` in Node and holds what it makes to the server's, byte for byte: 6,405 stored pages, the 1,626 sections' spoken text, 1,859 more addresses (every section with all its paragraphs marked, the not-found pages, the redirects) and 503 searches (`tests/fixtures/offline-queries.txt` and `var/visits.db`'s), and every link. `tools/offline_e2e.py` drives Chrome through turning it on, reading offline, a stale copy updated, an update that fails, and turning it off.
+  - **Static URLs carry their content's hash** since then (`app.py asset()`: `/static/ub.css?v=…`), so an offline page draws with its own build's stylesheet and scripts.
 - `deploy/` — the systemd unit, the nginx server block, the sudoers drop-in and `deploy.sh`, with a README naming the four steps that need root. All four have been run; the site is live at **https://ubsite.ddns.net**. **The database is the artifact**: the three source repos are not on pi5 and do not need to be, so `make data` runs here and `var/ub.db` is shipped.
 
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz, figures behind the rights gate), then 7 (human sources), 8 (the timeline, the map).
@@ -143,6 +150,7 @@ headwords with a reading path 2,058 (3+ paragraphs), 1,820 of them with 2+ chapt
 paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at version 8 (2026-10-13)
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
+offline copy 6,405 pages + 1,626 spoken texts in 251 chunks: 16.8 MB to download, 59.2 MB kept (2026-10-13)
 ```
 
 The index lines move as the index is edited (these are at its `224c84d`, 2026-10-09).
@@ -221,10 +229,18 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
     - A soft hyphen is honoured by `hyphens: manual`, the **initial** value. Only `hyphens: none` silences it, which is how Ragged right turns them off.
     - Chrome puts U+00AD on the clipboard with the text it copies (checked in Chrome 154). Building the clipboard's contents in a `copy` handler instead loses the inline styles the browser adds to its HTML, and with them the red letter in a paste into Docs or Word. So `ub.js` removes the hyphens from the DOM with `deleteData`, which the selection's ends follow, and restores them in `requestAnimationFrame`. A microtask would run before the browser copies.
 
+23. **Safari deletes everything a site keeps after seven days of Safari use without a visit to it**: the offline copy, the worker, the settings. A site added to the Home Screen is exempt, which is why Settings tells an iPhone reader to add it, and why `/manifest.webmanifest` says `standalone` (a Home Screen bookmark that opens in Safari is not exempt).
+24. **`sw.js` names `__VERSIONS__` in its own header comment.** `app.py` puts the scripts' hashed addresses in place of the line `var V = __VERSIONS__;`, whole, and fails if it is missing. Replacing the first `__VERSIONS__` filled in the comment and left `V` undefined, and all Chrome said was "ServiceWorker script evaluation failed".
+25. **A service worker runs only in a secure context**: HTTPS, or `localhost`. The dev server on `http://<LAN address>:8130` is neither, so a phone there shows no Offline section; test on this machine's `http://localhost:8130`, or on the live site.
+26. **`tests/test_no_writes.py` finds `.write_bytes(` only after a word character.** `(tmp / name).write_bytes(…)` passes it unseen, so `offline/pack.py` writes through a named path.
+27. **What a service worker posts to a page must be plain data.** `sw.js` once kept the running download's promise on `busy`, which it sends to the pages as the copy's state; `postMessage` cannot clone a promise, so every message while a copy downloaded failed. Settings went on saying "Update now" until the update had ended, with no sign that it had begun, and a second tap did nothing. Tigran reported an Update that did nothing on 2026-10-13. The promise is `running` now, apart.
+28. **Nothing in `sw.js` writes back a `meta` it read before a wait.** A check reads meta, asks the network, and writes; a download that ended in between had its `current` put back to the copy before, whose cache it had deleted, and the copy was lost. Every change to meta goes through `updateMeta()`, one at a time, each on what the last one wrote.
+
 ---
 
 ## 8. Decisions on the record
 
+- **Read offline: the reader taps to update, and the browser's voice reads offline** (Tigran, 2026-10-13). A stale copy is announced, under the header and in Settings, with what the update costs, and updated only when the reader asks. The copy carries every section's spoken text (+2.3 MB) so that listening works offline in the browser's voice; the recordings stay online. Offline, a recording chosen in Settings is not swapped for the browser's voice: Listen does not play, and the bar says the recordings need a connection and that Settings can read it in the browser's voice (Tigran, the same day, after a first version read it in Google UK English Female while Settings said Merritt Horn).
 - **One mode.** Reading mode was removed; the study apparatus is always on. The individual elements become switches under **Settings** — red letter, paragraph references, the 1955 variants — rather than one coarse lever. The margin index was one of them until 2026-10-13, when it began to fold where it stands (below).
 - **Slugs are data, not a function.** `data/slugs.tsv` is checked in and append-only. A headword keeps its slug for ever; collisions get a recorded numeric suffix (11 so far). A permalink that moves because someone improved the slugifier is a broken permalink.
 - **An exact headword match wins the search.** bm25 has no notion that a query names an entry, so headwords are resolved separately: exact, then prefix, then full text.
@@ -338,6 +354,7 @@ Carried from the plan, none blocking:
 2. **Site licence** — the press repo is CC BY-NC-SA 4.0, and NC forecloses most of what a public API is for. For the text this is settled: the API serves it as public domain (2026-10-11, §8). The index's footing is still open.
 3. **Domain and host**; whether `urantia-library` on this box merges or coexists. Port 80 is reportedly not forwarded, which affects certbot.
 4. **The 58 rights-restricted images** — attribution cards, or seek permission.
+5. **Read offline and the index: answered** (2026-10-14). The copy puts the whole index on every device that asks, as pages and as a SQLite file DevTools can extract. Tigran asked Geoff, who asked Harry, who "is happy as long as our terms of use don't introduce the book into the public domain": the book as a whole, the index with it. The text of *The Urantia Book* stays public domain. Read offline was deployed the same day.
 
 ---
 

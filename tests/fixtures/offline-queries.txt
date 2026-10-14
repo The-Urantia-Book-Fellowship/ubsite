@@ -1,0 +1,93 @@
+# What offline/check.py searches for, in every list, to hold the offline copy's
+# search (static/offline-core.js) to the site's (app.py search()), byte for
+# byte.  One query to a line, as typed; a line starting "# " is a comment.
+# Besides these, every search typed into this machine's dev server.
+prayer
+God
+Jesus
+jesus
+JESUS
+Thought Adjuster
+"Thought Adjuster"
+"thought adjuster
+adjuster
+adjust*
+pray*
+wor*
+*
+Universal Father
+"kingdom of heaven"
+Spirit of Truth
+self-conscious
+God-knowing
+Father's
+God’s
+Michael of Nebadon
+Melchizedek
+Machiventa
+Adam and Eve
+Lucifer
+Caligastia
+Andon
+Paradise
+Havona
+morontia
+Urantia
+love
+faith
+truth
+worship
+the universal father is the god of all creation
+God AND man
+NOT
+NEAR
+text:prayer
+-prayer
+prayer -worship
+Ádám
+café
+naïve
+Élan
+Badanon
+Tannach
+forego
+commerical
+Greeks
+Teuskwatowa
+Caesarea Philippi
+Sumeria
+widow in Rome
+Nazareth
+1955
+3
+0
+100%
+a_b
+---
+?
+""
+"
+русский
+中文
+🙂
+101:4.2
+101:4
+101:4.2-7
+86:5.14-15
+39:3.9-8
+101:4.7,9
+Paper 100
+Papers 1-3
+Papers 32 and 57
+F:XII.8
+0:12.8
+101:4sec
+101:4-6secs
+101.4.2
+101:4:2
+106:812
+134:2,5
+126:5.7sec
+191:2.5secs
+101:4.2.3
+101: 4.2

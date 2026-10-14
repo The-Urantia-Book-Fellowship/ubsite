@@ -150,7 +150,8 @@ class Pages(Counted):
 
     def test_what_is_not_reading_is_not_a_view(self):
         for path in ("/healthz", "/favicon.ico", "/static/ub.js", "/static/ub.css", "/stats",
-                     "/rail/1"):
+                     "/rail/1", "/sw.js", "/manifest.webmanifest", "/offline/manifest.json",
+                     "/offline/sqlite3.js", "/offline/c/0123456789abcdef.gz"):
             call(path)
         self.assertEqual(self.rows("SELECT path FROM view"), [])
 

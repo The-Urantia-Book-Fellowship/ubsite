@@ -729,6 +729,20 @@ dialog.settings .done { padding: .3rem 1.1rem; font: inherit;
   border-radius: 3px; cursor: pointer; }
 dialog.settings .done span { position: relative; top: var(--lift); }
 
+/* Read offline (static/offline.js): what the copy is, and its buttons. */
+dialog.settings .offline .state { margin: .15rem 0 0 1.55rem; font-size: .85rem; color: var(--faint); }
+dialog.settings .offline .state:empty { display: none; }
+dialog.settings .offline .install { margin: .5rem 0 0; }
+:is(dialog.settings .offline, .offnote) button { padding: .05rem .55rem; font: inherit; font-size: .85rem;
+  color: var(--link); background: none; border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; }
+/* The line under the header when the offline copy is stale, or updating. */
+.offnote { border-bottom: 1px solid var(--rule);
+  background: color-mix(in oklch, var(--link) 7%, var(--paper)); }
+.offnote p { max-width: 62rem; margin: 0 auto; padding: .45rem 1rem; font-size: .9rem; }
+/* A page the offline copy answered (static/sw.js) says so, and of when. */
+footer[data-copy]::before { content: "This page is from the offline copy of " attr(data-copy) ".";
+  display: block; margin-bottom: .3rem; }
+
 /* ---- prose pages ------------------------------------------------------- */
 .prose { max-width: 62ch; margin: 0 auto; padding: 2rem 1rem 0; }
 .concept { max-width: 86ch; }

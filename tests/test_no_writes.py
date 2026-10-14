@@ -21,6 +21,7 @@ ALLOWED = {
     "build/vendorlib.py": "vendor/",               # the vendored copies + lock
     "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
     "epub/pack.py": "var/epub/",                   # the EPUB, by way of a .tmp
+    "offline/pack.py": "var/offline/",             # the offline copy, by way of a .tmp
 }
 
 WRITE_OPEN = re.compile(r"""\bopen\s*\([^)]*['"][waxr]?\+?[wax]\+?['"]""")
@@ -33,9 +34,9 @@ OWN = ("var/", "export/", "data/", "vendor/", "build/cache/", "tests/fixtures/")
 
 class NoWrites(unittest.TestCase):
     def _sources(self):
-        # build/ reads the masters; epub/ only the database, and is held to the
-        # same rule so that it never grows a reason to.
-        for d in ("build", "epub"):
+        # build/ reads the masters; epub/ and offline/ only the database, and
+        # are held to the same rule so that they never grow a reason to.
+        for d in ("build", "epub", "offline"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 
@@ -73,6 +74,19 @@ class NoWrites(unittest.TestCase):
         self.assertIn('OUT = ROOT / "var" / "epub"', src)
         for rel, other in self._sources():
             if rel.startswith("epub/") and rel != "epub/pack.py":
+                self.assertNotRegex(other, WRITERS, f"{rel} must not write; pack.py does")
+                self.assertNotRegex(other, WRITE_OPEN, f"{rel} must not write; pack.py does")
+
+    def test_offline_writes_only_var(self):
+        """The offline copy is written by pack.py alone, into var/offline/, which
+        it builds as var/offline.tmp/ and swaps in."""
+        src = (ROOT / "offline/pack.py").read_text()
+        writes = sorted(set(re.findall(WRITERS, src)))
+        self.assertEqual(writes, [".write_bytes(", "os.replace", "shutil.rmtree"],
+                         f"offline/pack.py writes: {writes}")
+        self.assertIn('OUT = ROOT / "var" / "offline"', src)
+        for rel, other in self._sources():
+            if rel.startswith("offline/") and rel != "offline/pack.py":
                 self.assertNotRegex(other, WRITERS, f"{rel} must not write; pack.py does")
                 self.assertNotRegex(other, WRITE_OPEN, f"{rel} must not write; pack.py does")
 

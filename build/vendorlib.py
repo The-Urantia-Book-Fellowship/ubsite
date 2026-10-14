@@ -31,6 +31,10 @@ MANIFEST = [
     ("index", "xref.py",                              "index/xref.py"),
     # Data, not code: the patterns the book is hyphenated with (build/hyphen.py).
     ("texlive", "tex/generic/hyphen/hyphen.tex",      "tex/hyphen.tex"),
+    # SQLite's WebAssembly build, which searches the offline copy in a reader's
+    # browser (ubsite/static/sw.js): the classic script and its binary.
+    ("sqlite_wasm", "jswasm/sqlite3.js",               "sqlite-wasm/sqlite3.js"),
+    ("sqlite_wasm", "jswasm/sqlite3.wasm",             "sqlite-wasm/sqlite3.wasm"),
 ]
 
 
@@ -81,6 +85,8 @@ def check(repos) -> int:
         if sha256(up) != e["sha256"]:
             bad += 1
             print(f"\nvendor: UPSTREAM MOVED  {e['repo']}:{e['path']}", file=sys.stderr)
+            if e["dest"].endswith(".wasm"):
+                continue                           # a binary: a diff would say nothing
             diff = difflib.unified_diff(
                 ours.read_text(errors="replace").splitlines(True),
                 up.decode(errors="replace").splitlines(True),

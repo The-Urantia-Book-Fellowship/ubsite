@@ -1,6 +1,6 @@
 # vendor/
 
-Six files copied by value: five from two sibling repositories, and one from TeX Live. They are pinned by SHA-256 in `UPSTREAM.lock`, and `make vendor-check` fails if either side moves (CLAUDE.md §6). They are copies, never edited here; adopting a change upstream is `make vendor-sync` and a reviewed commit.
+Eight files copied by value: five from two sibling repositories, one from TeX Live, and two from SQLite's WebAssembly release. They are pinned by SHA-256 in `UPSTREAM.lock`, and `make vendor-check` fails if either side moves (CLAUDE.md §6). They are copies, never edited here; adopting a change upstream is `make vendor-sync` and a reviewed commit.
 
 | here | copied from |
 |---|---|
@@ -10,6 +10,8 @@ Six files copied by value: five from two sibling repositories, and one from TeX 
 | `index/cite.py` | the index repository, `cite.py` |
 | `index/xref.py` | the index repository, `xref.py` |
 | `tex/hyphen.tex` | TeX Live, `texmf-dist/tex/generic/hyphen/hyphen.tex`: Knuth's hyphenation patterns, which the press sets the book with (`build/hyphen.py`) |
+| `sqlite-wasm/sqlite3.js` | SQLite 3.53.4's WebAssembly release (`sqlite-wasm-3530400.zip` from sqlite.org), `jswasm/sqlite3.js`: the classic script, which a service worker can load with `importScripts` |
+| `sqlite-wasm/sqlite3.wasm` | the same release, `jswasm/sqlite3.wasm`: SQLite with FTS5, which searches the offline copy in a reader's browser (`ubsite/static/sw.js`) |
 
 ## Licence
 
@@ -18,3 +20,5 @@ The five Python files were written by Tigran Aivazian, who makes them available 
 Their home repositories keep their own terms. The press repository is licensed as a whole under CC BY-NC-SA 4.0, and the index repository states no licence; neither changes. Nothing here licenses the text of *The Urantia Book*, the Uversa Press edition or the Uversa Press index, which these files only read.
 
 `tex/hyphen.tex` is Donald Knuth's, and is copied here unmodified, as its own header requires: "Unlimited copying and redistribution of this file are permitted as long as this file is not modified."
+
+The two SQLite files are SQLite's, which its authors have dedicated to the public domain (https://sqlite.org/copyright.html), and are copied here unmodified.

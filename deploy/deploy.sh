@@ -2,7 +2,7 @@
 # Push ubsite to pi5 and restart it there.
 #
 #   ./deploy/deploy.sh                 build the database here, ship it, restart
-#   ./deploy/deploy.sh --no-data       ship code only, leave the database alone
+#   ./deploy/deploy.sh --no-data       ship code only, leave the database and the offline copy alone
 #   ./deploy/deploy.sh --no-restart    ship, do not restart
 #   ./deploy/deploy.sh --audio         also copy the AI voice (var/audio/ai, ~4 GB) first
 #   UBSITE_HOST=other ./deploy/deploy.sh
@@ -48,6 +48,7 @@ if [ "$BUILD" = 1 ]; then
     echo "==> building the database here"
     make data
     make check
+    make offline
 fi
 
 # The text API's versions (data/text/, build/versions.py).  A site syncing with
@@ -131,6 +132,26 @@ if [ "$BUILD" = 1 ]; then
     # being served. mv within a filesystem is atomic.
     rsync -az --info=progress2 var/ub.db "$HOST:$DEST/var/ub.db.new"
     ssh "$HOST" "mv $DEST/var/ub.db.new $DEST/var/ub.db"
+
+    # The offline copy (offline/, `make offline`), made from this database: its
+    # chunks first, adding and never deleting, so that a reader updating from
+    # the copy before still finds every chunk it was told of; then the manifest
+    # that names them, by a temp name and mv.  A chunk neither this manifest
+    # nor the one it replaced names is pruned, as the AI voice's files are.
+    chunks='import json, sys; d = sys.stdin.read().strip(); print("\n".join(c["file"][2:] for c in json.loads(d)["chunks"]) if d else "")'
+    echo "==> offline copy ($(du -sh var/offline/c | cut -f1))"
+    before=$(ssh "$HOST" "cat $DEST/var/offline/manifest.json 2>/dev/null || true" | python3 -c "$chunks")
+    ssh "$HOST" "mkdir -p $DEST/var/offline/c"
+    rsync -a var/offline/c/ "$HOST:$DEST/var/offline/c/"
+    rsync -a var/offline/manifest.json "$HOST:$DEST/var/offline/manifest.json.new"
+    ssh "$HOST" "mv $DEST/var/offline/manifest.json.new $DEST/var/offline/manifest.json"
+    keep=$( { echo "$before"; python3 -c "$chunks" < var/offline/manifest.json; } | { grep -v '^$' || true; } | LC_ALL=C sort -u)
+    have=$(ssh "$HOST" "ls $DEST/var/offline/c" | LC_ALL=C sort)
+    stale=$(LC_ALL=C comm -23 <(echo "$have") <(echo "$keep") | grep -v '^$' || true)
+    if [ -n "$stale" ]; then
+        echo "    pruning $(echo "$stale" | wc -l) chunks no manifest names"
+        echo "$stale" | ssh "$HOST" "cd $DEST/var/offline/c && xargs -r rm -f --"
+    fi
 
     # Prune: an AI file neither the new database nor the one it replaced names.
     # grep exits 1 when it passes nothing, as it does while there are no AI

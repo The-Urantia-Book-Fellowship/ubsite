@@ -10,6 +10,12 @@ requested by fixed name, without any <link>:
     apple-touch-icon.png  180 px, OPAQUE on the site's paper colour -- iOS puts
                           a transparent icon on black and rounds the corners itself
 
+and two more are named by /manifest.webmanifest, for a reader who installs the
+site as an app (Read offline, in Settings):
+
+    icon-192.png, icon-512.png   the touch icon's tile, at the sizes the
+                                 manifest asks for
+
 Rendered by headless Chrome, so each fallback is exactly what Chrome draws from
 the SVG, and assembled by ImageMagick.  Neither is a build dependency: run this
 by hand when the SVG changes, and commit the outputs.
@@ -39,7 +45,8 @@ def render(svg: str, size: int, out: pathlib.Path) -> None:
         subprocess.run(["google-chrome", "--headless=new", "--disable-gpu", "--hide-scrollbars",
                         "--force-device-scale-factor=1", "--default-background-color=00000000",
                         "--blink-settings=preferredColorScheme=1",      # light: the deep blue
-                        "--window-size=400,400", f"--screenshot={shot}", str(t / "page.html")],
+                        f"--window-size={max(400, size)},{max(400, size)}", f"--screenshot={shot}",
+                        str(t / "page.html")],
                        check=True, capture_output=True)
         subprocess.run(["magick", str(shot), "-crop", f"{size}x{size}+0+0", "+repage", str(out)],
                        check=True)
@@ -68,7 +75,9 @@ def main() -> int:
                        f'viewBox="{-p:g} {-p:g} {n + 2 * p:g} {n + 2 * p:g}">'
                        f'<rect x="{-p:g}" y="{-p:g}" width="{n + 2 * p:g}" height="{n + 2 * p:g}" fill="{PAPER}"/>')
     render(tile, 180, STATIC / "apple-touch-icon.png")
-    for f in ("favicon.ico", "apple-touch-icon.png"):
+    for n in (192, 512):
+        render(tile, n, STATIC / f"icon-{n}.png")
+    for f in ("favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"):
         print(f"  {f:22} {(STATIC / f).stat().st_size:>6,} bytes")
     return 0
 

@@ -46,5 +46,21 @@
     "sha256": "2c18acdc04c1a066aeb1759905e7ca449f0616c314b5ed6aebe55b9d4a89b8d4",
     "bytes": 27860,
     "commit": null
+  },
+  {
+    "repo": "sqlite_wasm",
+    "path": "jswasm/sqlite3.js",
+    "dest": "sqlite-wasm/sqlite3.js",
+    "sha256": "b6f472d13f7030d3ca60b8c592ffb84507ef4300e1276dd81b96bd3030d9ec6b",
+    "bytes": 432966,
+    "commit": null
+  },
+  {
+    "repo": "sqlite_wasm",
+    "path": "jswasm/sqlite3.wasm",
+    "dest": "sqlite-wasm/sqlite3.wasm",
+    "sha256": "3929b5b2a1cd7d7c32171e1f654fce0355191b7c9bc84afc61d9b2b99b96531f",
+    "bytes": 869277,
+    "commit": null
   }
 ]

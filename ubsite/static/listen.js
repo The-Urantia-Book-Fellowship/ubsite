@@ -83,6 +83,9 @@
     for (var v in d.voices) return v;
     return null;
   }
+  // Offline a recording cannot be had: the voice Settings names is not changed
+  // for another (Tigran, 2026-10-13), the bar says why it does not play.
+  var NEEDS_NET = 'The recordings need a connection. Offline, Settings can read it in your browser\u2019s voice.';
   // Section d's voice kk; the browser's is made from the paragraphs in root.
   function voiceOf(d, kk, root) {
     return kk === 'browser' ? spoken(root, href(d)) : kk ? d.voices[kk] : null;
@@ -262,8 +265,13 @@
     var s = k >= 0 ? V.segs[k] : null;
     return !s ? null : s[0] ? paras[s[0]] || null : same(P, D) ? head : null;
   }
-  // A message in the bar in place of what is being read, until the next render.
+  // A message in the bar in place of what is being read, until something is
+  // played again.  Kept, not only written: a recording that cannot be loaded
+  // fires its error, then rejects play(), whose catch renders the bar, and the
+  // message went with it.
+  var trouble = null;
   function tell(msg) {
+    trouble = msg;
     if (!bar) return;
     bar.querySelector('.at').hidden = true;
     bar.querySelector('.who').textContent = msg;
@@ -281,12 +289,17 @@
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
     if (D.next) { on.href = D.next.href + '#listen'; on.textContent = 'Next: ' + D.next.label + ' ›'; }
+    if (trouble) {
+      at.hidden = true;
+      bar.querySelector('.who').textContent = trouble;
+    }
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
   }
 
   // ---- playing ---------------------------------------------------------------
   function go(i) {
     if (!V || i < 0 || i >= V.segs.length) return;
+    trouble = null;
     if (!bar) {
       makeBar();
       // The paragraph the page was opened at has served its purpose: from now
@@ -301,6 +314,10 @@
       // The last paragraph, with the next section to come: fetch it now.
       if (i === V.segs.length - 1 && S.get().onward) fetchNext();
       return speakFrom(0);
+    }
+    if (navigator.onLine === false) {
+      tell(NEEDS_NET);
+      return render();
     }
     var s = V.segs[i], t = s[2] / 1000;
     if (file !== s[1]) {
@@ -542,7 +559,9 @@
   audio.addEventListener('play', render);
   audio.addEventListener('pause', render);
   audio.addEventListener('error', function () {
-    if (audio.getAttribute('src')) tell('The recording could not be loaded.');
+    if (audio.getAttribute('src'))
+      tell(navigator.onLine === false ? NEEDS_NET
+                                      : 'The recording could not be loaded. Your browser\u2019s voice can read without it: Settings, Listening.');
   });
 
   // ---- the browser's own voice -----------------------------------------------
@@ -625,7 +644,7 @@
     t.wait.then(function (m) { if (gen === said.gen) begin(gen, m); }, function () {
       if (gen !== said.gen) return;
       hush();
-      tell('The text could not be loaded.');
+      tell(navigator.onLine === false ? 'Offline, this needs Read offline, in Settings.' : 'The text could not be loaded.');
     });
   }
   function begin(gen, m) {
@@ -655,7 +674,12 @@
       if (gen !== said.gen || e.error === 'interrupted' || e.error === 'canceled') return;
       hush();
       // Refused before a tap (arriving by "#listen"): the bar waits for one.
-      if (e.error !== 'not-allowed') tell('Your browser could not speak (' + e.error + ').');
+      if (e.error === 'not-allowed') return;
+      // Chrome's Google voices and Edge's Natural ones are spoken by a server.
+      var bv = S.voice();
+      tell(navigator.onLine === false && bv && !bv.localService
+           ? bv.name + ' needs a connection, and this browser has no voice of its own.'
+           : 'Your browser could not speak (' + e.error + ').');
     };
     said.u = u;                     // Chrome drops the events of an utterance nothing holds
     synth.speak(u);
