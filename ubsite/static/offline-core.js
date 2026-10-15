@@ -13,6 +13,11 @@
   'use strict';
 
   var HTML = 'text/html; charset=utf-8', TEXT = 'text/plain; charset=utf-8';
+  // What the server answers by the host it is asked at (app.py SITES): the
+  // app's manifest, which names the site, and the touch icon.  The copy is made
+  // once for every host, so it never answers these: from it, one site's
+  // installed app could be told that it was the other's.
+  var HOSTED = ['/manifest.webmanifest', '/apple-touch-icon.png'];
 
   // markupsafe's escape, Jinja's autoescape.
   function esc(s) {
@@ -99,7 +104,7 @@
         return d[sk] === undefined ? missing(sh, esc(NOPAGE), path) : { status: 200, type: 'application/json', body: d[sk] };
       } };
     }
-    if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$)/.test(path)) return null;
+    if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
     if (path === '/api') return { res: away(sh, 'The page about the text API is read online.') };
     if (path === '/stats') return { res: away(sh, 'This page is read online.') };
     if ((m = /^\/index\/([^\/]+)$/.exec(path))) {
@@ -456,7 +461,8 @@
     return o + '\n</main>';
   }
 
-  var api = { resolve: resolve, search: search, compose: compose, quote: quote, esc: esc, parse: parse, suggest: suggest };
+  var api = { resolve: resolve, search: search, compose: compose, quote: quote, esc: esc, parse: parse, suggest: suggest,
+              HOSTED: HOSTED };
   root.ubOffline = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof self !== 'undefined' ? self : globalThis);

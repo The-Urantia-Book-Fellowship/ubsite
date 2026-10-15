@@ -99,13 +99,15 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # 5f95c31 and index 40cc439.  The counts are exact: every page the copy stores,
 # every section's spoken text (the browser's voice reads offline), and the
 # chunks: 197 papers, 27 index letters, 10 of spoken text, the misc pages, the
-# shell, two databases and 13 files.  The sizes are bands, since the index
-# grows as it is edited.
+# shell, two databases and 9 files (13 until 2026-10-15, when the app's
+# manifest, the touch icon and the two icons the manifest names left the copy:
+# they differ by host).  The sizes are bands, since the index grows as it is
+# edited.
 [offline]
-measured_on = "2026-10-14"
+measured_on = "2026-10-15"
 pages       = 10283      # 1,626 sections, 4,736 headwords, 27 index letters, 16 more, 3,878 reading paths
 paths       = 3878       # 2,058 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
-chunks      = 394
+chunks      = 390
 download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 44.0 at measurement
 raw_mb      = [160.0, 220.0] # unpacked: 191.0 at measurement

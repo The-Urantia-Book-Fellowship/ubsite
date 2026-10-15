@@ -200,6 +200,9 @@ self.addEventListener('fetch', function (e) {
   var req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
   if (/^\/(offline\/|sw\.js$|api\/|audio\/|healthz$)/.test(url.pathname)) return;
+  // Nor what depends on the host: a copy kept before 2026-10-15 holds the
+  // manifest and the touch icon as one host sent them.
+  if (self.ubOffline.HOSTED.indexOf(url.pathname) >= 0) return;
   e.respondWith(copy().then(function (c) {
     if (!c) return fetch(req);
     var mine = function () {

@@ -220,6 +220,9 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         print("  " + pg.inner_text("#offmenu .net"))
         ok(pg.inner_text("#offmenu .net").lower().startswith("offline"), "and so does its menu")
         ok(pg.inner_text("#offmenu .net .host") == "localhost:8131", "and names the site from the copy too")
+        hosted = pg.evaluate("Promise.all(['/manifest.webmanifest', '/apple-touch-icon.png'].map(u =>"
+                             " fetch(u).then(r => r.status, () => 'none')))")
+        ok(hosted == ["none", "none"], f"the app's manifest and touch icon are the server's alone ({hosted})")
         pg.keyboard.press("Escape")
         ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),

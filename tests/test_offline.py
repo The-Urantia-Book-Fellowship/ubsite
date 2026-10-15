@@ -27,7 +27,8 @@ COPY = ROOT / "var" / "offline"
 def call(path: str, query: str = "", headers: dict | None = None):
     from offline import site
     import asyncio
-    hs = [(b"host", b"ubsite.test"), *((k.encode(), v.encode()) for k, v in (headers or {}).items())]
+    headers = {"host": "ubsite.test", **(headers or {})}
+    hs = [(k.encode(), v.encode()) for k, v in headers.items()]
     scope = {"type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1", "method": "GET",
              "scheme": "https", "path": path, "raw_path": path.encode(), "query_string": query.encode(),
              "root_path": "", "headers": hs, "client": ("198.51.100.7", 1), "server": ("ubsite.test", 443)}
@@ -97,6 +98,27 @@ class Worker(unittest.TestCase):
         for icon in m["icons"]:
             self.assertTrue((ROOT / "ubsite" / icon["src"].lstrip("/")).is_file(), icon["src"])
 
+    def test_each_site_names_itself_and_its_icons(self):
+        # The same build at two addresses, and an installed app of each that
+        # says which it is (app.py SITES): the full name names the site, the
+        # label under the icon does not, and sigmaai.au's book is burgundy.
+        def site(host):
+            m = json.loads(call("/manifest.webmanifest", headers={"host": host})[2])
+            pngs = [(ROOT / "ubsite" / i["src"].lstrip("/")).read_bytes() for i in m["icons"]
+                    if i["type"] == "image/png"]
+            return m, pngs, call("/apple-touch-icon.png", headers={"host": host})[2]
+        here, ddns, sigma = site("localhost:8130"), site("ubsite.ddns.net"), site("ubsite.sigmaai.au")
+        self.assertEqual(here[0]["name"], "The Urantia Book")
+        self.assertEqual(ddns[0]["name"], "The Urantia Book · ubsite.ddns.net")
+        self.assertEqual(sigma[0]["name"], "The Urantia Book · ubsite.sigmaai.au")
+        self.assertEqual({here[0]["short_name"], ddns[0]["short_name"], sigma[0]["short_name"]}, {"Urantia Book"})
+        self.assertEqual(here[1:], ddns[1:])
+        self.assertEqual(len(sigma[1]), 2)
+        self.assertTrue(set(sigma[1]).isdisjoint(ddns[1]))
+        self.assertNotEqual(sigma[2], ddns[2])
+        self.assertTrue(sigma[2].startswith(b"\x89PNG"))
+        self.assertNotIn("favicon.svg", json.dumps(sigma[0]["icons"]))   # the blue book
+
 
 @unittest.skipUnless(DB.exists(), "var/ub.db has not been built")
 class Pages(unittest.TestCase):
@@ -159,6 +181,16 @@ class Copy(unittest.TestCase):
         status, h, body = call(f"/offline/{c['file']}")
         self.assertEqual((status, h["cache-control"]), (200, "public, max-age=31536000, immutable"))
         self.assertEqual(hashlib.sha256(gzip.decompress(body)).hexdigest()[:16], c["hash"])
+
+    def test_it_holds_nothing_that_depends_on_the_host(self):
+        # The copy is one for both hosts; what each host answers otherwise is
+        # left to the server (offline-core.js HOSTED).
+        names = {c["name"] for c in json.loads((COPY / "manifest.json").read_text())["chunks"]}
+        core = (ROOT / "ubsite/static/offline-core.js").read_text()
+        hosted = json.loads(re.search(r"var HOSTED = (\[.*?\]);", core).group(1).replace("'", '"'))
+        self.assertEqual(hosted, ["/manifest.webmanifest", "/apple-touch-icon.png"])
+        self.assertFalse(names & set(hosted))
+        self.assertFalse({n for n in names if "icon-" in n})
 
     def test_its_news_is_the_sites_own_changes(self):
         # What's new (offline/news.py): newest first, a UTC time to compare with

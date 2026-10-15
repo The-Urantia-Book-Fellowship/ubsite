@@ -30,14 +30,16 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "var" / "offline"
 FORMAT = 1
 
-# What a page loads besides itself, and the icons, each by the address a page
-# names it with.  The scripts a stored page names carry their hash, as base.html
-# writes them.  Not sw.js and what it imports: the browser keeps a worker's own
-# scripts with the worker.
+# What a page loads besides itself, and the tab's icons, each by the address a
+# page names it with.  The scripts a stored page names carry their hash, as
+# base.html writes them.  Not sw.js and what it imports: the browser keeps a
+# worker's own scripts with the worker.  Not the app's manifest, the touch icon
+# or the icons the manifest names, which differ by host (app.py SITES) while the
+# copy is one for every host (offline-core.js HOSTED); until 2026-10-15 they
+# were in it.
 ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js"]
 PLAIN = ["/static/favicon.svg", "/static/fonts/UBGoudy.woff2", "/static/fonts/UBGoudy-Italic.woff2",
-         "/static/fonts/OFL.txt", "/static/icon-192.png", "/static/icon-512.png",
-         "/favicon.ico", "/apple-touch-icon.png", "/manifest.webmanifest"]
+         "/static/fonts/OFL.txt", "/favicon.ico"]
 
 
 def _json(obj) -> bytes:

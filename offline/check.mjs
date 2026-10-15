@@ -93,6 +93,10 @@ for (const h of hrefs) {
   out.links++;
   const [pq] = h.split('#');
   const [p, query] = pq.split('?');
+  if (core.HOSTED.includes(p)) {               // the server's alone, by its host
+    if (assets.has(pq)) out.broken.push({ href: h, why: 'kept in the copy, though it depends on the host' });
+    continue;
+  }
   if (assets.has(pq) || p.startsWith('/static/')) {
     if (!assets.has(pq)) out.broken.push({ href: h, why: 'not kept in the copy' });
     continue;

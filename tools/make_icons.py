@@ -11,10 +11,17 @@ requested by fixed name, without any <link>:
                           a transparent icon on black and rounds the corners itself
 
 and two more are named by /manifest.webmanifest, for a reader who installs the
-site as an app (Work offline, in Settings):
+site as an app (the cloud's menu):
 
     icon-192.png, icon-512.png   the touch icon's tile, at the sizes the
                                  manifest asks for
+
+The same build is live at two addresses, and an app installed from each looked
+the same (Tigran, 2026-10-15).  So the touch icon and the two app icons are drawn
+again for each variant in VARIANTS, with the book in another colour, as
+apple-touch-icon-<variant>.png and icon-<size>-<variant>.png; app.py SITES says
+which host takes which.  The tab's icon and the header's mark are the same on
+every host.
 
 Rendered by headless Chrome, so each fallback is exactly what Chrome draws from
 the SVG, and assembled by ImageMagick.  Neither is a build dependency: run this
@@ -31,6 +38,11 @@ import tempfile
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 STATIC = ROOT / "ubsite" / "static"
 PAPER = "#f8f5f0"                     # --paper in ub.css
+BOOK = "#1b4a76"                      # the book's colour in favicon.svg, light
+# Each variant's book colour.  Burgundy is ubsite.sigmaai.au's, the site's other
+# colour (the red letter's), chosen by Tigran from a comparison with green, the
+# two colours swapped, and a lighter blue (https://claude.ai/artifact/1LdhRdAb9kPoQb5CkGY4B6).
+VARIANTS = {"burgundy": "#7a2230"}
 
 
 def render(svg: str, size: int, out: pathlib.Path) -> None:
@@ -48,8 +60,16 @@ def render(svg: str, size: int, out: pathlib.Path) -> None:
                         f"--window-size={max(400, size)},{max(400, size)}", f"--screenshot={shot}",
                         str(t / "page.html")],
                        check=True, capture_output=True)
-        subprocess.run(["magick", str(shot), "-crop", f"{size}x{size}+0+0", "+repage", str(out)],
+        drawn = t / "drawn.png"
+        subprocess.run(["magick", str(shot), "-crop", f"{size}x{size}+0+0", "+repage", str(drawn)],
                        check=True)
+        # ImageMagick stamps a PNG with the time it was written, so a drawing
+        # that did not change would still be a new file, and an installed app
+        # would be told its icon had.  Kept unless a pixel differs.
+        if out.exists() and subprocess.run(["magick", "compare", "-metric", "AE", str(out), str(drawn), "null:"],
+                                           capture_output=True).returncode == 0:
+            return
+        out.write_bytes(drawn.read_bytes())
 
 
 def main() -> int:
@@ -74,11 +94,18 @@ def main() -> int:
     tile = svg.replace(m.group(0) + ">",
                        f'viewBox="{-p:g} {-p:g} {n + 2 * p:g} {n + 2 * p:g}">'
                        f'<rect x="{-p:g}" y="{-p:g}" width="{n + 2 * p:g}" height="{n + 2 * p:g}" fill="{PAPER}"/>')
-    render(tile, 180, STATIC / "apple-touch-icon.png")
-    for n in (192, 512):
-        render(tile, n, STATIC / f"icon-{n}.png")
-    for f in ("favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"):
-        print(f"  {f:22} {(STATIC / f).stat().st_size:>6,} bytes")
+    if tile.count(BOOK) != 2:
+        raise SystemExit(f"make_icons: favicon.svg should colour the book and its edge {BOOK}")
+    made = ["favicon.ico"]
+    for variant, colour in [("", BOOK), *VARIANTS.items()]:
+        suffix = f"-{variant}" if variant else ""
+        drawn = tile.replace(BOOK, colour)
+        for name, n in ((f"apple-touch-icon{suffix}.png", 180), (f"icon-192{suffix}.png", 192),
+                        (f"icon-512{suffix}.png", 512)):
+            render(drawn, n, STATIC / name)
+            made.append(name)
+    for f in made:
+        print(f"  {f:31} {(STATIC / f).stat().st_size:>6,} bytes")
     return 0
 
 

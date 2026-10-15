@@ -357,6 +357,23 @@ T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
 
 
+# The same build is live at two addresses, and an app installed from each looked
+# the same (Tigran, 2026-10-15).  So each says which it is: its manifest's full
+# name, which installing and Android's Settings > Apps show, names the site, and
+# ubsite.sigmaai.au's icons have a burgundy book (tools/make_icons.py VARIANTS).
+# The label under the icon, short_name, stays "Urantia Book" on both, since it
+# has no room for more.  Any other host, this machine's included, is the first
+# without its name.  Only the manifest and the touch icon differ: the offline
+# copy, made once for both, holds neither (offline-core.js HOSTED).
+SITES = {"ubsite.ddns.net": "", "ubsite.sigmaai.au": "-burgundy"}
+
+
+def _site(request: Request) -> tuple[str, str]:
+    """(the site's name, its icons' suffix) for the host the request was sent to."""
+    host = request.url.hostname or ""
+    return (host, SITES[host]) if host in SITES else ("", "")
+
+
 # Asked for by fixed name at the root, with or without a <link>: browsers try
 # /favicon.ico, iOS /apple-touch-icon.png.  Both are drawn from favicon.svg by
 # tools/make_icons.py.  Without these they fell through to the {ref} route and
@@ -367,8 +384,8 @@ def favicon():
 
 
 @app.get("/apple-touch-icon.png", include_in_schema=False)
-def touch_icon():
-    return FileResponse(ROOT / "ubsite" / "static" / "apple-touch-icon.png")
+def touch_icon(request: Request):
+    return FileResponse(ROOT / "ubsite" / "static" / f"apple-touch-icon{_site(request)[1]}.png")
 
 
 @app.get("/audio/{key}/{name:path}", include_in_schema=False)
@@ -522,18 +539,23 @@ def offline_engine(name: str, request: Request):
 
 
 @app.get("/manifest.webmanifest", include_in_schema=False)
-def web_manifest():
+def web_manifest(request: Request):
     """What lets a reader install the site as an app: a Home Screen icon, and on
     an iPhone the only way an offline copy is kept for good (Safari deletes a
-    site's stored data after seven days of use without a visit)."""
+    site's stored data after seven days of use without a visit).  Each host's
+    names it and its icons (SITES).  A variant's icons are its PNGs alone: the
+    SVG is the blue book, and a browser may take it over a PNG."""
+    host, v = _site(request)
+    icons = [{"src": f"/static/icon-192{v}.png", "sizes": "192x192", "type": "image/png"},
+             {"src": f"/static/icon-512{v}.png", "sizes": "512x512", "type": "image/png"}]
+    if not v:
+        icons.append({"src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml"})
     return JSONResponse({
-        "name": "The Urantia Book", "short_name": "Urantia Book",
+        "name": f"The Urantia Book · {host}" if host else "The Urantia Book", "short_name": "Urantia Book",
         "description": "The Uversa Press text read together with its index.",
         "start_url": "/", "scope": "/", "display": "standalone",
         "background_color": "#f8f5f0", "theme_color": "#f8f5f0",  # --paper
-        "icons": [{"src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png"},
-                  {"src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png"},
-                  {"src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml"}],
+        "icons": icons,
     }, media_type="application/manifest+json", headers={"Cache-Control": "no-cache"})
 
 
