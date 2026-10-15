@@ -393,6 +393,19 @@ def touch_icon(request: Request):
     return FileResponse(ROOT / "ubsite" / "static" / f"apple-touch-icon{_site(request)[1]}.png")
 
 
+# Asked for by a crawler before it crawls; every other crawler may read it all.
+# Reflectionbot gathers pages to train Reflection AI's models (reflection.ai/bot)
+# and sends no readers: from 2026-10-09 it took a thousand pages a day from pi5,
+# asking here 32 times and getting a 404, which says take everything.  Refused
+# here alone on 2026-10-15 (Tigran); should it crawl on, nginx refuses it next.
+ROBOTS = "User-agent: Reflectionbot\nDisallow: /\n"
+
+
+@app.get("/robots.txt", include_in_schema=False)
+def robots():
+    return Response(ROBOTS, media_type="text/plain")
+
+
 @app.get("/audio/{key}/{name:path}", include_in_schema=False)
 def audio_file(key: str, name: str):
     """A recording, by the name the database lists -- and only such a name.
