@@ -462,13 +462,16 @@
     // Offline: the browser says so, or the worker answered for this page from
     // its copy, which sw.js writes on the footer; after that, as the browser says.
     var fromCopy = document.querySelector('footer[data-copy]'), loaded = false;
+    // Which site this is: the same build is at ubsite.ddns.net and
+    // ubsite.sigmaai.au, and an app installed from either shows no address.
+    menu.querySelector('.net .host').textContent = location.host;
     var label = function () {
       var on = cloud.dataset.net === 'on', none = cloud.dataset.have === 'none';
       var t = !on ? (none ? 'Offline' : 'Offline: reading the copy kept in this browser')
             : cloud.dataset.say || (none ? 'Online' : 'Online, with a copy kept for working offline');
       cloud.title = t;
       cloud.setAttribute('aria-label', t);
-      menu.querySelector('.net').textContent = on ? 'Online' : 'Offline' +
+      menu.querySelector('.net .conn').textContent = on ? 'Online' : 'Offline' +
         (fromCopy ? ' · the copy of ' + fromCopy.dataset.copy : '');
     };
     var net = function (on) { cloud.dataset.net = on ? 'on' : 'off'; label(); };

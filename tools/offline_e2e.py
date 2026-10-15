@@ -171,6 +171,7 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         ok(not pg.locator("#offmenu input").count(), "and the menu has no switch to turn off")
         pg.click(ICON)
         ok(pg.is_visible("#offmenu"), "the icon opens its menu")
+        ok(pg.inner_text("#offmenu .net .host") == "localhost:8131", "which names the site, from its address")
         wait_state(pg, "t.includes('MB to download')")
         print("  " + pg.inner_text(STATE))
         t = time.time()
@@ -218,6 +219,7 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         pg.click(ICON)
         print("  " + pg.inner_text("#offmenu .net"))
         ok(pg.inner_text("#offmenu .net").lower().startswith("offline"), "and so does its menu")
+        ok(pg.inner_text("#offmenu .net .host") == "localhost:8131", "and names the site from the copy too")
         pg.keyboard.press("Escape")
         ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),

@@ -721,7 +721,9 @@ dialog.settings .reset:disabled { opacity: .35; cursor: default; }
   dialog.settings .bar button:not(:disabled):hover {
     background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
 }
-dialog.settings fieldset { border: 0; border-top: 1px solid var(--rule); margin: 0;
+/* As wide as the dialog, never its widest line: a fieldset is min-content wide
+   at least, unless told otherwise, and so a row could not wrap within it. */
+dialog.settings fieldset { min-width: 0; border: 0; border-top: 1px solid var(--rule); margin: 0;
   padding: .55rem 0 .7rem; }
 dialog.settings legend { padding: 0 .4rem 0 0; font-size: .82rem; letter-spacing: .06em;
   font-variant-caps: small-caps; color: var(--faint); }
@@ -733,6 +735,13 @@ dialog.settings select { margin-left: .5rem; font: .9rem system-ui, sans-serif; 
 dialog.settings .kept { margin: .3rem 0 .7rem; font-size: .85rem; color: var(--faint); }
 dialog.settings .row { display: flex; align-items: center; justify-content: space-between;
   gap: .8rem; padding: .2rem 0; font-size: 1.02rem; }
+/* A row of pills: its label takes what the pills leave, on two lines if it must,
+   as it always has; where even its longest word does not fit beside them, the
+   pills go under it, at the right.  Until 2026-10-15 they ran past the dialog's
+   edge instead: at Larger on any phone, and at Standard on one 360px wide. */
+dialog.settings div.row { flex-wrap: wrap; row-gap: .3rem; }
+dialog.settings div.row > span { flex: 1 1 0; }
+dialog.settings div.row > .seg { margin-left: auto; }
 dialog.settings .sub { margin: .35rem 0 .05rem; font-size: 1.02rem; }
 dialog.settings .face-serif { font-family: var(--serif); font-size-adjust: .43; }
 dialog.settings .face-sans { font-family: var(--sans); font-size-adjust: .43; }
@@ -741,9 +750,16 @@ dialog.settings :is(.face-goudy, .face-serif, .face-sans) small { font-family: "
 dialog.settings .pcm { margin: 0 0 0 .1em; }
 /* Greyed while the setting it needs is off: Speed, with Listening off. */
 dialog.settings .idle { opacity: .45; cursor: default; }
-/* Which of the browser's voices, only while that voice is chosen. */
+/* Which of the browser's voices, only while that voice is chosen.  A voice's
+   name can be longer than a phone's line, as Edge's "Microsoft Ava Online
+   (Natural) - English (United States)" is: the menu then has a line of its own,
+   still at the right, and narrower still it shrinks to the line, the browser
+   cutting the name it shows.  The list it opens has every name whole.  Until
+   2026-10-15 it ran past the dialog's edge, and Settings scrolled sideways on a
+   phone.  Where the two fit, they share a line, as before. */
 :root:not([data-voice="browser"]) dialog.settings .set-bvoice { display: none; }
-dialog.settings .set-bvoice select { max-width: 16rem; }
+dialog.settings .set-bvoice { flex-wrap: wrap; row-gap: .3rem; }
+dialog.settings .set-bvoice select { min-width: 0; max-width: min(16rem, 100%); margin-left: auto; }
 /* A row of radio buttons drawn as one control: Theme, Text size. */
 .seg { display: inline-flex; flex-shrink: 0; border: 1px solid var(--rule); border-radius: 999px;
   overflow: hidden; }
@@ -777,8 +793,13 @@ dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5
   padding: .7rem 1rem .85rem; color: var(--ink); font-size: 1rem; line-height: 1.4;
   background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
   border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
-.offmenu .net { margin: 0 0 .45rem; font-size: .82rem; letter-spacing: .06em;
-  font-variant-caps: small-caps; color: var(--faint); }
+.offmenu .net { display: flex; flex-wrap: wrap; column-gap: .8rem; margin: 0 0 .45rem;
+  font-size: .82rem; letter-spacing: .06em; font-variant-caps: small-caps; color: var(--faint); }
+/* Which site this is, at the line's right, or under it at the right when the
+   line is full: the same build is at two addresses, and an installed app shows
+   none (Tigran, 2026-10-15).  Written as an address is. */
+.offmenu .net .host { margin-left: auto; font-variant-caps: normal; letter-spacing: 0;
+  white-space: nowrap; }
 .offmenu .what { margin: 0; font-size: 1.02rem; }
 .offmenu small { color: var(--faint); font-size: .85rem; }
 .offmenu .state { margin: .45rem 0 0; font-size: .85rem; color: var(--faint); }

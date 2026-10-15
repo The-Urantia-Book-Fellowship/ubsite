@@ -65,9 +65,11 @@ window.ubDefaults = {{ settings_defaults|tojson }};
     No switch: going offline and online again is the browser's, and the copy
     stays through both.  Its buttons download it, update it, or remove it, and
     removing it is apart, since a switch turned off to be "online" removed it
-    (Tigran, 2026-10-14). #}
+    (Tigran, 2026-10-14).  Its first line names the site at its right, which
+    ub.js reads from the page's own address: never written here, since the
+    offline copy's pages are made under one name for both hosts. #}
 <div id="offmenu" class="offmenu" popover hidden>
-  <p class="net">Online</p>
+  <p class="net"><span class="conn">Online</span> <span class="host"></span></p>
   <p class="what">Work offline
     <small>the book, its index, every headword read through, the 1955 readings, and search:
     all but the audio recordings</small></p>
