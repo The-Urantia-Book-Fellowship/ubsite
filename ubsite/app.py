@@ -358,14 +358,18 @@ T.env.globals["settings_defaults"] = settings.defaults()
 
 
 # The same build is live at two addresses, and an app installed from each looked
-# the same (Tigran, 2026-10-15).  So each says which it is: its manifest's full
-# name, which installing and Android's Settings > Apps show, names the site, and
-# ubsite.sigmaai.au's icons have a burgundy book (tools/make_icons.py VARIANTS).
-# The label under the icon, short_name, stays "Urantia Book" on both, since it
-# has no room for more.  Any other host, this machine's included, is the first
-# without its name.  Only the manifest and the touch icon differ: the offline
-# copy, made once for both, holds neither (offline-core.js HOSTED).
+# the same, as did a tab of each (Tigran, 2026-10-15).  So each says which it is:
+# its manifest's full name, which installing and Android's Settings > Apps show,
+# names the site, and ubsite.sigmaai.au's icons have a burgundy book
+# (tools/make_icons.py VARIANTS).  The label under the icon, short_name, stays
+# "Urantia Book" on both, since it has no room for more.  Any other host, this
+# machine's included, is the first without its name.  The server answers the
+# manifest and the touch icon by host, and the offline copy, made once for both,
+# holds neither (offline-core.js HOSTED).  The tab's icon is chosen in the page,
+# from its address, by base.html's head script, which is handed this table; the
+# header's mark and the home page's logo are the same on both.
 SITES = {"ubsite.ddns.net": "", "ubsite.sigmaai.au": "-burgundy"}
+T.env.globals["sites"] = SITES
 
 
 def _site(request: Request) -> tuple[str, str]:

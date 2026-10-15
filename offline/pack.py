@@ -36,7 +36,8 @@ FORMAT = 1
 # worker's own scripts with the worker.  Not the app's manifest, the touch icon
 # or the icons the manifest names, which differ by host (app.py SITES) while the
 # copy is one for every host (offline-core.js HOSTED); until 2026-10-15 they
-# were in it.
+# were in it.  The tab's icon is chosen in the page from its address, so every
+# site's is kept (build()).
 ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js"]
 PLAIN = ["/static/favicon.svg", "/static/fonts/UBGoudy.woff2", "/static/fonts/UBGoudy-Italic.woff2",
          "/static/fonts/OFL.txt", "/favicon.ico"]
@@ -68,7 +69,8 @@ def build(con: sqlite3.Connection) -> dict:
         add(name, "pages", _json(obj))
     add("text.db", "db", searchdb.text_db(con))
     add("index.db", "db", searchdb.index_db(con))
-    for url in [A.asset(a) for a in ASSETS] + PLAIN:
+    tabs = [f"/static/favicon{v}.{x}" for v in sorted(set(A.SITES.values()) - {""}) for x in ("svg", "ico")]
+    for url in [A.asset(a) for a in ASSETS] + PLAIN + tabs:
         path, _, query = url.partition("?")
         got = site.get(path, query)
         if got.status != 200:

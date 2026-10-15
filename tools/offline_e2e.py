@@ -223,6 +223,8 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         hosted = pg.evaluate("Promise.all(['/manifest.webmanifest', '/apple-touch-icon.png'].map(u =>"
                              " fetch(u).then(r => r.status, () => 'none')))")
         ok(hosted == ["none", "none"], f"the app's manifest and touch icon are the server's alone ({hosted})")
+        tab = pg.evaluate("fetch('/static/favicon-burgundy.svg').then(r => r.status, () => 'none')")
+        ok(tab == 200, f"but the other site's tab icon is in the copy ({tab})")
         pg.keyboard.press("Escape")
         ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),

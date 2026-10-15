@@ -20,6 +20,13 @@
 window.ubDefaults = {{ settings_defaults|tojson }};
 (function (r, D) {
   r.classList.add('js');
+  // The tab's icon says which site this is, the book burgundy on one of them
+  // (app.py SITES).  Chosen here, from the page's own address, since the same
+  // pages are served at both, and the offline copy holds them once for both.
+  var v = {{ sites|tojson }}[location.hostname];
+  if (v) document.querySelectorAll('link[rel=icon]').forEach(function (l) {
+    l.href = '/static/favicon' + v + (l.type === 'image/svg+xml' ? '.svg' : '.ico');
+  });
   try {
     var s = JSON.parse(localStorage.getItem('ub_settings') || '{}') || {};
     if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');

@@ -119,6 +119,16 @@ class Worker(unittest.TestCase):
         self.assertTrue(sigma[2].startswith(b"\x89PNG"))
         self.assertNotIn("favicon.svg", json.dumps(sigma[0]["icons"]))   # the blue book
 
+    def test_a_page_chooses_its_tab_icon_by_its_address(self):
+        # The same page at both addresses, and in the offline copy: base.html's
+        # head script picks /static/favicon<variant>.svg and .ico from this table.
+        from ubsite.app import SITES
+        self.assertIn(json.dumps(SITES, sort_keys=True), call("/101:4")[2].decode())
+        static = ROOT / "ubsite" / "static"
+        for v in set(SITES.values()) - {""}:
+            for x in ("svg", "ico"):
+                self.assertNotEqual((static / f"favicon{v}.{x}").read_bytes(), (static / f"favicon.{x}").read_bytes())
+
 
 @unittest.skipUnless(DB.exists(), "var/ub.db has not been built")
 class Pages(unittest.TestCase):
@@ -190,7 +200,9 @@ class Copy(unittest.TestCase):
         hosted = json.loads(re.search(r"var HOSTED = (\[.*?\]);", core).group(1).replace("'", '"'))
         self.assertEqual(hosted, ["/manifest.webmanifest", "/apple-touch-icon.png"])
         self.assertFalse(names & set(hosted))
-        self.assertFalse({n for n in names if "icon-" in n})
+        self.assertFalse({n for n in names if n.startswith("/static/icon-")})
+        # But every site's tab icon, which the page chooses (base.html).
+        self.assertLessEqual({"/static/favicon-burgundy.svg", "/static/favicon-burgundy.ico"}, names)
 
     def test_its_news_is_the_sites_own_changes(self):
         # What's new (offline/news.py): newest first, a UTC time to compare with
