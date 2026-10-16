@@ -144,10 +144,14 @@ window.ubDefaults = {{ settings_defaults|tojson }};
     {%- if r.url %}<a href="{{ r.url }}" target="_blank" rel="noopener">{% endif %}{{ r.date or r.commit[:7] }}{% if r.url %}</a>{% endif %}
     {%- if r.dirty %}, dirty{% endif %})</span>{% endif %}{% endmacro %}
   {%- set src = sources() %}
+  {#- The typeface the text is in, as Settings' Typeface chose it: ub.css shows
+      the one sentence of the three that is true (Tigran, 2026-10-16). #}
   <p>Text{{ rev(src.press) }}: the Uversa Press edition, which other sites may
      <a href="/api">sync with their own</a>. Index{{ rev(src.index) }}: the
      Uversa Press index as revised for the third edition.
-     Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</p>
+     <span class="setin goudy">Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</span>
+     <span class="setin serif">Set in this device’s own serif.</span>
+     <span class="setin sans">Set in this device’s own sans-serif.</span></p>
   {#- What the site's terms say: the text is public domain, the edition as a whole
       is not (Tigran, 2026-10-14, after Harry's condition for Work offline). #}
   <p>The text of <i>The Urantia Book</i> is in the public domain. The Uversa Press

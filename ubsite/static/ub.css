@@ -155,6 +155,12 @@ a:hover { text-decoration-thickness: 2px; }
 footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1rem;
   font-size: .88rem; color: var(--faint); }
 footer p { margin: .2rem 0; }
+/* The footer names the typeface the text is in: Goudy, or the device's own
+   when Settings' Typeface chose it (Tigran, 2026-10-16). */
+footer .setin:is(.serif, .sans),
+:root:is([data-face="serif"], [data-face="sans"]) footer .setin.goudy { display: none; }
+:root[data-face="serif"] footer .setin.serif,
+:root[data-face="sans"] footer .setin.sans { display: inline; }
 
 /* ---- the reader -------------------------------------------------------- */
 /* The gap is the gutter the paragraph references stand in: 118:10.13 is 3.3rem. */
