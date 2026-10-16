@@ -3,15 +3,16 @@ network off, learn of a newer copy and take it, survive an update that fails,
 say offline while the site is gone though the browser is online, and turn it
 off.
 
-    ~/Software/ml/venv-browser/bin/python tools/offline_e2e.py
+    make e2e          (make offline, then .venv/bin/python tools/offline_e2e.py)
 
-Needs a built copy (`make offline`).  It serves a scratch copy of var/offline/
-from a server of its own, on 127.0.0.1:8131 with the visit counter off, so that
-it can make a "newer build" by changing that copy, and leaves var/offline/ and
-the dev server alone.  localhost is a secure context, so the worker runs there
-as on the live site.  Not a gate: offline/check.py is, for every page; this
-shows that the worker, the icon at the header's corner and its menu do what
-they say.
+Playwright is in .venv as a dev requirement (requirements-dev.in), and drives
+the system's Chrome.  It needs a built copy, which `make e2e` builds.  It
+serves a scratch copy of var/offline/ from a server of its own, on
+127.0.0.1:8131 with the visit counter off, so that it can make a "newer build"
+by changing that copy, and leaves var/offline/ and the dev server alone.
+localhost is a secure context, so the worker runs there as on the live site.
+Not a gate: offline/check.py is, for every page; this shows that the worker,
+the icon at the header's corner and its menu do what they say.
 """
 
 from __future__ import annotations

@@ -12,20 +12,25 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot data check epub offline test paranoid serve serve-bg stop ports geoip clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot data check epub offline e2e test paranoid serve serve-bg stop ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
 
-## venv          create .venv on the pinned Python and sync requirements.txt
+## venv          create .venv on the pinned Python and sync requirements-dev.txt
+# The site's requirements.txt and, on this machine only, the tools' few more
+# (requirements-dev.in): the hosts sync requirements.txt alone (deploy.sh).
+# Created once, then only synced, as deploy.sh does: uv refuses to create a
+# venv over an existing one.
 venv:
-	@uv venv --python $$(cat .python-version)
-	@uv pip sync requirements.txt
-	@$(PY) -c "import fastapi, uvicorn, jinja2, fontTools; print('venv ready')"
+	@[ -x $(PY) ] || uv venv --python $$(cat .python-version)
+	@uv pip sync requirements-dev.txt
+	@$(PY) -c "import fastapi, uvicorn, jinja2, fontTools, playwright; print('venv ready')"
 
-## lock          recompile requirements.txt from requirements.in
+## lock          recompile requirements.txt and requirements-dev.txt from their .in files
 lock:
 	@uv pip compile requirements.in -o requirements.txt
+	@uv pip compile requirements-dev.in -o requirements-dev.txt
 
 ## align-venv    create the aligner's venv in $(ML) (faster-whisper, CUDA libraries)
 align-venv:
@@ -128,6 +133,12 @@ epub:
 offline:
 	@$(PY) -m offline build
 	@$(PY) -m offline check
+
+## e2e           Work offline end to end in Chrome, on a fresh offline copy (tools/offline_e2e.py)
+# After `make offline`, as `make check` rebuilds its oracles: a stale copy
+# would test the scripts of a build before.
+e2e: offline
+	@$(PY) tools/offline_e2e.py
 
 ## test          unit tests, including the never-write-to-a-master guard
 test:

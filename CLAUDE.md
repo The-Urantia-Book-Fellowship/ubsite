@@ -40,14 +40,15 @@ Careful: there are three `urantia-study-edition` trees on this machine. `urantia
 ## 2. Commands
 
 ```
-make venv           create .venv (uv) and sync requirements.txt -- run this first
-make lock           recompile requirements.txt from requirements.in
+make venv           create .venv (uv) and sync requirements-dev.txt -- run this first
+make lock           recompile requirements.txt and requirements-dev.txt from their .in files
 make sources        the three repos and the revisions in use
 make vendor-check   re-hash the vendored copies against upstream (fails with a diff)
 make data           build var/ub.db          (~20 s)
 make check          every gate               (~8 s; rebuilds the oracles first)
 make epub           the whole site as an EPUB -> var/epub/  (~3 s, ~10 s more for its gates)
 make offline        the copy Work offline keeps -> var/offline/  (~22 s, ~20 s more for its gates; needs Node)
+make e2e            make offline, then Work offline end to end in Chrome  (~2 min more)
 make test           the never-write-to-a-master guards
 make paranoid       fingerprint all three trees, build, and prove nothing moved
 make srt-snapshot   refetch the SRT Committee's page into data/srt/ (review the diff)
@@ -61,7 +62,7 @@ make tts                the whole book in the AI voice, 3090 only (~27 h, resuma
 make tts-assemble       one MP3 per section from what has been made -> data/audio/ai*.tsv
 ```
 
-The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-browser` for Playwright) and their caches live in **`~/Software/ml`**, on the NVMe home, never in `requirements.txt` and never on `/Audio`.
+The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, `venv-vllm`) and their caches live in **`~/Software/ml`**, on the NVMe home, never in `requirements.txt` and never on `/Audio`. They are for the audio work on the GPU **and nothing else** (Tigran, 2026-10-16): a general tool's dependencies go in `.venv`. Playwright was in a `venv-browser` there until that day; it is now in `requirements-dev.in`.
 
 `make data` never edits in place: it builds `var/ub.db.tmp` and swaps it in, so a failed build leaves the previous database untouched.
 
@@ -83,7 +84,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-browser`
   - `checks/` — the gates
 - `ubsite/` — FastAPI + Jinja2, server-rendered, no build step, ~70 KB CSS, ~18 KB `ub.js` plus `listen.js` on section pages
 - `vendor/` — copied by value with `UPSTREAM.lock`: press's tokenizer/macros/normalize, index's `cite.py`/`xref.py`, TeX Live's `hyphen.tex`, and SQLite 3.53.4's WebAssembly build (`sqlite-wasm/`, from the release zip unpacked in `~/Software/sqlite-wasm/`, named in `sources.toml`)
-- `.venv/` — `uv venv` + `uv pip sync requirements.txt`, gitignored; `requirements.txt` is compiled from `requirements.in` with `uv pip compile`. Same arrangement as `../libnodes`. **Everything runs under it** — `make` sets `PY := .venv/bin/python`, so the build gets fontTools and the server gets uvicorn from one place.
+- `.venv/` — `uv venv` + `uv pip sync requirements-dev.txt`, gitignored; `requirements.txt` is compiled from `requirements.in` with `uv pip compile`, and `requirements-dev.txt` from `requirements-dev.in`: the same pins (`-c requirements.txt`) plus what only this machine's tools need, Playwright for `make e2e`. The hosts sync `requirements.txt` alone. Same arrangement as `../libnodes`. **Everything runs under it** — `make` sets `PY := .venv/bin/python`, so the build gets fontTools and the server gets uvicorn from one place.
   **Python 3.12**, pinned in `.python-version` to match `../libnodes` and `urantia-library`: all three will be hosted on the same Raspberry Pi 5 with uv-managed venvs, and sharing one interpreter saves fetching and storing a second. The full gate suite passes on it, with byte-identical output.
 
 - **Listening** (2026-10-07). Every section can be heard in Merritt Horn's reading, and from any paragraph once his reading is aligned:

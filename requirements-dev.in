@@ -1,0 +1,11 @@
+# What this machine needs beyond the site: never on the hosts, which sync
+# requirements.txt alone (deploy.sh).  The pinned set is requirements-dev.txt,
+# compiled with `make lock`; -c holds every package the two share to the
+# site's own pin, so .venv runs the site exactly as the hosts do.
+-r requirements.in
+-c requirements.txt
+
+# tools/offline_e2e.py (`make e2e`): Work offline, driven in Chrome.  It drives
+# the system's Chrome (/usr/bin/google-chrome), so never `playwright install`,
+# which would download browsers into ~/.cache.
+playwright
