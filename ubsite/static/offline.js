@@ -56,7 +56,16 @@
   }
 
   // An update can be had only online; offline, the menu says so instead.
-  function online() { return navigator.onLine !== false; }
+  // Online is the site reached, not the browser's word alone: ub.js says it
+  // from the browser and from where this page came, and the worker's check
+  // of the manifest says it again (heard).  A server that is not there is
+  // offline, its buttons would do nothing (Tigran, 2026-10-16).
+  function online() { return icon.dataset.net === 'on'; }
+  function reach(on) { icon.dataset.net = on ? 'on' : 'off'; }
+  function heard(s) {
+    if (s && 'reached' in s) reach(s.reached);
+    show(s);
+  }
   var last = null;
   function show(s) {
     last = s;
@@ -100,18 +109,22 @@
     clearTimeout(quiet);
     if (s && s.busy) quiet = setTimeout(function () { ask('state').then(show); }, 20000);
   }
-  // Before there is a copy: what it would cost, and the button.
+  // Before there is a copy: what it would cost, and the button.  A site that
+  // does not answer, or answers 5xx, is offline here too.
   function sized() {
     line.textContent = '';
+    var gone = function () { reach(false); return Promise.reject(); };
     fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
+      if (r.status >= 500) return gone();
       if (!r.ok) throw new Error(r.status);
       return r.json();
-    }).then(function (m) {
+    }, gone).then(function (m) {
       if (!kept) line.innerHTML = 'About ' + mb(m.bytes) + ' to download and keep in this browser.' +
                                   '<br><button type="button" class="keep"><span>Download it</span></button>';
     }, function () {
-      if (!kept) line.textContent = !online() ? 'It can be downloaded only online.'
-                                              : 'This site has no offline copy yet.';
+      if (kept) return;
+      line.textContent = !online() ? 'It can be downloaded only online.' : 'This site has no offline copy yet.';
+      mark('none');
     });
   }
 
@@ -164,8 +177,13 @@
     });
   }
 
+  // A download that stopped asks whether the site is still there: if not, its
+  // buttons go with it, rather than come back to do nothing again.
   function get() {
-    return ask('get').then(show);
+    return ask('get').then(function (s) {
+      show(s);
+      if (s && s.error) fresh();
+    });
   }
   function on() {
     line.textContent = 'Starting…';
@@ -221,11 +239,13 @@
   sw.getRegistration('/').then(function (reg) {
     if (!reg) return show(null);
     kept = true;
-    return ask('check').then(show);
+    return ask('check').then(heard);
   });
   // Opening the menu asks the site afresh, and so does coming back online: a
   // 304 of a few hundred bytes.  Going offline only takes the buttons away.
-  function fresh() { if (kept && online()) ask('check', { force: true }).then(show); }
+  // Asked whenever the browser is online, the site reached or not, so that a
+  // page from the copy learns that the site is back.
+  function fresh() { if (kept && navigator.onLine !== false) ask('check', { force: true }).then(heard); }
   box.addEventListener('toggle', function (ev) { if (ev.newState === 'open') fresh(); });
   window.addEventListener('online', fresh);
   window.addEventListener('offline', function () { if (last) show(last); });

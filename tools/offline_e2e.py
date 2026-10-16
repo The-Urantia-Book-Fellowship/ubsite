@@ -1,6 +1,7 @@
 """Work offline, end to end, in Chrome: turn it on, read and search with the
 network off, learn of a newer copy and take it, survive an update that fails,
-and turn it off.
+say offline while the site is gone though the browser is online, and turn it
+off.
 
     ~/Software/ml/venv-browser/bin/python tools/offline_e2e.py
 
@@ -132,27 +133,45 @@ def icon(pg) -> dict:
                        f" shown: !c.hidden}}))(document.querySelector('{ICON}'))")
 
 
+class Server:
+    """The scratch copy's server, which a test can stop and start again, as a
+    site that goes away while the browser stays online."""
+
+    def __init__(self, copy: pathlib.Path, tmp: str):
+        self.args = [str(ROOT / ".venv" / "bin" / "python"), "-c", SERVER, str(copy), str(ROOT)]
+        self.tmp = tmp
+        self.log = open(pathlib.Path(tmp) / "server.log", "w")
+        self.proc = None
+
+    def start(self) -> None:
+        self.proc = subprocess.Popen(self.args, stdout=self.log, stderr=subprocess.STDOUT, cwd=self.tmp)
+        for _ in range(50):
+            try:
+                urllib.request.urlopen(BASE + "/healthz", timeout=1)
+                return
+            except OSError:
+                time.sleep(0.2)
+
+    def stop(self) -> None:
+        if self.proc:
+            self.proc.terminate()
+            self.proc.wait()
+            self.proc = None
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         copy = pathlib.Path(tmp) / "offline"
         shutil.copytree(ROOT / "var" / "offline", copy)
-        log = open(pathlib.Path(tmp) / "server.log", "w")
-        srv = subprocess.Popen([str(ROOT / ".venv" / "bin" / "python"), "-c", SERVER, str(copy), str(ROOT)],
-                               stdout=log, stderr=subprocess.STDOUT, cwd=tmp)
+        srv = Server(copy, tmp)
         try:
-            for _ in range(50):
-                try:
-                    urllib.request.urlopen(BASE + "/healthz", timeout=1)
-                    break
-                except OSError:
-                    time.sleep(0.2)
-            return run(copy, pathlib.Path(tmp) / "server.log")
+            srv.start()
+            return run(copy, pathlib.Path(tmp) / "server.log", srv)
         finally:
-            srv.terminate()
-            srv.wait()
+            srv.stop()
 
 
-def run(copy: pathlib.Path, log: pathlib.Path) -> int:
+def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True)
         ctx = b.new_context()
@@ -366,6 +385,41 @@ def run(copy: pathlib.Path, log: pathlib.Path) -> int:
         ctx.set_offline(True)
         pg.goto(BASE + "/")
         ok(pg.title() == "The Urantia Book, changed", "the copy before it still answers, whole")
+
+        print("The site gone, the browser online")
+        ctx.set_offline(False)
+        pg.goto(BASE + "/read")
+        menu(pg)
+        wait_state(pg, "t.includes('changed since')")
+        ok(pg.is_visible("#offmenu .get"), "with the site there, Update now is offered")
+        pg.keyboard.press("Escape")
+        srv.stop()
+        menu(pg)
+        wait_state(pg, "t.includes('once online')", 10000)
+        print("  " + pg.inner_text("#offmenu .net") + ": " + pg.inner_text(STATE))
+        i = icon(pg)
+        ok(i["net"] == "off" and i["have"] == "stale", f"a page from the site, which then went: the icon says offline ({i['title']!r})")
+        ok(not pg.locator("#offmenu .get").count() and not pg.locator("#offmenu .newsbtn").count()
+           and pg.is_hidden("#offmenu p.remove"), "and the menu offers no Update now, What's new or Remove")
+        pg.keyboard.press("Escape")
+        pg.reload()
+        ok(pg.locator("footer[data-copy]").count() == 1, "a page loaded now comes from the copy")
+        pg.evaluate(WATCH)
+        menu(pg)
+        pg.wait_for_timeout(1500)
+        i = icon(pg)
+        ok(i["net"] == "off" and "once online" in pg.inner_text(STATE), f"and says offline ({i['title']!r})")
+        ok(not any("Update now" in t for t in pg.evaluate("window.shown")) and not pg.locator("#offmenu .get").count(),
+           "with Update now never offered")
+        ok(pg.inner_text("#offmenu .net").lower().startswith("offline"), "and the menu's first line says offline")
+        pg.keyboard.press("Escape")
+        srv.start()
+        menu(pg)
+        pg.wait_for_selector("#offmenu .get", timeout=10000)
+        i = icon(pg)
+        ok(i["net"] == "on" and pg.inner_text("#offmenu .net").lower().startswith("online"),
+           f"the site back, a page from the copy says online, and Update now is back ({i['title']!r})")
+        pg.keyboard.press("Escape")
 
         print("Turning it off")
         ctx.set_offline(False)

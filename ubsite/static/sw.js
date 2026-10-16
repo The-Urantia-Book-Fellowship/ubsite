@@ -251,14 +251,23 @@ function tell() {
   });
 }
 // Whether the site's copy is another than ours, and what fetching it would
-// cost: the chunks we do not have, by hash.
+// cost: the chunks we do not have, by hash.  Null if it was asked within the
+// hour and so not asked again.  It fails `away` where the site could not be
+// reached, as the fetch handler counts it: the network failed, or the server
+// answered 5xx.  offline.js then says offline, whatever the browser says.
+function away(why) {
+  var e = new Error(String(why && why.message || why));
+  e.away = true;
+  return e;
+}
 function check(force) {
   return readMeta().then(function (meta) {
     if (!force && meta.checked && Date.now() - meta.checked < CHECK) return null;
     return fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
+      if (r.status >= 500) throw away('the server answered ' + r.status);
       if (!r.ok) throw new Error('the site has no offline copy (' + r.status + ')');
       return r.json();
-    }).then(function (m) {
+    }, function (err) { throw away(err); }).then(function (m) {
       return copy().then(function (c) {
         var have = {};
         if (c) c.manifest.chunks.forEach(function (x) { have[x.hash] = true; });
@@ -376,12 +385,16 @@ function remove() {
 }
 
 // offline.js asks: {cmd: 'state' | 'check' | 'get' | 'remove', force}, and the
-// answer, the state, comes back on the message's port.
+// answer, the state, comes back on the message's port.  A check's says too
+// whether it reached the site: `reached` true or false, or none where it did
+// not ask, or failed otherwise (a 404: the site is there, with no copy).
 self.addEventListener('message', function (e) {
   var cmd = e.data && e.data.cmd, port = e.ports && e.ports[0];
   var p = cmd === 'get' ? download()
-        : cmd === 'check' ? check(!!e.data.force).then(state, function (err) {
-            return state().then(function (s) { s.offline = String(err && err.message || err); return s; });
+        : cmd === 'check' ? check(!!e.data.force).then(function (asked) {
+            return state().then(function (s) { if (asked) s.reached = true; return s; });
+          }, function (err) {
+            return state().then(function (s) { if (err && err.away) s.reached = false; return s; });
           })
         : cmd === 'remove' ? remove().then(function () { return { removed: true }; })
         : state();

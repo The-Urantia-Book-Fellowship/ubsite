@@ -459,8 +459,11 @@
   if (cloud && menu && 'serviceWorker' in navigator && window.isSecureContext &&
       'popover' in HTMLElement.prototype) {
     cloud.hidden = menu.hidden = false;
-    // Offline: the browser says so, or the worker answered for this page from
-    // its copy, which sw.js writes on the footer; after that, as the browser says.
+    // Offline (data-net) is the site out of reach: the browser says so, or the
+    // worker answered for this page from its copy, which sw.js writes on the
+    // footer; after that, as the browser says, and as the worker's check of
+    // the site says, which offline.js writes on the icon.  Coming online sets
+    // it on, and offline.js asks at once whether the site is there.
     var fromCopy = document.querySelector('footer[data-copy]'), loaded = false;
     // Which site this is: the same build is at ubsite.ddns.net and
     // ubsite.sigmaai.au, and an app installed from either shows no address.
