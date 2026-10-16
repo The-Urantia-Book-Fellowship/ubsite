@@ -9,15 +9,23 @@ sha256 recorded in ``vendor/UPSTREAM.lock``.
 ``check()`` re-hashes the originals and fails with a unified diff if upstream
 moved.  It is a prerequisite of every build target.  Refreshing a vendored file
 is a deliberate, reviewed commit -- never a silent side effect of `make`.
+
+A release (SQLite's WebAssembly build) is not a tree here but a zip, by its
+address and digest in its [sqlite_wasm] entry.  It cannot move, so ``check()``
+holds our copy to the lock alone, and to the release that entry names;
+``sync()`` fetches the zip only when it names one the lock does not record.
 """
 
 from __future__ import annotations
 
 import difflib
 import hashlib
+import io
 import json
 import pathlib
 import sys
+import urllib.request
+import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 LOCK = ROOT / "vendor" / "UPSTREAM.lock"
@@ -46,24 +54,63 @@ def _src(repos, key, rel):
     return (pathlib.Path(repos[key]["path"]) / rel).resolve()
 
 
+def _release(src: dict) -> zipfile.ZipFile | None:
+    """The release zip its entry names, fetched and held to its digest."""
+    try:
+        with urllib.request.urlopen(src["url"], timeout=60) as r:
+            blob = r.read()
+    except OSError as e:
+        print(f"vendor: could not fetch {src['url']}: {e}", file=sys.stderr)
+        return None
+    if sha256(blob) != src["sha256"]:
+        print(f"vendor: {src['url']} is not the release [{src['key']}] names "
+              f"(sha256 {sha256(blob)})", file=sys.stderr)
+        return None
+    return zipfile.ZipFile(io.BytesIO(blob))
+
+
+def _member(z: zipfile.ZipFile, rel: str) -> bytes | None:
+    """A file of the release by its path under the zip's one top directory,
+    which is named for the release (sqlite-wasm-3530400/jswasm/sqlite3.js)."""
+    names = [n for n in z.namelist() if n.split("/", 1)[-1] == rel]
+    return z.read(names[0]) if len(names) == 1 else None
+
+
 def sync(repos) -> int:
     """Copy every manifest file and (re)write the lock."""
-    entries = []
+    old = {e["dest"]: e for e in json.loads(LOCK.read_text())} if LOCK.exists() else {}
+    entries, zips = [], {}
     for key, rel, dest in MANIFEST:
-        src = _src(repos, key, rel)
-        if not src.exists():
-            print(f"vendor: MISSING {src}", file=sys.stderr)
-            return 1
-        data = src.read_bytes()
+        src = repos[key]
         out = ROOT / "vendor" / dest
+        if "url" in src:
+            was = old.get(dest)
+            if (was and was.get("commit") == src["sha256"] and out.exists()
+                    and sha256(out.read_bytes()) == was["sha256"]):
+                data = out.read_bytes()                # this release, already ours
+            else:
+                if key not in zips:
+                    zips[key] = _release(src)
+                data = zips[key] and _member(zips[key], rel)
+                if data is None:
+                    print(f"vendor: MISSING {rel} in {src['url']}", file=sys.stderr)
+                    return 1
+            where = src["url"]
+        else:
+            path = _src(repos, key, rel)
+            if not path.exists():
+                print(f"vendor: MISSING {path}", file=sys.stderr)
+                return 1
+            data = path.read_bytes()
+            where = f"{key}:{rel}"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes(data)
         entries.append({
             "repo": key, "path": rel, "dest": dest,
             "sha256": sha256(data), "bytes": len(data),
-            "commit": repos[key].get("commit"),
+            "commit": src.get("commit"),
         })
-        print(f"vendor: {key}:{rel} -> vendor/{dest}  ({len(data)} bytes)")
+        print(f"vendor: {where} -> vendor/{dest}  ({len(data)} bytes)")
     LOCK.write_text(json.dumps(entries, indent=2) + "\n")
     return 0
 
@@ -75,24 +122,33 @@ def check(repos) -> int:
         return 1
     bad = 0
     for e in json.loads(LOCK.read_text()):
-        src = _src(repos, e["repo"], e["path"])
+        src = repos[e["repo"]]
         ours = ROOT / "vendor" / e["dest"]
-        if not src.exists():
-            print(f"vendor: MISSING upstream {src}", file=sys.stderr)
-            bad += 1
-            continue
-        up = src.read_bytes()
-        if sha256(up) != e["sha256"]:
-            bad += 1
-            print(f"\nvendor: UPSTREAM MOVED  {e['repo']}:{e['path']}", file=sys.stderr)
-            if e["dest"].endswith(".wasm"):
-                continue                           # a binary: a diff would say nothing
-            diff = difflib.unified_diff(
-                ours.read_text(errors="replace").splitlines(True),
-                up.decode(errors="replace").splitlines(True),
-                fromfile=f"vendor/{e['dest']}", tofile=str(src), n=2)
-            sys.stderr.writelines(list(diff)[:60])
-        elif sha256(ours.read_bytes()) != e["sha256"]:
+        if "url" in src:
+            if e.get("commit") != src["sha256"]:
+                bad += 1
+                print(f"\nvendor: ANOTHER RELEASE  [{src['key']}] names {src['url']}, "
+                      f"but vendor/{e['dest']} is from another", file=sys.stderr)
+                continue
+        else:
+            path = _src(repos, e["repo"], e["path"])
+            if not path.exists():
+                print(f"vendor: MISSING upstream {path}", file=sys.stderr)
+                bad += 1
+                continue
+            up = path.read_bytes()
+            if sha256(up) != e["sha256"]:
+                bad += 1
+                print(f"\nvendor: UPSTREAM MOVED  {e['repo']}:{e['path']}", file=sys.stderr)
+                if e["dest"].endswith(".wasm"):
+                    continue                       # a binary: a diff would say nothing
+                diff = difflib.unified_diff(
+                    ours.read_text(errors="replace").splitlines(True),
+                    up.decode(errors="replace").splitlines(True),
+                    fromfile=f"vendor/{e['dest']}", tofile=str(path), n=2)
+                sys.stderr.writelines(list(diff)[:60])
+                continue
+        if not ours.exists() or sha256(ours.read_bytes()) != e["sha256"]:
             bad += 1
             print(f"vendor: LOCAL EDIT to vendor/{e['dest']} -- vendored files "
                   f"are copies, not forks", file=sys.stderr)

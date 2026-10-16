@@ -37,6 +37,26 @@ make sources       # the three repos and the commits a build would read
 
 Merritt Horn's recordings must be at `/Audio/Urantia/Urantia-MH-Audio-DVD`, here **and on both hosts**: the build lists them, and each host serves them from that path. They are the Uversa Press DVD's MP3s (128 kbps stereo), copied once with the folder names lowercased. `/Audio/Urantia/Urantia-MH-Audio` is a 32 kbps transcode of the same recordings and is not used. `sources.toml` names it under `[audio.mh]`. They are a master like the repos, and nothing writes to them.
 
+### What this machine needs besides
+
+Two programs outside the tree are needed by every build, and so by every deploy:
+
+- **TeX Live 2026**, at `/usr/local/texlive/2026` (`[texlive]` in `sources.toml`). `make data` begins with `make vendor-check`, which holds `vendor/tex/hyphen.tex` to TeX Live's `hyphen.tex` and fails without it. The press needs it anyway, to set the book.
+- **Node 24**, on the `PATH` (24.16.0 here, installed with nvm). `make offline`'s gates run `offline-core.js` and SQLite's WebAssembly build in Node, as the service worker does. No other version has been tried.
+
+The rest are needed only by the tool named:
+
+| program | here | for |
+|---|---|---|
+| uv | 0.11 | `make venv`, `make lock` |
+| Java (`openjdk-26-jre-headless`) | OpenJDK 26 | `make epub`'s last gate, epubcheck, which `make epub` fetches itself |
+| Google Chrome (`/usr/bin/google-chrome`) | 155 | `make e2e` (Playwright, in `.venv`), `tools/make_icons.py`, `tools/make_cover.py` |
+| ImageMagick 7 (`magick`) | 7.1 | `tools/make_icons.py`, `tools/make_cover.py` |
+| `pdftotext` (poppler-utils) | 26.01 | `tools/hyphen_print.py` |
+| `ffprobe` (ffmpeg) | 8.0 | `tools/audio/manifest.py` |
+
+Nothing else a tool uses lives outside the tree, but the audio work's environments in `~/Software/ml` ([Listening](#listening)). epubcheck and SQLite's WebAssembly release are fetched by URL and held to a digest: epubcheck into `var/epubcheck/` by `make epub`, the SQLite files into `vendor/` by `make vendor-sync`. The hosts need none of this but uv: `deploy.sh` ships what was built here.
+
 ---
 
 ## Updating the site
@@ -74,11 +94,12 @@ sqlite3 var/ub.db "SELECT COUNT(*) FROM citation_target ct JOIN paragraph p
 
 ### 1. `make vendor-check`, and when it fails
 
-Six files are copied by value into `vendor/`, and their hashes are recorded in `vendor/UPSTREAM.lock`:
+Eight files are copied by value into `vendor/`, and their hashes are recorded in `vendor/UPSTREAM.lock`:
 
 - `latex_tokenizer.py`, `macros.py` and `normalize.py` from press's `tools/text-verify/`;
 - `cite.py` and `xref.py` from the index;
 - `hyphen.tex`, Knuth's hyphenation patterns, from TeX Live (`[texlive]` in `sources.toml`). It is "NOT TO BE CHANGED IN ANY WAY", so a difference there means `sources.toml` names the wrong TeX Live tree.
+- `sqlite3.js` and `sqlite3.wasm`, SQLite's WebAssembly build, from a release zip that `sources.toml` names by its URL and SHA-256 (`[sqlite_wasm]`). A release cannot move, so `vendor-check` holds the two files to the lock, and the lock to the release `sources.toml` names, without the network; `vendor-sync` fetches the zip only when `sources.toml` names another. To adopt a new release, give its URL and SHA-256 there, then `make vendor-sync`.
 
 `make data` runs `vendor-check` first. If upstream has moved, the build stops and prints a unified diff:
 
@@ -102,7 +123,7 @@ This is deliberate. Adopting upstream code is a reviewed commit, never a side ef
 To adopt:
 
 ```
-make vendor-sync          # copies all six files and rewrites the lock
+make vendor-sync          # copies all eight files and rewrites the lock
 git diff vendor/          # only what you reviewed, plus the lock's commit fields
 git commit -am 'vendor: adopt press macros.py at 3983645 (\fill, stripped)'
 ```
@@ -206,14 +227,13 @@ make data                  # if the database is stale
 make epub                  # -> var/epub/the-urantia-book.epub, then every gate
 ```
 
-The last gate is epubcheck, the W3C's validator. It needs Java and the jar, once:
+The last gate is epubcheck, the W3C's validator. It needs Java, once:
 
 ```
 sudo apt install openjdk-26-jre-headless      # any Java 11 or later
-# epubcheck 5.4.0 from github.com/w3c/epubcheck/releases, unpacked into ~/Software/epubcheck/
 ```
 
-`EPUBCHECK=/path/to/epubcheck.jar make epub` uses another copy. Without Java, every other gate still runs and the last one fails, naming the package.
+The first `make epub` fetches epubcheck 5.4.0 from its GitHub release into `var/epubcheck/`, held to the SHA-256 in the `Makefile` (`EPUBCHECK_SHA`); it was unpacked by hand into `~/Software` until 2026-10-16. `EPUBCHECK=/path/to/epubcheck.jar make epub` uses another copy. Without Java, every other gate still runs and the last one fails, naming the package.
 
 The file carries a fixed identifier, so a reader takes a new build for a new version of the same book and keeps its highlights. The same database always builds the same bytes. `tools/make_cover.py` redraws `epub/cover.jpg` when the mark or the wording changes.
 

@@ -126,13 +126,14 @@ def texlive() -> dict:
 
 
 def sqlite_wasm() -> dict:
-    """Return {key, path} for the unpacked SQLite WASM release that
-    vendor/sqlite-wasm/ is copied from, shaped like texlive()'s entry and for
-    the same reason: vendorlib takes it beside the repositories, and the build
-    never reads it."""
+    """Return {key, url, sha256, commit} for the SQLite WASM release that
+    vendor/sqlite-wasm/ is copied from: a zip, by its address and digest, with
+    no path on this machine.  vendorlib takes it beside the repositories, the
+    digest standing where a repository's commit does, and the build never
+    reads it."""
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["sqlite_wasm"]
-    return {"key": "sqlite_wasm", "path": pathlib.Path(cfg["path"]), "commit": None}
+    return {"key": "sqlite_wasm", "url": cfg["url"], "sha256": cfg["sha256"], "commit": cfg["sha256"]}
 
 
 def describe(repos: dict) -> str:

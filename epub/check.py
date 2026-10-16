@@ -45,7 +45,7 @@ OPF = "{http://www.idpf.org/2007/opf}"
 NCX = "{http://www.daisy.org/z3986/2005/ncx/}"
 JAVA_PACKAGE = "openjdk-26-jre-headless"
 EPUBCHECK = pathlib.Path(os.environ.get(
-    "EPUBCHECK", pathlib.Path.home() / "Software/epubcheck/epubcheck-5.4.0/epubcheck.jar"))
+    "EPUBCHECK", pack.ROOT / "var/epubcheck/epubcheck-5.4.0/epubcheck.jar"))
 RE_PID = re.compile(r"^p(\d+)_(\d+)_(\d+)$")
 
 
@@ -265,7 +265,7 @@ def epubcheck(path: pathlib.Path) -> tuple[bool, str, str]:
     if java is None:
         return False, "epubcheck", f"no java: sudo apt install {JAVA_PACKAGE}"
     if not EPUBCHECK.exists():
-        return False, "epubcheck", f"no {EPUBCHECK} (EPUBCHECK= names another)"
+        return False, "epubcheck", f"no {EPUBCHECK}: `make epub` fetches it (EPUBCHECK= names another)"
     with tempfile.TemporaryDirectory() as tmp:
         report = pathlib.Path(tmp) / "report.json"
         subprocess.run([java, "-jar", str(EPUBCHECK), str(path), "--json", str(report)],

@@ -5,7 +5,7 @@
     "dest": "press/latex_tokenizer.py",
     "sha256": "8b620ef668bb1325e9607cb8a27401e20446d251c7422336e2496e0f4f975473",
     "bytes": 12689,
-    "commit": "398364542052ac47800d8e6f9dd944dd2f70e140"
+    "commit": "5f95c312e679c1fc6c4d3d0f7a0b75535b8a641d"
   },
   {
     "repo": "press",
@@ -13,7 +13,7 @@
     "dest": "press/macros.py",
     "sha256": "4a2e857eeadb3f878e2b91801c30d0055dd673123bb2d7407f30003b9c838d38",
     "bytes": 12019,
-    "commit": "398364542052ac47800d8e6f9dd944dd2f70e140"
+    "commit": "5f95c312e679c1fc6c4d3d0f7a0b75535b8a641d"
   },
   {
     "repo": "press",
@@ -21,7 +21,7 @@
     "dest": "press/normalize.py",
     "sha256": "f2e93063e5e09effba1ec44e39ff69153d439b4bcfbc67bfffa0534a4a3d60ab",
     "bytes": 5015,
-    "commit": "398364542052ac47800d8e6f9dd944dd2f70e140"
+    "commit": "5f95c312e679c1fc6c4d3d0f7a0b75535b8a641d"
   },
   {
     "repo": "index",
@@ -29,7 +29,7 @@
     "dest": "index/cite.py",
     "sha256": "083b6f84521e9564f919fae487c317709c6c4cfa8496274f0363057097aa795d",
     "bytes": 15165,
-    "commit": "b12500f4272b9dd21be917c44be713d3db79bbbc"
+    "commit": "27df9a5e5b6ecab2dfd845dc2e6649b6cab4a226"
   },
   {
     "repo": "index",
@@ -37,7 +37,7 @@
     "dest": "index/xref.py",
     "sha256": "91643f77ef18114610b4740329d87c0bde139903a3acc7aeaa67f92537313330",
     "bytes": 4686,
-    "commit": "b12500f4272b9dd21be917c44be713d3db79bbbc"
+    "commit": "27df9a5e5b6ecab2dfd845dc2e6649b6cab4a226"
   },
   {
     "repo": "texlive",
@@ -53,7 +53,7 @@
     "dest": "sqlite-wasm/sqlite3.js",
     "sha256": "b6f472d13f7030d3ca60b8c592ffb84507ef4300e1276dd81b96bd3030d9ec6b",
     "bytes": 432966,
-    "commit": null
+    "commit": "b38d042be415af040679804dbf66264c6e6ec324d79840c284f673c4f2a63c4d"
   },
   {
     "repo": "sqlite_wasm",
@@ -61,6 +61,6 @@
     "dest": "sqlite-wasm/sqlite3.wasm",
     "sha256": "3929b5b2a1cd7d7c32171e1f654fce0355191b7c9bc84afc61d9b2b99b96531f",
     "bytes": 869277,
-    "commit": null
+    "commit": "b38d042be415af040679804dbf66264c6e6ec324d79840c284f673c4f2a63c4d"
   }
 ]

@@ -123,11 +123,27 @@ check:
 
 ## epub          the whole site as an EPUB -> var/epub/the-urantia-book.epub, then every gate
 # epubcheck (W3C) is the last gate.  It needs Java -- apt's openjdk-26-jre-headless --
-# and the jar from github.com/w3c/epubcheck/releases, unpacked into ~/Software.
-EPUBCHECK ?= $(HOME)/Software/epubcheck/epubcheck-5.4.0/epubcheck.jar
-epub:
+# and its release, which this fetches once into var/epubcheck/, held to the
+# digest below.  Until 2026-10-16 it was unpacked by hand into ~/Software; the
+# tree's tools keep nothing outside it but the audio work's (Tigran).
+EPUBCHECK_VER := 5.4.0
+EPUBCHECK_ZIP := https://github.com/w3c/epubcheck/releases/download/v$(EPUBCHECK_VER)/epubcheck-$(EPUBCHECK_VER).zip
+EPUBCHECK_SHA := 33350c61038e71dfb3d45a76aed04bf5481e6d5500cb780f6e98db8bbd15a28c
+EPUBCHECK ?= $(CURDIR)/var/epubcheck/epubcheck-$(EPUBCHECK_VER)/epubcheck.jar
+epub: $(EPUBCHECK)
 	@$(PY) -m epub build
 	@EPUBCHECK=$(EPUBCHECK) $(PY) -m epub check
+
+# Into a temp name, checked, then unpacked: a fetch that fails or differs
+# leaves nothing that looks like the jar.
+$(CURDIR)/var/epubcheck/epubcheck-$(EPUBCHECK_VER)/epubcheck.jar:
+	@mkdir -p var/epubcheck
+	@curl -fsSL $(EPUBCHECK_ZIP) -o var/epubcheck/release.zip.tmp
+	@echo "$(EPUBCHECK_SHA)  var/epubcheck/release.zip.tmp" | sha256sum -c --quiet - || \
+		{ rm -f var/epubcheck/release.zip.tmp; echo "epubcheck: $(EPUBCHECK_ZIP) is not the release this names" >&2; exit 1; }
+	@unzip -q -o var/epubcheck/release.zip.tmp -d var/epubcheck
+	@rm -f var/epubcheck/release.zip.tmp
+	@test -f $@ && echo "epubcheck $(EPUBCHECK_VER) -> var/epubcheck/"
 
 ## offline       the offline copy that Work offline keeps -> var/offline/, then every gate (needs Node)
 offline:

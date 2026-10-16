@@ -2,6 +2,8 @@
 
 Eight files copied by value: five from two sibling repositories, one from TeX Live, and two from SQLite's WebAssembly release. They are pinned by SHA-256 in `UPSTREAM.lock`, and `make vendor-check` fails if either side moves (CLAUDE.md §6). They are copies, never edited here; adopting a change upstream is `make vendor-sync` and a reviewed commit.
 
+The SQLite release is not a tree on this machine: `sources.toml` names its zip by URL and SHA-256, and the lock records that digest. A release cannot move, so `make vendor-check` holds the two files to the lock, and the lock to that digest, without the network; `make vendor-sync` fetches the zip, and checks it, only when `sources.toml` names another release.
+
 | here | copied from |
 |---|---|
 | `press/latex_tokenizer.py` | the press repository, `tools/text-verify/latex_tokenizer.py` |

@@ -53,13 +53,16 @@ path = "/usr/local/texlive/2026/texmf-dist"
 
 # SQLite's own WebAssembly build, for one thing: searching the offline copy in
 # the reader's browser (offline/, ubsite/static/sw.js), with the same FTS5,
-# tokenizer and bm25 as the site.  The release zip from sqlite.org, unpacked;
-# not a repository and not read by the build.  vendor/sqlite-wasm/ holds its
-# two files by value, and `make vendor-check` compares them with this tree's.
-# 3.53.4 of 2026-07-24, https://sqlite.org/2026/sqlite-wasm-3530400.zip,
-# sha256 b38d042be415af040679804dbf66264c6e6ec324d79840c284f673c4f2a63c4d.
+# tokenizer and bm25 as the site.  A release zip from sqlite.org, named by its
+# address and fixed by its digest: 3.53.4 of 2026-07-24.  Not a tree on this
+# machine and not read by the build.  vendor/sqlite-wasm/ holds its two files
+# by value, and the lock records this digest; a release cannot move, so
+# `make vendor-check` holds our copy to the lock alone, and `make vendor-sync`
+# fetches the zip only when this names another release.  Until 2026-10-16 it
+# was unpacked by hand into ~/Software, and `make data` failed without it.
 [sqlite_wasm]
-path = "/home/tigran/Software/sqlite-wasm/sqlite-wasm-3530400"
+url    = "https://sqlite.org/2026/sqlite-wasm-3530400.zip"
+sha256 = "b38d042be415af040679804dbf66264c6e6ec324d79840c284f673c4f2a63c4d"
 
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
