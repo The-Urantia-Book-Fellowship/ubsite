@@ -91,7 +91,9 @@ LISTEN = [
     # then Off; '' is the first voice the section has.
     ("voice", "radio", "Listen with", "", [], ""),
     # Which of the browser's voices: its English ones, filled in by ub.js,
-    # which also says which '' picks.  Shown only while that voice is chosen.
+    # which also says which '' picks.  Always shown, and greyed unless that
+    # voice is chosen: until 2026-10-16 it was shown only then, and the dialog
+    # jumped as the line came and went (Tigran).
     ("bvoice", "select", "Browser voice", "", [("", "Automatic", "", "")], ""),
     ("rate", "select", "Speed", 1, [(r, f"{r}×", "", "") for r in SPEEDS], ""),
     ("follow", "switch", "Follow along", True, [], "keep the paragraph being read in view"),
@@ -120,14 +122,18 @@ KEPT = [
 # A setting that means nothing while another is off ('off', or a switch turned
 # off): shown, greyed, and not to be changed (ub.js disables it).  With
 # Listening off there is no speed to set (Tigran, 2026-10-08), and with the 1955
-# readings off no reading to search for.
-NEEDS = {"bvoice": "voice", "rate": "voice", "follow": "voice", "onward": "voice",
+# readings off no reading to search for.  A pair is a setting that means
+# something only while another has that value: which of the browser's voices,
+# while the browser's voice is chosen.
+NEEDS = {"bvoice": ("voice", "browser"), "rate": "voice", "follow": "voice", "onward": "voice",
          "notesearch": "notes"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:
+    needs = NEEDS.get(key, "")
+    needs, needs_is = needs if isinstance(needs, tuple) else (needs, "")
     return {"key": key, "kind": kind, "label": label, "default": default, "hint": hint,
-            "needs": NEEDS.get(key, ""),
+            "needs": needs, "needs_is": needs_is,
             "choices": [{"value": v, "label": l, "hint": h, "cls": c} for v, l, h, c in choices]}
 
 

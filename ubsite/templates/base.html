@@ -104,7 +104,8 @@ window.ubDefaults = {{ settings_defaults|tojson }};
       {%- for it in g["items"] %}
       {#- Built inside the tag, so fonts.py, which reads a template's text for the
           characters to subset, does not count it as words on the page. #}
-      {%- set needs = (' data-needs="' ~ it.needs ~ '"') if it.needs else '' %}
+      {%- set needs = ((' data-needs="' ~ it.needs ~ '"') if it.needs else '') ~
+                      ((' data-is="' ~ it.needs_is ~ '"') if it.needs_is else '') %}
       {%- if it.kind == 'switch' %}
       <label{{ needs|safe }}><input type="checkbox" name="{{ it.key }}"> {{ it.label }}
         {%- if it.key == 'pilcrow' %} <span class="pcm" aria-hidden="true"></span>{% endif %}

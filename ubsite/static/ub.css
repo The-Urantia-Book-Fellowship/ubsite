@@ -754,16 +754,17 @@ dialog.settings .face-sans { font-family: var(--sans); font-size-adjust: .43; }
 dialog.settings label.face-serif, dialog.settings label.face-sans { padding-left: 0; }
 dialog.settings :is(.face-goudy, .face-serif, .face-sans) small { font-family: "UB Goudy", Georgia, serif; }
 dialog.settings .pcm { margin: 0 0 0 .1em; }
-/* Greyed while the setting it needs is off: Speed, with Listening off. */
+/* Greyed while the setting it needs is off: Speed, with Listening off; and
+   which of the browser's voices, unless that voice is chosen. */
 dialog.settings .idle { opacity: .45; cursor: default; }
-/* Which of the browser's voices, only while that voice is chosen.  A voice's
-   name can be longer than a phone's line, as Edge's "Microsoft Ava Online
-   (Natural) - English (United States)" is: the menu then has a line of its own,
-   still at the right, and narrower still it shrinks to the line, the browser
-   cutting the name it shows.  The list it opens has every name whole.  Until
-   2026-10-15 it ran past the dialog's edge, and Settings scrolled sideways on a
-   phone.  Where the two fit, they share a line, as before. */
-:root:not([data-voice="browser"]) dialog.settings .set-bvoice { display: none; }
+/* Which of the browser's voices.  A voice's name can be longer than a phone's
+   line, as Edge's "Microsoft Ava Online (Natural) - English (United States)"
+   is: the menu then has a line of its own, still at the right, and narrower
+   still it shrinks to the line, the browser cutting the name it shows.  The
+   list it opens has every name whole.  Until 2026-10-15 it ran past the
+   dialog's edge, and Settings scrolled sideways on a phone.  Where the two fit,
+   they share a line, as before.  Until 2026-10-16 it was drawn only while the
+   browser's voice was chosen, and the dialog jumped as it came and went. */
 dialog.settings .set-bvoice { flex-wrap: wrap; row-gap: .3rem; }
 dialog.settings .set-bvoice select { min-width: 0; max-width: min(16rem, 100%); margin-left: auto; }
 /* A row of radio buttons drawn as one control: Theme, Text size. */

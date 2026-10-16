@@ -102,8 +102,11 @@
     gear.hidden = false;
     var form = dlg.querySelector('form');
     var bsel = form.querySelector('select[name="bvoice"]'), bopt = form.querySelector('.v-browser');
-    // A browser that cannot speak is not offered its voice.
-    if (bopt && !synth) bopt.hidden = true;
+    // A browser that cannot speak is not offered its voice, nor a choice of them.
+    if (bopt && !synth) {
+      bopt.hidden = true;
+      if (bsel) bsel.closest('label').hidden = true;
+    }
     var listVoices = function () {
       if (!bsel) return;
       var all = voices();
@@ -135,10 +138,12 @@
     var reset = form.querySelector('.reset');
     var resettable = function () { reset.disabled = !Object.keys(stored()).length; };
     // A setting that means nothing while the one it needs is off (settings.py
-    // NEEDS) is shown, greyed, and cannot be changed: 'off', or a switch's false.
+    // NEEDS) is shown, greyed, and cannot be changed: 'off', or a switch's false,
+    // or, where it needs a value (data-is), any other.
     var idle = function (o) {
       Array.prototype.forEach.call(form.querySelectorAll('[data-needs]'), function (el) {
-        var v = o[el.dataset.needs], off = v === 'off' || v === false;
+        var v = o[el.dataset.needs];
+        var off = el.dataset.is ? String(v) !== el.dataset.is : v === 'off' || v === false;
         el.classList.toggle('idle', off);
         Array.prototype.forEach.call(el.querySelectorAll('input, select'), function (c) { c.disabled = off; });
       });
