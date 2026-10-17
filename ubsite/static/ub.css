@@ -436,9 +436,12 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
    (max-width: 62rem, below) has not already made one. */
 :root[data-width="full"] .reader { max-width: none; }
 @media (min-width: 62.01rem) {
-  /* The text column is the measure, or what the margin's 26ch and the gap leave;
-     the head above it is as wide, so that it is centred over the text. */
-  :root:not([data-margin="off"]) .papertop { max-width: min(var(--measure), 100% - 26ch - 2rem); }
+  /* The text column is the measure, or what the margin's 26ch and the gap leave,
+     or half of what the gap leaves where that is more: the grid's two tracks grow
+     alike until the margin's is 26ch.  The head above it and the box of what the
+     whole section cites are as wide, so that the head is centred over the text. */
+  :root:not([data-margin="off"]) :is(.papertop, .blanket) {
+         max-width: min(var(--measure), max(100% - 26ch - 2rem, (100% - 2rem) / 2)); }
   :root[data-width="full"]:not([data-margin="off"]) .papertop { max-width: calc(100% - 26ch - 2rem); }
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
@@ -597,11 +600,14 @@ a.fn.on::after { background: currentColor; }
   .pop .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
 }
 
+/* As wide as the text: its measure is taken at the text's size, so the smaller
+   size is its list's alone. */
 .blanket { border: 1px solid var(--rule); border-radius: 4px; padding: .7rem .9rem;
-  margin: 0 0 1.6rem; font-size: .9rem; max-width: var(--measure); }
+  margin: 0 0 1.6rem; max-width: var(--measure); }
 .blanket h3 { margin: 0 0 .4rem; font-size: .82rem; font-variant-caps: small-caps;
   letter-spacing: .06em; color: var(--faint); font-weight: 400; }
-.blanket ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 1.4rem; }
+.blanket ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 1.4rem;
+  font-size: .9rem; }
 /* One entry must not be split down the middle by the column break. */
 .blanket li { break-inside: avoid; margin-bottom: .2rem; }
 .blanket a { color: var(--faint); text-decoration: none; }
