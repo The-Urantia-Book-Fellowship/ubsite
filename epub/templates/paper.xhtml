@@ -28,10 +28,13 @@
 <section class="sec" id="{{ s.id }}">
 {% if s.n %}<h2>{{ s.n }}{% if s.combined_with %} and {{ s.combined_with }}{% endif %}. {{ s.title_html|safe }}</h2>
 {% endif %}
-{% if s.blanket %}
+{% if s.paperwide or s.blanket %}
 {#- No "Cited across this whole section" above them, as the site has: standing
-    under the section's title, before its first paragraph, they say so (Tigran). #}
-<div class="blanket"><p class="ix">{{ chips(s.blanket) }}</p></div>
+    under the section's title, before its first paragraph, they say so (Tigran).
+    What the whole paper cites stands once, under the paper's title, before
+    what section 0 does. #}
+<div class="blanket">{% if s.paperwide %}<p class="ix">{{ chips(s.paperwide) }}</p>{% endif %}
+{%- if s.blanket %}<p class="ix">{{ chips(s.blanket) }}</p>{% endif %}</div>
 {% endif %}
 {% for r in s.rows %}
 {% set first = r.p if 'p' in r else r.lines[0] %}

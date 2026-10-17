@@ -7,6 +7,10 @@ precisely has an empty margin, not "no entry cites this paragraph precisely".
 Which ranges the index cites is edited daily, so the cases are asked of the
 database.  Skipped when var/ub.db has not been built.
 
+An entry citing a whole paper stands once, in the box above section 0, under
+"Cited across this whole paper", and in no other section's box (Tigran,
+2026-10-17); what cites a whole section stands in that section's.
+
 The index folds (templates/_fold.html): a button at the head of a section page
 and of a reading path, and in every box of entries a line saying how many it
 holds, which is the box on a phone while the index is folded.
@@ -17,10 +21,25 @@ import sqlite3
 import unittest
 
 from test_appendix_pages import DB, get
+from ubsite import queries
 
 
 RE_AFOLD = re.compile(r'<button class="afold" type="button" aria-expanded="false">'
-                      r'(\d+) index entr(y|ies)( across this whole section)?</button>')
+                      r'(\d+) index entr(y|ies)( across (?:this whole section|this whole paper'
+                      r'|the whole paper and this section))?</button>')
+# A box's line, by which of its two headings it has.
+TAILS = {(False, True): " across this whole section", (True, False): " across this whole paper",
+         (True, True): " across the whole paper and this section"}
+
+
+def box(body: str) -> str:
+    """The box of what the whole section, or paper, cites, or ""."""
+    b = re.search(r'<aside class="blanket">(.*?)</aside>', body, re.S)
+    return b[1] if b else ""
+
+
+def box_chips(body: str) -> list[str]:
+    return [re.sub(r"<[^>]+>", "", li) for li in re.findall(r"<li>(.*?)</li>", box(body), re.S)]
 
 
 def margin(body: str, ref: str) -> str:
@@ -105,10 +124,44 @@ class Margin(unittest.TestCase):
                 self.assertTrue(m, f"{url}: {a[:80]}")
                 self.assertEqual(int(m[1]), a.count("<li>"), url)
                 self.assertEqual(m[2], "y" if m[1] == "1" else "ies")
-            b = re.search(r'<aside class="blanket">(.*?)</aside>', body, re.S)
+            b = box(body)
             if b:
-                m = RE_AFOLD.match(b[1].strip())
-                self.assertEqual((int(m[1]), m[3]), (b[1].count("<li>"), " across this whole section"))
+                m = RE_AFOLD.match(b.strip())
+                heads = ("<h3>Cited across this whole paper</h3>" in b,
+                         "<h3>Cited across this whole section</h3>" in b)
+                self.assertEqual((int(m[1]), m[3]), (b.count("<li>"), TAILS[heads]), url)
+
+    def test_a_whole_paper_is_cited_once_above_section_0(self):
+        b = box(get("/1:0")[2])
+        self.assertIn("<h3>Cited across this whole paper</h3>", b)
+        self.assertNotIn("<h3>Cited across this whole section</h3>", b)
+        self.assertEqual(box_chips(get("/1:0")[2]), ["God", "Universal Father"])
+        later = box_chips(get("/1:1")[2])
+        self.assertTrue(later)                      # Universal Father › also known as › ...
+        self.assertNotIn("God", later)
+        self.assertNotIn("Universal Father", later)
+        # Both kinds above 133:0, the paper's first, in one box.
+        b = box(get("/133:0")[2])
+        self.assertLess(b.index("<h3>Cited across this whole paper</h3>"),
+                        b.index("<h3>Cited across this whole section</h3>"))
+        self.assertEqual(RE_AFOLD.match(b.strip())[3], TAILS[True, True])
+        self.assertNotIn("<h3>Cited across this whole paper</h3>", box(get("/133:1")[2]))
+
+    def test_every_paper_wide_entry_stands_above_its_section_0(self):
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        con.row_factory = sqlite3.Row
+        want: dict[int, set] = {}
+        for n, path in con.execute(
+                "SELECT DISTINCT p.paper_n, e.path_plain FROM para_citers c"
+                " JOIN index_entry e ON e.id=c.entry_id JOIN paragraph p ON p.id=c.paragraph_id"
+                " WHERE c.precision='paper' AND p.section_n=0" + queries.CHIP_NEW):
+            want.setdefault(n, set()).add(path)
+        self.assertGreater(len(want), 150)
+        for paper, sec in con.execute("SELECT paper_n, n FROM section"):
+            rows = queries.section(con, paper, sec)
+            got = {r["path"] for r in rows["paperwide"]}
+            self.assertEqual(got, want.get(paper, set()) if sec == 0 else set(), f"{paper}:{sec}")
+            self.assertFalse(got & {r["path"] for r in rows["blanket"]}, f"{paper}:{sec}")
 
     def test_each_caption_on_a_reading_path_says_how_many(self):
         for url in ("/i/ice-ages/read", "/i/prayer/read/theme", "/i/thirst/read"):   # thirst: verse

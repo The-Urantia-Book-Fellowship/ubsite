@@ -53,10 +53,15 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
              and page_1955, where the paragraph begins in the first printing
     citers   paragraph id -> its chips, the entries citing it precisely, a
              range beside its first paragraph only (CHIP_OPENS)
-    blanket  the entries citing the whole section or paper -- read_pack's rule:
-             listed ONCE at the section's head, never repeated under every
-             paragraph, or Paper 15's 470 citations print some entries forty
-             times over and the eye stops reading
+    blanket  the entries citing the whole section -- read_pack's rule: listed
+             ONCE at the section's head, never repeated under every paragraph,
+             or Paper 15's 470 citations print some entries forty times over
+             and the eye stops reading
+    paperwide  the entries citing the whole paper: the same rule a level up,
+             listed once, above section 0, and in no other section's box, as
+             a range stands beside its first paragraph only (Tigran,
+             2026-10-17).  Empty after section 0.  An entry citing the paper
+             and section 0 alike is listed here only
     notes    paragraph id -> its 1955 readings, as notes() gives them
     rows     the paragraphs as the page sets them: {"p": a paragraph}, or
              {"lines": [...]} for a block of verse, set as one (paragraph.verse_start),
@@ -77,14 +82,19 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
             " WHERE p.paper_n=? AND p.section_n=? AND c.precision='para'" + CHIP_NEW + CHIP_OPENS +
             " ORDER BY e.ord", (paper, sec)):
         citers.setdefault(row["paragraph_id"], []).append(row)
-    blanket = con.execute(
-        "SELECT DISTINCT " + CHIP_COLS +
-        " FROM para_citers c"
-        " JOIN index_entry e ON e.id=c.entry_id"
-        " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
-        " JOIN paragraph p ON p.id=c.paragraph_id"
-        " WHERE p.paper_n=? AND p.section_n=? AND c.precision IN ('sec','paper')" + CHIP_NEW +
-        f" ORDER BY e.ord LIMIT {BLANKET_MAX}", (paper, sec)).fetchall()
+    def whole(precision: str, also: str = "") -> list:
+        return con.execute(
+            "SELECT DISTINCT " + CHIP_COLS +
+            " FROM para_citers c"
+            " JOIN index_entry e ON e.id=c.entry_id"
+            " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
+            " JOIN paragraph p ON p.id=c.paragraph_id"
+            " WHERE p.paper_n=? AND p.section_n=? AND c.precision=?" + CHIP_NEW + also +
+            f" ORDER BY e.ord LIMIT {BLANKET_MAX}", (paper, sec, precision)).fetchall()
+    paperwide = whole("paper") if sec == 0 else []
+    blanket = whole("sec", " AND NOT EXISTS (SELECT 1 FROM para_citers c3"
+                           " WHERE c3.paragraph_id = c.paragraph_id"
+                           " AND c3.entry_id = c.entry_id AND c3.precision = 'paper')")
     by_para: dict[int, list] = {}
     for n in notes(con, "p.paper_n=? AND p.section_n=?", (paper, sec)):
         by_para.setdefault(n["paragraph_id"], []).append(n)
@@ -97,7 +107,7 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
         else:
             rows[-1]["lines"].append(q)
     return {"paras": paras, "rows": rows, "citers": citers, "blanket": blanket,
-            "notes": by_para}
+            "paperwide": paperwide, "notes": by_para}
 
 
 def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:

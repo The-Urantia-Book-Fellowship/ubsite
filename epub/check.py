@@ -214,7 +214,7 @@ def run(con, path: pathlib.Path) -> int:
     for p, s in con.execute("SELECT paper_n, n FROM section"):
         rows = queries.section(con, p, s)
         want_para += sum(map(len, rows["citers"].values()))
-        want_blanket += len(rows["blanket"])
+        want_blanket += len(rows["blanket"]) + len(rows["paperwide"])
     g.line(chips_para == want_para, f"chips beneath paragraphs {chips_para:,}",
            f"the site has {want_para:,}" if chips_para != want_para else "")
     g.line(chips_blanket == want_blanket, f"chips at section heads {chips_blanket:,}",

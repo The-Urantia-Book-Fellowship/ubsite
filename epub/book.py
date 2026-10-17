@@ -132,6 +132,7 @@ def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
         by_id = {q["id"]: d for q, d in zip(rows["paras"], paras)}
         secs.append({"id": H.section_id(p["n"], s["n"]), "n": s["n"],
                      "combined_with": s["combined_with"], "title_html": s["title_html"],
+                     "paperwide": [_chip(links, c) for c in rows["paperwide"]],
                      "blanket": [_chip(links, c) for c in rows["blanket"]],
                      "rows": [{"p": by_id[r["p"]["id"]]} if "p" in r
                               else {"lines": [by_id[q["id"]] for q in r["lines"]]}

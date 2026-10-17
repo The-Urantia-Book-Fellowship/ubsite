@@ -608,6 +608,8 @@ a.fn.on::after { background: currentColor; }
   letter-spacing: .06em; color: var(--faint); font-weight: 400; }
 .blanket ul { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 1.4rem;
   font-size: .9rem; }
+/* Above section 0, what the whole paper cites, then what the section does. */
+.blanket ul + h3 { margin-top: .7rem; }
 /* One entry must not be split down the middle by the column break. */
 .blanket li { break-inside: avoid; margin-bottom: .2rem; }
 .blanket a { color: var(--faint); text-decoration: none; }

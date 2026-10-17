@@ -28,14 +28,24 @@
       {%- endif %}
     </header>
 
-    {% if blanket %}
+    {% if paperwide or blanket %}
     <aside class="blanket">
-      {{ afold(blanket|length, ' across this whole section') }}
-      <h3>Cited across this whole section</h3>
+      {{ afold(paperwide|length + blanket|length,
+               ' across the whole paper and this section' if paperwide and blanket
+               else ' across this whole paper' if paperwide else ' across this whole section') }}
       {# read_pack's rule: a blanket citation is listed ONCE here, never repeated
          under every paragraph -- otherwise Paper 15's 470 citations print some
-         entries forty times over and the eye stops reading. #}
+         entries forty times over and the eye stops reading.  An entry citing the
+         whole paper is listed once, above section 0, under a heading of its own
+         (Tigran, 2026-10-17). #}
+      {%- if paperwide %}
+      <h3>Cited across this whole paper</h3>
+      <ul>{% for b in paperwide %}<li>{{ chip(b) }}</li>{% endfor %}</ul>
+      {%- endif %}
+      {%- if blanket %}
+      <h3>Cited across this whole section</h3>
       <ul>{% for b in blanket %}<li>{{ chip(b) }}</li>{% endfor %}</ul>
+      {%- endif %}
     </aside>
     {% endif %}
 
