@@ -52,6 +52,25 @@ class ChangeLog(unittest.TestCase):
             self.skipTest("no git")
         self.assertEqual(sorted(f"v{a}.{b}.{c}" for (a, b, c), _ in released), sorted(tags))
 
+    def test_entries_newest_first(self):
+        # "The newest is at the top", under each heading of a version too, as
+        # What's new lists them: no entry was written after the one above it.
+        # A line not yet committed is the newest; the lines of one commit keep
+        # the order they were written in.  /changelog showed Unreleased oldest
+        # first, being the file as written (Tigran, 2026-10-18).
+        when = changelog.written()
+        if not when:
+            self.skipTest("no git")
+        under = {}
+        for x in changelog.parse(self.text):
+            if x.kind == "entry" and x.version:
+                t = when[x.line].timestamp() if x.line in when else float("inf")
+                under.setdefault((x.version, x.heading), []).append((x.line, t))
+        for (version, heading), es in under.items():
+            for (_, above), (line, t) in zip(es, es[1:]):
+                self.assertGreaterEqual(above, t, f"ChangeLog.md:{line}, under {version} › {heading},"
+                                                  " is newer than the entry above it")
+
     def test_one_line_to_a_paragraph(self):
         # Read full width (Obsidian, MarkText): never wrapped by hand.
         for i in range(1, len(self.lines)):

@@ -73,6 +73,14 @@ READING = [
       ("ragged", "Ragged right", "even spaces, no hyphens", "")], ""),
 ]
 SHOW = [
+    # Off, the site is the book alone, with its 1955 readings if they are on:
+    # the margin, the box of what a whole section or paper cites, the Index
+    # button, the index's lines in search and on the home page, and every link
+    # to the index and the appendices (ub.css .ix).  Their own pages stay as
+    # they are, for an address asked for.  Promised to the Fellowship on
+    # 2026-10-17 (Tigran, 2026-10-18).
+    ("index", "switch", "Index and appendices", True, [],
+     "beside the text, in search results, and every link to them"),
     ("redletter", "switch", "Words of Jesus in red", True, [], ""),
     ("paranum", "switch", "Paragraph references", True, [], "such as 0:1.2, beside each paragraph"),
     # Where each paragraph begins in the 1955 first printing.  Obsolete as a way
@@ -118,6 +126,8 @@ LISTEN = [
 # the text", which hid the index, until the button made it one more way to
 # the same thing on every page that has an index (Tigran, 2026-10-13); its key
 # and its values stay, so a reader who had it off finds the index folded.
+# What hides the index is SHOW's `index` (2026-10-18), which leaves this as it
+# was for when the index comes back.
 KEPT = [
     ("rail", "kept", "Contents", "open", [], ""),
     ("margin", "kept", "Index", True, [], ""),

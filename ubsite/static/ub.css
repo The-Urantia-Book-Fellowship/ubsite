@@ -391,7 +391,16 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 :root[data-paranum="off"] .num { display: none; }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
 :root[data-notes="off"] :is(a.fn, .notes, .pop) { display: none; }
-:root[data-margin="off"] .grid { grid-template-columns: minmax(0, var(--measure)); }
+/* The index turned off, and the appendices with it (Tigran, 2026-10-18): the
+   margin, the box of what a whole section or paper cites, the Index button,
+   and whatever else is marked .ix, the header's link, the home page's lines,
+   the search overview's.  A reading path is the index's own page, and keeps
+   its fold.  A .noix is said only then, in place of an .ix (notfound.html).
+   A section page is laid out as with the index folded, the chevron's place
+   left empty, so that nothing moves between the two. */
+:root[data-index="off"] :is(.ix, .a, .blanket, .reader .marginhead) { display: none; }
+:root:not([data-index="off"]) .noix { display: none; }
+:root:is([data-margin="off"], [data-index="off"]) .grid { grid-template-columns: minmax(0, var(--measure)); }
 /* Text size scales the root, so everything set in rem follows, as with the
    browser's zoom.  Standard is 112.5% (settings.py); "largest" was the step
    above "larger" until 2026-10-14, and is its size still. */
@@ -433,12 +442,14 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
      or half of what the gap leaves where that is more: the grid's two tracks grow
      alike until the margin's is 26ch.  The head above it and the box of what the
      whole section cites are as wide, so that the head is centred over the text. */
-  :root:not([data-margin="off"]) :is(.papertop, .blanket) {
+  :root:not([data-margin="off"], [data-index="off"]) :is(.papertop, .blanket) {
          max-width: min(var(--measure), max(100% - 26ch - 2rem, (100% - 2rem) / 2)); }
-  :root[data-width="full"]:not([data-margin="off"]) .papertop { max-width: calc(100% - 26ch - 2rem); }
+  :root[data-width="full"]:not([data-margin="off"], [data-index="off"]) .papertop {
+         max-width: calc(100% - 26ch - 2rem); }
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
-  :root[data-width="full"][data-margin="off"] .grid { grid-template-columns: minmax(0, 1fr); }
+  :root[data-width="full"]:is([data-margin="off"], [data-index="off"]) .grid {
+         grid-template-columns: minmax(0, 1fr); }
 }
 /* The rail folded away: no column at all, and the text takes the rest.  The
    gap stays, being the gutter the references stand in, and the chevron, which
@@ -465,18 +476,21 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
    stands, pointing back the way the index went, level with the header's last
    icon.
    Measured, the frame gives up what the index did, as for the rail, so the page
-   stays centred.  A section page's frame is .reader, a reading path's .path. */
+   stays centred.  A section page's frame is .reader, a reading path's .path.
+   A section page with the index turned off in Settings is laid out the same,
+   without the chevron. */
 @media (min-width: 62.01rem) {
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   :root[data-margin="off"] .indexfold { right: -2.2rem; width: .8rem; padding: 0 0 .9rem;
                                         justify-content: flex-end; background: none; box-shadow: none; }
   :root[data-margin="off"] .indexfold span { display: none; }
   :root[data-margin="off"] .indexfold::before { transform: rotate(135deg); margin: 0 0 .1em; }
-  :root[data-margin="off"] .reader > article:has(> .marginhead) { padding-right: 2rem; }
-  :root[data-margin="off"]:not([data-width="full"]) .reader:has(> article > .marginhead) {
+  :root:is([data-margin="off"], [data-index="off"]) .reader > article:has(> .marginhead) {
+         padding-right: 2rem; }
+  :root:is([data-margin="off"], [data-index="off"]):not([data-width="full"]) .reader:has(> article > .marginhead) {
          max-width: calc(92rem - 26ch); }
-  :root[data-margin="off"][data-rail="folded"]:not([data-width="full"]) .reader:has(> article > .marginhead) {
-         max-width: calc(92rem - 16rem - 26ch); }
+  :root:is([data-margin="off"], [data-index="off"])[data-rail="folded"]:not([data-width="full"])
+       .reader:has(> article > .marginhead) { max-width: calc(92rem - 16rem - 26ch); }
   :root[data-margin="off"] .path { max-width: calc(4.4rem + var(--measure) + 2rem + 2.4rem);
                                    padding-right: 3.2rem; }
   :root[data-margin="off"][data-width="full"] .path { max-width: none; }

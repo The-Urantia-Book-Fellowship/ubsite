@@ -15,13 +15,13 @@
 {% if scope %}<p class="hint"><a href="/search?q={{ q|urlencode }}">All results for “{{ q }}”</a></p>{% endif %}
 {% if diagnose and diagnose[1] %}<p class="didyou">Did you mean
   {% for c in diagnose[1] %}<a href="/search?q={{ c|urlencode }}">{{ c }}</a>{% if not loop.last %} or {% endif %}{% endfor %}?</p>{% endif %}
-{% if heads %}<section><h2>Headwords</h2>
+{% if heads %}<section{% if not scope %} class="ix"{% endif %}><h2>Headwords</h2>
 <ul class="hits heads-hit">{% for h in heads %}<li>
   {%- if h.slug %}<a href="/i/{{ h.slug }}">{{ h.headword }}</a>
   {% if h.kids %}<span>{{ h.kids }} {{ 'subentry' if h.kids == 1 else 'subentries' }}</span>{% endif %}
   {%- else %}<a href="{{ appendix_href(h.scope, h.anchor) }}">{{ h.headword }}</a>
   <span>Appendix {{ h.scope }}, {{ h.appendix }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
-{% if scope in ('', 'index') %}<section><h2>In the index {% if idx %}{{ count(idx) }}{% else %}<span>(0)</span>{% endif %}</h2>
+{% if scope in ('', 'index') %}<section{% if not scope %} class="ix"{% endif %}><h2>In the index {% if idx %}{{ count(idx) }}{% else %}<span>(0)</span>{% endif %}</h2>
 {% if idx and idx.rows %}<ul class="hits">{% for e in idx.rows %}<li>
   {%- if e.rslug %}<a href="{{ entry_href(e.rslug, e.level, e.anchor) }}">{{ e.marked }}</a>
   {%- else %}<a class="app" href="{{ appendix_href(e.scope, e.anchor) }}"><span class="lbl">{{ e.appendix }}</span> {{ e.marked }}</a>{% endif %}</li>{% endfor %}</ul>

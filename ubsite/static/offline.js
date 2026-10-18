@@ -38,6 +38,9 @@
     return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate();
   }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  // The index turned off in Settings: what the menu says of the copy leaves it
+  // out, as the page does (settings.py `index`).
+  function noIndex() { return !!window.ubSettings && window.ubSettings.get().index === false; }
   function ask(cmd, more) {
     return sw.ready.then(function (reg) {
       return new Promise(function (resolve) {
@@ -99,7 +102,7 @@
       mark('stale', 'An update to the offline copy is waiting (' + mb(up.fetch) + ')');
     } else {
       line.textContent = 'Up to date: kept as the site was on ' + day(have.made) + ', with the text of ' +
-                         day(have.text.date) + ' and the index of ' + day(have.index.date) + ', ' +
+                         day(have.text.date) + (noIndex() ? '' : ' and the index of ' + day(have.index.date)) + ', ' +
                          mb(have.bytes) + ' in this browser. ' +
                          'Without a connection, the site reads from it by itself.';
       mark('kept');
@@ -135,7 +138,7 @@
   // What's new: what changed on the site after this copy was made, from the
   // manifest an update would fetch (offline/news.py), newest first, by day; and
   // a line where the text or the index is newer than the copy's, never their
-  // own commits (Tigran, 2026-10-14).  A popup over the menu, which stays open
+  // own commits (Tigran, 2026-10-14); the index's not while Settings has it off.  A popup over the menu, which stays open
   // beneath it with its Update button: a popover inside the menu's, so the
   // browser counts it the menu's own.  At its foot, the whole changelog, the
   // page /changelog (2026-10-18).
@@ -168,7 +171,7 @@
       }
       // The times are UTC, written alike, so they compare as strings.
       n.items.forEach(function (x) { if (x.t > have.made) put(x.d, esc(x.s)); });
-      if (m.index && have.index && m.index.commit !== have.index.commit)
+      if (m.index && have.index && m.index.commit !== have.index.commit && !noIndex())
         put(m.index.date, 'The index as of ' + day(m.index.date), true);
       if (m.text && have.text && m.text.commit !== have.text.commit)
         put(m.text.date, 'The text as of ' + day(m.text.date), true);

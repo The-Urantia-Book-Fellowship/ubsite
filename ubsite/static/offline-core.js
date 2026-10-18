@@ -412,7 +412,7 @@
       }).join(' or ') + '?</p>';
     o += '\n';
     if (heads.length) {
-      o += '<section><h2>Headwords</h2>\n<ul class="hits heads-hit">';
+      o += '<section' + (scope ? '' : ' class="ix"') + '><h2>Headwords</h2>\n<ul class="hits heads-hit">';
       heads.forEach(function (h) {
         o += '<li>';
         if (h.slug) o += '<a href="/i/' + esc(h.slug) + '">' + esc(h.headword) + '</a>\n  ' +
@@ -425,7 +425,7 @@
     }
     o += '\n';
     if (scope === '' || scope === 'index') {
-      o += '<section><h2>In the index ' + (idx ? count(idx) : '<span>(0)</span>') + '</h2>\n';
+      o += '<section' + (scope ? '' : ' class="ix"') + '><h2>In the index ' + (idx ? count(idx) : '<span>(0)</span>') + '</h2>\n';
       if (idx && idx.rows.length) {
         o += '<ul class="hits">';
         idx.rows.forEach(function (e) {

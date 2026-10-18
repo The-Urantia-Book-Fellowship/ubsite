@@ -7,7 +7,7 @@
     <div>
       <h1>The Urantia Book</h1>
 
-      <p class="lead">The Uversa Press text, read together with the Uversa Press
+      <p class="lead ix">The Uversa Press text, read together with the Uversa Press
       index. Every paragraph carries in its margin the index entries that cite it,
       so the index works in both directions at once: from a concept into the text,
       and from any passage back to everything the index has to say about it.</p>
@@ -34,10 +34,10 @@
 
   <h2>Other ways in</h2>
   <ul class="ways">
-    <li><a href="/index">The index</a> — {{ '{:,}'.format(stats.az_entries) }}
+    <li class="ix"><a href="/index">The index</a> — {{ '{:,}'.format(stats.az_entries) }}
       entries under {{ '{:,}'.format(stats.headwords) }} headwords, each opening onto the
       passages it cites.</li>
-    <li><a href="/appendix">The appendices</a> — a chronology of
+    <li class="ix"><a href="/appendix">The appendices</a> — a chronology of
       {{ '{:,}'.format(stats.app_events) }} dated events, and the
       {{ '{:,}'.format(stats.app_names) }} beings, persons and places the book names.</li>
     <li><a href="/lists">Lists</a> — of the <a href="/lists/1955">1955 readings</a>,
@@ -68,7 +68,7 @@
   apparatus notes every place where the text differs from the first printing of
   1955, {{ stats.variants_1955 }} in all, and gives the 1955 reading beneath
   each.</p>
-  <p>The index is the Uversa Press index, revised with numerous corrections for
+  <p class="ix">The index is the Uversa Press index, revised with numerous corrections for
   the third edition, 2026, where it is bound together with the text in a single
   volume. Its {{ '{:,}'.format(stats.citations) }} references, reaching
   {{ '{:,}'.format(stats.citation_targets) }} places in the text, compiled and

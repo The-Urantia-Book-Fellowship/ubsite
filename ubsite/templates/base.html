@@ -45,7 +45,7 @@ window.ubDefaults = {{ settings_defaults|tojson }};
     placeholder="a word, or a citation like 101:4.2" autocomplete="off"></form>
   <nav>
     <a href="/read">Contents</a>
-    <a href="/index">Index</a>
+    <a class="ix" href="/index">Index</a>
     <button class="theme" type="button" aria-label="Theme">◐</button>
     {#- Hidden until ub.js runs: with JavaScript off there is nothing to set. #}
     <button class="gear" type="button" aria-label="Settings" aria-haspopup="dialog" hidden>
@@ -78,7 +78,7 @@ window.ubDefaults = {{ settings_defaults|tojson }};
 <div id="offmenu" class="offmenu" popover hidden>
   <p class="net"><span class="conn">Online</span> <span class="host"></span></p>
   <p class="what">Work offline
-    <small>the book, its index, every headword read through, the 1955 readings, and search:
+    <small>the book,<span class="ix"> its index, every headword read through,</span> the 1955 readings, and search:
     all but the audio recordings</small></p>
   <p class="state" aria-live="polite"></p>
   <p class="remove" hidden><button type="button" class="drop">Remove the offline copy</button></p>
