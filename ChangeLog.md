@@ -1,6 +1,6 @@
 # Changelog
 
-What has changed in ubsite, the reader of *The Urantia Book* read together with its index, at https://ubsite.ddns.net and https://ubsite.sigmaai.au. The newest is at the top.
+What has changed in *ubsite*, *The Urantia Book* read together with its index, at https://ubsite.ddns.net and https://ubsite.sigmaai.au. The newest is at the top.
 
 The form follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). A release will be a tag `vX.Y.Z` on `main`, numbered by [Semantic Versioning](https://semver.org/spec/v2.0.0.html): the first number goes up when anything that reads `var/ub.db`, the text API or the class names in a paragraph's stored HTML has to change; the second when something is added; the third for a fix. Until the first release, everything is under Unreleased.
 
@@ -8,15 +8,25 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ## [Unreleased]
 
+### Added
+
+- A Changelog link at the foot of every page opens this changelog, each change with the day it was made; What's new links to it too.
+
 ### Changed
 
 - Update now, in the offline menu, reloads the page once the update is in, and brings with it the part of the site that answers offline, so that nothing needs reloading by hand, even when you go offline straight after.
+- When the offline copy is up to date, its menu now gives the date of the site it keeps, as it already did when the copy was out of date.
+- Dates are written the American way, month first: October 18.
+- The footer is two lines: the edition and its licence, with a link to this changelog, and that the site is not affiliated with Urantia Foundation.
+- The licence of Goudy, the book's typeface, is linked from Settings, beside the typeface.
 
 ### For developers
 
 - The site's What's new is read from this file (`offline/news.py`), each entry dated by the commit that wrote its line. Before this file began, it listed the subjects of the commits that touched `ubsite/`, `offline/`, `build/` or `data/`, and copies made before then still see those.
+- `var/ub.db` has a new table, `changelog`: this file block by block, which `/changelog` shows as written, each entry dated by the commit that wrote it, since the hosts have no `.git`. `build/changelog.py` makes it, and `offline/news.py` now reads the file through it, so What's new and the page cannot disagree.
+- The footer no longer names the commits the text and the index were built from, nor links them on GitHub, their repositories being private; `/healthz` still names them. Nor does it name the typeface, say that other sites may sync with the text, or say how visits are counted.
 
-## The site on 18 October 2026, when this changelog began
+## The site on October 18, 2026, when this changelog began
 
 Not a release, and not news: what the site was when this file began, for whoever starts reading here.
 

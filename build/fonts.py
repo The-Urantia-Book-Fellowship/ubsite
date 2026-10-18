@@ -68,6 +68,7 @@ def corpus_codepoints(con) -> set[str]:
               "SELECT title FROM appendix",             # an appendix chip's label
               "SELECT label FROM chronology_event",     # its year and month too
               "SELECT text FROM footnote",
+              "SELECT text FROM changelog",             # /changelog
               # The SRT Committee's reasons a 1955 note shows, and those of the
               # note it refers to.
               "SELECT verdict || why_text FROM srt_item WHERE id IN"

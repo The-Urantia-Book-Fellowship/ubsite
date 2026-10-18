@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block title %}Changelog{% endblock %}
+{#- ChangeLog.md as written, as app.py changelog() arranges it (Tigran,
+    2026-10-18): every block in the file's order, each entry in a version with
+    the day it was written, and what is for developers folded where it stands.
+    What's new, in the offline menu, lists the same entries for readers, those
+    after a reader's copy. #}
+{%- macro draw(bs) %}{% for b in bs %}
+  {%- if b.kind in ('h1', 'h2', 'h3') %}
+<{{ b.kind }}>{{ b.html }}</{{ b.kind }}>
+  {%- elif b.kind == 'p' %}
+<p>{{ b.html }}</p>
+  {%- elif b.kind == 'ul' %}
+<ul>{% for e in b["items"] %}
+  <li>{{ e.html }}{% if e.day %} <small class="day">{{ e.day }}</small>{% endif %}</li>{% endfor %}
+</ul>
+  {%- elif b.kind == 'dev' %}
+<details class="dev"><summary>{{ b.summary }}</summary>
+{{- draw(b.blocks) }}
+</details>
+  {%- endif %}
+{%- endfor %}{% endmacro %}
+{% block body %}<main class="prose changelog">
+{{- draw(blocks) }}
+</main>{% endblock %}

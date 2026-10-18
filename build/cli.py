@@ -137,6 +137,9 @@ def main(argv: list[str]) -> int:
         from . import audio
         audio_stats = audio.load_audio(con, report)
         audio_stats["speech_units"] = n_speech
+        print("changelog ...")
+        from . import changelog
+        print(f"  {changelog.load(con)} lines of ChangeLog.md, for /changelog")
         print("fonts ...")
         from . import fonts
         for name, (size, glyphs) in fonts.build(
@@ -153,10 +156,10 @@ def main(argv: list[str]) -> int:
             print(f"  unchanged at version {text_version}")
         con.execute("INSERT INTO build VALUES (1, ?, 3, 0)",
                     (time.strftime("%Y-%m-%dT%H:%M:%S"),))
-        # The commits this database was read from: the footer and /healthz show
-        # them, so the live site can say which index it carries, and the footer
-        # links each to its page.  Only the repos the build reads; study joins
-        # when Phase 6 imports it.
+        # The commits this database was read from: /healthz shows them, so the
+        # live site can say which index it carries (the footer did too, with a
+        # link to each, until 2026-10-18).  Only the repos the build reads;
+        # study joins when Phase 6 imports it.
         con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
                         [(k, repos[k]["commit"], int(repos[k]["dirty"]), repos[k]["rev"],
                           repos[k]["date"], repos[k]["commit_url"]) for k in ("press", "index")])
@@ -170,8 +173,8 @@ def main(argv: list[str]) -> int:
         for k in ("press", "index"):
             if repos[k]["commit_url"] and not repos[k]["pushed"]:
                 report.warn("source-not-pushed", f"{k} {repos[k]['commit'][:7]}",
-                            "on no remote branch as of the last fetch: the footer's"
-                            " link to it is a 404 until it is pushed")
+                            "on no remote branch as of the last fetch: /healthz names"
+                            " a commit nobody else can fetch until it is pushed")
         for k, q in [
                 ("papers", "SELECT COUNT(*) FROM paper"),
                 ("sections", "SELECT COUNT(*) FROM section"),

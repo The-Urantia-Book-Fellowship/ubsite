@@ -137,29 +137,20 @@ window.ubDefaults = {{ settings_defaults|tojson }};
 </dialog>
 {% block body %}{% endblock %}
 <footer>
-  {#- The commit each source was built from: which text and which index this is.
-      Shown as the commit's date, linked to its page when sources.toml gives the
-      repository a url; the full id is in the tooltip. #}
-  {%- macro rev(r) %}{% if r %} <span class="rev" title="built from commit {{ r.commit }}
-    {%- if r.date %} of {{ r.date }}{% endif %}{% if r.dirty %}, with uncommitted changes{% endif %}">(
-    {%- if r.url %}<a href="{{ r.url }}" target="_blank" rel="noopener">{% endif %}{{ r.date or r.commit[:7] }}{% if r.url %}</a>{% endif %}
-    {%- if r.dirty %}, dirty{% endif %})</span>{% endif %}{% endmacro %}
-  {%- set src = sources() %}
-  {#- The typeface the text is in, as Settings' Typeface chose it: ub.css shows
-      the one sentence of the three that is true (Tigran, 2026-10-16). #}
-  <p>Text{{ rev(src.press) }}: the Uversa Press edition, which other sites may
-     <a href="/api">sync with their own</a>. Index{{ rev(src.index) }}: the
-     Uversa Press index as revised for the third edition.
-     <span class="setin goudy">Set in UB&nbsp;Goudy (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>).</span>
-     <span class="setin serif">Set in this device’s own serif.</span>
-     <span class="setin sans">Set in this device’s own sans-serif.</span></p>
-  {#- What the site's terms say: the text is public domain, the edition as a whole
-      is not (Tigran, 2026-10-14, after Harry's condition for Work offline). #}
-  <p>The text of <i>The Urantia Book</i> is in the public domain. The Uversa Press
-     edition as a whole, with its index, is licensed under
-     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">CC&nbsp;BY-NC-SA&nbsp;4.0</a>.</p>
-  <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.
-     Visits are counted without cookies, and no IP address is kept.</p>
+  {#- Which text and which index this is, and the site's terms: the text is in
+      the public domain, the edition as a whole is not (Tigran, 2026-10-14,
+      after Harry's condition for Work offline); one sentence since 2026-10-18,
+      with the changelog after it.  Until then the footer also gave each
+      source's commit date, linked to its private repository on GitHub, which
+      /healthz still names; said that other sites may sync with the text, which
+      the home page's link to /api says; named the typeface the text is in,
+      whose licence is now beside it in Settings; and said how visits are
+      counted. #}
+  <p>The Uversa Press edition of <i>The Urantia Book</i>, with the Index and Appendices
+     as revised for the third edition, is licensed as a whole under
+     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">CC&nbsp;BY-NC-SA&nbsp;4.0</a>;
+     its text is in the public domain. <a href="/changelog">Changelog</a>.</p>
+  <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.</p>
 </footer>
 <script src="{{ asset('ub.js') }}" defer></script>
 {% block scripts %}{% endblock %}

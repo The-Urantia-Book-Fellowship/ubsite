@@ -167,9 +167,10 @@ function database(c) {
 // ---- Answering -----------------------------------------------------------
 var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
               'October', 'November', 'December'];
+// "October 18, 2026", in the American order, as offline.js writes it.
 function day(iso) {
   var d = new Date(iso);
-  return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
 }
 function respond(c, r) {
   if (r.location) return Response.redirect(new URL(r.location, location).href, r.status);

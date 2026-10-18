@@ -31,9 +31,11 @@
                 'October', 'November', 'December'];
 
   function mb(n) { return Math.max(0.1, n / 1e6).toFixed(1) + ' MB'; }
+  // "October 18": the American order, as the site writes every date in words
+  // (Tigran, 2026-10-18).
   function day(iso) {
     var d = new Date(iso);
-    return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()];
+    return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate();
   }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
   function ask(cmd, more) {
@@ -96,8 +98,9 @@
                        (err ? '<br>The last update stopped: ' + err + '.' : '');
       mark('stale', 'An update to the offline copy is waiting (' + mb(up.fetch) + ')');
     } else {
-      line.textContent = 'Up to date: the text of ' + day(have.text.date) + ' and the index of ' +
-                         day(have.index.date) + ', ' + mb(have.bytes) + ' in this browser. ' +
+      line.textContent = 'Up to date: kept as the site was on ' + day(have.made) + ', with the text of ' +
+                         day(have.text.date) + ' and the index of ' + day(have.index.date) + ', ' +
+                         mb(have.bytes) + ' in this browser. ' +
                          'Without a connection, the site reads from it by itself.';
       mark('kept');
     }
@@ -134,7 +137,8 @@
   // a line where the text or the index is newer than the copy's, never their
   // own commits (Tigran, 2026-10-14).  A popup over the menu, which stays open
   // beneath it with its Update button: a popover inside the menu's, so the
-  // browser counts it the menu's own.
+  // browser counts it the menu's own.  At its foot, the whole changelog, the
+  // page /changelog (2026-10-18).
   var news = document.createElement('div');
   news.id = 'offnews';
   news.className = 'offnews';
@@ -149,7 +153,8 @@
       '<button type="button" class="x" popovertarget="offnews" popovertargetaction="hide" aria-label="Close" ' +
       'title="Close"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>' +
       '</svg></button></div><p class="since">' + (have ? 'Since your copy, kept as the site was on ' + day(have.made) + ':'
-                                                       : '') + '</p><div class="days">…</div>';
+                                                       : '') + '</p><div class="days">…</div>' +
+      '<p class="all"><a href="/changelog">The whole changelog</a></p>';
     var out = news.querySelector('.days');
     if (!have) { out.textContent = ''; return; }
     fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {

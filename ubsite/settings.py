@@ -19,6 +19,8 @@ is set where it is used.
 
 from __future__ import annotations
 
+from markupsafe import Markup
+
 # (key, kind, label, default, choices, hint).  kind: 'switch' (a checkbox),
 # 'segmented' (a row of radio buttons), 'radio' (a list of them), 'select'.
 # A choice is (value, label, hint, css class).
@@ -49,9 +51,12 @@ READING = [
       ("looser", "", "Looser", "sp4")], ""),
     # UB Goudy is the book's own face.  Its x-height is small, and some readers
     # will want one that reads larger at the same size; the other two are the
-    # device's own, so nothing more is downloaded.
+    # device's own, so nothing more is downloaded.  Goudy's licence, the OFL,
+    # is linked from its hint; until 2026-10-18 the footer named the face the
+    # text was in, with it (Tigran).
     ("face", "radio", "Typeface", "goudy",
-     [("goudy", "Goudy", "the book's own typeface", "face-goudy"),
+     [("goudy", "Goudy", Markup('the book’s own typeface (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>)'),
+       "face-goudy"),
       ("serif", "A plainer serif", "", "face-serif"),
       ("sans", "Sans-serif", "", "face-sans")], ""),
     # Measured keeps the line near 68 characters and the page in a frame of its

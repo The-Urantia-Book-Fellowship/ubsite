@@ -17,6 +17,7 @@ the icon at the header's corner and its menu do what they say.
 
 from __future__ import annotations
 
+import datetime
 import gzip
 import hashlib
 import json
@@ -235,12 +236,16 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         t = time.time()
         pg.click("#offmenu .keep")
         wait_state(pg, "t.startsWith('Up to date')", 120000)
-        print(f"  downloaded in {time.time() - t:.1f} s: " + pg.inner_text(STATE))
+        said = pg.inner_text(STATE)
+        print(f"  downloaded in {time.time() - t:.1f} s: " + said)
         ok(icon(pg)["have"] == "kept", f"the icon says a copy is kept ({icon(pg)['title']!r})")
         pg.click(ICON)
         ok(not pg.is_visible("#offmenu"), "the icon closes its menu again")
         m = json.loads((copy / "manifest.json").read_text())
-        used = pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
+        made = datetime.datetime.fromisoformat(m["made"].replace("Z", "+00:00"))
+        ok(f"kept as the site was on {made:%B} {made.day}, with the text of" in said,
+           "the menu says when the site was as the copy keeps it")
+        used =pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
         print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
         ok(used < m["bytes"] * 1.25, "it keeps the copy gzipped, as it came")
 
@@ -249,7 +254,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         urls = ["/101:4", "/101:4.2-3", "/i/god", "/appendix/A", "/lists/1955", "/index/G", "/", "/read",
                 "/part/2", "/search?q=prayer", "/search?q=self-conscious&in=text", "/search?q=Badanon&in=notes",
                 "/i/jesus/read", "/i/prayer/read/theme",
-                "/rail/120?v=1", "/static/fonts/UBGoudy.woff2", "/speech/101:4", "/speech/0:0"]
+                "/rail/120?v=1", "/static/fonts/UBGoudy.woff2", "/speech/101:4", "/speech/0:0", "/changelog"]
         for u in urls:
             with urllib.request.urlopen(BASE + u) as r:
                 want[u] = r.read()
@@ -368,7 +373,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=5000)
         said = pg.inner_text("#offnews")
         print("  " + " | ".join(said.split("\n")))
-        ok(f"A change made for this test, number {change.n}" in said and f"{24 + change.n} December" in said
+        ok(f"A change made for this test, number {change.n}" in said and f"December {24 + change.n}" in said
            and pg.locator("#offnews li").count() == 1,
            "What's new lists the change made after the copy, and nothing older")
         ok(pg.is_visible("#offmenu .get"), "with the menu and its Update button still open beneath it")

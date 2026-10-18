@@ -105,8 +105,8 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # the page chooses).  The sizes are bands, since the index grows as it is
 # edited.
 [offline]
-measured_on = "2026-10-15"
-pages       = 10283      # 1,626 sections, 4,736 headwords, 27 index letters, 16 more, 3,878 reading paths
+measured_on = "2026-10-18"
+pages       = 10284      # 1,626 sections, 4,736 headwords, 27 index letters, 17 more, 3,878 reading paths
 paths       = 3878       # 2,058 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
 chunks      = 392

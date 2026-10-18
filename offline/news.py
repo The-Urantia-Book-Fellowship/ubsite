@@ -20,90 +20,33 @@ holds: a change to the news alone offers no update.
 from __future__ import annotations
 
 import datetime
-import pathlib
-import re
 import subprocess
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-CHANGELOG = ROOT / "ChangeLog.md"
+from build import changelog
+
+ROOT = changelog.ROOT
+CHANGELOG = changelog.CHANGELOG
 # Before ChangeLog.md, what a reader is sent came from these; a commit touching
 # only the notes, the tests, the tools, the EPUB, the deploy or vendor/ was
 # not news to them.
 PATHS = ("ubsite", "offline", "build", "data")
 LIMIT = 200
 
-FOR_READERS = {"Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"}
-FOR_DEVELOPERS = "For developers"
-RE_VERSION = re.compile(r"^## \[(?:Unreleased|\d+\.\d+\.\d+)\](?: - \d{4}-\d\d-\d\d)?$")
-# What's new shows an entry as text, so Markdown would show as written.
-RE_MARKUP = re.compile(r"[`*\[\]<>]")
-
 
 def entries(text: str) -> list[tuple[int, str]]:
-    """(line, words) of each entry for readers, in the file's order.
-
-    Raises on what What's new could not show, or would silently miss: a
-    heading of a version that is neither for readers nor for developers, an
-    entry that is not one line begun by "- ", or one with Markdown in it.
-    A `##` that is not a version, such as where the file began, is not news.
-    """
-    out = []
-    version = heading = None
-    for i, line in enumerate(text.splitlines(), 1):
-        if line.startswith("## "):
-            version, heading = RE_VERSION.match(line), None
-        elif line.startswith("### "):
-            heading = line[4:].strip()
-            if version and heading not in FOR_READERS | {FOR_DEVELOPERS}:
-                raise ValueError(f"ChangeLog.md:{i}: {heading!r} is not a heading of Keep a"
-                                 f" Changelog, nor {FOR_DEVELOPERS!r}")
-        elif version and heading in FOR_READERS and line.strip():
-            if not line.startswith("- "):
-                raise ValueError(f"ChangeLog.md:{i}: an entry for readers is one line, begun by '- '")
-            words = line[2:].strip()
-            if RE_MARKUP.search(words):
-                raise ValueError(f"ChangeLog.md:{i}: an entry for readers is plain text,"
-                                 f" shown as written: {words!r}")
-            out.append((i, words))
-    return out
+    """(line, words) of each entry for readers, in the file's order: as
+    build/changelog.py parses the file for the page /changelog, which raises
+    on what What's new could not show, or would silently miss."""
+    return [(x.line, x.words) for x in changelog.parse(text)
+            if x.part == "readers" and x.kind == "entry"]
 
 
-def _git(*args: str) -> str:
-    return subprocess.run(["git", "-C", str(ROOT), *args],
-                          capture_output=True, text=True, check=True).stdout
+_git = changelog._git
 
 
 def _item(when: datetime.datetime, words: str) -> dict:
     t = when.astimezone(datetime.timezone.utc)
     return {"t": t.strftime("%Y-%m-%dT%H:%M:%SZ"), "d": when.date().isoformat(), "s": words}
-
-
-def _written() -> dict[int, datetime.datetime]:
-    """When each line of ChangeLog.md was written: its commit's time, where it
-    was made.  A line not yet committed is written now; -M follows a line
-    moved within the file, as entries are when a release is cut."""
-    try:
-        out = _git("blame", "--porcelain", "-M", "--", CHANGELOG.name)
-    except subprocess.CalledProcessError:   # not yet committed at all
-        return {}
-    when, line, commits = {}, 0, {}
-    sha = None
-    for row in out.splitlines():
-        m = re.match(r"^([0-9a-f]{40}) \d+ (\d+)", row)
-        if m:
-            sha, line = m[1], int(m[2])
-            commits.setdefault(sha, {})
-        elif row.startswith("committer-time "):
-            commits[sha]["time"] = int(row.split()[1])
-        elif row.startswith("committer-tz "):
-            tz = row.split()[1]
-            sign = -1 if tz[0] == "-" else 1
-            commits[sha]["tz"] = datetime.timezone(
-                sign * datetime.timedelta(hours=int(tz[1:3]), minutes=int(tz[3:5])))
-        elif row.startswith("\t"):
-            c = commits[sha]
-            when[line] = datetime.datetime.fromtimestamp(c["time"], c["tz"])
-    return when
 
 
 def news() -> dict:
@@ -115,7 +58,7 @@ def news() -> dict:
     except (OSError, subprocess.CalledProcessError):
         return {"items": [], "earlier": False}
     now = datetime.datetime.now().astimezone()
-    written = _written()
+    written = changelog.written()
     items = [_item(written.get(i, now), words)
              for i, words in entries(CHANGELOG.read_text(encoding="utf-8"))]
     # What came before the changelog: the commits before the one that began it.

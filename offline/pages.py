@@ -122,7 +122,7 @@ def universe(con: sqlite3.Connection) -> dict:
         "SELECT paper_n, section_n, MAX(para_n) FROM paragraph GROUP BY paper_n, section_n")}
     misc = (["/", "/read", "/index", "/appendix"]
             + [f"/appendix/{r[0]}" for r in con.execute("SELECT letter FROM appendix ORDER BY letter")]
-            + ["/lists", "/lists/1955"]
+            + ["/lists", "/lists/1955", "/changelog"]
             + [f"/part/{r[0]}" for r in con.execute("SELECT n FROM part ORDER BY n")])
     return {"papers": papers, "letters": letters, "slugs": slugs, "paths": paths,
             "lasts": lasts, "misc": misc}

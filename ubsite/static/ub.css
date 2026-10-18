@@ -155,12 +155,6 @@ a:hover { text-decoration-thickness: 2px; }
 footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1rem;
   font-size: .88rem; color: var(--faint); }
 footer p { margin: .2rem 0; }
-/* The footer names the typeface the text is in: Goudy, or the device's own
-   when Settings' Typeface chose it (Tigran, 2026-10-16). */
-footer .setin:is(.serif, .sans),
-:root:is([data-face="serif"], [data-face="sans"]) footer .setin.goudy { display: none; }
-:root[data-face="serif"] footer .setin.serif,
-:root[data-face="sans"] footer .setin.sans { display: inline; }
 
 /* ---- the reader -------------------------------------------------------- */
 /* The gap is the gutter the paragraph references stand in: 118:10.13 is 3.3rem. */
@@ -871,6 +865,7 @@ dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5
 .offnews ul { margin: 0; padding-left: 1.1rem; }
 .offnews li { margin: .2rem 0; }
 .offnews .earlier, .offnews .days > p { margin: .8rem 0 0; color: var(--faint); font-size: .88rem; }
+.offnews .all { margin: .8rem 0 0; font-size: .88rem; }
 /* A page the offline copy answered (static/sw.js) says so, and of when. */
 footer[data-copy]::before { content: "This page is from the offline copy of " attr(data-copy) ".";
   display: block; margin-bottom: .3rem; }
@@ -879,6 +874,16 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
 .prose { max-width: 62ch; margin: 0 auto; padding: 2rem 1rem 0; }
 .concept { max-width: 86ch; }
 .lead { font-size: 1.05rem; }
+/* The changelog (/changelog): ChangeLog.md as written, each entry in a
+   version with its day, what is for developers folded where it stands. */
+.changelog h2 { margin-top: 2.2rem; }
+/* A ###, under the small-caps h2, never larger than it. */
+.changelog h3, .changelog summary { font-size: 1em; font-weight: 400; font-style: italic;
+  margin: 1.4rem 0 .3rem; }
+.changelog summary { cursor: pointer; }
+.changelog li { margin: .3rem 0; }
+.changelog .day { color: var(--faint); font-size: .8em; white-space: nowrap; }
+.changelog code { font-size: .88em; }
 .cta { display: inline-block; margin: .4rem 1rem .4rem 0; }
 .counts { display: flex; gap: 2rem; flex-wrap: wrap; margin: 1.6rem 0; }
 .counts dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); }

@@ -12,6 +12,7 @@ them together; the margin index folds where it stands (templates/_fold.html).
 
 from __future__ import annotations
 
+import datetime
 import functools
 import gzip
 import hashlib
@@ -271,8 +272,8 @@ def _sources(mtime_ns: int) -> dict:
             " FROM build_source").fetchall()
     except sqlite3.Error:
         # A database from before build_source or its commit_url -- a --no-data
-        # deploy of this code over an older ub.db.  The footer then omits the
-        # commits; every page turning into a 500 would be the worse failure.
+        # deploy of this code over an older ub.db.  /healthz then omits the
+        # commits; turning into a 500 would be the worse failure.
         return {}
     return {r["repo"]: {"commit": r["commit_id"], "dirty": bool(r["dirty"]),
                         "date": r["committed_at"], "url": r["commit_url"]} for r in rows}
@@ -289,8 +290,6 @@ def sources() -> dict:
     except OSError:
         return {}
 
-
-T.env.globals["sources"] = sources
 
 
 @functools.lru_cache(maxsize=4)
@@ -897,6 +896,47 @@ def list_1955(request: Request):
         groups[-1]["rows"].append(_old_hit(n, Markup(n["html"]), dec=n["verdict"]))
     return page(request, "list_1955.html", groups=groups,
                 n=sum(len(g["rows"]) for g in groups))
+
+
+# The changelog, ChangeLog.md as build/changelog.py put it in the database
+# (Tigran, 2026-10-18): the file as written, every block in its order, each
+# entry in a version with the day it was written, and what is for developers
+# folded where it stands.  What's new lists the same entries for readers, those
+# after a reader's copy.  The footer links it from every page.
+def us_date(iso: str) -> str:
+    """"October 18, 2026": the site writes a date in words in the American
+    order (Tigran, 2026-10-18), as offline.js and sw.js do."""
+    d = datetime.date.fromisoformat(iso)
+    return f"{d:%B} {d.day}, {d.year}"
+
+
+def _blocks(rows) -> list[dict]:
+    """[{kind: h1 h2 h3 p ul dev, ...}] in the file's order: a run of entries is
+    one list, and what stands under For developers one folded block."""
+    out: list[dict] = []
+    into = out
+    for r in rows:
+        k, h = r["kind"], Markup(r["html"])
+        if k in ("h1", "h2", "h3"):
+            into = out
+            if k == "h3" and r["part"] == "developers":
+                out.append({"kind": "dev", "summary": h, "blocks": []})
+                into = out[-1]["blocks"]
+                continue
+            out.append({"kind": k, "html": h})
+        elif k == "para":
+            into.append({"kind": "p", "html": h})
+        else:
+            if not into or into[-1]["kind"] != "ul":
+                into.append({"kind": "ul", "items": []})
+            into[-1]["items"].append({"html": h, "day": r["version"] and us_date(r["written"])})
+    return out
+
+
+@app.get("/changelog", response_class=HTMLResponse)
+def changelog(request: Request):
+    rows = db().execute("SELECT * FROM changelog ORDER BY line").fetchall()
+    return page(request, "changelog.html", blocks=_blocks(rows))
 
 
 # The passage /api shows a reply for: across a section's end, so that the reply
