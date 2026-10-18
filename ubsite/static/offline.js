@@ -12,8 +12,9 @@
 //   busy    {done, total} in bytes while downloading
 //   error   why the last download stopped
 //
-// Downloading registers the worker, which fetches the copy; removing it
-// removes the copy and unregisters the worker.  Nothing else does: the copy
+// Downloading registers the worker, which fetches the copy; updating asks for
+// the site's worker first, and reloads the page once the copy is in; removing
+// it removes the copy and unregisters the worker.  Nothing else does: the copy
 // stays through going offline and online again, and the worker answers from
 // it whenever the network does not.  An out-of-date copy is said, with what
 // the update costs, whenever the menu shows it, and the icon has the flame's
@@ -178,12 +179,38 @@
   }
 
   // A download that stopped asks whether the site is still there: if not, its
-  // buttons go with it, rather than come back to do nothing again.
-  function get() {
+  // buttons go with it, rather than come back to do nothing again.  An update
+  // that ends whole reloads this page, so that it is the new one too, playing
+  // or not (Tigran, 2026-10-18); while What's new is open, once it closes.
+  function get(update) {
     return ask('get').then(function (s) {
       show(s);
       if (s && s.error) fresh();
+      else if (update) reload();
     });
+  }
+  function reload() {
+    if (news.matches(':popover-open'))
+      return news.addEventListener('toggle', function (ev) { if (ev.newState === 'closed') reload(); });
+    history.scrollRestoration = 'auto';   // listen.js may have set it to manual
+    location.reload();
+  }
+  // The site's worker, asked for before an update and waited for, so that the
+  // new one, if there is one, fetches the copy and answers every page after.
+  // The browser itself looks only as a page loads online: an app kept open
+  // across a deploy would otherwise take the copy with the old worker, and a
+  // reader going offline at once would keep it.
+  function newest() {
+    return sw.getRegistration('/').then(function (reg) {
+      return reg && reg.update().then(function () {
+        var w = reg.installing || reg.waiting;
+        return w && new Promise(function (resolve) {
+          var done = function () { if (w.state === 'activated' || w.state === 'redundant') resolve(); };
+          w.addEventListener('statechange', done);
+          done();
+        });
+      });
+    }).catch(function () {});
   }
   function on() {
     line.textContent = 'Starting…';
@@ -208,8 +235,9 @@
     else if (b.classList.contains('get')) {
       // Said here at once, not left to the worker: the button goes, so a
       // second tap cannot look as if it did nothing.
+      var update = !!(last && last.have);
       show(Object.assign({}, last || {}, { busy: { done: 0, total: 0 }, removed: false }));
-      get();
+      newest().then(function () { return get(update); });
     } else if (b.classList.contains('app') && window.ubInstall) {
       window.ubInstall.prompt();
       window.ubInstall.userChoice.then(function () { window.ubInstall = null; installed(); });

@@ -1,7 +1,7 @@
 """Work offline, end to end, in Chrome: turn it on, read and search with the
-network off, learn of a newer copy and take it, survive an update that fails,
-say offline while the site is gone though the browser is online, and turn it
-off.
+network off, learn of a newer copy and take it, with the site's newer worker,
+the page reloading itself after, survive an update that fails, say offline
+while the site is gone though the browser is online, and turn it off.
 
     make e2e          (make offline, then .venv/bin/python tools/offline_e2e.py)
 
@@ -34,13 +34,35 @@ from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BASE = "http://localhost:8131"
 SERVER = """
-import os, pathlib, sys
+import os, pathlib, sys, types
 os.environ["UB_VISITS"] = "off"
 sys.path.insert(0, sys.argv[2])
 import uvicorn
+from starlette.responses import Response
 import ubsite.app as A
 A.OFFLINE = pathlib.Path(sys.argv[1])
+TAG = A.OFFLINE.with_name("sw-tag")
+
+# A newer worker, while the test has written TAG: the site's, and TAG after it.
+@A.app.middleware("http")
+async def newer_worker(request, call_next):
+    if request.url.path != "/sw.js" or not TAG.exists():
+        return await call_next(request)
+    body = A.service_worker(types.SimpleNamespace(headers={})).body + TAG.read_bytes()
+    return Response(body, media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+
 uvicorn.run(A.app, host="127.0.0.1", port=8131, log_level="info")
+"""
+# What the newer worker adds: it says, in a cache of its own, that it was
+# installed, and that it was the worker asked to fetch the copy.
+NEWER = """
+self.addEventListener('install', function (e) {
+  e.waitUntil(caches.open('e2e').then(function (c) { return c.put('/installed', new Response('newer')); }));
+});
+self.addEventListener('message', function (e) {
+  if (e.data && e.data.cmd === 'get')
+    e.waitUntil(caches.open('e2e').then(function (c) { return c.put('/got', new Response('get')); }));
+});
 """
 
 fails: list[str] = []
@@ -108,11 +130,13 @@ KEPT = """async () => { const out = {gz: 0, have: 0};
   return out; }"""
 
 # What the page shows while an update runs, in the menu and on the icon's
-# label, each line once, as it changes.
-WATCH = """() => { window.shown = [];
+# label, each line once, as it changes; in sessionStorage too, which the
+# reload at its end keeps.
+WATCH = """() => { window.shown = []; sessionStorage.shown = '[]';
   const keep = () => { for (const t of [document.querySelector('#offmenu .state').textContent,
                                         document.querySelector('.top .offline').title])
-    if (!window.shown.includes(t)) window.shown.push(t); };
+    if (!window.shown.includes(t)) window.shown.push(t);
+    sessionStorage.shown = JSON.stringify(window.shown); };
   new MutationObserver(keep).observe(document.body, {subtree: true, childList: true, characterData: true,
                                                      attributes: true, attributeFilter: ['title']}); }"""
 
@@ -120,6 +144,19 @@ WATCH = """() => { window.shown = [];
 def wait_state(pg, test: str, timeout: int = 30000) -> None:
     """Until the menu's line passes `test`, a JavaScript expression in t."""
     pg.wait_for_function(f"(t => {test})(document.querySelector('{STATE}').textContent)", timeout=timeout)
+
+
+def update(pg, pressed=None, timeout: int = 60000) -> None:
+    """Tap Update now, which reloads the page once the copy is in, and open the
+    menu of the page it reloads to.  `pressed` runs at once after the tap."""
+    pg.evaluate("window.ubStay = 1")
+    with pg.expect_event("load", timeout=timeout):
+        pg.click("#offmenu .get")
+        if pressed:
+            pressed()
+    ok(not pg.evaluate("window.ubStay"), "the page reloads itself once the copy is in")
+    menu(pg)
+    wait_state(pg, "t.startsWith('Up to date')")
 
 
 def menu(pg) -> None:
@@ -296,8 +333,20 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         wait_state(pg, "t.includes('changed since')")
         print("  " + pg.inner_text(STATE))
         before = log.read_text().count("/offline/c/")
-        pg.click("#offmenu .get")
+        # With What's new open, the reload waits for it to close.  Tapping
+        # Update now beneath it closes it first; from the keyboard, it stays.
+        pg.click("#offmenu .newsbtn")
+        pg.wait_for_selector("#offnews", state="visible")
+        pg.evaluate("window.ubStay = 1")
+        pg.focus("#offmenu .get")
+        pg.keyboard.press("Enter")
         wait_state(pg, "t.startsWith('Up to date')", 60000)
+        pg.wait_for_timeout(500)
+        ok(pg.evaluate("window.ubStay") == 1 and pg.is_visible("#offnews"),
+           "with What's new open, the page is not reloaded when the update ends")
+        with pg.expect_event("load", timeout=10000):
+            pg.click("#offnews .x")
+        ok(not pg.evaluate("window.ubStay"), "but once it is closed")
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == 1, f"an update packs what it has rather than fetch it ({fetched} chunk fetched)")
         kept = pg.evaluate(KEPT)
@@ -346,11 +395,17 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.evaluate("caches.keys().then(k => k.some(n => n.startsWith('ub-copy-')))"),
            "online again, the copy is still kept, and the Update button is back")
         before = log.read_text().count("/offline/c/")
-        pg.click("#offmenu .get")
-        wait_state(pg, "t.startsWith('Up to date')")
+        # The site has a newer worker too, which no page loaded since has seen.
+        (copy.parent / "sw-tag").write_text(NEWER)
+        update(pg)
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == 1, f"the update fetched only what changed ({fetched} chunk)")
         ok(icon(pg)["have"] == "kept", "and the dot goes")
+        said = pg.evaluate("caches.open('e2e').then(c => Promise.all(['/installed', '/got'].map(u =>"
+                           " c.match(u).then(r => r && r.text()))))")
+        ok(said == ["newer", "get"], f"the site's newer worker came with it, and fetched the copy ({said})")
+        pg.evaluate("caches.delete('e2e')")
+        (copy.parent / "sw-tag").unlink()
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.goto(BASE + "/")
@@ -366,10 +421,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         print("  " + pg.inner_text(STATE))
         pg.evaluate(WATCH)
         before = log.read_text().count("/offline/c/")
-        pg.click("#offmenu .get")
-        ok(not pg.locator("#offmenu .get").count(), "the button goes as soon as it is pressed")
-        wait_state(pg, "t.startsWith('Up to date')", 60000)
-        shown = pg.evaluate("window.shown")
+        update(pg, lambda: ok(not pg.locator("#offmenu .get").count(), "the button goes as soon as it is pressed"))
+        shown = pg.evaluate("JSON.parse(sessionStorage.shown)")
         steps = [t for t in shown if t.startswith("Updating: ")]
         print(f"  {len(steps)} steps shown: {steps[:2]} … {steps[-1:]}")
         ok(len(steps) >= 3, "the menu shows the update going on")
@@ -386,10 +439,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/read")
         menu(pg)
         wait_state(pg, "t.includes('changed since')")
+        pg.evaluate("window.ubStay = 1")
         pg.click("#offmenu .get")
         wait_state(pg, "t.includes('stopped')")
         print("  " + pg.inner_text(STATE))
         ok(icon(pg)["have"] == "stale", "the icon still says an update is waiting")
+        ok(pg.evaluate("window.ubStay") == 1, "and the page is not reloaded")
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.goto(BASE + "/")

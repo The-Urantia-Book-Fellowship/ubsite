@@ -8,6 +8,10 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ## [Unreleased]
 
+### Changed
+
+- Update now, in the offline menu, reloads the page once the update is in, and brings with it the part of the site that answers offline, so that nothing needs reloading by hand, even when you go offline straight after.
+
 ### For developers
 
 - The site's What's new is read from this file (`offline/news.py`), each entry dated by the commit that wrote its line. Before this file began, it listed the subjects of the commits that touched `ubsite/`, `offline/`, `build/` or `data/`, and copies made before then still see those.
