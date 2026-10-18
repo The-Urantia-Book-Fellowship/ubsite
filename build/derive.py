@@ -160,8 +160,9 @@ def links(con, report) -> int:
       ("6. & 7. Secrets of Greatness and Souls of Goodness q.v.");
     * an Appendix B-F row's own name, when it is an A-Z headword
       (`appendix_head`, via 'name');
-    * the target of an Appendix B-F `See`.  An A-Z entry's See is not linked
-      here, because its concept page lists its cross-references as links.
+    * the target of every See and See also, A-Z and appendix alike -- to the
+      line it names when that is a subentry (`/i/mind#e...`).  A concept page
+      also gathers them under Cross-references, by the same `xref.href`.
 
     Mirrors the routes of load._resolve, so the part linked is the part that
     resolved: "1. administrative assistants" links its words, not its number.
@@ -216,24 +217,43 @@ def links(con, report) -> int:
             continue
         html[eid] = a(name, f"/i/{slug[head]}") + h[len(name):]
 
-    for eid, h, kind, target, head, deep, dlevel, danchor, where, line in con.execute(
-            "SELECT e.id, e.text_html, x.kind, x.target, x.head_entry_id,"
-            "       x.deep_entry_id, d.level, d.anchor, e.source_file, e.source_line"
+    # A clause can name 154 targets ("named philosophies"), so each is taken
+    # where it must stand -- just after its mark, or after the "; " that
+    # follows the one before -- never found by a search, which would match
+    # "God" inside "God the Father", or "love" inside an href just written.
+    # The line named is linked only when it is a subentry of the headword
+    # reached: `load._clean` drops parentheses, so "Jupiter (planet)" names
+    # "Jupiter (god)" as its line.
+    con.execute("ALTER TABLE xref ADD COLUMN href TEXT")
+    hrefs = []
+    at: dict[int, int] = {}
+    for xid, eid, h, kind, target, head, danchor, where, line in con.execute(
+            "SELECT x.id, e.id, e.text_html, x.kind, x.target, x.head_entry_id,"
+            "       d.anchor, e.source_file, e.source_line"
             "  FROM xref x JOIN index_entry e ON e.id = x.entry_id"
             "  LEFT JOIN index_entry d ON d.id = x.deep_entry_id"
-            " WHERE e.scope <> 'az' AND x.kind IN ('see', 'seealso')"):
+            "   AND d.level > 1 AND d.root_id = x.head_entry_id"
+            " WHERE x.kind IN ('see', 'seealso') ORDER BY x.entry_id, x.ord"):
         h = html.get(eid, h)
         mark = "<i>See also</i> " if kind == "seealso" else "<i>See</i> "
-        i = h.find(mark)
-        j = h.find(target, i) if i >= 0 else -1
-        if j < 0 or head is None:
-            report.hard("appendix-see-unlinked", f"{where}:{line}", f"{h!r} -> {target!r}")
+        p = at.get(eid, 0)
+        if p and h.startswith("; ", p):
+            p += 2
+        else:
+            i = h.find(mark, p)
+            p = i + len(mark) if i >= 0 else -1
+        if p < 0 or not h.startswith(target, p) or head is None:
+            report.hard("see-unlinked", f"{where}:{line}", f"{h!r} -> {target!r}")
             continue
-        href = f"/i/{slug[head]}" + (f"#{danchor}" if deep and dlevel > 1 else "")
-        html[eid] = h[:j] + a(target, href) + h[j + len(target):]
+        href = f"/i/{slug[head]}" + (f"#{danchor}" if danchor else "")
+        link = a(target, href)
+        html[eid] = h[:p] + link + h[p + len(target):]
+        at[eid] = p + len(link)
+        hrefs.append((href, xid))
 
     con.executemany("UPDATE index_entry SET text_html=? WHERE id=?",
                     [(h, i) for i, h in html.items()])
+    con.executemany("UPDATE xref SET href=? WHERE id=?", hrefs)
     return len(html)
 
 

@@ -192,7 +192,7 @@ def index_file(con, links: H.Hrefs, e: jinja2.Environment, f: dict) -> Doc:
                         "text": f"Appendix {x['scope']}, {x['title']}"} for x in c["listed"]],
             "xrefs": [{"kind": "See also" if x["kind"] == "seealso" else "See",
                        "target": x["target"],
-                       "href": links.entry(x["slug"]) if x["slug"] else None}
+                       "href": links.site(x["href"]) if x["href"] else None}
                       for x in c["xrefs"]],
             "near": [{"href": links.entry(n["slug"]), "text": n["headword"]} for n in c["near"]],
         })

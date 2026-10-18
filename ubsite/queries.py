@@ -153,10 +153,10 @@ def concept(con: sqlite3.Connection, root_id: int) -> dict:
         "SELECT e.*, s.n_targets FROM index_entry e"
         " LEFT JOIN entry_stats s ON s.entry_id=e.id"
         " WHERE e.root_id=? ORDER BY e.ord", (root_id,)).fetchall()
-    # A q.v. is linked where it stands, in the tree; this list is See and See also.
+    # Every See, See also and q.v. is linked where it stands, in the tree; this
+    # list gathers the See and See also, each by the link it has there.
     xrefs = con.execute(
-        "SELECT x.kind, x.target, t.slug FROM xref x"
-        " LEFT JOIN index_entry t ON t.id=x.head_entry_id"
+        "SELECT x.kind, x.target, x.href FROM xref x"
         " WHERE x.entry_id IN (SELECT id FROM index_entry WHERE root_id=?)"
         "   AND x.kind IN ('see','seealso')"
         " ORDER BY x.kind, x.ord", (root_id,)).fetchall()

@@ -14,7 +14,7 @@
 </ul>
 {% if xrefs %}<h2>Cross-references</h2><ul class="xrefs">
 {% for x in xrefs %}<li><i>{{ 'See also' if x.kind=='seealso' else 'See' }}</i>
-  {% if x.slug %}<a href="/i/{{ x.slug }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}</li>{% endfor %}
+  {% if x.href %}<a href="{{ x.href }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}</li>{% endfor %}
 </ul>{% endif %}
 {% if near %}<h2>Cited alongside</h2>
 <p class="hint">Headwords that cite the same paragraphs as this one, commonest

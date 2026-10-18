@@ -99,6 +99,8 @@ INVARIANTS = [
     ("every q.v. names its headword with a link",
      """SELECT COUNT(*) FROM index_entry WHERE qv = 1
          AND text_html NOT LIKE '%<a class="hw" href="/i/%</a> <i>q.v.</i>'"""),
+    ("every See and See also has its link",
+     "SELECT COUNT(*) FROM xref WHERE kind IN ('see', 'seealso') AND href IS NULL"),
     ("every entry's root is a level-1 entry",
      """SELECT COUNT(*) FROM index_entry e JOIN index_entry r ON r.id = e.root_id
          WHERE r.level <> 1"""),
@@ -232,6 +234,47 @@ def run(con) -> int:
     print(f"            {k - loff}/{k} index links into the book land"
           + ("" if not loff else f"   {loff} FAIL"))
     if loff:
+        bad += 1
+    # A headword link -- a q.v., a See, an appendix name -- opens a concept
+    # page, and one to a line of it names a line that page holds.
+    under = {(s, a) for s, a in con.execute(
+        "SELECT r.slug, e.anchor FROM index_entry e JOIN index_entry r ON r.id = e.root_id"
+        " WHERE e.scope = 'az'")}
+    slugs = {s for s, _ in under}
+    k = hoff = 0
+    for (h,) in con.execute("SELECT text_html FROM index_entry"):
+        for s, a in re.findall(r'<a class="hw" href="/i/([^"#]*)(?:#([^"]*))?"', h):
+            k += 1
+            if s not in slugs or (a and (s, a) not in under):
+                hoff += 1
+                print(f"            headword link to nowhere: /i/{s}" + (f"#{a}" if a else ""))
+    print(f"            {k - hoff}/{k} headword links in the index land"
+          + ("" if not hoff else f"   {hoff} FAIL"))
+    if hoff:
+        bad += 1
+    # Each See and See also is linked where it stands, in the order written,
+    # by the link the concept page's Cross-references gives it.
+    want: dict[int, list[str]] = {}
+    for eid, target, href in con.execute(
+            "SELECT entry_id, target, href FROM xref"
+            " WHERE kind IN ('see', 'seealso') ORDER BY entry_id, ord"):
+        want.setdefault(eid, []).append(f'<a class="hw" href="{href}">{target}</a>')
+    k = woff = 0
+    for eid, h in con.execute("SELECT id, text_html FROM index_entry"):
+        if eid not in want:
+            continue
+        k += 1
+        p = 0
+        for link in want[eid]:
+            p = h.find(link, p)
+            if p < 0:
+                break
+            p += len(link)
+        if p < 0:
+            woff += 1
+    print(f"            {k - woff}/{k} entries link each See where it stands"
+          + ("" if not woff else f"   {woff} FAIL"))
+    if woff:
         bad += 1
     k = toff = 0
     for text, h in con.execute("SELECT title, title_html FROM section WHERE n > 0"):

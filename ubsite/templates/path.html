@@ -96,7 +96,7 @@
     <h2>Onward</h2>
     {%- for kind, xs in xrefs|groupby('kind') %}
     <p><i>{{ 'See also' if kind == 'seealso' else 'See' }}</i>
-      {% for x in xs %}{% if x.slug %}<a href="/i/{{ x.slug }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}{% if not loop.last %}; {% endif %}{% endfor %}</p>
+      {% for x in xs %}{% if x.href %}<a href="{{ x.href }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}{% if not loop.last %}; {% endif %}{% endfor %}</p>
     {%- endfor %}
     {%- if near %}
     <p>Cited alongside: {% for n in near %}<a href="/i/{{ n.slug }}">{{ n.headword }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
