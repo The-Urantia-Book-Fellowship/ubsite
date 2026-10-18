@@ -103,6 +103,7 @@ def _offline(links: H.Hrefs, html: str) -> str:
 
 def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
     secs = []
+    every = []   # the paper's 1955 readings, in reading order, for its end
     for s in con.execute("SELECT * FROM section WHERE paper_n=? ORDER BY n", (p["n"],)):
         rows = queries.section(con, p["n"], s["n"])
         paras = []
@@ -125,8 +126,8 @@ def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
                           "ref": q["ref"], "pc": bool(q["gap_before"]), "head": bool(q["heading"]),
                           "stars": q["sep_before"], "setoff": bool(q["setoff"]),
                           "html": html,
-                          "chips": [_chip(links, c) for c in rows["citers"].get(q["id"], [])],
-                          "notes": notes})
+                          "chips": [_chip(links, c) for c in rows["citers"].get(q["id"], [])]})
+            every += notes
         # Set as the site sets them (queries.section): a paragraph alone, or a
         # block of verse as one, the entries citing its lines after it.
         by_id = {q["id"]: d for q, d in zip(rows["paras"], paras)}
@@ -139,7 +140,7 @@ def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
                               for r in rows["rows"]]})
     title = p["title"] if p["n"] == 0 else f"{p['n']}. {p['title']}"
     return Doc(H.paper_file(p["n"]), title,
-               e.get_template("paper.xhtml").render(paper=p, sections=secs))
+               e.get_template("paper.xhtml").render(paper=p, sections=secs, notes=every))
 
 
 def part(e: jinja2.Environment, r) -> Doc:

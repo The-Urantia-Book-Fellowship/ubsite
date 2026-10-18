@@ -109,8 +109,11 @@ p.ix a { color: #555; }
 /* The entries citing the whole section, under its title. */
 .blanket { margin: .4em 0 .8em; }
 
-/* The 1955 readings: a pop-up where the reader offers one, else a small line. */
+/* The 1955 readings: a pop-up where the reader offers one, at the foot of the
+   page in KOReader, and at the end of the paper, where they all stand.  No
+   heading or rule above them: a reader that hides them would draw it alone. */
 a.fn { font-size: .75em; vertical-align: super; line-height: 0; }
+div.notes { margin-top: 2em; }
 aside.note p {
   font-size: .8em;
   margin: .2em 0 0 1.5em;

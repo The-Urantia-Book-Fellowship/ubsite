@@ -147,9 +147,13 @@ def run(con, path: pathlib.Path) -> int:
     seen_p, off = set(), []
     papers = sections = notes = noterefs = 0
     chips_para = chips_blanket = 0
+    # A paper's notes stand after all its text, in the order of their markers:
+    # one under its paragraph KOReader drew twice on a page.
+    misplaced = []
     for name, root in docs.items():
         if not re.match(r"^p\d{3}\.xhtml$", name):
             continue
+        refs, asides, text_after = [], [], False
         for el in root.iter():
             c = classes(el)
             if el.tag == f"{X}section" and "paper" in c:
@@ -161,14 +165,19 @@ def run(con, path: pathlib.Path) -> int:
                         chips_blanket += sum(1 for _ in b.iter(f"{X}a"))
             elif el.tag == f"{X}aside" and el.get(f"{EPUB}type") == "footnote":
                 notes += 1
+                asides.append(el.get("id"))
             elif el.tag == f"{X}a" and el.get(f"{EPUB}type") == "noteref":
                 noterefs += 1
+                refs.append((el.get("href") or "").lstrip("#"))
             elif el.tag == f"{X}p" and "t" in c:
+                text_after = text_after or bool(asides)
                 m = RE_PID.match(el.get("id") or "")
                 key = tuple(map(int, m.groups())) if m else None
                 seen_p.add(key)
                 if key not in texts or para_text(el) != texts[key]:
                     off.append(el.get("id"))
+        if text_after or asides != refs:
+            misplaced.append(name)
         for p in root.iter(f"{X}section"):
             if "sec" not in classes(p):
                 continue
@@ -206,6 +215,8 @@ def run(con, path: pathlib.Path) -> int:
     g.line(sections == count("SELECT COUNT(*) FROM section"), f"sections {sections:,}")
     n_notes = count("SELECT COUNT(*) FROM footnote")
     g.line(notes == noterefs == n_notes, f"1955 notes {notes}, each with its marker ({noterefs})")
+    g.line(not misplaced, "every 1955 note stands at its paper's end, in the order of its marker",
+           ", ".join(misplaced[:4]))
     heads = sum(1 for n, r in docs.items() if n.startswith("index-")
                 for el in r.iter(f"{X}h2") if "l1" in classes(el))
     g.line(heads == count("SELECT COUNT(*) FROM index_entry WHERE scope='az' AND level=1"),
