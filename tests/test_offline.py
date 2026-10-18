@@ -206,8 +206,9 @@ class Copy(unittest.TestCase):
 
     def test_its_news_is_the_sites_own_changes(self):
         # What's new (offline/news.py): newest first, a UTC time to compare with
-        # a copy's `made`, the date as git gives it, and the subject alone; only
-        # the commits that touch what a reader is sent, and never a commit's id.
+        # a copy's `made`, the date as git gives it, and the words alone: the
+        # changelog's entries for readers, and before it began the subjects of
+        # the commits that touch what a reader is sent; never a commit's id.
         from offline import news
         n = json.loads((COPY / "manifest.json").read_text())["news"]
         items = n["items"]

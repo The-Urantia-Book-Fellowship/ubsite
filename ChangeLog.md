@@ -1,0 +1,47 @@
+# Changelog
+
+What has changed in ubsite, the reader of *The Urantia Book* read together with its index, at https://ubsite.ddns.net and https://ubsite.sigmaai.au. The newest is at the top.
+
+The form follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). A release will be a tag `vX.Y.Z` on `main`, numbered by [Semantic Versioning](https://semver.org/spec/v2.0.0.html): the first number goes up when anything that reads `var/ub.db`, the text API or the class names in a paragraph's stored HTML has to change; the second when something is added; the third for a fix. Until the first release, everything is under Unreleased.
+
+Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are written for readers, one plain sentence to an entry, without Markdown: the site's What's new shows them to a reader whose offline copy is older, each dated by the day its line was written. For developers is for anyone who builds, deploys or reads the database: the schema, the API, what the build needs, and anything that breaks. What's new never shows it.
+
+## [Unreleased]
+
+### For developers
+
+- The site's What's new is read from this file (`offline/news.py`), each entry dated by the commit that wrote its line. Before this file began, it listed the subjects of the commits that touched `ubsite/`, `offline/`, `build/` or `data/`, and copies made before then still see those.
+
+## The site on 18 October 2026, when this changelog began
+
+Not a release, and not news: what the site was when this file began, for whoever starts reading here.
+
+### Reading
+
+- The text of the Uversa Press edition: 197 papers, 1,626 sections and 14,586 paragraphs, each paragraph at an address of its own (`/101:4.2`) and marked with its reference.
+- Set as the book sets it: justified, and hyphenated only where the book hyphenates; verse as verse; the separators; each paper's first letter dropped two lines; the words of Jesus in red.
+- The 180 places where the text departs from the 1955 printing, each a small ring that opens the 1955 reading, as the press gives it, with the SRT Committee's decision and reasons. All 180 are listed at `/lists/1955`.
+- Settings, kept in the browser, with no account: theme, text size, line spacing, typeface, width, and what is shown beside the text.
+- Search over the text and the index, and the 1955 readings when Settings asks; a reference typed into it opens that paragraph or range.
+
+### The index
+
+- The Uversa Press index, A–Z and Appendices A–F, read in both directions: a page for each of its 4,736 headwords, and beside every paragraph each entry that cites it.
+- Every See, See also and q.v. is a link to what it names.
+- A headword citing three paragraphs or more can be read through as one text, in the order of the book or by theme.
+
+### Listening
+
+- Every section in Merritt Horn's reading, from any paragraph, or in the browser's own voice. Playing can carry on through the book, and goes on while the reader moves to other pages.
+
+### Work offline
+
+- The whole site can be kept in the browser, search and the reading paths included, but not the recordings; offline, the browser's voice reads.
+
+### For developers
+
+- `var/ub.db` is built from three LaTeX repositories by `make data` and gated by `make check`; it is what the hosts are sent. The README's "Updating the site" is the procedure, and `CLAUDE.md` the record of decisions.
+- Its schema is `build/schema/*.sql`; `PRAGMA user_version` is 1.
+- The text API, `/api/v1`, documented at `/api`, is at text version 8.
+- Python 3.12, FastAPI and Jinja2, rendered on the server; the offline copy is the site's own pages, held to the server's byte for byte by `make offline`.
+- `make epub` makes the whole site an EPUB 3, private for now.
