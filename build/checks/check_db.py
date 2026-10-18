@@ -158,6 +158,28 @@ INVARIANTS = [
                    AND s.start < d.start AND s."end" > d.start)
             + (SELECT COUNT(*) FROM (SELECT paragraph_id FROM span WHERE kind = 'dotleader'
                                       GROUP BY 1 HAVING COUNT(*) > 1))"""),
+    # The study edition's notes, one reviewed paper at a time (build/study.py).
+    ("study notes without their study_note row, or rows without their note",
+     """SELECT (SELECT COUNT(*) FROM footnote f LEFT JOIN study_note s ON s.footnote_id = f.id
+                 WHERE f.kind = 'study' AND s.footnote_id IS NULL)
+            + (SELECT COUNT(*) FROM study_note s LEFT JOIN footnote f ON f.id = s.footnote_id
+                 WHERE f.id IS NULL OR f.kind <> 'study')"""),
+    ("a study note filed under another paper than its paragraph's",
+     """SELECT COUNT(*) FROM study_note s JOIN footnote f ON f.id = s.footnote_id
+         JOIN paragraph p ON p.id = f.paragraph_id WHERE p.paper_n <> s.paper_n"""),
+    ("study notes not numbered 1.. in each paper in the order of the text",
+     """SELECT COUNT(*) FROM (SELECT s.num, ROW_NUMBER() OVER (PARTITION BY s.paper_n
+           ORDER BY p.ord, f.anchor, f.ord) AS rn
+         FROM study_note s JOIN footnote f ON f.id = s.footnote_id
+         JOIN paragraph p ON p.id = f.paragraph_id) WHERE num <> rn"""),
+    ("a reviewed paper whose count of notes is not its notes'",
+     """SELECT COUNT(*) FROM study_paper x
+         WHERE n_notes <> (SELECT COUNT(*) FROM study_note s WHERE s.paper_n = x.paper_n)"""),
+    ("a study source no note cites, or one cited from another paper",
+     """SELECT (SELECT COUNT(*) FROM study_source x
+                 WHERE NOT EXISTS (SELECT 1 FROM study_cite c WHERE c.source_id = x.id))
+            + (SELECT COUNT(*) FROM study_cite c JOIN study_note s ON s.footnote_id = c.footnote_id
+                 JOIN study_source x ON x.id = c.source_id WHERE x.paper_n <> s.paper_n)"""),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]
@@ -295,6 +317,7 @@ def run(con) -> int:
             "SELECT 'paragraph ' || ref, html FROM paragraph"
             " UNION ALL SELECT 'hyphenated ' || ref, html_hy FROM paragraph"
             " UNION ALL SELECT 'note ' || id, html FROM footnote"
+            " UNION ALL SELECT 'study source ' || paper_n || ' ' || key, html FROM study_source"
             " UNION ALL SELECT 'SRT ' || name, then_html || why_html FROM srt_item"
             " UNION ALL SELECT 'section ' || paper_n || ':' || n, title_html FROM section"
             "  WHERE title_html IS NOT NULL"
@@ -332,6 +355,7 @@ def run(con) -> int:
         bad += 1
 
     bad += _text_api(con)
+    bad += _study(con, places)
 
     # The 1955 pages run forward through the book, and no two paragraphs begin
     # at one place: a paragraph matched to the wrong one of the Foundation's
@@ -364,6 +388,71 @@ def run(con) -> int:
             bad += 1
         print(f"  {name:52} {got}{'' if not got else '   FAIL'}")
     return 1 if bad else 0
+
+
+def _study(con, places: set[str]) -> int:
+    """The study notes as the pages show them: each marker numbered as its
+    note, standing after its words, its links landing, its text the edition's
+    words set as TeX sets them."""
+    import re
+
+    from ..render import strip_tags
+
+    bad = 0
+    want = {k: n for k, n in con.execute("SELECT key, num FROM study_note")}
+    marker = re.compile(r'<a class="fn" href="#fn(st[0-9_]+)" id="fnref\1" data-k="st"'
+                        r' data-n="(\d+)"(?: data-hs="1")? aria-label="Note \2"></a>')
+    got_html: dict[str, int] = {}
+    got_hy: dict[str, int] = {}
+    n_html = n_hy = 0
+    for h, hy in con.execute("SELECT html, html_hy FROM paragraph WHERE html LIKE '%data-k=\"st\"%'"):
+        n_html += h.count('data-k="st"')
+        n_hy += hy.count('data-k="st"')
+        got_html.update((k, int(n)) for k, n in marker.findall(h))
+        got_hy.update((k, int(n)) for k, n in marker.findall(hy))
+    ok = got_html == want == got_hy and n_html == n_hy == len(want)
+    print(f"study:      {len(want)} notes, each marker numbered as its note"
+          + ("" if ok else f"   FAIL: {n_html} markers, {len(got_html)} well formed, {len(want)} notes"))
+    bad += not ok
+    k = aoff = 0
+    for ref, text, anchor, after in con.execute(
+            "SELECT p.ref, p.text, f.anchor, s.after FROM study_note s"
+            " JOIN footnote f ON f.id = s.footnote_id JOIN paragraph p ON p.id = f.paragraph_id"):
+        k += 1
+        if text[anchor - len(after):anchor] != after or text.count(after) != 1:
+            aoff += 1
+            print(f"            study note at {ref} is not after {after!r}")
+    print(f"            {k - aoff}/{k} stand after the words they name, which occur once"
+          + ("" if not aoff else f"   {aoff} FAIL"))
+    bad += bool(aoff)
+    k = loff = 0
+    for (h,) in con.execute("SELECT f.html FROM footnote f WHERE f.kind = 'study'"
+                            " UNION ALL SELECT html FROM study_source"):
+        for to in re.findall(r'href="/([^"]*)"', h):
+            k += 1
+            m = re.fullmatch(r"(\d+:\d+)\.(\d+)-(\d+)", to)
+            if not (to in places if m is None else
+                    f"{m[1]}.{m[2]}" in places and f"{m[1]}.{m[3]}" in places
+                    and int(m[2]) < int(m[3])):
+                loff += 1
+                print(f"            study link to nowhere: /{to}")
+    print(f"            {k - loff}/{k} links in the study notes land"
+          + ("" if not loff else f"   {loff} FAIL"))
+    bad += bool(loff)
+    k = coff = 0
+    for where, text, h in con.execute(
+            "SELECT 'note ' || s.key, f.text, f.html FROM study_note s JOIN footnote f"
+            " ON f.id = s.footnote_id"
+            " UNION ALL SELECT 'source ' || paper_n || ' ' || key, text, html FROM study_source"):
+        k += 1
+        odd = sorted({c for c in text if c in "`'\"" or 0xE000 <= ord(c) <= 0xF8FF})
+        if odd or strip_tags(h) != text:
+            coff += 1
+            print(f"            study {where}: {odd or 'does not round-trip'}")
+    print(f"            {k - coff}/{k} notes and sources round-trip, with TeX's quotes set"
+          + ("" if not coff else f"   {coff} FAIL"))
+    bad += bool(coff)
+    return bad
 
 
 def _text_api(con) -> int:

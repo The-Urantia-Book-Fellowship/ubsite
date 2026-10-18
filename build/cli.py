@@ -49,6 +49,8 @@ def main(argv: list[str]) -> int:
 
         trees = [r["path"] for r in repos.values()]
         trees += [a["path"] for a in config.audio().values() if a["present"]]
+        if config.block()["charts"] is not None:
+            trees.append(config.block()["path"])
 
         def fingerprint():
             out = {}
@@ -64,7 +66,7 @@ def main(argv: list[str]) -> int:
 
         before = fingerprint()
         print(f"fingerprinted {len(before):,} files in {len(trees)} source trees"
-              " (three repos and the recordings)")
+              " (three repos, the recordings and Block's charts)")
         rc = main(["data"])
         after = fingerprint()
         changed = [k for k in before if k in after and before[k] != after[k]]
@@ -105,10 +107,20 @@ def main(argv: list[str]) -> int:
         print(f"reading index at {at(ix)} ...")
         az = read_az(ix["tex"], report, rev=ix["at"])
         apps = read_appendices(ix["tex"], report, rev=ix["at"])
+        # The study edition's notes, for each paper reviewed in data/study/:
+        # onto the press text before it is rendered, so one render places them.
+        from . import study
+        curated = study.load_curated(report)
+        block = config.block()
+        if curated:
+            print(f"study notes of {len(curated)} paper{'s' * (len(curated) > 1)},"
+                  f" the edition at {at(repos['study'])} ...")
+        study_built = study.attach(papers, curated, repos["study"], block, report)
 
         con = db.create(tmp)
         print("loading ...")
         para_key = load.load_text(con, papers, parts, repos["press"], hyphenator, report)
+        study.store(con, study_built)
         print("the Foundation's numbering ...")
         from . import foundation
         n_uf = foundation.load(con, repos["press"], report,
@@ -180,6 +192,14 @@ def main(argv: list[str]) -> int:
         con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
                         [(k, repos[k]["commit"], int(repos[k]["dirty"]), repos[k]["rev"],
                           repos[k]["date"], repos[k]["commit_url"]) for k in ("press", "index")])
+        # The study edition, and Block's charts by their manifest's SHA-256, once
+        # a paper's notes are on the site: until then the build reads neither.
+        if study_built.papers:
+            st = repos["study"]
+            con.execute("INSERT INTO build_source VALUES ('study',?,?,?,?,?)",
+                        (st["commit"], int(st["dirty"]), st["rev"], st["date"], st["commit_url"]))
+            con.execute("INSERT INTO build_source VALUES ('block', ?, 0, 'manifest', NULL, NULL)",
+                        (block["sha256"],))
         # The SRT snapshot is no repository: its "commit" is the file's SHA-256,
         # its date the day it was fetched, its page the committee's.
         if srt_stats:
@@ -203,6 +223,7 @@ def main(argv: list[str]) -> int:
                 # counts these, not `footnotes`, which Phase 6's study notes join.
                 ("variants_1955", "SELECT COUNT(*) FROM footnote"
                                   " WHERE kind='variant-1955'"),
+                ("study_notes", "SELECT COUNT(*) FROM footnote WHERE kind='study'"),
                 ("srt_items", "SELECT COUNT(*) FROM srt_item"),
                 ("variants_1955_explained", "SELECT COUNT(*) FROM footnote"
                                             " WHERE srt_item_id IS NOT NULL"),
@@ -275,7 +296,10 @@ def main(argv: list[str]) -> int:
             print("  press misc/html absent -- skipped")
         print("\n== edition alignment ==")
         rc |= align_run(repos["study"]["tex"],
-                        repos["index"]["path"] / "data" / "srt.jsonl", {})
+                        repos["index"]["path"] / "data" / "srt.jsonl", {}, repos["study"]["at"])
+        print("\n== study notes ==")
+        from .checks.check_study import run as study_run
+        rc |= study_run(repos["study"], config.block(), report)
         print("\n== italic spans vs press artifacts ==")
         from .checks.check_spans import load_press_italics, run as span_run
         art = ital or (repos["press"]["path"] / "artifacts" / "text-verify" / "tex")

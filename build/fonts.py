@@ -67,7 +67,10 @@ def corpus_codepoints(con) -> set[str]:
               "SELECT path_plain FROM index_entry",     # the chips, with their ›
               "SELECT title FROM appendix",             # an appendix chip's label
               "SELECT label FROM chronology_event",     # its year and month too
-              "SELECT text FROM footnote",
+              # A study note is read from its HTML, below: its Greek, Hebrew and
+              # math are drawn in other faces.
+              "SELECT text FROM footnote WHERE kind <> 'study'",
+              "SELECT text FROM study_source",
               "SELECT text FROM changelog",             # /changelog
               # The SRT Committee's reasons a 1955 note shows, and those of the
               # note it refers to.
@@ -76,12 +79,45 @@ def corpus_codepoints(con) -> set[str]:
               "  JOIN footnote f ON f.srt_item_id = s.id)"):
         for (t,) in con.execute(q):
             cps.update(t or "")
+    cps.update(study_codepoints(con)[0])
     cps.update("0123456789:.,()[]-–—…'’“” /*&%#?!; ")
     # The soft hyphens of paragraph.html_hy, and the hyphen a browser may draw
     # for one at a line's end when the page does not name its own: in the
     # book's face, never a fallback's.  The press's fonts have both.
     cps.update("­‐")
     return cps
+
+
+# A study note's words in another language (study_macros.py \textgreek ...):
+# drawn by the device's own font, as UB Goudy has none of these scripts, and
+# held to the script its `lang` names, so that nothing else slips past the gate.
+SCRIPTS = {
+    "grc": ((0x0370, 0x03FF), (0x1F00, 0x1FFF), (0x0300, 0x036F)),
+    "he": ((0x0590, 0x05FF), (0xFB1D, 0xFB4F)),
+    "hy": ((0x0530, 0x058F), (0xFB13, 0xFB17)),
+    "zh": ((0x4E00, 0x9FFF), (0x3400, 0x4DBF), (0x3000, 0x303F)),
+}
+RE_LANG = re.compile(r'<span class="lang" lang="([a-z]+)"[^>]*>(.*?)</span>', re.S)
+RE_MATH = re.compile(r"<math\b.*?</math>", re.S)
+
+
+def study_codepoints(con) -> tuple[set[str], dict[str, set[str]], list[str]]:
+    """What the study notes draw: in UB Goudy, in the device's font by
+    language, and in math (each <math> whole)."""
+    goudy: set[str] = set()
+    other: dict[str, set[str]] = {}
+    maths: list[str] = []
+    for (h,) in con.execute("SELECT html FROM footnote WHERE kind = 'study'"):
+        maths += RE_MATH.findall(h)
+        h = RE_MATH.sub(" ", h)
+        for lang, inner in RE_LANG.findall(h):
+            for c in html.unescape(RE_TAG.sub("", inner)):
+                if c.isspace() or (c.isascii() and not c.isalnum()):
+                    goudy.add(c)
+                else:
+                    other.setdefault(lang, set()).add(c)
+        goudy.update(html.unescape(RE_TAG.sub("", RE_LANG.sub(" ", h))))
+    return goudy, other, maths
 
 
 def chrome_codepoints(site: pathlib.Path) -> set[str]:
@@ -115,6 +151,16 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
     # break is not drawn.
     wanted = {c for c in corpus_codepoints(con) | chrome_codepoints(site)
               if unicodedata.category(c) != "Cc" and c not in ELSEWHERE}
+    _, other, maths = study_codepoints(con)
+    for lang, chars in sorted(other.items()):
+        spans = SCRIPTS.get(lang, ())
+        stray = sorted(c for c in chars if not any(a <= ord(c) <= b for a, b in spans))
+        if stray:
+            report.hard("study-lang-script", f"lang={lang}",
+                        " ".join(f"{c} U+{ord(c):04X}" for c in stray)[:200])
+    if maths:
+        report.hard("study-math-font", f"{len(maths)} <math>",
+                    "a study note holds math, and the site has no math font yet")
     stats = {}
     subsets = []
     for src, dst in FACES:

@@ -104,6 +104,16 @@ if [ -n "$(git status --porcelain -- data/text)" ]; then
     exit 1
 fi
 
+# The study notes the site shows are the reviewed copies in data/study/ (build/
+# study.py).  One not committed was never looked at as a whole, and a checkout
+# would lose the review that the hosts are already showing.
+if [ -n "$(git status --porcelain -- data/study)" ]; then
+    echo "refusing: data/study/ holds reviewed notes that are not committed." >&2
+    echo "          Commit the paper's review, then deploy." >&2
+    git status --short -- data/study >&2
+    exit 1
+fi
+
 # One host: everything from here on is done once for each, with what was built above.
 ship() {
     local HOST="$1"

@@ -92,10 +92,11 @@ def load_text(con, papers, parts, repo, hyphenator, report) -> dict:
                                 " and its italics")
                 # srt_item_id is filled by build/srt.py, once the Foundation's
                 # numbering is in.
+                # A study note comes rendered, its math in it (build/study.py).
                 con.execute("INSERT INTO footnote (id, edition_id, kind, paragraph_id,"
                             " anchor, ord, text, html) VALUES (?,1,?,?,?,?,?,?)",
                             (fid, nt.kind, qid, nt.offset, i, nt.text,
-                             render(nt.text, nt.spans)))
+                             nt.html if nt.html is not None else render(nt.text, nt.spans)))
     return para_key
 
 

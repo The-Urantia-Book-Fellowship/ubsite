@@ -22,6 +22,7 @@ ALLOWED = {
     "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
     "epub/pack.py": "var/epub/",                   # the EPUB, by way of a .tmp
     "offline/pack.py": "var/offline/",             # the offline copy, by way of a .tmp
+    "tools/study/draft.py": "var/study/",          # a paper's notes drafted for review
 }
 
 WRITE_OPEN = re.compile(r"""\bopen\s*\([^)]*['"][waxr]?\+?[wax]\+?['"]""")
@@ -36,7 +37,8 @@ class NoWrites(unittest.TestCase):
     def _sources(self):
         # build/ reads the masters; epub/ and offline/ only the database, and
         # are held to the same rule so that they never grow a reason to.
-        for d in ("build", "epub", "offline"):
+        # tools/study/ reads the study edition and Block's charts.
+        for d in ("build", "epub", "offline", "tools/study"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 
@@ -90,12 +92,29 @@ class NoWrites(unittest.TestCase):
                 self.assertNotRegex(other, WRITERS, f"{rel} must not write; pack.py does")
                 self.assertNotRegex(other, WRITE_OPEN, f"{rel} must not write; pack.py does")
 
+    def test_study_tools_write_only_var(self):
+        """A draft goes to var/study/, never data/study/, where the reviewed
+        copies are: a re-draft must not overwrite a review.  And pdftotext is
+        always given `-`, or it writes NNN.txt beside the chart, in a master."""
+        for rel, src in self._sources():
+            if not rel.startswith("tools/study/"):
+                continue
+            self.assertNotRegex(src, WRITERS, f"{rel} must not move or delete files")
+            if rel == "tools/study/draft.py":
+                self.assertIn('OUT = ROOT / "var" / "study"', src)
+                self.assertNotIn('"data"', src)
+            else:
+                self.assertNotRegex(src, WRITE_OPEN, f"{rel} must not write")
+        block = (ROOT / "tools/study/block.py").read_text()
+        self.assertIn('["pdftotext", *args, str(pdf), "-"]', block)
+        self.assertEqual(block.count("subprocess.run("), 1)
+
     def test_no_writer_names_a_sibling(self):
         """No module may name a sibling repo path in a write context."""
         for rel, src in self._sources():
             # The recordings are a master too: Merritt Horn's reading.
             for bad in ("urantia-uversa-press-claude", "../index",
-                        "urantia-study-edition", "Urantia-MH-Audio"):
+                        "urantia-study-edition", "Urantia-MH-Audio", "block-sources"):
                 for m in WRITE_OPEN.finditer(src):
                     seg = src[max(0, m.start() - 200):m.end() + 200]
                     self.assertNotIn(bad, seg,

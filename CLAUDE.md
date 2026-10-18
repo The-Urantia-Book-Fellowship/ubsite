@@ -23,8 +23,9 @@ Paths live in `sources.toml` and **nowhere else**; `build/config.py` is the only
 | key | repo | what it supplies |
 |---|---|---|
 | `press` | `../urantia-uversa-press-claude` | the authoritative text |
-| `study` | `../urantia-study-edition` | apparatus: footnotes, human sources, KJV, quiz, images *(not yet imported)* |
+| `study` | `../urantia-study-edition` | apparatus: footnotes, human sources, KJV, quiz, images. Its notes reach the site one reviewed paper at a time (§3, Study notes); the rest is not yet imported |
 | `index` | `../index` | the Uversa Press index, revised for the third edition |
+| `block` | `../block-sources` | Matthew Block's parallel charts of the human sources, one PDF per paper, and `MANIFEST.tsv` naming each chart's address, its version. No git; kept by `../explore-tools/block_fetch.py`. The build reads the manifest alone, `tools/study/` the PDFs |
 | `audio.mh` | `/Audio/Urantia/Urantia-MH-Audio-DVD` | Merritt Horn's reading, one MP3 per section, 121 h, as on the Uversa Press DVD (2006): 128 kbps stereo, 44.1 kHz. On pi5 too, same path |
 
 All three share one address space: the `\vs` macro addresses `\vs p133 1:3` (a Urantia paragraph) and `\vs Gen 1:1` (a Bible verse) alike.
@@ -32,6 +33,8 @@ All three share one address space: the `\vs` macro addresses `\vs p133 1:3` (a U
 The index is read **at HEAD** and the revision recorded in the build, because that repo is under active editorial work. Count gates against it are therefore reported bands; structural gates stay hard.
 
 Until 2026-10-06 the first half of that was not true. The readers opened the working tree, while `config` reported HEAD as clean. Now `config` resolves `rev` to one SHA (`at`), `_io.read_tex` reads `tex/` at it, and `build_source` records it. `tests/test_read_tex.py` proves that worktree edits do not get through.
+
+The study edition is read at HEAD too, since 2026-10-18, when its notes began to reach the site (`_io.read_tex_many`, one `git cat-file --batch` for all 197 papers).
 
 Careful: there are three `urantia-study-edition` trees on this machine. `urantia-study-edition-latest` is the **oldest**. `sources.toml` pins the right one.
 
@@ -60,6 +63,8 @@ make align / align-repair   cut them at the paragraph -> data/audio/mh.tsv
 make tts-bakeoff        the AI-voice listening test -> var/tts/bakeoff/
 make tts                the whole book in the AI voice, 3090 only (~27 h, resumable)
 make tts-assemble       one MP3 per section from what has been made -> data/audio/ai*.tsv
+
+.venv/bin/python tools/study/draft.py N   a paper's study notes drafted for review -> var/study/
 ```
 
 The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, `venv-vllm`) and their caches live in **`~/Software/ml`**, on the NVMe home, never in `requirements.txt` and never on `/Audio`. They are for the audio work on the GPU **and nothing else** (Tigran, 2026-10-16): a general tool's dependencies go in `.venv`, or are fetched into the tree by URL and digest (epubcheck, the SQLite release). TeX Live 2026 and Node 24 stay system installs; README, "What this machine needs besides". Playwright was in a `venv-browser` there until that day; it is now in `requirements-dev.in`.
@@ -129,7 +134,14 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
   - **Static URLs carry their content's hash** since then (`app.py asset()`: `/static/ub.css?v=…`), so an offline page draws with its own build's stylesheet and scripts.
 - `deploy/` — the systemd unit, the nginx server blocks, the sudoers drop-in and `deploy.sh`, with a README naming the four steps that need root on each host. All have been run on both: the site is live at **https://ubsite.ddns.net** (pi5) and, since 2026-10-14, **https://ubsite.sigmaai.au** (the VPS behind sigmaai.au; Tigran: both stay live). `deploy.sh` builds once and ships the same build to each, pi5 then sigmaai.au, the name it reaches the VPS by; `./deploy/deploy.sh sigmaai.au` deploys to one. `ubsite-sigmaai.nginx` is `ubsite.nginx` but for the name and certificate, held to it by `tests/test_nginx.py`. On the VPS, `sigmaai.au` (Open WebUI, `/library/`, `/tair/`, `/cashreconai/`) is nginx's default by parse order alone, so our block never says `default_server`. A subdomain, not `sigmaai.au/ubsite`, because the app assumes it lives at `/` (links, the worker's scope, 29,716 links stored in `ub.db`). Each host has its own `var/visits.db` and `/stats` (one password). **The database is the artifact**: the three source repos are not on the hosts and do not need to be, so `make data` runs here and `var/ub.db` is shipped.
 
-Next: Phase 6 (the study-edition apparatus — `\fnst` notes, KJV, the quiz, figures behind the rights gate), then 7 (human sources), 8 (the timeline, the map).
+- **Study notes** (2026-10-18, building; no paper on the site yet). The study edition's 404 `\fnst` notes are not imported: each is read, checked and edited by hand, so that it asserts nothing a reader could not check (Tigran), and a paper reaches the site only with its reviewed copy, `data/study/NNN.toml`, whose README holds the rules. Plan: `~/.claude/plans/start-exploring-the-large-gleaming-stallman.md`.
+  - `build/readers/study.py` reads a paper's notes and bibliography as written, brace- and escape-aware, and names each by `origin`, 16 hex digits of its SHA-256. `build/study.py` holds a reviewed copy to the edition: every note and source carried or `[[dropped]]` exactly once, so a note changed upstream fails the build until reviewed again; and to Block's chart, which the copy names, so a chart revised since fails it too (`block-chart-revised`).
+  - A note stands after the press words its `after` names, once in the paragraph and whole words: the study text is British and metricated, so its offsets say nothing about ours. It is a footnote of kind `study`, **appended after the press's own notes**, so no 1955 key moves; `study_note` and its siblings (`009_study.sql`) hold its number, from 1 in each paper in reading order, its origin and what it cites.
+  - Its marker is `<a class="fn" … data-k="st" data-n="3">`, empty, the number to be drawn by CSS: `class="fn"` like the ring, so that every gate looking for a marker where none belongs (the API, reading paths, the EPUB's count) finds it too. `data-hs` marks a note on a human source, for a switch of its own one day.
+  - Its TeX is the study edition's closed table (`build/study_macros.py`, never press's: trap 1), and its math, `$...$`, MathML Core from `build/texmath.py`, a closed set too: all 118 expressions of the edition are in `tests/fixtures/study-math.tsv`. `make check` reports the whole edition (`checks/check_study.py`): what is there, what a paper still to come would need.
+  - Still to come before Paper 0: the reader (the Settings switch "Study notes", the card, the number, per-host defaults, a math font, the EPUB). Then Paper 0, reviewed, and on in book order.
+
+Next: Phase 6 (the study-edition apparatus — `\fnst` notes, now under way, then KJV, the quiz, figures behind the rights gate), then 7 (human sources), 8 (the timeline, the map).
 
 ---
 
@@ -238,6 +250,8 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 28. **Nothing in `sw.js` writes back a `meta` it read before a wait.** A check reads meta, asks the network, and writes; a download that ended in between had its `current` put back to the copy before, whose cache it had deleted, and the copy was lost. Every change to meta goes through `updateMeta()`, one at a time, each on what the last one wrote.
 29. **Nothing a stored page carries may move with a build that changes nothing.** The rail's `data-v` was `ub.db`'s mtime, which every `make data` moves, and every section page carries the rail. So each deploy changed all 197 papers' chunks of the offline copy, and asked every reader for a 5.5 MB update with the book unchanged; the update offered on 2026-10-14 after the licence footer was that. `data-v` is now a hash of what the rail draws (`app.py _book`). After changing a template, rebuild `ub.db` and the copy twice and compare the manifests: nothing may differ.
 30. **Chrome installs an app from the manifest it read when the page loaded.** An Android tab kept alive across a deploy installs the old one, name, icons and all, and `chrome://webapks` is where to see what an installed app was given. On 2026-10-15 ubsite.sigmaai.au's app was installed at 14:56 from a tab loaded at 11:22, before its burgundy icons went live, and came out the same as ddns.net's (the visit record showed no load between). Reload the page before installing; an app already installed is put right by uninstalling and installing again from a fresh page, or by its Update button in `chrome://webapks`.
+31. **The study edition is not the press text with notes.** It is British and metricated: 23:3.2 reads "299,789 kilometres" for "186,280 miles", 41:4.1 "$2\times 10^{30}$ kg" for "two octillion (2×10²⁷) tons", and 0:1.24 restores the 1955 "other" that the press gives as a reading. So a study note's place is never an offset in its text (each reviewed note names the press words it follows), and a note about a number or a reading may be about the study edition's own words, true there and false on the site.
+32. **The study edition writes Hebrew word by word reversed**, visual order, for XeTeX without bidi: its Shema at 1:7.6 begins with אֶחָד. `tools/mktext.php` turned it round; `tools/study/draft.py` does now, and a reviewed note holds Hebrew in logical order, which nothing can check.
 
 ---
 
@@ -405,7 +419,7 @@ Everything through Phase 5 is committed in seven commits, the last four of which
 
 **One open question, not a defect.** On a concept page the first line of the tree repeats the heading: `/i/adoption` shows "adoption" under the `<h1>` "adoption". On `/i/oaths` the same line reads "oaths. *See also* promises" and earns its place, because the level-1 entry carries citations and cross-references. Suppressing it when it adds nothing was offered and not yet ruled on.
 
-**Next is Phase 6**, the study-edition apparatus, and it is the largest remaining import: 307 `\fnst` study footnotes, 54 human-source `\bibitem` records, 86 `\bibref` cross-references, the whole KJV (24,974 verses + 5,069 marginal notes), 819 quiz questions (**83 of them multi-answer** — a single-answer model marks correct responses wrong), and 84 figures of which **58 are rights-restricted** and must be separable at query time.
+**Next is Phase 6**, the study-edition apparatus, and it is the largest remaining import: 404 `\fnst` study footnotes (307 when this was written; the human-source notes of Papers 1–6 came on 2026-10-07 and 09), 60 human-source `\bibitem` records, 116 `\bibref` cross-references, the whole KJV (24,974 verses + 5,069 marginal notes), 819 quiz questions (**83 of them multi-answer** — a single-answer model marks correct responses wrong), and 84 figures of which **58 are rights-restricted** and must be separable at query time.
 
 Note when starting it: the study edition's own `tools/extracttext.py` truncates about two thirds of its footnotes (`[^}]+` against braces nested three deep), and `\tunemarkup` there means the opposite of what it means in press — see §7.
 

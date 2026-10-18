@@ -86,6 +86,10 @@ def render(text: str, spans, note_key: str = "", shy=()) -> str:
             # \bibref spans carry a citation instead, and no href.
             if s.kind == "link" and isinstance(s.attr, dict) and s.attr.get("href"):
                 attrs += f' href="{html.escape(s.attr["href"])}"'
+            # A study note's Greek or Hebrew says which, and which way it runs.
+            if s.kind == "lang" and isinstance(s.attr, dict):
+                attrs += "".join(f' {k}="{html.escape(s.attr[k])}"'
+                                 for k in ("lang", "dir") if s.attr.get(k))
             out.append(f"<{tag}{attrs}>")
             stack.append(s)
         if i < len(text):
@@ -107,6 +111,15 @@ def _point(s, note_key: str) -> str:
         # and the round-trip gate would rightly reject.
         k = f"{note_key}_{n}" if note_key else f"{n}"
         kind = (s.attr or {}).get("kind") if isinstance(s.attr, dict) else None
+        # A study note's marker shows its number, 1.. in the paper, drawn from
+        # data-n by CSS like the ring; it is `fn` like the ring, so that every
+        # gate looking for a marker where none belongs finds this one too.
+        # data-hs: it names a human source, for a switch of its own one day.
+        if kind == "study":
+            key, num = s.attr["key"], s.attr["n"]
+            hs = ' data-hs="1"' if s.attr.get("hs") else ""
+            return (f'<a class="fn" href="#fn{key}" id="fnref{key}" data-k="st"'
+                    f' data-n="{num}"{hs} aria-label="Note {num}"></a>')
         if kind == "variant-1955":
             return (f'<a class="fn" href="#fn{k}" id="fnref{k}" data-k="1955"'
                     f' aria-label="1955 reading"></a>')

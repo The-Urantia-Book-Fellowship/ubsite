@@ -24,7 +24,8 @@ The three source repositories must be at the paths `sources.toml` gives, relativ
 |---|---|---|
 | `press` | `../urantia-uversa-press-claude` | from the working tree |
 | `index` | `../index` | **at HEAD**, never the working tree |
-| `study` | `../urantia-study-edition` | by `make check` only, until Phase 6 |
+| `study` | `../urantia-study-edition` | **at HEAD**: by `make check`, and by `make data` for each paper whose notes are reviewed in `data/study/` |
+| `block` | `../block-sources` | Matthew Block's charts, no git: `make data` reads its `MANIFEST.tsv` alone, which counts once a paper's notes are reviewed |
 
 Then:
 

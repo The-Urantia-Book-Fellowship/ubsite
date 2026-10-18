@@ -20,9 +20,12 @@ url  = "https://github.com/The-Urantia-Book-Fellowship/urantia-uversa-press"
 # This tree and ../translation/urantia-study-edition are independent clones of
 # the same repo; the paragraph realignment of 2026-09-21 was applied HERE, so
 # this is the one the build reads until it is committed and the other pulled.
+# Read at a commit, as the index is, since 2026-10-18: its \fnst notes reach
+# the site one paper at a time, through the reviewed copies in data/study/,
+# each holding the hash of the note it was made from (build/study.py).
 path = "../urantia-study-edition"
 tex  = "tex"
-rev  = "worktree"
+rev  = "HEAD"
 
 [index]
 # The 2019 Uversa Press index, hand-corrected.  Read BY GIT REVISION, not the
@@ -42,6 +45,16 @@ url  = "https://github.com/The-Urantia-Book-Fellowship/index"   # PRIVATE, as ab
 [srt]
 url  = "https://members.urantiabook.org/text-standardization-Urantia-Book"
 path = "data/srt/considerations.html"
+
+# Matthew Block's parallel charts of the human sources, one PDF per paper, as
+# urantiabooksources.com publishes them, kept by ../explore-tools/block_fetch.py
+# with a MANIFEST.tsv naming each chart's address, which is its version.  Not a
+# repository, and a MASTER like those above.  The build reads the manifest
+# alone: a paper's study notes are reviewed against its chart, data/study/NNN.toml
+# names the chart reviewed, and a chart revised since fails the build until the
+# notes are reviewed against it (build/study.py).  tools/study/ reads the PDFs.
+[block]
+path = "../block-sources"
 
 # TeX Live, for one file: Knuth's hyphen.tex, the patterns the press sets the
 # book with (polyglossia `english` loads them, not hyph-en-us).  Not a

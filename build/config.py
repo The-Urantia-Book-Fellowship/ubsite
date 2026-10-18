@@ -57,8 +57,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive", "sqlite_wasm"):
-            continue                                # not repositories: see audio(), srt(), texlive(), sqlite_wasm()
+        if key in ("audio", "srt", "texlive", "sqlite_wasm", "block"):
+            continue                                # not repositories: see audio(), srt(), texlive(), sqlite_wasm(), block()
         path = (ROOT / cfg["path"]).resolve()
         if not path.is_dir():
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
@@ -144,6 +144,33 @@ def sqlite_wasm() -> dict:
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["sqlite_wasm"]
     return {"key": "sqlite_wasm", "url": cfg["url"], "sha256": cfg["sha256"], "commit": cfg["sha256"]}
+
+
+def block() -> dict:
+    """Return {path, manifest, sha256, charts} for Matthew Block's parallel charts.
+
+    A directory of PDFs, one per paper, kept by ../explore-tools/block_fetch.py,
+    and no repository.  What the build reads is its MANIFEST.tsv: `charts` maps
+    a paper's number to its row (url, uploaded, sha256, ...).  A chart is
+    revised under a new address, so the url is the chart's version, and a paper
+    without a chart has no row.  None for each if the directory is absent.
+    """
+    import csv
+    import hashlib
+
+    from .readers._io import read_bytes
+
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["block"]
+    path = (ROOT / cfg["path"]).resolve()
+    manifest = path / "MANIFEST.tsv"
+    if not manifest.is_file():
+        return {"key": "block", "path": path, "manifest": None, "sha256": None, "charts": None}
+    raw = read_bytes(manifest)
+    rows = csv.DictReader(raw.decode("utf-8").splitlines(), delimiter="\t")
+    return {"key": "block", "path": path, "manifest": manifest,
+            "sha256": hashlib.sha256(raw).hexdigest(),
+            "charts": {int(r["paper"]): r for r in rows}}
 
 
 def describe(repos: dict) -> str:

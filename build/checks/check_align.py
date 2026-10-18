@@ -20,14 +20,19 @@ import sys
 RE_VS = re.compile(r"^\\vs p(\d+) (\d+):(\d+) ?(.*)$")
 
 
-def study_keys(texdir: pathlib.Path) -> dict[tuple[int, int, int], str]:
+def study_keys(texdir: pathlib.Path, rev: str = "worktree") -> dict[tuple[int, int, int], str]:
+    """Each paragraph of the study edition, at the commit the build reads it at."""
+    from ..readers._io import read_tex_many
     out = {}
-    for f in sorted(texdir.glob("p[0-9]*.tex")):
-        paper = int(f.stem[1:])
-        for ln, raw in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+    names = [f"p{n:03d}.tex" for n in range(197)]
+    for name, src in read_tex_many(texdir, names, rev).items():
+        if src is None:
+            continue
+        paper = int(name[1:4])
+        for ln, raw in enumerate(src.splitlines(), 1):
             m = RE_VS.match(raw.strip())
             if m:
-                out[(paper, int(m.group(2)), int(m.group(3)))] = f"{f.name}:{ln}"
+                out[(paper, int(m.group(2)), int(m.group(3)))] = f"{name}:{ln}"
     return out
 
 
@@ -36,8 +41,9 @@ def press_keys(oracle: pathlib.Path) -> dict[tuple[int, int, int], str]:
             for r in (json.loads(l) for l in oracle.open(encoding="utf-8"))}
 
 
-def run(study_tex: pathlib.Path, oracle: pathlib.Path, exceptions: dict) -> int:
-    s, p = study_keys(study_tex), press_keys(oracle)
+def run(study_tex: pathlib.Path, oracle: pathlib.Path, exceptions: dict,
+        rev: str = "worktree") -> int:
+    s, p = study_keys(study_tex, rev), press_keys(oracle)
     so, po = sorted(set(s) - set(p)), sorted(set(p) - set(s))
     print(f"press {len(p)}   study {len(s)}")
     bad = 0

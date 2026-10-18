@@ -25,8 +25,11 @@ MARK = "MARK"                    # emit argument `which`, record a ZERO-WIDTH sp
 NOTE = "NOTE"                    # emit NOTHING; record a note anchored at the cursor
 FLAG = "FLAG"                    # emit nothing; set a paragraph-level flag
 STRUCTURAL = "STRUCTURAL"        # handled by the paper state machine, not here
+CALL = "CALL"                    # the expander's `calls[name]` decides (a study note's \cite)
+ACCENT = "ACCENT"                # put `text`, a combining mark, on the next letter (\')
 
-ALL_ACTIONS = {STRIP, EMIT_TEXT, EMIT_ARG, EMIT_SUP, SPAN, MARK, NOTE, FLAG, STRUCTURAL}
+ALL_ACTIONS = {STRIP, EMIT_TEXT, EMIT_ARG, EMIT_SUP, SPAN, MARK, NOTE, FLAG, STRUCTURAL,
+               CALL, ACCENT}
 
 # The closed span vocabulary.  A CHECK constraint in the schema mirrors this.
 SPAN_KINDS = {
@@ -56,6 +59,7 @@ class Spec:
     text: str = ""          # for EMIT_TEXT
     kind: str = ""          # for SPAN / MARK / NOTE / FLAG
     note: str = ""          # human-readable rationale
+    attr: tuple = ()        # for SPAN: the span's attributes, as (name, value) pairs
 
     def __post_init__(self) -> None:
         if self.action not in ALL_ACTIONS:

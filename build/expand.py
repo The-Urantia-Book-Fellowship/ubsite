@@ -20,8 +20,8 @@ import pathlib
 import re
 import sys
 
-from .spec import (EMIT_ARG, EMIT_SUP, EMIT_TEXT, FLAG, MARK, NOTE, SPAN,
-                   STRIP, STRUCTURAL)
+from .spec import (ACCENT, CALL, EMIT_ARG, EMIT_SUP, EMIT_TEXT, FLAG, MARK, NOTE,
+                   SPAN, STRIP, STRUCTURAL)
 
 # \kern-1pt and friends take a length with no braces around it; the length is
 # not text and must be eaten or it lands in the middle of a sentence.
@@ -54,6 +54,9 @@ class Note:
     # carry a macro reached the reader as "\bibemph {the}" and "\ldots \ ".
     text: str
     spans: list[Span]
+    # Set when the note was rendered elsewhere: a study note (build/study.py),
+    # whose HTML carries what render() cannot make from text and spans, math.
+    html: str | None = None
 
 
 @dataclasses.dataclass(slots=True)
@@ -67,13 +70,21 @@ class Expanded:
 
 class Expander:
     def __init__(self, table, environments, report, where: str,
-                 unbraced_lengths=frozenset(), italic_openers=frozenset()):
+                 unbraced_lengths=frozenset(), italic_openers=frozenset(),
+                 calls=None, subs=None, forbid_comments=False):
         self.table = table
         self.environments = environments
         self.unbraced_lengths = unbraced_lengths
         self.italic_openers = italic_openers
         self.report = report
         self.where = where
+        # For a table with CALL actions: name -> f(expander, opts, args, tok).
+        self.calls = calls or {}
+        # The text substitutions, if not the press's: the study notes write
+        # `quotes' and Nave's, which TeX sets as ‘quotes’ and Nave’s.
+        self.subs = _SUBS if subs is None else subs
+        # A % in a reviewed note would hide the rest of its line, unseen.
+        self.forbid_comments = forbid_comments
 
     def run(self, src: str) -> Expanded:
         return self._run(tokenize(src))
@@ -96,7 +107,7 @@ class Expander:
             self.n += len(s)
 
     def _text(self, raw: str) -> None:
-        for a, b in _SUBS:
+        for a, b in self.subs:
             raw = raw.replace(a, b)
         self._emit(raw)
 
@@ -112,7 +123,9 @@ class Expander:
             elif k == "NEWLINE":
                 self._emit(" ")
             elif k == "COMMENT":
-                pass
+                if self.forbid_comments:
+                    self.report.hard("comment-in-note", f"{self.where}:{tok.line}",
+                                     f"an unescaped % hides {tok.value[:40]!r}: write \\%")
             elif k == "OPEN_BRACE":
                 # a bare group: {\itshape ...}. Expand its contents inline.
                 depth, inner = 1, []
@@ -183,8 +196,7 @@ class Expander:
             else:
                 nxt.value = nxt.value[1:]
 
-        for _ in range(spec.opt):
-            ts.read_optional_arg()
+        opts = [ts.read_optional_arg() for _ in range(spec.opt)]
 
         args: list[list] = []
         for _ in range(spec.args):
@@ -193,6 +205,12 @@ class Expander:
 
         a = spec.action
         if a in (STRIP, STRUCTURAL):
+            return
+        if a == CALL:
+            self.calls[name](self, opts, args, tok)
+            return
+        if a == ACCENT:
+            self._accent(spec.text, ts, tok)
             return
         if a == FLAG:
             self.flags[spec.kind] = 1.0
@@ -225,7 +243,8 @@ class Expander:
             start = self.n
             self._expand(TokenStream(sel))
             if self.n > start:
-                self.spans.append(Span(start, self.n, spec.kind))
+                self.spans.append(Span(start, self.n, spec.kind,
+                                       dict(spec.attr) if spec.attr else None))
             return
         if a == EMIT_SUP:
             start = self.n
@@ -234,6 +253,21 @@ class Expander:
                 self.spans.append(Span(start, self.n, "sup"))
             return
         raise AssertionError(f"unhandled action {a!r}")
+
+    def _accent(self, mark: str, ts: TokenStream, tok) -> None:
+        """\\'a or \\'{a}: the next letter with the combining `mark`, composed."""
+        import unicodedata
+        nxt = ts.peek()
+        if nxt is not None and nxt.kind == "OPEN_BRACE":
+            group = ts.read_brace_group_tokens() or []
+            if len(group) == 1 and group[0].kind == "TEXT" and len(group[0].value) == 1:
+                self._text(unicodedata.normalize("NFC", group[0].value + mark))
+                return
+        elif nxt is not None and nxt.kind == "TEXT" and nxt.value[:1].isalpha():
+            nxt.value = unicodedata.normalize("NFC", nxt.value[0] + mark) + nxt.value[1:]
+            return
+        self.report.hard("accent-without-letter", f"{self.where}:{tok.line}",
+                         f"\\{tok.value} is not followed by a letter")
 
 
 def _raw(tokens) -> str:

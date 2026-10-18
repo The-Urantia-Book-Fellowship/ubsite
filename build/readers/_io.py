@@ -76,5 +76,36 @@ def read_tex(texdir: pathlib.Path, name: str, rev: str = "worktree") -> str | No
     return read_at_rev(texdir, f"./{name}", rev)
 
 
+def read_tex_many(texdir: pathlib.Path, names: list[str], rev: str = "worktree") -> dict[str, str | None]:
+    """read_tex for many files: {name: text, or None where absent}.
+
+    At a commit, one `git cat-file --batch` for them all, where read_tex runs
+    two processes a file: the study edition's 197 papers are read whole by
+    `make check`.
+    """
+    if rev == "worktree":
+        return {n: read_tex(texdir, n) for n in names}
+    out = subprocess.run(["git", "-C", str(texdir), "cat-file", "--batch"],
+                         input="".join(f"{rev}:./{n}\n" for n in names).encode("utf-8"),
+                         capture_output=True)
+    if out.returncode != 0:
+        raise SystemExit(f"_io: cannot read {texdir} at {rev}:\n"
+                         f"{out.stderr.decode('utf-8', 'replace')}")
+    got: dict[str, str | None] = {}
+    buf, i = out.stdout, 0
+    for n in names:
+        eol = buf.index(b"\n", i)
+        head = buf[i:eol].decode("utf-8").split()
+        i = eol + 1
+        if head[-1] == "missing":
+            got[n] = None
+            continue
+        size = int(head[2])
+        got[n] = buf[i:i + size].decode("utf-8")
+        i += size + 1
+        _READ[f"{texdir}:{rev}:./{n}"] = 1
+    return got
+
+
 def files_read() -> dict[str, int]:
     return dict(_READ)
