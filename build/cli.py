@@ -10,7 +10,7 @@ from . import config, vendorlib
 
 def main(argv: list[str]) -> int:
     if not argv:
-        print(__doc__ + "\n  sources | vendor-sync | vendor-check", file=sys.stderr)
+        print(__doc__ + "\n  sources | dirty [db] | vendor-sync | vendor-check", file=sys.stderr)
         return 2
     cmd, rest = argv[0], argv[1:]
     repos = config.load()
@@ -18,6 +18,23 @@ def main(argv: list[str]) -> int:
     if cmd == "sources":
         print(config.describe(repos))
         return 0
+    if cmd == "dirty":
+        # Whether a built database was read from uncommitted source files
+        # (config._dirty), as its build_source records: deploy.sh refuses to
+        # ship one unless told to (Tigran, 2026-10-18).  Each such source, and
+        # what makes it dirty now; 3 if any, 0 if none, so that a failure here
+        # (1) is never taken for a dirty build that --allow-dirty would ship.
+        import sqlite3
+        db = rest[0] if rest else str(config.ROOT / "var" / "ub.db")
+        with sqlite3.connect(f"file:{db}?mode=ro", uri=True) as con:
+            dirty = [k for (k,) in con.execute("SELECT repo FROM build_source WHERE dirty = 1 ORDER BY repo")]
+        for k in dirty:
+            r = repos[k]
+            print(f"  {k}, {r['path']}:")
+            for f in (config.dirty_files(r["path"], str(r["tex"].relative_to(r["path"])))
+                      or ["(nothing now: built while it was dirty; build again)"]):
+                print(f"    {f}")
+        return 3 if dirty else 0
     if cmd == "vendor-sync":
         return vendorlib.sync({**repos, "texlive": config.texlive(),
                             "sqlite_wasm": config.sqlite_wasm()})

@@ -8,6 +8,7 @@
 #   ./deploy/deploy.sh --no-data       ship code only, leave the database and the offline copy alone
 #   ./deploy/deploy.sh --no-restart    ship, do not restart
 #   ./deploy/deploy.sh --audio         also copy the AI voice (var/audio/ai, ~4 GB) first
+#   ./deploy/deploy.sh --allow-dirty   ship a database built from uncommitted press files
 #   UBSITE_HOSTS="pi5" ./deploy/deploy.sh
 #
 # The three source repositories are NOT on the hosts, and do not need to be:
@@ -25,6 +26,7 @@ PORT="${UBSITE_PORT:-8130}"                     # 8000 and 8090 are taken on pi5
 BUILD=1
 RESTART=1
 AUDIO=0
+ALLOW_DIRTY=0
 CHOSEN=""
 
 for arg in "$@"; do
@@ -32,7 +34,8 @@ for arg in "$@"; do
         --no-data)    BUILD=0 ;;
         --no-restart) RESTART=0 ;;
         --audio)      AUDIO=1 ;;
-        -*) echo "usage: $(basename "$0") [--no-data] [--no-restart] [--audio] [host...]" >&2; exit 2 ;;
+        --allow-dirty) ALLOW_DIRTY=1 ;;
+        -*) echo "usage: $(basename "$0") [--no-data] [--no-restart] [--audio] [--allow-dirty] [host...]" >&2; exit 2 ;;
         *)  CHOSEN="$CHOSEN $arg" ;;
     esac
 done
@@ -64,6 +67,30 @@ if [ "$BUILD" = 1 ]; then
     make data
     make check
     make offline
+fi
+
+# A dirty build: press read from a working tree that differs from the commit it
+# records (build/config.py _dirty), so that commit could not build what would go
+# live.  The footer said "dirty" until 2026-10-18; now /healthz alone would, so
+# it is refused here unless asked for (Tigran, 2026-10-18).  Checked on what the
+# database records, so a press edit made during the build counts too.
+if [ "$BUILD" = 1 ]; then
+    RC=0
+    DIRTY="$(.venv/bin/python -m build dirty var/ub.db)" || RC=$?
+    if [ "$RC" = 3 ] && [ "$ALLOW_DIRTY" = 1 ]; then
+        echo "==> shipping a dirty build, as asked (--allow-dirty); /healthz will say so:"
+        echo "$DIRTY"
+    elif [ "$RC" = 3 ]; then
+        echo "refusing: the database was built from source files that are not committed," >&2
+        echo "          so the commit /healthz would name could not build it again:" >&2
+        echo "$DIRTY" >&2
+        echo "          Deploy once they are committed; or, if the build reads none of them," >&2
+        echo "          ./deploy/deploy.sh --allow-dirty ships it as it is." >&2
+        exit 1
+    elif [ "$RC" != 0 ]; then
+        echo "refusing: could not tell whether the database is dirty (build dirty: $RC)" >&2
+        exit 1
+    fi
 fi
 
 # The text API's versions (data/text/, build/versions.py).  A site syncing with

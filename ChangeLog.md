@@ -25,6 +25,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 - The site's What's new is read from this file (`offline/news.py`), each entry dated by the commit that wrote its line. Before this file began, it listed the subjects of the commits that touched `ubsite/`, `offline/`, `build/` or `data/`, and copies made before then still see those.
 - `var/ub.db` has a new table, `changelog`: this file block by block, which `/changelog` shows as written, each entry dated by the commit that wrote it, since the hosts have no `.git`. `build/changelog.py` makes it, and `offline/news.py` now reads the file through it, so What's new and the page cannot disagree.
 - The footer no longer names the commits the text and the index were built from, nor links them on GitHub, their repositories being private; `/healthz` still names them. Nor does it name the typeface, say that other sites may sync with the text, or say how visits are counted.
+- `deploy.sh` refuses a database built from uncommitted press files, listing them, unless given `--allow-dirty`; `python -m build dirty var/ub.db` says whether a database is dirty (3) or clean (0). The index cannot be dirty: it is read at a commit.
 
 ## The site on October 18, 2026, when this changelog began
 

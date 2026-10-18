@@ -35,6 +35,16 @@ def _dirty(path: pathlib.Path, tex: str) -> bool:
                 or _git(path, "ls-files", "--others", "--exclude-standard", "--", tex))
 
 
+def dirty_files(path: pathlib.Path, tex: str) -> list[str]:
+    """What makes it dirty, as `git status --short` writes it: each tracked file
+    with uncommitted changes, and each untracked file under tex/ ('?? ...')."""
+    def lines(*args: str) -> list[str]:
+        out = subprocess.run(["git", "-C", str(path), *args], capture_output=True, text=True, timeout=30)
+        return out.stdout.splitlines() if out.returncode == 0 else []
+    return (lines("status", "--short", "--untracked-files=no")
+            + ["?? " + f for f in lines("ls-files", "--others", "--exclude-standard", "--", tex)])
+
+
 def load() -> dict:
     """Return {key: {path, tex, rev, at, commit, dirty, commit_url, pushed, subject, date}}.
 

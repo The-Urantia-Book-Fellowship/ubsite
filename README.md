@@ -80,7 +80,7 @@ Every deploy gives both hosts the same build, so the two should agree; if they d
 Two rules decide what a build sees:
 
 - **The index is read at HEAD.** Uncommitted work in `../index` never reaches the site, by design: the index is edited in another session, and a build must not race an edit in progress. If a correction is missing, first check that it is *committed* there, with `git -C ../index log -1`.
-- **Press is read from its working tree.** `make sources` marks it `+dirty` if a tracked file has uncommitted changes, or if `tex/` has an untracked file. An untracked directory elsewhere in press does not count. Do not deploy a dirty build: `/healthz` would say `"dirty":true`, and the commit alone could not reproduce it. Nothing stops one: `deploy.sh` does not check, and since 2026-10-18 the footer no longer says so.
+- **Press is read from its working tree.** `make sources` marks it `+dirty` if a tracked file has uncommitted changes, or if `tex/` has an untracked file. An untracked directory elsewhere in press does not count. Do not deploy a dirty build: `/healthz` would say `"dirty":true`, and the commit alone could not reproduce it. `deploy.sh` refuses one, naming the files that make it dirty, unless given `--allow-dirty` (2026-10-18), for when the build reads none of them; the footer said `dirty` until then. The index cannot be dirty, being read at a commit: its uncommitted reports and journal never count.
 - **Push the source commits.** `/healthz` names them, and a commit nobody else can fetch cannot be built again. If a commit is on no remote branch as of the last fetch, `make data` warns `source-not-pushed`.
 
 To ask whether one paragraph is cited in the database you have built:
@@ -179,11 +179,12 @@ A release is a tag on `main`. Put a heading `## [X.Y.Z] - YYYY-MM-DD` under `## 
 ./deploy/deploy.sh sigmaai.au    # the same, to one host (pi5 or sigmaai.au)
 ./deploy/deploy.sh --no-data     # code or templates only; leave the hosts' databases alone
 ./deploy/deploy.sh --audio       # also copy the AI voice first, after `make tts` changed it
+./deploy/deploy.sh --allow-dirty # ship a database built from uncommitted press files, which it otherwise refuses
 ```
 
 The script builds once, then does the rest for each host in turn, pi5 then sigmaai.au, and stops at the first that fails:
 
-1. runs `make data`, `make check` and `make offline` again, so a deploy never ships an unchecked database or offline copy, and checks that the host holds every recording the database serves, at the path and size it records;
+1. runs `make data`, `make check` and `make offline` again, so a deploy never ships an unchecked database or offline copy, refuses a database built from uncommitted press files (`python -m build dirty`, unless `--allow-dirty`), and checks that the host holds every recording the database serves, at the path and size it records;
 2. rsyncs the code to `<host>:/home/tigran/ubsite`, without `.git`, `.venv`, `var/` or `export/`;
 3. ships `var/ub.db` as `ub.db.new` and `mv`s it into place, so a half-copied file is never the one being served; then the offline copy, its chunks before the manifest that names them, pruning chunks that neither it nor the manifest before it names (see [Work offline](#work-offline));
 4. copies `var/geoip/dbip-city-lite.mmdb` when `make geoip` has changed it (the visit counter's places; see [Visits](#visits)), and runs `uv pip sync` in the host's venv;
