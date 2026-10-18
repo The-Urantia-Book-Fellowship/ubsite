@@ -45,14 +45,12 @@
     s.appendChild(p);
     return s;
   }
-  function button(cls, label, name, text) {
+  function button(cls, label, name) {
     var b = document.createElement('button');
     b.type = 'button';
     b.className = cls;
     b.setAttribute('aria-label', label);
     b.appendChild(icon(name));
-    // In a span of its own, so ub.css can set it level with its box (--lift).
-    if (text) b.appendChild(document.createElement('span')).textContent = text;
     return b;
   }
 
@@ -62,8 +60,12 @@
   var V = null, key = null;          // the voice being heard, and its key
   var PV = null, pkey = null;        // the voice the page's own controls start
   var k = -1, file = -1;             // the segment being heard, and its file
-  var marked = null, bar = null, controls = [], shutSpeeds = function () {};
+  var marked = null, bar = null, controls = [], shuts = [];
   var head, paras;
+  // The ids of the paragraphs in root, in reading order.
+  function ids(root) {
+    return Array.prototype.map.call(root.querySelectorAll('p.t[id]'), function (p) { return p.id; });
+  }
   function scan() {
     // The section's title, or over an introduction, which has none, the
     // paper's: what its spoken heading reads.
@@ -71,6 +73,7 @@
     paras = {};
     Array.prototype.forEach.call(document.querySelectorAll('p.t[id]'),
                                  function (p) { paras[p.id] = p; });
+    if (P) P.ids = ids(document);
   }
   scan();
 
@@ -84,11 +87,12 @@
     return null;
   }
   // Offline a recording cannot be had: the voice Settings names is not changed
-  // for another (Tigran, 2026-10-13), the bar says why it does not play.
-  var NEEDS_NET = 'The recordings need a connection. Offline, Settings can read it in your browser\u2019s voice.';
-  // Section d's voice kk; the browser's is made from the paragraphs in root.
-  function voiceOf(d, kk, root) {
-    return kk === 'browser' ? spoken(root, href(d)) : kk ? d.voices[kk] : null;
+  // for another (Tigran, 2026-10-13), the bar says why it does not play, and
+  // its voice menu stands beside the message.
+  var NEEDS_NET = 'The recordings need a connection. Offline, your browser\u2019s voice can read it.';
+  // Section d's voice kk; the browser's is made from its paragraphs, d.ids.
+  function voiceOf(d, kk) {
+    return kk === 'browser' ? spoken(d.ids, href(d)) : kk ? d.voices[kk] : null;
   }
   function href(d) { return '/' + d.paper + ':' + d.section; }
   function same(a, b) { return !!(a && b && a.paper === b.paper && a.section === b.section); }
@@ -100,53 +104,53 @@
     var v = S.voice();
     return v ? v.name : 'Your browser\u2019s voice';
   }
-  function byline() {
-    var v = S.voice();
-    return v ? v.name + ', your browser\u2019s voice' : 'Your browser\u2019s voice';
-  }
 
   // ---- controls in the page ------------------------------------------------
+  // A play button beside each paragraph, the first paragraph's reading the
+  // section's heading first.  Until 2026-10-18 a Listen button under the head
+  // did that, and Tigran took it out as the first paragraph's twin.
   function build() {
     controls.forEach(function (c) { c.remove(); });
     controls = [];
     if (!P) return;
     pkey = choose(P);
-    PV = voiceOf(P, pkey, document);
+    PV = voiceOf(P, pkey);
     if (!PV) return;
-    var row = document.createElement('p');
-    row.className = 'listenrow';
-    var b = button('listen', 'Listen to this section, read by ' +
-                   (PV.kind === 'browser' ? byline() : PV.label), 'play', 'Listen');
-    b.addEventListener('click', function () { start(0); });
-    var by = document.createElement('span');
-    by.className = 'by';
-    by.textContent = PV.kind === 'browser' ? byline() : PV.label;
-    // Boson's licence for the AI voice: its acknowledgment, beside the audio.
+    // Boson's licence for the AI voice: its acknowledgment, wherever the voice
+    // is offered or plays.  Under the head, where the Listen button stood.
     if (PV.credit) {
-      var c = document.createElement(PV.credit_url ? 'a' : 'span');
-      c.className = 'credit';
+      var row = document.createElement('p'), c = document.createElement(PV.credit_url ? 'a' : 'span');
+      row.className = 'voicecredit';
       c.textContent = PV.credit;
       if (PV.credit_url) { c.href = PV.credit_url; c.rel = 'noopener'; c.target = '_blank'; }
-      by.appendChild(document.createTextNode(' · '));
-      by.appendChild(c);
-    } else if (PV.kind === 'synthetic') by.textContent += ' (an AI voice)';
-    row.appendChild(b);
-    row.appendChild(by);
-    head.parentNode.appendChild(row);
-    controls.push(row);
-    // A paragraph can be started only once the reading is aligned to them.
-    if (PV.by !== 'paragraph') return;
-    PV.segs.forEach(function (s, i) {
-      var p = s[0] && paras[s[0]];
-      if (!p) return;
+      row.appendChild(c);
+      head.parentNode.appendChild(row);
+      controls.push(row);
+    }
+    function place(p, i, label) {
       // Outside the stored text, and with no text of its own: copying the
       // paragraph still returns its words exactly (CLAUDE.md §6).
-      var pb = button('playp', 'Listen from ' + s[0], 'play');
+      var pb = button('playp', label, 'play');
       pb.addEventListener('click', function () { start(i); });
       // After the reference: on a phone the two float as a stack, reference on top.
       var num = p.querySelector('.num');
       p.insertBefore(pb, num ? num.nextSibling : p.firstChild);
       controls.push(pb);
+    }
+    // A paragraph can be started only once the reading is aligned to them;
+    // until then the first paragraph's button starts the section.
+    if (PV.by !== 'paragraph') {
+      var p0 = document.querySelector('p.t[id]');
+      if (p0) place(p0, 0, 'Listen to this section');
+      return;
+    }
+    var first = true;
+    PV.segs.forEach(function (s, i) {
+      var p = s[0] && paras[s[0]];
+      if (!p) return;
+      if (first && PV.segs[0][0] === null) place(p, 0, 'Listen to this section, from its heading');
+      else place(p, i, 'Listen from ' + s[0]);
+      first = false;
     });
   }
   // A press on the page's own controls: what is heard becomes what the page shows.
@@ -159,7 +163,13 @@
   }
 
   // ---- the bar ---------------------------------------------------------------
+  var voiceMenu = null;
   function makeBar() {
+    // Chrome on Android names its voices only a moment after a page first asks
+    // for them, and with a recording playing nothing has: ask now, so that the
+    // list of voices has them by the time it is opened (voiceschanged, below).
+    if (synth) synth.getVoices();
+    shuts = [];
     bar = document.createElement('div');
     bar.className = 'player';
     bar.setAttribute('role', 'region');
@@ -181,6 +191,11 @@
     who.className = 'who';
     where.appendChild(at);
     where.appendChild(who);
+    // With the voice beside it, after a dot; on a phone, under it (ub.css).
+    var mid = document.createElement('span');
+    mid.className = 'mid';
+    mid.appendChild(where);
+    mid.appendChild(voiceMenu = voices());
     var spd = speeds();
     var on = document.createElement('a');
     on.className = 'onward';
@@ -197,56 +212,84 @@
     nxt.addEventListener('click', forward);
     tog.addEventListener('click', toggle);
     x.addEventListener('click', close);
-    [prev, tog, nxt, where, spd, on, x].forEach(function (e) { bar.appendChild(e); });
+    [prev, tog, nxt, mid, spd, on, x].forEach(function (e) { bar.appendChild(e); });
     document.body.appendChild(bar);
     document.body.classList.add('listening');
   }
-  // The speed, and the list of speeds that a tap on it opens above the bar.
-  function speeds() {
+  // A button in the bar and the list a tap on it opens above the bar: the
+  // speed, the voice.  entries() is asked each time it opens, so that what it
+  // lists and which is checked are current: [{text, on, pick, note}, ...],
+  // with {group} for a heading over the entries after it.
+  function dropup(boxCls, btnCls, menuCls, label, entries) {
     var box = document.createElement('span');
-    box.className = 'ratebox';
-    var spd = document.createElement('button');
-    spd.type = 'button';
-    spd.className = 'rate';
-    spd.setAttribute('aria-label', 'Speed');
-    spd.setAttribute('aria-haspopup', 'menu');
-    spd.setAttribute('aria-expanded', 'false');
+    box.className = boxCls;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = btnCls;
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('aria-haspopup', 'menu');
+    btn.setAttribute('aria-expanded', 'false');
     var menu = document.createElement('div');
-    menu.className = 'speeds';
+    menu.className = menuCls;
     menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', 'Speed');
+    menu.setAttribute('aria-label', label);
     menu.hidden = true;
-    var items = RATES.map(function (r) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.setAttribute('role', 'menuitemradio');
-      b.textContent = r + '×';
-      b.addEventListener('click', function () {
-        shut(true);
-        S.set('rate', r);
+    var items = [];
+    // The entries, drawn afresh; the index of the one checked.
+    function fill() {
+      menu.textContent = '';
+      items = [];
+      var into = menu, at = 0;
+      entries().forEach(function (e) {
+        if (e.group) {
+          into = menu.appendChild(document.createElement('div'));
+          into.setAttribute('role', 'group');
+          into.setAttribute('aria-label', e.group);
+          var h = into.appendChild(document.createElement('div'));
+          h.className = 'group';
+          h.setAttribute('aria-hidden', 'true');
+          h.textContent = e.group;
+          return;
+        }
+        var b = into.appendChild(document.createElement('button'));
+        b.type = 'button';
+        b.setAttribute('role', 'menuitemradio');
+        b.setAttribute('aria-checked', String(!!e.on));
+        b.textContent = e.text;
+        if (e.note) b.appendChild(document.createElement('small')).textContent = e.note;
+        b.addEventListener('click', function () {
+          shut(true);
+          e.pick();
+        });
+        if (e.on) at = items.length;
+        items.push(b);
       });
-      menu.appendChild(b);
-      return b;
-    });
+      return at;
+    }
     function open() {
-      var now = rate();
-      items.forEach(function (b, i) { b.setAttribute('aria-checked', String(RATES[i] === now)); });
+      var at = fill();
       menu.hidden = false;
-      spd.setAttribute('aria-expanded', 'true');
-      items[Math.max(0, RATES.indexOf(now))].focus();
+      btn.setAttribute('aria-expanded', 'true');
+      if (items.length) items[at].focus();
       document.addEventListener('pointerdown', away, true);
     }
-    // Closed by a choice, a second tap on the speed, Escape, or a tap elsewhere.
+    // Drawn again while open: the browser's voices can arrive after it opened.
+    box.refill = function () {
+      if (menu.hidden) return;
+      var had = menu.contains(document.activeElement), at = fill();
+      if (had && items.length) items[at].focus();
+    };
+    // Closed by a choice, a second tap on its button, Escape, or a tap elsewhere.
     function shut(refocus) {
       if (menu.hidden) return;
       menu.hidden = true;
-      spd.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-expanded', 'false');
       document.removeEventListener('pointerdown', away, true);
-      if (refocus) spd.focus();
+      if (refocus) btn.focus();
     }
     function away(ev) { if (!box.contains(ev.target)) shut(false); }
-    spd.addEventListener('click', function () { if (menu.hidden) open(); else shut(true); });
-    shutSpeeds = shut;
+    btn.addEventListener('click', function () { if (menu.hidden) open(); else shut(true); });
+    shuts.push(shut);
     menu.addEventListener('keydown', function (ev) {
       var i = items.indexOf(document.activeElement);
       if (ev.key === 'Escape') { ev.preventDefault(); shut(true); }
@@ -255,8 +298,42 @@
         items[(i + (ev.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
       } else if (ev.key === 'Tab') shut(false);
     });
-    box.appendChild(spd);
+    box.appendChild(btn);
     box.appendChild(menu);
+    return box;
+  }
+  function speeds() {
+    return dropup('ratebox', 'rate', 'speeds', 'Speed', function () {
+      var now = rate();
+      return RATES.map(function (r) {
+        return { text: r + '×', on: r === now, pick: function () { S.set('rate', r); } };
+      });
+    });
+  }
+  // The voices the section being heard can be read in, as Settings lists them,
+  // and each of the browser's under its own (Tigran, 2026-10-18).  Its
+  // "Automatic" stays in Settings: here the voice it speaks with is checked.
+  function voices() {
+    var box = dropup('voicebox', 'voice', 'voices', 'Voice', function () {
+      var out = [];
+      for (var kk in D.voices) (function (kk, v) {
+        out.push({ text: v.label, on: key === kk, pick: function () { S.set('voice', kk); },
+                   note: v.credit || (v.kind === 'synthetic' ? 'an AI voice' : '') });
+      })(kk, D.voices[kk]);
+      if (!synth) return out;
+      var all = S.usable(), cur = key === 'browser' && S.voice();
+      function browser() { if (S.get().voice !== 'browser') S.set('voice', 'browser'); }
+      if (!all.length)
+        return out.concat({ text: 'Your browser’s voice', on: key === 'browser', pick: browser });
+      out.push({ group: 'Your browser’s voice' });
+      all.forEach(function (v) {
+        out.push({ text: v.name, on: !!cur && cur.name === v.name,
+                   pick: function () { S.set('bvoice', v.name); browser(); } });
+      });
+      return out;
+    });
+    // The name in a span of its own, which a long one runs out of (ub.css).
+    box.firstChild.appendChild(document.createElement('span'));
     return box;
   }
   // The heading or paragraph being read, if this page has it.  A reference is
@@ -285,7 +362,8 @@
     var s = k >= 0 ? V.segs[k] : null, at = bar.querySelector('.at');
     at.hidden = !s;
     if (s) at.textContent = s[0] || D.paper + ':' + D.section;
-    bar.querySelector('.who').textContent = (s ? ' · ' : 'End of the section · ') + vname();
+    bar.querySelector('.who').textContent = s ? '' : 'End of the section';
+    bar.querySelector('.voice span').textContent = vname();
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
     if (D.next) { on.href = D.next.href + '#listen'; on.textContent = 'Next: ' + D.next.label + ' ›'; }
@@ -297,7 +375,8 @@
   }
 
   // ---- playing ---------------------------------------------------------------
-  function go(i) {
+  // Segment i, played -- or with `quiet`, made ready, for play() to start.
+  function go(i, quiet) {
     if (!V || i < 0 || i >= V.segs.length) return;
     trouble = null;
     if (!bar) {
@@ -313,7 +392,9 @@
       meta();
       // The last paragraph, with the next section to come: fetch it now.
       if (i === V.segs.length - 1 && S.get().onward) fetchNext();
-      return speakFrom(0);
+      if (!quiet) return speakFrom(0);
+      said.n = 0;
+      return render();
     }
     if (navigator.onLine === false) {
       tell(NEEDS_NET);
@@ -335,7 +416,7 @@
     });
     mark();
     meta();
-    var p = audio.play();
+    var p = quiet ? null : audio.play();
     if (p && p.catch) p.catch(render);   // autoplay refused: the bar waits for a tap
     render();
   }
@@ -412,8 +493,9 @@
       } else {
         // The reader is elsewhere: what is heard moves on, and the page stays.
         D = JSON.parse(json.textContent);
+        D.ids = ids(doc);
         key = choose(D);
-        V = voiceOf(D, key, doc);
+        V = voiceOf(D, key);
       }
       if (V) go(0); else finish();
     }).catch(function () {
@@ -522,9 +604,34 @@
     audio.load();
     file = k = -1;
     mark();
-    shutSpeeds(false);
+    shuts.forEach(function (f) { f(false); });
     if (bar) { bar.remove(); bar = null; }
     document.body.classList.remove('listening');
+  }
+
+  // Another voice, chosen in the bar's list or in Settings: what is being heard
+  // goes on in it from the start of the same paragraph, playing if it was, or
+  // if it was asked to and could not.  A paragraph the new voice does not read
+  // (Merritt Horn's leaves a few out, data/audio/mh-unread.tsv) gives way to
+  // the next one it does.  Until 2026-10-18 a new voice closed the bar.
+  function revoice() {
+    build();
+    if (!bar) return;
+    var nk = choose(D);
+    if (!nk) return close();
+    if (nk === key) return render();
+    var was = k >= 0 && (playing() || !!trouble), rest = k >= 0 ? V.segs.slice(k) : [];
+    hush();
+    audio.pause();
+    if (nk === 'browser') { audio.removeAttribute('src'); audio.load(); }
+    file = -1;
+    V = same(D, P) ? PV : voiceOf(D, nk);
+    key = nk;
+    if (k < 0) return render();
+    for (var j = 0; j < rest.length; j++)
+      for (var i = 0; i < V.segs.length; i++)
+        if (V.segs[i][0] === rest[j][0]) return go(i, !was);
+    finish();
   }
 
   // The segment that holds the playhead, within the file now loaded.
@@ -561,7 +668,7 @@
   audio.addEventListener('error', function () {
     if (audio.getAttribute('src'))
       tell(navigator.onLine === false ? NEEDS_NET
-                                      : 'The recording could not be loaded. Your browser\u2019s voice can read without it: Settings, Listening.');
+                                      : 'The recording could not be loaded. Your browser\u2019s voice can read without it.');
   });
 
   // ---- the browser's own voice -----------------------------------------------
@@ -595,12 +702,10 @@
     t.wait.then(function (m) { t.map = m; }, function () { if (texts[h] === t) delete texts[h]; });
     return t;
   }
-  // The heading, then every paragraph in root, section h.  Its text is fetched
+  // The heading, then every paragraph of section h, ids.  Its text is fetched
   // now, so that a tap starts it at once: iOS speaks only in answer to one.
-  function spoken(root, h) {
-    var segs = [[null]];
-    Array.prototype.forEach.call(root.querySelectorAll('p.t[id]'),
-                                 function (p) { segs.push([p.id]); });
+  function spoken(ids, h) {
+    var segs = [[null]].concat(ids.map(function (id) { return [id]; }));
     words(h);
     return { label: 'Your browser\u2019s voice', kind: 'browser', by: 'paragraph', segs: segs };
   }
@@ -715,8 +820,7 @@
   });
   // The browser names its voices only once it has them.
   function relabel() {
-    var by = document.querySelector('.listenrow .by');
-    if (by && PV && PV.kind === 'browser') by.textContent = byline();
+    if (voiceMenu) voiceMenu.refill();
     if (!V || V.kind !== 'browser') return;
     render();
     if (k >= 0) meta();
@@ -772,7 +876,7 @@
       render();
     }
     if (what === 'bvoice') { relabel(); if (said.on) speakFrom(said.n); }
-    if (what === 'voice') { close(); build(); }
+    if (what === 'voice') revoice();
     // Following again, from another page: back to the reading.
     if (what === 'follow' && S.get().follow) toReading(false);
   });

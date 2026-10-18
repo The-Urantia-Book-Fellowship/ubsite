@@ -255,12 +255,11 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage .sponsor { font-style: italic; margin: 0 auto; max-width: 32em; text-wrap: balance; }
 .partpage .transport { justify-content: flex-end; max-width: none; margin-top: 3.5rem; }
 /* A paper's head is centred over the text column, as the book sets it: the
-   paper's number, title and author, the section's title, and the Listen button
-   under them.  It is as wide as the column: the measure here, and on a wide
-   screen what the margin leaves, if less (below). */
+   paper's number, title and author, and the section's title.  It is as wide as
+   the column: the measure here, and on a wide screen what the margin leaves, if
+   less (below). */
 .papertop { margin-bottom: 1.6rem; max-width: var(--measure); text-align: center; }
 .papertop :is(h1, h2) { text-wrap: balance; color: var(--text); }
-.papertop .listenrow { justify-content: center; }
 .papernum { font-size: 1rem; letter-spacing: .12em; text-transform: uppercase;
             color: var(--faint); margin: 0; }
 h1 { font-size: 2.1rem; font-weight: 400; line-height: 1.15; margin: .2rem 0 .3rem; }
@@ -634,17 +633,11 @@ a.fn.on::after { background: currentColor; }
 /* ---- listening (listen.js) --------------------------------------------- */
 button svg { width: 1em; height: 1em; fill: currentColor; display: block; }
 button svg .stroke { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
-.listenrow { display: flex; align-items: center; gap: .7rem; margin: -.1rem 0 1.1rem;
-             font-size: .9rem; color: var(--faint); }
-button.listen { display: inline-flex; align-items: center; gap: .45rem; font: inherit;
-  font-size: .95rem; color: var(--link); background: none; cursor: pointer;
-  border: 1px solid var(--rule); border-radius: 999px; padding: .2rem .85rem .2rem .65rem; }
-
-/* Boson's acknowledgment for the AI voice, which its licence requires beside the audio. */
-.listenrow .credit { color: inherit; text-decoration-color: var(--rule); }
-.listenrow .credit:hover { color: var(--link); }
-button.listen svg { width: .8em; height: .8em; }
-button.listen span { position: relative; top: var(--lift); }
+/* Boson's acknowledgment for the AI voice, which its licence requires wherever
+   the voice is offered or plays: under the head, while it is the voice chosen. */
+.voicecredit { margin: -.1rem 0 1.1rem; font-size: .85rem; color: var(--faint); }
+.voicecredit a { color: inherit; text-decoration-color: var(--rule); }
+.voicecredit a:hover { color: var(--link); }
 /* A paragraph's own play button sits under its number, always there and faint
    like the number, full only on hover or while its paragraph is read.  It was
    once shown on hover alone, which a phone or tablet does not have (Tigran,
@@ -658,7 +651,7 @@ p.t { position: relative; }
   padding: .22rem; border: 0; border-radius: 50%; background: none; color: var(--link);
   cursor: pointer; opacity: .45; transition: opacity .15s; }
 .playp:focus-visible, p.t.now .playp { opacity: 1; }
-:root[data-voice="off"] :is(.listenrow, .playp) { display: none; }
+:root[data-voice="off"] :is(.voicecredit, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
    playing starts, so only one thing on the page is marked. */
 p.t.now, .papertop :is(h1, h2).now { background: color-mix(in oklch, var(--link) 11%, transparent);
@@ -677,8 +670,13 @@ p.t.now, .papertop :is(h1, h2).now { background: color-mix(in oklch, var(--link)
 .player button:active { background: color-mix(in oklch, var(--link) 18%, transparent); }
 .player .toggle { width: 2.3rem; height: 2.3rem; color: var(--paper); background: var(--link); }
 .player .toggle:active { background: color-mix(in oklch, var(--link) 80%, var(--ink)); }
-.player .where { min-width: 0; padding: 0 .55rem; white-space: nowrap; overflow: hidden;
+/* Only what is being read, and by whom, gives way when the bar is short of
+   room: the buttons keep their size, and the play button its circle. */
+.player > :not(.mid) { flex: none; }
+.player .mid { display: flex; align-items: center; min-width: 0; }
+.player .where { min-width: 0; padding-left: .55rem; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; color: var(--faint); }
+.player .where::after { content: "\00b7"; margin-left: .35em; }
 /* The reference being read: a tap brings its paragraph into view. */
 .player .where .at { display: inline; padding: 0; border-radius: 0; font: inherit;
   color: var(--link); }
@@ -687,22 +685,42 @@ p.t.now, .papertop :is(h1, h2).now { background: color-mix(in oklch, var(--link)
    set in the system face, like ◐. */
 .player .rate { min-width: 2.9rem; border-radius: 3px; font: .8rem system-ui, sans-serif;
   color: var(--faint); }
-/* The speeds, a small list rising from the speed. */
+/* The voice being heard, after the reference: a tap opens the list of voices,
+   as the speed's does (Tigran, 2026-10-18).  Its chevron, drawn as the fold
+   buttons' are, points up to where the list opens, and down while it is open. */
+.player .voicebox { display: flex; min-width: 0; }
+.player .voice { display: flex; align-items: center; min-width: 0; padding: .3rem .4rem .3rem .25rem;
+  border-radius: 3px; font: inherit; color: var(--faint); }
+.player .voice span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player .voice::after { content: ""; flex: none; width: .3em; height: .3em; margin: .3em 0 0 .45em;
+  border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(-135deg);
+  transition: transform .12s; }
+.player .voice[aria-expanded="true"]::after { margin-top: -.15em; transform: rotate(45deg); }
+/* The speeds, a small list rising from the speed; the voices, a longer one
+   rising from the bar's middle.  The bar is centred on the window, so a long
+   list of the browser's voices never runs off a phone's edge, and it scrolls
+   once it is taller than the window leaves. */
 .player .ratebox { position: relative; }
-.player .speeds { position: absolute; bottom: calc(100% + .7rem); left: 50%;
+.player :is(.speeds, .voices) { position: absolute; bottom: calc(100% + .7rem); left: 50%;
   transform: translateX(-50%); display: flex; flex-direction: column; padding: .25rem;
   background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
   box-shadow: 0 6px 24px rgb(0 0 0 / .18); }
-.player .speeds button { display: block; min-width: 3.6rem; padding: .3rem .7rem;
+.player .voices { width: max-content; max-width: min(calc(100vw - 2rem), 24rem);
+  max-height: calc(100dvh - 7rem); overflow-y: auto; overscroll-behavior: contain; }
+.player :is(.speeds, .voices) button { display: block; min-width: 3.6rem; padding: .3rem .7rem;
   border-radius: 3px; font: .85rem system-ui, sans-serif; color: var(--ink); text-align: center; }
-.player .speeds [aria-checked="true"] { color: var(--paper); background: var(--link); }
+.player :is(.speeds, .voices) [aria-checked="true"] { color: var(--paper); background: var(--link); }
+.player .voices button { width: 100%; text-align: left; }
+.player .voices small { display: block; font-size: .75rem; opacity: .75; }
+.player .voices .group { padding: .55rem .7rem .2rem; font: .75rem system-ui, sans-serif;
+  color: var(--faint); }
+.player .voices [role="group"] button { padding-left: 1.4rem; }
 .player .onward { white-space: nowrap; text-decoration: none; padding: 0 .5rem; }
 .player .close { color: var(--faint); }
 /* A touch screen keeps :hover on whatever was tapped last, so ⏮ and ⏭ stayed
    lit after a tap on Android.  Hover is drawn only where there is a pointer that
    hovers; a tap shows by :active instead. */
 @media (hover: hover) {
-  button.listen:hover { border-color: var(--link); }
   p.t:hover .playp { opacity: 1; }
   .playp:hover { background: color-mix(in oklch, var(--link) 14%, transparent); }
   .player button:hover { background: color-mix(in oklch, var(--link) 12%, transparent); }
@@ -1070,7 +1088,7 @@ main.results { position: relative; }
 /* ---- print ------------------------------------------------------------- */
 @media print {
   @page { margin: 22mm 20mm; }
-  .top, footer, .rail, .pager, .transport, .listenrow, .playp, .player, dialog, .offmenu { display: none; }
+  .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, dialog, .offmenu { display: none; }
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }
@@ -1213,8 +1231,16 @@ h2.chap + .rh { margin-top: 1rem; }
 .masthead > div { min-width: 0; }
 .masthead .logo { flex: none; width: 7.5rem; height: 7.5rem; margin-top: -.4rem; }
 @media (max-width: 34rem) {
-  /* At the end of a section, "Next" needs the room "End of the section" had. */
-  .player:has(.onward:not([hidden])) .where { display: none; }
+  /* At the end of a section, "Next" needs the room "End of the section" and
+     the voice had. */
+  .player:has(.onward:not([hidden])) .mid { display: none; }
+  /* The voice under what is being read, smaller, so that neither is cut to a
+     few letters (Tigran, 2026-10-18). */
+  .player .mid { flex-direction: column; align-items: flex-start; line-height: 1.2; }
+  .player .where { max-width: 100%; }
+  .player .where::after { content: none; }
+  .player .voicebox { max-width: 100%; }
+  .player .voice { padding: .05rem .3rem .1rem .55rem; font-size: .8rem; }
   .masthead { flex-direction: column; gap: .4rem; }
   .masthead .logo { width: 4.5rem; height: 4.5rem; margin-top: 0; }
 }

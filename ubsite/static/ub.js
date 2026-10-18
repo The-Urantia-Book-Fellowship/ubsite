@@ -57,17 +57,25 @@
     }).sort(function (a, b) { return score(b) - score(a) || (a.name < b.name ? -1 : 1); });
   }
 
+  // The voices that can speak now.  Offline, this device's own: Chrome's Google
+  // voices and Edge's Natural ones are spoken by a server, and fall silent
+  // without it.
+  function usable() {
+    var all = voices();
+    if (navigator.onLine === false) {
+      var here = all.filter(function (v) { return v.localService; });
+      if (here.length) all = here;
+    }
+    return all;
+  }
+
   window.ubSettings = {
-    // The browser voice Settings names, else the best there is; null with none.
-    // Offline, one of this device's own: Chrome's Google voices and Edge's
-    // Natural ones are spoken by a server, and fall silent without it.
     voices: voices,
+    // What the player's list of voices offers (listen.js).
+    usable: usable,
+    // The browser voice Settings names, else the best there is; null with none.
     voice: function () {
-      var all = voices(), want = load().bvoice;
-      if (navigator.onLine === false) {
-        var here = all.filter(function (v) { return v.localService; });
-        if (here.length) all = here;
-      }
+      var all = usable(), want = load().bvoice;
       return all.filter(function (v) { return v.name === want; })[0] || all[0] || null;
     },
     get: load,

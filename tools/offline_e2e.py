@@ -183,7 +183,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
 
         print("Turning it on")
         pg.goto(BASE + "/101:4")
-        ok("Merritt Horn" in pg.inner_text(".listenrow .by"), "online, Listen reads with Merritt Horn")
+        ok(pg.get_attribute("p.t .playp", "aria-label") == "Listen to this section, from its heading",
+           "online, the first paragraph's play button starts the section")
         i = icon(pg)
         ok(i["shown"] and i["net"] == "on" and i["have"] == "none" and i["title"] == "Online",
            f"the icon at the header's corner says online, with no copy ({i})")
@@ -260,16 +261,23 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/i/no-such-headword")
         ok("No headword" in pg.inner_text("main"), "an address the index lacks says so")
         pg.goto(BASE + "/101:4")
-        ok("Merritt Horn" in pg.inner_text(".listenrow .by"),
-           "offline, Listen still names the voice Settings chose")
-        pg.click(".listenrow button.listen")
+        pg.locator("p.t .playp").first.click()
         pg.wait_for_function("(document.querySelector('.player .who') || {}).textContent"
                              " && document.querySelector('.player .who').textContent.includes('connection')",
                              timeout=10000)
         pg.wait_for_timeout(1500)
         ok("connection" in pg.inner_text(".player .who") and pg.evaluate("!speechSynthesis.speaking"),
-           f"and refuses to play, saying why, and the message stays ({pg.inner_text('.player .who')!r})")
+           f"offline, a recording refuses to play, saying why, and the message stays ({pg.inner_text('.player .who')!r})")
+        ok(pg.inner_text(".player .voice") == "Merritt Horn", "and the bar still names the voice Settings chose")
+        pg.click(".player .voice")
+        pg.locator(".player .voices [role=group] button,"
+                   " .player .voices button:text-is('Your browser\u2019s voice')").first.click()
+        pg.wait_for_function("JSON.parse(localStorage.ub_settings || '{}').voice === 'browser'", timeout=5000)
+        pg.wait_for_timeout(500)
+        ok("connection" not in pg.inner_text(".player .who") and pg.inner_text(".player .voice") != "Merritt Horn",
+           f"its voice menu turns to the browser's voice in place ({pg.inner_text('.player .voice')!r})")
         pg.click(".player button.close") if pg.locator(".player button.close").count() else None
+        pg.evaluate("ubSettings.set('voice', '')")
         pg.evaluate("document.querySelectorAll('nav.rail li.lazy details')[40].open = true")
         pg.wait_for_selector("nav.rail li.lazy details[open] ol a", state="attached", timeout=5000)
         ok(True, "the rail opens another paper from the copy")
