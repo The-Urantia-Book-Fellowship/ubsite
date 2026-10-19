@@ -20,7 +20,6 @@ ALLOWED = {
     "build/versions.py": "data/text/",             # the append-only text-version ledger
     "build/vendorlib.py": "vendor/",               # the vendored copies + lock
     "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
-    "epub/pack.py": "var/epub/",                   # the EPUB, by way of a .tmp
     "offline/pack.py": "var/offline/",             # the offline copy, by way of a .tmp
     "tools/study/draft.py": "var/study/",          # a paper's notes drafted for review
 }
@@ -35,10 +34,10 @@ OWN = ("var/", "export/", "data/", "vendor/", "build/cache/", "tests/fixtures/")
 
 class NoWrites(unittest.TestCase):
     def _sources(self):
-        # build/ reads the masters; epub/ and offline/ only the database, and
-        # are held to the same rule so that they never grow a reason to.
+        # build/ reads the masters; offline/ only the database, and is held
+        # to the same rule so that it never grows a reason to.
         # tools/study/ reads the study edition and Block's charts.
-        for d in ("build", "epub", "offline", "tools/study"):
+        for d in ("build", "offline", "tools/study"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 
@@ -67,17 +66,6 @@ class NoWrites(unittest.TestCase):
             here = (ROOT / target).resolve()
             self.assertTrue(str(here).startswith(str(ROOT.resolve()) + "/"),
                             f"{rel} writes outside the project: {here}")
-
-    def test_epub_writes_only_var(self):
-        """The EPUB writes one file, under var/, by way of a temporary name."""
-        src = (ROOT / "epub/pack.py").read_text()
-        writes = re.findall(WRITERS, src)
-        self.assertEqual(sorted(writes), [".write_bytes("], f"epub/pack.py writes: {writes}")
-        self.assertIn('OUT = ROOT / "var" / "epub"', src)
-        for rel, other in self._sources():
-            if rel.startswith("epub/") and rel != "epub/pack.py":
-                self.assertNotRegex(other, WRITERS, f"{rel} must not write; pack.py does")
-                self.assertNotRegex(other, WRITE_OPEN, f"{rel} must not write; pack.py does")
 
     def test_offline_writes_only_var(self):
         """The offline copy is written by pack.py alone, into var/offline/, which

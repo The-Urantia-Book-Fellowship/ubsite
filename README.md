@@ -48,13 +48,12 @@ The rest are needed only by the tool named:
 | program | here | for |
 |---|---|---|
 | uv | 0.11 | `make venv`, `make lock` |
-| Java (`openjdk-26-jre-headless`) | OpenJDK 26 | `make epub`'s last gate, epubcheck, which `make epub` fetches itself |
-| Google Chrome (`/usr/bin/google-chrome`) | 155 | `make e2e` (Playwright, in `.venv`), `tools/make_icons.py`, `tools/make_cover.py` |
-| ImageMagick 7 (`magick`) | 7.1 | `tools/make_icons.py`, `tools/make_cover.py` |
+| Google Chrome (`/usr/bin/google-chrome`) | 155 | `make e2e` (Playwright, in `.venv`), `tools/make_icons.py` |
+| ImageMagick 7 (`magick`) | 7.1 | `tools/make_icons.py` |
 | `pdftotext` (poppler-utils) | 26.01 | `tools/hyphen_print.py` |
 | `ffprobe` (ffmpeg) | 8.0 | `tools/audio/manifest.py` |
 
-Nothing else a tool uses lives outside the tree, but the audio work's environments in `~/Software/ml` ([Listening](#listening)). epubcheck and SQLite's WebAssembly release are fetched by URL and held to a digest: epubcheck into `var/epubcheck/` by `make epub`, the SQLite files into `vendor/` by `make vendor-sync`. The hosts need none of this but uv: `deploy.sh` ships what was built here.
+Nothing else a tool uses lives outside the tree, but the audio work's environments in `~/Software/ml` ([Listening](#listening)). SQLite's WebAssembly release is fetched by URL and held to a digest, into `vendor/` by `make vendor-sync`. The hosts need none of this but uv: `deploy.sh` ships what was built here.
 
 ---
 
@@ -226,24 +225,7 @@ A reader can keep the whole site in their browser and use it with no connection:
 
 ## The EPUB
 
-The whole site as one EPUB 3, for reading offline: the text, the index entries beneath each paragraph, the Index A–Z with every headword's concept page, Appendices A–F, and an outline down to every section. Everything but listening. It is built from `var/ub.db` alone, here, and is private for now: nothing ships it.
-
-```
-make data                  # if the database is stale
-make epub                  # -> var/epub/the-urantia-book.epub, then every gate
-```
-
-The last gate is epubcheck, the W3C's validator. It needs Java, once:
-
-```
-sudo apt install openjdk-26-jre-headless      # any Java 11 or later
-```
-
-The first `make epub` fetches epubcheck 5.4.0 from its GitHub release into `var/epubcheck/`, held to the SHA-256 in the `Makefile` (`EPUBCHECK_SHA`); it was unpacked by hand into `~/Software` until 2026-10-16. `EPUBCHECK=/path/to/epubcheck.jar make epub` uses another copy. Without Java, every other gate still runs and the last one fails, naming the package.
-
-The file carries a fixed identifier, so a reader takes a new build for a new version of the same book and keeps its highlights. The same database always builds the same bytes. `tools/make_cover.py` redraws `epub/cover.jpg` when the mark or the wording changes.
-
-For a Kindle, send the EPUB with Send to Kindle, or convert it with Calibre: `ebook-convert var/epub/the-urantia-book.epub book.azw3` (about 3½ minutes).
+From 2026-10-10 to 2026-10-19 `make epub` made the whole site one EPUB 3, private and never shipped. It was retired once Work offline kept the whole site in the browser, search and reading paths included, with the site's own typography. The last commit that builds it is tagged `epub-last`.
 
 ---
 
@@ -335,7 +317,7 @@ Each host counts its own visitors, in its own `var/visits.db`, and has its own `
 
 ## The 1955 readings and their reasons
 
-Wherever the text departs from the 1955 first printing, the press TeX carries the 1955 reading (`\fnc`, 180 of them). On the site each is a small ring above the words that changed. A click opens a card under the line, with the 1955 reading as the press gives it, and the **SRT Committee's decision and its reasons**. The committee's page has errors of its own, and misquotes the 1955 text in places, so the card takes from it only its reasons, under its name. What 1955 printed is the press's to say. Without JavaScript, and in print, the same words are the section's endnotes. The EPUB has them as pop-up notes, which stand at the end of each paper. KOReader shows each at the foot of the page its marker is on. Settings → "1955 readings" turns them off. Search finds them too, by the reading and by the committee's reasons, once Settings → "1955 readings in search results" is on (it is off by default): a 1955 spelling that today's text no longer has, such as *Badanon* or *forego*, then leads to its paragraph with the card open. The build keeps what each card says in `footnote_fts`. All 180 stand in one list, the List of 1955 readings at `/lists/1955`, by paper; there, and among the search results, each ring opens its card as it does in the text.
+Wherever the text departs from the 1955 first printing, the press TeX carries the 1955 reading (`\fnc`, 180 of them). On the site each is a small ring above the words that changed. A click opens a card under the line, with the 1955 reading as the press gives it, and the **SRT Committee's decision and its reasons**. The committee's page has errors of its own, and misquotes the 1955 text in places, so the card takes from it only its reasons, under its name. What 1955 printed is the press's to say. Without JavaScript, and in print, the same words are the section's endnotes. Settings → "1955 readings" turns them off. Search finds them too, by the reading and by the committee's reasons, once Settings → "1955 readings in search results" is on (it is off by default): a 1955 spelling that today's text no longer has, such as *Badanon* or *forego*, then leads to its paragraph with the card open. The build keeps what each card says in `footnote_fts`. All 180 stand in one list, the List of 1955 readings at `/lists/1955`, by paper; there, and among the search results, each ring opens its card as it does in the text.
 
 The reasons are the joint Fellowship–Foundation committee's, published by the Fellowship at https://members.urantiabook.org/text-standardization-Urantia-Book, the page the printed preface sends readers to as `urantiabook.org/SRT`.
 

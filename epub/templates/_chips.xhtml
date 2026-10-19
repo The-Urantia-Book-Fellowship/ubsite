@@ -1,7 +1,0 @@
-{#- What the site's margin carries, as one line: each entry citing the paragraph,
-    with a bar between them that is not a link, in black (Tigran).  An appendix
-    chip names its appendix first. #}
-{% macro chips(cs) -%}
-{% for c in cs %}{% if not loop.first %}<span class="sep"> | </span>{% endif %}<a href="{{ c.href }}">
-{%- if c.label %}<span class="lbl">{{ c.label }}</span> {% endif %}{{ c.text }}</a>{% endfor %}
-{%- endmacro %}

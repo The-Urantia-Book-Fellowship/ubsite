@@ -1,9 +1,0 @@
-{% extends "_base.xhtml" %}
-{% block title %}{{ part.label }}. {{ part.title }}{% endblock %}
-{% block body %}
-<section epub:type="part" class="partpage">
-<p class="papernum">{{ part.label }}</p>
-<h1>{% for line in lines %}{% if not loop.first %}<br/>{% endif %}{{ line }}{% endfor %}</h1>
-<p class="sponsor">{{ part.sponsor }}</p>
-</section>
-{% endblock %}

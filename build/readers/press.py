@@ -43,7 +43,7 @@ RE_PC_REMOVED = re.compile(r"%.*\\pc at (\d+):(\d+)\.(\d+) has been removed")
 # A \vs whose body is one group pushed in by a fraction of the column is a
 # heading within the text, not prose: 0:12.10 "{\hspace*{0.15\columnwidth}\itshape
 # ACKNOWLEDGMENT}", which heads the Acknowledgment.  The press indents it; the
-# site and the EPUB centre it, as they do a section's title.
+# site centres it, as it does a section's title.
 RE_HEADING  = re.compile(r"\{\\hspace\*\{[\d.]+\\columnwidth\}")
 # A separator, on a line of its own between two paragraphs: the stars as the
 # press style prints them, `\separatorshort` three and `\separatorline` five,

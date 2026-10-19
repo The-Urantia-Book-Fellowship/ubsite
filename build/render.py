@@ -45,7 +45,7 @@ def render(text: str, spans, note_key: str = "", shy=()) -> str:
 
     note_key names the paragraph, as `101_4_2`, so that a footnote marker's id
     is unique in the whole book and not only within its paragraph: a section
-    page carries every paragraph's notes, and the EPUB a whole paper's.
+    page carries every paragraph's notes.
 
     shy: offsets before which to put a soft hyphen, U+00AD -- where the book
     lets a word break (build/hyphen.py).  The one character render() may add
@@ -147,7 +147,8 @@ def title(lines: str) -> tuple[str, str]:
     after a dash, since "Racial Amalgamation—" breaks after its em dash.  The
     HTML is that same text with a <br/> at each break, placed after the joining
     space, so stripping its tags returns the plain title byte for byte.  The
-    break is self-closed because the EPUB is XML, and HTML reads it the same.
+    break is self-closed so that the fragment is XML too (check_db), and HTML
+    reads it the same.
     """
     parts = lines.split("\n")
     plain, out = parts[0], [html.escape(parts[0], quote=False)]

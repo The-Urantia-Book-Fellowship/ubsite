@@ -141,17 +141,13 @@ def chrome_codepoints(site: pathlib.Path) -> set[str]:
 
     The text of each template with its Jinja, its scripts and its tags taken
     out, entities decoded -- so `&nbsp;` counts and `{% if %}` does not -- and
-    every string a stylesheet `content:` puts on the page.  The EPUB's
-    templates (epub/) count too: it embeds this same subset, and its own gate
-    fails on a character the subset lacks.
+    every string a stylesheet `content:` puts on the page.
     """
     cps: set[str] = set()
-    epub = site.parent / "epub"
-    for f in sorted([*(site / "templates").glob("*.html"),
-                     *(epub / "templates").glob("*.xhtml")]):
+    for f in sorted((site / "templates").glob("*.html")):
         src = RE_CODE.sub(" ", RE_JINJA.sub(" ", f.read_text(encoding="utf-8")))
         cps.update(html.unescape(RE_TAG.sub(" ", src)))
-    for f in sorted([*(site / "static").glob("*.css"), *epub.glob("*.css")]):
+    for f in sorted((site / "static").glob("*.css")):
         for s in RE_CSS_CONTENT.findall(f.read_text(encoding="utf-8")):
             # "\2060" is the one character it stands for, not five.
             cps.update(RE_CSS_ESCAPE.sub(lambda m: chr(int(m[1], 16)), s))

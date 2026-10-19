@@ -325,9 +325,10 @@ def run(con) -> int:
     if toff:
         bad += 1
 
-    # Every stored fragment is well-formed XML, because the EPUB is XML and
-    # carries these fragments as they are.  A browser forgives a bare & or an
-    # unclosed <br>; an e-reader may refuse the whole file.
+    # Every stored fragment is well-formed XML, so that whatever reads it --
+    # the API's sites among them -- may parse it as XML.  A browser forgives a
+    # bare & or an unclosed <br>; an XML reader refuses the whole document.
+    # (It began for the EPUB, retired on 2026-10-19.)
     import xml.etree.ElementTree as ET
     k = xoff = 0
     for where, h in con.execute(

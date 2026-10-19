@@ -1,13 +1,11 @@
-"""What a page shows, as rows: the queries the site and the EPUB share.
+"""What a page shows, as rows: the selection, apart from the drawing.
 
-Two views read `var/ub.db` -- the site (app.py) and the book (epub/) -- and a
-rule about what stands beside a paragraph must not exist twice, or the two
-will drift.  So the selection lives here, and each view only draws it: the
-site with its own hrefs and Jinja templates, the EPUB with its own.
+A rule about what stands beside a paragraph is decided here once, and the
+templates only draw it.  The EPUB read it too until it was retired
+(2026-10-19, tag `epub-last`).
 
 Every function takes an open connection whose row_factory is sqlite3.Row.
-Nothing here knows about requests, URLs or FastAPI, so the EPUB can import it
-without starting the site.
+Nothing here knows about requests, URLs or FastAPI.
 """
 
 from __future__ import annotations
@@ -125,7 +123,7 @@ def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     in section.html, fn<key> and fnref<key>.  Never the committee's quotation
     of the 1955 text: its page misquotes it in places, and what 1955 said is
     the press's to say (Tigran).  A section, the List of 1955 readings and a
-    search's hits all show a note through this, and the EPUB too.
+    search's hits all show a note through this.
     """
     out = []
     for f in con.execute(
@@ -167,8 +165,8 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     2026-10-19: the address's month is when it was uploaded) and with
     its address (block, block_url), and what the note corrects in it from the
     original (corrects, HTML), or a contributor's line as written (credit).
-    `key` is the note's in section.html, fn<key> and fnref<key>.  A section,
-    the List of study notes and the EPUB all show a note through this.
+    `key` is the note's in section.html, fn<key> and fnref<key>.  A section
+    and the List of study notes show a note through this.
     """
     out = []
     for f in con.execute(

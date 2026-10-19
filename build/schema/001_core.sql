@@ -63,7 +63,7 @@ CREATE TABLE paragraph (
   -- (\separatorshort) or '* * * * *' (\separatorline).  Eleven; NULL elsewhere.
   sep_before TEXT CHECK (sep_before IN ('* * *', '* * * * *')),
   -- Verse (src 'poetry' or 'vsmark'), set as the book sets it: the first line of
-  -- each block, which the site and the EPUB indent as one, and a line set in
+  -- each block, which the site indents as one, and a line set in
   -- further (\hsetoff), the Lord's Prayer's second lines.
   verse_start INTEGER NOT NULL DEFAULT 0,
   setoff INTEGER NOT NULL DEFAULT 0,
@@ -74,8 +74,7 @@ CREATE TABLE paragraph (
   html TEXT NOT NULL,
   -- The same with a soft hyphen (U+00AD) wherever the book lets a word break
   -- (build/hyphen.py): what the site sets, justified.  Removing every U+00AD
-  -- gives `html` byte for byte (check_hyphen).  The API and the EPUB take
-  -- `html`.
+  -- gives `html` byte for byte (check_hyphen).  The API takes `html`.
   html_hy TEXT NOT NULL,
   word_count INTEGER NOT NULL,
   source_line INTEGER NOT NULL,

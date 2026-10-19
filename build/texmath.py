@@ -3,9 +3,9 @@
 The notes hold 118 `$...$` in 39 notes (study 2474116), all inline, no
 environment, in about thirty commands.  Each is converted here, at build, so a
 page carries MathML the browser lays out itself: no script, the same in the
-offline copy, and native in an EPUB 3.  A command outside the set fails, as an
-unknown macro does in the text: a converter that guessed would print something
-else than the editor wrote, and nobody would see it.
+offline copy.  A command outside the set fails, as an unknown macro does in the
+text: a converter that guessed would print something else than the editor
+wrote, and nobody would see it.
 
 MathML Core honours `mathvariant` only as "normal", so a bold, script or
 double-struck letter is its own character (Unicode's mathematical

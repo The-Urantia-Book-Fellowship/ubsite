@@ -33,6 +33,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The EPUB is retired: `epub/`, `make epub` and its epubcheck, `tests/test_epub.py` and `tools/make_cover.py` are gone, and nothing here needs Java any more. Work offline keeps the whole site in the browser, search and the reading paths with it. The last commit that builds the EPUB is tagged `epub-last`.
 - `deploy.sh` no longer ships a file git neither tracks nor ignores, a draft or an editor's swap file, being in no commit; what the build makes is ignored and still goes.
 - `study_note` has a new column, `corrects`, the HTML of what a note corrects in Block's chart from the original, and its `origin` may now be NULL, for a note the review adds, as `study_source`'s may for a source.
 - The nginx server blocks (`deploy/*.nginx`) now compress what is under `/static/`: the stylesheet, the scripts, SVG and the fonts served as TTF or OTF, as the SBL fonts must be (SBL Greek goes from 1.1 MB to 0.4 MB). Until now only HTML was compressed, `nginx.conf` naming no `gzip_types`. `deploy.sh` does not install a server block: on each host, install it again by hand, as root, as in `deploy/README.md` step 3, then `nginx -t` and reload nginx. Without it the site works as before, sending these uncompressed.
