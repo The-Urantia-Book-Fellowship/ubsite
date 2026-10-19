@@ -3,7 +3,10 @@
 # March 14, 2023, at its 2023/07 address), and the edition's own KJV.  The
 # review, numbered F1-F34 in the order of the text, is var/study/review-001.md.
 # All 34 ruled by Tigran on 2026-10-19 and carried: F5 and F6 with White as
-# the source, as he asked, the rest as proposed.
+# the source, as he asked, the rest as proposed.  Re-read the same day for
+# Block's findings that no note gives, by the rule Paper 2 began: eleven added,
+# F9a-F34a, checked in the originals (Illingworth in his first edition of 1894,
+# ../block-sources/originals/), all ruled by Tigran and carried as proposed.
 
 paper = 1
 chart = "https://urantiabooksources.com/wp-content/uploads/2023/07/001.pdf"
@@ -28,10 +31,14 @@ key = "Matthews"
 origin = "f7800c54fb22a6c7"
 tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
 
+# Illingworth's publisher as the 1894 title page names it, "London: Macmillan
+# and Co. and New York" (../block-sources/originals/MANIFEST.tsv), where
+# Block's list and the edition have "The Macmillan Company", the New York
+# firm's later name (Tigran, 2026-10-19).
 [[source]]
 key = "Illingworth"
 origin = "4694671c303a318a"
-tex = '''J.~R. Illingworth, \emph{Personality Human and Divine} (London and New York: The Macmillan Company, 1894).'''
+tex = '''J.~R. Illingworth, \emph{Personality Human and Divine} (London and New York: Macmillan and Co., 1894).'''
 
 [[source]]
 key = "Nave"
@@ -123,6 +130,15 @@ origin = "223ae3bbfb2253ac"
 credit = "block"
 tex = '''The redefinitions of God denied in this paragraph are those surveyed in Knudson~\cite{Knudson}, pp.~210--213, where God is ``reality idealized'' or ``a law or process''; and Knudson quotes the last of them without attribution: ``It has been said that `God is the noblest work of man'\,''.'''
 
+# F9a, added, ruled as proposed: Block's "[Compare K 46-47 and 103:9.5]",
+# checked in Tigran's DjVu (originals/LIBRARY.tsv).
+[[note]]
+at = "1:2.2"
+after = "the mortal quest objectified."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, pp.~46--47, of religion: faith ``is to be viewed as something more than a mere product of unsatisfied desire. It is not simply man's inability to carry to a successful conclusion his quest after life that leads to the belief in a superworld'', and ``Religion is something more than the valid or invalid objectification of desire.'' What Knudson says of religion is here said of God, who ``is not simply the supreme desire of man, the mortal quest objectified''. Compare \bibref[103:9.5]{p103 9:5}, where genuine religious experience ``far transcends the philosophic objectification of idealistic desire''.'''
+
 # F10, ruled: as proposed, where Ingersoll wrote them, so that a reader can check
 [[note]]
 at = "1:2.2"
@@ -181,6 +197,15 @@ after = "or can see.”"
 origin = "55b63bab92eb4b7d"
 tex = '''1~Timothy~6:16: ``Who only hath immortality, dwelling in the light which no man can approach unto; whom no man hath seen, nor can see: to whom \bibemph{be} honour and power everlasting. Amen.'''''
 
+# F17a, added, ruled as proposed: Block's finding, as F1's, checked in the
+# printing he cites (originals/navestopicalbibl0000orvi_h3u8.pdf).
+[[note]]
+at = "1:3.3"
+after = "the spiritualized mind."
+origin = "none"
+credit = "block"
+tex = '''Four of the verses quoted in \bibref[1:3.1--3]{p001 3:1} stand under one heading of Nave's Topical Bible, \textsc{God}: \textsc{Invisible} \cite{Nave}: Exodus~33:20 and Job~9:11 (p.~459), 1~Timothy~1:17 and 6:16 (p.~460).'''
+
 # F18, ruled: kept as the edition has it
 [[note]]
 at = "1:4.2"
@@ -216,6 +241,35 @@ at = "1:5.3"
 after = "which are made.”"
 origin = "3ec8d4a18c997385"
 tex = '''Romans~1:20: ``For the invisible things of him from the creation of the world are clearly seen, being understood by the things that are made, \bibemph{even} his eternal power and Godhead; so that they are without excuse.'''''
+
+# F22a, added, ruled as proposed: Block's finding, checked in the printing he
+# cites.
+[[note]]
+at = "1:5.3"
+after = "their numerous subordinates."
+origin = "none"
+credit = "block"
+tex = '''All the verses quoted in this paragraph stand in Nave's Topical Bible \cite{Nave}: under \textsc{God}: \textsc{Incomprehensible}, Isaiah~40:12, 22 and~26, in one entry (p.~459), and under \textsc{Invisible}, 1~Timothy~6:16 and Romans~1:20 (p.~460). Four of the verses of \bibref[1:3.1--3]{p001 3:1} are from the same heading.'''
+
+# F22b, added, ruled as proposed: Block's pp. 285-286, checked in the DjVu,
+# where his chart has "it may be justly urged".  F23 cites pp. 285-293 for
+# 1:5.11-12, not this paragraph.
+[[note]]
+at = "1:5.10"
+after = "concept of the unity of God."
+origin = "none"
+credit = "block"
+corrects = '''``it may justly be urged'' for his ``it may be justly urged'''''
+tex = '''Knudson~\cite{Knudson}, p.~285, opens his chapter ``The Personality of God'' with Ritschl: ``Personality is the form in which the idea of God is given through Revelation.'' But ``it may justly be urged that revelation at this point is only the culmination of natural religion'': ``the earliest gods were personal beings'', and ``God was personal before he was regarded as absolute or as perfectly good'' (p.~286). Here the idea of God's personality comes ``chiefly through revelation'', as for Ritschl. The personal gods of the earliest religion are granted in \bibref[1:5.11]{p001 5:11}, but the personal Deity that measures religious maturity comes after the unity of God, where for Knudson personality came first.'''
+
+# F22c, added, ruled as proposed: Block's p. 291, checked in the DjVu: within
+# the pages F23 cites, but the sentence recast stands alone.
+[[note]]
+at = "1:5.11"
+after = "comprehend the unity of God."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~291: personality ``is itself the key to ultimate reality and identical with it. Only in and through the personal can we arrive at an understanding of the Absolute.'' Knudson's Absolute is here the unity of God.'''
 
 # F23, ruled: as proposed, Knudson's word is 'organization', not 'organism'; and 'not in Knudson' to what can be checked
 [[note]]
@@ -255,6 +309,23 @@ origin = "216f1bf5abb66747"
 credit = "block"
 tex = '''Compare Lotze, quoted in Illingworth~\cite{Illingworth}, p.~53: ``Perfect personality is in God only; to all finite minds there is allotted but a pale copy thereof''.'''
 
+# F27a, added, ruled as proposed: Block's p. 58, checked in the 1894 printing
+# (originals/personalityhuman189400illi.pdf).
+[[note]]
+at = "1:6.3"
+after = "Michael, the Creator Son."
+origin = "none"
+credit = "block"
+tex = '''Illingworth~\cite{Illingworth}, p.~58: ``uncivilized man has a very dim and obscure sense both of the limits and the content of his own personality \ldots{} And all this was naturally reflected in his view of the outside world, with the result that his gods were indefinite in number and in outline, and their character `vengeful, partial, passionate, unjust.' But as time went on, and man learned to distinguish between animate and inanimate, persons and things, and again between what was essential and accidental, good and bad in his own nature, higher conceptions of divine personality and character arose''. Here the better concepts of the divine personality ``await the appearance of improved ideas of human personality'', above all in the bestowal life of Michael, as Illingworth's lectures come at last to the Incarnation (p.~192; see \bibref[1:6.8]{p001 6:8}).'''
+
+# F27b, added, ruled as proposed: Block's p. 102, checked in the 1894 printing.
+[[note]]
+at = "1:6.4"
+after = "personal religious experience."
+origin = "none"
+credit = "block"
+tex = '''John Caird, quoted in Illingworth~\cite{Illingworth}, p.~102: ``The true meaning of the ontological proof is this \ldots{} that as spiritual beings our whole conscious life is based on a universal self-consciousness, an absolute spiritual life, which is not a mere subjective notion or conception, but which carries with it the proof of its necessary existence or reality.'' Illingworth counts it among ``the intellectual proofs of the existence of God''. Caird's absolute spiritual life is here ``the prepersonal divine spirit which indwells the mortal mind'', and what it carries is ``the valid proof of its actual existence'', not of its personality, which only religious experience grasps.'''
+
 # F28, ruled: kept as the edition has it, but for its source's key
 [[note]]
 at = "1:6.5"
@@ -279,6 +350,15 @@ origin = "b8515f0a254213fb"
 credit = "block"
 tex = '''The argument from intelligibility is that of Illingworth~\cite{Illingworth}, p.~210.'''
 
+# F30a, added, ruled as proposed: Block's pp. 192 and 193-194, checked in the
+# 1894 printing.
+[[note]]
+at = "1:6.8"
+after = "ideal revelation of the personality of God."
+origin = "none"
+credit = "block"
+tex = '''Illingworth~\cite{Illingworth}, p.~192, opening his lecture ``Jesus Christ the Divine and Human Person'': ``The line of thought which we have been pursuing leads us on to the Incarnation, as the adequate and final revelation of the personality of God.'' Man, he goes on, ``as we have already seen, knows himself to be spiritual'' (pp.~193--194). Where Illingworth names the Incarnation, here it is Jesus' ``life of achieving the Father's will'', in which he ``attained the full realization'' of man's potential spirit personality; and that revelation is ``most real and ideal'', where Illingworth's is ``adequate and final''.'''
+
 # F31, ruled: as proposed, 'not in Knudson' to what can be checked
 [[note]]
 at = "1:7.2"
@@ -295,6 +375,25 @@ origin = "e75a00478a173544"
 credit = "block"
 tex = '''Knudson~\cite{Knudson}, p.~314: we maintain our unity and identity ``over against the changing many. How this is possible we do not know, but it is a fact of our own experience; and what holds true of us in a limited degree we are warranted in ascribing to God in an unlimited degree.'''''
 
+# F32a, added, ruled as proposed: Block's pp. 309-310, checked in the DjVu,
+# with p. 311.
+[[note]]
+at = "1:7.5"
+after = "spiritual realization of the personality of God."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~309: ``It is in experience that all true reality is revealed. \ldots{} In personality we have the only empirical key to ultimate reality; and that as a metaphysical principle it has a decided advantage over the abstract essences of all types of impersonal philosophy has been made increasingly clear by the course of modern thought'' (pp.~309--310). Knudson's key is a principle of metaphysics, its solution ``empirical, not theoretical'' (p.~311); here ultimate reality ``cannot be grasped by mathematics, logic, or philosophy, only by personal experience in progressive conformity to the divine will of a personal God''.'''
+
+# F32b, added, ruled as proposed: Block's p. 311, checked in the DjVu, where
+# his chart drops "itself" and "that he is".
+[[note]]
+at = "1:7.6"
+after = "by indivisibility, by oneness."
+origin = "none"
+credit = "block"
+corrects = '''``is itself complex'' for his ``is complex'', and ``indivisible and that he is only'' for his ``indivisible and only'''''
+tex = '''Knudson~\cite{Knudson}, p.~311: ``Personality, however, is itself complex. It implies unity, identity, self-consciousness and self-control: four attributes, the last three of which, when applied to the Supreme Person, may perhaps better be designated as immutability, omniscience, and freedom.'' And under ``Unity'': ``The unity of God has a double meaning. It means that he is indivisible and that he is only.'' Here personality implies four again, but not Knudson's four: unity is left out, self-control is self-will, and self-revelation is added. Unity is then that of the associations of the Paradise Deities, known ``by indivisibility, by oneness''.'''
+
 # F33, ruled: kept as the edition has it
 [[note]]
 at = "1:7.6"
@@ -309,3 +408,14 @@ after = "absolute or infinite."
 origin = "9654ac2049e37f1c"
 credit = "block"
 tex = '''The premise that makes this follow is left out here. It is in Knudson~\cite{Knudson}, p.~313: ``If unity is to be ascribed to the world-ground, it must be lifted to a superspatial and supertemporal level.'''''
+
+# F34a, added, ruled as proposed: Block's p. 313, checked in the DjVu, with p.
+# 314, where Knudson rejects the method Block quotes; his chart has "nor it
+# is".
+[[note]]
+at = "1:7.7"
+after = "all matter, and all spirit."
+origin = "none"
+credit = "block"
+corrects = '''``nor is it matter'' for his ``nor it is matter'''''
+tex = '''Knudson~\cite{Knudson}, p.~313, goes on: ``A common method has been to identify the world-ground with the highest universal, with bare being, and then define its nature as pure simplicity. As such it transcends all the plurality and all the differences of finite existence. It is not mind, nor is it matter. It is something above them both.'' Knudson rejects it: ``So far as our articulate experience is concerned, it is a mere blank''; a God so thought of ``would be reduced to `a rigid and lifeless stare.' It is only on the plane of free intelligence that true unity can be realized'' (p.~314). Here the words of the method Knudson rejects, with spirit added, are said of the First Source and Center.'''

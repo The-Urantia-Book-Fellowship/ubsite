@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Paper 1, The Universal Father, has eleven more study notes, 45 in all, each a parallel in Matthew Block's chart that no note gave.
 - Beside a paragraph, a Chronology entry now stands first, and shows the event printed just before it in Appendix A and the one just after, each with a link to where the book tells it.
 - Paper 2, The Nature of God, has study notes too, 29 of them, and the Bibliography lists the four works they add.
 - Where a study note corrects Matthew Block's chart from the original, its credit line says so, with what it gives for his: a page, a title, a date.
@@ -30,6 +31,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- The Bibliography gives the publisher of Illingworth's Personality Human and Divine as its 1894 title page does, Macmillan and Co., not The Macmillan Company.
 - The Bibliography gives the publisher of Knudson's The Doctrine of God as its 1930 title page does, The Abingdon Press, not Abingdon-Cokesbury Press.
 
 ### For developers
