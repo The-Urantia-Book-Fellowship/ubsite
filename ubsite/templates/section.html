@@ -5,9 +5,16 @@
 {% from "_transport.html" import step %}
 {# An index entry beside the text.  A headword or subentry links to its line on
    the concept page; an appendix entry to its line on the appendix page, named
-   with its appendix, and a Chronology event with its date. #}
+   with its appendix.  A Chronology event stands in its window onto Appendix A
+   (queries.windows), a slice of the timeline: the event printed before it,
+   with its citations, the event itself, with its date, linking to its line
+   there, and the event after.  Windows one after another share a heading. #}
 {% macro chip(c) -%}
-{% if c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path }}</a>
+{% if c.window %}<div class="win">{% if not c.more %}<span class="lbl">{{ c.events[0].appendix }}</span>{% endif %}
+  {%- if c.before %}<span class="nb">{{ c.before.line_html|safe }}</span>{% endif %}
+  {%- for e in c.events %}<a class="here" href="{{ appendix_href(e.scope, e.anchor) }}">{{ e.event }}</a>{% endfor %}
+  {%- if c.after %}<span class="nb">{{ c.after.line_html|safe }}</span>{% endif %}</div>
+{%- elif c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path }}</a>
 {%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ c.event or c.path }}</a>{% endif %}
 {%- endmacro %}
 {% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
@@ -30,7 +37,7 @@
 
     {% if paperwide or blanket %}
     <aside class="blanket">
-      {{ afold(paperwide|length + blanket|length,
+      {{ afold(nwhole,
                ' across the whole paper and this section' if paperwide and blanket
                else ' across this whole paper' if paperwide else ' across this whole section') }}
       {# read_pack's rule: a blanket citation is listed ONCE here, never repeated
@@ -66,7 +73,7 @@
       {%- set cs = citers.get(r.p.id, []) %}
       <div class="a">
         {%- if cs %}
-          {{ afold(cs|length) }}
+          {{ afold(nciters[r.p.id]) }}
           <ul class="chips">
           {% for c in cs %}<li>{{ chip(c) }}</li>{% endfor %}
           </ul>
@@ -82,7 +89,7 @@
       {{ para(q, focus and q.para_n >= focus and q.para_n <= last) }}
       {%- endfor %}
       </div>
-      {%- set nv = namespace(n=0) %}{% for q in r.lines %}{% set nv.n = nv.n + citers.get(q.id, [])|length %}{% endfor %}
+      {%- set nv = namespace(n=0) %}{% for q in r.lines %}{% set nv.n = nv.n + nciters.get(q.id, 0) %}{% endfor %}
       <div class="a">
       {%- if nv.n %}{{ afold(nv.n) }}{% endif %}
       {%- for q in r.lines if citers.get(q.id) %}

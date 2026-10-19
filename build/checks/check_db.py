@@ -274,6 +274,24 @@ def run(con) -> int:
           + ("" if not loff else f"   {loff} FAIL"))
     if loff:
         bad += 1
+    # A Chronology event on one line (chronology_event.line_html) is its label
+    # and then its printed citations, the very links of its line in Appendix A,
+    # in order; so those links land too.
+    cit = re.compile(r' <a class="cit" href="[^"]*">\([^<]*\)</a>')
+    k = coff = 0
+    for label, lh, h in con.execute(
+            "SELECT v.label, v.line_html, e.text_html FROM chronology_event v"
+            " JOIN index_entry e ON e.id = v.entry_id"):
+        k += 1
+        cites = cit.findall(h)
+        if not cites or cit.findall(lh) != cites or strip_tags(lh) != label + strip_tags("".join(cites)):
+            coff += 1
+            if coff <= 5:
+                print(f"            {label}: its line is not its label and its citations")
+    print(f"            {k - coff}/{k} Chronology events on one line with their citations"
+          + ("" if not coff else f"   {coff} FAIL"))
+    if coff:
+        bad += 1
     # A headword link -- a q.v., a See, an appendix name -- opens a concept
     # page, and one to a line of it names a line that page holds.
     under = {(s, a) for s, a in con.execute(

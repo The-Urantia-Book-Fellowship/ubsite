@@ -17,9 +17,10 @@ import sqlite3
 # What a margin chip needs.  An appendix entry -- a Chronology event, a named
 # being, person or place -- has no headword of its own and so no slug; it links
 # to its line on the appendix page, named with its appendix, and an event with
-# its date (chronology_event.label).
+# its date (chronology_event.label), and its place in Appendix A (ev_ord) for
+# its window (windows, below).
 CHIP_COLS = ("e.path_plain AS path, e.level, e.anchor, e.scope, r.slug AS rslug,"
-             " r.anchor AS ranchor, a.title AS appendix, ev.label AS event")
+             " r.anchor AS ranchor, a.title AS appendix, ev.label AS event, ev.ord AS ev_ord")
 CHIP_JOIN = (" LEFT JOIN appendix a ON a.letter=e.scope"
              " LEFT JOIN chronology_event ev ON ev.entry_id=e.id")
 # An Appendix B-F row beside a paragraph the A-Z already names it at -- by its
@@ -39,6 +40,55 @@ CHIP_NEW = (" AND NOT EXISTS (SELECT 1 FROM appendix_head h"
 CHIP_OPENS = (" AND EXISTS (SELECT 1 FROM citation_target t"
               " WHERE t.paragraph_id = c.paragraph_id AND t.entry_id = c.entry_id"
               " AND t.opens)")
+
+# A Chronology event beside the text stands in a window onto Appendix A: the
+# event printed just before it and the one just after, each with its citations,
+# so that the margin says where the event falls in the book's chronology, not
+# only what the reader has just read (Geoff Theiss and Tigran, 2026-10-19).
+# The event keeps its words (Tigran).  Events of one list that follow each
+# other in the appendix share a window, so that no window points at an event
+# standing beside it: 121:8.8's three make one.
+def windows(con: sqlite3.Connection, chips: list) -> list:
+    """`chips`, one list of them, with each run of Chronology events made one
+    window: {"window": True, "events": [chip, ...], "before": row or None,
+    "after": row or None, "more": bool}, where the run's first event stood.
+    A neighbour is chronology_event's ord, label and line_html; the
+    appendix's first event has none before it, and its last none after.  A
+    window straight after another is `more`: one heading serves them both."""
+    runs: list[list] = []
+    for c in chips:
+        if c["ev_ord"] is None:
+            continue
+        if runs and runs[-1][-1]["ev_ord"] + 1 == c["ev_ord"]:
+            runs[-1].append(c)
+        else:
+            runs.append([c])
+    if not runs:
+        return chips
+    want = sorted({r[0]["ev_ord"] - 1 for r in runs} | {r[-1]["ev_ord"] + 1 for r in runs})
+    near = {v["ord"]: v for v in con.execute(
+        "SELECT ord, label, line_html FROM chronology_event WHERE ord IN"
+        f" ({','.join('?' * len(want))})", want)}
+    first = {r[0]["ev_ord"]: r for r in runs}
+    out: list = []
+    for c in chips:
+        if c["ev_ord"] is None:
+            out.append(c)
+        elif c["ev_ord"] in first:
+            r = first[c["ev_ord"]]
+            more = bool(out) and isinstance(out[-1], dict)
+            out.append({"window": True, "events": r, "before": near.get(r[0]["ev_ord"] - 1),
+                        "after": near.get(r[-1]["ev_ord"] + 1), "more": more})
+    return out
+
+
+# The appendices first, in the volume's order -- the Chronology, then B-F --
+# then the A-Z in the index's (Tigran, 2026-10-19): the Chronology's window
+# heads the margin, and the A-Z's list stands unbroken under it.  Until then
+# both were sorted by index_entry.ord, which numbers the appendices 1-1787 and
+# the A-Z 1-32963 apart, so an appendix entry fell among the A-Z's A's by
+# accident of number: at 121:8.8 the Chronology after "Acts, Book of".
+CHIP_ORDER = " e.scope = 'az', e.ord"
 
 # A section names at most this many blanket citations at its head.  None has
 # more today; the cap is there so that a change upstream cannot bury the text.
@@ -61,6 +111,9 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
              a range stands beside its first paragraph only (Tigran,
              2026-10-17).  Empty after section 0.  An entry citing the paper
              and section 0 alike is listed here only
+             In all three a Chronology event stands in its window (windows)
+    nciters  paragraph id -> how many entries cite it, a window counting as
+             its events; nwhole, the same for blanket and paperwide together
     notes    paragraph id -> its 1955 readings, as notes() gives them
     study    paragraph id -> its study notes, as study() gives them
     rows     the paragraphs as the page sets them: {"p": a paragraph}, or
@@ -80,7 +133,7 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
             " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
             " JOIN paragraph p ON p.id=c.paragraph_id"
             " WHERE p.paper_n=? AND p.section_n=? AND c.precision='para'" + CHIP_NEW + CHIP_OPENS +
-            " ORDER BY e.ord", (paper, sec)):
+            " ORDER BY" + CHIP_ORDER, (paper, sec)):
         citers.setdefault(row["paragraph_id"], []).append(row)
     def whole(precision: str, also: str = "") -> list:
         return con.execute(
@@ -90,11 +143,16 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
             " JOIN index_entry r ON r.id=e.root_id" + CHIP_JOIN +
             " JOIN paragraph p ON p.id=c.paragraph_id"
             " WHERE p.paper_n=? AND p.section_n=? AND c.precision=?" + CHIP_NEW + also +
-            f" ORDER BY e.ord LIMIT {BLANKET_MAX}", (paper, sec, precision)).fetchall()
+            " ORDER BY" + CHIP_ORDER + f" LIMIT {BLANKET_MAX}", (paper, sec, precision)).fetchall()
     paperwide = whole("paper") if sec == 0 else []
     blanket = whole("sec", " AND NOT EXISTS (SELECT 1 FROM para_citers c3"
                            " WHERE c3.paragraph_id = c.paragraph_id"
                            " AND c3.entry_id = c.entry_id AND c3.precision = 'paper')")
+    # The entries counted before their windows are drawn: what a fold says.
+    nciters = {pid: len(cs) for pid, cs in citers.items()}
+    nwhole = len(paperwide) + len(blanket)
+    citers = {pid: windows(con, cs) for pid, cs in citers.items()}
+    paperwide, blanket = windows(con, paperwide), windows(con, blanket)
     by_para: dict[int, list] = {}
     for n in notes(con, "p.paper_n=? AND p.section_n=?", (paper, sec)):
         by_para.setdefault(n["paragraph_id"], []).append(n)
@@ -110,7 +168,8 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
         else:
             rows[-1]["lines"].append(q)
     return {"paras": paras, "rows": rows, "citers": citers, "blanket": blanket,
-            "paperwide": paperwide, "notes": by_para, "study": by_para_st}
+            "paperwide": paperwide, "nciters": nciters, "nwhole": nwhole,
+            "notes": by_para, "study": by_para_st}
 
 
 def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:

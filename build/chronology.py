@@ -55,19 +55,41 @@ def parse_year(label: str) -> tuple[float | None, bool]:
 RE_READS_ON = re.compile(r"\b(?:by|until|till|from|to|since|before|after)$")
 
 
-def one_line(year: str, month: str | None, text: str) -> tuple[str, bool]:
-    """(the event with its date, whether the date follows it).
+def date(year: str, month: str | None) -> str:
+    """An event's date on one line.
 
     A day takes a comma before its year, "January 14, 26 A.D."; a month alone
     takes "of", because "December, 25 A.D." reads as nothing and "December
     25 A.D." as a day that is not meant.
     """
     if not month:
-        date = year
-    elif re.search(r"\d", month):
-        date = f"{month}, {year}"
-    else:
-        date = f"{month} of {year}"
+        return year
+    if re.search(r"\d", month):
+        return f"{month}, {year}"
+    return f"{month} of {year}"
+
+
+def one_line(year: str, month: str | None, text: str) -> tuple[str, bool]:
+    """(the event with its date, whether the date follows it)."""
+    d = date(year, month)
     if RE_READS_ON.search(text):
-        return f"{text} {date}", True
-    return f"{date}: {text}", False
+        return f"{text} {d}", True
+    return f"{d}: {text}", False
+
+
+# An event's citations, as index_macros.render_html links them: in Appendix A
+# every event ends with them, and the build fails on one that does not.
+RE_CITES = re.compile(r'(?: <a class="cit" href="[^"]*">\([^<]*\)</a>)+$')
+
+
+def line_html(year: str, month: str | None, text_html: str, reads_on: bool) -> str | None:
+    """The event on one line with its citations, as printed and linked:
+    '800,000,000,000 years ago: Andronover well established <a class="cit"
+    href="/57:2.2">(57:2.2)</a>', or 'Paul dies prior to 82 A.D. <a ...>'.
+    What stands either side of an event in its Chronology window (queries).
+    None where the citations do not end the event."""
+    m = RE_CITES.search(text_html)
+    if not m:
+        return None
+    body, d = text_html[:m.start()], date(year, month)
+    return (f"{body} {d}" if reads_on else f"{d}: {body}") + m.group(0)

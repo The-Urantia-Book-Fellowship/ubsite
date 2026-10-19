@@ -42,9 +42,17 @@ def box_chips(body: str) -> list[str]:
     return [re.sub(r"<[^>]+>", "", li) for li in re.findall(r"<li>(.*?)</li>", box(body), re.S)]
 
 
+def entries(items: list) -> list:
+    """queries.section's chips, each Chronology window's events among them."""
+    return [e for c in items for e in (c["events"] if isinstance(c, dict) and c.get("window") else [c])]
+
+
 def margin(body: str, ref: str) -> str:
     """What stands beside paragraph `ref` of a section page."""
-    m = re.search(r'id="' + re.escape(ref) + r'">.*?</p>\s*<div class="a">(.*?)</div>', body, re.S)
+    # Up to what follows the margin -- the next paragraph, a block of verse,
+    # a separator, the grid's end -- since a Chronology window is a div too.
+    m = re.search(r'id="' + re.escape(ref) + r'">.*?</p>\s*<div class="a">(.*?)</div>'
+                  r'\s*(?=<p class="t|<div class="(?:verse|stars)"|</div>)', body, re.S)
     assert m, f"no margin after {ref}"
     return m.group(1)
 
@@ -159,9 +167,9 @@ class Margin(unittest.TestCase):
         self.assertGreater(len(want), 150)
         for paper, sec in con.execute("SELECT paper_n, n FROM section"):
             rows = queries.section(con, paper, sec)
-            got = {r["path"] for r in rows["paperwide"]}
+            got = {r["path"] for r in entries(rows["paperwide"])}
             self.assertEqual(got, want.get(paper, set()) if sec == 0 else set(), f"{paper}:{sec}")
-            self.assertFalse(got & {r["path"] for r in rows["blanket"]}, f"{paper}:{sec}")
+            self.assertFalse(got & {r["path"] for r in entries(rows["blanket"])}, f"{paper}:{sec}")
 
     def test_each_caption_on_a_reading_path_says_how_many(self):
         for url in ("/i/ice-ages/read", "/i/prayer/read/theme", "/i/thirst/read"):   # thirst: verse
@@ -172,6 +180,106 @@ class Margin(unittest.TestCase):
             for button, n, cites in rows:
                 self.assertTrue(button, f"{url}: a caption without its line")
                 self.assertEqual(int(n), cites.count("<li>"), url)
+
+
+def is_window(c) -> bool:
+    return isinstance(c, dict) and bool(c.get("window"))
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class ChronologyWindow(unittest.TestCase):
+    """A Chronology event beside the text stands in its window onto Appendix A
+    (queries.windows): the event printed just before it, with its citations,
+    the event itself, with its words, linking to its line in the appendix, and
+    the event just after (Geoff Theiss and Tigran, 2026-10-19).  Events of one
+    list that follow each other in the appendix share one window."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        cls.con.row_factory = sqlite3.Row
+
+    def windows(self, ref: str) -> list[dict]:
+        paper, sec = map(int, ref.split(".")[0].split(":"))
+        rows = queries.section(self.con, paper, sec)
+        pid = next(p["id"] for p in rows["paras"] if p["ref"] == ref)
+        return [c for c in rows["citers"].get(pid, []) if is_window(c)]
+
+    def test_andronover(self):
+        m = margin(get("/57:1")[2], "57:1.6")
+        before, here, after = (m.index('href="/57:1.4"'),
+                               m.index('">875,000,000,000 years ago: Andronover initiated</a>'),
+                               m.index('href="/57:2.2"'))
+        self.assertLess(before, here)
+        self.assertLess(here, after)
+        self.assertIn('<a class="here" href="/appendix/A#', m)
+        self.assertEqual(RE_AFOLD.search(m)[1], "4")     # entries, not windows
+
+    def test_where_the_neighbours_are_told_elsewhere(self):
+        [w] = self.windows("135:4.1")
+        self.assertEqual([e["event"] for e in w["events"]], ["August 17, 22 A.D.: Elizabeth dies"])
+        self.assertIn("Jesus left Jerusalem for Rome", w["before"]["label"])
+        self.assertIn("Jesus leaves Ganid at Charax", w["after"]["label"])
+
+    def test_a_run_is_one_window(self):
+        self.assertEqual([len(w["events"]) for w in self.windows("121:8.8")], [3])
+        self.assertEqual([len(w["events"]) for w in self.windows("122:8.7")], [1, 2])
+
+    def test_the_ends_of_the_appendix(self):
+        last = self.con.execute("SELECT MAX(ord) FROM chronology_event").fetchone()[0]
+        for ord_, side in ((1, "before"), (last, "after")):
+            ref = self.con.execute(
+                "SELECT p.ref FROM chronology_event v JOIN citation_target t ON t.entry_id=v.entry_id"
+                " JOIN paragraph p ON p.id=t.paragraph_id WHERE v.ord=? AND t.opens", (ord_,)).fetchone()[0]
+            [w] = [w for w in self.windows(ref) if any(e["ev_ord"] == ord_ for e in w["events"])]
+            self.assertIsNone(w[side], f"{ref}: nothing stands {side} the appendix's {side} event")
+
+    def test_appendices_first(self):
+        """In every margin and box the appendices stand first, the Chronology
+        before B-F, then the A-Z (Tigran, 2026-10-19): 121:8.8's window stood
+        after "Acts, Book of" by an accident of numbering until then."""
+        rank = {"A": 0, "az": 2}
+        for paper, sec in self.con.execute("SELECT paper_n, n FROM section"):
+            rows = queries.section(self.con, paper, sec)
+            for items in [*rows["citers"].values(), rows["paperwide"], rows["blanket"]]:
+                r = [0 if is_window(c) else rank.get(c["scope"], 1) for c in items]
+                self.assertEqual(r, sorted(r), f"{paper}:{sec}")
+        m = margin(get("/121:8")[2], "121:8.8")
+        self.assertLess(m.index('<div class="win">'), m.index("Acts, Book of"))
+
+    def test_a_section_box(self):
+        b = box(get("/127:2")[2])
+        self.assertIn('<div class="win">', b)
+        self.assertIn(">11 A.D.: Jesus declines to join Zealots</a>", b)
+
+    def test_every_window(self):
+        """Every event beside the text is in a window; a window's neighbours
+        are the events either side of it in the appendix, neither of them
+        beside the same paragraph; and a fold counts entries, not windows."""
+        secs = self.con.execute(
+            "SELECT DISTINCT t.paper, COALESCE(t.section, 0) FROM chronology_event v"
+            " JOIN citation_target t ON t.entry_id=v.entry_id").fetchall()
+        self.assertGreater(len(secs), 200)
+        n = 0
+        for paper, sec in secs:
+            rows = queries.section(self.con, paper, sec)
+            lists = list(rows["citers"].items()) + [("box", rows["paperwide"] + rows["blanket"])]
+            for pid, items in lists:
+                where = f"{paper}:{sec} {pid}"
+                self.assertFalse([c for c in items if not is_window(c) and c["ev_ord"] is not None], where)
+                here = {e["ev_ord"] for w in items if is_window(w) for e in w["events"]}
+                for w in filter(is_window, items):
+                    n += 1
+                    o = [e["ev_ord"] for e in w["events"]]
+                    self.assertEqual(o, list(range(o[0], o[0] + len(o))), where)
+                    for side, k in (("before", o[0] - 1), ("after", o[-1] + 1)):
+                        if w[side] is not None:
+                            self.assertEqual(w[side]["ord"], k, where)
+                            self.assertNotIn(k, here, where)
+                if pid != "box":
+                    self.assertEqual(rows["nciters"][pid], len(entries(items)), where)
+            self.assertEqual(rows["nwhole"], len(entries(rows["paperwide"] + rows["blanket"])))
+        self.assertGreater(n, 400)
 
 
 if __name__ == "__main__":

@@ -601,12 +601,26 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .a { font-size: 1rem; line-height: 1.45; color: var(--faint); }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
-.chips a { color: var(--faint); text-decoration: none; display: block;
+.chips > li > a { color: var(--faint); text-decoration: none; display: block;
   border-left: 2px solid var(--rule); padding-left: .5rem; }
-.chips a:hover { color: var(--ink); border-left-color: var(--link); }
+.chips > li > a:hover { color: var(--ink); border-left-color: var(--link); }
 /* An appendix entry: led by its appendix's name, in small caps. */
-.app .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
+:is(.app, .win) .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
 .blanket .app { color: var(--faint); }
+/* A Chronology event in its window onto Appendix A (queries.windows): a slice
+   of the timeline, earlier above and later below, on a dashed rule.  A dot on
+   the rule marks the event the paragraph tells, which links to its line in the
+   appendix; the events either side stand smaller, their citations linking to
+   where the book tells them. */
+.win { border-left: 2px dashed var(--rule); padding-left: .5rem; color: var(--faint); }
+.win > * { display: block; }
+.win .nb { font-size: .85em; line-height: 1.3; margin: .15rem 0; }
+.win a { color: inherit; text-decoration: none; }
+.win .here { position: relative; }
+.win .here::before { content: ""; position: absolute; width: .5rem; height: .5rem;
+  border-radius: 50%; background: var(--link);
+  left: calc(-.75rem - 1px); top: calc(.725em - .25rem); }
+@media (hover: hover) { .win a:hover { color: var(--ink); } }
 /* The 1955 readings (section.html): the section's endnotes without JavaScript
    and in print; with it, hidden, and each opened as a card at its ring (ub.js),
    which carries the same words. */

@@ -11,7 +11,7 @@ from __future__ import annotations
 import pathlib
 import sys
 
-from .chronology import one_line, parse_year
+from .chronology import line_html, one_line, parse_year
 from .index_macros import render_html
 from . import variants
 from .render import render, title as render_title
@@ -167,18 +167,22 @@ def load_index(con, az, apps, para_key, report) -> None:
             cites_of(i, e.where, e.cites)
         for v in a.events:
             eid += 1
+            h = render_html(v.src_text)
             con.execute("INSERT INTO index_entry VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (eid, a.letter, None, eid, 1, None, None, v.text,
-                         render_html(v.src_text), v.text, v.text, v.label, xref.fold(v.text), 0,
+                         h, v.text, v.text, v.label, xref.fold(v.text), 0,
                          v.where.split(":")[0], int(v.where.split(":")[1]), v.ord))
             ysort, approx = parse_year(v.year_label)
             if ysort is None:
                 report.hard("chron-unparsed-year", v.where, v.year_label)
             evid += 1
             line, reads_on = one_line(v.year_label, v.month_label, v.label)
-            con.execute("INSERT INTO chronology_event VALUES (?,?,?,?,?,?,?,?,?,?)",
+            lh = line_html(v.year_label, v.month_label, h, reads_on)
+            if lh is None:
+                report.hard("chron-cites-not-last", v.where, v.text[:70])
+            con.execute("INSERT INTO chronology_event VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                         (evid, eid, v.ord, v.year_label, ysort, int(approx),
-                         v.month_label, v.text, line, int(reads_on)))
+                         v.month_label, v.text, line, int(reads_on), lh or line))
             cites_of(eid, v.where, v.cites)
 
     # Cross-references, resolved once the whole tree exists.

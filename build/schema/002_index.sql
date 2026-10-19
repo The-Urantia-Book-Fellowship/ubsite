@@ -97,7 +97,13 @@ CREATE TABLE chronology_event (
   -- events are finished by their date in print ('Paul dies prior to', under
   -- 82 A.D.), and for those the date follows: reads_on.  See chronology.one_line.
   label TEXT NOT NULL,
-  reads_on INTEGER NOT NULL DEFAULT 0
+  reads_on INTEGER NOT NULL DEFAULT 0,
+  -- The same with its citations as printed, each a link to its place in the
+  -- text: '800,000,000,000 years ago: Andronover well established <a
+  -- class="cit" href="/57:2.2">(57:2.2)</a>'.  What stands either side of an
+  -- event in its window beside the text (queries.windows).  check_db holds it
+  -- to `label` and to the citations of index_entry.text_html.
+  line_html TEXT NOT NULL
 );
 CREATE INDEX chronology_sort ON chronology_event(year_sort);
 
