@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Entries beside a paragraph that share a headword now stand together, the part they share said once and each entry's own words after it, separated by semicolons.
 - Paper 1, The Universal Father, has eleven more study notes, 45 in all, each a parallel in Matthew Block's chart that no note gave.
 - Beside a paragraph, a Chronology entry now stands first, and shows the event printed just before it in Appendix A and the one just after, each with a link to where the book tells it.
 - Paper 2, The Nature of God, has study notes too, 29 of them, and the Bibliography lists the four works they add.

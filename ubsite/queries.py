@@ -18,9 +18,11 @@ import sqlite3
 # being, person or place -- has no headword of its own and so no slug; it links
 # to its line on the appendix page, named with its appendix, and an event with
 # its date (chronology_event.label), and its place in Appendix A (ev_ord) for
-# its window (windows, below).
+# its window (windows, below); and an entry its own id, its headword's and its
+# parent's, for standing with the others of its headword (groups, below).
 CHIP_COLS = ("e.path_plain AS path, e.level, e.anchor, e.scope, r.slug AS rslug,"
-             " r.anchor AS ranchor, a.title AS appendix, ev.label AS event, ev.ord AS ev_ord")
+             " r.anchor AS ranchor, a.title AS appendix, ev.label AS event, ev.ord AS ev_ord,"
+             " e.id AS eid, e.root_id AS root, e.parent_id AS parent")
 CHIP_JOIN = (" LEFT JOIN appendix a ON a.letter=e.scope"
              " LEFT JOIN chronology_event ev ON ev.entry_id=e.id")
 # An Appendix B-F row beside a paragraph the A-Z already names it at -- by its
@@ -82,6 +84,51 @@ def windows(con: sqlite3.Connection, chips: list) -> list:
     return out
 
 
+# Entries of one headword beside one paragraph stand together, run on: the
+# part they share said once, as deep as they share it, then each entry's own
+# words, separated by semicolons -- "Elijah (Prophet) › John the Baptist ›
+# adopted dress and method of Elijah; held back 2 years by expectation of
+# return of" at 135:4.2, where each stood whole (Geoff Theiss and Tigran,
+# 2026-10-19).  The shared part links to its own line, each entry's words to
+# theirs.
+def groups(con: sqlite3.Connection, chips: list) -> list:
+    """`chips`, one list of them, with the A-Z entries of each headword made
+    one group: {"group": True, "rslug", "head": {label, level, anchor},
+    "tails": [{label, level, anchor}, ...], "entries": [chip, ...]}, where the
+    first stood.  `head` is the entries' deepest common part, itself an entry
+    of the index; an entry that is that part is the head's link and has no
+    tail.  A headword with one entry here stays a chip."""
+    by_root: dict[int, list] = {}
+    for c in chips:
+        if not isinstance(c, dict) and c["scope"] == "az":
+            by_root.setdefault(c["root"], []).append(c)
+    out: list = []
+    for c in chips:
+        es = [] if isinstance(c, dict) or c["scope"] != "az" else by_root[c["root"]]
+        if len(es) < 2:
+            out.append(c)
+            continue
+        if c is not es[0]:
+            continue
+        parts = [e["path"].split(SEP) for e in es]
+        depth = 1
+        while all(len(q) > depth for q in parts) and len({q[depth] for q in parts}) == 1:
+            depth += 1
+        tails = [{"label": SEP.join(q[depth:]), "level": e["level"], "anchor": e["anchor"]}
+                 for e, q in zip(es, parts) if e["level"] > depth]
+        if not tails:
+            out += es
+            continue
+        head = (es[0]["parent"], es[0]["level"], es[0]["anchor"])
+        while head[1] > depth:
+            head = tuple(con.execute("SELECT parent_id, level, anchor FROM index_entry WHERE id=?",
+                                     (head[0],)).fetchone())
+        out.append({"group": True, "rslug": c["rslug"], "entries": es, "tails": tails,
+                    "head": {"label": SEP.join(parts[0][:depth]), "level": head[1],
+                             "anchor": head[2]}})
+    return out
+
+
 # The appendices first, in the volume's order -- the Chronology, then B-F --
 # then the A-Z in the index's (Tigran, 2026-10-19): the Chronology's window
 # heads the margin, and the A-Z's list stands unbroken under it.  Until then
@@ -111,7 +158,8 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
              a range stands beside its first paragraph only (Tigran,
              2026-10-17).  Empty after section 0.  An entry citing the paper
              and section 0 alike is listed here only
-             In all three a Chronology event stands in its window (windows)
+             In all three a Chronology event stands in its window (windows),
+             and the entries of one headword together (groups)
     nciters  paragraph id -> how many entries cite it, a window counting as
              its events; nwhole, the same for blanket and paperwide together
     notes    paragraph id -> its 1955 readings, as notes() gives them
@@ -151,8 +199,9 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     # The entries counted before their windows are drawn: what a fold says.
     nciters = {pid: len(cs) for pid, cs in citers.items()}
     nwhole = len(paperwide) + len(blanket)
-    citers = {pid: windows(con, cs) for pid, cs in citers.items()}
-    paperwide, blanket = windows(con, paperwide), windows(con, blanket)
+    citers = {pid: groups(con, windows(con, cs)) for pid, cs in citers.items()}
+    paperwide = groups(con, windows(con, paperwide))
+    blanket = groups(con, windows(con, blanket))
     by_para: dict[int, list] = {}
     for n in notes(con, "p.paper_n=? AND p.section_n=?", (paper, sec)):
         by_para.setdefault(n["paragraph_id"], []).append(n)

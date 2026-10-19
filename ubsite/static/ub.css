@@ -604,6 +604,12 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .chips > li > a { color: var(--faint); text-decoration: none; display: block;
   border-left: 2px solid var(--rule); padding-left: .5rem; }
 .chips > li > a:hover { color: var(--ink); border-left-color: var(--link); }
+/* Entries of one headword, run on (queries.groups): one entry's block, each
+   part its own link, the rule lit by whichever is hovered. */
+.chips > li > .grp { display: block; border-left: 2px solid var(--rule); padding-left: .5rem; }
+.grp a { color: var(--faint); text-decoration: none; }
+.grp a:hover { color: var(--ink); }
+.chips > li > .grp:has(a:hover) { border-left-color: var(--link); }
 /* An appendix entry: led by its appendix's name, in small caps. */
 :is(.app, .win) .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
 .blanket .app { color: var(--faint); }

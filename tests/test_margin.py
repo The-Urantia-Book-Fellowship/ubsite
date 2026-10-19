@@ -43,8 +43,10 @@ def box_chips(body: str) -> list[str]:
 
 
 def entries(items: list) -> list:
-    """queries.section's chips, each Chronology window's events among them."""
-    return [e for c in items for e in (c["events"] if isinstance(c, dict) and c.get("window") else [c])]
+    """queries.section's chips, each Chronology window's events and each
+    group's entries among them."""
+    return [e for c in items for e in (c["events"] if isinstance(c, dict) and c.get("window")
+                                       else c["entries"] if isinstance(c, dict) else [c])]
 
 
 def margin(body: str, ref: str) -> str:
@@ -123,21 +125,31 @@ class Margin(unittest.TestCase):
         self.assertNotIn("marginhead", get("/part/4")[2])          # a part's page has no index
 
     def test_each_box_says_how_many_entries_it_holds(self):
-        for url in ("/1:0", "/144:3", "/15:4"):
+        # Entries, not lines: a group of one headword's entries is one line.
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        con.row_factory = sqlite3.Row
+        for url in ("/1:0", "/144:3", "/15:4", "/135:4"):
             body = get(url)[2]
-            for a in re.findall(r'<div class="a">(.*?)</div>', body, re.S):
+            rows = queries.section(con, *map(int, url[1:].split(":")))
+            want = [n for n in (sum(rows["nciters"].get(q["id"], 0) for q in ([r["p"]] if "p" in r else r["lines"]))
+                                for r in rows["rows"]) if n]
+            got = []
+            for a in re.findall(r'<div class="a">(.*?)</div>\s*(?=<p class="t|<div class="(?:verse|stars)"|</div>)',
+                                body, re.S):
                 if not a:
                     continue
                 m = RE_AFOLD.match(a.strip())
                 self.assertTrue(m, f"{url}: {a[:80]}")
-                self.assertEqual(int(m[1]), a.count("<li>"), url)
+                self.assertLessEqual(a.count("<li>"), int(m[1]), url)
                 self.assertEqual(m[2], "y" if m[1] == "1" else "ies")
+                got.append(int(m[1]))
+            self.assertEqual(got, want, url)
             b = box(body)
             if b:
                 m = RE_AFOLD.match(b.strip())
                 heads = ("<h3>Cited across this whole paper</h3>" in b,
                          "<h3>Cited across this whole section</h3>" in b)
-                self.assertEqual((int(m[1]), m[3]), (b.count("<li>"), TAILS[heads]), url)
+                self.assertEqual((int(m[1]), m[3]), (rows["nwhole"], TAILS[heads]), url)
 
     def test_a_whole_paper_is_cited_once_above_section_0(self):
         b = box(get("/1:0")[2])
@@ -242,7 +254,8 @@ class ChronologyWindow(unittest.TestCase):
         for paper, sec in self.con.execute("SELECT paper_n, n FROM section"):
             rows = queries.section(self.con, paper, sec)
             for items in [*rows["citers"].values(), rows["paperwide"], rows["blanket"]]:
-                r = [0 if is_window(c) else rank.get(c["scope"], 1) for c in items]
+                r = [0 if is_window(c) else 2 if isinstance(c, dict) else rank.get(c["scope"], 1)
+                     for c in items]
                 self.assertEqual(r, sorted(r), f"{paper}:{sec}")
         m = margin(get("/121:8")[2], "121:8.8")
         self.assertLess(m.index('<div class="win">'), m.index("Acts, Book of"))
@@ -266,7 +279,8 @@ class ChronologyWindow(unittest.TestCase):
             lists = list(rows["citers"].items()) + [("box", rows["paperwide"] + rows["blanket"])]
             for pid, items in lists:
                 where = f"{paper}:{sec} {pid}"
-                self.assertFalse([c for c in items if not is_window(c) and c["ev_ord"] is not None], where)
+                self.assertFalse([c for c in items if not isinstance(c, dict) and c["ev_ord"] is not None],
+                                 where)
                 here = {e["ev_ord"] for w in items if is_window(w) for e in w["events"]}
                 for w in filter(is_window, items):
                     n += 1
@@ -280,6 +294,60 @@ class ChronologyWindow(unittest.TestCase):
                     self.assertEqual(rows["nciters"][pid], len(entries(items)), where)
             self.assertEqual(rows["nwhole"], len(entries(rows["paperwide"] + rows["blanket"])))
         self.assertGreater(n, 400)
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class Together(unittest.TestCase):
+    """Entries of one headword beside one paragraph stand together, run on:
+    the part they share said once, as deep as they share it, linking to its
+    own line, then each entry's own words, linking to theirs, separated by
+    semicolons (queries.groups; Geoff Theiss and Tigran, 2026-10-19)."""
+
+    def items(self, body: str, ref: str) -> list[str]:
+        return [re.sub(r"<[^>]+>", "", li) for li in re.findall(r"<li>(.*?)</li>", margin(body, ref), re.S)]
+
+    def test_elijah_and_john(self):
+        body = get("/135:4")[2]
+        self.assertEqual(self.items(body, "135:4.2")[:2], [
+            "Elijah (Prophet) › John the Baptist › adopted dress and method of Elijah;"
+            " held back 2 years by expectation of return of",
+            "John the Baptist › presented flock to Nazarites; religion of repentance,"
+            " self-examination, and self-denial"])
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        head = con.execute(
+            "SELECT e.anchor FROM index_entry e JOIN index_entry r ON r.id=e.root_id"
+            " WHERE r.slug='elijah-prophet' AND e.path_plain='Elijah (Prophet) › John the Baptist'").fetchone()[0]
+        self.assertIn(f'<span class="grp"><a href="/i/elijah-prophet#{head}">Elijah (Prophet) › John the Baptist</a> ›',
+                      margin(body, "135:4.2"))
+
+    def test_a_headword_shared(self):
+        m = margin(get("/57:1")[2], "57:1.6")
+        self.assertIn('<a href="/i/andronover-nebula">Andronover nebula</a> ›', m)
+        self.assertIn("Andronover nebula › initiated 875 billion years ago; nebula #876,926",
+                      self.items(get("/57:1")[2], "57:1.6"))
+
+    def test_every_list(self):
+        """No list holds two items of one headword, and every entry beside a
+        paragraph is still linked to its own line, as a tail or as the head."""
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        con.row_factory = sqlite3.Row
+        n = 0
+        for paper, sec in con.execute("SELECT paper_n, n FROM section"):
+            rows = queries.section(con, paper, sec)
+            for items in [*rows["citers"].values(), rows["paperwide"], rows["blanket"]]:
+                roots = [c["root"] if not isinstance(c, dict) else c["entries"][0]["root"]
+                         for c in items if not (isinstance(c, dict) and c.get("window"))
+                         and (isinstance(c, dict) or c["scope"] == "az")]
+                self.assertEqual(len(roots), len(set(roots)), f"{paper}:{sec}")
+                for g in items:
+                    if not (isinstance(g, dict) and g.get("group")):
+                        continue
+                    n += 1
+                    linked = {g["head"]["anchor"]} | {t["anchor"] for t in g["tails"]}
+                    for e in g["entries"]:
+                        self.assertIn(e["anchor"], linked, f"{paper}:{sec} {e['path']}")
+                        self.assertTrue(e["path"].startswith(g["head"]["label"]), e["path"])
+        self.assertGreater(n, 3000)
 
 
 if __name__ == "__main__":
