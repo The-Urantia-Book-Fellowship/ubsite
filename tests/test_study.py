@@ -16,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from build import study  # noqa: E402
-from build.expand import Expanded  # noqa: E402
+from build.expand import Expanded, Note, Span  # noqa: E402
 from build.problems import Report  # noqa: E402
 from build.readers import study as reader  # noqa: E402
 from build.readers.press import Paper, Paragraph  # noqa: E402
@@ -157,6 +157,27 @@ class Study(unittest.TestCase):
         self.assertIn('<a class="fn" href="#fnst0_0_1_0" id="fnrefst0_0_1_0" data-k="st"'
                       ' data-n="1" data-hs="1" aria-label="Note 1"></a>—the name',
                       render(q.ex.text, q.ex.spans, "0_0_1"))
+
+    def test_a_note_on_the_words_of_a_1955_reading(self):
+        """A study note may stand on the very words a 1955 reading marks
+        (0:1.24's edition note did, after "perfection in all").  The press's
+        marker stays first and keeps its number, the study note's follows it,
+        and each links its own note."""
+        self.toml()
+        papers = press()
+        q = papers[0].paragraphs[0]
+        a = PRESS["0:0.1"].index("Urantia") + len("Urantia")
+        q.ex.notes.append(Note(a, "variant-1955", "Urantia", "Urantia", []))
+        q.ex.spans.append(Span(a, a, "fnref", {"kind": "variant-1955", "i": 0}))
+        report = Report()
+        study.attach(papers, study.load_curated(report, self.data),
+                     {"tex": self.tex, "at": self.at}, self.block, report)
+        self.assertEqual(report.problems, [])
+        self.assertEqual([(n.offset, n.kind) for n in q.ex.notes], [(a, "variant-1955"), (a, "study")])
+        html = render(q.ex.text, q.ex.spans, "0_0_1")
+        self.assertIn('Urantia<a class="fn" href="#fn0_0_1_0" id="fnref0_0_1_0" data-k="1955"'
+                      ' aria-label="1955 reading"></a><a class="fn" href="#fnst0_0_1_0"'
+                      ' id="fnrefst0_0_1_0" data-k="st" data-n="1"', html)
 
     def test_every_original_is_accounted_for_once(self):
         o = self.orig

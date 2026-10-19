@@ -577,6 +577,13 @@ a.fn.on::after { background: currentColor; }
 a.fn[data-k="st"]::after { content: "\2060" attr(data-n); font-size: .64em; top: -.58em;
   padding: 0 .14em; margin-left: .02em; border: 0; border-radius: .3em; }
 a.fn[data-k="st"].on::after { background: var(--link); color: var(--paper); }
+/* A study note on the very words a 1955 reading marks stands after its ring
+   (build/render.py keeps the press's markers first).  Each link is padded
+   beyond its mark to be easy to tap, and the number's padding, painted over
+   the ring's, took all but 9px of it; so the number starts where the ring
+   ends.  The selector also takes a number after text that follows a ring,
+   which loses only a little of its own padding. */
+a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 @media (hover: hover) { a.fn[data-k="st"]:hover::after { background: var(--link); color: var(--paper); } }
 
 .a { font-size: 1rem; line-height: 1.45; color: var(--faint); }
