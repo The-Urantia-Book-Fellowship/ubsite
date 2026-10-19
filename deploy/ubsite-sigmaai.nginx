@@ -69,6 +69,12 @@ server {
         proxy_pass http://127.0.0.1:8130;
         include /etc/nginx/proxy_params;
         add_header Cache-Control "no-cache" always;
+        # Compressed on the way, here only: nginx.conf's `gzip on` names no types,
+        # so until 2026-10-19 only HTML was.  The fonts are the SBL fonts, which
+        # their licence lets us serve only as published, TTF, never WOFF2
+        # (build/fonts.py): SBL Greek goes from 1.1 MB to 0.4 MB.  A gzipped
+        # reply's ETag is weakened to W/"…", which Starlette's 304 still matches.
+        gzip_types text/css text/javascript image/svg+xml font/ttf font/otf;
     }
 
     location = /healthz {
