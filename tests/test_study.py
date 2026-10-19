@@ -170,6 +170,22 @@ class Study(unittest.TestCase):
                 self.toml(**kw)
                 self.assertIn(code, codes(self.attach()[2]))
 
+    def test_a_key_names_one_work_in_every_paper(self):
+        """The Bibliography lists a work once, by its key, whichever paper
+        cites it: the same key for two works fails, and two keys for one."""
+        hart = {"paper_n": 0, "key": "Hartshorne", "html": "Charles Hartshorne, <em>Man’s Vision</em>."}
+        knud = {"paper_n": 1, "key": "Knudson", "html": "Albert C. Knudson, <em>The Doctrine of God</em>."}
+        for later, want in [({**hart, "paper_n": 2}, []),
+                            ({**knud, "paper_n": 2}, []),
+                            ({**knud, "paper_n": 2, "key": "Hartshorne"}, ["study-source-key"]),
+                            ({**hart, "paper_n": 2, "key": "Hartshorne1941"}, ["study-source-key"]),
+                            ({**hart, "paper_n": 2, "html": "C. Hartshorne, <em>Man’s Vision</em>."},
+                             ["study-source-key"])]:
+            with self.subTest(later=later):
+                report = Report()
+                study.one_work_one_key([hart, knud, later], report)
+                self.assertEqual(codes(report), want)
+
     def test_a_note_changed_upstream_fails_until_reviewed(self):
         self.toml()
         (self.tex / "p000.tex").write_text(PAPER.replace("Second.", "Second, revised."), encoding="utf-8")
@@ -227,6 +243,24 @@ class Study(unittest.TestCase):
         self.assertEqual(bad, [])
         self.assertEqual(text, "Nave’s “word” and ‘this’—Psalms\u00a0104:2, oorántee"
                                "ya, 12.6\u202fly… Lord")
+
+    def test_a_suffix_keeps_its_hyphen(self):
+        # Tigran saw "suffix -" end a line, and "tia" begin the next.
+        (text, html, _), bad = self.expand(
+            r"the Latin suffix \textit{-tia}, the ending -el/-al, but self\hyp{}realization")
+        self.assertEqual(bad, [])
+        self.assertIn('<em><span class="nobreak">-tia</span></em>', html)
+        self.assertIn('<span class="nobreak">-el</span>/<span class="nobreak">-al</span>', html)
+        self.assertIn("self-realization", html)
+        self.assertEqual(text, "the Latin suffix -tia, the ending -el/-al, but self-realization")
+
+    def test_a_long_tie_is_reported(self):
+        report = Report()
+        study.expand(r"Sir~Arthur~S.\,Eddington and Psalms~104:1--2", {}, {}, "t", report)
+        self.assertEqual([(p.severity, p.code) for p in report.problems], [("warn", "study-long-tie")])
+        report = Report()
+        study.expand(r"Sir~Arthur S. Eddington, p.~8, 1~Corinthians~13:12, Dr~Sadler", {}, {}, "t", report)
+        self.assertEqual(report.problems, [])
 
     def test_links_and_citations(self):
         (text, html, cites), bad = self.expand(

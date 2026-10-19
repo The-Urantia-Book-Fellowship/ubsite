@@ -16,9 +16,13 @@
 // blocked or cleared, and the page must render correctly without it.  The
 // theme was once kept apart, as ub_theme; it is read from there until ub.js
 // moves it.  ub.js owns the rest.  The class says that scripts run here: a
-// paper in the left rail is only openable with them (ub.css .lazy).
-window.ubDefaults = {{ settings_defaults|tojson }};
-(function (r, D) {
+// paper in the left rail is only openable with them (ub.css .lazy).  A site
+// may have defaults of its own (settings.py SITE_DEFAULTS): ubBase is
+// settings.py's, which the CSS is written against, and ubDefaults this site's,
+// which is what a reader has who never chose.
+window.ubBase = {{ settings_defaults|tojson }};
+window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[location.hostname]);
+(function (r, D, B) {
   r.classList.add('js');
   // The tab's icon says which site this is, the book burgundy on one of them
   // (app.py SITES).  Chosen here, from the page's own address, since the same
@@ -30,9 +34,12 @@ window.ubDefaults = {{ settings_defaults|tojson }};
   try {
     var s = JSON.parse(localStorage.getItem('ub_settings') || '{}') || {};
     if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
-    for (var k in D) if (k in s && s[k] !== D[k]) r.dataset[k] = s[k] === false ? 'off' : s[k];
-  } catch (e) {}
-})(document.documentElement, window.ubDefaults);
+  } catch (e) { s = {}; }
+  for (var k in B) {
+    var x = k in s ? s[k] : D[k];
+    if (x !== B[k]) r.dataset[k] = x === false ? 'off' : x;
+  }
+})(document.documentElement, window.ubDefaults, window.ubBase);
 </script>
 {% block head %}{% endblock %}
 </head>

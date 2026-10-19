@@ -10,7 +10,10 @@ follows, found by aligning the two texts' words: the study text is British and
 metricated, so the words may differ, and a proposal it could not make cleanly
 says CHECK.  Hebrew is turned to logical order (study_macros.py).  Beside each
 note, in comments: the press paragraph, the press's own 1955 readings in it,
-and what Block's chart sets beside it.  NNN.md is the same, to read.
+and what Block's chart sets beside it.  At the head, the reviewed notes of other
+papers that link into this one ("see the note at 103:8.6"), each to be read with
+the comment above it in its file, which may say what the note here is to give.
+NNN.md is the same, to read.
 
 Reads var/ub.db for the press text, so `make data` first.
 """
@@ -23,6 +26,7 @@ import pathlib
 import re
 import sqlite3
 import sys
+import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT))
@@ -30,11 +34,12 @@ sys.path.insert(0, str(ROOT / "tools" / "study"))
 
 import block  # noqa: E402
 
-from build import config  # noqa: E402
+from build import config, study  # noqa: E402
 from build.problems import Report  # noqa: E402
 from build.readers import study as reader  # noqa: E402
 
 OUT = ROOT / "var" / "study"
+RE_BIBREF = re.compile(r"\\bibref(?:\[[^\]]*\])?\{p(\d+) (\d+):(\d+)\}")
 RE_WORDS = re.compile(r"[A-Za-z0-9’']+")
 RE_HEB = re.compile(r"\\textheb\{([^{}]*)\}")
 
@@ -104,6 +109,20 @@ def comment(s: str, width: int = 0) -> str:
     return "\n".join("# " + line if line else "#" for line in s.splitlines())
 
 
+def pointing_in(n: int) -> list[str]:
+    """The reviewed notes of other papers that link into paper n, one line each."""
+    out = []
+    for path in sorted(study.DATA.glob("[0-9][0-9][0-9].toml")):
+        with open(path, "rb") as fh:
+            notes = tomllib.load(fh).get("note", [])
+        for nt in notes:
+            for m in RE_BIBREF.finditer(nt["tex"]):
+                if int(m[1]) == n and nt["at"].split(":")[0] != str(n):
+                    out.append(f"{int(m[1])}:{int(m[2])}.{int(m[3])} <- {path.name} {nt['at']}:"
+                               f" {nt['tex']}")
+    return out
+
+
 def logical_hebrew(tex: str) -> str:
     return RE_HEB.sub(lambda m: "\\textheb{" + " ".join(reversed(m[1].split())) + "}", tex)
 
@@ -141,6 +160,13 @@ def main(argv: list[str]) -> int:
             f"paper = {n}", f"chart = {toml_str(chart)}", ""]
     md = [f"# Paper {n}: the study edition's notes, for review", "",
           f"The edition at `{repo['at'][:7]}`; Block's chart: {chart}.", ""]
+    pointing = pointing_in(n)
+    if pointing:
+        toml += [comment("Reviewed notes that link here, with the comment above each in its file:\n"
+                         + "\n".join(pointing)), ""]
+        md += ["## Reviewed notes that link here", "",
+               "Read each with the comment above it in its file.", ""]
+        md += [f"- {line}" for line in pointing] + [""]
     if front:
         toml += [comment(front), ""]
         md += ["## Block's chart, page 1", "", "```", front, "```", ""]

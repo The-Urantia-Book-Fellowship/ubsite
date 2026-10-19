@@ -215,6 +215,23 @@ def run(con) -> int:
           + ("" if not foff else f"   {foff} FAIL"))
     if foff:
         bad += 1
+    # A card's copies with the book's soft hyphens (footnote.html_hy,
+    # srt_item.why_html_hy): the same HTML but for them, and each inside a word.
+    import re
+    k = hoff = 0
+    for where, h, hy in con.execute(
+            "SELECT 'note ' || id, html, html_hy FROM footnote"
+            " UNION ALL SELECT 'SRT ' || name || ' ' || n, why_html, why_html_hy FROM srt_item"):
+        k += 1
+        plain = strip_tags(hy)
+        if hy.replace("\u00ad", "") != h or re.search(r"(?<![A-Za-z])\u00ad|\u00ad(?![A-Za-z])", plain):
+            hoff += 1
+            if hoff <= 5:
+                print(f"            {where}: its soft hyphens are not only the book's")
+    print(f"            {k - hoff}/{k} notes and reasons hyphenated as the text is, and only so"
+          + ("" if not hoff else f"   {hoff} FAIL"))
+    if hoff:
+        bad += 1
     k = soff = 0
     for text, h in con.execute("SELECT then_text, then_html FROM srt_item"
                                " UNION ALL SELECT why_text, why_html FROM srt_item"):

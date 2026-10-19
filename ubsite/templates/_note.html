@@ -3,10 +3,25 @@
     JavaScript each opens as a card at its ring (ub.js), carrying these words,
     and the notes are hidden; without it, and in print, they are endnotes. #}
 {% macro note(n) %}<aside class="note" id="fn{{ n.key }}">
-        <p class="then"><a class="lbl" href="#fnref{{ n.key }}"><span class="at">{{ n.para_ref }} </span>1955</a> {{ n.html|safe }}</p>
+        <p class="then"><a class="lbl" href="#fnref{{ n.key }}"><span class="at">{{ n.para_ref }} </span>1955</a> {{ n.html_hy|safe }}</p>
         {% if n.verdict %}
-        <p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.srt_why|safe }}</p>
-        {% if n.see_why %}<p class="why see"><a href="/{{ n.see_ref }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why|safe }}</p>{% endif %}
+        <p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.srt_why_hy|safe }}</p>
+        {% if n.see_why %}<p class="why see"><a href="/{{ n.see_ref }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why_hy|safe }}</p>{% endif %}
         <p class="src">Source · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">SRT Committee table ↗</a></p>
         {% endif %}
       </aside>{% endmacro %}
+
+{#- A study note (queries.study): its number in the paper, the note as
+    reviewed, the sources it cites in full, and a credit only where it rests on
+    someone's research (Tigran, 2026-10-18): Block's chart, by its month, or a
+    contributor's line.  Opened as a card at its number, as a 1955 reading is
+    at its ring; endnotes without JavaScript and in print. #}
+{% macro snote(n) %}<aside class="note st" id="fn{{ n.key }}">
+        <p class="lead"><a class="lbl" href="#fnref{{ n.key }}"><span class="at">{{ n.para_ref }} </span>Note {{ n.num }}</a> {{ n.html_hy|safe }}</p>
+        {{ sfoot(n) }}
+      </aside>{% endmacro %}
+{#- What stands under a study note: the sources it cites, and its credit.  The
+    card and the List of study notes alike. #}
+{% macro sfoot(n) %}{% for c in n.sources %}<p class="cite">[{{ loop.index }}] {{ c|safe }}</p>{% endfor %}
+        {% if n.block %}<p class="src">Identified by Matthew Block · <a href="{{ n.block_url }}" target="_blank" rel="noopener">parallel chart, Paper {{ n.paper_n }}, {{ n.block }} ↗</a></p>{% endif %}
+        {% if n.credit %}<p class="src">{{ n.credit }}</p>{% endif %}{% endmacro %}

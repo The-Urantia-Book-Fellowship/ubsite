@@ -116,6 +116,9 @@ CREATE TABLE footnote (
   ord INTEGER NOT NULL,
   text TEXT NOT NULL,
   html TEXT NOT NULL,                         -- derived cache: render(text, spans)
+  -- html with a U+00AD wherever the book lets a word break (build/hyphen.py),
+  -- as paragraph.html_hy: what a card and an endnote set justified.
+  html_hy TEXT NOT NULL,
   -- A 1955 note's reason: the SRT Committee's decision on the change it shows
   -- (007_srt.sql, build/srt.py).  NULL where the committee's page has none.
   srt_item_id INTEGER REFERENCES srt_item(id)

@@ -40,7 +40,8 @@ FORMAT = 1
 # site's is kept (build()).
 ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js"]
 PLAIN = ["/static/favicon.svg", "/static/fonts/UBGoudy.woff2", "/static/fonts/UBGoudy-Italic.woff2",
-         "/static/fonts/OFL.txt", "/favicon.ico"]
+         "/static/fonts/OFL.txt", "/static/fonts/GaramondMath.woff2",
+         "/static/fonts/OFL-GaramondMath.txt", "/favicon.ico"]
 
 
 def _json(obj) -> bytes:

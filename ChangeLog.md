@@ -10,11 +10,13 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The Foreword has 11 study notes from The British Study Edition, edited by Tigran Aivazian, the first of the papers to have them: each is a small number in the text that opens the note, the List of study notes gathers them, the Bibliography lists the works they cite, and Settings can turn them off.
 - Settings can turn off the index and the appendices, leaving the text alone, with its 1955 readings while those are on.
 - A Changelog link at the foot of every page opens this changelog, each change with the day it was made; What's new links to it too.
 
 ### Changed
 
+- A note's card, a 1955 reading's or a study note's, has its close button above the words, which now take the card's whole width; before, a long note was set in from the right all the way down.
 - When the offline copy is up to date, its menu now gives the date of the site it keeps, as it already did when the copy was out of date.
 - Dates are written the American way, month first: October 18.
 - The footer is two lines: the edition and its licence, with a link to this changelog, and that the site is not affiliated with Urantia Foundation.
@@ -23,7 +25,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
-- `var/ub.db` has four new tables, `study_paper`, `study_note`, `study_source` and `study_cite`, for the British Study Edition's notes, which reach the site one paper at a time, each reviewed in `data/study/`; they stay empty until the first paper is. The build now reads the study edition at HEAD, and `../block-sources/MANIFEST.tsv`, the list of Matthew Block's charts of the human sources (`build/study.py`). `deploy.sh` refuses an uncommitted `data/study/`.
+- `var/ub.db` has four new tables, `study_paper`, `study_note`, `study_source` and `study_cite`, for the British Study Edition's notes, which reach the site one paper at a time, each reviewed in `data/study/`, the Foreword first. The build now reads the study edition at HEAD, and `../block-sources/MANIFEST.tsv`, the list of Matthew Block's charts of the human sources (`build/study.py`). `deploy.sh` refuses an uncommitted `data/study/`.
 - `deploy.sh` refuses a database built from uncommitted press files, listing them, unless given `--allow-dirty`; `python -m build dirty var/ub.db` says whether a database is dirty (3) or clean (0). The index cannot be dirty: it is read at a commit.
 - `var/ub.db` has a new table, `changelog`: this file block by block, which `/changelog` shows as written, each entry dated by the commit that wrote it, since the hosts have no `.git`. `build/changelog.py` makes it, and `offline/news.py` now reads the file through it, so What's new and the page cannot disagree.
 - The footer no longer names the commits the text and the index were built from, nor links them on GitHub, their repositories being private; `/healthz` still names them. Nor does it name the typeface, say that other sites may sync with the text, or say how visits are counted.

@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% from "_note.html" import note %}
+{% extends "base.html" %}{% from "_note.html" import note, snote %}
 {% from "_para.html" import para %}
 {% from "_rail.html" import rail %}
 {% from "_fold.html" import indexfold, afold %}
@@ -109,6 +109,16 @@
       {% endfor %}{% endfor %}
     </section>
     {% endif %}
+    {#- The study notes, as reviewed (build/study.py): numbered through the
+        paper, each opened as a card at its number. #}
+    {%- if study %}
+    <section class="notes st" aria-label="Study notes">
+      <h3>Study notes</h3>
+      {% for p in paras %}{% for n in study.get(p.id, []) %}
+      {{ snote(n) }}
+      {% endfor %}{% endfor %}
+    </section>
+    {%- endif %}
 
     {#- The transport bar: ⏪ ⏮ ⏭ ⏩, across papers in the order of the book
         (app.py transport, templates/_transport.html).  At the book's ends a

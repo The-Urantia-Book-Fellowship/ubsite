@@ -34,6 +34,14 @@ from .readers._io import read_bytes
 
 FACES = [("UBGoudy.otf", "UBGoudy.woff2"),
          ("UBGoudy-Italic.otf", "UBGoudy-Italic.woff2")]
+# A study note's math (build/texmath.py) is set in Garamond-Math, OFL 1.1, from
+# TeX Live, vendored by value: the nearest of its math fonts to Goudy.  Subset
+# like Goudy, to what the notes draw, its MATH table kept, so that a radical or
+# a fraction is laid out from the font's own metrics.  The base keeps the file
+# there, and the same, before any note has math.
+MATH = (pathlib.Path(__file__).resolve().parent.parent / "vendor" / "fonts" / "Garamond-Math.otf",
+        "GaramondMath.woff2")
+MATH_BASE = "0123456789+−=()[],./"
 FORBIDDEN = "Goudy-Handtooled-BT.ttf"
 
 # Characters the site draws on purpose in another face, and where.  The gate
@@ -158,9 +166,8 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
         if stray:
             report.hard("study-lang-script", f"lang={lang}",
                         " ".join(f"{c} U+{ord(c):04X}" for c in stray)[:200])
-    if maths:
-        report.hard("study-math-font", f"{len(maths)} <math>",
-                    "a study note holds math, and the site has no math font yet")
+    from .texmath import drawn
+    math_wanted = set(MATH_BASE).union(*(drawn(m) for m in maths))
     stats = {}
     subsets = []
     for src, dst in FACES:
@@ -182,6 +189,23 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
             report.hard("font-missing-glyph", dst,
                         " ".join(f"{c} U+{ord(c):04X}" for c in sorted(missing))[:200])
         subsets.append((font, opts, dst, len(have)))
+    font = TTFont(MATH[0], recalcTimestamp=False)
+    opts = subset.Options()
+    opts.flavor = "woff2"
+    opts.layout_features = ["*"]
+    opts.name_IDs = ["*"]
+    opts.notdef_outline = True
+    s = subset.Subsetter(options=opts)
+    s.populate(text="".join(sorted(math_wanted)))
+    s.subset(font)
+    have = {chr(c) for table in font["cmap"].tables for c in table.cmap}
+    missing = math_wanted - have
+    if missing:
+        report.hard("font-missing-glyph", MATH[1],
+                    " ".join(f"{c} U+{ord(c):04X}" for c in sorted(missing))[:200])
+    if "MATH" not in font:
+        report.hard("font-math-table", MATH[1], "the subset lost its MATH table")
+    subsets.append((font, opts, MATH[1], len(have)))
     if report.blocking:
         return stats
     outdir.mkdir(parents=True, exist_ok=True)

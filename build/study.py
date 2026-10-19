@@ -1,8 +1,8 @@
 """The British Study Edition's notes, one reviewed paper at a time.
 
 The edition's 404 `\\fnst` notes are not imported: each is read, checked and
-edited by hand (Tigran, 2026-10-18), so that a note asserts nothing a reader
-could not check, and a paper reaches the site only with its reviewed copy,
+edited by hand (Tigran, 2026-10-18), so that a note asserts as fact nothing a
+reader could not check, and a paper reaches the site only with its reviewed copy,
 data/study/NNN.toml.  A paper without one has no study notes.  The rules of
 that review are data/study/README.md; this module holds a copy to them where
 a machine can:
@@ -39,6 +39,7 @@ import tomllib
 
 from . import texmath
 from .expand import Expander, Note, Span, _raw
+from .problems import Report
 from .readers import study as reader
 from .render import render, strip_tags
 from .study_macros import ITALIC_OPENERS, SUBS, TABLE
@@ -49,6 +50,17 @@ RE_FILE = re.compile(r"\d{3}\.toml")
 RE_TARGET = re.compile(r"p(\d+) (\d+):(\d+)")
 RE_MONTH = re.compile(r"/uploads/(\d{4})/(\d{2})/")
 SENTINEL = 0xE000                    # a private-use character stands for each $...$
+# A hyphen that begins a word, a suffix's or an ending's ("the Latin suffix
+# -tia", "-el/-al"): a browser may break a line after any hyphen, and left
+# "-" alone at a line's end (Tigran, 2026-10-18).  Held to its letters.
+RE_LEADING_HYPHEN = re.compile(r"(?:^|(?<=[\s(\[/“‘]))-[^\W\d_]+")
+# Words joined by ties (~, \,) break as one, and a long run of them leaves a
+# gap at the end of the line before it: "Sir~Arthur~S.\,Eddington" did
+# (Tigran, 2026-10-18).  A tie goes after a title or an abbreviation (Dr~, p.~)
+# and inside a reference (Psalms~104:2), never through a whole name.
+# Measured between the places a line may break anyway: a space, a dash, a slash.
+RE_TIED = re.compile(r"[^\s\u00a0\u202f—–/-]+(?:[\u00a0\u202f][^\s\u00a0\u202f—–/-]+)+")
+TIED_MAX = 24
 
 KEYS = {"paper", "chart", "study", "reviewed", "source", "note", "dropped"}
 SOURCE_KEYS = {"key", "origin", "tex"}
@@ -118,7 +130,8 @@ def load_curated(report, root: pathlib.Path = DATA) -> dict[int, Curated]:
     return out
 
 
-def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report) -> Built:
+def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
+           hyphenator=None) -> Built:
     """Account for each admitted paper's notes and put them on the press text.
 
     Appends to each paragraph's `ex.notes` and `ex.spans`, before load_text
@@ -140,14 +153,32 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report)
         _account(cur, orig, where, report)
         month = _chart(cur, block, where, report)
         sources = _sources(cur, paras, where, report)
-        notes = _notes(cur, paras, order, sources, month, orig, where, report)
+        notes = _notes(cur, paras, order, sources, month, orig, where, report, hyphenator)
         built.papers.append({"paper_n": n, "file_sha256": cur.sha256, "study_commit": repo["at"],
                              "block_url": None if cur.chart == "none" else cur.chart,
                              "block_month": month, "n_notes": len(notes),
                              "n_dropped": sum(1 for d in cur.dropped if "at" in d)})
         built.sources.extend(sources.values())
         built.notes.extend(notes)
+    one_work_one_key(built.sources, report)
     return built
+
+
+def one_work_one_key(sources: list[dict], report) -> None:
+    """A key names one work in every paper, and a work has one key: the
+    Bibliography (/lists/bibliography) lists a work once, by its key, with every
+    note that cites it, in whichever paper (Tigran, 2026-10-19)."""
+    html_of: dict[str, tuple[int, str]] = {}
+    key_of: dict[str, tuple[int, str]] = {}
+    for s in sources:
+        where = f"data/study/{s['paper_n']:03d}.toml {s['key']}"
+        n, html = html_of.setdefault(s["key"], (s["paper_n"], s["html"]))
+        if html != s["html"]:
+            report.hard("study-source-key", where,
+                        f"Paper {n} has {s['key']} for another work, or words it differently")
+        n, key = key_of.setdefault(s["html"], (s["paper_n"], s["key"]))
+        if key != s["key"]:
+            report.hard("study-source-key", where, f"Paper {n} has this work as {key}")
 
 
 def _account(cur: Curated, orig, where: str, report) -> None:
@@ -221,7 +252,8 @@ def _sources(cur: Curated, paras, where: str, report) -> dict[str, dict]:
     return out
 
 
-def _notes(cur: Curated, paras, order, sources, month, orig, where, report) -> list[dict]:
+def _notes(cur: Curated, paras, order, sources, month, orig, where, report,
+           hyphenator=None) -> list[dict]:
     body_of = {x.origin: x.body for x in orig.notes}
     out: list[dict] = []
     last = None
@@ -230,6 +262,7 @@ def _notes(cur: Curated, paras, order, sources, month, orig, where, report) -> l
         at = f"{where} note {i} ({nt['at']})"
         # Set first, so that what it cites is counted even if it cannot be placed.
         text, html, cites = expand(nt["tex"], paras, sources, at, report)
+        html_hy = expand(nt["tex"], paras, sources, at, Report(), hyphenator)[1] if hyphenator else html
         for c in cites:
             if c in sources:
                 sources[c]["cited"] += 1
@@ -252,7 +285,7 @@ def _notes(cur: Curated, paras, order, sources, month, orig, where, report) -> l
         num = len(out) + 1
         key = f"st{q.paper}_{q.section}_{q.n}_{k}"
         hs = bool(cites) or credit == "block"
-        q.ex.notes.append(Note(a, "study", nt["tex"], text, [], html))
+        q.ex.notes.append(Note(a, "study", nt["tex"], text, [], html, html_hy))
         q.ex.spans.append(Span(a, a, "fnref", {"kind": "study", "key": key, "n": num, "hs": hs}))
         out.append({"paper_n": cur.paper, "ref": q.ref, "ord": len(q.ex.notes) - 1,
                     "num": num, "key": key, "origin": nt["origin"], "after": nt["after"],
@@ -285,13 +318,16 @@ def _anchor(text: str, after: str, where: str, report) -> int | None:
     return a
 
 
-def expand(tex: str, paras, sources: dict, where: str, report) -> tuple[str, str, list[str]]:
+def expand(tex: str, paras, sources: dict, where: str, report,
+           hyphenator=None) -> tuple[str, str, list[str]]:
     """A note's or a source's TeX -> (text, html, the keys it cites, in order).
 
     `$...$` is taken out first, each replaced by one private-use character, and
     put back as MathML into the rendered HTML; so math inside a macro's
     argument stays where it was.  `text` is what the HTML says, tags stripped,
-    which makes the round trip hold by construction.
+    which makes the round trip hold by construction.  With a `hyphenator`, the
+    HTML carries the book's soft hyphens (build/hyphen.py), and `text` is
+    still what it says without them.
     """
     if any(SENTINEL <= ord(c) < SENTINEL + 0x1000 for c in tex):
         report.hard("study-private-use", where, "the TeX holds a private-use character")
@@ -352,16 +388,23 @@ def expand(tex: str, paras, sources: dict, where: str, report) -> tuple[str, str
                    calls={"cite": cite, "bibref": bibref, "myurl": myurl, "bibfrac": bibfrac},
                    subs=SUBS, forbid_comments=True)
     ex = exp.run(src)
+    ex.spans += [Span(m.start(), m.end(), "nobreak") for m in RE_LEADING_HYPHEN.finditer(ex.text)]
+    for m in RE_TIED.finditer(ex.text):
+        run = m.group().strip("()[],.;:")
+        name = len(re.split("[\u00a0\u202f]", run)) >= 3 and not re.search(r"\d:\d", run)
+        if name or len(run) > TIED_MAX:
+            report.warn("study-long-tie", where,
+                        f"{m.group()!r} cannot break: tie after a title or an abbreviation only")
     for i in range(len(maths)):
         if ex.text.count(chr(SENTINEL + i)) != 1:
             report.hard("study-math-lost", where, f"${maths[i]}$ did not survive its macro")
-    html = render(ex.text, ex.spans)
+    html = render(ex.text, ex.spans, shy=hyphenator.points(ex.text, ex.spans) if hyphenator else ())
     for i, m in enumerate(maths):
         try:
             html = html.replace(chr(SENTINEL + i), texmath.convert(m))
         except texmath.MathError as e:
             report.hard("study-math", where, f"${m}$: {e}")
-    return strip_tags(html), html, cites
+    return strip_tags(html).replace("\u00ad", ""), html, cites
 
 
 def store(con, built: Built) -> None:

@@ -1,0 +1,119 @@
+# Paper 0, the Foreword: the British Study Edition's 13 notes at 2474116,
+# reviewed 2026-10-18 against the press text, Block's chart for 0:1 (December
+# 2019), and the 1955 plates.  The review, each note's original and the reason
+# for each change, numbered F1-F13 in the order of the text, is
+# var/study/review-000.md.  All thirteen ruled by Tigran, F1-F7 on 2026-10-18,
+# F8-F13 on 2026-10-19: eleven carried, two dropped.
+
+paper = 0
+chart = "https://urantiabooksources.com/wp-content/uploads/2019/12/000.pdf"
+
+[[source]]
+key = "Hartshorne"
+origin = "b186699ea02c9d22"
+# As Block's chart lists it, page 1.
+tex = '''Charles Hartshorne, \emph{Man's Vision of God and the Logic of Theism} (Chicago: Willett, Clark \& Company, 1941).'''
+
+# F1, ruled: kept, the derivation as a "may be", the pronunciation as the editor's,
+# spelt as the edition has it, ooránteeya (Tigran: no apostrophe).
+[[note]]
+at = "0:0.1"
+after = "mortals of Urantia"
+origin = "c4851d880d5cb283"
+tex = '''This may be a coined word from the Greek \textgreek{οὐρανός} ``heavens'' and the Latin suffix \textit{-tia}, signifying ``[y]our place in the heavens''. I pronounce it as \textit{oor\'anteeya}.'''
+
+# F2, ruled: kept, Parts II-IV corrected (Part IV is the midwayers', not the system's),
+# "under other levels of authorization" (Tigran).
+[[note]]
+at = "0:0.1"
+after = "have been authorized"
+origin = "9372bc888708160d"
+tex = '''Only the papers 1--31 (i.e. Part~I) were authorized at the superuniverse level. The papers 32--196 were revealed under other levels of authorization, all below the superuniverse level.'''
+
+# F3, ruled: kept, rewritten, without Tolstoy; a tie after a title only, not
+# through the name, which left a gap before it (Tigran).
+[[note]]
+at = "0:0.1"
+after = "the English language"
+origin = "219da6095c4fb39d"
+tex = '''One of the reasons why English was chosen for the Fifth Epochal Revelation is that the vast majority of authors, whose works served as the basis of its text, such as Dr~William S. Sadler, Sir~Arthur S. Eddington and Sir~James Jeans, were all English speakers.'''
+
+# F4, ruled: kept as it is, a reflection in the first person.
+[[note]]
+at = "0:0.4"
+after = "statement within itself;"
+origin = "ba8a27e69101881d"
+tex = '''Why \bibemph{exactly} does the need to anticipate the usage of terms make this Foreword an unfinished statement? I could not answer this question until I remembered the difficulty encountered when studying the ancient Hebrew poetry. Not prose, but \bibemph{poetry}. Namely, the paucity of language makes the reading of poetry orders of magnitude more complex than prose. The fundamental fact is that the true meaning of any word is not the paragraph or two found in its dictionary definition, but rather the entire usage thereof in the whole body of literature, everywhere it is encountered. Hebrew poetry provides a clear and relatively compact illustration of this, because to \bibemph{really} understand one verse you often need to re-read many times the entire body of literature (i.e. all three books of Hebrew poetry: Psalms, Proverbs and Job) and this is what makes reading poetry hundreds, if not thousands, times harder than prose. Likewise, here the paucity of English language makes the mere ``dictionary definitions'' incomplete, unfinished and they must be supplemented by the entire ``body of literature'', i.e. the 31 subsequent presentations where each of these definitions is encountered. Therefore, the terms defined here might still have different meanings later on and this is what makes this Foreword an unfinished statement, i.e. it cannot be ``finished'' without the entirety of all the contexts where all the terms are used.'''
+
+# F5, ruled: kept, with the pages of the 1955 printing, checked on the Guardian
+# plates (djvu pages 7, 13, 67-83 and 85).
+[[note]]
+at = "0:0.4"
+after = "universe of universes"
+origin = "ad7f2c227f7a031e"
+tex = '''As already noted at \bibref[0:0.1]{p000 0:1} these are limited to papers 1--31 only. Therefore, this Foreword is properly ``the Foreword to Part I of the Urantia Papers'' and that is where it should be printed. Curiously, this is where the Foreword is found in ``The Titles of the Papers'' (p.~vii) and ``Contents of the Book'' (p.~xiii) as printed in the 1955 edition, although the text of the Foreword is printed just before the Part I title page preceding Paper 1 of that edition.'''
+
+# F6, F7, ruled: kept, with "perhaps".
+[[note]]
+at = "0:1.1"
+after = "phenomena of deity"
+origin = "6a46c2e2a1c8115e"
+tex = '''In the lower case perhaps to reflect a certain degree of \bibemph{ambiguity} in associating observed universe phenomena with the activity of Deity. This sentence prepares the \bibemph{empirical soil} for the definition of Deity, which commences in the next paragraph.'''
+
+[[note]]
+at = "0:1.2"
+after = "DEITY"
+origin = "2646edcd5eb2629e"
+tex = '''In all capitals perhaps to reflect the \bibemph{over-exactness} of this description which compensates for the ambiguity in the previous paragraph. Without resorting to such a combination of ambiguity and over-exactness it would probably be well\hyp{}nigh impossible to formulate a definition of Deity, which is both comprehensible by a mortal mind and free of the circular reasoning involved in the conceptual pair (Deity, divinity).'''
+
+# F8, ruled: rewritten from Block's chart and Hartshorne's page 8 (Block's
+# Exhibit A).  The edition's 'listed in this particular order to reflect the
+# inherent ordering' is not Hartshorne's: he calls his order one of several.
+# Tigran added the last sentence: the order is the dictionary order of the
+# words, A before R before I.  A tie before each '>', so a line breaks only
+# after one, as TeX breaks a formula.
+[[note]]
+at = "0:1.19"
+after = "seven conceivable types"
+origin = "82aaaea83279fe25"
+credit = "block"
+tex = '''The seven are Charles Hartshorne's, in his order \cite{Hartshorne}, p.~8, from his chapter ``The Formally Possible Doctrines'' about God's perfection. His symbols for them, A, AR, ARI, AI, R, RI and I, take one, two or all three of absolute perfection (A), relative perfection (R) and imperfection (I): the $2^3 - 1 = 7$ ways there are. Of his order he writes: ``The seven cases can be arranged, in several different ways, into three main groups. The following of the possible triadic arrangements seems the most useful''. This arrangement corresponds mathematically to the natural ordering A~> R~> I.'''
+
+# F9, ruled: dropped.  Tigran: every 1955 reading among the edition's notes is
+# dropped without a ruling, the press's apparatus being complete.
+[[dropped]]
+at = "0:1.24"
+origin = "019b31e0df080e85"
+why = "F9, ruled: a 1955 reading: the press's \\fnc{all other} gives it, with the SRT Committee's reason, which is the grammar, not the human source the note guessed at"
+
+[[dropped]]
+at = "0:5.10"
+origin = "1880fee11829d2f1"
+why = "F10, ruled: an etymology with no authority, and wrong as written: 'mother' is not from Latin mater but cognate with it"
+
+# F11, ruled: kept as it is.  Its link opens 103:8.6, which has no note until
+# Paper 103 is reviewed.  There, Tigran: the note is to give both the edition's
+# Berdyaev (Slavery and Freedom) and Block's Knudson, The Doctrine of God,
+# pp. 169-70, which Block's chart for Paper 103 (September 2022) sets beside
+# 103:8.6.  tools/study/draft.py 103 lists this note as pointing there.
+[[note]]
+at = "0:5.11"
+after = "changing creature experience"
+origin = "204ed3b06822d2cb"
+tex = '''For the human source of this definition see the note at \bibref[103:8.6]{p103 8:6}.'''
+
+# F12, ruled: kept as it is, the editor's experience his own (Tigran).  Its
+# link opens 112:3.2, which has no note until Paper 112 is reviewed.
+[[note]]
+at = "0:5.12"
+after = "warp of morontia"
+origin = "35c66cbd89b85cb7"
+tex = '''The word ``morontia'' is composed of ``matter'' plus ``moral''. In addition to the present Editor's personal experience, the proof of this connection is given in the footnote to \bibref[112:3.2]{p112 3:2}. The link with the Greek word \textgreek{μάρανσις} ``causing to die away'', ``dying or fading away'' is also important here. And the medical term \textgreek{μαρασμός}, whence the English ``marasmus'' and ``marasmic'' come, is synonymous with \textgreek{μάρανσις}. It was used by the great \bibemph{Galen} in the II century A.D.'''
+
+# F13, ruled: kept as it is.  The reading it confirms is F5's, which stays; and
+# 0:12.11 names Part I's subjects, under the superuniverse rulers' mandate.
+[[note]]
+at = "0:12.11"
+after = "encircling seven superuniverses"
+origin = "8a9b98426c75d7f5"
+tex = '''Another clear confirmation (cf. \bibref[0:0.1]{p000 0:1}, \bibref[0:0.4]{p000 0:4} and \bibref[0:2.11]{p000 2:11}), that this Foreword is intended for papers 1--31 only.'''

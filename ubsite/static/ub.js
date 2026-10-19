@@ -5,7 +5,10 @@
   // the settings are, and their defaults, is ubsite/settings.py, handed over
   // by the head script in base.html, which also applies them before first
   // paint.  This keeps them, runs the dialog, and tells listen.js of a change.
-  var KEY = 'ub_settings', DEF = window.ubDefaults || {};
+  // DEF is this site's defaults, what is stored is what differs from them, and
+  // ↺ restores them; the data- attributes say where a value differs from
+  // settings.py's own, BASE, which the CSS is written against (SITE_DEFAULTS).
+  var KEY = 'ub_settings', DEF = window.ubDefaults || {}, BASE = window.ubBase || DEF;
   function stored() {
     var s = {};
     try {
@@ -28,11 +31,11 @@
       localStorage.removeItem('ub_theme');
     } catch (e) {}
   }
-  // As the head script does: data-<key> for each value that is not its default.
+  // As the head script does: data-<key> for each value that is not settings.py's default.
   function apply(o) {
     var r = document.documentElement;
     for (var k in DEF) {
-      if (o[k] === DEF[k]) delete r.dataset[k];
+      if (o[k] === BASE[k]) delete r.dataset[k];
       else r.dataset[k] = o[k] === false ? 'off' : String(o[k]);
     }
   }
@@ -354,7 +357,8 @@
   document.addEventListener('ub:settings', function (ev) { if (ev.detail.key === 'tips') tips(); });
 
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
-  // endnote's words (section.html), which are hidden while this runs.  One
+  // endnote's words (section.html), which are hidden while this runs, and a
+  // study note at its number the same way, its card .st.  One
   // card at a time, under the line and scrolling with it; the ring again, its
   // ×, Escape or a click elsewhere closes it.  Listened for on the document,
   // so it holds after listen.js swaps <main>.
@@ -381,9 +385,9 @@
         host = mark.closest('article') || mark.closest('main.results');
     if (!note || !host) return false;
     var el = document.createElement('div');
-    el.className = 'pop';
+    el.className = mark.dataset.k === 'st' ? 'pop st' : 'pop';
     el.setAttribute('role', 'dialog');
-    el.setAttribute('aria-label', '1955 reading');
+    el.setAttribute('aria-label', mark.getAttribute('aria-label') || '1955 reading');
     el.tabIndex = -1;
     el.innerHTML = '<span class="arrow"></span>' +
       '<button type="button" class="x" aria-label="Close">×</button>' +
@@ -421,7 +425,7 @@
   // after the card's own code, which sets `card` after arrive() has run.
   // Placed again when the fonts are in and the text has reflowed.
   function arriveNote() {
-    var m = /^#note(\d+_\d+_\d+_\d+)$/.exec(location.hash),
+    var m = /^#note((?:st)?\d+_\d+_\d+_\d+)$/.exec(location.hash),
         mark = m && document.getElementById('fnref' + m[1]);
     if (!mark || !mark.matches('a.fn') || !mark.offsetParent) return;
     shut(false);

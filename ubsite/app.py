@@ -354,6 +354,7 @@ def book() -> dict:
 T.env.globals["book"] = book
 T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
+T.env.globals["site_defaults"] = settings.site_defaults()
 
 
 # The same build is live at two addresses, and an app installed from each looked
@@ -874,7 +875,9 @@ def appendix(request: Request, letter: str):
 
 
 # The edition's lists, as a book's front matter names them: the 1955 readings
-# now, the illustrations and the study notes with Phase 6 (Tigran, 2026-10-12).
+# (Tigran, 2026-10-12), the study notes as their papers are reviewed (Tigran,
+# 2026-10-18), the works those notes cite (2026-10-19), and the illustrations
+# with Phase 6.
 @app.get("/lists", response_class=HTMLResponse)
 def lists(request: Request):
     stats = dict(db().execute("SELECT key, value FROM stat").fetchall())
@@ -896,6 +899,31 @@ def list_1955(request: Request):
         groups[-1]["rows"].append(_old_hit(n, Markup(n["html"]), dec=n["verdict"]))
     return page(request, "list_1955.html", groups=groups,
                 n=sum(len(g["rows"]) for g in groups))
+
+
+@app.get("/lists/notes", response_class=HTMLResponse)
+def list_notes(request: Request):
+    """Every study note on the site in one list, by paper, in the order of the
+    book (Tigran, 2026-10-18): the words it stands after, and the note itself,
+    as its card shows it.  The reference opens its paragraph, with the card.
+    Only the papers whose notes are reviewed (build/study.py)."""
+    groups: list[dict] = []
+    for n in queries.study(db()):
+        if not groups or groups[-1]["n"] != n["paper_n"]:
+            groups.append({"n": n["paper_n"], "title": n["paper_title"], "rows": []})
+        lead, word, _, _ = _around(n["para_text"], n["anchor"], before=10)
+        groups[-1]["rows"].append({**n, "before": lead + word})
+    return page(request, "list_notes.html", groups=groups,
+                n=sum(len(g["rows"]) for g in groups))
+
+
+@app.get("/lists/bibliography", response_class=HTMLResponse)
+def list_bibliography(request: Request):
+    """Every work the study notes on the site cite, once, by its author's
+    surname, with the notes that cite it (Tigran, 2026-10-19): so that, as the
+    papers' notes are reviewed, the human sources the book draws on can be
+    seen in one list.  A note's reference opens its paragraph, with the card."""
+    return page(request, "list_bibliography.html", works=queries.bibliography(db()))
 
 
 # The changelog, ChangeLog.md as build/changelog.py put it in the database

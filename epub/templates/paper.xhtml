@@ -19,6 +19,18 @@
 {% endif %}
 </aside>
 {%- endmacro %}
+{#- A study note (queries.study), as its card on the site: its number, the
+    note, the sources it cites, and its credit, without the links out. #}
+{% macro snote(n) -%}
+<aside epub:type="footnote" class="note st" id="{{ n.id }}"><p><a class="lbl" href="#{{ n.back }}">Note {{ n.num }}</a> {{ n.html|safe }}</p>
+{% for c in n.sources %}<p class="cite">[{{ loop.index }}] {{ c|safe }}</p>
+{% endfor %}
+{% if n.block %}<p class="src">Identified by Matthew Block, parallel chart, Paper {{ n.paper }}, {{ n.block }}, urantiabooksources.com</p>
+{% endif %}
+{% if n.credit %}<p class="src">{{ n.credit }}</p>
+{% endif %}
+</aside>
+{%- endmacro %}
 {% block title %}{{ paper.title }}{% endblock %}
 {% block body %}
 <section epub:type="chapter" class="paper">
@@ -67,7 +79,7 @@
 {% if notes %}
 <div class="notes">
 {% for n in notes %}
-{{ note(n) }}
+{% if n.kind == "st" %}{{ snote(n) }}{% else %}{{ note(n) }}{% endif %}
 {% endfor %}
 </div>
 {% endif %}

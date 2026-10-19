@@ -214,8 +214,9 @@ def run(con, path: pathlib.Path) -> int:
     g.line(papers == count("SELECT COUNT(*) FROM paper"), f"papers {papers}")
     g.line(sections == count("SELECT COUNT(*) FROM section"), f"sections {sections:,}")
     n_notes = count("SELECT COUNT(*) FROM footnote")
-    g.line(notes == noterefs == n_notes, f"1955 notes {notes}, each with its marker ({noterefs})")
-    g.line(not misplaced, "every 1955 note stands at its paper's end, in the order of its marker",
+    g.line(notes == noterefs == n_notes, f"notes {notes}, 1955 readings and study notes,"
+           f" each with its marker ({noterefs})")
+    g.line(not misplaced, "every note stands at its paper's end, in the order of its marker",
            ", ".join(misplaced[:4]))
     heads = sum(1 for n, r in docs.items() if n.startswith("index-")
                 for el in r.iter(f"{X}h2") if "l1" in classes(el))
@@ -237,19 +238,26 @@ def run(con, path: pathlib.Path) -> int:
            f"the database has {want:,}" if cits != want else "")
 
     # 6. fonts ------------------------------------------------------------------
+    M = "{http://www.w3.org/1998/Math/MathML}"
+
     def goudy(el):
-        """The text an element draws in UB Goudy: all of it but a <pre>."""
-        if el.tag == f"{X}pre":
+        """The text an element draws in UB Goudy: all of it but a <pre>, a
+        study note's math (in Garamond-Math) and its Greek or Hebrew (in the
+        reader's own font, as on the site: build/fonts.py SCRIPTS)."""
+        if el.tag == f"{X}pre" or el.tag.startswith(M) or "lang" in classes(el):
             return
         yield el.text or ""
         for ch in el:
             yield from goudy(ch)
             yield ch.tail or ""
     drawn: set[str] = set()
+    maths: list[str] = []
     for name, root in docs.items():
         body = root.find(f"{X}body")
         if body is not None:
             drawn.update("".join(goudy(body)))
+            maths += [ET.tostring(m, encoding="unicode").replace("ns0:", "").replace(":ns0", "")
+                      for m in body.iter(f"{M}math")]
     drawn = {c for c in drawn if unicodedata.category(c) not in ("Cc", "Zl", "Zp")}
     for face in ("fonts/UBGoudy.otf", "fonts/UBGoudy-Italic.otf"):
         font = TTFont(io.BytesIO(z.read(f"OEBPS/{face}")))
@@ -259,6 +267,14 @@ def run(con, path: pathlib.Path) -> int:
         miss = sorted(drawn - have - set(ELSEWHERE))
         g.line(not miss, f"{face}: every one of the {len(drawn)} characters drawn",
                " ".join(f"{c} U+{ord(c):04X}" for c in miss[:12]))
+    # The math as a browser draws it, its single letters in their italic.
+    from build.texmath import drawn as math_drawn
+    want = set().union(*(math_drawn(m) for m in maths))
+    font = TTFont(io.BytesIO(z.read("OEBPS/fonts/GaramondMath.otf")))
+    have = {chr(c) for t in font["cmap"].tables for c in t.cmap}
+    miss = sorted(want - have)
+    g.line(not miss, f"fonts/GaramondMath.otf: every one of the {len(want)} characters"
+           f" of {len(maths)} expressions", " ".join(f"{c} U+{ord(c):04X}" for c in miss[:12]))
 
     # 7. determinism ------------------------------------------------------------
     files, info = pack.files(con)

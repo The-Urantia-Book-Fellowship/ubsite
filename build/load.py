@@ -93,10 +93,16 @@ def load_text(con, papers, parts, repo, hyphenator, report) -> dict:
                 # srt_item_id is filled by build/srt.py, once the Foundation's
                 # numbering is in.
                 # A study note comes rendered, its math in it (build/study.py).
+                # Each also with the book's soft hyphens, for a card and an
+                # endnote, set justified as the text is.
+                if nt.html is not None:
+                    h, h_hy = nt.html, nt.html_hy
+                else:
+                    h = render(nt.text, nt.spans)
+                    h_hy = render(nt.text, nt.spans, shy=hyphenator.points(nt.text, nt.spans))
                 con.execute("INSERT INTO footnote (id, edition_id, kind, paragraph_id,"
-                            " anchor, ord, text, html) VALUES (?,1,?,?,?,?,?,?)",
-                            (fid, nt.kind, qid, nt.offset, i, nt.text,
-                             nt.html if nt.html is not None else render(nt.text, nt.spans)))
+                            " anchor, ord, text, html, html_hy) VALUES (?,1,?,?,?,?,?,?,?)",
+                            (fid, nt.kind, qid, nt.offset, i, nt.text, h, h_hy))
     return para_key
 
 

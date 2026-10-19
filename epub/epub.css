@@ -22,6 +22,12 @@
   font-weight: normal;
   src: url(fonts/UBGoudy-Italic.otf);
 }
+/* A study note's math, as on the site (build/texmath.py). */
+@font-face {
+  font-family: "Garamond Math";
+  src: url(fonts/GaramondMath.otf);
+}
+math { font-family: "Garamond Math", math; }
 
 body {
   font-family: "UB Goudy", serif;
@@ -123,6 +129,8 @@ aside.note p {
 aside.note .lbl { font-style: italic; }
 aside.note .dec { font-variant: small-caps; }
 aside.note .src { font-size: .7em; }
+aside.note .cite { font-size: .85em; }
+.nobreak { white-space: nowrap; }
 /* The words the SRT Committee changed, underlined as it underlines them. */
 mark.chg { background: none; color: inherit; text-decoration: underline; }
 

@@ -57,6 +57,7 @@ class Note:
     # Set when the note was rendered elsewhere: a study note (build/study.py),
     # whose HTML carries what render() cannot make from text and spans, math.
     html: str | None = None
+    html_hy: str | None = None
 
 
 @dataclasses.dataclass(slots=True)

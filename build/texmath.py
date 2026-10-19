@@ -16,6 +16,7 @@ TeX does.  Capital Greek is upright, as TeX sets it.
 from __future__ import annotations
 
 import html
+import re
 
 NS = "http://www.w3.org/1998/Math/MathML"
 
@@ -206,7 +207,9 @@ class _Parser:
         if v == "sqrt":
             return f"<msqrt>{self.argument()}</msqrt>", False
         if v in ("vec", "overline"):
-            mark = "→" if v == "vec" else "‾"
+            # \overline's bar is the macron, which MathML stretches as an
+            # accent, and which the math font has (it has no U+203E).
+            mark = "→" if v == "vec" else "¯"
             return f'<mover accent="true">{_row_of(self.argument())}<mo>{mark}</mo></mover>', False
         if v in ("mathbf", "mathcal", "mathbb"):
             style = {"mathbf": "bf", "mathcal": "cal", "mathbb": "bb"}[v]
@@ -257,6 +260,39 @@ def _single(s: str) -> bool:
         else:
             i += 1
     return True
+
+
+# What a browser draws for a single letter in an <mi>: its mathematical italic
+# (MathML Core's text-transform: math-auto).  The math font is subset to these,
+# not to the letters stored (build/fonts.py).
+_ITALIC = {"h": "ℎ", "ϵ": "𝜖", "ϑ": "𝜗", "ϰ": "𝜘", "ϕ": "𝜙", "ϱ": "𝜚", "ϖ": "𝜛", "∂": "𝜕",
+           "∇": "𝛻", "ı": "𝚤", "ȷ": "𝚥"}
+RE_TOKEN = re.compile(r"<(mi|mo|mn)( [^>]*)?>([^<]*)</\1>")
+
+
+def italic(ch: str) -> str:
+    if ch in _ITALIC:
+        return _ITALIC[ch]
+    if "A" <= ch <= "Z":
+        return chr(0x1D434 + ord(ch) - 65)
+    if "a" <= ch <= "z":
+        return chr(0x1D44E + ord(ch) - 97)
+    if "Α" <= ch <= "Ω" and ch != "΢":
+        return chr(0x1D6E2 + ord(ch) - 0x391)
+    if "α" <= ch <= "ω":
+        return chr(0x1D6FC + ord(ch) - 0x3B1)
+    return ch
+
+
+def drawn(mathml: str) -> set[str]:
+    """The characters a browser draws for a <math> this module made."""
+    out: set[str] = set()
+    for tag, attrs, text in RE_TOKEN.findall(mathml):
+        text = html.unescape(text)
+        if tag == "mi" and len(text) == 1 and "mathvariant" not in (attrs or ""):
+            text = italic(text)
+        out.update(text)
+    return out
 
 
 def convert(tex: str) -> str:

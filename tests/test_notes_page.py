@@ -19,8 +19,10 @@ from test_appendix_pages import DB, get  # noqa: E402
 
 
 def note(page: str, key: str) -> str:
+    """A 1955 note's endnote, which its card carries, as a reader reads it: without
+    the soft hyphens that let it break where the book would (footnote.html_hy)."""
     m = re.search(rf'<aside class="note" id="fn{key}">(.*?)</aside>', page, re.S)
-    return m.group(1) if m else ""
+    return m.group(1).replace("\u00ad", "") if m else ""
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
@@ -32,6 +34,11 @@ class NotesPage(unittest.TestCase):
     def test_the_ring(self):
         self.assertIn('<a class="fn" href="#fn41_4_4_0" id="fnref41_4_4_0" data-k="1955"'
                       ' aria-label="1955 reading"></a>', self.p41)
+
+    def test_set_as_the_text_is(self):
+        # Justified in the card, so hyphenated where the book would break.
+        m = re.search(r'<aside class="note" id="fn41_4_4_0">(.*?)</aside>', self.p41, re.S)
+        self.assertIn("Tex\u00adtual con\u00adsis\u00adtency", m.group(1))
 
     def test_the_committee_reason(self):
         n = note(self.p41, "41_4_4_0")

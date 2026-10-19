@@ -39,6 +39,9 @@ MANIFEST = [
     ("index", "xref.py",                              "index/xref.py"),
     # Data, not code: the patterns the book is hyphenated with (build/hyphen.py).
     ("texlive", "tex/generic/hyphen/hyphen.tex",      "tex/hyphen.tex"),
+    # The face a study note's math is set in, subset by build/fonts.py: OFL 1.1,
+    # drawn to match EB Garamond, the nearest of TeX Live's math fonts to Goudy.
+    ("texlive", "fonts/opentype/public/garamond-math/Garamond-Math.otf", "fonts/Garamond-Math.otf"),
     # SQLite's WebAssembly build, which searches the offline copy in a reader's
     # browser (ubsite/static/sw.js): the classic script and its binary.
     ("sqlite_wasm", "jswasm/sqlite3.js",               "sqlite-wasm/sqlite3.js"),

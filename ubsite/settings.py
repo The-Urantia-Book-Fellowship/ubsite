@@ -87,6 +87,13 @@ SHOW = [
     # to cite the book, so off unless a reader asks (Tigran, 2026-10-11).
     ("pages", "switch", "1955 page references", False, [], "such as (1109.3): page, and paragraph on it"),
     ("pilcrow", "switch", "Pilcrows", True, [], "where the 1955 text leaves a blank line"),
+    # The British Study Edition's notes, each read, checked and edited before it
+    # is shown (build/study.py, data/study/), numbered in each paper and opened
+    # at their number as a 1955 reading is at its ring.  On by default
+    # (Tigran, 2026-10-18), which a site may change (SITE_DEFAULTS).  Named
+    # with the edition and its editor, in the hint (Tigran, the same day).
+    ("studynotes", "switch", "Notes", True, [],
+     "from The British Study Edition (ed. Tigran Aivazian)"),
     ("notes", "switch", "1955 readings", True, [], ""),
     # What the 1955 cards say, listed among the search results: the reading,
     # and the SRT Committee's reasons beneath it.  Off unless a reader asks
@@ -134,6 +141,18 @@ KEPT = [
 ]
 
 
+# A site's own defaults, by the host a page is read at, where they differ from
+# those above: {"read.urantiabook.org": {"studynotes": False}}.  The Fellowship
+# decides what its readers see on its site, and a reader can still change it
+# (Tigran, 2026-10-17 and 18).  Chosen in the page, by base.html's head script
+# from location.hostname, as the tab's icon is, since the offline copy is one
+# for every host.  The CSS is written against the defaults above, whatever the
+# host: a value is marked on <html> where it differs from those, and only what
+# differs from the host's is stored, and ↺ restores the host's.  Empty until
+# the Fellowship's site exists.
+SITE_DEFAULTS: dict[str, dict] = {}
+
+
 # A setting that means nothing while another is off ('off', or a switch turned
 # off): shown, greyed, and not to be changed (ub.js disables it).  With
 # Listening off there is no speed to set (Tigran, 2026-10-08), and with the 1955
@@ -175,3 +194,13 @@ def groups(voices: list[dict]) -> list[dict]:
 def defaults() -> dict:
     """{key: default} for every setting, for the head script and ub.js."""
     return {s[0]: s[3] for s in READING + SHOW + LISTEN + KEPT}
+
+
+def site_defaults() -> dict:
+    """SITE_DEFAULTS, each checked against the settings it names."""
+    base = defaults()
+    for host, d in SITE_DEFAULTS.items():
+        for k, v in d.items():
+            if k not in base or type(v) is not type(base[k]):
+                raise ValueError(f"settings.SITE_DEFAULTS[{host!r}]: {k}={v!r}")
+    return SITE_DEFAULTS

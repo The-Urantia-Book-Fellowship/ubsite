@@ -30,7 +30,8 @@ OUT = ROOT / "var" / "epub" / "the-urantia-book.epub"
 UID = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, "https://ubsite.ddns.net/epub/the-urantia-book"))
 
 FACES = [("UBGoudy.woff2", "fonts/UBGoudy.otf"),
-         ("UBGoudy-Italic.woff2", "fonts/UBGoudy-Italic.otf")]
+         ("UBGoudy-Italic.woff2", "fonts/UBGoudy-Italic.otf"),
+         ("GaramondMath.woff2", "fonts/GaramondMath.otf")]
 
 MEDIA = {".xhtml": "application/xhtml+xml", ".css": "text/css", ".otf": "font/otf",
          ".jpg": "image/jpeg", ".ncx": "application/x-dtbncx+xml"}
@@ -74,7 +75,8 @@ def files(con) -> tuple[dict[str, bytes], dict]:
     docs, meta = book.documents(con)
     e = book.env(book.H.Hrefs(con))
     src = meta["sources"]
-    date = max(s["date"] for s in src.values())
+    # Block's charts are dated by no commit (build_source.committed_at NULL).
+    date = max(s["date"] for s in src.values() if s["date"])
 
     out: dict[str, bytes] = {}
     for d in docs:
@@ -106,10 +108,13 @@ def files(con) -> tuple[dict[str, bytes], dict]:
     for i in items:
         i["type"] = MEDIA[pathlib.PurePath(i["href"]).suffix]
         i.setdefault("properties", "")
-    labels = {"press": "The Uversa Press text", "index": "The Uversa Press index"}
+    labels = {"press": "The Uversa Press text", "index": "The Uversa Press index",
+              "study": "The British Study Edition, whose notes are reviewed one paper at a time",
+              "block": "Matthew Block's charts of the human sources, as listed in the manifest of SHA-256"}
     out["OEBPS/package.opf"] = e.get_template("package.opf").render(
         uid=UID, date=date, modified=f"{date}T00:00:00Z", items=items, spine=spine,
-        sources=[f"{labels.get(k, k)}, commit {s['commit']} of {s['date']}"
+        sources=[(f"{labels.get(k, k)}, commit {s['commit']} of {s['date']}" if s["date"]
+                  else f"{labels.get(k, k)} {s['commit']}")
                  + (", with uncommitted changes" if s["dirty"] else "")
                  for k, s in sorted(src.items())]).encode("utf-8")
     out["META-INF/container.xml"] = e.get_template("container.xml").render().encode("utf-8")

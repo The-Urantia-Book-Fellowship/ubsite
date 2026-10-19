@@ -63,6 +63,7 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
              2026-10-17).  Empty after section 0.  An entry citing the paper
              and section 0 alike is listed here only
     notes    paragraph id -> its 1955 readings, as notes() gives them
+    study    paragraph id -> its study notes, as study() gives them
     rows     the paragraphs as the page sets them: {"p": a paragraph}, or
              {"lines": [...]} for a block of verse, set as one (paragraph.verse_start),
              with the entries citing its lines gathered beside it
@@ -98,6 +99,9 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     by_para: dict[int, list] = {}
     for n in notes(con, "p.paper_n=? AND p.section_n=?", (paper, sec)):
         by_para.setdefault(n["paragraph_id"], []).append(n)
+    by_para_st: dict[int, list] = {}
+    for n in study(con, "p.paper_n=? AND p.section_n=?", (paper, sec)):
+        by_para_st.setdefault(n["paragraph_id"], []).append(n)
     rows: list[dict] = []
     for q in paras:
         if q["src"] == "vs":
@@ -107,7 +111,7 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
         else:
             rows[-1]["lines"].append(q)
     return {"paras": paras, "rows": rows, "citers": citers, "blanket": blanket,
-            "paperwide": paperwide, "notes": by_para}
+            "paperwide": paperwide, "notes": by_para, "study": by_para_st}
 
 
 def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:
@@ -126,6 +130,7 @@ def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     for f in con.execute(
             "SELECT f.*, p.ref AS para_ref, p.text AS para_text, p.paper_n, p.section_n,"
             " p.para_n, pa.title AS paper_title, s.verdict, s.why_html AS srt_why,"
+            " s.why_html_hy AS srt_why_hy, t.why_html_hy AS see_why_hy,"
             " (SELECT commit_url FROM build_source WHERE repo='srt') || '#' || s.name AS srt_href,"
             " t.verdict AS see_verdict, t.why_html AS see_why, tp.ref AS see_ref"
             " FROM footnote f JOIN paragraph p ON p.id=f.paragraph_id"
@@ -141,9 +146,65 @@ def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
         # own.  A note referred to elsewhere stays apart, named by its paragraph.
         if n["see_why"] and not n["srt_why"] and n["see_ref"] == n["para_ref"]:
             n["srt_why"], n["see_why"] = n["see_why"], None
+            n["srt_why_hy"], n["see_why_hy"] = n["see_why_hy"], None
         n["key"] = f'{n["paper_n"]}_{n["section_n"]}_{n["para_n"]}_{n["ord"]}'
         out.append(n)
     return out
+
+
+MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August",
+          "September", "October", "November", "December")
+
+
+def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:
+    """The study notes `where` selects, in the order of the book.
+
+    Each as reviewed (build/study.py): its number in the paper (num), its HTML,
+    the sources it cites, in full and in the order of its [1], [2] (sources),
+    and its credit.  Credit goes only where a note rests on someone's research
+    (Tigran, 2026-10-18): Block's chart for the paper, by its month and with
+    its address (block, block_url), or a contributor's line as written
+    (credit).  `key` is the note's in section.html, fn<key> and fnref<key>.  A
+    section, the List of study notes and the EPUB all show a note through this.
+    """
+    out = []
+    for f in con.execute(
+            "SELECT f.id, f.html, f.html_hy, f.paragraph_id, f.anchor, f.ord, s.num, s.key, s.credit,"
+            " s.human_source, p.ref AS para_ref, p.text AS para_text, p.paper_n, p.section_n,"
+            " p.para_n, pa.title AS paper_title, x.block_url, x.block_month"
+            " FROM study_note s JOIN footnote f ON f.id = s.footnote_id"
+            " JOIN paragraph p ON p.id = f.paragraph_id JOIN paper pa ON pa.n = p.paper_n"
+            " JOIN study_paper x ON x.paper_n = s.paper_n"
+            " WHERE (" + where + ") ORDER BY p.ord, f.anchor, f.ord", params):
+        n = dict(f)
+        n["sources"] = [h for (h,) in con.execute(
+            "SELECT x.html FROM study_cite c JOIN study_source x ON x.id = c.source_id"
+            " WHERE c.footnote_id = ? ORDER BY c.ord", (n["id"],))]
+        n["block"] = None
+        if n["credit"] == "block" and n["block_month"]:
+            y, m = n["block_month"].split("-")
+            n["block"] = f"{MONTHS[int(m) - 1]} {y}"
+            n["credit"] = None
+        out.append(n)
+    return out
+
+
+def bibliography(con: sqlite3.Connection) -> list[dict]:
+    """Every work the study notes on the site cite, once, in the order of its
+    key, the author's surname (Tigran, 2026-10-19): its entry as reviewed
+    (html) and the notes citing it (cited_by), in the order of the book, each
+    with its paragraph (para_ref), its number in its paper (num) and its key.
+    A key names one work in every paper (build/study.py one_work_one_key)."""
+    works: dict[str, dict] = {}
+    for key, html, ref, num, note in con.execute(
+            "SELECT x.key, x.html, p.ref, s.num, s.key FROM study_source x"
+            " JOIN study_cite c ON c.source_id = x.id"
+            " JOIN study_note s ON s.footnote_id = c.footnote_id"
+            " JOIN footnote f ON f.id = s.footnote_id JOIN paragraph p ON p.id = f.paragraph_id"
+            " ORDER BY p.ord, f.anchor, f.ord"):
+        w = works.setdefault(key, {"key": key, "html": html, "cited_by": []})
+        w["cited_by"].append({"para_ref": ref, "num": num, "key": note})
+    return sorted(works.values(), key=lambda w: w["key"].casefold())
 
 
 def concept(con: sqlite3.Connection, root_id: int) -> dict:

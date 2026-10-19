@@ -32,6 +32,9 @@ ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV"}
 INDEX_SPLIT = 110_000
 
 RE_FNREF = re.compile(r'<a class="fn" href="#(fn[0-9_]+)" id="(fnref[0-9_]+)"[^>]*></a>')
+# A study note's mark: its number, as text here, where the site draws it.
+RE_STREF = re.compile(r'<a class="fn" href="#(fnst[0-9_]+)" id="(fnrefst[0-9_]+)" data-k="st"'
+                      r' data-n="(\d+)"[^>]*></a>')
 # A link out of the book, in the SRT Committee's reasons: the book is read
 # offline, and every link in it lands inside it (check.py), so it is its words.
 RE_OUT = re.compile(r'<a href="https?://[^"]*">(.*?)</a>', re.S)
@@ -103,7 +106,7 @@ def _offline(links: H.Hrefs, html: str) -> str:
 
 def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
     secs = []
-    every = []   # the paper's 1955 readings, in reading order, for its end
+    every = []   # the paper's 1955 readings and study notes, in reading order, for its end
     for s in con.execute("SELECT * FROM section WHERE paper_n=? ORDER BY n", (p["n"],)):
         rows = queries.section(con, p["n"], s["n"])
         paras = []
@@ -118,16 +121,28 @@ def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
                       "see_verdict": f["see_verdict"],
                       "see_why": f["see_why"] and _offline(links, f["see_why"])}
                      for f in rows["notes"].get(q["id"], [])]
+            for d, f in zip(notes, rows["notes"].get(q["id"], [])):
+                d.update(kind="1955", anchor=f["anchor"], ord=f["ord"])
+            # The study notes as the site's cards show them (queries.study).
+            study = [{"kind": "st", "id": f"fn{n['key']}", "back": f"fnref{n['key']}",
+                      "num": n["num"], "html": _offline(links, n["html"]),
+                      "sources": [_offline(links, c) for c in n["sources"]],
+                      "block": n["block"], "paper": n["paper_n"], "credit": n["credit"],
+                      "anchor": n["anchor"], "ord": n["ord"]}
+                     for n in rows["study"].get(q["id"], [])]
             html, n = RE_FNREF.subn(
                 r'<a class="fn" epub:type="noteref" href="#\1" id="\2">*</a>', q["html"])
-            if n != len(notes) or q["html"].count('class="fn"') != n:
-                raise ValueError(f"{q['ref']}: {n} note markers for {len(notes)} notes")
+            html, m = RE_STREF.subn(
+                r'<a class="fn st" epub:type="noteref" href="#\1" id="\2">\3</a>', html)
+            if n != len(notes) or m != len(study) or q["html"].count('class="fn"') != n + m:
+                raise ValueError(f"{q['ref']}: {n + m} note markers for {len(notes) + len(study)} notes")
             paras.append({"id": H.para_id(q["paper_n"], q["section_n"], q["para_n"]),
                           "ref": q["ref"], "pc": bool(q["gap_before"]), "head": bool(q["heading"]),
                           "stars": q["sep_before"], "setoff": bool(q["setoff"]),
                           "html": html,
                           "chips": [_chip(links, c) for c in rows["citers"].get(q["id"], [])]})
-            every += notes
+            # In the order of their marks: at one place, the 1955 ring first.
+            every += sorted(notes + study, key=lambda x: (x["anchor"], x["kind"] == "st", x["ord"]))
         # Set as the site sets them (queries.section): a paragraph alone, or a
         # block of verse as one, the entries citing its lines after it.
         by_id = {q["id"]: d for q, d in zip(rows["paras"], paras)}
@@ -139,8 +154,11 @@ def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
                               else {"lines": [by_id[q["id"]] for q in r["lines"]]}
                               for r in rows["rows"]]})
     title = p["title"] if p["n"] == 0 else f"{p['n']}. {p['title']}"
+    # A document with math says so in the manifest, as EPUB 3 requires.
+    math = any("<math" in n.get("html", "") for n in every)
     return Doc(H.paper_file(p["n"]), title,
-               e.get_template("paper.xhtml").render(paper=p, sections=secs, notes=every))
+               e.get_template("paper.xhtml").render(paper=p, sections=secs, notes=every),
+               properties="mathml" if math else "")
 
 
 def part(e: jinja2.Environment, r) -> Doc:

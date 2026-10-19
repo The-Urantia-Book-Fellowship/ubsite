@@ -6,6 +6,11 @@
              font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: "UB Goudy"; src: url(/static/fonts/UBGoudy-Italic.woff2) format("woff2");
              font-weight: 400; font-style: italic; font-display: swap; }
+/* A study note's math (build/texmath.py, MathML): Garamond-Math, OFL, subset
+   by build/fonts.py to what the notes draw; fetched only by a page with math. */
+@font-face { font-family: "Garamond Math"; src: url(/static/fonts/GaramondMath.woff2) format("woff2");
+             font-display: swap; }
+math { font-family: "Garamond Math", math; }
 
 :root {
   --paper: oklch(0.972 0.008 85);
@@ -390,7 +395,17 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 :root[data-redletter="off"] .jesus { color: inherit; }
 :root[data-paranum="off"] .num { display: none; }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
-:root[data-notes="off"] :is(a.fn, .notes, .pop) { display: none; }
+:root[data-notes="off"] :is(a.fn:not([data-k="st"]), .notes:not(.st), .pop:not(.st)) { display: none; }
+:root[data-studynotes="off"] :is(a.fn[data-k="st"], .notes.st, .pop.st) { display: none; }
+/* A list is named only while what it lists is shown (home.html, lists.html):
+   with the 1955 readings off, the text has no rings, and the list sent a reader
+   to rings that were not there (Tigran, 2026-10-18).  Its own page answers an
+   address asked for, as the index's do. */
+:root[data-notes="off"] .n1955, :root[data-studynotes="off"] .nst,
+:root[data-notes="off"][data-studynotes="off"] .ways-lists { display: none; }
+.nolists { display: none; }
+:root[data-notes="off"] .nolists.one,
+:root[data-notes="off"][data-studynotes="off"] .nolists.both { display: block; }
 /* The index turned off, and the appendices with it (Tigran, 2026-10-18): the
    margin, the box of what a whole section or paper cites, the Index button,
    and whatever else is marked .ix, the header's link, the home page's lines,
@@ -555,6 +570,14 @@ a.fn::after { content: "\2060"; position: relative; font-size: 0;
               border: calc(var(--ring) * .065) solid currentColor; border-radius: 50%; }
 a.fn.on::after { background: currentColor; }
 @media (hover: hover) { a.fn:hover::after { background: currentColor; } }
+/* A study note's mark is its number, 1.. in the paper (build/study.py), small
+   and raised, drawn from data-n like the ring, so a copy never takes it, and
+   held to its word by the same word joiner.  None of the ring's circle; open,
+   or under the pointer, it is the link's colour reversed. */
+a.fn[data-k="st"]::after { content: "\2060" attr(data-n); font-size: .64em; top: -.58em;
+  padding: 0 .14em; margin-left: .02em; border: 0; border-radius: .3em; }
+a.fn[data-k="st"].on::after { background: var(--link); color: var(--paper); }
+@media (hover: hover) { a.fn[data-k="st"]:hover::after { background: var(--link); color: var(--paper); } }
 
 .a { font-size: 1rem; line-height: 1.45; color: var(--faint); }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
@@ -585,24 +608,36 @@ a.fn.on::after { background: currentColor; }
 :is(.note, .pop) .why { font-size: .95em; }
 :is(.note, .pop) .src { font-family: var(--sans); font-size: .78rem; color: var(--faint); }
 :is(.note, .pop) .src a { color: var(--faint); }
-/* The card: under the line, a pointer to the ring, scrolling with the text. */
-.pop { position: absolute; z-index: 5; width: min(25rem, calc(100% - 1rem));
+/* The card: under the line, a pointer to the ring, scrolling with the text.
+   Its × stands in a strip of its own above the words, which therefore take
+   the card's whole width and, scrolled, pass under the strip, never the ×
+   (Tigran, 2026-10-19: beside the first line, it set the whole of a long note
+   in by its width). */
+.pop { position: absolute; z-index: 5; width: min(25rem, calc(100% - 1rem)); padding-top: 1.65rem;
        font-size: 1.05rem; line-height: var(--lead); color: var(--text); font-variant-numeric: lining-nums;
        background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
        border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
 .pop:focus { outline: none; }
-.pop .body { padding: .85rem 1rem .8rem; max-height: min(55vh, 28rem); overflow-y: auto;
+.pop .body { padding: .1rem 1rem .8rem; max-height: min(55vh, 28rem); overflow-y: auto;
              overscroll-behavior: contain; }
-.pop .then { padding-right: 1.6rem; }
+/* A card and an endnote are read as the text is, so set as it is: justified,
+   breaking a word only where the book would, by the soft hyphens the build put
+   in (footnote.html_hy, srt_item.why_html_hy); ragged with the text (Tigran,
+   2026-10-18).  The source line is a caption, and stays ragged. */
+:is(.note, .pop) p:not(.src) { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
+      hyphenate-character: "-"; -webkit-hyphenate-character: "-"; -webkit-hyphenate-limit-lines: 1; }
+:root[data-align="ragged"] :is(.note, .pop) p { text-align: start; hyphens: none; -webkit-hyphens: none; }
+/* The sources a study note cites, in full, under it. */
+:is(.note, .pop) .cite { font-size: .88em; }
 .pop .at { display: none; }                     /* the card stands at its paragraph */
 .pop .lbl { pointer-events: none; }
 .pop .src { border-top: 1px solid var(--rule); padding-top: .45rem; margin-top: .7rem; }
 .pop .arrow { position: absolute; top: -7px; width: 12px; height: 12px; background: var(--card);
               border: solid color-mix(in oklch, var(--ink) 22%, transparent); border-width: 1px 0 0 1px;
               transform: rotate(45deg); }
-.pop .x { position: absolute; top: .35rem; right: .35rem; width: 1.9rem; height: 1.9rem; border: 0;
+.pop .x { position: absolute; top: .15rem; right: .3rem; width: 1.5rem; height: 1.5rem; border: 0;
           border-radius: 50%; background: transparent; color: var(--faint); cursor: pointer;
-          font: 1.2rem/1 var(--sans); }
+          font: 1.15rem/1 var(--sans); }
 @media (hover: hover) {
   .pop .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
 }
@@ -960,6 +995,21 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
 main.results { position: relative; }
 :root[data-notes="off"] .lists a.fn { display: inline; }
 :root[data-notes="off"] .lists .pop { display: block; }
+/* The List of study notes: each note under the words it stands after. */
+.stl .snote { margin: .25rem 0 .2rem 1.2rem; }
+.stl .snote p { margin: 0; }
+.stl .snote p + p { margin-top: .3rem; }
+.stl .cite { font-size: .9em; }
+.stl .src { font-family: var(--sans); font-size: .78rem; color: var(--faint); }
+.stl .src a { color: var(--faint); }
+.stl .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint); margin: 0 .2em; }
+.stl .today { color: var(--faint); }
+/* The Bibliography: each work set with a hanging indent, as a bibliography
+   sets it, and under it the notes that cite it. */
+.bib { list-style: none; padding: 0; }
+.bib li { padding: .45rem 0; border-bottom: 1px solid var(--rule); }
+.bib .work { margin: 0; padding-left: 1.5em; text-indent: -1.5em; }
+.bib .by { margin: .15rem 0 0 1.5em; font-size: .9em; color: var(--faint); }
 
 /* ---- appendices -------------------------------------------------------- */
 .listed { color: var(--faint); font-size: 1.02rem; margin: -.2rem 0 .3rem; }

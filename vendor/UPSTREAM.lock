@@ -48,6 +48,14 @@
     "commit": null
   },
   {
+    "repo": "texlive",
+    "path": "fonts/opentype/public/garamond-math/Garamond-Math.otf",
+    "dest": "fonts/Garamond-Math.otf",
+    "sha256": "c6161377e97084152b948f62abe874cbe27405938956346b54a4c6488a5009f1",
+    "bytes": 823988,
+    "commit": null
+  },
+  {
     "repo": "sqlite_wasm",
     "path": "jswasm/sqlite3.js",
     "dest": "sqlite-wasm/sqlite3.js",

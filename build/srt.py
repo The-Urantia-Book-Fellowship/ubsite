@@ -283,7 +283,7 @@ def _norm(t: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
-def load(con, src: dict, report, known: pathlib.Path) -> dict:
+def load(con, src: dict, report, known: pathlib.Path, hyphenator=None) -> dict:
     """Fill srt_item and footnote.srt_item_id.  Returns counts for the build's stats."""
     snapshot = src["path"].read_text(encoding="utf-8")
     try:
@@ -365,7 +365,10 @@ def load(con, src: dict, report, known: pathlib.Path) -> dict:
         code = VERDICTS[it.verdict][0] if it.verdict else None
         shown = VERDICTS[it.verdict][1] if it.verdict else None
         rows.append([i, it.name, it.n, it.label, pid, it.page, code, shown, then_t,
-                     render(then_t, then_s), review_t or None, why_t, render(why_t, why_s), it.see])
+                     render(then_t, then_s), review_t or None, why_t, render(why_t, why_s), it.see,
+                     # The reasons as a 1955 card sets them, justified, breaking
+                     # where the book would (hyphen.py), as the text does.
+                     render(why_t, why_s, shy=hyphenator.points(why_t, why_s) if hyphenator else ())])
         ids.setdefault(it.name, i)
         labels.setdefault(it.label, i)
     if bad:
@@ -393,8 +396,8 @@ def load(con, src: dict, report, known: pathlib.Path) -> dict:
         if not r[11] and r[13] is None and r[2] > 1:
             r[13] = ids[r[1]]
     # A row may refer to one further down the page: the references go in after.
-    con.executemany("INSERT INTO srt_item VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL)",
-                    [r[:13] for r in rows])
+    con.executemany("INSERT INTO srt_item VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?)",
+                    [r[:13] + [r[14]] for r in rows])
     con.executemany("UPDATE srt_item SET see_id=? WHERE id=?",
                     [(r[13], r[0]) for r in rows if r[13] is not None])
 

@@ -27,7 +27,7 @@ RE_SEC = re.compile(r"^/(\d+):(\d+)$")
 RE_PAPER = re.compile(r"^/(\d+)$")
 RE_SLUG = re.compile(r"^/i/([a-z0-9-]+)(?:#([a-z0-9-]+))?$")
 RE_APP = re.compile(r"^/appendix/([A-F])#([a-z0-9-]+)$")
-RE_NOTE = re.compile(r"^#fn\d+_\d+_\d+_\d+$")
+RE_NOTE = re.compile(r"^#fn(?:ref)?(?:st)?\d+_\d+_\d+_\d+$")
 
 
 def paper_file(n: int) -> str:

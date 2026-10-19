@@ -115,7 +115,7 @@ def main(argv: list[str]) -> int:
         if curated:
             print(f"study notes of {len(curated)} paper{'s' * (len(curated) > 1)},"
                   f" the edition at {at(repos['study'])} ...")
-        study_built = study.attach(papers, curated, repos["study"], block, report)
+        study_built = study.attach(papers, curated, repos["study"], block, report, hyphenator)
 
         con = db.create(tmp)
         print("loading ...")
@@ -130,7 +130,8 @@ def main(argv: list[str]) -> int:
         print("the SRT Committee's reasons ...")
         from . import srt
         srt_src = config.srt()
-        srt_stats = srt.load(con, srt_src, report, root / "tests" / "known-srt-deltas.tsv")
+        srt_stats = srt.load(con, srt_src, report, root / "tests" / "known-srt-deltas.tsv",
+                             hyphenator)
         if srt_stats:
             print(f"  {srt_stats['srt_items']} changes considered;"
                   f" {srt_stats['srt_notes']} of the 1955 notes have their reason")
@@ -224,6 +225,8 @@ def main(argv: list[str]) -> int:
                 ("variants_1955", "SELECT COUNT(*) FROM footnote"
                                   " WHERE kind='variant-1955'"),
                 ("study_notes", "SELECT COUNT(*) FROM footnote WHERE kind='study'"),
+                ("study_papers", "SELECT COUNT(*) FROM study_paper"),
+                ("study_sources", "SELECT COUNT(DISTINCT key) FROM study_source"),
                 ("srt_items", "SELECT COUNT(*) FROM srt_item"),
                 ("variants_1955_explained", "SELECT COUNT(*) FROM footnote"
                                             " WHERE srt_item_id IS NOT NULL"),

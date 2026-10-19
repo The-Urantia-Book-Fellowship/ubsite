@@ -23,6 +23,7 @@ CREATE TABLE srt_item (
   why_text TEXT NOT NULL,         -- the reasons; empty when the decision is all there is
   why_html TEXT NOT NULL,         -- derived cache, links rewritten to our paragraphs
   see_id INTEGER REFERENCES srt_item(id),   -- the note it refers to: "See SRT note for 89:3.1"
+  why_html_hy TEXT NOT NULL,      -- why_html with the book's soft hyphens, for a 1955 card
   UNIQUE (name, n)
 );
 CREATE INDEX srt_item_para ON srt_item(paragraph_id);
