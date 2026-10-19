@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% from "_note.html" import sfoot %}{% block title %}List of study notes{% endblock %}
+{% extends "base.html" %}{% from "_note.html" import sfoot %}{% from "_papers.html" import papers_nav %}{% block title %}List of study notes{% endblock %}
 {#- Every study note on the site (app.py list_notes): by paper, in the order of
     the book, the words each stands after and the note as its card shows it. #}
 {% block body %}<main class="prose results lists">
@@ -7,8 +7,9 @@
 {{ n }} in all, each read, checked and edited before it is shown, one paper at a time: in
 the order of the book, the words each stands after, then the note. A reference opens its
 paragraph, with the note.</p>
+{{ papers_nav(groups) }}
 {% for g in groups %}
-<section><h2><a href="/{{ g.n }}:0">{% if g.n %}Paper {{ g.n }}. {% endif %}{{ g.title }}</a> <span>({{ g.rows|length }})</span></h2>
+<section id="paper{{ g.n }}"><h2><a href="/{{ g.n }}:0">{% if g.n %}Paper {{ g.n }}. {% endif %}{{ g.title }}</a> <span>({{ g.rows|length }})</span></h2>
 <ul class="hits stl">{% for s in g.rows %}
 <li><a href="/{{ s.para_ref }}#note{{ s.key }}">{{ s.para_ref }}</a> <span class="lbl">Note {{ s.num }}</span>
   <span class="today">{{ s.before }}</span>

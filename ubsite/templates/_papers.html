@@ -1,0 +1,10 @@
+{#- The papers a list gives, each a link to its section there, #paperN, and
+    kept to one line (Tigran, 2026-10-19): "Go to a paper", which opens onto
+    their numbers, each with its title and count in its tooltip.  The List of
+    1955 readings has 105; the List of study notes grows a paper at a time.
+    groups: [{n, title, rows}], as app.py's lists make them. #}
+{% macro papers_nav(groups) %}
+<details class="papers"><summary>Go to a paper <span class="n">({{ groups|length }})</span></summary>
+<nav aria-label="Papers">{% for g in groups %}
+  <a href="#paper{{ g.n }}" title="{% if g.n %}Paper {{ g.n }}. {% endif %}{{ g.title }} ({{ g.rows|length }})">{{ g.n if g.n else 'Foreword' }}</a>{% endfor %}
+</nav></details>{% endmacro %}

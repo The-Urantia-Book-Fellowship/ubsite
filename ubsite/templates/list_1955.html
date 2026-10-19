@@ -1,12 +1,13 @@
-{% extends "base.html" %}{% from "_old.html" import old_hit, notes_after %}{% block title %}List of 1955 readings{% endblock %}
+{% extends "base.html" %}{% from "_old.html" import old_hit, notes_after %}{% from "_papers.html" import papers_nav %}{% block title %}List of 1955 readings{% endblock %}
 {% block body %}<main class="prose results lists">
 <h1>List of 1955 readings</h1>
 <p class="hint">Every place where the text departs from the first printing of 1955,
 {{ n }} in all, in the order of the book: the 1955 reading as the press gives it,
 today’s words around the ring, and the SRT Committee’s decision where it gives one.
 A ring opens its note, with the committee’s reasons; a reference opens its paragraph.</p>
+{{ papers_nav(groups) }}
 {% for g in groups %}
-<section><h2><a href="/{{ g.n }}:0">{% if g.n %}Paper {{ g.n }}. {% endif %}{{ g.title }}</a> <span>({{ g.rows|length }})</span></h2>
+<section id="paper{{ g.n }}"><h2><a href="/{{ g.n }}:0">{% if g.n %}Paper {{ g.n }}. {% endif %}{{ g.title }}</a> <span>({{ g.rows|length }})</span></h2>
 <ul class="hits old">{% for o in g.rows %}{{ old_hit(o) }}{% endfor %}</ul></section>
 {% endfor %}
 {{ notes_after(groups|map(attribute='rows')|sum(start=[])) }}

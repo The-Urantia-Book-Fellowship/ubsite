@@ -1054,6 +1054,23 @@ main.results { position: relative; }
 .appendix { max-width: 80ch; }
 .jump { display: flex; flex-wrap: wrap; gap: .2rem .7rem; margin: 0 0 1.2rem; }
 .jump a { text-decoration: none; }
+/* A list's papers (_papers.html): one folded line that opens onto their
+   numbers, at the size of the papers' headings below it, not the text's. */
+.papers { margin: 0 0 1.2rem; font-size: 1.05rem; line-height: 1.6; }
+.papers a { text-decoration: none; }
+.papers a:hover { text-decoration: underline; }
+.papers .n { color: var(--faint); }
+details.papers summary { cursor: pointer; color: var(--link); width: fit-content; list-style: none; }
+details.papers summary::-webkit-details-marker { display: none; }
+/* The rail's chevron: right, and down when open. */
+details.papers summary::before { content: ""; display: inline-block; width: .34em; height: .34em;
+  margin: 0 .5em .1em .1em; border: solid var(--faint); border-width: 0 1.5px 1.5px 0;
+  transform: rotate(-45deg); transition: transform .12s; }
+details.papers[open] summary::before { transform: rotate(45deg); }
+details.papers summary:hover::before { border-color: var(--ink); }
+details.papers nav { display: flex; flex-wrap: wrap; gap: 0 .15rem; margin-top: .3rem; }
+details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: center; }
+.lists section[id] { scroll-margin-top: 1rem; }
 /* B-F: short lines, two columns where there is room for them, as printed. */
 .applist { list-style: none; padding: 0; columns: 2 24rem; column-gap: 2.5rem; }
 .applist li { break-inside: avoid; padding: .1rem 0 .1rem 1.2em; text-indent: -1.2em; }
