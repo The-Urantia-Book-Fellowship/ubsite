@@ -32,11 +32,12 @@ CREATE TABLE study_note (
     paper_n      INTEGER NOT NULL REFERENCES study_paper(paper_n),
     num          INTEGER NOT NULL,     -- the marker's number: 1.. in the paper, in reading order
     key          TEXT NOT NULL UNIQUE, -- st<paper>_<section>_<para>_<k>: #fn<key>, #fnref<key>
-    origin       TEXT NOT NULL,        -- the \fnst it was made from
+    origin       TEXT,                 -- the \fnst it was made from; NULL: added in review
     after        TEXT NOT NULL,        -- the words of the press text the marker follows
     edited       INTEGER NOT NULL,     -- 1 where the note differs from the edition's
     human_source INTEGER NOT NULL,     -- 1 where it cites a source or rests on Block's chart
     credit       TEXT,                 -- 'block', or a contributor's name
+    corrects     TEXT,                 -- HTML: what the note gives for Block's chart, from the original
     UNIQUE (paper_n, num)
 );
 

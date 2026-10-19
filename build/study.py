@@ -15,6 +15,10 @@ a machine can:
     reviewed again, and so does a note added.  A source the edition lacks may
     be added, `origin = "none"`, where the review finds the work a note quotes:
     Ellen G. White's, which Paper 1's notes quote and the edition does not list.
+    So may a note, where what the review found is not the editor's to sign:
+    at 2:1.1 the note on "touching" is Tigran's, and Block's finding that the
+    paragraph's verses are Nave's a note of its own, credited to Block
+    (Tigran, 2026-10-19).
   * The copy names the chart of Matthew Block's it was checked against, the
     address `../block-sources/MANIFEST.tsv` gives the paper's chart, or "none".
     A chart revised since, or a chart where there was none, fails the build:
@@ -25,6 +29,9 @@ a machine can:
     build reads no PDF, so it holds the date only to be no later than that
     month, which all 139 dated charts were (2026-10-19); tests/test_study.py
     holds it to the chart itself.
+  * A note credited to Block that corrects his chart from the original says
+    what it gives for his, `corrects`, and the card's credit says so (Tigran,
+    2026-10-19): at 2:7.6, p. 788 for his 610.  Only such a note may.
   * A note stands in the press text after the words its `after` gives, which
     occur once in the paragraph and end a word.  The study text is British
     and metricated (23:3.2 "299,789 kilometres" for "186,280 miles"), so an
@@ -73,9 +80,9 @@ TIED_MAX = 24
 
 KEYS = {"paper", "chart", "chart_date", "study", "reviewed", "source", "note", "dropped"}
 SOURCE_KEYS = {"key", "origin", "tex"}
-NOTE_KEYS = {"at", "after", "origin", "tex", "credit"}
+NOTE_KEYS = {"at", "after", "origin", "tex", "credit", "corrects"}
 DROPPED_KEYS = {"at", "key", "origin", "why"}
-ADDED = "none"                       # a source's origin when the review added it
+ADDED = "none"                       # the origin of a note or source the review added
 
 
 @dataclasses.dataclass
@@ -124,7 +131,7 @@ def load_curated(report, root: pathlib.Path = DATA) -> dict[int, Curated]:
             continue
         missing = ({k for k in ("paper", "chart") if k not in doc}
                    | {f"source.{k}" for s in doc.get("source", []) for k in SOURCE_KEYS - set(s)}
-                   | {f"note.{k}" for s in doc.get("note", []) for k in NOTE_KEYS - {"credit"} - set(s)}
+                   | {f"note.{k}" for s in doc.get("note", []) for k in NOTE_KEYS - {"credit", "corrects"} - set(s)}
                    | {f"dropped.{k}" for s in doc.get("dropped", []) for k in ("origin", "why")
                       if k not in s}
                    | {"dropped.at or dropped.key" for s in doc.get("dropped", [])
@@ -206,7 +213,7 @@ def _account(cur: Curated, orig, where: str, report) -> None:
     have_s = collections.Counter(x.origin for x in orig.sources)
     ref_of = {x.origin: x.ref for x in orig.notes}
     key_of = {x.origin: x.key for x in orig.sources}
-    got_n = collections.Counter([x["origin"] for x in cur.notes]
+    got_n = collections.Counter([x["origin"] for x in cur.notes if x["origin"] != ADDED]
                                 + [x["origin"] for x in cur.dropped if "at" in x])
     got_s = collections.Counter([x["origin"] for x in cur.sources if x["origin"] != ADDED]
                                 + [x["origin"] for x in cur.dropped if "key" in x])
@@ -305,6 +312,13 @@ def _notes(cur: Curated, paras, order, sources, orig, where, report,
         credit = nt.get("credit")
         if credit == "block" and cur.chart == "none":
             report.hard("study-credit", at, "credited to Block's chart, and the paper has none")
+        corrects = None
+        if "corrects" in nt:
+            if credit != "block":
+                report.hard("study-corrects", at, "corrects Block's chart, and is not credited to it")
+            ctext, corrects, ccites = expand(nt["corrects"], paras, sources, at, report)
+            if ccites or not ctext.strip():
+                report.hard("study-corrects", at, "`corrects` says what it gives for Block's, citing nothing")
         k = per_para[q.ref]
         per_para[q.ref] += 1
         num = len(out) + 1
@@ -313,9 +327,11 @@ def _notes(cur: Curated, paras, order, sources, orig, where, report,
         q.ex.notes.append(Note(a, "study", nt["tex"], text, [], html, html_hy))
         q.ex.spans.append(Span(a, a, "fnref", {"kind": "study", "key": key, "n": num, "hs": hs}))
         out.append({"paper_n": cur.paper, "ref": q.ref, "ord": len(q.ex.notes) - 1,
-                    "num": num, "key": key, "origin": nt["origin"], "after": nt["after"],
+                    "num": num, "key": key, "after": nt["after"],
+                    "origin": None if nt["origin"] == ADDED else nt["origin"],
                     "edited": int(nt["tex"].strip() != body_of.get(nt["origin"], "").strip()),
-                    "human_source": int(hs), "credit": credit, "cites": cites})
+                    "human_source": int(hs), "credit": credit, "corrects": corrects,
+                    "cites": cites})
     for s in sources.values():
         if not s["cited"]:
             report.hard("study-source-uncited", where,
@@ -446,9 +462,9 @@ def store(con, built: Built) -> None:
         (fid,) = con.execute(
             "SELECT f.id FROM footnote f JOIN paragraph p ON p.id = f.paragraph_id"
             " WHERE p.ref = ? AND f.ord = ? AND f.kind = 'study'", (nt["ref"], nt["ord"])).fetchone()
-        con.execute("INSERT INTO study_note VALUES (?,?,?,?,?,?,?,?,?)",
+        con.execute("INSERT INTO study_note VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (fid, nt["paper_n"], nt["num"], nt["key"], nt["origin"], nt["after"],
-                     nt["edited"], nt["human_source"], nt["credit"]))
+                     nt["edited"], nt["human_source"], nt["credit"], nt["corrects"]))
         con.executemany("INSERT INTO study_cite VALUES (?,?,?)",
                         [(fid, source_id[(nt["paper_n"], k)], j)
                          for j, k in enumerate(nt["cites"]) if (nt["paper_n"], k) in source_id])

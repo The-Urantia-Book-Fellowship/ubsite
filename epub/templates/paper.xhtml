@@ -25,7 +25,8 @@
 <aside epub:type="footnote" class="note st" id="{{ n.id }}"><p><a class="lbl" href="#{{ n.back }}">Note {{ n.num }}</a> {{ n.html|safe }}</p>
 {% for c in n.sources %}<p class="cite">[{{ loop.index }}] {{ c|safe }}</p>
 {% endfor %}
-{% if n.block %}<p class="src">Identified by Matthew Block, parallel chart, Paper {{ n.paper }}, {{ n.block }}, urantiabooksources.com</p>
+{% if n.block %}<p class="src">Identified by Matthew Block, parallel chart, Paper {{ n.paper }}, {{ n.block }}, urantiabooksources.com
+{%- if n.corrects %}; corrected here from the original: {{ n.corrects|safe }}{% endif %}</p>
 {% endif %}
 {% if n.credit %}<p class="src">{{ n.credit }}</p>
 {% endif %}

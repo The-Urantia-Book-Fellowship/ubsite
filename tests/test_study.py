@@ -97,9 +97,10 @@ class Study(unittest.TestCase):
         out = ["paper = 0", f'chart = "{chart}"'] + ([f"chart_date = {dated}"] if dated else []) + [""]
         for key, origin, tex in sources:
             out += ["[[source]]", f'key = "{key}"', f'origin = "{origin}"', f"tex = '''{tex}'''", ""]
-        for at, after, origin, tex, credit in notes:
+        for at, after, origin, tex, credit, *corrects in notes:
             out += ["[[note]]", f'at = "{at}"', f'after = "{after}"', f'origin = "{origin}"',
-                    f"tex = '''{tex}'''"] + ([f'credit = "{credit}"'] if credit else []) + [""]
+                    f"tex = '''{tex}'''"] + ([f'credit = "{credit}"'] if credit else []) \
+                + [f"corrects = '''{c}'''" for c in corrects] + [""]
         for kind, what, origin, why in dropped:
             out += ["[[dropped]]", f'{kind} = "{what}"', f'origin = "{origin}"', f'why = "{why}"', ""]
         (self.data / "000.toml").write_text("\n".join(out), encoding="utf-8")
@@ -193,6 +194,39 @@ class Study(unittest.TestCase):
             with self.subTest(code=code):
                 self.toml(**kw)
                 self.assertIn(code, codes(self.attach()[2]))
+
+    def test_a_note_the_review_adds(self):
+        """A note the edition lacks, origin "none", as at 2:1.1, where Block's
+        finding is a note of its own beside the editor's: counted against no
+        \\fnst, stored without an origin, placed and numbered as any other."""
+        o = self.orig
+        notes = [("0:0.1", "mortals of Urantia", o.notes[0].origin, r"See \cite{Hart}.", None),
+                 ("0:0.1", "great confusion", "none", "Block's finding.", "block")]
+        self.toml(notes=notes)
+        _, built, report = self.attach()
+        self.assertEqual(report.problems, [])
+        self.assertEqual([(n["num"], n["origin"], n["credit"]) for n in built.notes],
+                         [(1, o.notes[0].origin, None), (2, None, "block")])
+        self.toml(notes=notes[1:], sources=[])
+        self.assertIn("study-unaccounted", codes(self.attach()[2]))
+
+    def test_a_note_that_corrects_blocks_chart(self):
+        """A note credited to Block that corrects his chart from the original
+        says what it gives for his, set as a note is, and only such a note may
+        (Tigran, 2026-10-19)."""
+        o = self.orig
+        note = ("0:0.1", "mortals of Urantia", o.notes[0].origin, r"See \cite{Hart}, p.~8.", "block",
+                r"p.~8 for his 9, ``seven'' for ``six''")
+        self.toml(notes=[note])
+        _, built, report = self.attach()
+        self.assertEqual(report.problems, [])
+        self.assertEqual(built.notes[0]["corrects"], "p.\u00a08 for his 9, “seven” for “six”")
+        self.toml(notes=[note[:4] + (None,) + note[5:]])
+        self.assertIn("study-corrects", codes(self.attach()[2]))
+        self.toml(notes=[note[:5] + (r"\cite{Hart}",)])
+        self.assertIn("study-corrects", codes(self.attach()[2]))
+        self.toml(notes=[note[:5] + ("",)])
+        self.assertIn("study-corrects", codes(self.attach()[2]))
 
     def test_a_source_the_review_adds(self):
         """A work a note quotes and the edition does not list is carried with

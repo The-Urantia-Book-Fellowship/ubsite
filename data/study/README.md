@@ -37,6 +37,10 @@ Every such change is proposed in the review and ruled on by Tigran, note by note
 
 **A work a note quotes is a source, cited in full, even where the edition does not list it and Block only compares it** (Tigran, 2026-10-19, of Ellen G. White in Paper 1: "Block says 'compare', but I say it is an obvious source"). It is added as a `[[source]]` with `origin = "none"`, checked in the original, page and words, and the original is kept in `../block-sources/originals/`, whose `MANIFEST.tsv` gives the official address it was downloaded from. The note then cites it as any other, `White~\cite{White1892}, p.~225`, without "Compare".
 
+**What the editor wrote and what Block found are separate notes** (Tigran, 2026-10-19). Where the review finds something on Block's chart that no note of the edition says, it is added as a note of its own, `origin = "none"`, with Block's credit, never joined to the editor's note at the same place, which keeps none: at 2:1.1 the editor's note on "touching" stands at the paragraph's first words, and Block's finding that its verses are Nave's at its end. An added note is numbered and placed as any other; the review numbers it after the note before it (F1a).
+
+**A note that corrects Block's chart says so in its credit line** (Tigran, 2026-10-19). Block is corrected only from the original, never from the edition or another chart, and the note then gives the original's page, words or date, with `corrects` saying what it gives for his: `corrects = '''p.~788 for his 610 (10 in his list of sources), ``View'' for ``Review'' in the article's title, and September~19 for September~17, 1899'''` (2:7.6). The card reads "Identified by Matthew Block · parallel chart, Paper 2, July 1, 2026 · corrected here from the original: p. 788 for his 610 …". Only a note credited to Block may say it, and it cites nothing. A slip of his that no note repeats, a chapter's title on his chart, say, is recorded in the review and nowhere else. Where the edition's note differs from Block and Block is right, the note is corrected and his credit says nothing more.
+
 ## How a paper is reviewed
 
 1. `make data`, then `.venv/bin/python tools/study/draft.py N`. It writes `var/study/NNN.toml`, every note and source of the paper as the edition has them, each with its `origin` and, for a note, a proposed `after`; and beside each note, in comments, the press paragraph, the press's 1955 readings there, and what Block's chart sets beside it; and at its head, the reviewed notes of other papers that link into this one. `var/study/NNN.md` is the same, to read.
@@ -60,7 +64,7 @@ tex = '''Charles Hartshorne, \emph{Man's Vision of God and the Logic of Theism} 
 [[note]]
 at = "0:1.19"                       # the paragraph
 after = "seven conceivable types"   # the press words the marker follows: once in the paragraph, whole words
-origin = "9c2e…"                    # the \fnst it was made from
+origin = "9c2e…"                    # the \fnst it was made from; "none" for a note the review adds
 credit = "block"                    # the note rests on Block's chart; or a contributor's name; or none
 tex = '''…'''
 

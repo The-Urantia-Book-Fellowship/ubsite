@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Where a study note corrects Matthew Block's chart from the original, its credit line says so, with what it gives for his: a page, a title, a date.
 - The List of study notes and the List of 1955 readings begin with "Go to a paper", which opens onto the numbers of the papers they list, to go straight to one.
 - The Foreword and Paper 1 have study notes from The British Study Edition, edited by Tigran Aivazian, 45 in all, the first of the papers to have them, shown once Notes is turned on in Settings: each is a small number in the text that opens the note, the List of study notes gathers them, and the Bibliography lists the works they cite.
 - Settings can turn off the index and the appendices, leaving the text alone, with its 1955 readings while those are on.
@@ -27,6 +28,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- `study_note` has a new column, `corrects`, the HTML of what a note corrects in Block's chart from the original, and its `origin` may now be NULL, for a note the review adds, as `study_source`'s may for a source.
 - The nginx server blocks (`deploy/*.nginx`) now compress what is under `/static/`: the stylesheet, the scripts, SVG and the fonts served as TTF or OTF, as the SBL fonts must be (SBL Greek goes from 1.1 MB to 0.4 MB). Until now only HTML was compressed, `nginx.conf` naming no `gzip_types`. `deploy.sh` does not install a server block: on each host, install it again by hand, as root, as in `deploy/README.md` step 3, then `nginx -t` and reload nginx. Without it the site works as before, sending these uncompressed.
 - A study note's Greek and Hebrew are set in SBL Greek and SBL Hebrew, vendored by address and digest (`sources.toml`) and served as published: their licence, unlike the site's other fonts', is not OFL, and allows them to be embedded only in non-commercial web pages and e-books, and redistributed only unmodified, so they are never subset (`build/fonts.py`).
 - `var/ub.db` has four new tables, `study_paper`, `study_note`, `study_source` and `study_cite`, for the British Study Edition's notes, which reach the site one paper at a time, each reviewed in `data/study/`, the Foreword first. The build now reads the study edition at HEAD, and `../block-sources/MANIFEST.tsv`, the list of Matthew Block's charts of the human sources (`build/study.py`). `deploy.sh` refuses an uncommitted `data/study/`.

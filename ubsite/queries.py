@@ -165,13 +165,14 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     and its credit.  Credit goes only where a note rests on someone's research
     (Tigran, 2026-10-18): Block's chart for the paper, by its own date (Tigran,
     2026-10-19: the address's month is when it was uploaded) and with
-    its address (block, block_url), or a contributor's line as written
-    (credit).  `key` is the note's in section.html, fn<key> and fnref<key>.  A
-    section, the List of study notes and the EPUB all show a note through this.
+    its address (block, block_url), and what the note corrects in it from the
+    original (corrects, HTML), or a contributor's line as written (credit).
+    `key` is the note's in section.html, fn<key> and fnref<key>.  A section,
+    the List of study notes and the EPUB all show a note through this.
     """
     out = []
     for f in con.execute(
-            "SELECT f.id, f.html, f.html_hy, f.paragraph_id, f.anchor, f.ord, s.num, s.key, s.credit,"
+            "SELECT f.id, f.html, f.html_hy, f.paragraph_id, f.anchor, f.ord, s.num, s.key, s.credit, s.corrects,"
             " s.human_source, p.ref AS para_ref, p.text AS para_text, p.paper_n, p.section_n,"
             " p.para_n, pa.title AS paper_title, x.block_url, x.block_date"
             " FROM study_note s JOIN footnote f ON f.id = s.footnote_id"

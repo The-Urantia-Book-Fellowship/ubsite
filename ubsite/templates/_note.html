@@ -13,7 +13,8 @@
 
 {#- A study note (queries.study): its number in the paper, the note as
     reviewed, the sources it cites in full, and a credit only where it rests on
-    someone's research (Tigran, 2026-10-18): Block's chart, by its date, or a
+    someone's research (Tigran, 2026-10-18): Block's chart, by its date, with
+    what the note corrects in it from the original (Tigran, 2026-10-19), or a
     contributor's line.  Opened as a card at its number, as a 1955 reading is
     at its ring; endnotes without JavaScript and in print. #}
 {% macro snote(n) %}<aside class="note st" id="fn{{ n.key }}">
@@ -23,5 +24,6 @@
 {#- What stands under a study note: the sources it cites, and its credit.  The
     card and the List of study notes alike. #}
 {% macro sfoot(n) %}{% for c in n.sources %}<p class="cite">[{{ loop.index }}] {{ c|safe }}</p>{% endfor %}
-        {% if n.block %}<p class="src">Identified by Matthew Block · <a href="{{ n.block_url }}" target="_blank" rel="noopener">parallel chart, Paper {{ n.paper_n }}, {{ n.block }} ↗</a></p>{% endif %}
+        {% if n.block %}<p class="src">Identified by Matthew Block · <a href="{{ n.block_url }}" target="_blank" rel="noopener">parallel chart, Paper {{ n.paper_n }}, {{ n.block }} ↗</a>
+          {%- if n.corrects %} · corrected here from the original: {{ n.corrects|safe }}{% endif %}</p>{% endif %}
         {% if n.credit %}<p class="src">{{ n.credit }}</p>{% endif %}{% endmacro %}

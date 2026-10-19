@@ -127,7 +127,8 @@ def paper(con, links: H.Hrefs, e: jinja2.Environment, p) -> Doc:
             study = [{"kind": "st", "id": f"fn{n['key']}", "back": f"fnref{n['key']}",
                       "num": n["num"], "html": _offline(links, n["html"]),
                       "sources": [_offline(links, c) for c in n["sources"]],
-                      "block": n["block"], "paper": n["paper_n"], "credit": n["credit"],
+                      "block": n["block"], "corrects": n["corrects"], "paper": n["paper_n"],
+                      "credit": n["credit"],
                       "anchor": n["anchor"], "ord": n["ord"]}
                      for n in rows["study"].get(q["id"], [])]
             html, n = RE_FNREF.subn(
