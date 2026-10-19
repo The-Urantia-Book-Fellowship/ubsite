@@ -126,11 +126,11 @@ class Bibliography(unittest.TestCase):
 
 
 class Setting(unittest.TestCase):
-    def test_on_by_default_and_not_first(self):
+    def test_off_by_default_and_not_first(self):
         keys = [s[0] for s in settings.SHOW]
         self.assertEqual(keys[0], "index")
         self.assertIn("studynotes", keys)
-        self.assertIs(settings.defaults()["studynotes"], True)
+        self.assertIs(settings.defaults()["studynotes"], False)
 
     def test_in_the_dialog(self):
         page = get("/")[2]
@@ -158,13 +158,13 @@ class Setting(unittest.TestCase):
 
     def test_a_list_goes_with_its_switch(self):
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
-        self.assertIn(':root[data-notes="off"] .n1955, :root[data-studynotes="off"] .nst,', css)
+        self.assertIn(':root[data-notes="off"] .n1955, :root:not([data-studynotes="true"]) .nst,', css)
 
     def test_the_1955_switch_leaves_study_notes_alone(self):
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
         self.assertIn(':root[data-notes="off"] :is(a.fn:not([data-k="st"]), .notes:not(.st),'
                       ' .pop:not(.st))', css)
-        self.assertIn(':root[data-studynotes="off"] :is(a.fn[data-k="st"], .notes.st, .pop.st)', css)
+        self.assertIn(':root:not([data-studynotes="true"]) :is(a.fn[data-k="st"], .notes.st, .pop.st)', css)
 
 
 if __name__ == "__main__":

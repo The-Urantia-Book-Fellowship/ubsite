@@ -406,16 +406,18 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
 :root[data-paranum="off"] .num { display: none; }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
 :root[data-notes="off"] :is(a.fn:not([data-k="st"]), .notes:not(.st), .pop:not(.st)) { display: none; }
-:root[data-studynotes="off"] :is(a.fn[data-k="st"], .notes.st, .pop.st) { display: none; }
+/* The study notes are off unless a reader asks (Tigran, 2026-10-19), so
+   their switch is marked on <html> when it is on. */
+:root:not([data-studynotes="true"]) :is(a.fn[data-k="st"], .notes.st, .pop.st) { display: none; }
 /* A list is named only while what it lists is shown (home.html, lists.html):
    with the 1955 readings off, the text has no rings, and the list sent a reader
    to rings that were not there (Tigran, 2026-10-18).  Its own page answers an
    address asked for, as the index's do. */
-:root[data-notes="off"] .n1955, :root[data-studynotes="off"] .nst,
-:root[data-notes="off"][data-studynotes="off"] .ways-lists { display: none; }
+:root[data-notes="off"] .n1955, :root:not([data-studynotes="true"]) .nst,
+:root[data-notes="off"]:not([data-studynotes="true"]) .ways-lists { display: none; }
 .nolists { display: none; }
 :root[data-notes="off"] .nolists.one,
-:root[data-notes="off"][data-studynotes="off"] .nolists.both { display: block; }
+:root[data-notes="off"]:not([data-studynotes="true"]) .nolists.both { display: block; }
 /* The index turned off, and the appendices with it (Tigran, 2026-10-18): the
    margin, the box of what a whole section or paper cites, the Index button,
    and whatever else is marked .ix, the header's link, the home page's lines,

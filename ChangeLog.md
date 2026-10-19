@@ -10,7 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
-- The Foreword and Paper 1 have study notes from The British Study Edition, edited by Tigran Aivazian, 45 in all, the first of the papers to have them: each is a small number in the text that opens the note, the List of study notes gathers them, the Bibliography lists the works they cite, and Settings can turn them off.
+- The Foreword and Paper 1 have study notes from The British Study Edition, edited by Tigran Aivazian, 45 in all, the first of the papers to have them, shown once Notes is turned on in Settings: each is a small number in the text that opens the note, the List of study notes gathers them, and the Bibliography lists the works they cite.
 - Settings can turn off the index and the appendices, leaving the text alone, with its 1955 readings while those are on.
 - A Changelog link at the foot of every page opens this changelog, each change with the day it was made; What's new links to it too.
 

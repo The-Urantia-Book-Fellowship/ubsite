@@ -89,10 +89,11 @@ SHOW = [
     ("pilcrow", "switch", "Pilcrows", True, [], "where the 1955 text leaves a blank line"),
     # The British Study Edition's notes, each read, checked and edited before it
     # is shown (build/study.py, data/study/), numbered in each paper and opened
-    # at their number as a 1955 reading is at its ring.  On by default
-    # (Tigran, 2026-10-18), which a site may change (SITE_DEFAULTS).  Named
-    # with the edition and its editor, in the hint (Tigran, the same day).
-    ("studynotes", "switch", "Notes", True, [],
+    # at their number as a 1955 reading is at its ring.  Off unless a reader
+    # asks (Tigran, 2026-10-19; on from 2026-10-18), which a site may change
+    # (SITE_DEFAULTS).  Named with the edition and its editor, in the hint
+    # (Tigran, 2026-10-18).
+    ("studynotes", "switch", "Notes", False, [],
      "from The British Study Edition (ed. Tigran Aivazian)"),
     ("notes", "switch", "1955 readings", True, [], ""),
     # What the 1955 cards say, listed among the search results: the reading,
@@ -142,7 +143,7 @@ KEPT = [
 
 
 # A site's own defaults, by the host a page is read at, where they differ from
-# those above: {"read.urantiabook.org": {"studynotes": False}}.  The Fellowship
+# those above: {"read.urantiabook.org": {"pages": True}}.  The Fellowship
 # decides what its readers see on its site, and a reader can still change it
 # (Tigran, 2026-10-17 and 18).  Chosen in the page, by base.html's head script
 # from location.hostname, as the tab's icon is, since the offline copy is one
