@@ -629,9 +629,15 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
    Its × stands in a strip of its own above the words, which therefore take
    the card's whole width and, scrolled, pass under the strip, never the ×
    (Tigran, 2026-10-19: beside the first line, it set the whole of a long note
-   in by its width). */
-.pop { position: absolute; z-index: 5; width: min(25rem, calc(100% - 1rem)); padding-top: 1.65rem;
-       font-size: 1.05rem; line-height: var(--lead); color: var(--text); font-variant-numeric: lining-nums;
+   in by its width).  Its words keep the proportion to the text's that they
+   have on a tablet, .77, and never go below 1.05rem, which is what they were
+   everywhere: the text grows with the window (--size), and at 1.05rem a card
+   was .81 of it on a phone but .68 on a desktop, too small there (Tigran,
+   2026-10-19, on phone and tablet "perfect").  Its width is in its own ems,
+   so a line holds as many words at every size. */
+.pop { position: absolute; z-index: 5; width: min(23.8em, calc(100% - 1rem)); padding-top: 1.65rem;
+       font-size: max(1.05rem, calc(var(--size) * .77)); line-height: var(--lead); color: var(--text);
+       font-variant-numeric: lining-nums;
        background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
        border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
 .pop:focus { outline: none; }
@@ -648,7 +654,11 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 :is(.note, .pop) .cite { font-size: .88em; }
 .pop .at { display: none; }                     /* the card stands at its paragraph */
 .pop .lbl { pointer-events: none; }
-.pop .src { border-top: 1px solid var(--rule); padding-top: .45rem; margin-top: .7rem; }
+/* A note's first paragraph is a .lead, which the prose pages set at 1.05rem
+   (below): in a card it takes the card's size, as its other paragraphs do. */
+.pop .lead { font-size: inherit; }
+.pop .src { border-top: 1px solid var(--rule); padding-top: .45rem; margin-top: .7rem;
+            font-size: .74em; }                 /* .78rem at the card's 1.05rem, and grows with it */
 .pop .arrow { position: absolute; top: -7px; width: 12px; height: 12px; background: var(--card);
               border: solid color-mix(in oklch, var(--ink) 22%, transparent); border-width: 1px 0 0 1px;
               transform: rotate(45deg); }
