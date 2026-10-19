@@ -14,10 +14,14 @@ chart_date = 2023-03-14          # as Block dates it on its first page
 # degrees as is custom for bibliographies"), and under the keys every later
 # paper is to use for them (one key, one work: build/study.py one_work_one_key).
 
+# Knudson's publisher as the 1930 title page names it, "The Abingdon Press,
+# New York, Cincinnati, Chicago" (Tigran's DjVu, ../block-sources/originals/
+# LIBRARY.tsv), where Block's list and the edition have "Abingdon-Cokesbury
+# Press", the name of a later printing (Tigran, 2026-10-19).
 [[source]]
 key = "Knudson"
 origin = "b2e56294dc68ca61"
-tex = '''Albert C. Knudson, \emph{The Doctrine of God} (New York: Abingdon-Cokesbury Press, 1930).'''
+tex = '''Albert C. Knudson, \emph{The Doctrine of God} (New York: The Abingdon Press, 1930).'''
 
 [[source]]
 key = "Matthews"

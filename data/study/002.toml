@@ -1,0 +1,335 @@
+# Paper 2, The Nature of God: the British Study Edition's 17 notes at 2474116,
+# reviewed 2026-10-19 against the press text, Block's chart for Paper 2 (dated
+# July 1, 2026, read whole, its seven endnotes too), the edition's own KJV, and
+# the originals where the chart and the notes disagree: Hume's Treasure-House,
+# the Review and Herald issues of 1899 and 1900, The Desire of Ages of 1898,
+# Nave's printing of 1901 (../block-sources/originals/), and Overstreet and
+# Knudson in Tigran's DjVus (originals/LIBRARY.tsv).  Twelve of Block's
+# findings that no note of the edition gives are added, F1a and, at Tigran's
+# word once the chart had been read for them, F3a-F17a (2026-10-19).  The
+# review, numbered F1-F17 in the order of the text, each added note after the
+# one before it, is var/study/review-002.md.  All 29 ruled by Tigran on
+# 2026-10-19 and carried as proposed, F4 with White as the source.
+
+paper = 2
+chart = "https://urantiabooksources.com/wp-content/uploads/2026/07/002.pdf"
+chart_date = 2026-07-01          # as Block dates it on its first page
+
+# The sources as Block's chart lists them, page 1, without degrees, under the
+# keys Paper 1 gave those it shares (one key, one work).
+
+# Knudson's publisher as the 1930 title page names it, "The Abingdon Press,
+# New York, Cincinnati, Chicago" (Tigran's DjVu, ../block-sources/originals/
+# LIBRARY.tsv), where Block's list and the edition have "Abingdon-Cokesbury
+# Press", the name of a later printing (Tigran, 2026-10-19).
+[[source]]
+key = "Knudson"
+origin = "d2a76e6bda7d04c5"
+tex = '''Albert C. Knudson, \emph{The Doctrine of God} (New York: The Abingdon Press, 1930).'''
+
+# Block's title, as the 1933 printing's title page has it.
+[[source]]
+key = "Hume"
+origin = "7a16dd38a8fc51a3"
+tex = '''Robert Ernest Hume, \emph{Treasure-House of the Living Religions: Selections from Their Sacred Scriptures} (New York: Charles Scribner's Sons, 1932).'''
+
+# The edition's "W. Norton" is W. W. Norton, as Block has it and the title
+# page prints it (Tigran's DjVu of the 1931 printing).
+[[source]]
+key = "Overstreet"
+origin = "c4ac3352e79a004e"
+tex = '''H.~A. Overstreet, \emph{The Enduring Quest: A Search for a Philosophy of Life} (New York: W.~W. Norton \& Company, Inc., 1931).'''
+
+# Cited by F1a: no note of the edition cites it.
+[[source]]
+key = "Nave"
+origin = "27122cfdf0e68a58"
+tex = '''Orville J. Nave, \emph{Nave's Topical Bible: A Digest of the Holy Scriptures} (New York: Topical Bible Publishing Company, from press of Eaton \& Mains, 1896, 1897).'''
+
+[[source]]
+key = "Matthews"
+origin = "da3cfc81f86996e9"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+# As the issue prints it (originals/RH19001211-V77-50.pdf): the series
+# banner, then the article, "A Comprehensive View", where Block and the
+# edition have "Review"; on p. 788, where Block has p. 10 and 610.  A year
+# key, Paulson's 1899 article being named in F15.
+[[source]]
+key = "Paulson1900"
+origin = "bafb92ef7a50178b"
+tex = '''David Paulson and W.~S. Sadler, ``Sowing for Physical and Spiritual Health: A Comprehensive View of the Digestive Process'', \emph{Advent Review and Sabbath Herald} (Battle Creek, Michigan), vol.~77, no.~50, December 11, 1900, p.~788.'''
+
+# Added, as Tigran ruled for White in Paper 1: a source, not a comparison.
+# The 1898 printing (originals/desireofages002842mbp.pdf), p. 107.
+[[source]]
+key = "White1898"
+origin = "none"
+tex = '''Ellen G. White, \emph{The Desire of Ages} (Oakland, California: Pacific Press Publishing Company, 1898).'''
+
+# F1, ruled as proposed: the sentence given its subject; the claim checked (all
+# 30 are the preposition).  The editor's own note, so no credit.
+[[note]]
+at = "2:1.1"
+after = "Touching the Infinite"
+origin = "5323bfbae0fd4398"
+tex = '''Here ``touching'', as in all 30 of its occurrences in the KJV, from which this quotation comes (Job~37:23), is of course a preposition meaning ``regarding'', ``concerning''. The same applies to the usage in \bibref[96:6.4]{p096 6:4}.'''
+
+# F1a, added, ruled as proposed: Block's finding, a note of its own, credited
+# to him (Tigran, 2026-10-19: not joined to his note on "touching"); it cites
+# Nave, which the edition lists for Paper 2 and no note of the edition cites.
+[[note]]
+at = "2:1.1"
+after = "past finding out!”"
+origin = "none"
+credit = "block"
+tex = '''All but one of the verses quoted in this paragraph stand in Nave's Topical Bible under \textsc{God}: \textsc{Unsearchable} \cite{Nave}, p.~514: Job~37:23, Psalms~77:19 and 145:3, 1~Kings~8:12, Job~5:9 and 36:26, 1~Kings~8:27 and Romans~11:33. The other, ``His understanding is infinite'', is Psalms~147:5, which Block compares.'''
+
+# F2, ruled as proposed: not "in Hume's own order"; the chapters named; the
+# credit line replaces "Here and in the notes below", and says that Hume's
+# second chapter is "The Divine Power and Wisdom" (the 1933 printing), not
+# Block's "Purpose"
+[[note]]
+at = "2:1.2"
+after = "a faithful Creator.”"
+origin = "1f225dce62a1e995"
+credit = "block"
+corrects = '''``Wisdom'' for his ``Purpose'' in the title of Hume's second chapter'''
+tex = '''This paragraph is a chain of quotations from Hume~\cite{Hume}, one or two lines per religion, most from his first chapter, ``The One Supreme God'', and in its order but for Hinduism, which comes before Confucianism here: Christianity (1~Corinthians~8:6 and 1~Peter~4:19, p.~3), Hinduism (pp.~3, 16 and 4), Confucianism (p.~3), Islam (p.~4), Sikhism (p.~5), Taoism (p.~6) and Zoroastrianism (p.~6); then, from his second, ``The Divine Power and Wisdom'', Christianity (Matthew~19:26, p.~7) and Sikhism (p.~10). The impersonal is made personal: ``Great Heaven makes no mistakes'' becomes ``The great Controller makes no mistakes'', and Laozi's ``It is only the Supreme that excels in imparting itself to men'' becomes ``The Infinite is most excellent in that he imparts himself to men''. Laozi's ``How pure and still is the Supreme Being! How deep and unfathomable, as if the Honored Ancestor of all things!'' loses its \textit{as if}. And the one phrase of the Sikh Mul Mantar left out is the name: ``There is but one God, Whose name is True''.'''
+
+# F3, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "2:1.3"
+after = "appraisal of himself."
+origin = "95df3f51fcbe994c"
+credit = "block"
+tex = '''Compare Matthews~\cite{Matthews}, p.~176: ``the perfect Personality of God alone can possess this quality [of self-knowledge] in its completeness''.'''
+
+# F3a, added, ruled as proposed: Block's finding, as F1a's at 2:1.1, checked in
+# the printing he cites (originals/navestopicalbibl0000orvi_h3u8.pdf): the four
+# verses on pp. 461-463; Psalms 145:17, where his chart has 145:7.
+[[note]]
+at = "2:3.1"
+after = "no taking of gifts.”"
+origin = "none"
+credit = "block"
+corrects = '''Psalms~145:17 for his 145:7'''
+tex = '''All the verses quoted in this paragraph stand in Nave's Topical Bible under \textsc{God}: \textsc{Judge, and His Justice} \cite{Nave}: Psalms~145:17 (p.~462), Ezekiel~14:23 (p.~463), Psalms~19:9 and 2~Chronicles~19:7 (p.~461).'''
+
+# F4, ruled as proposed: White as the source, cited in full, as Tigran ruled in
+# Paper 1; checked in the 1898 printing, p. 107; and after the sentence Block
+# sets it beside, whose "sin-identified" it shares
+[[note]]
+at = "2:3.2"
+after = "their embrace of iniquity."
+origin = "5872e99064d78a7b"
+credit = "block"
+tex = '''White~\cite{White1898}, p.~107: ``if men cling to sin, they become identified with it. Then the glory of God, which destroys sin, must destroy them.'''''
+
+# F5, ruled: kept as the edition has it
+[[note]]
+at = "2:3.4"
+after = "had not been."
+origin = "ea841c7ebc2e1d73"
+tex = '''Obadiah~1:16: ``\ldots{} and they shall be as though they had not been.'''''
+
+# F5a, added, ruled as proposed: Block's finding, as F1a's, checked in the
+# printing he cites: all nine verses on pp. 476-480.
+[[note]]
+at = "2:4.1"
+after = "God of all comfort.”"
+origin = "none"
+credit = "block"
+tex = '''All the verses quoted in this paragraph stand in Nave's Topical Bible under \textsc{God}: \textsc{Mercy of} \cite{Nave}: Psalms~86:15 (p.~476), Romans~10:13 (p.~479), Isaiah~55:7, Psalms~103:17 and 106:1 (p.~477), Jeremiah~9:24 and Lamentations~3:33 (p.~478), and 2~Corinthians~1:3 (p.~480).'''
+
+# F6, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "2:5.10"
+after = "is not God."
+origin = "9062b6e857d429b9"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, pp.~225--226: ``Love is not God but `of God'\,''. And ``The love of God is individualized'' (p.~232); here it is the indwelling Adjuster who individualizes it.'''
+
+# F7, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "2:5.12"
+after = "kingdom of good."
+origin = "e7fa815ce3ff11e6"
+credit = "block"
+tex = '''Compare Matthews~\cite{Matthews}, pp.~232--233: a ``Kingdom of Good rather than a Kingdom of God''.'''
+
+# F8, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "2:6.1"
+after = "goodness of God."
+origin = "98a4dcef396022f5"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~325: ``In its essence religion is trust in the goodness of God.'''''
+
+# F8a, added, ruled as proposed: the rest of Knudson's p. 325, which Block sets
+# beside the paragraph; checked in Tigran's DjVu (originals/LIBRARY.tsv).  The
+# omission is F8's sentence.
+[[note]]
+at = "2:6.1"
+after = "loves only a good God."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~325: ``The bare absoluteness of God might awaken the sense of wonder and his metaphysical personality might elicit a spirit of inquiry with reference to the ultimate meaning of life; but these mental states belong only to the antechamber of religion. \ldots{} If God were a nonmoral Being, either intelligent or nonintelligent, he would not be a proper object of religious faith. It is only insofar as he is morally good, and so worthy of being trusted, that he is truly God in the religious sense of the term. At first the idea of divinity probably had very little ethical content; the gods were feared more than they were trusted.'' Knudson's antechamber of religion is here philosophy, and what he tells as history, gods feared before they were trusted, is here said of man at any time.'''
+
+# F8b, added, ruled as proposed: Tigran's own find in Block's chart
+# (2026-10-19); p. 326, as Block has it, checked in the DjVu.
+[[note]]
+at = "2:6.2"
+after = "truly and spiritually moral."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~326: ``Faith in the responsiveness of the superworld to human need has always been the heart of religion, and the development of religion through the ages has consisted largely in the increasing clearness and thoroughness with which men have moralized this responsiveness.'' His first step was animism, which ``laid the foundation of a more distinctly ethical relation between the human and the divine''; his second, the prophets' ethical monotheism: ``Here it is that we have the essence of `revealed' religion.'' Knudson's two steps are here two kinds of religion, evolutionary and revealed, and his quotation marks round \textit{revealed} are gone.'''
+
+# F9, ruled as proposed: the edition's note corrected, Block's chart being
+# right: the Bible's lines are Hume's too, not alternating with his; the verses
+# named from Hume's reference-notes
+[[note]]
+at = "2:6.3"
+after = "souls of men.”"
+origin = "a36a347fa17ef376"
+credit = "block"
+tex = '''Hinduism, in Hume~\cite{Hume}, p.~12: ``God is the good man's refuge in his need''. All the quotations of this paragraph are from Hume's chapter ``The Divine Goodness and Wonder'' (pp.~11--14), the Bible's among them: Romans~2:4, James~1:17, Exodus~34:6, Psalms~34:8, 145:8, 65:5 and 147:3. The last is paired with a Zoroastrian line, ``the All-powerful Benefactor''.'''
+
+# F10, ruled as proposed: the quotation is on p. 333 (Tigran's DjVu), not 331;
+# Block's "332-33" is the run he quotes, from p. 332
+[[note]]
+at = "2:6.4"
+after = "in parental love."
+origin = "4c6163c166953115"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~333: ``self-sacrifice is inherent in perfect love''. The paragraph follows Knudson, pp.~329--333, but \textit{sacrifice} is left out, as it is at \bibref[1:6.5]{p001 6:5}.'''
+
+# F10a, added, ruled as proposed: Block sets pp. 336-338 beside the paragraph's
+# first three sentences; checked in the DjVu ("what holds true of man" runs
+# from p. 337 to p. 338).  F11 cites pp. 336-348 for the atonement; this is the
+# attributes before it.
+[[note]]
+at = "2:6.5"
+after = "between parent and child."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, on the divine attributes: righteousness ``brings out the thought that God is the ultimate source and ground of moral distinctions'', and truth ``takes special cognizance of God as Revealer'' (p.~336). Love ``in its human form'' is ``a craving and also a giving impulse. Both impulses are essential to true love'' (p.~337), and ``what holds true of man may properly be regarded as holding true also of God'' (pp.~337--338): in the divine love ``there must be \ldots{} more or less of the love of complacency, the love which takes pleasure in men and seeks fellowship with them. This is implied in the idea of the divine Fatherhood'' (p.~338). What Knudson grants with ``may properly'' and ``more or less'' is here said outright: love ``gives and craves affection''.'''
+
+# F11, ruled as proposed: the dualism is in the belief Knudson rejects, not in
+# the doctrine; "holds", the pages running backwards for "concludes"; Knudson's
+# word is dualism, not assault; and the number after "free-willness of God.",
+# not inside the word
+[[note]]
+at = "2:6.5"
+after = "free-willness of God."
+origin = "01402d982327c5fc"
+credit = "block"
+tex = '''The critique of the atonement doctrine is that of Knudson~\cite{Knudson}, pp.~336--348, who finds in the belief that God's righteousness and his love are opposed ``a deep-seated dualism, a dualism that in practice can be overcome only by an act of atonement'' (p.~348), and holds that ``No atonement in the ordinary sense of the term is necessary'' (p.~346). Knudson saw a dualism in God; here it is ``a philosophic assault upon both the unity and the free-willness of God''.'''
+
+# F11a, added, ruled as proposed: Block's p. 346, checked in the DjVu.  F11
+# quotes the next sentence; the point here is the paper's change of verb.
+[[note]]
+at = "2:6.6"
+after = "transcends God as a judge."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~346: ``The divine righteousness, in other words, does not involve strict retributive justice.'' Here it ``is not dominated by'' it: not absent, as for Knudson, but not the master. Compare the justice of \bibref[2:3.1]{p002 3:1}.'''
+
+# F12, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "2:6.8"
+after = "hate other persons."
+origin = "3792bd983f8b9a86"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, pp.~347--350, makes the same point, that love and hate are properly directed only towards persons, but lets divine wrath, as ``an altered form'' of love, be ``properly vented'' on sin. Here ``God is never wrathful'' (\bibref[2:6.7]{p002 6:7}), and he strikes no personal attitude towards sin at all.'''
+
+# F12a, added, ruled as proposed: Block's pp. 352-353, checked in the DjVu.
+[[note]]
+at = "2:6.9"
+after = "volitional will of God."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~352: ``As over against a legalistic but theistic Pharisaism we would naturally say that God is personal love, but as over against an impersonal naturalism we would more fittingly say that God is a loving Person. At bottom the two expressions have virtually the same meaning.'' And p.~353: ``the attributes of personality and love agree in fixing attention on the volitional, as distinguished from the intellectual, side of the divine nature. The fundamental thing in personality is will, and this also is true of love.'' Knudson's two standpoints are a theologian's, against Pharisaism and against naturalism; here they are the two worlds God faces, of personality and of spirit, and in religious experience he is both.'''
+
+# F13, ruled as proposed: "outcast relation" is p. 125, not 129, which has the
+# "sentence"; the section follows pp. 129-169, Overstreet's Part Three, "The
+# Great Elementals": ch. IX, "The Philosophic Test" (p. 129), then truth (p.
+# 140), beauty (p. 152) and the good (p. 162).  Checked in the book.
+[[note]]
+at = "2:7.4"
+after = "in the universe."
+origin = "969f34f3a7017e24"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}: man's ``outcast relation to the universe'' (p.~125), and ``the scientific sentence pronounced upon us'' (p.~129). Most of this section follows the third part of Overstreet's book, ``The Great Elementals'', pp.~129--169: the philosophic test, then truth, beauty and the good.'''
+
+# F14, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "2:7.5"
+after = "fallacy of abstraction,"
+origin = "7e1f49c98e81c87e"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, p.~130: the ``fallacy of abstraction, or of `misplaced concreteness'\,'', Whitehead's phrase.'''
+
+# F14a, added, ruled as proposed: Block's p. 148, checked in Tigran's DjVu; the
+# chapter's title from p. 129, which Block gives as "Actuality".
+[[note]]
+at = "2:7.6"
+after = "realized in experience."
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, p.~148: ``To discover enduring coherence and to bring enduring coherence into life is, apparently, to move toward reality. For coherence---so the long history of man seems to have shown---can be acted out. It is only when we introduce an element into a situation that does not link up properly with the rest that conflict breaks out, and we go down in defeat.'' To be acted out is Overstreet's test of truth: his ninth chapter, ``The Philosophic Test'', is ``The Criterion of Actability'' (p.~129).'''
+
+# F15, ruled as proposed: the page, p. 788; Paulson's 1899 article was in the
+# issue of September 19 (the 17th was a Sunday), p. 600; the last sentence goes
+# for the credit line, which says what is corrected in Block's chart, from both
+# issues; the number after "flavor.", not inside the sentence
+[[note]]
+at = "2:7.6"
+after = "its spiritual flavor."
+origin = "2c2fde3d87b9cb9e"
+credit = "block"
+corrects = '''p.~788 for his 610 (10 in his list of sources), ``View'' for ``Review'' in the article's title, and September~19 for September~17, 1899'''
+tex = '''Paulson and Sadler~\cite{Paulson1900}, p.~788: ``Just as the Creator has put into every separate food a distinct and characteristic flavor which distinguishes it from every other food; just as He has put flavors in foods, good and bad, which would, to the unperverted taste, be sufficient to rightly guide man in the selection of his daily food; so also the Lord has placed a spiritual flavor in every divine truth.'' The co-author is Dr~William S. Sadler. Paulson had first put it in his article ``Truth Is Known by Its Flavor'' (\textit{Advent Review and Sabbath Herald}, September 19, 1899, p.~600).'''
+
+# F15a, added, ruled as proposed: Block's p. 149, checked in the DjVu.
+[[note]]
+at = "2:7.7"
+after = "for divine coherence."
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, p.~149: ``We discover, then, the reason for one of the most continuing quests in human nature---the quest for coherence, the movement away from the fragmentary and disconnected to the connected and the unified. The reason apparently lies in the fact that the universe is itself fundamentally a coherent system.'' Overstreet's book is \textit{The Enduring Quest}; here it is ``the eternal quest'', and the paragraph says in what each universe coheres: the physical in Paradise, the intellectual in the Conjoint Actor, the spiritual in the Eternal Son, and man in the Father, through his Adjuster.'''
+
+# F15b, added, ruled as proposed: Block's pp. 156 and 159, checked in the DjVu.
+[[note]]
+at = "2:7.8"
+after = "harmony of its unity."
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, p.~156, of Plato: ``Above all and comprehending all, there was the trinity of the Good, the True, and the Beautiful. The Good was the True, and the True was the Good. And always the Good and the True were the Beautiful.'' And of a great piece of sculpture: ``It is a unity that has no distracting irrelevancies, a whole that animates all its parts and in which all the parts together animate the whole'' (p.~159).'''
+
+# F16, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "2:7.9"
+after = "of modern religion"
+origin = "85735cc4734b2a96"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, pp.~162--163, where Christianity has ``overstressed morality'' and neglected truth and beauty. Overstreet blames ``Christianity, as an institutionalized religion''; here it is ``the Hebrew religion'' and ``modern religion''.'''
+
+# F17, ruled as proposed: the page is 163, as the book and Block's chart have
+# it, not 167
+[[note]]
+at = "2:7.11"
+after = "true and beautiful."
+origin = "6cdc918b250a7095"
+credit = "block"
+tex = '''Overstreet runs in one direction: ``goodness without truth and beauty is never really goodness at all'', and ``Goodness is a special kind of truth and beauty'' (Overstreet~\cite{Overstreet}, p.~163). Here the three are made fully convertible.'''
+
+# F17a, added, ruled as proposed: Block's pp. 167 and 169, checked in the DjVu,
+# with the insane person of p. 167, which Block does not give.  P. 169
+# misprints "educaton", so the note quotes round it.
+[[note]]
+at = "2:7.12"
+after = "his expanding experience."
+origin = "none"
+credit = "block"
+tex = '''This paragraph and the end of the one before follow Overstreet's ``Principle of Integration'' \cite{Overstreet}, pp.~166--169. The insane person ``is a little world in isolation. That world, in itself, may be a unified one, but it is futile, since it cannot relate itself to the larger world to which the individual belongs. Health is integration, the parts linked in harmonious working relation. \ldots{} A truth-system, in short, as we noted in a previous chapter, is a coherence system'' (p.~167). ``Human life, in brief, grows more adequate as it grows increasingly competent in the linking of itself with the various realities of its environment'', and life's basic education ``should be a training in unification or integration'' (p.~169). Overstreet's insane person, ``a little world in isolation'', is here ``the isolated child of the worlds'', whom education is to co-ordinate ``with the larger realities of his expanding experience''.'''

@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Paper 2, The Nature of God, has study notes too, 29 of them, and the Bibliography lists the four works they add.
 - Where a study note corrects Matthew Block's chart from the original, its credit line says so, with what it gives for his: a page, a title, a date.
 - The List of study notes and the List of 1955 readings begin with "Go to a paper", which opens onto the numbers of the papers they list, to go straight to one.
 - The Foreword and Paper 1 have study notes from The British Study Edition, edited by Tigran Aivazian, 45 in all, the first of the papers to have them, shown once Notes is turned on in Settings: each is a small number in the text that opens the note, the List of study notes gathers them, and the Bibliography lists the works they cite.
@@ -25,6 +26,10 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 - The footer is two lines: the edition and its licence, with a link to this changelog, and that the site is not affiliated with Urantia Foundation.
 - The licence of Goudy, the book's typeface, is linked from Settings, beside the typeface.
 - Update now, in the offline menu, reloads the page once the update is in, and brings with it the part of the site that answers offline, so that nothing needs reloading by hand, even when you go offline straight after.
+
+### Fixed
+
+- The Bibliography gives the publisher of Knudson's The Doctrine of God as its 1930 title page does, The Abingdon Press, not Abingdon-Cokesbury Press.
 
 ### For developers
 
