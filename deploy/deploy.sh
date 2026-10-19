@@ -124,13 +124,19 @@ ship() {
 
     echo "==> rsync to $HOST:$DEST"
     # Excluded: .venv (per-architecture, the target builds its own), var/ except the
-    # database, and everything only the build needs.
+    # database, and everything only the build needs.  So is a file git neither
+    # tracks nor ignores, being in no commit: a draft beside the code, an editor's
+    # swap file (INTEGRATION.md, 2026-10-19).  What the build makes is ignored, and goes.
+    local -a untracked=()
+    while IFS= read -r f; do untracked+=(--exclude "/$f"); done \
+        < <(git -C "$HERE" ls-files --others --exclude-standard)
     rsync -az --delete \
         --exclude '.git/' \
         --exclude '.venv/' \
         --exclude '__pycache__/' \
         --exclude 'var/' \
         --exclude 'export/' \
+        "${untracked[@]}" \
         "$HERE"/ "$HOST:$DEST"/
 
     # The visit counter's place database (`make geoip`, monthly), which the rsync

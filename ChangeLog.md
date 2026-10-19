@@ -33,6 +33,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- `deploy.sh` no longer ships a file git neither tracks nor ignores, a draft or an editor's swap file, being in no commit; what the build makes is ignored and still goes.
 - `study_note` has a new column, `corrects`, the HTML of what a note corrects in Block's chart from the original, and its `origin` may now be NULL, for a note the review adds, as `study_source`'s may for a source.
 - The nginx server blocks (`deploy/*.nginx`) now compress what is under `/static/`: the stylesheet, the scripts, SVG and the fonts served as TTF or OTF, as the SBL fonts must be (SBL Greek goes from 1.1 MB to 0.4 MB). Until now only HTML was compressed, `nginx.conf` naming no `gzip_types`. `deploy.sh` does not install a server block: on each host, install it again by hand, as root, as in `deploy/README.md` step 3, then `nginx -t` and reload nginx. Without it the site works as before, sending these uncompressed.
 - A study note's Greek and Hebrew are set in SBL Greek and SBL Hebrew, vendored by address and digest (`sources.toml`) and served as published: their licence, unlike the site's other fonts', is not OFL, and allows them to be embedded only in non-commercial web pages and e-books, and redistributed only unmodified, so they are never subset (`build/fonts.py`).

@@ -188,7 +188,7 @@ A release is a tag on `main`. Put a heading `## [X.Y.Z] - YYYY-MM-DD` under `## 
 The script builds once, then does the rest for each host in turn, pi5 then sigmaai.au, and stops at the first that fails:
 
 1. runs `make data`, `make check` and `make offline` again, so a deploy never ships an unchecked database or offline copy, refuses a database built from uncommitted press files (`python -m build dirty`, unless `--allow-dirty`), and checks that the host holds every recording the database serves, at the path and size it records;
-2. rsyncs the code to `<host>:/home/tigran/ubsite`, without `.git`, `.venv`, `var/` or `export/`;
+2. rsyncs the code to `<host>:/home/tigran/ubsite`, without `.git`, `.venv`, `var/` or `export/`, nor any file git neither tracks nor ignores, such as a draft beside the code or an editor's swap file;
 3. ships `var/ub.db` as `ub.db.new` and `mv`s it into place, so a half-copied file is never the one being served; then the offline copy, its chunks before the manifest that names them, pruning chunks that neither it nor the manifest before it names (see [Work offline](#work-offline));
 4. copies `var/geoip/dbip-city-lite.mmdb` when `make geoip` has changed it (the visit counter's places; see [Visits](#visits)), and runs `uv pip sync` in the host's venv;
 5. runs `sudo systemctl restart ubsite`. This is password-free: the sudoers drop-in from `deploy/README.md` step 4 allows exactly that and nothing else;
