@@ -275,6 +275,10 @@ def run(con, path: pathlib.Path) -> int:
     miss = sorted(want - have)
     g.line(not miss, f"fonts/GaramondMath.otf: every one of the {len(want)} characters"
            f" of {len(maths)} expressions", " ".join(f"{c} U+{ord(c):04X}" for c in miss[:12]))
+    # The SBL fonts, which may be embedded only as published: the site's bytes.
+    for ttf, name in pack.AS_PUBLISHED:
+        g.line(z.read(f"OEBPS/{name}") == (pack.FONTS / ttf).read_bytes(),
+               f"{name}: as published, byte for byte")
 
     # 7. determinism ------------------------------------------------------------
     files, info = pack.files(con)

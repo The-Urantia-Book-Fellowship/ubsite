@@ -70,5 +70,21 @@
     "sha256": "3929b5b2a1cd7d7c32171e1f654fce0355191b7c9bc84afc61d9b2b99b96531f",
     "bytes": 869277,
     "commit": "b38d042be415af040679804dbf66264c6e6ec324d79840c284f673c4f2a63c4d"
+  },
+  {
+    "repo": "sbl_greek",
+    "path": "SBL_grk.ttf",
+    "dest": "fonts/SBL_grk.ttf",
+    "sha256": "cbf8b1a87a4a311e2aa9b5b2995f83b23159fbe0ca9ca517d3fd43b5911e925a",
+    "bytes": 1123080,
+    "commit": "cbf8b1a87a4a311e2aa9b5b2995f83b23159fbe0ca9ca517d3fd43b5911e925a"
+  },
+  {
+    "repo": "sbl_hebrew",
+    "path": "SBL_Hbrw.ttf",
+    "dest": "fonts/SBL_Hbrw.ttf",
+    "sha256": "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99",
+    "bytes": 315092,
+    "commit": "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99"
   }
 ]

@@ -13,11 +13,15 @@ the PDF, into ../block-sources, which is a master.
 
 from __future__ import annotations
 
+import datetime
 import hashlib
 import html
 import re
 import subprocess
 
+RE_DATED = re.compile(r"WORK-IN-PROGRESS \(([A-Z]+) (\d{1,2}), (\d{4})\)")
+MONTHS = ("JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST",
+          "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER")
 RE_WORD = re.compile(r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="[\d.]+" yMax="[\d.]+">([^<]*)</word>')
 SPLIT = 262
 
@@ -33,6 +37,16 @@ def verify(pdf, row: dict) -> str | None:
     """None if the PDF is the one the manifest lists, else what is wrong."""
     got = hashlib.sha256(pdf.read_bytes()).hexdigest()
     return None if got == row["sha256"] else f"{pdf.name} is not the manifest's ({got[:12]})"
+
+
+def dated(pdf) -> datetime.date | None:
+    """The chart's date as Block gives it, "WORK-IN-PROGRESS (MARCH 14, 2023)",
+    the first words of its first page; None for a chart without one (048 is an
+    article from The Circular)."""
+    m = RE_DATED.search(pdftotext(pdf, "-f", "1", "-l", "1"))
+    if not m or m[1] not in MONTHS:
+        return None
+    return datetime.date(int(m[3]), MONTHS.index(m[1]) + 1, int(m[2]))
 
 
 def sources_page(pdf) -> str:

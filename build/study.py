@@ -12,11 +12,19 @@ a machine can:
     [[note]] or [[source]], or [[dropped]] with the reason.  Each names its
     original by `origin`, 16 hex digits of the SHA-256 of what it was made
     from, so a note the editor changes upstream fails the build until it is
-    reviewed again, and so does a note added.
+    reviewed again, and so does a note added.  A source the edition lacks may
+    be added, `origin = "none"`, where the review finds the work a note quotes:
+    Ellen G. White's, which Paper 1's notes quote and the edition does not list.
   * The copy names the chart of Matthew Block's it was checked against, the
     address `../block-sources/MANIFEST.tsv` gives the paper's chart, or "none".
     A chart revised since, or a chart where there was none, fails the build:
-    a note on a human source is never older than the chart it relies on.
+    a note on a human source is never older than the chart it relies on.  It
+    names the chart's date too, `chart_date`, as Block dates it on its first
+    page, which the card's credit gives (Tigran, 2026-10-19): the address's
+    month is when it was uploaded, 2023-07 for a chart of March 14, 2023.  The
+    build reads no PDF, so it holds the date only to be no later than that
+    month, which all 139 dated charts were (2026-10-19); tests/test_study.py
+    holds it to the chart itself.
   * A note stands in the press text after the words its `after` gives, which
     occur once in the paragraph and end a word.  The study text is British
     and metricated (23:3.2 "299,789 kilometres" for "186,280 miles"), so an
@@ -32,6 +40,7 @@ from __future__ import annotations
 
 import collections
 import dataclasses
+import datetime
 import hashlib
 import pathlib
 import re
@@ -62,10 +71,11 @@ RE_LEADING_HYPHEN = re.compile(r"(?:^|(?<=[\s(\[/“‘]))-[^\W\d_]+")
 RE_TIED = re.compile(r"[^\s\u00a0\u202f—–/-]+(?:[\u00a0\u202f][^\s\u00a0\u202f—–/-]+)+")
 TIED_MAX = 24
 
-KEYS = {"paper", "chart", "study", "reviewed", "source", "note", "dropped"}
+KEYS = {"paper", "chart", "chart_date", "study", "reviewed", "source", "note", "dropped"}
 SOURCE_KEYS = {"key", "origin", "tex"}
 NOTE_KEYS = {"at", "after", "origin", "tex", "credit"}
 DROPPED_KEYS = {"at", "key", "origin", "why"}
+ADDED = "none"                       # a source's origin when the review added it
 
 
 @dataclasses.dataclass
@@ -74,6 +84,7 @@ class Curated:
     path: pathlib.Path
     sha256: str
     chart: str
+    chart_date: datetime.date | None
     sources: list[dict]
     notes: list[dict]
     dropped: list[dict]
@@ -124,8 +135,16 @@ def load_curated(report, root: pathlib.Path = DATA) -> dict[int, Curated]:
         if doc["paper"] != int(f.stem):
             report.hard("study-file-paper", where, f"says paper {doc['paper']}")
             continue
+        dated = doc.get("chart_date")
+        if (dated is None) != (doc["chart"] == "none"):
+            report.hard("study-chart-date", where,
+                        "a chart is named with its date, chart_date = YYYY-MM-DD, and none without")
+            continue
+        if dated is not None and type(dated) is not datetime.date:
+            report.hard("study-chart-date", where, f"chart_date = {dated!r} is not a date")
+            continue
         out[doc["paper"]] = Curated(doc["paper"], f, hashlib.sha256(raw).hexdigest(),
-                                    doc["chart"], doc.get("source", []), doc.get("note", []),
+                                    doc["chart"], dated, doc.get("source", []), doc.get("note", []),
                                     doc.get("dropped", []))
     return out
 
@@ -151,12 +170,12 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
                         f"the edition has no p{n:03d}.tex at {repo['at'][:7]}")
             continue
         _account(cur, orig, where, report)
-        month = _chart(cur, block, where, report)
+        dated = _chart(cur, block, where, report)
         sources = _sources(cur, paras, where, report)
-        notes = _notes(cur, paras, order, sources, month, orig, where, report, hyphenator)
+        notes = _notes(cur, paras, order, sources, orig, where, report, hyphenator)
         built.papers.append({"paper_n": n, "file_sha256": cur.sha256, "study_commit": repo["at"],
                              "block_url": None if cur.chart == "none" else cur.chart,
-                             "block_month": month, "n_notes": len(notes),
+                             "block_date": dated, "n_notes": len(notes),
                              "n_dropped": sum(1 for d in cur.dropped if "at" in d)})
         built.sources.extend(sources.values())
         built.notes.extend(notes)
@@ -189,7 +208,7 @@ def _account(cur: Curated, orig, where: str, report) -> None:
     key_of = {x.origin: x.key for x in orig.sources}
     got_n = collections.Counter([x["origin"] for x in cur.notes]
                                 + [x["origin"] for x in cur.dropped if "at" in x])
-    got_s = collections.Counter([x["origin"] for x in cur.sources]
+    got_s = collections.Counter([x["origin"] for x in cur.sources if x["origin"] != ADDED]
                                 + [x["origin"] for x in cur.dropped if "key" in x])
     for o in sorted(have_n - got_n):
         report.hard("study-unaccounted", where,
@@ -216,7 +235,7 @@ def _account(cur: Curated, orig, where: str, report) -> None:
 
 
 def _chart(cur: Curated, block: dict, where: str, report) -> str | None:
-    """The month of the chart the notes were checked against, 'YYYY-MM', or None."""
+    """The date of the chart the notes were checked against, 'YYYY-MM-DD', or None."""
     if block["charts"] is None:
         report.hard("block-manifest-missing", str(block["path"]),
                     "no MANIFEST.tsv: refresh with ../explore-tools/block_fetch.py")
@@ -237,7 +256,12 @@ def _chart(cur: Curated, block: dict, where: str, report) -> str | None:
     if not m:
         report.hard("block-chart-month", where, f"no /uploads/YYYY/MM/ in {cur.chart}")
         return None
-    return f"{m[1]}-{m[2]}"
+    d = cur.chart_date
+    if (d.year, d.month) > (int(m[1]), int(m[2])):
+        report.hard("study-chart-date", where,
+                    f"chart_date = {d} is after the chart was uploaded, {m[1]}-{m[2]}")
+        return None
+    return d.isoformat()
 
 
 def _sources(cur: Curated, paras, where: str, report) -> dict[str, dict]:
@@ -247,12 +271,13 @@ def _sources(cur: Curated, paras, where: str, report) -> dict[str, dict]:
             report.hard("study-source-twice", where, s["key"])
             continue
         text, html, _ = expand(s["tex"], paras, {}, f"{where} {s['key']}", report)
-        out[s["key"]] = {"paper_n": cur.paper, "key": s["key"], "origin": s["origin"],
+        out[s["key"]] = {"paper_n": cur.paper, "key": s["key"],
+                         "origin": None if s["origin"] == ADDED else s["origin"],
                          "text": text, "html": html, "cited": 0}
     return out
 
 
-def _notes(cur: Curated, paras, order, sources, month, orig, where, report,
+def _notes(cur: Curated, paras, order, sources, orig, where, report,
            hyphenator=None) -> list[dict]:
     body_of = {x.origin: x.body for x in orig.notes}
     out: list[dict] = []
@@ -411,7 +436,7 @@ def store(con, built: Built) -> None:
     """The study_* rows, once load_text has made each note its footnote."""
     con.executemany(
         "INSERT INTO study_paper VALUES (:paper_n, :file_sha256, :study_commit, :block_url,"
-        " :block_month, :n_notes, :n_dropped)", built.papers)
+        " :block_date, :n_notes, :n_dropped)", built.papers)
     source_id = {}
     for i, s in enumerate(built.sources, 1):
         con.execute("INSERT INTO study_source VALUES (?,?,?,?,?,?)",

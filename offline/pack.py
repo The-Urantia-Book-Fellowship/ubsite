@@ -41,7 +41,8 @@ FORMAT = 1
 ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js"]
 PLAIN = ["/static/favicon.svg", "/static/fonts/UBGoudy.woff2", "/static/fonts/UBGoudy-Italic.woff2",
          "/static/fonts/OFL.txt", "/static/fonts/GaramondMath.woff2",
-         "/static/fonts/OFL-GaramondMath.txt", "/favicon.ico"]
+         "/static/fonts/OFL-GaramondMath.txt", "/static/fonts/SBL_grk.ttf",
+         "/static/fonts/SBL_Hbrw.ttf", "/favicon.ico"]
 
 
 def _json(obj) -> bytes:

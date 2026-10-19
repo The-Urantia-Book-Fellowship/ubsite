@@ -11,6 +11,16 @@
 @font-face { font-family: "Garamond Math"; src: url(/static/fonts/GaramondMath.woff2) format("woff2");
              font-display: swap; }
 math { font-family: "Garamond Math", math; }
+/* A study note's Greek and Hebrew: the SBL fonts, as the British Study Edition
+   sets them, served as published (their licence allows no subset: build/fonts.py,
+   sources.toml [sbl_greek]); fetched only by a page that draws them.  The device's
+   own font drew them until 2026-10-19, and Georgia drew θεὸς as θεο` ς. */
+@font-face { font-family: "SBL Greek"; src: url(/static/fonts/SBL_grk.ttf) format("truetype");
+             font-display: swap; }
+@font-face { font-family: "SBL Hebrew"; src: url(/static/fonts/SBL_Hbrw.ttf) format("truetype");
+             font-display: swap; }
+.lang:lang(grc) { font-family: "SBL Greek", serif; }
+.lang:lang(he) { font-family: "SBL Hebrew", serif; }
 
 :root {
   --paper: oklch(0.972 0.008 85);

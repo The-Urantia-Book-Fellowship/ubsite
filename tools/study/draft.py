@@ -147,17 +147,23 @@ def main(argv: list[str]) -> int:
         readings.setdefault(ref, []).append(f"…{ptext[max(0, anchor - 40):anchor]}◦ 1955: {text}")
     b = config.block()
     row = (b["charts"] or {}).get(n)
-    chart, col, front = "none", {}, ""
+    chart, col, front, date = "none", {}, "", None
     if row:
         pdf = b["path"] / f"{n:03d}.pdf"
         bad = block.verify(pdf, row)
         if bad:
             print(f"warning: {bad}; refresh ../block-sources", file=sys.stderr)
         chart, col, front = row["url"], block.column(pdf, n), block.sources_page(pdf)
+        date = block.dated(pdf)
 
     toml = [f"# Paper {n}: a DRAFT for review, made by tools/study/draft.py from the study edition",
             f"# at {repo['at'][:7]}.  Edit, then save as data/study/{n:03d}.toml.", "",
-            f"paper = {n}", f"chart = {toml_str(chart)}", ""]
+            f"paper = {n}", f"chart = {toml_str(chart)}"]
+    if date:
+        toml += [f"chart_date = {date.isoformat()}          # as Block dates it on its first page"]
+    elif row:
+        toml += ["chart_date = ?   # CHECK: the chart gives no WORK-IN-PROGRESS date on its first page"]
+    toml.append("")
     md = [f"# Paper {n}: the study edition's notes, for review", "",
           f"The edition at `{repo['at'][:7]}`; Block's chart: {chart}.", ""]
     pointing = pointing_in(n)

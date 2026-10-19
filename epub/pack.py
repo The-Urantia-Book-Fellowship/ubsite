@@ -32,8 +32,12 @@ UID = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_URL, "https://ubsite.ddns.net/
 FACES = [("UBGoudy.woff2", "fonts/UBGoudy.otf"),
          ("UBGoudy-Italic.woff2", "fonts/UBGoudy-Italic.otf"),
          ("GaramondMath.woff2", "fonts/GaramondMath.otf")]
+# A study note's Greek and Hebrew: the SBL fonts, which their licence lets an
+# e-book embed only as published (build/fonts.py SBL), so the bytes the site serves.
+AS_PUBLISHED = [("SBL_grk.ttf", "fonts/SBL_grk.ttf"),
+                ("SBL_Hbrw.ttf", "fonts/SBL_Hbrw.ttf")]
 
-MEDIA = {".xhtml": "application/xhtml+xml", ".css": "text/css", ".otf": "font/otf",
+MEDIA = {".xhtml": "application/xhtml+xml", ".css": "text/css", ".otf": "font/otf", ".ttf": "font/ttf",
          ".jpg": "image/jpeg", ".ncx": "application/x-dtbncx+xml"}
 
 
@@ -84,6 +88,8 @@ def files(con) -> tuple[dict[str, bytes], dict]:
     out["OEBPS/epub.css"] = (HERE / "epub.css").read_bytes()
     for woff2, name in FACES:
         out[f"OEBPS/{name}"] = otf(FONTS / woff2)
+    for ttf, name in AS_PUBLISHED:
+        out[f"OEBPS/{name}"] = (FONTS / ttf).read_bytes()
     if not COVER.exists():
         raise FileNotFoundError(f"{COVER}: run tools/make_cover.py")
     out["OEBPS/cover.jpg"] = COVER.read_bytes()
@@ -98,7 +104,8 @@ def files(con) -> tuple[dict[str, bytes], dict]:
              {"id": "ncx", "href": "toc.ncx"},
              {"id": "css", "href": "epub.css"},
              {"id": "cover-image", "href": "cover.jpg", "properties": "cover-image"},
-             *({"id": pathlib.PurePath(n).stem.replace(".", "-"), "href": n} for _, n in FACES)]
+             *({"id": pathlib.PurePath(n).stem.replace(".", "-").replace("_", "-"), "href": n}
+               for _, n in FACES + AS_PUBLISHED)]
     spine = []
     for d in docs:
         i = {"id": "x-" + d.name.removesuffix(".xhtml"), "href": d.name,

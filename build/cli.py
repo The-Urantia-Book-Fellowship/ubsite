@@ -37,10 +37,10 @@ def main(argv: list[str]) -> int:
         return 3 if dirty else 0
     if cmd == "vendor-sync":
         return vendorlib.sync({**repos, "texlive": config.texlive(),
-                            "sqlite_wasm": config.sqlite_wasm()})
+                               "sqlite_wasm": config.sqlite_wasm(), **config.sbl()})
     if cmd == "vendor-check":
         return vendorlib.check({**repos, "texlive": config.texlive(),
-                             "sqlite_wasm": config.sqlite_wasm()})
+                                "sqlite_wasm": config.sqlite_wasm(), **config.sbl()})
 
     if cmd == "paranoid":
         # Prove, rather than assert, that a build leaves the source repos alone.
@@ -174,7 +174,7 @@ def main(argv: list[str]) -> int:
         from . import fonts
         for name, (size, glyphs) in fonts.build(
                 con, repos["press"]["path"] / "fonts", root / "ubsite", report).items():
-            print(f"  {name:22} {size:>7,} bytes  {glyphs} glyphs")
+            print(f"  {name:22} {size:>9,} bytes  " + (f"{glyphs} glyphs" if glyphs else "as published"))
         print("text versions ...")
         from . import versions
         text_version, pending = versions.assign(con, repos["press"])

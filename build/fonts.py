@@ -42,6 +42,14 @@ FACES = [("UBGoudy.otf", "UBGoudy.woff2"),
 MATH = (pathlib.Path(__file__).resolve().parent.parent / "vendor" / "fonts" / "Garamond-Math.otf",
         "GaramondMath.woff2")
 MATH_BASE = "0123456789+−=()[],./"
+# A study note's Greek and Hebrew are set in the SBL fonts, as the British Study
+# Edition sets them (Tigran, 2026-10-19): until then the device's own font drew
+# them, and Georgia drew 1:7.6's θεὸς as θεο` ς, with its own spacing grave.
+# Not OFL: their EULA lets them be embedded in a non-commercial web page or
+# e-book, and redistributed only unmodified (config.sbl()).  So each
+# is copied here byte for byte, never subset, and must have every character a
+# note draws in its script.  The other scripts are still the device's.
+SBL = {"grc": "SBL_grk.ttf", "he": "SBL_Hbrw.ttf"}
 FORBIDDEN = "Goudy-Handtooled-BT.ttf"
 
 # Characters the site draws on purpose in another face, and where.  The gate
@@ -166,6 +174,15 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
         if stray:
             report.hard("study-lang-script", f"lang={lang}",
                         " ".join(f"{c} U+{ord(c):04X}" for c in stray)[:200])
+    copies = []
+    for lang, name in SBL.items():
+        data = (MATH[0].parent / name).read_bytes()
+        cmap = TTFont(io.BytesIO(data), lazy=True).getBestCmap()
+        missing = sorted(c for c in other.get(lang, ()) if ord(c) not in cmap)
+        if missing:
+            report.hard("font-missing-glyph", name,
+                        " ".join(f"{c} U+{ord(c):04X}" for c in missing)[:200])
+        copies.append((name, data))
     from .texmath import drawn
     math_wanted = set(MATH_BASE).union(*(drawn(m) for m in maths))
     stats = {}
@@ -214,4 +231,9 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
         subset.save_font(font, str(out), opts)
         font.close()
         stats[dst] = (out.stat().st_size, n)
+    for name, data in copies:
+        out = outdir / name
+        if not out.exists() or out.read_bytes() != data:
+            out.write_bytes(data)
+        stats[name] = (len(data), None)
     return stats

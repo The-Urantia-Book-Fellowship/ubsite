@@ -10,12 +10,15 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import tomllib
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools" / "study"))
 
-from build import study  # noqa: E402
+import block  # noqa: E402
+from build import config, study  # noqa: E402
 from build.expand import Expanded, Note, Span  # noqa: E402
 from build.problems import Report  # noqa: E402
 from build.readers import study as reader  # noqa: E402
@@ -82,7 +85,7 @@ class Study(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def toml(self, notes=None, chart=CHART, sources=None, dropped=None):
+    def toml(self, notes=None, chart=CHART, sources=None, dropped=None, dated="2019-12-04"):
         o = self.orig
         if notes is None:
             notes = [("0:0.1", "mortals of Urantia", o.notes[0].origin,
@@ -91,7 +94,7 @@ class Study(unittest.TestCase):
             dropped = [("at", "0:0.1", o.notes[1].origin, "the edition's own reading")]
         if sources is None:
             sources = [("Hart", o.sources[0].origin, r"Charles Hartshorne, \emph{Man's Vision of God} (1941).")]
-        out = ["paper = 0", f'chart = "{chart}"', ""]
+        out = ["paper = 0", f'chart = "{chart}"'] + ([f"chart_date = {dated}"] if dated else []) + [""]
         for key, origin, tex in sources:
             out += ["[[source]]", f'key = "{key}"', f'origin = "{origin}"', f"tex = '''{tex}'''", ""]
         for at, after, origin, tex, credit in notes:
@@ -150,7 +153,7 @@ class Study(unittest.TestCase):
         note = q.ex.notes[0]
         self.assertEqual((note.offset, note.kind), (a, "study"))
         self.assertEqual(note.text, "See [1], p.\u00a08: “seven” cases.")
-        self.assertEqual(built.papers[0]["block_month"], "2019-12")
+        self.assertEqual(built.papers[0]["block_date"], "2019-12-04")
         self.assertEqual(built.papers[0]["n_dropped"], 1)
         self.assertEqual(built.notes[0]["cites"], ["Hart"])
         self.assertEqual(built.sources[0]["text"], "Charles Hartshorne, Man’s Vision of God (1941).")
@@ -191,6 +194,25 @@ class Study(unittest.TestCase):
                 self.toml(**kw)
                 self.assertIn(code, codes(self.attach()[2]))
 
+    def test_a_source_the_review_adds(self):
+        """A work a note quotes and the edition does not list is carried with
+        origin "none": counted against no \\bibitem, stored without an origin,
+        and like any source, cited by a note or a failure."""
+        o = self.orig
+        hart = ("Hart", o.sources[0].origin, r"Charles Hartshorne, \emph{Man's Vision of God} (1941).")
+        white = ("White1911", "none", r"Ellen G. White, \emph{The Great Controversy} (1911).")
+        cited = [("0:0.1", "mortals of Urantia", o.notes[0].origin,
+                  r"See \cite{Hart}, and White~\cite{White1911}, p.~493.", "block")]
+        self.toml(sources=[hart, white], notes=cited)
+        _, built, report = self.attach()
+        self.assertEqual(report.problems, [])
+        self.assertEqual([(s["key"], s["origin"]) for s in built.sources],
+                         [("Hart", o.sources[0].origin), ("White1911", None)])
+        self.toml(sources=[hart, white])
+        self.assertEqual(codes(self.attach()[2]), ["study-source-uncited"])
+        self.toml(sources=[white], notes=cited)
+        self.assertIn("study-unaccounted", codes(self.attach()[2]))
+
     def test_a_key_names_one_work_in_every_paper(self):
         """The Bibliography lists a work once, by its key, whichever paper
         cites it: the same key for two works fails, and two keys for one."""
@@ -217,11 +239,40 @@ class Study(unittest.TestCase):
     def test_blocks_chart_is_never_older_than_the_review(self):
         self.toml(chart=CHART.replace("2019/12", "2016/11"))
         self.assertIn("block-chart-revised", codes(self.attach()[2]))
-        self.toml(chart="none", notes=[("0:0.1", "mortals of Urantia", self.orig.notes[0].origin,
-                                        r"See \cite{Hart}.", None)])
+        self.toml(chart="none", dated=None, notes=[("0:0.1", "mortals of Urantia", self.orig.notes[0].origin,
+                                                    r"See \cite{Hart}.", None)])
         self.assertEqual(codes(self.attach()[2]), ["block-chart-new"])
         self.block = {"path": self.data, "charts": {}}
         self.assertEqual(codes(self.attach()[2]), [])
+
+    def test_a_chart_is_named_with_blocks_date(self):
+        """The card's credit gives the chart's date as Block gives it, which
+        the copy names: never after the month the address says it was
+        uploaded, never missing beside a chart, never beside none."""
+        none = dict(chart="none", notes=[("0:0.1", "mortals of Urantia", self.orig.notes[0].origin,
+                                          r"See \cite{Hart}.", None)])
+        for kw, want in [({"dated": "2019-12-31"}, []),
+                         ({"dated": "2020-01-01"}, ["study-chart-date"]),
+                         ({"dated": None}, ["study-chart-date"]),
+                         ({"dated": '"December 4, 2019"'}, ["study-chart-date"]),
+                         ({**none, "dated": "2019-12-04"}, ["study-chart-date"]),
+                         ({**none, "dated": None}, [])]:
+            with self.subTest(**kw):
+                self.block = {"path": self.data,
+                              "charts": {} if kw.get("chart") == "none" else {0: {"url": CHART}}}
+                self.toml(**kw)
+                self.assertEqual(codes(self.attach()[2]), want)
+
+    def test_each_reviewed_chart_date_is_blocks_own(self):
+        """Held to the chart itself, which the build never opens."""
+        b = config.block()
+        for f in sorted(study.DATA.glob("[0-9][0-9][0-9].toml")):
+            doc = tomllib.loads(f.read_text(encoding="utf-8"))
+            pdf = b["path"] / f"{doc['paper']:03d}.pdf"
+            if doc["chart"] == "none" or not pdf.exists():
+                continue
+            with self.subTest(f.name):
+                self.assertEqual(doc["chart_date"], block.dated(pdf))
 
     def test_strict_keys(self):
         self.toml()

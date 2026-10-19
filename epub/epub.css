@@ -28,6 +28,17 @@
   src: url(fonts/GaramondMath.otf);
 }
 math { font-family: "Garamond Math", math; }
+/* A study note's Greek and Hebrew, as on the site: the SBL fonts, as published. */
+@font-face {
+  font-family: "SBL Greek";
+  src: url(fonts/SBL_grk.ttf);
+}
+@font-face {
+  font-family: "SBL Hebrew";
+  src: url(fonts/SBL_Hbrw.ttf);
+}
+.lang[lang="grc"] { font-family: "SBL Greek", serif; }
+.lang[lang="he"] { font-family: "SBL Hebrew", serif; }
 
 body {
   font-family: "UB Goudy", serif;

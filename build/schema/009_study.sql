@@ -9,17 +9,19 @@ CREATE TABLE study_paper (
     file_sha256  TEXT NOT NULL,        -- data/study/NNN.toml, as built
     study_commit TEXT NOT NULL,        -- the edition's commit its originals were read at
     block_url    TEXT,                 -- Block's chart, as reviewed; NULL: the paper has none
-    block_month  TEXT,                 -- 'YYYY-MM', from the chart's address
+    block_date   TEXT,                 -- 'YYYY-MM-DD': the chart's date, as Block gives it
     n_notes      INTEGER NOT NULL,
     n_dropped    INTEGER NOT NULL      -- the edition's notes not carried, each with its reason
 );
 
--- A source the paper's notes cite: a \bibitem of the edition, as reviewed.
+-- A source the paper's notes cite: a \bibitem of the edition, as reviewed, or
+-- a work the review found a note quoting, which the edition does not list.
 CREATE TABLE study_source (
     id      INTEGER PRIMARY KEY,
     paper_n INTEGER NOT NULL REFERENCES study_paper(paper_n),
     key     TEXT NOT NULL,             -- as \cite names it
-    origin  TEXT NOT NULL,             -- the \bibitem it was made from (readers/study.py digest)
+    origin  TEXT,                      -- the \bibitem it was made from (readers/study.py digest);
+                                       -- NULL: added in review
     text    TEXT NOT NULL,
     html    TEXT NOT NULL,
     UNIQUE (paper_n, key)

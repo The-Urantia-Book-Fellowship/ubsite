@@ -57,8 +57,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive", "sqlite_wasm", "block"):
-            continue                                # not repositories: see audio(), srt(), texlive(), sqlite_wasm(), block()
+        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block"):
+            continue                                # not repositories: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block()
         path = (ROOT / cfg["path"]).resolve()
         if not path.is_dir():
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
@@ -144,6 +144,16 @@ def sqlite_wasm() -> dict:
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["sqlite_wasm"]
     return {"key": "sqlite_wasm", "url": cfg["url"], "sha256": cfg["sha256"], "commit": cfg["sha256"]}
+
+
+def sbl() -> dict[str, dict]:
+    """{key: {key, url, sha256, commit}} for the SBL fonts vendor/fonts/ holds:
+    each a single file, by its address and digest, taken by vendorlib as a
+    release is.  Served as published, never modified (sources.toml)."""
+    with open(ROOT / "sources.toml", "rb") as fh:
+        raw = tomllib.load(fh)
+    return {k: {"key": k, "url": raw[k]["url"], "sha256": raw[k]["sha256"], "commit": raw[k]["sha256"]}
+            for k in ("sbl_greek", "sbl_hebrew")}
 
 
 def block() -> dict:

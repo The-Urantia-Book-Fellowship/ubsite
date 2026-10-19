@@ -119,8 +119,10 @@ class Bibliography(unittest.TestCase):
 
     def test_named_on_the_lists_and_the_home_page_by_its_switch(self):
         self.assertIn('<li class="nst"><a href="/lists/bibliography">Bibliography</a>', get("/lists")[2])
+        n = len({k for k, _ in WORKS})
         self.assertRegex(get("/")[2], r'<span class="nst">of the\s+<a href="/lists/notes">study notes</a>'
-                                      r'[^<]*, with a <a href="/lists/bibliography">bibliography</a>')
+                                      r'[^<]*, with a <a href="/lists/bibliography">bibliography</a>'
+                                      rf' of {n} works they cite</span>')
 
 
 class Setting(unittest.TestCase):

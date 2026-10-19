@@ -12,6 +12,7 @@ without starting the site.
 
 from __future__ import annotations
 
+import datetime
 import re
 import sqlite3
 
@@ -162,7 +163,8 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     Each as reviewed (build/study.py): its number in the paper (num), its HTML,
     the sources it cites, in full and in the order of its [1], [2] (sources),
     and its credit.  Credit goes only where a note rests on someone's research
-    (Tigran, 2026-10-18): Block's chart for the paper, by its month and with
+    (Tigran, 2026-10-18): Block's chart for the paper, by its own date (Tigran,
+    2026-10-19: the address's month is when it was uploaded) and with
     its address (block, block_url), or a contributor's line as written
     (credit).  `key` is the note's in section.html, fn<key> and fnref<key>.  A
     section, the List of study notes and the EPUB all show a note through this.
@@ -171,7 +173,7 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     for f in con.execute(
             "SELECT f.id, f.html, f.html_hy, f.paragraph_id, f.anchor, f.ord, s.num, s.key, s.credit,"
             " s.human_source, p.ref AS para_ref, p.text AS para_text, p.paper_n, p.section_n,"
-            " p.para_n, pa.title AS paper_title, x.block_url, x.block_month"
+            " p.para_n, pa.title AS paper_title, x.block_url, x.block_date"
             " FROM study_note s JOIN footnote f ON f.id = s.footnote_id"
             " JOIN paragraph p ON p.id = f.paragraph_id JOIN paper pa ON pa.n = p.paper_n"
             " JOIN study_paper x ON x.paper_n = s.paper_n"
@@ -181,9 +183,9 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
             "SELECT x.html FROM study_cite c JOIN study_source x ON x.id = c.source_id"
             " WHERE c.footnote_id = ? ORDER BY c.ord", (n["id"],))]
         n["block"] = None
-        if n["credit"] == "block" and n["block_month"]:
-            y, m = n["block_month"].split("-")
-            n["block"] = f"{MONTHS[int(m) - 1]} {y}"
+        if n["credit"] == "block" and n["block_date"]:
+            d = datetime.date.fromisoformat(n["block_date"])
+            n["block"] = f"{MONTHS[d.month - 1]} {d.day}, {d.year}"
             n["credit"] = None
         out.append(n)
     return out

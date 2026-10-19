@@ -1,0 +1,307 @@
+# Paper 1, The Universal Father: the British Study Edition's 34 notes at 2474116,
+# reviewed 2026-10-19 against the press text, Block's chart for Paper 1 (dated
+# March 14, 2023, at its 2023/07 address), and the edition's own KJV.  The
+# review, numbered F1-F34 in the order of the text, is var/study/review-001.md.
+# All 34 ruled by Tigran on 2026-10-19 and carried: F5 and F6 with White as
+# the source, as he asked, the rest as proposed.
+
+paper = 1
+chart = "https://urantiabooksources.com/wp-content/uploads/2023/07/001.pdf"
+chart_date = 2023-03-14          # as Block dates it on its first page
+
+# The sources as Block's chart lists them, page 1, without the degrees and
+# honours it copies from their title pages (Tigran, 2026-10-19: "drop the
+# degrees as is custom for bibliographies"), and under the keys every later
+# paper is to use for them (one key, one work: build/study.py one_work_one_key).
+
+[[source]]
+key = "Knudson"
+origin = "b2e56294dc68ca61"
+tex = '''Albert C. Knudson, \emph{The Doctrine of God} (New York: Abingdon-Cokesbury Press, 1930).'''
+
+[[source]]
+key = "Matthews"
+origin = "f7800c54fb22a6c7"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+[[source]]
+key = "Illingworth"
+origin = "4694671c303a318a"
+tex = '''J.~R. Illingworth, \emph{Personality Human and Divine} (London and New York: The Macmillan Company, 1894).'''
+
+[[source]]
+key = "Nave"
+origin = "141746ff0231152c"
+tex = '''Orville J. Nave, \emph{Nave's Topical Bible: A Digest of the Holy Scriptures} (New York: Topical Bible Publishing Company, from press of Eaton \& Mains, 1896, 1897).'''
+
+# Ellen G. White's two works, which the edition does not list and Block's chart
+# names only in brackets, beside 1:0.5 and 1:1.2.  Tigran, 2026-10-19: "Block
+# says 'compare', but I say it is an obvious source."  Each checked in the
+# original, kept in ../block-sources/originals/ (its MANIFEST.tsv says where
+# from): the Review's issue of April 12, 1892, and the 1911 printing.
+
+[[source]]
+key = "White1892"
+origin = "none"
+tex = '''Ellen G. White, ``Sanctification Through the Truth'', \emph{Advent Review and Sabbath Herald} (Battle Creek, Michigan), vol.~69, no.~15, April 12, 1892, pp.~225--226.'''
+
+# The note quotes the 1911 wording, "He ... He ... Him"; the 1888 edition has the
+# sentence on the same page, p. 493, with "he" and "him".
+[[source]]
+key = "White1911"
+origin = "none"
+tex = '''Ellen G. White, \emph{The Great Controversy Between Christ and Satan: The Conflict of the Ages in the Christian Dispensation} (Mountain View, California: Pacific Press Publishing Association, 1911; first published 1888).'''
+
+# F1, ruled: as proposed, corrected: 1 Samuel 2:2 is Block's comparison, not one of Nave's verses, and pp. 434-436 are not one page; Sadler's identifications from Block's endnotes; the credit line replaces 'Here and in the notes below'
+[[note]]
+at = "1:0.1"
+after = "the prophet said:"
+origin = "5243af2f44047c31"
+credit = "block"
+tex = '''Not one prophet's words but several verses. Three stand in Nave's Topical Bible under \textsc{God}: \textsc{Creator} \cite{Nave}, pp.~434--436: Nehemiah~9:6, Psalms~33:6 and Psalms~104:2. For ``You, God, are alone; there is none beside you'', Block compares the first words of Nehemiah~9:6 and 1~Samuel~2:2; Dr~Sadler, in his \textit{Analytical Study of Part~I of the Urantia Book} (1964), named 2~Kings~19:15 and Deuteronomy~4:35. In Psalms~33:6, ``By the word of the \textsc{Lord} were the heavens made'' has become ``By the Sons of God were the universes made'', which agrees in advance with \bibref[1:2.9]{p001 2:9}: the universes of time and space are created by the Sons.'''
+
+# F2, ruled: kept as the edition has it
+[[note]]
+at = "1:0.1"
+after = "as a curtain.”"
+origin = "cc4f93d2dad77ccc"
+tex = '''Psalms~104:1--2: ``Bless the \textsc{Lord}, O my soul. O \textsc{Lord} my God, thou art very great; thou art clothed with honour and majesty. Who coverest \bibemph{thyself} with light as \bibemph{with} a garment: who stretchest out the heavens like a curtain.'''''
+
+# F3, ruled: as proposed, a tie in the reference, as the rest have
+[[note]]
+at = "1:0.2"
+after = "to be inhabited.”"
+origin = "fb7a594810f40bdd"
+tex = '''Isaiah~45:18: ``For thus saith the \textsc{Lord} that created the heavens; God himself that formed the earth and made it; he hath established it, he created it not in vain, he formed it to be inhabited: I \bibemph{am} the \textsc{Lord}; and \bibemph{there is} none else.'''''
+
+# F4, ruled: kept as the edition has it
+[[note]]
+at = "1:0.3"
+after = "I am perfect.”"
+origin = "e9721da68ae7aa71"
+tex = '''Matthew~5:48: ``Be ye therefore perfect, even as your Father which is in heaven is perfect.'''''
+
+# F5, ruled (Tigran, 2026-10-19): White is the source, not a comparison, so no 'Compare', and the article cited in full, with its page
+[[note]]
+at = "1:0.5"
+after = "infinity and eternity."
+origin = "6c4d5d3c5d776a05"
+credit = "block"
+tex = '''White~\cite{White1892}, p.~225: the command of Matthew~5:48 ``would never have been given, if every provision had not been made whereby we may become as perfect in our sphere as God is in his.'''''
+
+# F6, ruled (Tigran, 2026-10-19): White is the source, not a comparison, cited in full; the 1911 printing, whose wording the note quotes; and 'not in this passage' for 'not in White', as proposed
+[[note]]
+at = "1:1.2"
+after = "his material creatures."
+origin = "ed76097efc858cb1"
+credit = "block"
+tex = '''White~\cite{White1911}, p.~493: ``He takes no pleasure in a forced allegiance, and to all He grants freedom of will, that they may render Him voluntary service.'' The argument that the will is therefore man's only possible gift is not in this passage.'''
+
+# F7, ruled: kept as the edition has it
+[[note]]
+at = "1:1.6"
+after = "the everlasting God”"
+origin = "d260fc56cd29e7c9"
+tex = '''Isaiah~40:28: \textheb{אֱלֹהֵי עוֹלָם} $=$ ``God of eternity''.'''
+
+# F8, ruled: kept as the edition has it
+[[note]]
+at = "1:1.6"
+after = "who “inhabits eternity.”"
+origin = "e931eab0ef0264d8"
+tex = '''Isaiah~57:15: \textheb{שֹׁכֵן עַד} $=$ ``dwelling eternally'' or ``inhabiting eternity''.'''
+
+# F9, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:2.2"
+after = "than reality idealized"
+origin = "223ae3bbfb2253ac"
+credit = "block"
+tex = '''The redefinitions of God denied in this paragraph are those surveyed in Knudson~\cite{Knudson}, pp.~210--213, where God is ``reality idealized'' or ``a law or process''; and Knudson quotes the last of them without attribution: ``It has been said that `God is the noblest work of man'\,''.'''
+
+# F10, ruled: as proposed, where Ingersoll wrote them, so that a reader can check
+[[note]]
+at = "1:2.2"
+after = "work of man.”"
+origin = "1d327cf01394cd47"
+tex = '''The words ``An honest God is the noblest work of man'' belong to the American lawyer Robert Green Ingersoll (1833--1899), who wrote them in ``The Gods'' (1872).'''
+
+# F11, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:2.3"
+after = "three experiential phenomena:"
+origin = "350a48fed3149932"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, pp.~218--219, grounds the ``religious argument'' in man's ``capacity for religion as original and distinct as is his capacity for art, for morality, and for science''. Here the ground is not a human capacity but the presence of the Adjuster.'''
+
+# F12, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:2.7"
+after = "plausible to philosophy"
+origin = "1441b8e7135b166b"
+credit = "block"
+tex = '''Compare Knudson~\cite{Knudson}, p.~241: the theoretical arguments ``do not demonstrate the existence of God'', but ``they do make it clear that the theistic world-view is `the line of least resistance' for the intellect''.'''
+
+# F13, ruled: kept as the edition has it
+[[note]]
+at = "1:3.1"
+after = "God is spirit.”"
+origin = "99f86495734fd1f1"
+tex = '''John~4:24: ``God \bibemph{is} a Spirit: and they that worship him must worship \bibemph{him} in spirit and in truth.'''''
+
+# F14, ruled: kept as the edition has it
+[[note]]
+at = "1:3.1"
+after = "only true God.”"
+origin = "6ddfb4003f76bec5"
+tex = '''1~Timothy~1:17: ``Now unto the King eternal, immortal, invisible, the only wise God, \bibemph{be} honour and glory for ever and ever. Amen.'''''
+
+# F15, ruled: kept as the edition has it
+[[note]]
+at = "1:3.2"
+after = "perceive him not.”"
+origin = "2e97937ca89222d5"
+tex = '''A direct quote of Job~9:11.'''
+
+# F16, ruled: kept as the edition has it
+[[note]]
+at = "1:3.3"
+after = "me and live.”"
+origin = "6c5637d28f5f9b44"
+tex = '''Exodus~33:20: ``And he said, Thou canst not see my face: for there shall no man see me, and live.'''''
+
+# F17, ruled: kept as the edition has it
+[[note]]
+at = "1:3.3"
+after = "or can see.”"
+origin = "55b63bab92eb4b7d"
+tex = '''1~Timothy~6:16: ``Who only hath immortality, dwelling in the light which no man can approach unto; whom no man hath seen, nor can see: to whom \bibemph{be} honour and power everlasting. Amen.'''''
+
+# F18, ruled: kept as the edition has it
+[[note]]
+at = "1:4.2"
+after = "temples of God.”"
+origin = "adea1a2b89536629"
+tex = '''1~Corinthians~3:16: ``Know ye not that ye are the temple of God, and \bibemph{that} the Spirit of God dwelleth in you?'''''
+
+# F19, ruled: kept as the edition has it
+[[note]]
+at = "1:4.3"
+after = "who gave it.”"
+origin = "10969e459da88454"
+tex = '''Ecclesiastes~12:7: ``Then shall the dust return to the earth as it was: and the spirit shall return unto God who gave it.'' Note, that ``as it was'' is a more accurate rendering of both the Hebrew (MT) \textheb{כְּשֶׁהָיָה} and the Greek (LXX) \textgreek{ὡς ἦν}.'''
+
+# F20, ruled: as proposed, 'between ... from', and the book's spelling of the name, Center
+[[note]]
+at = "1:5.1"
+after = "he not see?”"
+origin = "540d8df39e990457"
+tex = '''Psalms~94:9: ``He that planted the ear, shall he not hear? he that formed the eye, shall he not see?'' Note, that ``he that planted'' is a more accurate translation of the Hebrew \textheb{הֲנֹטַע} and Greek \textgreek{ὁ φυτεύσας}, than ``he who planned'' given in the text. This is probably intentional to differentiate God as the First Source and Center from the Creator Son or even from the ultimate actual agencies (Life Carriers) who directly ``planted'' the ear and all other organs. But if so, then why is \textheb{יֹצֵר} correctly given as ``he who formed'' in the second part of this verse?'''
+
+# F21, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:5.2"
+after = "and beautiful personality."
+origin = "9e9355e99bc91b70"
+credit = "block"
+tex = '''Compare Matthews~\cite{Matthews}, pp.~159--164: if the idea of the ``supra\hyp{}personal'' has any meaning, ``the religious consciousness would be, on the whole, in favour of ascribing this to God'' (p.~163).'''
+
+# F22, ruled: kept as the edition has it
+[[note]]
+at = "1:5.3"
+after = "which are made.”"
+origin = "3ec8d4a18c997385"
+tex = '''Romans~1:20: ``For the invisible things of him from the creation of the world are clearly seen, being understood by the things that are made, \bibemph{even} his eternal power and Godhead; so that they are without excuse.'''''
+
+# F23, ruled: as proposed, Knudson's word is 'organization', not 'organism'; and 'not in Knudson' to what can be checked
+[[note]]
+at = "1:5.11"
+after = "materialism or pantheism."
+origin = "623dbfe69fd57b9a"
+credit = "block"
+tex = '''The argument of this and the next paragraph is that of Knudson~\cite{Knudson}, pp.~285--293: both these types of philosophy ``have maintained that personality is indissolubly bound up with a material organization''. The positive alternative, ``a union of mind and spirit'' (\bibref[1:5.12]{p001 5:12}), is not in the passages of Knudson that Block sets beside them.'''
+
+# F24, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:5.15"
+after = "finality of perfectness"
+origin = "bf139509b7dc6d74"
+credit = "block"
+tex = '''This reverses Knudson~\cite{Knudson}, p.~294, where Th.~Steinmann is quoted: to be a person ``means to be in the process of becoming one. At least this is true of men\ldots{} God is not a struggling and developing Being; he is `complete'.'' Here an unqualified completeness would be an ``awful limitation'', which the Father escapes by taking part in the very struggle that Steinmann reserved for men.'''
+
+# F25, ruled: kept as the edition has it
+[[note]]
+at = "1:5.16"
+after = "he is afflicted.”"
+origin = "4f9d2c9bd6c4094f"
+tex = '''Isaiah~63:9: ``In all their affliction he was afflicted, and the angel of his presence saved them: in his love and in his pity he redeemed them; and he bare them, and carried them all the days of old.'''''
+
+# F26, ruled: kept as the edition has it
+[[note]]
+at = "1:5.16"
+after = "have our being.”"
+origin = "b8a77f722cbaf2f1"
+tex = '''Acts~17:28: ``For in him we live, and move, and have our being; as certain also of your own poets have said, For we are also his offspring.'' Here, by ``certain also of your own poets'' Paul is probably referring to Aratus (315--240\,B.C.) who wrote in \textgreek{Φαινόμενα}~4--5: ``Everywhere everyone is indebted to Zeus. For we are indeed his offspring.'''''
+
+# F27, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:6.1"
+after = "divine Creator personality."
+origin = "216f1bf5abb66747"
+credit = "block"
+tex = '''Compare Lotze, quoted in Illingworth~\cite{Illingworth}, p.~53: ``Perfect personality is in God only; to all finite minds there is allotted but a pale copy thereof''.'''
+
+# F28, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:6.5"
+after = "a loveless person."
+origin = "6bffe18c7b24c373"
+credit = "block"
+tex = '''Illingworth~\cite{Illingworth}, pp.~120--124: a loving Person ``cannot reveal Himself as such to those who have no notion that love must involve sacrifice, and has in it, therefore, an awful element of sternness''. Here sacrifice and sternness are left out.'''
+
+# F29, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:6.6"
+after = "satisfaction of believers."
+origin = "9b93d3ed5a3bbcc2"
+credit = "block"
+tex = '''Compare Illingworth~\cite{Illingworth}, pp.~136--137: such testimony is given ``less for the conviction of opponents than for the confirmation of kindred souls''.'''
+
+# F30, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:6.7"
+after = "and personality managed."
+origin = "b8515f0a254213fb"
+credit = "block"
+tex = '''The argument from intelligibility is that of Illingworth~\cite{Illingworth}, p.~210.'''
+
+# F31, ruled: as proposed, 'not in Knudson' to what can be checked
+[[note]]
+at = "1:7.2"
+after = "with the ocean."
+origin = "1c34ba34c29e2d62"
+credit = "block"
+tex = '''The argument of \bibref[1:7.1--3]{p001 7:1} is that of Knudson~\cite{Knudson}, pp.~305--307: ``There may be interactions between impersonal beings''; union with God is not ``the union of absorption'' but ``a union that grows out of reciprocal intercourse''; and ``only a personal being can be good''. The image of the drop and the ocean, and the contrast of goodness with truth and beauty in \bibref[1:7.3]{p001 7:3}, are not in the passages of Knudson that Block sets beside them.'''
+
+# F32, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:7.4"
+after = "and our environment."
+origin = "e75a00478a173544"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~314: we maintain our unity and identity ``over against the changing many. How this is possible we do not know, but it is a fact of our own experience; and what holds true of us in a limited degree we are warranted in ascribing to God in an unlimited degree.'''''
+
+# F33, ruled: kept as the edition has it
+[[note]]
+at = "1:7.6"
+after = "God is one.”"
+origin = "b3107e6401821fed"
+tex = '''Deuteronomy~6:4 says: \textheb{שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ יְהוָה אֶחָד} ``Hear, O Israel! Yahweh our God, Yahweh \bibemph{is} One.'' This formula is literally quoted in the Greek text of Mark~12:29: \textgreek{Ἄκουε, Ἰσραήλ, κύριος ὁ θεὸς ἡμῶν κύριος εἷς ἐστιν}.'''
+
+# F34, ruled: kept as the edition has it, but for its source's key
+[[note]]
+at = "1:7.7"
+after = "absolute or infinite."
+origin = "9654ac2049e37f1c"
+credit = "block"
+tex = '''The premise that makes this follow is left out here. It is in Knudson~\cite{Knudson}, p.~313: ``If unity is to be ascribed to the world-ground, it must be lifted to a superspatial and supertemporal level.'''''

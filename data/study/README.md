@@ -27,11 +27,15 @@ Every note is read, checked and edited, so that it asserts as fact nothing a rea
 
 Every such change is proposed in the review and ruled on by Tigran, note by note, each numbered F1… in the order of the text.
 
-**Each card stands alone.** A reader opens one note at a time, so "Here and in the notes below…" becomes a credit line on each note (`credit = "block"`).
+**Each card stands alone.** A reader opens one note at a time, so "Here and in the notes below…" becomes a credit line on each note (`credit = "block"`). Block is credited on a note that rests on a human source his chart identifies, never on one that only gives a Bible reference, though his chart may give the verse too: the editor recognised those himself (Tigran, 2026-10-19).
+
+**A source is cited as bibliographies cite it**: author, title, place, publisher, year, without the degrees and honours a title page or Block's chart gives ("Orville J. Nave", not "Orville J. Nave, A.M., D.D., LL.D."; Tigran, 2026-10-19).
 
 **A note may point to a note still to come** (Tigran, ruling on Paper 0, 2026-10-19). 0:5.11's "see the note at 103:8.6" stays as the edition has it, and its link opens 103:8.6, where the note will stand once Paper 103 is reviewed. What the note there is to give, where Tigran has said, is in the comment above the pointing note in its file; `tools/study/draft.py` puts every reviewed note that links into a paper at the head of that paper's draft, so that it is read with the comment when the paper's turn comes.
 
-**Human sources come from Block's current chart**, the one `../block-sources/MANIFEST.tsv` lists for the paper, never from the edition's citation of an older one. The file names that chart; a chart revised since fails the build until the notes are checked against it. Refreshing `../block-sources` (`../explore-tools/block_fetch.py`, which uses the network) is Tigran's call.
+**Human sources come from Block's current chart**, the one `../block-sources/MANIFEST.tsv` lists for the paper, never from the edition's citation of an older one. The file names that chart, and its date as Block gives it on its first page, "WORK-IN-PROGRESS (MARCH 14, 2023)", which a note's credit shows (Tigran, 2026-10-19): the address's month is only when the chart was uploaded, July 2023 for that one. The draft proposes the date from the chart, and `tests/test_study.py` holds it there. A chart revised since fails the build until the notes are checked against it. Refreshing `../block-sources` (`../explore-tools/block_fetch.py`, which uses the network) is Tigran's call.
+
+**A work a note quotes is a source, cited in full, even where the edition does not list it and Block only compares it** (Tigran, 2026-10-19, of Ellen G. White in Paper 1: "Block says 'compare', but I say it is an obvious source"). It is added as a `[[source]]` with `origin = "none"`, checked in the original, page and words, and the original is kept in `../block-sources/originals/`, whose `MANIFEST.tsv` gives the official address it was downloaded from. The note then cites it as any other, `White~\cite{White1892}, p.~225`, without "Compare".
 
 ## How a paper is reviewed
 
@@ -46,10 +50,11 @@ Every such change is proposed in the review and ruled on by Tigran, note by note
 ```toml
 paper = 0
 chart = "https://urantiabooksources.com/wp-content/uploads/2019/12/000.pdf"   # or "none"
+chart_date = 2019-12-04             # the chart's date as Block gives it on its first page; none without a chart
 
 [[source]]                          # a \bibitem carried
 key = "Hartshorne"                  # what \cite names: the author's surname, the Bibliography's order
-origin = "1f3a…"                    # the \bibitem it was made from
+origin = "1f3a…"                    # the \bibitem it was made from; "none" for a work the review adds
 tex = '''Charles Hartshorne, \emph{Man's Vision of God and the Logic of Theism} (Chicago: Willett, Clark \& Company, 1941).'''
 
 [[note]]

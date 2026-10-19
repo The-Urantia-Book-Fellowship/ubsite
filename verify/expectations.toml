@@ -115,6 +115,6 @@ measured_on = "2026-10-19"
 pages       = 10286      # 1,626 sections, 4,736 headwords, 27 index letters, 19 more, 3,878 reading paths
 paths       = 3878       # 2,058 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
-chunks      = 394
+chunks      = 396        # 394 + the SBL Greek and SBL Hebrew fonts, as published (2026-10-19)
 download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 44.0 at measurement
 raw_mb      = [160.0, 220.0] # unpacked: 191.0 at measurement

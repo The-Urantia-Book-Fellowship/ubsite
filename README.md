@@ -93,12 +93,14 @@ sqlite3 var/ub.db "SELECT COUNT(*) FROM citation_target ct JOIN paragraph p
 
 ### 1. `make vendor-check`, and when it fails
 
-Eight files are copied by value into `vendor/`, and their hashes are recorded in `vendor/UPSTREAM.lock`:
+Eleven files are copied by value into `vendor/`, and their hashes are recorded in `vendor/UPSTREAM.lock`:
 
 - `latex_tokenizer.py`, `macros.py` and `normalize.py` from press's `tools/text-verify/`;
 - `cite.py` and `xref.py` from the index;
 - `hyphen.tex`, Knuth's hyphenation patterns, from TeX Live (`[texlive]` in `sources.toml`). It is "NOT TO BE CHANGED IN ANY WAY", so a difference there means `sources.toml` names the wrong TeX Live tree.
 - `sqlite3.js` and `sqlite3.wasm`, SQLite's WebAssembly build, from a release zip that `sources.toml` names by its URL and SHA-256 (`[sqlite_wasm]`). A release cannot move, so `vendor-check` holds the two files to the lock, and the lock to the release `sources.toml` names, without the network; `vendor-sync` fetches the zip only when `sources.toml` names another. To adopt a new release, give its URL and SHA-256 there, then `make vendor-sync`.
+- `Garamond-Math.otf`, the study notes' math, from TeX Live, beside `hyphen.tex`.
+- `SBL_grk.ttf` and `SBL_Hbrw.ttf`, the study notes' Greek and Hebrew, each a single file that `sources.toml` names by its address on SBL's fonts page and its SHA-256 (`[sbl_greek]`, `[sbl_hebrew]`), held as a release is. Not OFL: their licence lets them be served only as published, so they are never subset.
 
 `make data` runs `vendor-check` first. If upstream has moved, the build stops and prints a unified diff:
 
@@ -122,7 +124,7 @@ This is deliberate. Adopting upstream code is a reviewed commit, never a side ef
 To adopt:
 
 ```
-make vendor-sync          # copies all eight files and rewrites the lock
+make vendor-sync          # copies all eleven files and rewrites the lock
 git diff vendor/          # only what you reviewed, plus the lock's commit fields
 git commit -am 'vendor: adopt press macros.py at 3983645 (\fill, stripped)'
 ```

@@ -7,6 +7,7 @@
 
 paper = 0
 chart = "https://urantiabooksources.com/wp-content/uploads/2019/12/000.pdf"
+chart_date = 2019-12-04          # as Block dates it on its first page
 
 [[source]]
 key = "Hartshorne"

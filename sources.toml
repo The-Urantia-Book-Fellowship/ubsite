@@ -53,6 +53,9 @@ path = "data/srt/considerations.html"
 # alone: a paper's study notes are reviewed against its chart, data/study/NNN.toml
 # names the chart reviewed, and a chart revised since fails the build until the
 # notes are reviewed against it (build/study.py).  tools/study/ reads the PDFs.
+# Its originals/ holds, by hand, the works themselves where a note was checked
+# against one (Ellen G. White's, for Paper 1), with a MANIFEST.tsv of where
+# each was downloaded from; nothing here reads it yet.
 [block]
 path = "../block-sources"
 
@@ -76,6 +79,29 @@ path = "/usr/local/texlive/2026/texmf-dist"
 [sqlite_wasm]
 url    = "https://sqlite.org/2026/sqlite-wasm-3530400.zip"
 sha256 = "b38d042be415af040679804dbf66264c6e6ec324d79840c284f673c4f2a63c4d"
+
+# The fonts a study note's Greek and Hebrew are set in, as the British Study
+# Edition sets them and Tigran writes them (2026-10-19): SBL Greek 1.00 Build 010
+# (2009-03-06) and SBL Hebrew 1.56a Build 016 (2010-12-15), John Hudson's, Tiro
+# Typeworks, the latest the Society of Biblical Literature offers, from its fonts
+# page (https://www.sbl-site.org/fonts), by address and digest.  Until then the
+# device's own font drew them, and Georgia drew 1:7.6's θεὸς as θεο` ς.
+#
+# NOT OFL.  The SBL Font EULA, in each font's name table and at
+# https://www.sbl-site.org/wp-content/uploads/2024/05/SBL_Font_End_User_License_Agreement.pdf:
+# free for non-commercial use (2); embedded "in non-commercial electronic
+# documents, including but not limited to web pages and e-books" (5);
+# redistributed only unmodified, with its notices (3), never "any modified
+# version", derivatives "in any format" being Tiro's (4).  So each is served as
+# published, byte for byte: never subset, never made WOFF2.  build/fonts.py
+# copies it into ubsite/static/fonts/ and fails on any other bytes.
+[sbl_greek]
+url    = "https://www.sbl-site.org/wp-content/themes/basket/fonts/bib-fonts/SBL_grk.ttf"
+sha256 = "cbf8b1a87a4a311e2aa9b5b2995f83b23159fbe0ca9ca517d3fd43b5911e925a"
+
+[sbl_hebrew]
+url    = "https://www.sbl-site.org/wp-content/themes/basket/fonts/bib-fonts/SBL_Hbrw.ttf"
+sha256 = "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99"
 
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the

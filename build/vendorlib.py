@@ -14,6 +14,8 @@ A release (SQLite's WebAssembly build) is not a tree here but a zip, by its
 address and digest in its [sqlite_wasm] entry.  It cannot move, so ``check()``
 holds our copy to the lock alone, and to the release that entry names;
 ``sync()`` fetches the zip only when it names one the lock does not record.
+A single file by its address and digest (the SBL fonts) is taken the same way,
+the file being the release.
 """
 
 from __future__ import annotations
@@ -46,6 +48,10 @@ MANIFEST = [
     # browser (ubsite/static/sw.js): the classic script and its binary.
     ("sqlite_wasm", "jswasm/sqlite3.js",               "sqlite-wasm/sqlite3.js"),
     ("sqlite_wasm", "jswasm/sqlite3.wasm",             "sqlite-wasm/sqlite3.wasm"),
+    # The fonts a study note's Greek and Hebrew are set in: not OFL, and served
+    # as published, never subset (config.sbl()).
+    ("sbl_greek", "SBL_grk.ttf",                       "fonts/SBL_grk.ttf"),
+    ("sbl_hebrew", "SBL_Hbrw.ttf",                     "fonts/SBL_Hbrw.ttf"),
 ]
 
 
@@ -57,10 +63,13 @@ def _src(repos, key, rel):
     return (pathlib.Path(repos[key]["path"]) / rel).resolve()
 
 
-def _release(src: dict) -> zipfile.ZipFile | None:
-    """The release zip its entry names, fetched and held to its digest."""
+def _release(src: dict) -> zipfile.ZipFile | bytes | None:
+    """The release its entry names, fetched and held to its digest: a zip, or
+    a single file, which is returned as it is."""
     try:
-        with urllib.request.urlopen(src["url"], timeout=60) as r:
+        # Named: SBL's server refuses urllib's own User-Agent with a 403.
+        req = urllib.request.Request(src["url"], headers={"User-Agent": "ubsite vendor-sync"})
+        with urllib.request.urlopen(req, timeout=60) as r:
             blob = r.read()
     except OSError as e:
         print(f"vendor: could not fetch {src['url']}: {e}", file=sys.stderr)
@@ -69,12 +78,15 @@ def _release(src: dict) -> zipfile.ZipFile | None:
         print(f"vendor: {src['url']} is not the release [{src['key']}] names "
               f"(sha256 {sha256(blob)})", file=sys.stderr)
         return None
-    return zipfile.ZipFile(io.BytesIO(blob))
+    return zipfile.ZipFile(io.BytesIO(blob)) if src["url"].endswith(".zip") else blob
 
 
-def _member(z: zipfile.ZipFile, rel: str) -> bytes | None:
+def _member(z: zipfile.ZipFile | bytes, rel: str) -> bytes | None:
     """A file of the release by its path under the zip's one top directory,
-    which is named for the release (sqlite-wasm-3530400/jswasm/sqlite3.js)."""
+    which is named for the release (sqlite-wasm-3530400/jswasm/sqlite3.js);
+    a single file is its own release."""
+    if isinstance(z, bytes):
+        return z
     names = [n for n in z.namelist() if n.split("/", 1)[-1] == rel]
     return z.read(names[0]) if len(names) == 1 else None
 
