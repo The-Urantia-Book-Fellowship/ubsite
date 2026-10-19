@@ -51,6 +51,7 @@ MATH_BASE = "0123456789+−=()[],./"
 # note draws in its script.  The other scripts are still the device's.
 SBL = {"grc": "SBL_grk.ttf", "he": "SBL_Hbrw.ttf"}
 FORBIDDEN = "Goudy-Handtooled-BT.ttf"
+ASCII = "".join(map(chr, range(0x20, 0x7F)))
 
 # Characters the site draws on purpose in another face, and where.  The gate
 # excuses these and nothing else.
@@ -161,7 +162,9 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
                     "Goudy Handtooled BT is proprietary and must never be served")
     # Spaces count -- the footer's "UB&nbsp;Goudy" needs U+00A0 -- but a line
     # break is not drawn.
-    wanted = {c for c in corpus_codepoints(con) | chrome_codepoints(site)
+    # Every printable ASCII character too, used or not: a search draws back
+    # whatever a reader typed, and | \ ` would otherwise come from another face.
+    wanted = {c for c in corpus_codepoints(con) | chrome_codepoints(site) | set(ASCII)
               if unicodedata.category(c) != "Cc" and c not in ELSEWHERE}
     _, other, maths = study_codepoints(con)
     for lang, chars in sorted(other.items()):
