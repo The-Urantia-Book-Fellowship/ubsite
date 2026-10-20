@@ -82,4 +82,4 @@ Not a release, and not news: what the site was when this file began, for whoever
 - Its schema is `build/schema/*.sql`; `PRAGMA user_version` is 1.
 - The text API, `/api/v1`, documented at `/api`, is at text version 8.
 - Python 3.12, FastAPI and Jinja2, rendered on the server; the offline copy is the site's own pages, held to the server's byte for byte by `make offline`.
-- `make epub` makes the whole site an EPUB 3, private for now.
+- `make epub` made the whole site an EPUB 3, private, until it was retired on October 19, 2026; the tag `epub-last` is the last commit that builds it.
