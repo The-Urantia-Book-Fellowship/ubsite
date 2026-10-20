@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Paper 4, God's Relation to the Universe, has study notes too, 27 of them, and the Bibliography lists the work they add.
 - Paper 3, The Attributes of God, has study notes too, 32 of them, and the Bibliography lists the four works they add.
 - Ctrl+, opens Settings from any page, and closes it again.
 - Space, Page Down and the right arrow turn the page, keeping the last line read at the top, and Settings can make a tap on the text turn it too, on a phone or a tablet.

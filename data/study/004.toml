@@ -1,0 +1,262 @@
+# Paper 4, God's Relation to the Universe: the British Study Edition's 18
+# notes at 2474116, reviewed 2026-10-20 against the press text, Block's chart
+# for Paper 4 (dated March 7, 2020, read whole: it charts section 4 alone), the
+# edition's own KJV, and the originals: Hocking's Meaning of God in Human
+# Experience in Tigran's copy of the seventh printing, 1928, from the plates of
+# 1912, its pages confirmed in the first printing (Cornell's scan, archive.org
+# cu31924029077836), Knudson in Tigran's DjVu (originals/LIBRARY.tsv), Nave's
+# printing of 1901 and Sadler's Analytic Study of Part I
+# (../block-sources/originals/).  Three of Block's findings that no note gives
+# are added (F9a, F11a, F11b), and six found in review that neither Block nor
+# the edition gives (F0a, F1a, F5a, F6a, F7a, F18a).  The review, numbered
+# F1-F18 in the order of the text, each added note after the one before it
+# (F0a before F1), is var/study/review-004.md.  All 27 ruled by Tigran on
+# 2026-10-20 and carried as proposed, the six found in review with no credit
+# line, F5a and F18a among them (question 1).
+
+paper = 4
+chart = "https://urantiabooksources.com/wp-content/uploads/2020/03/004.pdf"
+chart_date = 2020-03-07          # as Block dates it on its first page
+
+# The sources as Block's chart lists them, page 1, without degrees, under the
+# keys earlier papers gave those it shares (one key, one work).  Knudson's
+# publisher as the title page of the 1930 printing has it (Paper 2).
+[[source]]
+key = "Knudson"
+origin = "4981dbf3a9a4785a"
+tex = '''Albert C. Knudson, \emph{The Doctrine of God} (New York: The Abingdon Press, 1930).'''
+
+[[source]]
+key = "Hocking"
+origin = "0b74ffb564fc9af6"
+tex = '''William Ernest Hocking, \emph{The Meaning of God in Human Experience: A Philosophic Study of Religion} (New Haven: Yale University Press, 1912).'''
+
+# Added: F0a, F1a, F5 and F6a cite it, under Papers 2 and 3's key and words;
+# checked in the printing of 1901 (originals/navestopicalbibl0000orvi_h3u8.pdf,
+# book page N = PDF page N+2).
+[[source]]
+key = "Nave"
+origin = "none"
+tex = '''Orville J. Nave, \emph{Nave's Topical Bible: A Digest of the Holy Scriptures} (New York: Topical Bible Publishing Company, from press of Eaton \& Mains, 1896, 1897).'''
+
+# Added: F5 quotes it, under Paper 3's key and words; checked in Urantia
+# Foundation's republication, p. 143.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# F0a, added in review, ruled as proposed: no note of the edition's is on this
+# paragraph, and Block's chart does not reach it; checked in Nave's page
+# images, pp. 440-443 and 457.
+[[note]]
+at = "4:1.3"
+after = "He is a faithful Creator.”"
+origin = "none"
+tex = '''Four of the five quotations of this paragraph stand in Nave's Topical Bible under \textsc{God}: \textsc{Faithfulness of} \cite{Nave}, pp.~440--443: 1~Corinthians~1:9 or 10:13, ``God is faithful'' (p.~443); Psalms~89:2, ``thy faithfulness shalt thou establish in the very heavens'' (p.~441); Psalms~119:89--90, ``For ever, O \textsc{Lord}, thy word is settled in heaven. Thy faithfulness is unto all generations: thou hast established the earth, and it abideth'' (p.~442, where Nave stops at ``generations'', and whole under \textsc{Immutable}, p.~457); and 1~Peter~4:19, ``as unto a faithful Creator'' (p.~443). No verse of the King James Version reads ``all his commandments are just'': under the same heading Nave has Psalms~111:7, ``all his commandments are sure'' (p.~442), and Romans~7:12 calls the commandment ``holy, and just, and good''.'''
+
+# F1, ruled as proposed: kept; every verse checked in the edition's KJV.
+[[note]]
+at = "4:1.4"
+after = "the everlasting arms.”"
+origin = "a94cc30785d0de8a"
+tex = '''Deuteronomy~33:27: ``The eternal God is thy refuge, and underneath are the everlasting arms: and he shall thrust out the enemy from before thee; and shall say, Destroy them.'' The other quotations of this paragraph are Psalms~91:1, Psalms~121:4 (``Behold, he that keepeth Israel shall neither slumber nor sleep''), Romans~8:28 (``to them that love God, to them who are the called according to his purpose'') and 1~Peter~3:12 (``his ears are open unto their prayers: but the face of the Lord is against them that do evil''). \textit{Thy} refuge and \textit{Israel} have become \textit{our} refuge and \textit{us}, and the destruction of the enemy, the face of the Lord against evildoers, and the called according to his purpose are left out.'''
+
+# F1a, added in review, ruled as proposed: checked in Nave's page images, pp. 485-497.
+[[note]]
+at = "4:1.4"
+after = "open to their prayers.”"
+origin = "none"
+tex = '''The five quotations of this paragraph stand in Nave's Topical Bible under \textsc{God}: \textsc{Preserver} \cite{Nave}, in the order Nave prints them: Deuteronomy~33:27 (p.~487), Psalms~91:1 and 121:4 (p.~489), Romans~8:28 and 1~Peter~3:12 (p.~493). The next paragraph's are near by: Hebrews~1:3 is under \textsc{Power of} (pp.~485--486), Nehemiah~9:6 is under \textsc{Preserver} (p.~488), and Psalms~104:30 under \textsc{Providence of} (p.~497).'''
+
+# F2, ruled as proposed: kept, with the rest of Psalms 104:30, which the next paragraph
+# echoes.
+[[note]]
+at = "4:1.5"
+after = "preserves them all.”"
+origin = "3b79b4332cba40f2"
+tex = '''Hebrews~1:3, of the Son: ``upholding all things by the word of his power''; Psalms~104:30: ``Thou sendest forth thy spirit, they are created''; Nehemiah~9:6: ``thou preservest them all''. The Son's upholding has become the Father's, and the Psalm's spirit has become the Sons, as the word of Psalms~33:6 did at \bibref[1:0.1]{p001 0:1}. The rest of the Psalm's verse, ``and thou renewest the face of the earth'', is in the next paragraph: ``all things are constantly being renewed''.'''
+
+# F3, ruled as proposed: kept.
+[[note]]
+at = "4:2.2"
+after = "system of Satania"
+origin = "9e00b367ecae3b1b"
+tex = '''Possibly a coined word from the Hebrew \textheb{שָׂטָן} \textit{satan} ``adversary'', resulting in the probable meaning of ``the hostile system''.'''
+
+# F4, ruled as proposed: kept.
+[[note]]
+at = "4:2.7"
+after = "by morontia mota"
+origin = "cbd85fe31d3ae822"
+tex = '''Possibly a coined word from the Latin \textit{motus} ``movement'', because the super\hyp{}knowledge corresponding to the true harmony of science, philosophy and religion is inherently active and moving.'''
+
+# F5, ruled as proposed: kept, with the verses of "jealous for" under the same heading of
+# Nave's, p. 460, and Sadler's comment, p. 143, checked in the republication.
+[[note]]
+at = "4:3.1"
+after = "never of him."
+origin = "5a9e4f59b526f90a"
+tex = '''Exodus~20:5: ``for I the \textsc{Lord} thy God am a jealous God''. \textit{Jealous for} is under the same heading of Nave's Topical Bible, \textsc{God}: \textsc{Jealous} \cite{Nave}, p.~460: ``I am jealous for Jerusalem and for Zion with a great jealousy'' (Zechariah~1:14; also Joel~2:18 and Ezekiel~39:25). Dr~Sadler set Zechariah~1:14 beside this paragraph: ``This concept of a jealous God was later exalted to a higher level'' \cite{Sadler2003}, p.~143.'''
+
+# F5a, added in review, ruled as proposed: checked in the book, pp. 346-347.
+[[note]]
+at = "4:3.2"
+after = "man understands such reactions."
+origin = "none"
+tex = '''Knudson~\cite{Knudson}, pp.~346--347, on the wrath of God: ``Some theologians have rejected it as an unworthy anthropomorphism on the ground that it is inconsistent with the divine love''. He keeps it, as indignation at wrongdoing, in which there is ``nothing of the vindictive or vengeful. It stands closer to grief and compassion''. Here wrath ``in the sense of these human emotions'' is set aside, and grief is kept: the Father's heart ``is undoubtedly grieved'' (\bibref[4:3.5]{p004 3:5}).'''
+
+# F6, ruled as proposed: corrected.  The Latin caligo has no sense "waste away": as a
+# noun, mist, darkness, gloom; as a verb, to be in darkness, to grope about
+# (Lewis and Short).
+[[note]]
+at = "4:3.3"
+after = "and the Caligastia"
+origin = "40eba5ba7dadb1a9"
+tex = '''Possibly a coined word from the Latin \textit{caligo}, as a noun ``mist, darkness, gloom'', and as a verb ``to be in darkness, to grope about'', giving the meaning ``the one who is in darkness''.'''
+
+# F6a, added in review, ruled as proposed: checked in Nave's page image, p. 457, and in
+# Knudson, pp. 315-316.
+[[note]]
+at = "4:3.4"
+after = "or ever will do."
+origin = "none"
+tex = '''Numbers~23:19: ``God is not a man, that he should lie; neither the son of man, that he should repent''; 1~Samuel~15:29: ``he is not a man, that he should repent''. Both stand first under \textsc{God}: \textsc{Immutable} in Nave's Topical Bible \cite{Nave}, p.~457. Knudson~\cite{Knudson} reads such verses as affirming God's ethical unchangeability, not his metaphysical immutability: ``The various passages that deny that God repents (for example, Num. 23. 19) \ldots{} are also to be so construed. This stress on the ethical constancy of God \ldots{} has to do with his `goodness,' which is the subject of the next chapter'' (pp.~315--316). The paper keeps the two apart as he does: this section, God's unchanging character, is of jealousy, wrath, repentance and goodness, and the metaphysical immutability is left to \bibref[4:4.2]{p004 4:2}, which follows Knudson's next pages.'''
+
+# F7, ruled as proposed: kept; Genesis 6:6 checked in the edition's KJV.
+[[note]]
+at = "4:3.5"
+after = "is undoubtedly grieved"
+origin = "f868f997637192cf"
+tex = '''Genesis~6:6: ``And it repented the \textsc{Lord} that he had made man on the earth, and it grieved him at his heart.'' Here the verse is divided: ``God repents of nothing'' (\bibref[4:3.4]{p004 3:4}), but his heart is grieved. Compare \bibref[3:6.6]{p003 6:6}, where a Divine Counselor does not know whether the Father suffers.'''
+
+# F7a, added in review, ruled as proposed: four pages after the one Block gives for the
+# next words; checked in Tigran's copy and in the first printing, pp. 187-188.
+[[note]]
+at = "4:4.1"
+after = "whole universe of universes,"
+origin = "none"
+tex = '''Hocking~\cite{Hocking}, p.~187: ``It may be well for us that the only changeless Being in the universe is the Absolute, if there be an Absolute.'' What Hocking allows only on a condition is here said of God without one; and his next page says what \bibref[4:4.2]{p004 4:2} goes on to say: ``Our Ultimate Reality must have qualities of both changelessness and change'' (p.~188).'''
+
+# F8, ruled as proposed: kept, but for "Here and in the notes below to this section",
+# which the credit line on each card replaces; checked in the book, p. 183.
+[[note]]
+at = "4:4.1"
+after = "and no future."
+origin = "7df5ee8bb30cc4c4"
+credit = "block"
+tex = '''Hocking~\cite{Hocking}, p.~183, of the Absolute: ``final, resting in itself---having no outside, nor beyond''.'''
+
+# F9, ruled as proposed: kept; checked in the book, p. 246.
+[[note]]
+at = "4:4.1"
+after = "existent and universal."
+origin = "1328c8fce41d2e0f"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~246: ``The Absolute is purposive energy, will, rather than abstract reason.'''''
+
+# F9a, added, ruled as proposed: Block's finding, checked in the book, p. 245.
+[[note]]
+at = "4:4.2"
+after = "absolutely independent."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~245, of the third meaning of \textit{absolute}, ``independent'' or ``self-existent'': ``The Absolute is not the `unrelated' nor is it the `unlimited' in the sense of being the All; it is the independent and self-existent cause or ground of a dependent world.'''''
+
+# F10, ruled as proposed: corrected and extended.  Knudson's section on immutability
+# begins on p. 314, where Block gives its first sentence for the paragraph's
+# second; p. 315 quoted more fully, on the page Block gives.
+[[note]]
+at = "4:4.2"
+after = "Lord, change not.”"
+origin = "966be2f32bde792d"
+credit = "block"
+tex = '''Malachi~3:6: ``For I am the \textsc{Lord}, I change not''. It is quoted in that form at \bibref[2:2.1]{p002 2:1}; here it is in the wording of Knudson~\cite{Knudson}, p.~315, in the section on immutability that this paragraph follows (pp.~314--317). The section opens, ``As unity denies divisibility, so immutability denies change'' (p.~314), and the next page says that God's being unchangeable ``means, then, that he is self-existent and eternal'' and affirms ``an identity of being within God himself'' (p.~315): the two sentences before the quotation here.'''
+
+# F11, ruled as proposed: corrected.  Knudson's unity to plurality is not added but
+# recast; his "key" is self-identity.  The credit line corrects Block's
+# quotation of p. 316.
+[[note]]
+at = "4:4.2"
+after = "he is will."
+origin = "f4f0265e864be469"
+credit = "block"
+corrects = '''``thought of as changeless substance'' for his ``thought as'''''
+tex = '''Knudson~\cite{Knudson}, p.~316: ``Just as there is no way of passing from simplicity to complexity or from unity to plurality, so there is no way of passing from identity to change or from immutability to motion. If God be thought of as changeless substance, there would be no way of accounting for the advancing cosmic movement.'' He finds the immutable principle in ``the unique power of self-consciousness'', its ``capacity of self-identity'' being ``the key, and only key, to the divine immutability'', and concludes: ``Immutability is thus completely dissociated from immobility'' (pp.~316--317). Here the impossible transitions are the ones God makes; two are added, from infinity to finitude and from the divine to the human; Knudson's unity to plurality has become unity to duality and triunity; and the key is not self-consciousness but will.'''
+
+# F11a, added, ruled as proposed: Block's finding, checked in the book, pp. 248 and 262.
+[[note]]
+at = "4:4.3"
+after = "his eternal nature."
+origin = "none"
+credit = "block"
+corrects = '''``dependent upon God'' for his ``dependent on God'''''
+tex = '''Knudson~\cite{Knudson}, p.~248: ``Almightiness and creatorship mean absoluteness. They mean that the entire world is dependent upon God for its existence and that there are no limits to his power except those which he himself has imposed.'' And p.~262: ``We may distinguish two kinds of limitations---those that are imposed from without and those that are self-imposed or that inhere in the divine nature. It is only the latter that may be affirmed of God.'' Both of Knudson's kinds of limitation that may be affirmed of God are here: the self-imposed, and the qualities and attributes ``which inherently characterize his eternal nature''.'''
+
+# F11b, added, ruled as proposed: Block's finding, checked in the book, pp. 242 and 248.
+[[note]]
+at = "4:4.4"
+after = "will is his alone."
+origin = "none"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~242, opening his chapter ``The Absoluteness of God'': ``Personality and goodness are characteristics that God shares with men, but absoluteness sets him apart from all creaturely existence.'' And p.~248: ``The Christian God is absolute by virtue of the fact that he is `the Father Almighty, Maker of heaven and earth.'\,'' Here the Creed's Father Almighty is the Father-Absolute, creator of the central universe and Father of the Creators, and what sets him apart is not absoluteness but ``infinity of will''.'''
+
+# F12, ruled as proposed: kept; checked in the book, p. 263.
+[[note]]
+at = "4:4.4"
+after = "his volitional absoluteness."
+origin = "613e25da3bc90e37"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~263: ``To deny to God the power of self-limitation would itself be to limit God, and that in an unworthy way.'' That the Father, choosing only the infinitely perfect, is the creator of the perfect central universe, while the Creator Sons, ``not altogether limited by that finality of wisdom'', have the more active free will, is not in Knudson.'''
+
+# F13, ruled as proposed: kept; checked in the book, p. 194.
+[[note]]
+at = "4:4.7"
+after = "all other beings."
+origin = "deb1d2f1f7f139ed"
+credit = "block"
+tex = '''Hocking~\cite{Hocking}, p.~194: ``what is the absolutely real? That, namely, which exists by itself, not depending on any other being for existence; but conferring being on every other''. \textit{Beneficently} is added here.'''
+
+# F14, ruled as proposed: kept; checked in the book, p. 185.
+[[note]]
+at = "4:4.8"
+after = "idea of God,"
+origin = "9c38d876d36b196b"
+credit = "block"
+tex = '''Compare Hocking~\cite{Hocking}, p.~185: ``Something like the Absolute appears from time to time in the history of religion; but it is noteworthy that it is not worshipped.'''''
+
+# F15, ruled as proposed: kept; checked in the book, p. 238.
+[[note]]
+at = "4:4.9"
+after = "will do it,"
+origin = "313f232f45382970"
+credit = "block"
+tex = '''Hocking~\cite{Hocking}, p.~238: ``\,`I cannot, but He can,' lifts man over his first formidable obstacles''. Hocking's \textit{He} is God, over against man; here the one who can ``lives in me''.'''
+
+# F16, ruled as proposed: kept.  A Bible note, so no credit.
+[[note]]
+at = "4:4.9"
+after = "even your faith.”"
+origin = "d446b986e1da6cb2"
+tex = '''1~John~5:4: ``this is the victory that overcometh the world, even our faith.'' \textit{Our} has become \textit{your}.'''
+
+# F17, ruled as proposed: kept; every verse checked in the edition's KJV.
+[[note]]
+at = "4:5.2"
+after = "from God himself."
+origin = "76d94b1b2259da93"
+tex = '''The New Testament already says as much of the law: ``Who have received the law by the disposition of angels'' (Acts~7:53); ``it was ordained by angels in the hand of a mediator'' (Galatians~3:19); ``the word spoken by angels'' (Hebrews~2:2).'''
+
+# F18, ruled as proposed: the verse quoted, and the law it speaks of.
+[[note]]
+at = "4:5.5"
+after = "remission of sin.”"
+origin = "66bf5058c1851165"
+tex = '''Hebrews~9:22: ``And almost all things are by the law purged with blood; and without shedding of blood is no remission.'' The words are the Epistle's, of the law of Moses, whose reason is Leviticus~17:11: ``it is the blood that maketh an atonement for the soul''.'''
+
+# F18a, added in review, ruled as proposed: checked in the book, p. 346.
+[[note]]
+at = "4:5.6"
+after = "upon the cross of Calvary!"
+origin = "none"
+tex = '''Knudson~\cite{Knudson}, p.~346: ``No atonement in the ordinary sense of the term is necessary before the forgiving love of God can become operative. This is a point of decisive importance in the Christian conception of the divine character.'' Here the doctrine is not only set aside but called ``a travesty upon the infinite character of God''.'''
