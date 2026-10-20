@@ -18,14 +18,14 @@
 {% macro item(it) -%}
 {%- if it.kind == 'head' %}
 <div class="row rh">{% if it.why %}{{ afold(it.why|length) }}{{ cites(it.why) }}{% endif %}<div class="main">
-  <p class="rh-paper"><a href="/{{ it.paper }}:0">Paper {{ it.paper }} · {{ it.paper_title }}</a></p>
+  <p class="rh-paper"><a href="/{{ it.paper }}:0">{% if it.paper %}Paper {{ it.paper }} · {% endif %}{{ it.paper_title }}</a></p>
   {%- if it.section %}
   <p class="rh-sec"><a href="/{{ it.paper }}:{{ it.section }}">{{ it.section }}{% if it.combined %} and {{ it.combined }}{% endif %}. {{ it.title|safe }}</a></p>
   {%- endif %}
 </div></div>
 {%- elif it.kind == 'sign' %}
-<div class="row sign">{{ afold(it.why|length) }}{{ cites(it.why) }}<div class="main"><p class="signpost">Paper {{ it.paper }},
-  <i>{{ it.title }}</i>, is cited whole. <a href="/{{ it.paper }}:0">Read it in the reader ›</a></p></div></div>
+<div class="row sign">{{ afold(it.why|length) }}{{ cites(it.why) }}<div class="main"><p class="signpost">{% if it.paper %}Paper {{ it.paper }},
+  <i>{{ it.title }}</i>,{% else %}The <i>{{ it.title }}</i>{% endif %} is cited whole. <a href="/{{ it.paper }}:0">Read it in the reader ›</a></p></div></div>
 {%- elif it.kind == 'stars' %}
 <div class="row"><div class="stars" role="separator" data-stars="{{ it.stars }}"></div></div>
 {%- elif it.kind == 'again' %}

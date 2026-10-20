@@ -30,7 +30,11 @@
   <article>
     {{ indexfold() }}
     <header class="papertop">
+      {#- The Foreword is not a paper: the book heads it FOREWORD alone (Tigran,
+          2026-10-20). #}
+      {%- if paper.n %}
       <p class="papernum">Paper {{ paper.n }}</p>
+      {%- endif %}
       <h1>{{ paper.title }}</h1>
       {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
       {#- An introduction has no title of its own: the paper's stands over it, and

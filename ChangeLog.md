@@ -39,6 +39,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- The Foreword is headed Foreword alone, as the book heads it, not Paper 0.
 - The Bibliography gives the publisher of Illingworth's Personality Human and Divine as its 1894 title page does, Macmillan and Co., not The Macmillan Company.
 - The Bibliography gives the publisher of Knudson's The Doctrine of God as its 1930 title page does, The Abingdon Press, not Abingdon-Cokesbury Press.
 
