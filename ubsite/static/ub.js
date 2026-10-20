@@ -163,6 +163,14 @@
       if (dlg.open) fill();
     });
     gear.addEventListener('click', function () { fill(); resettable(); dlg.showModal(); });
+    // Ctrl+, opens Settings from any page, as it opens an application's
+    // preferences, and closes it again (Tigran, 2026-10-20).  On a Mac, ⌘, is
+    // the browser's own and never reaches the page.
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key !== ',' || !ev.ctrlKey || ev.altKey || ev.shiftKey || ev.metaKey) return;
+      ev.preventDefault();
+      if (dlg.open) dlg.close(); else gear.click();
+    });
     // A value takes its default's type: a switch is true or false, the speed a number.
     form.addEventListener('change', function (ev) {
       var el = ev.target, d = DEF[el.name];

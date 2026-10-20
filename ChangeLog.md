@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Ctrl+, opens Settings from any page, and closes it again.
 - Space, Page Down and the right arrow turn the page, keeping the last line read at the top, and Settings can make a tap on the text turn it too, on a phone or a tablet.
 - Entries beside a paragraph that share a headword now stand together, the part they share said once and each entry's own words after it, separated by semicolons.
 - Paper 1, The Universal Father, has eleven more study notes, 45 in all, each a parallel in Matthew Block's chart that no note gave.
