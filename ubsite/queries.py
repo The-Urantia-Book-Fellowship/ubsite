@@ -53,10 +53,9 @@ CHIP_OPENS = (" AND EXISTS (SELECT 1 FROM citation_target t"
 def windows(con: sqlite3.Connection, chips: list) -> list:
     """`chips`, one list of them, with each run of Chronology events made one
     window: {"window": True, "events": [chip, ...], "before": row or None,
-    "after": row or None, "more": bool}, where the run's first event stood.
-    A neighbour is chronology_event's ord, label and line_html; the
-    appendix's first event has none before it, and its last none after.  A
-    window straight after another is `more`: one heading serves them both."""
+    "after": row or None}, where the run's first event stood.  A neighbour
+    is chronology_event's ord, label and line_html; the appendix's first
+    event has none before it, and its last none after."""
     runs: list[list] = []
     for c in chips:
         if c["ev_ord"] is None:
@@ -78,9 +77,8 @@ def windows(con: sqlite3.Connection, chips: list) -> list:
             out.append(c)
         elif c["ev_ord"] in first:
             r = first[c["ev_ord"]]
-            more = bool(out) and isinstance(out[-1], dict)
             out.append({"window": True, "events": r, "before": near.get(r[0]["ev_ord"] - 1),
-                        "after": near.get(r[-1]["ev_ord"] + 1), "more": more})
+                        "after": near.get(r[-1]["ev_ord"] + 1)})
     return out
 
 

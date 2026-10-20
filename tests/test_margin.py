@@ -227,6 +227,17 @@ class ChronologyWindow(unittest.TestCase):
         self.assertIn('<a class="here" href="/appendix/A#', m)
         self.assertEqual(RE_AFOLD.search(m)[1], "4")     # entries, not windows
 
+    def test_no_heading(self):
+        """A window opens onto its slice of the timeline, under no heading
+        (Tigran, 2026-10-20): its dashed rule marks it, and the margin keeps
+        the line.  136:2.8 has three windows one after another."""
+        self.assertIn('<div class="win"><span class="nb">', margin(get("/57:1")[2], "57:1.6"))
+        m = margin(get("/136:2")[2], "136:2.8")
+        wins = re.findall(r'<div class="win">(.*?)</div>', m, re.S)
+        self.assertEqual(len(wins), 3)
+        for w in wins:
+            self.assertNotIn('class="lbl"', w)
+
     def test_where_the_neighbours_are_told_elsewhere(self):
         [w] = self.windows("135:4.1")
         self.assertEqual([e["event"] for e in w["events"]], ["August 17, 22 A.D.: Elizabeth dies"])

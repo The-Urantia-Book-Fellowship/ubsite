@@ -8,12 +8,12 @@
    with its appendix.  A Chronology event stands in its window onto Appendix A
    (queries.windows), a slice of the timeline: the event printed before it,
    with its citations, the event itself, with its date, linking to its line
-   there, and the event after.  Windows one after another share a heading.
+   there, and the event after, under no heading: its dashed rule marks it.
    Entries of one headword stand together, run on (queries.groups): the part
    they share once, linking to its line, then each entry's own words, linking
    to theirs, separated by semicolons. #}
 {% macro chip(c) -%}
-{% if c.window %}<div class="win">{% if not c.more %}<span class="lbl">{{ c.events[0].appendix }}</span>{% endif %}
+{% if c.window %}<div class="win">
   {%- if c.before %}<span class="nb">{{ c.before.line_html|safe }}</span>{% endif %}
   {%- for e in c.events %}<a class="here" href="{{ appendix_href(e.scope, e.anchor) }}">{{ e.event }}</a>{% endfor %}
   {%- if c.after %}<span class="nb">{{ c.after.line_html|safe }}</span>{% endif %}</div>

@@ -611,7 +611,7 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .grp a:hover { color: var(--ink); }
 .chips > li > .grp:has(a:hover) { border-left-color: var(--link); }
 /* An appendix entry: led by its appendix's name, in small caps. */
-:is(.app, .win) .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
+.app .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
 .blanket .app { color: var(--faint); }
 /* A Chronology event in its window onto Appendix A (queries.windows): a slice
    of the timeline, earlier above and later below, on a dashed rule.  A dot on

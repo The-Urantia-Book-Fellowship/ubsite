@@ -22,6 +22,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- A Chronology entry beside the text no longer has the heading Chronology over it; its dashed line marks it.
 - On a wide screen a note's card, a 1955 reading's or a study note's, is set larger, in the same proportion to the text as on a tablet; on a phone or a tablet it is as before.
 - A note's card, a 1955 reading's or a study note's, has its close button above the words, which now take the card's whole width; before, a long note was set in from the right all the way down.
 - When the offline copy is up to date, its menu now gives the date of the site it keeps, as it already did when the copy was out of date.
