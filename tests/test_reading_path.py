@@ -56,7 +56,7 @@ class ReadingPath(unittest.TestCase):
                 all_ids = RE_ID.findall(body)
                 self.assertEqual(len(all_ids), len(set(all_ids)), f"{url}: an id repeats")
                 # A paragraph met again points back at one drawn on the page.
-                back = re.findall(r'<div class="row again"><p class="t"><a class="num" href="#([^"]+)"', body)
+                back = re.findall(r'<div class="row again"><p class="t"><span class="stk"><a class="num" href="#([^"]+)"', body)
                 self.assertTrue(set(back) <= set(ids), url)
                 if url.endswith("/read"):
                     self.assertEqual(back, [], "book order draws each paragraph once")

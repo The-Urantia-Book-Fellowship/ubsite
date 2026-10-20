@@ -132,9 +132,9 @@
       // paragraph still returns its words exactly (CLAUDE.md §6).
       var pb = button('playp', label, 'play');
       pb.addEventListener('click', function () { start(i); });
-      // After the reference: on a phone the two float as a stack, reference on top.
-      var num = p.querySelector('.num');
-      p.insertBefore(pb, num ? num.nextSibling : p.firstChild);
+      // Under the reference, in the stack at the paragraph's start (_para.html).
+      var num = p.querySelector('.num'), stk = p.querySelector('.stk') || p;
+      stk.insertBefore(pb, num ? num.nextSibling : stk.firstChild);
       controls.push(pb);
     }
     // A paragraph can be started only once the reading is aligned to them;

@@ -29,7 +29,7 @@
 {%- elif it.kind == 'stars' %}
 <div class="row"><div class="stars" role="separator" data-stars="{{ it.stars }}"></div></div>
 {%- elif it.kind == 'again' %}
-<div class="row again"><p class="t"><a class="num" href="#{{ it.anchor }}">{{ it.p.ref }}</a>
+<div class="row again"><p class="t"><span class="stk"><a class="num" href="#{{ it.anchor }}">{{ it.p.ref }}</a></span>
   <span class="back">read <a href="#{{ it.anchor }}">above</a>{% if it.where %}, under <i>{{ it.where }}</i>{% endif %}</span></p></div>
 {%- elif it.kind == 'p' %}
 <div class="row">{% if it.why %}{{ afold(it.why|length) }}{{ cites(it.why) }}{% endif %}

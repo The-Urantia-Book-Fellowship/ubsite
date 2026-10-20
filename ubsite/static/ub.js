@@ -407,7 +407,7 @@
       if (again || open(mark) !== false) ev.preventDefault();
       return;
     }
-    if (!card) return;
+    if (!card) { tapTurn(ev); return; }
     if (card.el.contains(t)) { if (t.closest('.x')) shut(true); return; }
     shut(false);
   });
@@ -416,6 +416,82 @@
   });
   window.addEventListener('resize', place);
   document.addEventListener('ub:swap', function () { card = null; });
+
+  // Turning the page (Tigran, 2026-10-20).  A phone's volume keys never reach a
+  // web page: Chrome keeps them for the system (ContentUiEventHandler's
+  // shouldPropagateKeyEvent), and Safari has no such event.  So where the
+  // book's text is, Space, Page Down and → go on a screen, and Shift+Space,
+  // Page Up and ← back: from a keyboard, a page turner, or volume keys an
+  // Android app sends as Page Down.  With Settings' "Tap to turn the page", a
+  // tap on the text goes on in the lower half of the screen and back in the
+  // upper.  A screen is what the window shows, less a line: the last whole line
+  // comes to the top, and going back, the first whole line to the bottom, so
+  // that no line the reader picks up at is cut.
+  var EDGE = 6, touch = false;
+  // The line of text crossing y, as the box of one of its letters, or null.
+  function lineAt(x, y) {
+    var c = document.caretPositionFromPoint ? document.caretPositionFromPoint(x, y) : null,
+        n, at, q = document.createRange(), i, j, rs;
+    if (c) { n = c.offsetNode; at = c.offset; }
+    else if (document.caretRangeFromPoint && (c = document.caretRangeFromPoint(x, y))) {
+      n = c.startContainer; at = c.startOffset;
+    }
+    if (!n || n.nodeType !== 3 || !n.length) return null;
+    // The letter after the caret, or at a line's end the one before it.
+    for (j = Math.min(at, n.length - 1); j >= Math.max(0, Math.min(at, n.length) - 1); j--) {
+      q.setStart(n, j);
+      q.setEnd(n, j + 1);
+      rs = q.getClientRects();
+      for (i = 0; i < rs.length; i++) if (rs[i].height && rs[i].top <= y && y <= rs[i].bottom) return rs[i];
+    }
+    return null;
+  }
+  // The first line wholly between lo and hi, looking from y by step: past the
+  // space between paragraphs, and past a line cut at the edge.
+  function whole(x, y, step, lo, hi) {
+    for (var k = 0, L; k < 80 && y >= lo - 1 && y <= hi + 1; k++) {
+      L = lineAt(x, y);
+      if (L && L.top >= lo - 1 && L.bottom <= hi + 1) return L;
+      y = L ? (step < 0 ? L.top - 1 : L.bottom + 1) : y + step;
+    }
+    return null;
+  }
+  function turn(dir) {
+    var col = document.querySelector('main p.t'), pl = document.querySelector('.player'),
+        lo = EDGE, hi = innerHeight - EDGE, x, L, d;
+    if (!col) return false;
+    // Not under the player, while it is open.
+    if (pl && pl.offsetParent) hi = Math.min(hi, pl.getBoundingClientRect().top - EDGE);
+    x = col.getBoundingClientRect();
+    x = x.left + x.width / 2;
+    L = dir > 0 ? whole(x, hi, -4, lo, hi) : whole(x, lo, 4, lo, hi);
+    d = L ? (dir > 0 ? L.top - lo : L.bottom - hi) : 0;
+    // No line to keep, or one so near that the page would hardly move: most of
+    // a screen, as the browser goes.
+    if (d * dir < (hi - lo) / 3) d = dir * (hi - lo) * .9;
+    scrollBy({ top: d, behavior: 'instant' });
+    // Back, a line cut at the top goes, so that the first line is whole.
+    if (dir < 0 && (L = lineAt(x, lo)) && L.top < lo - 1) scrollBy({ top: L.bottom + 1 - lo, behavior: 'instant' });
+    return true;
+  }
+  document.addEventListener('keydown', function (ev) {
+    var k = ev.key, t = ev.target, dir;
+    if (ev.defaultPrevented || ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    dir = k === 'PageDown' || (k === 'ArrowRight' && !ev.shiftKey) || (k === ' ' && !ev.shiftKey) ? 1
+        : k === 'PageUp' || (k === 'ArrowLeft' && !ev.shiftKey) || (k === ' ' && ev.shiftKey) ? -1 : 0;
+    if (!dir || (t.closest && t.closest('input, textarea, select, button, summary, [contenteditable], dialog, [popover], .pop, .player'))) return;
+    if (turn(dir)) ev.preventDefault();
+  });
+  // Only a finger's tap, or a pen's: a mouse's click selects words.
+  document.addEventListener('pointerdown', function (ev) { touch = ev.pointerType !== 'mouse'; },
+                            { passive: true });
+  function tapTurn(ev) {
+    var t = ev.target;
+    if (document.documentElement.dataset.tappage !== 'true' || !touch || ev.button ||
+        !t.closest || !t.closest('main') || !getSelection().isCollapsed ||
+        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .blanket, .marginhead, .player')) return;
+    if (turn(ev.clientY < innerHeight / 2 ? -1 : 1)) ev.preventDefault();
+  }
 
   // A search hit among the 1955 readings opens /93:5.8#note93_5_8_0, and
   // arrive() brings its paragraph into view: its card opens too -- if the ring
@@ -444,9 +520,12 @@
   // The copy is then the browser's own, as plain text and as HTML with its
   // styles (the red letter, the face), exactly as from a page without them.
   // One deleteData per hyphen, which a selection's ends follow; put back in
-  // reverse, so each goes where it was.
+  // reverse, so each goes where it was.  A list's label, floated in a box of
+  // its own (ub.css .mark), drops the space after it from the copy, so for the
+  // same moment the page is .copying, and the labels stand in the line.
   document.addEventListener('copy', function () {
-    var sel = getSelection(), gone = [], i, r, root, w, n, k;
+    var sel = getSelection(), gone = [], i, r, root, w, n, k, html = document.documentElement;
+    html.classList.add('copying');
     for (i = 0; i < sel.rangeCount; i++) {
       r = sel.getRangeAt(i);
       root = r.commonAncestorContainer;
@@ -459,7 +538,8 @@
         }
       }
     }
-    if (gone.length) requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      html.classList.remove('copying');
       for (var j = gone.length - 1; j >= 0; j--) gone[j][0].insertData(gone[j][1], '­');
     });
   });

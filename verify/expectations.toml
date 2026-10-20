@@ -111,10 +111,11 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # notes came in with its licence.  The sizes are bands, since the index grows as
 # it is edited.  One page more since 2026-10-19: the Bibliography.
 [offline]
-measured_on = "2026-10-19"
+measured_on = "2026-10-20"
 pages       = 10286      # 1,626 sections, 4,736 headwords, 27 index letters, 19 more, 3,878 reading paths
 paths       = 3878       # 2,058 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
-chunks      = 396        # 394 + the SBL Greek and SBL Hebrew fonts, as published (2026-10-19)
-download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 44.0 at measurement
-raw_mb      = [160.0, 220.0] # unpacked: 191.0 at measurement
+chunks      = 400        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
+                         # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages
+download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement
+raw_mb      = [160.0, 220.0] # unpacked: 198.2 at measurement

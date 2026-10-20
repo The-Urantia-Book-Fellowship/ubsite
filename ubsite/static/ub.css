@@ -47,8 +47,8 @@ math { font-family: "Garamond Math", math; }
   /* The site is set 1.4 to the line, and the book's text (p.t) at --lead,
      which Settings' Line spacing sets: 1.25 unless a reader chooses otherwise.
      Both were 1.55, which Tigran found too open, worst on a phone (2026-10-12).
-     --dl is how far it is from the 1.55 the gutter was placed for, and moves
-     the gutter with the lines. */
+     --dl is how far it is from the 1.55 the reference was placed for, and
+     moves the reference with the lines. */
   --lead: 1.25;
   --dl: calc(var(--lead) - 1.55);
   /* In ch, so the measure follows the type size instead of staying fixed at a
@@ -172,9 +172,12 @@ footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1r
 footer p { margin: .2rem 0; }
 
 /* ---- the reader -------------------------------------------------------- */
-/* The gap is the gutter the paragraph references stand in: 118:10.13 is 3.3rem. */
-.reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 4.4rem;
-          padding: 2rem 1.2rem 0; max-width: 92rem; margin: 0 auto; }
+/* The gap between the rail and the text.  It was the gutter the paragraph
+   references stood in on a wide screen, 4.4rem, empty with them turned off;
+   they stand at the paragraph's start now, as on a phone (.stk), and the gap
+   is a gap (Tigran, 2026-10-20). */
+.reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 2.4rem;
+          padding: 2rem 1.2rem 0; max-width: 90rem; margin: 0 auto; }
 /* The left rail is the whole book (templates/_rail.html), everything closed but
    the paper being read.  Each level stands in by the chevron's width, so a
    title lines up under its parent's and a wrapped one hangs. */
@@ -320,6 +323,41 @@ p.t.head { text-align: center; }
    text, so copying the paragraph still returns it exactly, and the "" after the
    slash keeps a screen reader from reading it out. */
 .pcm::before { content: "¶"; content: "¶" / ""; color: var(--faint); margin-right: .3em; }
+/* A list's label (\ublistelem, the listmark span), as the press sets it:
+   right-aligned in a box of its own (\makebox[0.2em][r] after the 8pt indent
+   and \kern1em), so that it ends 2em into the line, then \kern0.1em and 5pt
+   (\bibnobreakspace), a space that neither stretches nor breaks, so that the
+   words of every item begin at one place, 2.6em in.  Here the box is 2.2em and
+   the space .6em, in every layout.  The press's lines after the first go back
+   to the margin, and so do these: the box floats, one line tall, beside the
+   stack if there is one (.stk).  The space after the label is the text's own
+   and stays in it, but at the start of a line beside a float the browser draws
+   none.  A float drops it from a copy too ("2.By the will"), so ub.js lifts the
+   float while the browser copies (.copying), and the copy is the browser's own
+   from the page without it.  A pilcrow before a label stands at the box's
+   start.  Every label begins its paragraph, 2,397 of them; the widest is
+   "“10.", 1.76em in Goudy (Tigran, 2026-10-20). */
+:root:not(.copying) p.t > .mark { float: left; display: flex; justify-content: flex-end;
+      width: 2.2em; margin-right: .6em; }
+:root:not(.copying) p.t > .pcm:has(+ .mark) { display: none; }
+:root:not(.copying) p.t > .pcm + .mark::before { content: "¶"; content: "¶" / "";
+      margin-right: auto; padding-right: .3em; color: var(--faint); }
+:root[data-pilcrow="off"] p.t > .pcm + .mark::before { content: none; }
+/* Nothing at a paragraph's start -- no reference, no play button, no 1955
+   page -- and its first line is set in a little, as the book's are.  The
+   stack is an indent of its own when it stands there (Tigran, 2026-10-20: "when
+   the references or audio playback is turned on there is no need for extra
+   indentation as they serve this purpose already").  A reading path has no
+   play buttons.  Not a paper's opening, its letter dropped, nor the heading in
+   the text, a line of verse, or a list's item, whose label has a box of its
+   own.  The opening then needs no room above it either, where the stack would
+   stand.  A leader row's figure takes no part of the indent. */
+:root[data-paranum="off"][data-voice="off"]:not([data-pages="true"])
+     .reader p.t:not(.opening, .head, .verse, :has(> .mark)),
+:root[data-paranum="off"]:not([data-pages="true"]) .path p.t:not(.head, .verse, :has(> .mark)) {
+     text-indent: 1em; }
+:root[data-paranum="off"][data-voice="off"]:not([data-pages="true"]) .reader p.t.opening { margin-top: 0; }
+.leadrow > .fig { text-indent: 0; }
 /* A separator between two paragraphs, its stars as printed: `* * *`, or the five
    of \separatorline set wider, as the press sets them (paragraph.sep_before).  A
    row of its own across the grid, laid on the grid's own columns, so the stars
@@ -336,23 +374,32 @@ p.t.head { text-align: center; }
    a blank line above and below, its lines close, a line's wrapped part hanging
    further in, and a line the press sets in (\hsetoff, the Lord's Prayer's
    second lines) further still -- measured off the press's own page, in --size,
-   not em, so that the gutter's smaller face keeps the same lengths.  Ragged,
+   not em, so that the reference's smaller face keeps the same lengths.  Ragged,
    not justified: a browser justifies one short line at a time, and badly.
-   Each line keeps its reference in the gutter, which has no second line to
-   hold the play button, so the button stands in the indent, before the line. */
+   A line would carry its reference as a drop capital, two lines tall.  So only
+   a block's first line shows it, as the book numbers only a block's first
+   line: with its play button and its 1955 page, in a line of their own above
+   the block.  The other lines are still there to land on.  Until 2026-10-20 a
+   wide screen kept every line's reference in its gutter (Tigran's choice,
+   2026-10-12), and the gutter went. */
 .verse { --vin: calc(var(--size) * 1.05); --hang: calc(var(--size) * .7);
          margin: .6rem 0 1.45rem; }
 .verse + .a { margin-top: .6rem; }
 .verse p.t { margin: 0; padding: 0 calc(var(--size) * .5) 0 calc(var(--vin) + var(--hang));
              text-indent: calc(-1 * var(--hang)); }
 .verse p.t.setoff { text-indent: calc(var(--size) * .6 - var(--hang)); }
-.verse .num { margin-left: calc(-4rem - var(--vin) - var(--hang)); }
 .verse :is(.num, .playp, .pg) { text-indent: 0; }     /* not the line's hang */
-.verse p.t > .playp { left: calc(var(--vin) - 1.3rem);
-                      top: calc((var(--line) * var(--size) - 1.15rem) / 2); }
-/* The 1955 page stands under the reference, so with it shown the lines part a
-   little, or it would run into the next line's reference. */
-:root[data-pages="true"] .verse p.t { margin-bottom: .6rem; }
+.verse p.t:not(:first-child) .stk { display: none; }
+:root:not([data-paranum="off"]) .verse p.t:first-child { margin-top: 1.5rem; }
+:root:not([data-paranum="off"]) .verse p.t:first-child .stk { float: none; }
+:root:not([data-paranum="off"]) .verse p.t:first-child :is(.num, .playp, .pg) {
+       position: absolute; margin: 0; width: auto; right: auto;
+       min-width: 0; padding-right: 0; text-align: left; }
+:root:not([data-paranum="off"]) .verse p.t:first-child .num { top: -1.25rem; left: var(--vin); }
+:root:not([data-paranum="off"]) .verse p.t:first-child .playp {
+       top: -1.45rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch); }
+:root:not([data-paranum="off"])[data-pages="true"] .verse p.t:first-child .pg {
+       top: -1.25rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch + 1.6rem); }
 /* A range of lines in a block, /144:3.9-10.  A paragraph's tint reaches past it
    by a shadow, which the space between paragraphs takes up; lines of verse
    touch, so two shadows would lie over each other and darken the strip between
@@ -374,30 +421,74 @@ p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 /* The paragraph's full reference, so the reader always knows which one this is;
-   Settings can turn it off.  The gutter was placed for a line spacing of 1.55.
-   At another, the first baseline moves by half the change in a text line, and
-   the reference's own by half the change in its smaller one: --ref is the
-   difference, which keeps the reference on the first line. */
-p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
-.num { float: left; margin-left: -4rem; width: 3.5rem; text-align: right; white-space: nowrap;
+   Settings can turn it off.  It stands at the start of the paragraph, the play
+   button under it and the 1955 page under that, as a drop capital stands: the
+   text runs beside them for two lines, and then the full width.  One float,
+   .stk (_para.html; listen.js puts the button in it), so that a list's label
+   floats beside it on the first line (.mark, below).  So on a phone from the
+   first, and at every width since 2026-10-20 (Tigran: "always the same as we do
+   on the phone"): a wide screen kept them in a gutter, 4.4rem between the rail
+   and the text, which stood empty with them turned off.  The reference is as
+   wide as the section's longest (--refw characters, section.html), so the text
+   stands at one indent all down the page; it is set right, as the 1955 page
+   under it is (Tigran, 2026-10-20).  The button is set in the reference's
+   font and size, so that 1ch is the same in both.  The stack was placed for a
+   line spacing of 1.55.  At another, the first baseline moves by half the
+   change in a text line, and the reference's own by half the change in its
+   smaller one: --ref is the difference, which keeps the reference on the first
+   line.  Each part of the stack is one line of the text tall, --lh, the line
+   kept as a length (@property), since the parts are set smaller: so the
+   reference stands on the first line and the button is centred on the next.
+   Until 2026-10-20 the button followed the reference's own small line, close
+   under it, with most of the second line empty below (Tigran). */
+@property --lh { syntax: "<length>"; inherits: true; initial-value: 0px; }
+p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); --lh: calc(var(--line) * 1em); }
+.stk, .stk > * { float: left; }
+.stk > * { clear: left; }
+.num { width: 100%; min-width: calc(var(--refw, 9) * 1ch + .4rem); padding-right: .4rem;
+       height: var(--lh); text-align: right; white-space: nowrap;
        font-size: .78rem; color: var(--faint); text-decoration: none;
-       position: relative; top: calc(.35rem + var(--ref)); }
+       position: relative; top: calc(.2rem + var(--ref)); }
 .num:hover { color: var(--ink); }
 /* The 1955 page, only if a reader asks (Settings): where the paragraph begins
    in the first printing.  Drawn from data-pg, as the pilcrow is drawn, so
-   copying a paragraph never takes it along.  In the gutter it stands on the
-   reference's second line with the play button beside it, which moves up to
-   meet it: the gutter stays two lines tall, or a one-line paragraph's would run
-   into the next one's.  Both move with the reference, and its second line with
-   the line spacing; without the reference the page stands on the first line. */
+   copying a paragraph never takes it along.  It stands beside the play button,
+   on the second line, so that the stack is never more than two lines tall and
+   the third line is the text's whole width; under the reference with no
+   button, and on the first line with no reference.  Set right, under the
+   reference's right edge (Tigran, 2026-10-20). */
 .pg { display: none; }
 .pg::before { content: "(" attr(data-pg) ")"; }
-:root[data-pages="true"] .pg { display: block; position: absolute; right: calc(100% + 1.75rem);
-       top: calc(1.45rem + var(--ref) + var(--dl) * .78rem);
-       white-space: nowrap; font-size: .72rem; color: var(--faint); }
-:root[data-pages="true"] .playp { top: calc(1.35rem + var(--ref) + var(--dl) * .78rem); }
-:root[data-pages="true"][data-paranum="off"] .pg {
-       top: calc(.45rem + var(--dl) * (var(--size) - .72rem) / 2); }
+:root[data-pages="true"] .pg { display: block; position: relative; top: calc(.2rem + var(--ref));
+       height: var(--lh); width: max-content; padding-right: .4rem;
+       white-space: nowrap; font-size: .78rem; color: var(--faint); }
+.stk > .pg { float: right; }
+:root:not([data-voice="off"]) .stk > .playp + .pg { clear: none; }
+:root[data-pages="true"]:not([data-voice="off"]) .playp:has(+ .pg) { margin-right: .35rem; }
+/* A paper's opening paragraph gives its corner to the dropped letter: the
+   stack floated there would take the first two lines' start, and the second
+   line would run into the letter.  So its reference, play button and 1955
+   page stand in a line of their own above it, as a verse block's do; the
+   book prints no number at a paper's first paragraph either. */
+p.t.opening { margin-top: 1.5rem; }
+p.t.opening .stk { float: none; }
+p.t.opening :is(.num, .playp, .pg) { position: absolute; margin: 0; width: auto; right: auto;
+       min-width: 0; padding-right: 0; text-align: left; }
+p.t.opening .num { top: -1.25rem; left: 0; }
+p.t.opening .playp { top: -1.45rem; left: calc((var(--refw, 9) + 1) * 1ch); }
+:root[data-pages="true"] p.t.opening .pg { top: -1.25rem;
+       left: calc((var(--refw, 9) + 1) * 1ch + 1.6rem); }
+:root[data-paranum="off"] p.t.opening .playp { left: -.25rem; }
+:root[data-paranum="off"][data-pages="true"] p.t.opening .pg { left: 1.6rem; }
+:root[data-paranum="off"][data-voice="off"][data-pages="true"] p.t.opening .pg { left: 0; }
+/* The heading in the text is centred on the column, not on what the stack
+   floated beside it leaves: an empty float as wide as the stack balances it
+   on the right.  Without references the stack is the button alone, if there
+   is one. */
+p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
+                   width: calc(var(--refw, 9) * 1ch + .4rem); }
+:root[data-paranum="off"] p.t.head::before { width: 0; }
+:root[data-paranum="off"]:not([data-voice="off"]) p.t.head:has(.playp)::before { width: 1.7rem; }
 
 .jesus { color: var(--jesus); }
 
@@ -479,18 +570,14 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
          grid-template-columns: minmax(0, 1fr); }
 }
 /* The rail folded away: no column at all, and the text takes the rest.  The
-   gap stays, being the gutter the references stand in, and the chevron, which
-   points back the way the rail went, stands at its outer edge, level with the
-   header's mark: the widest reference (118:10.10) reaches 3.8rem into it of
-   4.4.  A 1955 page, if shown, can be wider than the gutter (2094.10 is 4.7rem),
-   so then the chevron is given .9rem of its own.  Its box is no wider than it,
-   and clear, so that nothing is hidden as it scrolls past.  Measured, the frame
-   gives up what the rail did, so the page stays centred in the window.  After
-   Full's columns, so as to win over them. */
+   gap stays, and the chevron, which points back the way the rail went, stands
+   at its outer edge, level with the header's mark.  Its box is no wider than
+   it, and clear, so that nothing is hidden as it scrolls past.  Measured, the
+   frame gives up what the rail did, so the page stays centred in the window.
+   After Full's columns, so as to win over them. */
 @media (min-width: 62.01rem) {
   :root[data-rail="folded"] .reader { grid-template-columns: 0 minmax(0, 1fr);
-                                      max-width: calc(92rem - 16rem); }
-  :root[data-rail="folded"][data-pages="true"] .reader { grid-template-columns: .9rem minmax(0, 1fr); }
+                                      max-width: calc(90rem - 16rem); }
   :root[data-rail="folded"][data-width="full"] .reader { max-width: none; }
   :root[data-rail="folded"] .rail { overflow: visible; }
   :root[data-rail="folded"] .rail > ol, :root[data-rail="folded"] .railfold span { display: none; }
@@ -515,10 +602,10 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); }
   :root:is([data-margin="off"], [data-index="off"]) .reader > article:has(> .marginhead) {
          padding-right: 2rem; }
   :root:is([data-margin="off"], [data-index="off"]):not([data-width="full"]) .reader:has(> article > .marginhead) {
-         max-width: calc(92rem - 26ch); }
+         max-width: calc(90rem - 26ch); }
   :root:is([data-margin="off"], [data-index="off"])[data-rail="folded"]:not([data-width="full"])
-       .reader:has(> article > .marginhead) { max-width: calc(92rem - 16rem - 26ch); }
-  :root[data-margin="off"] .path { max-width: calc(4.4rem + var(--measure) + 2rem + 2.4rem);
+       .reader:has(> article > .marginhead) { max-width: calc(90rem - 16rem - 26ch); }
+  :root[data-margin="off"] .path { max-width: calc(var(--measure) + 2rem + 2.4rem);
                                    padding-right: 3.2rem; }
   :root[data-margin="off"][data-width="full"] .path { max-width: none; }
   :root[data-margin="off"] :is(.path .row, details.gap > summary, button.foldup) {
@@ -730,18 +817,22 @@ button svg .stroke { fill: none; stroke: currentColor; stroke-width: 1.7; stroke
 .voicecredit { margin: -.1rem 0 1.1rem; font-size: .85rem; color: var(--faint); }
 .voicecredit a { color: inherit; text-decoration-color: var(--rule); }
 .voicecredit a:hover { color: var(--link); }
-/* A paragraph's own play button sits under its number, always there and faint
-   like the number, full only on hover or while its paragraph is read.  It was
-   once shown on hover alone, which a phone or tablet does not have (Tigran,
-   2026-10-08).  It is outside the stored text and has no text of its own, so
-   copying a paragraph still returns its words.  At another line spacing it moves
-   as far as the next paragraph's reference does after a paragraph of one line,
-   a verse or a leader row: a text line's change, and the reference's. */
+/* A paragraph's own play button sits under its reference, in the stack at the
+   paragraph's start (.stk), always there and faint like the reference, full
+   only on hover or while its paragraph is read.  It was once shown on hover
+   alone, which a phone or tablet does not have (Tigran, 2026-10-08).  It is
+   outside the stored text and has no text of its own, so copying a paragraph
+   still returns its words.  As wide, with its margins, as the reference, so
+   that the text stands at one indent; without the reference it keeps .8rem
+   from the text. */
 p.t { position: relative; }
-.playp { position: absolute; left: -1.6rem; width: 1.15rem; height: 1.15rem;
-  top: calc(2.3rem + var(--dl) * var(--size) + var(--ref));
+.playp { display: grid; place-items: center; width: 1.15rem; height: 1.15rem;
+  margin: calc((var(--lh) - 1.15rem) / 2) calc(var(--refw, 9) * 1ch + .4rem - .9rem)
+          calc((var(--lh) - 1.15rem) / 2) -.25rem;
   padding: .22rem; border: 0; border-radius: 50%; background: none; color: var(--link);
-  cursor: pointer; opacity: .45; transition: opacity .15s; }
+  font-family: inherit; font-size: .78rem; cursor: pointer; opacity: .45; transition: opacity .15s; }
+.playp svg { width: .83rem; height: .83rem; }
+:root[data-paranum="off"] .playp { margin-right: .8rem; }
 .playp:focus-visible, p.t.now .playp { opacity: 1; }
 :root[data-voice="off"] :is(.voicecredit, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
@@ -1154,69 +1245,9 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
      grows to its widest item's least width, and one long dot-leader row once
      pushed all of 15:2 off the side. */
   .grid { grid-template-columns: minmax(0, 1fr); }
-  /* No gutter on a phone: the reference and the play button under it stand at
-     the start of the paragraph, as a drop capital does, and the text runs
-     beside them for two lines and then the full width.  The reference is as wide
-     as the section's longest (--refw characters, section.html), so the text
-     stands at one indent all down the page.  The button is set in the
-     reference's font and size, so that 1ch is the same in both. */
-  .num { float: left; clear: left; width: calc(var(--refw, 9) * 1ch + .4rem); margin: 0;
-         text-align: left; top: calc(.2rem + var(--ref)); }
-  /* At another line spacing the button keeps its place against the end of the
-     first line: the reference above it moves by its own line's change, and the
-     margin by the rest of a text line's, which is twice --ref. */
-  .playp { position: static; float: left; clear: left; display: grid; place-items: center;
-           font-family: inherit; font-size: .78rem;
-           /* as wide as .num: the lines align */
-           margin: calc(.15rem + 2 * var(--ref)) calc(var(--refw, 9) * 1ch + .4rem - .9rem) 0 -.25rem; }
-  .playp svg { width: .83rem; height: .83rem; }
-  :root[data-paranum="off"] .playp { margin-right: .8rem; }
-  /* On a phone it floats under the reference and the play button, a third
-     line of the stack beside the paragraph's first words. */
-  :root[data-pages="true"] .pg { position: relative; right: auto; float: left; clear: left;
-         width: calc(var(--refw, 9) * 1ch + .4rem); top: .2rem; font-size: .78rem; }
-  :root[data-pages="true"][data-paranum="off"] .pg { top: .2rem; }
-  /* The heading in the text is centred on the column, not on what the stack of
-     reference and play button floated beside it leaves: an empty float as wide
-     as that stack balances it on the right.  Without references the stack is
-     the button alone, if there is one. */
-  p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
-                     width: calc(var(--refw, 9) * 1ch + .4rem); }
-  :root[data-paranum="off"] p.t.head::before { width: 0; }
-  :root[data-paranum="off"]:not([data-voice="off"]) p.t.head:has(> .playp)::before { width: 1.7rem; }
   .a:not(:empty) { margin: -.4rem 0 1rem 1rem; border-left: 2px solid var(--rule);
                    padding-left: .7rem; }
-  /* A line of verse would carry its reference as a drop capital, two lines
-     tall.  So only a block's first line shows it, as the book numbers only a
-     block's first line: with its play button and its 1955 page, in a line of
-     their own above the block.  The other lines are still there to land on. */
-  .verse p.t:not(:first-child) :is(.num, .playp, .pg) { display: none; }
-  .verse .num { margin: 0; }
-  :root:not([data-paranum="off"]) .verse p.t:first-child { margin-top: 1.5rem; }
-  :root:not([data-paranum="off"]) .verse p.t:first-child :is(.num, .playp, .pg) {
-         position: absolute; float: none; margin: 0; width: auto; right: auto; }
-  :root:not([data-paranum="off"]) .verse p.t:first-child .num { top: -1.25rem; left: var(--vin); }
-  :root:not([data-paranum="off"]) .verse p.t:first-child > .playp {
-         top: -1.45rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch); }
-  :root:not([data-paranum="off"])[data-pages="true"] .verse p.t:first-child .pg {
-         top: -1.25rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch + 1.6rem); }
-  :root[data-pages="true"] .verse p.t { margin-bottom: 0; }
   .verse + .a:not(:empty) { margin-top: -.4rem; }
-  /* A paper's opening paragraph gives its corner to the dropped letter: the
-     stack floated there would take the first two lines' start, and the second
-     line would run into the letter.  So its reference, play button and 1955
-     page stand in a line of their own above it, as a verse block's do; the
-     book prints no number at a paper's first paragraph either. */
-  p.t.opening { margin-top: 1.5rem; }
-  p.t.opening :is(.num, .playp, .pg) { position: absolute; float: none; margin: 0;
-         width: auto; right: auto; }
-  p.t.opening .num { top: -1.25rem; left: 0; }
-  p.t.opening > .playp { top: -1.45rem; left: calc((var(--refw, 9) + 1) * 1ch); }
-  :root[data-pages="true"] p.t.opening .pg { top: -1.25rem;
-         left: calc((var(--refw, 9) + 1) * 1ch + 1.6rem); }
-  :root[data-paranum="off"] p.t.opening > .playp { left: -.25rem; }
-  :root[data-paranum="off"][data-pages="true"] p.t.opening .pg { left: 1.6rem; }
-  :root[data-paranum="off"][data-voice="off"][data-pages="true"] p.t.opening .pg { left: 0; }
   .blanket ul { columns: 1; }
 }
 
@@ -1252,9 +1283,9 @@ a.cit:hover { color: var(--link); text-decoration: underline; }
 /* A headword's citations read as one text, /i/<slug>/read.  The paragraphs are
    the reader's own (p.t, .num, .verse), so every Setting holds for them; each
    stands in a row with what brings it in beside it, in the margin's column on
-   a wide screen and above it on a phone.  The gutter is the reader's. */
-.path { max-width: calc(4.4rem + var(--measure) + 2rem + 26ch + 2.4rem); margin: 0 auto;
-        padding: 2rem 1.2rem 0 calc(1.2rem + 4.4rem); }
+   a wide screen and above it on a phone. */
+.path { max-width: calc(var(--measure) + 2rem + 26ch + 2.4rem); margin: 0 auto;
+        padding: 2rem 1.2rem 0; }
 .path .row, details.gap > summary, button.foldup {
         display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch); gap: 0 2rem; }
 .path .row > :not(.cites) { grid-column: 1; grid-row: 1; min-width: 0; }
@@ -1294,7 +1325,7 @@ a.cit:hover { color: var(--link); text-decoration: underline; }
                     margin: .1rem 0 .7rem; color: var(--text); }
 /* A paragraph drawn above, in one line, and a paper cited whole. */
 .path .again p.t { text-align: start; color: var(--faint); font-size: .95rem; }
-.path .again .num { font-size: .82rem; top: .1rem; }
+.path .again .num { font-size: .82rem; top: .05rem; }
 .signpost { margin: 0 0 1rem; padding: .5rem .8rem; border: 1px solid var(--rule);
             border-radius: 4px; font-size: 1.02rem; }
 .path p.t[id] { scroll-margin-top: 3rem; }
@@ -1349,7 +1380,6 @@ h2.chap + .rh { margin-top: 1rem; }
   .path { padding: 1.4rem 1.2rem 0; }
   .path .row, details.gap > summary, button.foldup { display: block; }
   .path .row > .cites { margin: 0 0 .3rem; font-size: .92rem; }
-  .path .again .num { top: .05rem; }
   .chapters ol { columns: 1; }
 }
 @media print {

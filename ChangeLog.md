@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Space, Page Down and the right arrow turn the page, keeping the last line read at the top, and Settings can make a tap on the text turn it too, on a phone or a tablet.
 - Entries beside a paragraph that share a headword now stand together, the part they share said once and each entry's own words after it, separated by semicolons.
 - Paper 1, The Universal Father, has eleven more study notes, 45 in all, each a parallel in Matthew Block's chart that no note gave.
 - Beside a paragraph, a Chronology entry now stands first, and shows the event printed just before it in Appendix A and the one just after, each with a link to where the book tells it.
@@ -22,6 +23,9 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- With paragraph references, listening and the 1955 page references all off, each paragraph's first line is set in a little, as the book's are.
+- A numbered list stands as the book sets it, every number ending at one place and every item's words beginning at one place.
+- On a wide screen, as on a phone, a paragraph's reference and play button stand at its start, and the text stands nearer the contents; the play button stands on the second line, under the reference.
 - The offline menu says simply what Work offline keeps: everything but Merritt Horn's recordings.
 - A Chronology entry beside the text no longer has the heading Chronology over it; its dashed line marks it.
 - On a wide screen a note's card, a 1955 reading's or a study note's, is set larger, in the same proportion to the text as on a tablet; on a phone or a tablet it is as before.
