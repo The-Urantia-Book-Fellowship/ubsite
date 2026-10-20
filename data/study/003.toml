@@ -1,0 +1,375 @@
+# Paper 3, The Attributes of God: the British Study Edition's 21 notes at
+# 2474116, reviewed 2026-10-20 against the press text, Block's chart for Paper 3
+# (dated February 23, 2020, read whole, its eight endnotes too), the edition's
+# own KJV, and the originals: Lewis's God and Ourselves, Matthews's God in
+# Christian Thought and Experience, Eddy's Christian Healing, Sadler's Analytic
+# Study of Part I, Hume's Treasure-House and Nave's printing of 1901
+# (../block-sources/originals/), and Knudson in Tigran's DjVu
+# (originals/LIBRARY.tsv), White's Great Controversy of 1911 and Gardner's
+# Urantia: The Great Cult Mystery.  Seven of Block's findings that no note
+# gives are added (F2a, F6a, F7a, F8a, F10b, F11a, F12a), and four found in
+# review that neither Block nor the edition gives (F5a, F8b, F10a, F13a).  The
+# review, numbered F1-F21 in the order of the text, each added note after the
+# one before it, is var/study/review-003.md.  All 32 ruled by Tigran on
+# 2026-10-20 and carried as proposed, the four found in review with no credit
+# line (question 2), Eddy, Sadler and Gardner as sources (questions 1 and 3).
+
+paper = 3
+chart = "https://urantiabooksources.com/wp-content/uploads/2020/02/003.pdf"
+chart_date = 2020-02-23          # as Block dates it on its first page
+
+# The sources as Block's chart lists them, page 1, without degrees, under the
+# keys earlier papers gave those it shares (one key, one work).  Block lists
+# Nave in the Lincoln, Nebraska, printing of 1905; every page he gives is the
+# same in the printing of 1901 the notes are checked in, which Paper 2's key
+# names.
+[[source]]
+key = "Nave"
+origin = "a9a65f7c82da2cba"
+tex = '''Orville J. Nave, \emph{Nave's Topical Bible: A Digest of the Holy Scriptures} (New York: Topical Bible Publishing Company, from press of Eaton \& Mains, 1896, 1897).'''
+
+[[source]]
+key = "Hume"
+origin = "0ef15cc458feeed5"
+tex = '''Robert Ernest Hume, \emph{Treasure-House of the Living Religions: Selections from Their Sacred Scriptures} (New York: Charles Scribner's Sons, 1932).'''
+
+[[source]]
+key = "Knudson"
+origin = "4f485dd739e7ac4d"
+tex = '''Albert C. Knudson, \emph{The Doctrine of God} (New York: The Abingdon Press, 1930).'''
+
+# As the title page of the 1931 printing names it (originals/MN41467ucmf_1.pdf):
+# "The Abingdon Press, New York, Cincinnati, Chicago".
+[[source]]
+key = "Lewis"
+origin = "b6d57299b6eb0bec"
+tex = '''Edwin Lewis, \emph{God and Ourselves: A Plea for the Reality, Adequacy and Availability of God} (New York: The Abingdon Press, 1931).'''
+
+# Added: F2 quotes it (Block's endnote 2), as Papers 1 and 2 cite it.
+[[source]]
+key = "Matthews"
+origin = "none"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+# Added: F3 quotes it (Block's endnote 4, from a printing of 1917); checked in
+# the printing of 1915 (originals/christianhealing00eddy.pdf), p. 10.
+[[source]]
+key = "Eddy"
+origin = "none"
+tex = '''Mary Baker Eddy, \emph{Christian Healing and The People's Idea of God: Sermons Delivered at Boston} (Boston: Allison V. Stewart, 1915).'''
+
+# Added: F5 and F5a quote it (Block's endnote 5); checked in Urantia
+# Foundation's republication, p. 110 (originals/The_Urantia_Book_Workbooks-...).
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# Added: F7a quotes her, after Gardner (Block's endnote 7), under Paper 1's
+# key and words; checked in the 1911 printing, pp. 677-678
+# (originals/greatcontroversy00whit.pdf).
+[[source]]
+key = "White1911"
+origin = "none"
+tex = '''Ellen G. White, \emph{The Great Controversy Between Christ and Satan: The Conflict of the Ages in the Christian Dispensation} (Mountain View, California: Pacific Press Publishing Association, 1911; first published 1888).'''
+
+# Added: F7a names him as the one who found White's sentence (Block's endnote
+# 7); checked in Tigran's copy, pp. 227-228 (originals/LIBRARY.tsv).
+[[source]]
+key = "Gardner"
+origin = "none"
+tex = '''Martin Gardner, \emph{Urantia: The Great Cult Mystery} (Amherst, New York: Prometheus Books, 1995).'''
+
+# F1, ruled as proposed: kept, but for "Here and in the notes below", which the credit
+# line on each card replaces.  A Bible note, so no credit.
+[[note]]
+at = "3:0.1"
+after = "in his Sons.”"
+origin = "9198a6032b626f85"
+tex = '''1~John~5:11: ``And this is the record, that God hath given to us eternal life, and this life is in his Son.'' The Son has become the Sons.'''
+
+# F2, ruled as proposed: kept, Matthews cited by his key (Block's endnotes 1 and 2,
+# both "Compare"); Knudson pp. 270-271 and Matthews p. 72 checked in the books.
+[[note]]
+at = "3:0.3"
+after = "his acting nature."
+origin = "e2cb68a6d1502c42"
+credit = "block"
+tex = '''Compare Knudson~\cite{Knudson}, pp.~270--271, on the two views of creation: the prevailing one, that God ``might have entirely abstained from creative activity'', and the other, ``that creation is eternal and that it is an outgrowth of the divine nature. God, it is said, would not be God if he were not Creator.'' And Matthews~\cite{Matthews}, p.~72: ``it is in virtue of His creativeness that God is God''.'''
+
+# F2a, added, ruled as proposed: Block's finding, as Paper 2's F1a, checked in the
+# printing he cites: all six on p. 486, Deuteronomy 4:39 within the entry
+# headed 4:34, where his chart has 4:29.
+[[note]]
+at = "3:1.2"
+after = "cannot contain him.”"
+origin = "none"
+credit = "block"
+corrects = '''Deuteronomy~4:39 for his 4:29'''
+tex = '''The verses quoted in this paragraph and the one before stand in Nave's Topical Bible under \textsc{God}: \textsc{Presence of} \cite{Nave}, p.~486: Deuteronomy~4:39, Psalms~139:7, Jeremiah~23:23--24, Ephesians~1:23, 1~Corinthians~12:6 and 1~Kings~8:27.'''
+
+# F3, ruled as proposed: Eddy cited in full, as a work a note quotes is; "Compare"
+# kept (question 1); after the sentence whose words it quotes, as Block sets
+# it, not after the next; checked in the printing of 1915, p. 10.
+[[note]]
+at = "3:1.2"
+after = "God is all and in all."
+origin = "764835d27f0ff93e"
+credit = "block"
+tex = '''Compare Eddy~\cite{Eddy}, p.~10: ``God is All, and in all: that finishes the question of a good and a bad side to existence.'' For Eddy the words deny that evil is real; here they say where God is, and the next sentence goes beyond them: ``But even that is not all of God.'''''
+
+# F4, ruled as proposed: kept; "(noticed by M. Block)" is the credit line now (his
+# endnote 6).
+[[note]]
+at = "3:1.3"
+after = "the light thereof.”"
+origin = "5e20bfc6299dffcd"
+credit = "block"
+tex = '''Psalms~19:6, of the sun: ``His going forth is from the end of the heaven, and his circuit unto the ends of it: and there is nothing hid from the heat thereof.'' \textit{Heat} has become \textit{light}; compare the ``light without heat'' of \bibref[3:2.3]{p003 2:3}.'''
+
+# F5, ruled as proposed: 1 John 4:13 "as Hume gives it", on p. 15; Sadler's words on
+# the last quotation added, from Block's endnote 5, checked in the
+# republication, p. 110.
+[[note]]
+at = "3:1.4"
+after = "man’s inseparable companion.”"
+origin = "3b7d8947b1c28a02"
+credit = "block"
+tex = '''From Hume~\cite{Hume}, pp.~15--18, ``The Divine Omnipresence and Inner Presence''. This first quotation joins 1~John~4:13, as Hume gives it, ``We know that we dwell in Him and He in us because He hath given us of His spirit'' (p.~15), to a Hindu text, ``I worship as the Supreme Being, as the Inseparable Companion'' (p.~16): the Supreme Being worshipped has become the Adjuster, ``This gift from the Paradise Father''. ``All-pervading is He'' is Hindu too (p.~16); ``God is concealed in every heart'' and ``I go searching for the Friend; but the Friend is with me'' are Sikh (p.~18). The last quotation of the paragraph has not been found. Dr~Sadler, who took all six for Sikh, from Macauliffe's The Sikh Religion, wrote of it: ``I have been unable to locate'' \cite{Sadler2003}, p.~110.'''
+
+# F5a, added in review, ruled as proposed: neither Block nor the edition gives
+# these lines; checked in Hume's page image, p. 18.  Sadler's list (p. 110)
+# has the first and the last of them.  No credit line, as Tigran ruled
+# (question 2).
+[[note]]
+at = "3:1.4"
+after = "speaks from within us.”"
+origin = "none"
+tex = '''The fourth and fifth quotations draw on more of Hume's Sikh lines on p.~18 \cite{Hume} than the Friend: ``Many millions search for God, And find Him in their hearts''; ``Since God dwelleth in thy heart, Why leave, and go far to find Him! Near thee shalt thou find Him For Whom thou searchest the world!''; ``Thou art omnipresent, though I thought Thee distant. Thou art near''; and Kabir's ``Him Whom I thought without me I now find within me.'' Sadler's list of Sikh sources for the paragraph has the first and the last of these \cite{Sadler2003}, p.~110. Kabir's discovery, that the one he thought outside him is within, is here said of every man: the true God ``is a part of us''.'''
+
+# F6, ruled as proposed: kept; Knudson p. 275 checked in the book.
+[[note]]
+at = "3:1.6"
+after = "barrier to Deity."
+origin = "df5764e7b5629172"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~275: omnipresence ``means that space constitutes no barrier or limitation to the divine power''.'''
+
+# F6a, added, ruled as proposed: Block's finding, as F2a: Daniel 4:35 and Matthew 19:26
+# on p. 485, Revelation 19:6 and James 4:12 on p. 486; Romans 13:1 is not under
+# the heading, and Block brackets it.
+[[note]]
+at = "3:2.2"
+after = "only one lawgiver."
+origin = "none"
+credit = "block"
+tex = '''Four of the five verses quoted in this paragraph and the one before stand in Nave's Topical Bible under \textsc{God}: \textsc{Power of} \cite{Nave}: Revelation~19:6 (p.~486), Daniel~4:35 and Matthew~19:26 (p.~485), and James~4:12 (p.~486). The other, ``there is no power but of God'', is Romans~13:1, which Block gives apart from Nave.'''
+
+# F7, ruled as proposed: kept; Knudson p. 264 checked in the book.
+[[note]]
+at = "3:2.3"
+after = "the best understood."
+origin = "fda8d7ccc65ba4c4"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~264: ``Of the three attributes just mentioned, omnipotence is the most fundamental.'' Here it is not the most fundamental but the best understood, which leaves the refusal to rank the attributes in \bibref[3:0.3]{p003 0:3} intact.'''
+
+# F7a, added, ruled as proposed: Block's finding, his endnote 7, after Gardner,
+# pp. 227-228; White as a source, as Tigran ruled in Paper 1, checked in the
+# 1911 printing, pp. 677-678.
+[[note]]
+at = "3:2.4"
+after = "all things and beings."
+origin = "none"
+credit = "block"
+tex = '''White~\cite{White1911}, pp.~677--678, of the redeemed: ``With undimmed vision they gaze upon the glory of creation,---suns and stars and systems, all in their appointed order circling the throne of Deity.'' Here the throne of Deity is the ``Paradise-Personality center'', and White's appointed order ``the endless but orderly procession of the starry hosts''. Martin Gardner set the two side by side~\cite{Gardner}, pp.~227--228.'''
+
+# F8, ruled as proposed: Knudson's question on truth restored where the edition, after
+# Block, has an ellipsis, since the paper's first condition names truth.
+[[note]]
+at = "3:2.11"
+after = "conditions or situations:"
+origin = "a2871871bc590557"
+credit = "block"
+tex = '''These three answer the questions of Knudson~\cite{Knudson}, p.~267: ``Are there any limits to the divine power, and if so, what are they? Is truth a barrier to the divine will? Does God have a nature, and if so, does it limit his power and his will? Is his power exhausted in the actual universe, or has he reserves of power as yet untouched?'' The last question is answered at \bibref[3:4.1]{p003 4:1}.'''
+
+# F8a, added, ruled as proposed: Block's finding, as F2a: all twelve on the pages he
+# gives.  Nave cuts Job 37:16 and 23:10 short, and the paper quotes what he
+# leaves out.
+[[note]]
+at = "3:3.2"
+after = "before you ask him.”"
+origin = "none"
+credit = "block"
+tex = '''The verses quoted in this paragraph and the one before stand in Nave's Topical Bible under \textsc{God}: \textsc{Knowledge of} \cite{Nave}: 1~John~3:20 (p.~467), Job~37:16 (p.~465), Proverbs~15:3 (p.~466), Matthew~10:29--30 (p.~467), Psalms~147:4 (p.~466), Exodus~3:7, Psalms~33:13--14 and Job~23:10 (p.~465), Psalms~139:2--3 (p.~466), Hebrews~4:13 (p.~467), Psalms~103:14 (p.~466) and Matthew~6:8 (p.~467). Where Nave cuts a verse short, the words he leaves out are quoted here: ``balances the clouds'' (Job~37:16) and ``when he has tried me, I shall come forth as gold'' (Job~23:10).'''
+
+# F8b, added in review, ruled as proposed: on no page Block gives for the
+# paragraph; checked in the book, pp. 106 and 132.  No credit line, as Tigran
+# ruled (question 2).
+[[note]]
+at = "3:3.4"
+after = "events of sin."
+origin = "none"
+tex = '''Lewis~\cite{Lewis}, p.~106, in the argument of his chapter on sin, ``The Moral Shadow'': ``Sin is therefore no surprise to God. He allows for it not only as possibility, but also as fact.'' And p.~132: ``It is a philosophy that holds that God is never surprised, and that he is never baffled by any circumstance, however dreadful.'' Whether God foreknows sin is here left open, and Lewis's ``God is never surprised'' is the one thing certain.'''
+
+# F9, ruled as proposed: corrected.  Knudson does not tie the absence of surprise to
+# foreknowledge: he reports it as an argument for foreknowledge and answers it
+# (p. 321).  The first quotation begins on p. 319, where Block has 320.
+[[note]]
+at = "3:3.4"
+after = "subjected to surprise."
+origin = "7a7af614fd4bbbf6"
+credit = "block"
+corrects = '''pp.~319--320 for his 320'''
+tex = '''Knudson~\cite{Knudson}, pp.~319--320, allows that ``To deny to God foreknowledge of free acts, would not necessarily be inconsistent with his omniscience''. To the argument for foreknowledge that ``If God foreknows everything, he will never be taken by surprise, not even by the acts of evil men'', he answers that even if free acts ``cannot be positively foreknown, to infinite insight it is hardly possible that they should contain much in the way of surprise'' (p.~321). Here the foreknowledge of sin is left to God's choice, and Knudson's ``hardly \ldots{} much'' has become ``never''.'''
+
+# F10, ruled as proposed: kept; Knudson p. 320 checked in the book.
+[[note]]
+at = "3:3.5"
+after = "of the unknowable."
+origin = "82f9a745ecc62ba2"
+credit = "block"
+tex = '''Knudson~\cite{Knudson}, p.~320: ``as omnipotence does not imply the power to do the nondoable, so omniscience does not imply the power to know the unknowable.'''''
+
+# F10a, added in review, ruled as proposed: Block gives p. 267's question here,
+# not p. 271's answer; checked in the book.  No credit line, as Tigran ruled
+# (question 2).
+[[note]]
+at = "3:4.1"
+after = "central personality of Deity."
+origin = "none"
+tex = '''Knudson~\cite{Knudson} answers his own question of p.~267 on p.~271, of those for whom God does all he can do: ``There are no transcendent reserves of divine power. Nature reflects all there is of God. But this pantheistic view is manifestly inconsistent with the divine omnipotence. God, if truly omnipotent, cannot have exhausted himself in the present temporal order.'' Here the reserves are not only untouched but undiminished by all that is given: God ``would still possess the same infinite potential, just as if force, energy, and power had never been poured forth'' (\bibref[3:4.2]{p003 4:2}).'''
+
+# F10b, added, ruled as proposed: Block's finding, as F2a, for this paragraph and two of
+# the three verses of 3:5.4 (Colossians 1:17, the third, Block brackets).
+[[note]]
+at = "3:5.2"
+after = "the fullness thereof.”"
+origin = "none"
+credit = "block"
+tex = '''The verses quoted in this paragraph stand in Nave's Topical Bible under \textsc{God}: \textsc{Sovereign} \cite{Nave}: Psalms~24:1 (p.~510), Daniel~2:21 (p.~511) and Daniel~4:17 (p.~512); so do two of the three in \bibref[3:5.4]{p003 5:4}, John~10:29 and Ephesians~4:6 (p.~512).'''
+
+# F11, ruled as proposed: kept.  A Bible note, so no credit.
+[[note]]
+at = "3:5.2"
+after = "kingdoms of men.”"
+origin = "88158057946c3703"
+tex = '''Daniel~4:17: ``the most High ruleth in the kingdom of men''. The singular, God, has become the plural, the Most High Fathers of the constellations; compare \bibref[43:3.4]{p043 3:4}.'''
+
+# F11a, added, ruled as proposed: Block's finding, Lewis pp. 74 and 83, beside the
+# paragraph's first two sentences; checked in the book.
+[[note]]
+at = "3:5.5"
+after = "universal sovereignty of God."
+origin = "none"
+credit = "block"
+tex = '''Lewis~\cite{Lewis}, in the argument of his chapter ``The Inevitabilities of Life'' (p.~74): ``There is no necessary antagonism between the conditions of life and the Sovereign Goodness of God.'' And p.~83: ``Life is full of inevitabilities, and from the stark horror of some of them we would fain hide our face.'' Lewis's ``Sovereign Goodness'' is here ``universal sovereignty'', and the horror is gone.'''
+
+# F12, ruled as proposed: the pages drawn on, pp. 74-113; pleasure (item 9) is Lewis's
+# too, p. 91, which Block's chart gives in brackets.
+[[note]]
+at = "3:5.5"
+after = "Consider the following:"
+origin = "64a552efb287a0d0"
+credit = "block"
+tex = '''This list and the argument of \bibref[3:5.15]{p003 5:15} are taken from Lewis~\cite{Lewis}, chapters~III, ``The Inevitabilities of Life'', and IV, ``The Moral Shadow'' (pp.~74--113): ``Is courage desirable? Then man must encounter hardship. Is service of one's kind desirable? Then there must be inequalities in the human lot. Is hope desirable? Then life must be beset by uncertainties. Is faith desirable? Then the mind must know less than it is able to believe. Is truth desirable? Then one must be able to lie'' (p.~93). Idealism, loyalty and unselfishness (items 6--8) are added here, and Lewis's lie has become error and the possibility of falsehood. Pleasure (item~9) is Lewis's too, from p.~91: ``There could be no pleasure if there were no pain, for both have the same physical basis---a nervous system.'''''
+
+# F12a, added, ruled as proposed: Block's finding, Lewis p. 96; checked in the book,
+# which has "the spirit and the needs", where his chart has "spirit and needs".
+[[note]]
+at = "3:5.15"
+after = "Father’s divine will."
+origin = "none"
+credit = "block"
+corrects = '''``the spirit and the needs'' for his ``the spirit and needs'''''
+tex = '''Lewis~\cite{Lewis}, p.~96: ``The world is a system: so far as we can tell, it must be that or nothing. A system means coherence, continuity, relationship. In a system, the parts are as they are and where they are because of the requirements of the whole. This surrender to the spirit and the needs of the whole is the price the part must pay for its own existence.'' Lewis's price for existence is here the condition of survival: co-operation, ``the wholehearted desire and perfect willingness to do the Father's divine will''.'''
+
+# F13, ruled as proposed: "The purpose requires" is on p. 113 alone; the next sentence,
+# which the paper's "Free and inexperienced intelligence" takes up, added from
+# Block's chart; p. 106's sentence given whole.
+[[note]]
+at = "3:5.15"
+after = "without free intelligence."
+origin = "b0d048fd0c6ccf7b"
+credit = "block"
+tex = '''Lewis~\cite{Lewis}, p.~112: ``The only world in which there could be no error would be a world in which there was no free intelligence''; p.~113: ``The purpose requires that men shall be fallible because it requires that they shall be free. Intelligence that is free and inexperienced and under necessity of learning is bound to go astray''; and p.~106: ``The possibility of moral evil necessarily goes with human life: sin is the responsible actualizing of this possibility.'''''
+
+# F13a, added in review, ruled as proposed: on no page Block gives; checked in
+# the book, p. 123.  No credit line, as Tigran ruled (question 2).
+[[note]]
+at = "3:5.15"
+after = "deliberate immoral judgment."
+origin = "none"
+tex = '''Lewis~\cite{Lewis}, p.~123: ``sin is inner disloyalty to what is taken to be right and therefore obligatory, or \ldots{} the failure of the will to indorse a moral judgment.'' Here it is turned round: sin is the will's endorsing an immoral judgment, ``consciously'' and ``knowingly''.'''
+
+# F14, ruled as proposed: kept; Lewis p. 113 checked in the book.
+[[note]]
+at = "3:5.16"
+after = "fact of existence."
+origin = "f518f5bbc7f203ee"
+credit = "block"
+tex = '''Compare Lewis~\cite{Lewis}, p.~113, of beings who could not err: ``Perhaps `angels' are such beings. But if they are, what man who appreciates the meaning of his own manhood would want to be an angel?'' Here the hypothetical angels are the actual Havoners, and \bibref[3:5.17]{p003 5:17} says, item by item, what they lack.'''
+
+# F15, ruled as proposed: the rest of Lewis's argument on p. 48, the page Block gives,
+# which the paragraph's third and fourth sentences follow; the pages drawn on,
+# pp. 48-63, for the chapter's (pp. 47-68).
+[[note]]
+at = "3:6.2"
+after = "was not inevitable."
+origin = "da69fcffffb45130"
+credit = "block"
+tex = '''Lewis~\cite{Lewis}, p.~48: ``Any attempt to `explain' the universe must begin with the assumption that it need not have been. \ldots{} In that case, the whole---the universe---is dependent, and a dependent universe calls for a Creator. But the Creator must be free if his act is not necessary, and a free Creator will also be sovereign.'' The argument of \bibref[3:6.2--4]{p003 6:2} is that of Lewis's chapter~II, ``The Universal Sovereign'' (pp.~48--63).'''
+
+# F16, ruled as proposed: Block's pp. 49 and 51, which the paragraph's first and last
+# sentences follow, added to the edition's p. 50, and the note moved to the
+# paragraph's end; checked in the book (p. 51 reads "then is he sovereign",
+# where Block has "then he is", which the note does not quote).
+[[note]]
+at = "3:6.3"
+after = "Universal Father is acknowledged."
+origin = "def95a3be4f31647"
+credit = "block"
+tex = '''Lewis~\cite{Lewis}, p.~49: ``The only God who can be made finally intelligible is a God who is absolute Sovereign. Even polytheism had eventually to make provision for one God who gave the law to all lesser gods.'' P.~50: ``the very least we can ask of the cause of all things is that it shall not be lower in kind or quality than what is admittedly the highest feature of the `all things' that are to be accounted for. This ranking place must be assigned to mind \ldots{} Mind is either to be explained by Other Mind or to be explained by that which is not mind.'' And p.~51: ``If mind requires Other Mind to account for it---more exactly, if man is inexplicable without God---then man is the issue either of God's free will or of his necessitated will.'' Lewis's ``Other Mind'' is here ``higher orders of thought and purposive will''.'''
+
+# F17, ruled as proposed: corrected from the book, "reverenced", the paper's own word,
+# where Block and the edition have "revered"; the next sentence, on Block's
+# chart, added, since the paper's "unintended homage" answers it.
+[[note]]
+at = "3:6.4"
+after = "and self-explanatory!"
+origin = "4068d75285de48a7"
+credit = "block"
+corrects = '''``reverenced'' for his ``revered'''''
+tex = '''Lewis~\cite{Lewis}, pp.~62--63: an age that accepts a mechanistic philosophy ``professes to be pained at the suggestion of a universal and sovereign Will whose activity is precisely those laws which, when conceived as self-explaining and self-acting, are so deeply reverenced. No medieval saint ever worshiped more fervently in the temple of his God than some moderns worship at the shrine in which they have elevated law to be `king of kings and lord of lords'\,''. Lewis's worship of law is here ``unintended homage'' to the law-Creator.'''
+
+# F18, ruled as proposed: kept; its anchor written for the press's "Center".
+[[note]]
+at = "3:6.5"
+after = "Great Source and Center."
+origin = "2ba21afe76f46636"
+credit = "block"
+tex = '''Lewis~\cite{Lewis}, p.~139: ``Why is it a sign of philosophical ineptitude to `humanize' God but a sign of philosophical superiority to `mechanize' him?'' Lewis defends humanizing God; here it is ``a great blunder'', with the Adjuster as the one exception.'''
+
+# F19, ruled as proposed: p. 149 quoted more fully, on the page Block gives: Lewis's
+# confessed inability to say how God suffers, the paper's "I cannot understand
+# how", and his "in all our affliction he too is afflicted".
+[[note]]
+at = "3:6.6"
+after = "do not know."
+origin = "c45b1cdf082442b1"
+credit = "block"
+tex = '''Lewis~\cite{Lewis}, chapter~V, under the heading ``God suffers'' (p.~148), affirms it: ``With due modesty we confess our inability to state clearly the process whereby suffering can be an actual experience for a being such as we conceive God to be; but this inability is no sufficient reason for the conclusion that therefore he cannot suffer. \ldots{} Better, because far truer, that we should say that the world's travail is also his travail---that `in all our affliction he too is afflicted.' \ldots{} we can affirm the fact even if we are uncertain respecting the process'' (p.~149). He reports that Friedrich von H\"ugel preferred the word ``sympathy'', since suffering implies ``a certain deprivation of bliss which cannot be consistently attributed to God'' (p.~152). Here Lewis's assertion becomes a question, answered ``I do not know'', and his confessed inability is ``I cannot understand how''; von H\"ugel's sympathy is the certainty, and Lewis's suffering only a possibility.'''
+
+# F20, ruled as proposed: kept.  A Bible note, so no credit.
+[[note]]
+at = "3:6.6"
+after = "I am afflicted.”"
+origin = "9c5d3ddde0c91a4f"
+tex = '''Isaiah~63:9: ``In all their affliction he was afflicted''; compare \bibref[1:5.16]{p001 5:16} and \bibref[2:5.3]{p002 5:3}. Here the Father speaks in the first person.'''
+
+# F21, ruled as proposed: kept; Lewis p. 157 checked in the book.
+[[note]]
+at = "3:6.7"
+after = "and idealized reality."
+origin = "d895ed089c2252b2"
+credit = "block"
+tex = '''Lewis~\cite{Lewis}, p.~157: ``As between God conceived as at once Creative Will and Suffering Love and conceived as mere Pattern, or Form, or Process, or Ideal, the greater worth belongs to the former.'''''
