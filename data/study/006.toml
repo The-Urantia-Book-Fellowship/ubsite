@@ -1,0 +1,172 @@
+# Paper 6, The Eternal Son: the British Study Edition's 13 notes at 2474116,
+# reviewed 2026-10-21 against the press text, the edition's own KJV, and the
+# originals.  Block has no chart for Paper 6.  The works two notes quote are
+# added to the Bibliography and checked in the original: Julian of Norwich in
+# Grace Warrack's version (Methuen, 1901) and Aquinas in the English Dominican
+# translation (second and revised edition, 1921), both now in
+# ../block-sources/originals/.  Four notes found in review are added, with no
+# credit line (F0a, F0b, F12a, and Sadler's remark in F5), from Matthews's
+# chapter on the Trinity, Illingworth's third lecture, and Sadler's Analytic
+# Study of Part I.  The review, numbered F1-F13 in the order of the text, each
+# added note after the one before it (F0a and F0b before F1), is
+# var/study/review-006.md.  All 16 ruled by Tigran on 2026-10-21 and carried
+# as proposed, the notes found in review with no credit line; F12a stands on
+# a shared idea (question 1), and Sadler's remarks stay in F0b and F5
+# (question 2).
+
+paper = 6
+chart = "none"
+
+# The works the notes quote, none of which the edition lists for this paper,
+# each under the key and words earlier papers gave it where it has one.
+# Added: F0a quotes it; checked in the book, pp. 191-192.
+[[source]]
+key = "Matthews"
+origin = "none"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+# Added: F0b and F5 quote it; checked in Urantia Foundation's republication,
+# pp. 185 and 190.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# Added: F12 quotes it; the title page of the first printing
+# (originals/revelationsdivi00juligoog.pdf, Harvard's copy).
+[[source]]
+key = "Julian"
+origin = "none"
+tex = '''Julian of Norwich, \emph{Revelations of Divine Love, Recorded by Julian, Anchoress at Norwich, Anno Domini 1373}, a version from the manuscript in the British Museum, ed.~Grace Warrack (London: Methuen \& Company, 1901).'''
+
+# Added: F12a quotes it, under Paper 1's key and words; checked in the book,
+# pp. 70-73.
+[[source]]
+key = "Illingworth"
+origin = "none"
+tex = '''J.~R. Illingworth, \emph{Personality Human and Divine} (London and New York: Macmillan and Co., 1894).'''
+
+# Added: F13 quotes it; the title page of the volume
+# (originals/summatheologi02thom.pdf).
+[[source]]
+key = "Aquinas"
+origin = "none"
+tex = '''Thomas Aquinas, \emph{The ``Summa Theologica'' of St.~Thomas Aquinas}, Part~I, QQ.~XXVII--XLIX, literally translated by Fathers of the English Dominican Province, second and revised edition (London: Burns Oates \& Washbourne, 1921).'''
+
+# F0a, added in review: checked in the book, pp. 191-192.
+[[note]]
+at = "6:0.2"
+after = "ever have had a beginning."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, p.~191, in his chapter ``The Holy Trinity'': ``God's thought of Himself, therefore, must be a completely adequate thought. We have no difficulty then in approving the proposition `In the beginning was the Thought'. God's thought of Himself is co\ae val with God's existence. In thinking Himself he `begets' the Son.'' And p.~192: ``the `me', the thought of God, is not passive object but active correlated subject---the perfect Image of the Father.'' Here the Son is ``the perfect and final expression'' of the Father's ``first'' concept (\bibref[6:0.1]{p006 0:1}), and as eternal as the Father: the Father ``never could have had a first thought, nor could the Eternal Son ever have had a beginning''. At \bibref[6:8.3]{p006 8:3}, ``God is the initiating thought and the Son is the expressionful word''.'''
+
+# F0b, added in review: the verses checked in the edition's KJV, the Creed in
+# Schaff's Creeds of Christendom (Tigran's library), Sadler's remark in the
+# republication, p. 185.
+[[note]]
+at = "6:1.1"
+after = "only-begotten Son of God."
+origin = "none"
+tex = '''John~1:18: ``the only begotten Son, which is in the bosom of the Father''; John~3:16: ``he gave his only begotten Son''; and the Nicene Creed: ``the only-begotten Son of God, begotten of the Father before all worlds''. In all three he is Jesus. The book gives the title twice: to the Eternal Son, here and at \bibref[10:1.4]{p010 1:4}, and to each Creator Son, ``the only-begotten and only-begettable offspring'' of one union of the Father's and the Son's concepts (\bibref[21:1.2]{p021 1:2}), Michael of Nebadon being the ``only-begotten Son'' of the 611,121st (\bibref[33:1.1]{p033 1:1}). Dr~Sadler set John~1:18 beside this paragraph, and wrote: ``How true: The Eternal Son enshrouds the Father. This is a direct attempt to separate the concepts of Michael and the Eternal Son'' \cite{Sadler2003}, p.~185.'''
+
+# F1: kept; checked in the edition's KJV.
+[[note]]
+at = "6:1.3"
+after = "that was made.”"
+origin = "0b4a7fc16756482a"
+tex = '''John~1:1--3: ``In the beginning was the Word, and the Word was with God, and the Word was God. The same was in the beginning with God. All things were made by him; and without him was not any thing made that was made.'' The second verse is left out, and the quotation stops before John~1:14, ``And the Word was made flesh'', which is not true of the Eternal Son; see \bibref[6:1.5]{p006 1:5}.'''
+
+# F2: kept; checked in the edition's KJV.
+[[note]]
+at = "6:1.4"
+after = "Word of life.”"
+origin = "2a29910d50ae66bc"
+tex = '''1~John~1:1 reads ``That which was from the beginning \ldots{} of the Word of life''. \textit{That which} has become \textit{He who}, and \textit{of the Word of life} has become \textit{even the Word of life}.'''
+
+# F3: kept; checked in the edition's KJV.
+[[note]]
+at = "6:1.4"
+after = "this world was.”"
+origin = "8c78245b87ac25cc"
+tex = '''John~17:5: ``And now, O Father, glorify thou me with thine own self with the glory which I had with thee before the world was.'' \textit{The world} has become \textit{this world}: the glory is Michael's before Urantia, not the Eternal Son's from eternity.'''
+
+# F4: kept; checked in the edition's KJV.
+[[note]]
+at = "6:2.2"
+after = "seen the Father.”"
+origin = "deafbbc95f6fc0f8"
+tex = '''John~14:9: ``he that hath seen me hath seen the Father''. \textit{Me} has become \textit{the Son}, said here of the Eternal Son and of every Creator Son.'''
+
+# F5: kept, with Sadler's remark at this paragraph, p. 190; the verses checked in
+# the edition's KJV.
+[[note]]
+at = "6:3.4"
+after = "crude and grotesque."
+origin = "ab5ce90b883cdf3d"
+tex = '''Compare Hebrews~7:25: ``he ever liveth to make intercession for them''; Romans~8:34: ``who also maketh intercession for us''; and 1~John~2:1: ``we have an advocate with the Father''. Dr~Sadler, at this paragraph: ``The Son does not function as a mediator---he is a revealer'' \cite{Sadler2003}, p.~190.'''
+
+# F6: kept; the verse checked in the edition's KJV, the cross-references in the
+# press text.
+[[note]]
+at = "6:4.7"
+after = "from the beginning."
+origin = "d848744454c4ed7e"
+tex = '''Isaiah~46:10: ``Declaring the end from the beginning''. Compare \bibref[3:3.2]{p003 3:2}, where the Father is ``the only personality in all the universe who does actually know the number of the stars and planets of space''; the Son is omnipotent ``only in the spiritual realm'' (\bibref[6:4.2]{p006 4:2}).'''
+
+# F7: kept; checked in the edition's KJV.
+[[note]]
+at = "6:5.5"
+after = "realities to himself."
+origin = "43c083029e350d16"
+tex = '''Compare John~12:32: ``And I, if I be lifted up from the earth, will draw all men unto me.'''''
+
+# F8: kept; checked in the edition's KJV.
+[[note]]
+at = "6:5.7"
+after = "our own image.”"
+origin = "f8e8f43ccbb18aa5"
+tex = '''Genesis~1:26: ``Let us make man in our image, after our likeness''; and Genesis~1:27: ``So God created man in his own image''. Here the words are the Father's to the Son, and the image of God in man is the Thought Adjuster.'''
+
+# F9: kept; checked in the edition's KJV.
+[[note]]
+at = "6:6.3"
+after = "they are known;"
+origin = "37a2c826e3b90db0"
+tex = '''1~Corinthians~13:12: ``then shall I know even as also I am known.'''''
+
+# F10: kept; checked in the edition's KJV.
+[[note]]
+at = "6:6.4"
+after = "of the spirit”—"
+origin = "5de269bfbe2ed9fa"
+tex = '''Romans~8:27: ``the mind of the Spirit''.'''
+
+# F11: kept; the cross-references checked in the press text.
+[[note]]
+at = "6:7.1"
+after = "technique of trinitization,"
+origin = "8c22db201bbc4cdd"
+tex = '''The price of this escape is given at \bibref[10:3.7]{p010 3:7}: the Father can never again ``act alone as the personality-absolute''. The Son's own escape from ``the otherwise all-encompassing fetters of personality absolutism'' is incarnation (\bibref[7:5.4]{p007 5:4}).'''
+
+# F12: kept, with the book cited as a source; checked in Warrack's first
+# printing, ch. LVIII, p. 145.
+[[note]]
+at = "6:8.1"
+after = "the Universal Mother."
+origin = "2f7c91c2eb39cf99"
+tex = '''Compare Julian of Norwich~\cite{Julian}, chapter~58, p.~145: the Second Person ``is our Mother, Brother, and Saviour'', and ``the Second Person of the Trinity is our Mother in Nature''. Compare also \bibref[6:2.8]{p006 2:8}, where the Son looks upon all creatures ``both as father and as brother''; and \bibref[8:2.2]{p008 2:2}, where the Infinite Spirit is ``the Paradise Mother Spirit''.'''
+
+# F12a, added in review: checked in the book, pp. 70-73.
+[[note]]
+at = "6:8.1"
+after = "their universal family."
+origin = "none"
+tex = '''Illingworth~\cite{Illingworth}, in his lecture on the conception of divine personality, finds the triunity of personality first realized in the family, ``its abstract triunity being therein adequately, because personally, realized in father, mother, and child'' (p.~71); and goes on: ``the Christian Church did not press the family analogy, at any rate further than the doctrine of the Son. It probably saw early exhibited, among the Gnostic sects, the dangerous practical consequences which might ensue, from the introduction of a feminine principle into our thoughts about the Godhead; and therefore, while freely admitting feminine attributes, declined all thought of a feminine hypostasis, though possibly this may have involved some underestimate of an aspect of truth'' (pp.~72--73). Here the analogy is pressed: the Son is the Universal Mother, and ``all of us, high and low, constitute their universal family''.'''
+
+# F13: kept, with the book cited as a source; checked in the second and revised
+# edition, p. 9.
+[[note]]
+at = "6:8.3"
+after = "the expressionful word."
+origin = "485bd40ceaf807c0"
+tex = '''Compare Thomas Aquinas~\cite{Aquinas}, I, q.~27, a.~3, p.~9: ``The procession of the Word is by way of an intelligible operation''; the other procession, of the Holy Spirit, is that of love. Here the mind of the universe belongs to the Third Person, ``the Infinite Mind'' (\bibref[8:2.2]{p008 2:2}).'''
