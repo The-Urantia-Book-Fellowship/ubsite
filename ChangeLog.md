@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Paper 7, Relation of the Eternal Son to the Universe, has study notes too, 17 of them, and the Bibliography lists the two works they add.
 - Paper 6, The Eternal Son, has study notes too, 16 of them, and the Bibliography lists the two works they add.
 - Paper 5, God's Relation to the Individual, has study notes too, 29 of them, and the Bibliography lists the three works they add.
 - Paper 4, God's Relation to the Universe, has study notes too, 27 of them, and the Bibliography lists the work they add.

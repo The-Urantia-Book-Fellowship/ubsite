@@ -1,0 +1,163 @@
+# Paper 7, Relation of the Eternal Son to the Universe: the British Study
+# Edition has no notes on it at 2474116, and Block has no chart for it.  Every
+# note here was found in review, with no credit line, checked against the press
+# text, the edition's own KJV, and the originals: Strong's New World-Religion,
+# Rufus Jones's The World Within and Sadler's Physiology of Faith and Fear in
+# Tigran's copies (originals/LIBRARY.tsv), and Matthews's God in Christian
+# Thought and Experience (../block-sources/originals/).  The review, numbered F1-F17 in the order of
+# the text, is var/study/review-007.md.  All 17 ruled by Tigran on 2026-10-21
+# and carried as proposed, with no credit line: the ten Bible notes kept
+# (question 1), Jones's four (question 2), and no note added at 4:2.1, the
+# fuller one on Strong to come at 12:7.2 with Paper 12 (question 3).
+
+paper = 7
+chart = "none"
+
+# The works the notes quote, none of which the edition lists for this paper,
+# each under the key and words earlier papers gave it where it has one.
+# Added: F1 quotes it, under Paper 5's key and words; checked in Tigran's copy,
+# p. 39.
+[[source]]
+key = "Strong"
+origin = "none"
+tex = '''Josiah Strong, \emph{The New World-Religion} (Garden City, New York: Doubleday, Page \& Company, 1915).'''
+
+# Added: F5 quotes it; the title page of Tigran's copy.
+[[source]]
+key = "Sadler1912"
+origin = "none"
+tex = '''William S. Sadler, \emph{The Physiology of Faith and Fear, or The Mind in Health and Disease} (Chicago: A.~C. McClurg \& Co., 1912).'''
+
+# Added: F3, F4, F6 and F8 quote it; checked in Tigran's copy, the 1921 printing,
+# whose copyright page reads "Set up and electrotyped.  Published, September,
+# 1918"; pp. 74, 100-102 and 114 in the page images.
+[[source]]
+key = "Jones1921"
+origin = "none"
+tex = '''Rufus M. Jones, \emph{The World Within} (New York: The Macmillan Company, 1921; first published 1918).'''
+
+# Added: F12 quotes it, under Paper 5's key and words; checked in the book,
+# p. 200.
+[[source]]
+key = "Matthews"
+origin = "none"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+# F1: checked in Tigran's copy of Strong, p. 39.
+[[note]]
+at = "7:0.4"
+after = "of the Absolute Son."
+origin = "none"
+tex = '''Strong~\cite{Strong}, p.~39: ``God is perfectly free in a universe of laws, because they are the methods of his activities. Natural laws, so called, are the eternal habits of God. They are the same yesterday, to-day, and forever, because he is ever the same.'' The book has nature as ``in a limited sense the physical habit of God'' (\bibref[4:2.1]{p004 2:1}), and here the spirit world as the habit of the Son. At \bibref[12:7.2]{p012 7:2} it is nearer still to Strong's words: ``The laws of God are merely the habits of God, his way of repeatedly doing things'', and God does the same thing in the same way ``simply because that is the best way to do that particular thing in a given circumstance'', where Strong has ``He does things the same way every time because he does things the best way every time.'''''
+
+# F2: checked in the edition's KJV.
+[[note]]
+at = "7:1.1"
+after = "in the hollow of his hand."
+origin = "none"
+tex = '''Isaiah~40:12: ``Who hath measured the waters in the hollow of his hand, and meted out heaven with the span''. Here the hand holds the spirit realities.'''
+
+# F3: checked in Tigran's copy of Jones, pp. 100-102, in the page image.
+[[note]]
+at = "7:1.6"
+after = "a figure of speech."
+origin = "none"
+tex = '''Jones~\cite{Jones1921}, pp.~100--101, in his chapter on prayer, ``The Soul's Converse'': ``If we belong, as I believe we do, in a real kingdom of God---an organic fellowship of inter-related lives---prayer should be as effective a force in this inter-related social world of ours as gravitation is in the world of matter. Personal spirits experience spiritual gravitation, soul reaches after soul, hearts draw toward each other.'' And p.~102: ``Prayer releases energy as certainly as the closing of an electric circuit does. \ldots{} It is effective and operative as surely as are the forces of steam and gravitation.'' Here spiritual gravitation is ``not wholly a figure of speech'', and its circuit carries prayer (\bibref[7:3.3]{p007 3:3}).'''
+
+# F4: checked in Tigran's copy of Jones, p. 74, in the page image.
+[[note]]
+at = "7:3.2"
+after = "of man Paradiseward."
+origin = "none"
+tex = '''Jones~\cite{Jones1921}, p.~74, of the inner ``must'' of conscience: ``It reveals a new kind of gravitation toward a new kind of center, and it implies the existence of another sort of invisible universe in which we live.'' And: ``Some persons do not feel this irresistible pull as powerfully as others do, but probably nobody, who can be called a person, altogether escapes it.'' Here the pull is spirit gravity, ``the inward pulling urge'' toward the Son, ``the center and source of spirit gravity'' (\bibref[7:1.4]{p007 1:4}).'''
+
+# F5: checked in Tigran's copy of Sadler, pp. xvii-xviii, in the page images.
+[[note]]
+at = "7:3.4"
+after = "levels of human consciousness."
+origin = "none"
+tex = '''Sadler~\cite{Sadler1912}, pp.~xvii--xviii, sets out the levels of the nervous system. The basal ganglia ``serve as sort of middlemen, or private secretaries, to the brain centres. When certain physical acts, such as walking or writing, are frequently performed, the basal ganglia acquire the ability to carry on these habitual movements without taxing the higher brain centres''. ``\textit{Reflex action} is the short-cut passage of nerve impulses through the spine or the medulla, whereby sensations provoke motor responses without the action or knowledge of the higher conscious brain centres.'' And: ``The sensory impulses may pass up the spinal cord to the conscious sensory centres of the cerebrum over the long circuit, and excite to action the conscious motor centres of the upper brain. The majority of common and habitual nerve impressions do not travel this long circuit, they go by the automatic or \textit{short circuit} to the basal ganglia''. These are the paper's three levels: the ``lower automatic spinal centers'', the ``habit-trained centers of the lower brain'', and ``the highest levels of human consciousness''.'''
+
+# F6: checked in Tigran's copy of Jones, pp. 101-102, in the page image.
+[[note]]
+at = "7:3.6"
+after = "of true spirit values."
+origin = "none"
+tex = '''Jones~\cite{Jones1921}, p.~101, on prayer: ``The only obstacle to effectual praying, in this world of spiritual fellowship, would be individual selfishness. To want to get just for one's own self, to ask for something which brings loss and injury to others, would be to sever one's self from the source of blessings, and to lose not only the thing sought, but to lose, as well, one's very self.'' And p.~102: ``we can make our personal contribution to the Will of the universe, but we can do it only by wanting what everybody can share, and by seeking blessings which have a universal implication.'''''
+
+# F7: checked in the edition's KJV.
+[[note]]
+at = "7:3.6"
+after = "tinkling cymbal.”"
+origin = "none"
+tex = '''1~Corinthians~13:1: ``Though I speak with the tongues of men and of angels, and have not charity, I am become \bibemph{as} sounding brass, or a tinkling cymbal.'' \textit{Or} has become \textit{and}. In Paul it is speech without charity; here, prayer for purely selfish and material ends.'''
+
+# F8: checked in Tigran's copy of Jones, p. 114, in the page image.
+[[note]]
+at = "7:3.7"
+after = "Words are valueless."
+origin = "none"
+tex = '''Jones~\cite{Jones1921}, p.~114: ``There is no solid hindrance to prayer except ourselves. \ldots{} The difficulty is not objective; it is subjective. We so often do not really pray. We only say over words and call it `prayer.' Let us instead learn to \textit{pray}.'''''
+
+# F9: checked in the edition's KJV, and in the press text at 6:5.7.
+[[note]]
+at = "7:4.4"
+after = "in our own image.”"
+origin = "none"
+tex = '''Genesis~1:26: ``Let us make man in our image, after our likeness''. At \bibref[6:5.7]{p006 5:7} the Father's proposal is ``Let us make mortal man in our own image''; here it is ``mortal creatures''.'''
+
+# F10: checked in the edition's KJV; the note at 1:0.3 gives Matthew 5:48.
+[[note]]
+at = "7:4.7"
+after = "as I am perfect,”"
+origin = "none"
+tex = '''The mandate of \bibref[1:0.3]{p001 0:3}, whose note gives Matthew~5:48. Said by God of himself, in the first person, it has the form of Leviticus~11:44, ``ye shall be holy; for I \bibemph{am} holy'', which 1~Peter~1:16 quotes: ``Be ye holy; for I am holy.'''''
+
+# F11: checked in the edition's KJV.
+[[note]]
+at = "7:5.1"
+after = "in Havona is perfect.”"
+origin = "none"
+tex = '''Matthew~5:48: ``Be ye therefore perfect, even as your Father which is in heaven is perfect.'' \textit{Which is in heaven} has become \textit{in Havona}. The Father's own form of the mandate is ``Be you perfect, even as I am perfect'' (\bibref[1:0.3]{p001 0:3}, \bibref[7:4.7]{p007 4:7}).'''
+
+# F12: the verse checked in the edition's KJV, Matthews in the book, p. 200.
+[[note]]
+at = "7:5.1"
+after = "the truth, and the life.”"
+origin = "none"
+tex = '''John~14:6: ``Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me.'' Here the words are said of all the bestowal Sons. Matthews~\cite{Matthews}, p.~200, reads the verse so: ``In the light of this conception we may interpret those sayings of the Fourth Gospel in which Jesus seems to claim an exclusive right to introduce men to the Father. `No man cometh unto the Father but by me.' Here the eternal Son is speaking. The divine Logos proclaims His universal mediatorship. As the words of the Son they are true, and so far from being exclusive, are universal in their implication.'' Compare \bibref[7:7.4]{p007 7:4}: ``you ascend to the Father by the guidance of this group of divine Sons''.'''
+
+# F13: checked in the edition's KJV, and 7:5.5 in the press text.
+[[note]]
+at = "7:5.9"
+after = "progressive Havona attainment."
+origin = "none"
+tex = '''Compare Philippians~2:6--7: ``Who, being in the form of God, thought it not robbery to be equal with God: But made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men''; and 2~Corinthians~8:9: ``though he was rich, yet for your sakes he became poor''. In Paul it is Christ's one descent, made in the likeness of men; here the Eternal Son lays aside the power and glory of Paradise seven times, and in none of these bestowals is he made a creature: ``He existed as himself'' (\bibref[7:5.5]{p007 5:5}).'''
+
+# F14: checked in the edition's KJV, and 6:2.2 in the press text.
+[[note]]
+at = "7:5.11"
+after = "Eternal Son of God."
+origin = "none"
+tex = '''John~14:9: ``he that hath seen me hath seen the Father''. At \bibref[6:2.2]{p006 2:2} it is ``He who has seen the Son has seen the Father''; here a Paradise Son stands for the Eternal Son.'''
+
+# F15: checked in the edition's KJV.
+[[note]]
+at = "7:6.1"
+after = "sang together.”"
+origin = "none"
+tex = '''Job~38:7: ``When the morning stars sang together, and all the sons of God shouted for joy?'' The two clauses are turned round, and \textit{shouted for joy} has become \textit{proclaimed joy}. A gathering of the sons of God is told in Job~1:6: ``there was a day when the sons of God came to present themselves before the \textsc{Lord}''; and again in Job~2:1.'''
+
+# F16: checked in the edition's KJV.
+[[note]]
+at = "7:7.1"
+after = "his Paradise Sons."
+origin = "none"
+tex = '''Compare Matthew~11:27: ``neither knoweth any man the Father, save the Son, and \bibemph{he} to whomsoever the Son will reveal \bibemph{him}.'' Here it is said of the Eternal Son and his Paradise Sons together.'''
+
+# F17: checked in the edition's KJV.
+[[note]]
+at = "7:7.4"
+after = "this same living way;"
+origin = "none"
+tex = '''Hebrews~10:20: ``By a new and living way, which he hath consecrated for us, through the veil, that is to say, his flesh''. Here the way is the divine Sons, as at \bibref[7:5.1]{p007 5:1}.'''
