@@ -1,0 +1,153 @@
+# Paper 8, The Infinite Spirit: the British Study Edition has no notes on it
+# at 2474116, and Block has no chart for it.  Every note here was found in
+# review, with no credit line, checked against the press text, the edition's
+# own KJV, the Revised Version where a note gives it, the 1955 printing where
+# a note gives it, and the originals: Matthews's God in Christian Thought and
+# Experience and Sadler's Analytic Study of Part I (../block-sources/
+# originals/), and R. A. Torrey's The Person and Work of the Holy Spirit
+# (1910), Princeton Theological Seminary's copy (the same), first found in
+# Project Gutenberg's transcription, whose page breaks agree.  The review, numbered F1-F16 in the order of the text, is
+# var/study/review-008.md.  All 16 ruled by Tigran on 2026-10-21 and carried
+# as proposed, with no credit line: F8 with Sadler's "falling" (question 1),
+# and the Bible notes on echoes, F2, F5 and F6 (question 2).
+
+paper = 8
+chart = "none"
+
+# The works the notes quote, none of which the edition lists for this paper,
+# each under the key and words earlier papers gave it where it has one.
+# Added: F1, F3 and F9 quote it, under Paper 5's key and words; checked in the
+# book, pp. 195-196 and 201, in the page images.
+[[source]]
+key = "Matthews"
+origin = "none"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+# Added: F8 quotes it, under Paper 3's key and words; checked in the
+# republication, p. 231.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# Added: F10 and F16 quote it; its title page (originals/
+# personworkofholy00torr.pdf, PDF page 7), the pages in the page images.
+[[source]]
+key = "Torrey"
+origin = "none"
+tex = '''R.~A. Torrey, \emph{The Person and Work of the Holy Spirit, as Revealed in the Scriptures and in Personal Experience} (New York: Fleming H. Revell Company, 1910).'''
+
+# F1: checked in the book, p. 195, in the page image.
+[[note]]
+at = "8:0.4"
+after = "think of their relationship."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, p.~195: ``The Holy Spirit, we may say, is not a relation; but the relation between Father and Son gives rise (not, of course, temporally) to the being of the Holy Spirit.'' Here the Spirit springs into existence the very instant the Father and the Son ``conjointly conceive an identical and infinite action'' (\bibref[8:0.3]{p008 0:3}), and the order is told only to help the mind: ``In reality they are all three existent from eternity''.'''
+
+# F2: checked in the edition's KJV.
+[[note]]
+at = "8:0.4"
+after = "or ending of days;"
+origin = "none"
+tex = '''Compare Hebrews~7:3, said of Melchisedec: ``having neither beginning of days, nor end of life''.'''
+
+# F3: checked in the book, p. 201, in the page image; John 14:6 in the
+# edition's KJV.
+[[note]]
+at = "8:3.7"
+after = "to discover the Son."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, p.~201: ``Thus it is said of the Spirit both that `He shall take of mine and show it unto you,' and that `He shall guide you into all truth.' These two activities of the Spirit are identical. The Spirit moves the will of personal beings by presenting to them the Son in whom they see the truth of their nature, its ideal perfection. And when they perceive Him, they desire to move towards Him.'' As the Son is the way to the Father (John~14:6; \bibref[7:5.1]{p007 5:1}), so here the Spirit is the way to the Son.'''
+
+# F4: checked in the edition's KJV.
+[[note]]
+at = "8:4.1"
+after = "when “made flesh,”"
+origin = "none"
+tex = '''John~1:14: ``And the Word was made flesh, and dwelt among us''.'''
+
+# F5: checked in the edition's KJV, and 6:3.1 and 6:3.5 in the press text.
+[[note]]
+at = "8:4.2"
+after = "the Spirit is ministry"
+origin = "none"
+tex = '''1~John~4:8: ``God is love''; and 4:16. The book has ``God is love, the Son is mercy'' at \bibref[6:3.5]{p006 3:5}, and ``As God is love, so the Son is mercy'' at \bibref[6:3.1]{p006 3:1}; here the Spirit completes the three.'''
+
+# F6: checked in the edition's KJV.
+[[note]]
+at = "8:4.5"
+after = "likeness of mortal flesh"
+origin = "none"
+tex = '''Romans~8:3: ``God sending his own Son in the likeness of sinful flesh''. \textit{Sinful} has become \textit{mortal}; compare Philippians~2:7: ``was made in the likeness of men''.'''
+
+# F7: checked in the edition's KJV.
+[[note]]
+at = "8:4.8"
+after = "open to their prayers.”"
+origin = "none"
+tex = '''1~Peter~3:12: ``For the eyes of the Lord \bibemph{are} over the righteous, and his ears \bibemph{are open} unto their prayers'', from Psalms~34:15: ``The eyes of the \textsc{Lord} \bibemph{are} upon the righteous, and his ears \bibemph{are open} unto their cry.'' \textit{Ever} is added twice, and \textit{his ears} have become \textit{the divine ears}.'''
+
+# F8: checked in the edition's KJV, the 1955 printing (the Guardian plates,
+# p. 96), and Sadler's workbook, p. 231 = PDF page 249.
+[[note]]
+at = "8:5.4"
+after = "your Father on high.”"
+origin = "none"
+tex = '''Jude~24: ``Now unto him that is able to keep you from falling, and to present \bibemph{you} faultless before the presence of his glory with exceeding joy''. \textit{Falling} has become \textit{failing}, as the 1955 printing has it too (p.~96); \textit{faultless}, \textit{blameless}; and \textit{the presence of his glory}, \textit{your Father on high}. Dr~Sadler, quoting this paragraph, wrote ``falling'' \cite{Sadler2003}, p.~231.'''
+
+# F9: checked in the book, pp. 195-196, in the page images.
+[[note]]
+at = "8:6.1"
+after = "true and divine personality."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, pp.~195--196: ``The New Testament evidence for the personal conception of the Holy Spirit is mixed, and I cannot resist the conclusion that, in many cases, the Holy Spirit is thought of as the power, influence, or presence of God through Christ. I am sure that the normal attitude of most Christians towards the Holy Spirit is of this character, and the idea of personal relations with the Spirit is very little prominent in the life of devotion.'' Here the Spirit is presence, power and influence, ``and infinitely more, but he is also a true and divine personality''.'''
+
+# F10: checked in the scan, pp. 7 and 13, in the page images.
+[[note]]
+at = "8:6.2"
+after = "the Father through the Son."
+origin = "none"
+tex = '''Torrey~\cite{Torrey}, p.~13: ``Oh, the Holy Spirit is not merely an influence or a power or an illumination but is a Person just as real as God the Father or Jesus Christ His Son.'' On p.~7 he sets out the question: ``whether the Holy Spirit is a Divine Person \ldots{} or whether it is simply an influence emanating from God or a power or an illumination that God imparts to us''. Here the Spirit is ``just as real and visible to the higher intelligences of the universes as are the Father and the Son''.'''
+
+# F11: checked in the edition's KJV.
+[[note]]
+at = "8:6.3"
+after = "deep things of God.”"
+origin = "none"
+tex = '''1~Corinthians~2:10: ``for the Spirit searcheth all things, yea, the deep things of God.'' \textit{Searcheth} has become \textit{searches}, and \textit{yea}, \textit{even}.'''
+
+# F12: checked in the edition's KJV.
+[[note]]
+at = "8:6.3"
+after = "and as he wills.”"
+origin = "none"
+tex = '''1~Corinthians~12:11: ``But all these worketh that one and the selfsame Spirit, dividing to every man severally as he will.'' \textit{Worketh} has become \textit{works}, and \textit{as he will}, \textit{and as he wills}.'''
+
+# F13: checked in the edition's KJV.
+[[note]]
+at = "8:6.4"
+after = "the Spirit of God.”"
+origin = "none"
+tex = '''Romans~15:30: ``for the love of the Spirit''; and Ephesians~4:30: ``And grieve not the holy Spirit of God''.'''
+
+# F14: checked in the edition's KJV.
+[[note]]
+at = "8:6.4"
+after = "what the Spirit says.”"
+origin = "none"
+tex = '''Revelation~2:7: ``He that hath an ear, let him hear what the Spirit saith unto the churches''.'''
+
+# F15: checked in the edition's KJV, and in the Revised Version's text.
+[[note]]
+at = "8:6.4"
+after = "makes intercession for you.”"
+origin = "none"
+tex = '''Romans~8:26: ``but the Spirit itself maketh intercession for us''. \textit{Itself} has become \textit{himself}, as the Revised Version (1881) has it: ``but the Spirit himself maketh intercession for us''; and \textit{us}, \textit{you}.'''
+
+# F16: checked in the edition's KJV; Torrey, pp. 9-19, in the scan's page
+# images and text layer.
+[[note]]
+at = "8:6.4"
+after = "they are the sons of God.”"
+origin = "none"
+tex = '''Romans~8:14: ``For as many as are led by the Spirit of God, they are the sons of God.'' The seven verses of \bibref[8:6.3]{p008 6:3} and this paragraph are those of Torrey's proof that the Holy Spirit is a person~\cite{Torrey}, pp.~9--19, in his order. First, ``All the distinctive characteristics of personality are ascribed to the Holy Spirit in the Bible'': knowledge (1~Corinthians~2:10), will (12:11), mind (Romans~8:27, which the paper does not quote), love (15:30) and grief (Ephesians~4:30). Then, ``Many acts that only a Person can perform are ascribed to the Holy Spirit'': he searches (1~Corinthians~2:10), speaks (Revelation~2:7), prays (Romans~8:26, which Torrey quotes from the Revised Version: ``the Spirit Himself maketh intercession''), and leads (Romans~8:14).'''
