@@ -4,11 +4,15 @@
 # text, the edition's own KJV, and the originals: Strong's New World-Religion,
 # Rufus Jones's The World Within and Sadler's Physiology of Faith and Fear in
 # Tigran's copies (originals/LIBRARY.tsv), and Matthews's God in Christian
-# Thought and Experience (../block-sources/originals/).  The review, numbered F1-F17 in the order of
-# the text, is var/study/review-007.md.  All 17 ruled by Tigran on 2026-10-21
-# and carried as proposed, with no credit line: the ten Bible notes kept
-# (question 1), Jones's four (question 2), and no note added at 4:2.1, the
-# fuller one on Strong to come at 12:7.2 with Paper 12 (question 3).
+# Thought and Experience and Hendrix's The Religion of the Incarnation
+# (../block-sources/originals/).  The review, numbered F1-F17 in the order of
+# the text, each added note after the one before it (F2a), is
+# var/study/review-007.md.  All 17 ruled by Tigran on 2026-10-21 and carried
+# as proposed, with no credit line: the ten Bible notes kept (question 1),
+# Jones's four (question 2), and no note added at 4:2.1, the fuller one on
+# Strong to come at 12:7.2 with Paper 12 (question 3).  Three more, F2a, F2b
+# and F3a, from Hendrix's chapter "Spiritual Gravitation", found once the
+# Internet Archive's search answered again, ruled Yes the same day.
 
 paper = 7
 chart = "none"
@@ -36,6 +40,14 @@ key = "Jones1921"
 origin = "none"
 tex = '''Rufus M. Jones, \emph{The World Within} (New York: The Macmillan Company, 1921; first published 1918).'''
 
+# Added after the ruling, and ruled on 2026-10-21: F2a, F2b and F3a quote
+# it; the title page of Princeton's copy (originals/religionofincarn00hend.pdf,
+# PDF page 11).
+[[source]]
+key = "Hendrix"
+origin = "none"
+tex = '''Eugene Russell Hendrix, \emph{The Religion of the Incarnation}, the Cole Lectures for 1903 (Nashville and Dallas: Publishing House of the M.~E. Church, South, Smith \& Lamar, Agents, 1903).'''
+
 # Added: F12 quotes it, under Paper 5's key and words; checked in the book,
 # p. 200.
 [[source]]
@@ -57,12 +69,36 @@ after = "in the hollow of his hand."
 origin = "none"
 tex = '''Isaiah~40:12: ``Who hath measured the waters in the hollow of his hand, and meted out heaven with the span''. Here the hand holds the spirit realities.'''
 
+# F2a, added after the ruling: checked in Princeton's copy of Hendrix,
+# pp. 251-252, in the page images.
+[[note]]
+at = "7:1.2"
+after = "distance of its transmission;"
+origin = "none"
+tex = '''Hendrix~\cite{Hendrix}, pp.~251--252, in his chapter ``Spiritual Gravitation; or, The Ascended Christ'', of Newton's law: ``the attraction of material bodies being proportional to the sum of their substance and inverse to the square of their distance. \ldots{} This wonderful law of physical gravitation is applicable throughout the universe despite the fact that distance diminishes its force, but no distance has yet been found so great as to show exemption from the operations of this law. Now the moral law is just as real and as universal as this great physical law.'' Here spirit gravity is as universal, and distance does not diminish it at all.'''
+
+# F2b, added after the ruling: checked in Princeton's copy of Hendrix,
+# pp. 255-256, in the page images.
+[[note]]
+at = "7:1.6"
+after = "of like tastes and longings."
+origin = "none"
+tex = '''Hendrix~\cite{Hendrix}, pp.~255--256: ``Fallen natures are drawn together in all worlds where they are found. The power of spiritual gravitation brings together kindred spirits, and in all worlds, who love the Lord Jesus Christ in sincerity.'' Here spirit gravity acts between ``spiritually minded persons of like tastes and longings'', and ``The term kindred spirits is not wholly a figure of speech.'''''
+
 # F3: checked in Tigran's copy of Jones, pp. 100-102, in the page image.
 [[note]]
 at = "7:1.6"
 after = "a figure of speech."
 origin = "none"
 tex = '''Jones~\cite{Jones1921}, pp.~100--101, in his chapter on prayer, ``The Soul's Converse'': ``If we belong, as I believe we do, in a real kingdom of God---an organic fellowship of inter-related lives---prayer should be as effective a force in this inter-related social world of ours as gravitation is in the world of matter. Personal spirits experience spiritual gravitation, soul reaches after soul, hearts draw toward each other.'' And p.~102: ``Prayer releases energy as certainly as the closing of an electric circuit does. \ldots{} It is effective and operative as surely as are the forces of steam and gravitation.'' Here spiritual gravitation is ``not wholly a figure of speech'', and its circuit carries prayer (\bibref[7:3.3]{p007 3:3}).'''
+
+# F3a, added after the ruling: checked in Princeton's copy of Hendrix,
+# pp. 224, 227-228 and 254, in the page images.
+[[note]]
+at = "7:3.2"
+after = "during this entire experience."
+origin = "none"
+tex = '''Hendrix~\cite{Hendrix}, p.~224, of the Ascension: ``The power of spiritual gravitation was greater than the power of physical gravitation.'' And pp.~227--228, of Christ's body: ``It was humanity so spiritualized that the flesh yielded to the very laws of the spirit and was drawn upward rather than downward.'' On p.~254, while the stones ``may obey the law of physical gravitation as they fall upon his devoted head, Stephen is caught up by the law of spiritual gravitation''. Here the mortal mind, through all its ascent, becomes ``progressively less subject to material gravity and correspondingly more responsive to the inward pulling urge of spirit gravity''.'''
 
 # F4: checked in Tigran's copy of Jones, p. 74, in the page image.
 [[note]]
