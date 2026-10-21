@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Paper 5, God's Relation to the Individual, has study notes too, 29 of them, and the Bibliography lists the three works they add.
 - Paper 4, God's Relation to the Universe, has study notes too, 27 of them, and the Bibliography lists the work they add.
 - Paper 3, The Attributes of God, has study notes too, 32 of them, and the Bibliography lists the four works they add.
 - Ctrl+, opens Settings from any page, and closes it again.

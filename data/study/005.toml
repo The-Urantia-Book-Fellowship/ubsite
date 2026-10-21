@@ -1,0 +1,309 @@
+# Paper 5, God's Relation to the Individual: the British Study Edition's 17
+# notes at 2474116, reviewed 2026-10-21 against the press text, Block's chart
+# for Paper 5 (dated August 8, 2020, read whole), the edition's own KJV, and the
+# originals: Strong's New World-Religion in Tigran's copy (originals/LIBRARY.tsv),
+# Matthews's God in Christian Thought and Experience and Illingworth's
+# Personality Human and Divine (../block-sources/originals/), Sadler's Analytic
+# Study of Part I (the same), and Griffiths's God in Idea and Experience, which
+# the Internet Archive lends only and which was checked through its full-text
+# search, phrase by phrase, page breaks with it.  Sadler's Theory and Practice
+# of Psychiatry (1936) was not to be had: F15 rests on Block's endnote 3.
+# Eight of Block's findings that no note gives are added (F3a, F3b, F4a, F4b,
+# F9a, F9b, F11a, F12a), and four found in review that neither Block nor the
+# edition gives (F1a, F2a, F13a, F17a).  The review, numbered F1-F17 in the
+# order of the text, each added note after the one before it, is
+# var/study/review-005.md.  All 29 ruled by Tigran on
+# 2026-10-21 and carried as proposed, the four found in review with no credit
+# line; F15's pages from Block's two charts (question 1), Griffiths on the
+# full-text search (question 2), F2 with the Creed and Sadler's note (question 3).
+
+paper = 5
+chart = "https://urantiabooksources.com/wp-content/uploads/2020/08/005.pdf"
+chart_date = 2020-08-08          # as Block dates it on its first page
+
+# The sources as Block's chart lists them, page 1, without degrees, under the
+# keys earlier papers gave those it shares (one key, one work).  Illingworth's
+# publisher as the 1894 title page has it (Paper 1).  Strong's and Griffiths's
+# title pages confirm Block's imprints.
+[[source]]
+key = "Strong"
+origin = "6c882d0b18c7d338"
+tex = '''Josiah Strong, \emph{The New World-Religion} (Garden City, New York: Doubleday, Page \& Company, 1915).'''
+
+[[source]]
+key = "Matthews"
+origin = "0d20a350df4e2a8f"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+[[source]]
+key = "Griffiths"
+origin = "9b352f145ab92931"
+tex = '''Rees Griffiths, \emph{God in Idea and Experience, or, The A~Priori Elements of the Religious Consciousness} (Edinburgh: T.~\& T.~Clark, 1931).'''
+
+[[source]]
+key = "Illingworth"
+origin = "fe23e72db9cdd179"
+tex = '''J.~R. Illingworth, \emph{Personality Human and Divine} (London and New York: Macmillan and Co., 1894).'''
+
+# Added: F15 quotes it, as Block's endnote 3 gives it; the imprint as Block's
+# list of sources gives it in his chart of Sadler's Evolution of the Soul (1941),
+# May 18, 2016, in Tigran's library (William-Sadler/Matthew-Block-Evolution-
+# of-the-Soul-1941.pdf), and as other books of the time cite it.  The 1936 book
+# itself is not in Tigran's library, which has every other of Sadler's books.
+[[source]]
+key = "Sadler1936"
+origin = "none"
+tex = '''William S. Sadler, \emph{Theory and Practice of Psychiatry} (St.~Louis: The C.~V. Mosby Company, 1936).'''
+
+# Added: F2 quotes it, under Papers 3 and 4's key and words; checked in Urantia
+# Foundation's republication, pp. 157-158.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# F1, ruled as proposed: kept, quoted more fully on the pages Block gives (checked in Tigran's
+# copy, pp. 19-20); "Here and in the notes below" goes, for the credit line.
+# The credit line corrects Block's "our highest happiness" (p. 20).
+[[note]]
+at = "5:1.2"
+after = "in arbitrary seclusion."
+origin = "7ce421c7856b2a1b"
+credit = "block"
+corrects = '''``our highest possible blessedness'' for his ``our highest happiness'''''
+tex = '''Strong~\cite{Strong}, p.~19: ``I believe that God created the world out of the fullness of his wonderful love; and that he is ever seeking in every possible way to reveal himself to the objects of that love. He is unknown to multitudes, not because he hides himself, but because multitudes are blind. I cannot conceive of a loving Father's hiding himself from children whose highest happiness and well-being depend on knowing him.'' And pp.~19--20: ``Because God loves us he seeks to bring us into the most intimate possible knowledge of himself, the most perfect likeness to himself, and the most complete co\"operation with himself, which would be the realization of our highest possible blessedness.'' Strong's blindness of the multitudes has become, in \bibref[5:1.1]{p005 1:1}, the finiteness of creatures who would not know they were in the Father's presence; in \bibref[5:1.10]{p005 1:10} it is their own doing: they ``have hidden themselves away in the mists of their own willful decisions''.'''
+
+# F1a, added in review, ruled as proposed: checked in Tigran's copy, p. 23.
+[[note]]
+at = "5:1.2"
+after = "center of all things."
+origin = "none"
+tex = '''Strong~\cite{Strong}, p.~23, three pages on: ``if he was ever to become a co-labourer with God, if he was ever to know such divine fellowship, then it is certain that God must work on a plane where man could work with him, must in man's education employ a method which man was capable of learning and using. In other words, our limitations limit God in dealing with us---a fact often forgotten.'' Here it is ``the limitations inherent in you'' that determine when and where the goal is reached, as in \bibref[5:1.1]{p005 1:1} the inability to approach the Father lies ``not in the Father's aloofness, but in the finiteness and material limitations of created beings''.'''
+
+# F2, ruled as proposed: kept, with the Creed's words, which no verse of the KJV has (checked in
+# the edition's KJV), and Sadler's study of the right hand of God, p. 158, to
+# which Block's endnote 1 points.
+[[note]]
+at = "5:2.2"
+after = "of the Father.”"
+origin = "fbbce8e44f0c0533"
+tex = '''Mark~16:19: ``he was received up into heaven, and sat on the right hand of God''; John~1:18: ``the only begotten Son, which is in the bosom of the Father''. Here the right hand is the place of the Paradise Sons, and the bosom is open to every personal creature. No verse of the King James Version speaks of the right hand ``of the Father'': it is the right hand ``of God'' (Mark~16:19, Romans~8:34, Colossians~3:1), ``of power'' (Matthew~26:64) or ``of the Majesty'' (Hebrews~1:3). The words are the Nicene Creed's: ``sitteth on the right hand of the Father''. Dr~Sadler, setting out the Bible's uses of ``the right hand of God'' at this paragraph, noted: ``In Pauline philosophy the right hand of God is Salvington, headquarters of the local universe of Nebadon'' \cite{Sadler2003}, pp.~157--158.'''
+
+# F2a, added in review, ruled as proposed: checked in the book, pp. 7 and 21.
+[[note]]
+at = "5:4.1"
+after = "feeling of “absolute dependence”"
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, p.~7, of the defects he finds in Schleiermacher's conception of religion: ``Closely connected with this defect is the second---that he conceives the religious life too much as passive. The feeling of absolute dependence, taken by itself, seems to rule out the sense of co-operation with God which has been an element in some at least of the most highly evolved religious experience.'' And p.~21: ``The religious attitude, though self-abnegating, is not passive, for it includes the possibility of co-operation.'' Matthews's answer to the passive feeling is co-operation with God; here it is ``a living and dynamic experience of divinity attainment predicated on humanity service''.'''
+
+# F3, ruled as proposed: kept; checked in the book, pp. 5-6.
+[[note]]
+at = "5:4.1"
+after = "on humanity service."
+origin = "07b27e2017b2c0c1"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~5: ``We are concerned to know what drives man forward in his quest for God,---or what allures him''; and p.~6, of Schleiermacher, ``who was among the first to concentrate attention on religious experience and to make it the foundation of theology'': religion is ``a feeling of absolute dependence''. Here it is fear that drives and revelation that allures.'''
+
+# F3a, added, ruled as proposed: Block's finding, checked in the book, pp. 18-20.
+[[note]]
+at = "5:4.2"
+after = "the life of truth."
+origin = "none"
+credit = "block"
+tex = '''Matthews~\cite{Matthews} finds two needs that religion meets, ``the need for unity and the need for the substantiation of value'' (p.~18). Of the first: ``if we try to place ourselves at the standpoint of the primitive believer, we can see that for him his belief in spirits or d\ae mons is a relative unification''; and he quotes Professor Hocking: ``All polytheism is imperfect monotheism'' (p.~19). Of the second: ``The monotheistic faiths have held that God is the substance of values, Himself the supreme Value'' (p.~20). Here unity is the first service of religion, Hocking's saying has become ``polytheism is monotheism in the making'', and God is ``the reality of values, the substance of meanings, and the life of truth''.'''
+
+# F3b, added, ruled as proposed: Block's finding, checked in the book, p. 21; with the next
+# sentence, which Block sets beside 5:4.4 as a comparison.
+[[note]]
+at = "5:4.3"
+after = "human and superhuman."
+origin = "none"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~21, names Professor J.~B. Pratt among those who have described the religious attitude, as one who designates God as ``the determiner of destiny''; here God is that, and ``man's eternal destination''. Matthews goes on: ``Religious states of mind contrast with those which are scientific or simply practical or moral in this respect, that whereas the scientific and moral are attempts at mastery over the not-self, to bring the objective material within the categories of the understanding or to bend it to the purpose of the will, in religion the self seeks rather to be mastered, to bend itself to that `other' with which it is continuous.'' Here the religious self identifies itself with the universe, and dedicates itself to the service of ``the universe family of fellow beings''. Of the same attitude Matthews says that it ``is more closely akin to that of \ae sthetic enjoyment, which wishes not to alter the object but to remain in its presence''; in \bibref[5:4.4]{p005 4:4} art and philosophy stand between the nonreligious and the religious.'''
+
+# F4, ruled as proposed: kept; checked in the book, pp. 21-22.
+[[note]]
+at = "5:4.5"
+after = "and in eternity."
+origin = "4a5cf8fb70bad9aa"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, pp.~21--22: ``There is, for example, a profound and significant difference between the salvation of the Buddhist and the Christian. The former seeks release from suffering, the latter from sin''; and p.~22: ``In so far as he is religious man feels himself to be, in the end, impotent and miserable so long as he remains in his isolated selfhood.'' The Jewish, Greek and Islamic lines, and salvation from self, are not in the passage.'''
+
+# F4a, added, ruled as proposed: Block's finding, checked in the book, p. 24.
+[[note]]
+at = "5:4.7"
+after = "in human experience."
+origin = "none"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~24, closing his first chapter: ``In religion the life of the spirit of man reaches unity, and the richest religious life has not left the other activities of spirit behind but has taken them up into itself. The Reality which it seeks and thinks that it has known is One in which the thirsts of the soul for goodness, beauty, and truth are not annulled but satisfied.'' Here the unification is still to come: religion ``is destined to become'' it.'''
+
+# F4b, added, ruled as proposed: Block's finding, checked in the book, pp. 34-35; the verse is
+# Block's too, and the edition's KJV has it.
+[[note]]
+at = "5:4.8"
+after = "nature of its prayers."
+origin = "none"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~34: ``The two fundamental maxims of Greek and Hebrew aspiration respectively `Know thyself' and `Know God', are not contradictory but complementary, for man knows God in so far as he truly knows himself and he knows himself through knowing God.'' Here the two are joined, as Matthews joins them, in Jesus' ``knowing God, and yourself as a son of God''; the Christians' ``knowledge of the Lord Jesus Christ'' is 2~Peter~1:8's. And p.~35: ``\,`Not lehrt beten' [need teaches prayer], and in the prayers which are offered we may discern most clearly the kinds of need of which the worshipper is conscious and the kind of deity to whom he prays. Petitions reveal more candidly than anything else a man's thought of himself and his thought of God.'''''
+
+# F5, ruled as proposed: kept, with Block's p. 38, and quoted more fully on p. 87, the page Block
+# gives; checked in the book.
+[[note]]
+at = "5:4.9"
+after = "can ever conceive."
+origin = "f4e3177749b83272"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~38: ``It is only those faiths which have clung to the personal conception of Deity which have had a `jealous God' who will tolerate no other gods beside Him.'' On p.~31: ``Anthropomorphism is the road along which the believing mind has travelled from superstition to noble creeds''; and p.~87, under the running head ``The Highest Anthropomorphism'': the Apostolic experience ``is built on the affirmation that God is the Father of the Lord Jesus Christ, and the Creator is revealed as love through the Person and work of the Redeemer''. The page goes on: ``The Christian experience of God may thus be regarded as the highest form, the logical outcome by a kind of spiritual dialectic, of that anthropomorphic tendency which we have described as the line of upward movement of the religious consciousness of the race.'''''
+
+# F6, ruled as proposed: kept; checked in the book, pp. 39-40.
+[[note]]
+at = "5:4.10"
+after = "three separate teachings:"
+origin = "6fde4cba2ecf1e6f"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, pp.~39--40, has two: ``Two great streams flow together into the sea of Christian thought about God---the Hebrew and the Greek''. The Hebrew ``pushes to the furthest point the conception of Deity as the Vindicator of moral values''; in Greece ``Philosophers were the real teachers \ldots{} men who sought to understand, to find unity in experience''. The third, Jesus' concept, is added here.'''
+
+# F7, ruled as proposed: kept; checked in the book, p. 42.
+[[note]]
+at = "5:4.14"
+after = "Paul of Tarsus."
+origin = "fa2b1372def1b225"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~42: ``The two elements within its experience of God have never been completely harmonized; the personal, `psychological', living God of Hebrew tradition and piety has never been successfully identified with the God of metaphysics whose ancestry derives from Greece.'' The three persons named here are not in the passage.'''
+
+# F8, ruled as proposed: kept, quoted more fully on p. 59, the page Block gives; checked in the
+# book, pp. 51-52 and 59.
+[[note]]
+at = "5:4.15"
+after = "of the wrongdoer."
+origin = "1e0d542d19eb8acf"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, pp.~51--52, on the Lord's ``sinlessness'': ``it is perhaps unfortunate that so much stress should have been laid on this word. It is negative'', and ``it cannot adequately convey the positive nature of Jesus' communion with God''; and p.~59: ``God's love is active not passive, it goes out to seek and save those who are lost.'' The same page: ``In the widest sense God is the Father of the whole creation \ldots{} And the evil and the good alike share in the benefits of sun and rain which are bestowed with generous impartiality.'''''
+
+# F9, ruled as proposed: kept; checked by the Archive's full-text search, the break between pp.
+# 161 and 162 with it.
+[[note]]
+at = "5:5.1"
+after = "of self-consciousness;"
+origin = "c5487a5d442e90fd"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, pp.~161--162, on Kant: the moral law's ``source was in self-consciousness and not in the external conditions of the struggle for existence, nor yet in the realm of the instincts which man has in common with the animals. Morality had its foundation in Reason, which is the distinctive property of self-consciousness.'' The argument of \bibref[5:5.1--5]{p005 5:1} follows Griffiths, pp.~160--172.'''
+
+# F9a, added, ruled as proposed: Block's finding, p. 165, with p. 169's list; checked by the
+# Archive's full-text search.
+[[note]]
+at = "5:5.2"
+after = "implied duties of morality."
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~165: ``if there are religious values discoverable in our experience---values that cannot be equated with or derived from other values, such as the scientific, moral, or \ae sthetic---then there must be within the mind itself some pristine capacity for viewing the world in the way we call religious. Religion cannot be derived from non-religious characteristics of experience.'' And p.~169: ``Religion, then, cannot be equated either with philosophical speculation, science, morality, or \ae sthetics.'' Here society takes the place of \ae sthetics, which comes in \bibref[5:5.4]{p005 5:4}.'''
+
+# F9b, added, ruled as proposed: Block's finding, checked by the Archive's full-text search, p. 167.
+[[note]]
+at = "5:5.3"
+after = "even a pantheistic Deity."
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~167: ``We cannot reduce religion to philosophy, to the attempt reason naturally makes to organise experience and think out the world as a unity, or reach some Absolute or God as the principle of that unity. This was Kant's impossible quest. \ldots{} But God thus conceived is not the God of the religious consciousness. He is the God of philosophy.'' Here the philosopher's God of unity stands beside the scientist's and the artist's, and only the religionist's is ``the God of love''.'''
+
+# F10, ruled as proposed: kept; checked by the Archive's full-text search, p. 169.
+[[note]]
+at = "5:5.4"
+after = "worship of God."
+origin = "96735be89dfd6bea"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~169: ``From the side of religion you may pass to morality, but from morality there is no obvious nor even a possible path to religious experience''; and ``the worship of beauty in the abstract \ldots{} in no way resembles religion''.'''
+
+# F11, ruled as proposed: kept; checked by the Archive's full-text search, pp. 169-170.
+[[note]]
+at = "5:5.5"
+after = "art, and philosophy"
+origin = "70866871cd956b68"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, pp.~169--170: ``The religious consciousness is sui generis, but it is more. It is the ancient mother of all the sciences---the science of nature, of morality, of art, of philosophy.'''''
+
+# F11a, added, ruled as proposed: Block's finding, checked by the Archive's full-text search, p. 172.
+[[note]]
+at = "5:5.5"
+after = "against his will."
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~172, asks: ``Is the religious valuation of life normal to human nature and can we always deal with men on that assumption?'' If religious indifference is only ``a failure to accept religion on our particular terms, then the imperative remains and is, in fact, operative. But what does this imperative imply? It implies that man is religious by nature, incorrigibly and ineradicably.'' Here religion is ``normal and natural to man'', but not imperative: it is ``also optional''.'''
+
+# F12, ruled as proposed: kept, with Block's p. 25 and the sentence before on p. 26; checked in
+# the book, pp. 25-28.
+[[note]]
+at = "5:5.6"
+after = "for intellectual comprehension."
+origin = "213b6b247713b22b"
+credit = "block"
+tex = '''Matthews~\cite{Matthews} finds ``a paradox in religion from the outset'' (p.~25), which ``comes to the surface in a theoretical form in the crucial problem of religious thought---the debate between transcendence and immanence. A philosophy which will justify the religious attitude must maintain both that God is immanent and that He is transcendent'', for ``Either conception, in the long run, must deprive worship of its justification and prayer of its reality'' (p.~26); and p.~28: the contradictions of religion ``indicate rather that we are dealing with an object which is beyond our full comprehension''. Here the immanence is that of the indwelling Adjuster.'''
+
+# F12a, added, ruled as proposed: Block's finding, checked in the book, p. 37.
+[[note]]
+at = "5:5.9"
+after = "of moral values."
+origin = "none"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~37, of the needs that carry the religious consciousness beyond polytheism: ``Two needs in particular he discovers---that for the unification of experience, the intellectual need, and that for the substantiation of universal values, the moral and the \ae sthetic need.'' Here they are two of the three satisfactions of religious experience, ``a more unified human consciousness'' and ``the substantiation of his ideals of moral values''; the third, the spiritual, is added in \bibref[5:5.10]{p005 5:10}.'''
+
+# F13, ruled as proposed: kept; checked in the book, p. 42.
+[[note]]
+at = "5:5.12"
+after = "God must change."
+origin = "0b141fced1d2d54a"
+credit = "block"
+tex = '''Matthews~\cite{Matthews}, p.~42: ``Every generation has the duty and opportunity of contributing to the work of thinking out the Christian idea of God in the light of its own special point of view.'' That the experience itself remains the same is not in the passage.'''
+
+# F13a, added in review, ruled as proposed: checked in the book, pp. 4, 11 and 112.
+[[note]]
+at = "5:5.12"
+after = "of human experience."
+origin = "none"
+tex = '''That the experience stays the same while its concepts change is Matthews's thought too~\cite{Matthews}: ``There is an identity in the experience though an unlimited diversity in the concepts and images of religion'' (p.~4); the fundamental reactions of the Christian soul ``are essentially the same in all Christian generations'', while the theologies are ``various and embattled'', and the unity of Christianity is owed to the words and story of Jesus, ``which vibrate again in the souls of men from generation to generation'' (p.~112). So is the rest of the paragraph: ``we would protest against any view of religious experience which would deny its intimate connexion with thought and conduct or which, in the endeavour to safeguard its specific nature and its independence, would cut it off from the general life of the mind'' (p.~11).'''
+
+# F14, ruled as proposed: corrected from the book, p. 52: "which we know best", where Block's
+# chart, and the edition after it, have "we know best".
+[[note]]
+at = "5:6.2"
+after = "of the universes."
+origin = "2bdb4d13dd7e45e2"
+credit = "block"
+corrects = '''``the one thing which we know best'' for his ``the one thing we know best'''''
+tex = '''Illingworth~\cite{Illingworth}, p.~52: ``though personality, as above described, is the one thing which we know best in the world, it is also the most mysterious thing we know''.'''
+
+# F15, ruled as proposed: kept, with the book cited as a source; it rests on Block's endnote 3,
+# the 1936 book not being to hand (its successor of 1953, in Tigran's library,
+# lists the same six components on p. 528, under another sentence).  Pages
+# 234-235, as Block's chart of Evolution of the Soul quotes the same passage:
+# "Personality Components (Theory and Practice of Psychiatry 234)" over it, the
+# list ending "(TPoP 235)"; his chart of Paper 5 gives p. 235 alone.
+[[note]]
+at = "5:6.2"
+after = "levels of personality,"
+origin = "4da1b6833e255200"
+credit = "block"
+tex = '''Compare Sadler~\cite{Sadler1936}, pp.~234--235: ``It is not an easy matter to segregate the factors which make up personality, but we view it as consisting of the following components'': physical, intellectual, emotional, social, moral and spiritual qualities. Compare also \bibref[16:8.2]{p016 8:2}.'''
+
+# F16, ruled as proposed: kept; checked in the book, pp. 28-29.
+[[note]]
+at = "5:6.6"
+after = "self-creative personality."
+origin = "25058e5a3b1e6d75"
+credit = "block"
+tex = '''Illingworth~\cite{Illingworth}, pp.~28--29: ``the quality of self-consciousness immediately involves that of self-determination, the power of making my desires an object of my will''. Here the self-determination is relative.'''
+
+# F17, ruled as proposed: kept; checked in the book, pp. 46-47.
+[[note]]
+at = "5:6.9"
+after = "to antecedent causation,"
+origin = "8c02fba30f462172"
+credit = "block"
+tex = '''Illingworth~\cite{Illingworth}, pp.~46--47: ``Necessity or determination from without is characteristic of the material world, one event producing another in endless continuity of causation; whereas I am directly conscious of being self-determined from within---a source of original activity, a free agent, a will.'' Here freedom is not read off consciousness but bestowed with personality, and it is relative.'''
+
+# F17a, added in review, ruled as proposed: checked in the book, pp. 166 and 173.
+[[note]]
+at = "5:6.9"
+after = "in all personality."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, in his chapter ``The Living and Personal God'', p.~166: ``That spontaneity, that living and acting from a centre, which is present in some measure in every living being, comes to a full development in those individuals which we should call persons. They are self-conscious and self-directing \ldots{} In him [man] spontaneity has become creativity \ldots{} Creativeness is the mark of personality.'' And p.~173: ``Though the creative activity of the ego is the essence of personality, that without which it could not exist, the freedom cannot in human persons be absolute, for the activity is partly determined and limited by the conditions and the environment.'' Here personality is ``self-conscious'' and ``(relatively) self-determinative and self-creative'' (\bibref[5:6.6]{p005 6:6}), its liberation from causation is ``relative'', and the spontaneity in it is a ``kinship of divine spontaneity''.'''
