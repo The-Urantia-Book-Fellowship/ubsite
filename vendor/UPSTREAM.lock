@@ -27,9 +27,9 @@
     "repo": "index",
     "path": "cite.py",
     "dest": "index/cite.py",
-    "sha256": "083b6f84521e9564f919fae487c317709c6c4cfa8496274f0363057097aa795d",
-    "bytes": 15165,
-    "commit": "27df9a5e5b6ecab2dfd845dc2e6649b6cab4a226"
+    "sha256": "60a828f149ddf24bd4efd462c8ed9d18a8972023d105a057c951f289cac192d0",
+    "bytes": 17289,
+    "commit": "5e357f62de41d97ba026fb7a52b6f349bdfe1875"
   },
   {
     "repo": "index",
@@ -37,7 +37,7 @@
     "dest": "index/xref.py",
     "sha256": "91643f77ef18114610b4740329d87c0bde139903a3acc7aeaa67f92537313330",
     "bytes": 4686,
-    "commit": "27df9a5e5b6ecab2dfd845dc2e6649b6cab4a226"
+    "commit": "5e357f62de41d97ba026fb7a52b6f349bdfe1875"
   },
   {
     "repo": "texlive",

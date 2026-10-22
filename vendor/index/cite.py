@@ -343,6 +343,59 @@ def key(c):
     return (c.kind, tuple(c.expand()))
 
 
+def _runs(numbers):
+    """Sorted, distinct paragraph numbers as maximal runs: 2,15,16 -> (2,2),(15,16)."""
+    out = []
+    for n in sorted(set(numbers)):
+        if out and out[-1][1] + 1 == n:
+            out[-1][1] = n
+        else:
+            out.append([n, n])
+    return tuple((lo, hi) for lo, hi in out)
+
+
+def normal_run(cites):
+    """An entry's citations in house form: one citation per paper:section.
+
+    The house form is the 2019's own majority, measured there: it gathers one
+    section's paragraphs into one citation 1 292 times and splits them over
+    several 25 times -- ``(0:1.2,16) (0:1.15)`` on printed page 55 -- and it
+    writes two consecutive paragraphs as a range 1 973 times and with a comma
+    81.  So a section's paragraphs go into the first of its citations, sorted,
+    each paragraph once, and consecutive ones as a range: ``0:1.2,15-16``
+    (Tigran, 2026-10-21).
+
+    Paragraph citations only, by that ruling.  A section list (``54:4,5secs``)
+    and a section cited beside a paragraph inside it (``(84:2sec) (84:2.3)``)
+    pass through as printed, and so do an uncertain citation and an inverted
+    range, whose paragraph set is not what it says.  *cites* is parsed
+    citations in printed order; ``None`` (a malformed one) passes through too.
+    """
+    out, members = [], {}
+    for c in cites:
+        if (c is None or c.kind != "para" or c.uncertain
+                or "inverted-range" in c.flags):
+            out.append(c)
+            continue
+        k = (c.paper, c.sec)
+        if k not in members:
+            members[k] = []
+            out.append(k)
+        members[k].append(c)
+    for i, k in enumerate(out):
+        if not isinstance(k, tuple):
+            continue
+        group = members[k]
+        spans = _runs(n for c in group for _p, _s, n in c.expand())
+        if len(group) == 1 and group[0].spans == spans:
+            out[i] = group[0]
+        else:
+            body = Cite(kind="para", paper=k[0], sec=k[1], spans=spans)
+            out[i] = Cite(kind="para", paper=k[0], sec=k[1], spans=spans,
+                          raw=fmt(body))
+    return out
+
+
 def main(argv):
     """Parse each argument (or line of stdin) and print what it is."""
     items = argv[1:] or [ln.strip() for ln in sys.stdin if ln.strip()]
