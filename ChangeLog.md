@@ -30,6 +30,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The index is revised from its reading of Papers 11 and 14 to 16: entries reworded to say more exactly what the book says, citations corrected, and nether Paradise's three zones of absolute force presence numbered as the book numbers them, with the Zone of Infinity apart.
+- The index now cites two paragraphs in a row as a range, and all it cites in one section together, so an entry citing such a pair stands beside the first of the two only, as one citing a longer range already did.
 - With paragraph references, listening and the 1955 page references all off, each paragraph's first line is set in a little, as the book's are.
 - A numbered list stands as the book sets it, every number ending at one place and every item's words beginning at one place.
 - On a wide screen, as on a phone, a paragraph's reference and play button stand at its start, and the text stands nearer the contents; the play button stands on the second line, under the reference.

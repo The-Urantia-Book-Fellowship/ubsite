@@ -194,10 +194,10 @@ quotation can be headed without a second request. This is the reply to
 in keeping a copy, and its <code>version</code> is only the version its records are from.
 Never keep it as the version of a copy.</p>
 
-<p>The index writes <code>61:4.3,4</code> for two paragraphs of one section. Here that
-would mean 61:4.3 and the whole of Paper 4, so <code>/paragraphs/</code> refuses a bare
-number with a 400 that says so. Write <code>61:4.3,61:4.4</code> or <code>61:4.3-4</code>,
-and ask <code>/papers/4</code> for the paper.</p>
+<p>The index writes <code>61:5.3,7</code> for two paragraphs of one section. Here that
+would mean 61:5.3 and the whole of Paper 7, so <code>/paragraphs/</code> refuses a bare
+number with a 400 that says so. Write <code>61:5.3,61:5.7</code>,
+and ask <code>/papers/7</code> for the paper.</p>
 
 <p>To ask by the Foundation's numbering, add <code>?numbering=uf</code>: <a
 href="/api/v1/paragraphs/144:5.108?numbering=uf"><code>/paragraphs/144:5.108?numbering=uf</code></a>

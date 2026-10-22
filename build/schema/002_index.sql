@@ -52,7 +52,7 @@ CREATE TABLE citation_target (
   -- 0 where the paragraph continues a printed range: 44:0.20-21 names 21 as
   -- part of a span opened at 20, and the margin shows the entry at 20 only.
   -- 1 for everything else: a single paragraph, a range's first, each of a
-  -- comma list (61:4.3,4), a section, a paper.
+  -- comma list (61:5.3,7), a section, a paper.
   opens INTEGER NOT NULL CHECK (opens IN (0, 1))
 );
 -- entry_stats runs three correlated subqueries per entry against this

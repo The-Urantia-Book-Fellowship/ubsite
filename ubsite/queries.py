@@ -37,7 +37,7 @@ CHIP_NEW = (" AND NOT EXISTS (SELECT 1 FROM appendix_head h"
 # An entry citing a range stands beside its first paragraph only: 44:0.20-21
 # beside 44:0.20, not 44:0.21 too, and 0:0.1-4 once, not four times (Tigran,
 # 2026-10-13).  Its citation on the concept page still opens /44:0.20-21, with
-# both tinted.  A comma list is not a range: 61:4.3,4 stands beside both.
+# both tinted.  A comma list is not a range: 61:5.3,7 stands beside both.
 # citation_target.opens is the parser's, set at load.
 CHIP_OPENS = (" AND EXISTS (SELECT 1 FROM citation_target t"
               " WHERE t.paragraph_id = c.paragraph_id AND t.entry_id = c.entry_id"

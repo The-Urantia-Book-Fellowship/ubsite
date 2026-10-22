@@ -109,11 +109,13 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # since they differ by host, and ubsite.sigmaai.au's tab icons came in, which
 # the page chooses), and 13 since 2026-10-18, when the math font of the study
 # notes came in with its licence.  The sizes are bands, since the index grows as
-# it is edited.  One page more since 2026-10-19: the Bibliography.
+# it is edited.  One page more since 2026-10-19: the Bibliography.  One fewer
+# since 2026-10-23, at index 5e357f6: the Zone of Infinity cites two paragraphs
+# now, too few for a reading path.
 [offline]
-measured_on = "2026-10-20"
-pages       = 10286      # 1,626 sections, 4,736 headwords, 27 index letters, 19 more, 3,878 reading paths
-paths       = 3878       # 2,058 headwords in book order, 1,820 of them by theme too
+measured_on = "2026-10-23"
+pages       = 10285      # 1,626 sections, 4,736 headwords, 27 index letters, 19 more, 3,877 reading paths
+paths       = 3877       # 2,057 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
 chunks      = 400        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
                          # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages
