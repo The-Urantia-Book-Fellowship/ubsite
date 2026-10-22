@@ -481,6 +481,13 @@ p.t.opening .playp { top: -1.45rem; left: calc((var(--refw, 9) + 1) * 1ch); }
 :root[data-paranum="off"] p.t.opening .playp { left: -.25rem; }
 :root[data-paranum="off"][data-pages="true"] p.t.opening .pg { left: 1.6rem; }
 :root[data-paranum="off"][data-voice="off"][data-pages="true"] p.t.opening .pg { left: 0; }
+/* Its entries beside it stand level with its text, not with that line
+   (Tigran, 2026-10-23): the row begins at the paragraph's margin.  A block of
+   verse needs nothing, its margin naming each line's reference in that line. */
+@media (min-width: 62.01rem) {
+  p.t.opening + .a { margin-top: 1.5rem; }
+  :root[data-paranum="off"][data-voice="off"]:not([data-pages="true"]) .reader p.t.opening + .a { margin-top: 0; }
+}
 /* The heading in the text is centred on the column, not on what the stack
    floated beside it leaves: an empty float as wide as the stack balances it
    on the right.  Without references the stack is the button alone, if there
