@@ -31,6 +31,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The index is revised from its reading of Papers 17 to 19: entries reworded to say more exactly what the book says, the numbers of beings given as the book gives them, for Orvonton or for one superuniverse, citations corrected, and the Advisory Commission of Interuniverse Ethics and Self-government under the name the book gives it.
 - What's new no longer adds a line of its own, "The index as of" a date, when the index or the text has changed: its lines from the changelog say what changed.
 - The index is revised from its reading of Papers 11 and 14 to 16: entries reworded to say more exactly what the book says, citations corrected, and nether Paradise's three zones of absolute force presence numbered as the book numbers them, with the Zone of Infinity apart.
 - The index now cites two paragraphs in a row as a range, and all it cites in one section together, so an entry citing such a pair stands beside the first of the two only, as one citing a longer range already did.

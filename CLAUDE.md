@@ -170,7 +170,7 @@ headwords with a reading path 2,058 (3+ paragraphs), 1,820 of them with 2+ chapt
 paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at version 8 (2026-10-13)
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
-offline copy 10,285 pages (3,877 reading paths, and /changelog and /lists/notes since 2026-10-18, /lists/bibliography since 2026-10-19) + 1,626 spoken texts in 400 chunks: 45.2 MB to download and keep, 199 MB unpacked (2026-10-23, index 5e357f6, the Zone of Infinity's path gone; 10,286 pages until then; 394 chunks since 2026-10-18, with the math font of the study notes, 396 since 2026-10-19, with the SBL Greek and SBL Hebrew fonts, 400 since 2026-10-20, with every paragraph's reference in a `.stk`)
+offline copy 10,284 pages (3,877 reading paths, and /changelog and /lists/notes since 2026-10-18, /lists/bibliography since 2026-10-19) + 1,626 spoken texts in 400 chunks: 45.2 MB to download and keep, 199 MB unpacked (2026-10-23, index c0db98c, a headword fewer; 10,285 at index 5e357f6, the Zone of Infinity's path gone; 10,286 pages until then; 394 chunks since 2026-10-18, with the math font of the study notes, 396 since 2026-10-19, with the SBL Greek and SBL Hebrew fonts, 400 since 2026-10-20, with every paragraph's reference in a `.stk`)
 ```
 
 The index lines move as the index is edited (these are at its `224c84d`, 2026-10-09).
