@@ -9,8 +9,10 @@ compare with the copy's `made` (Tigran, 2026-10-18).  Before ChangeLog.md
 began, they were the subjects of this repository's commits that touch what a
 reader is sent (PATHS), and a copy made before then still sees those.  The
 index's and the press's commits are never listed, their subjects being
-editorial notes ("Ignore .obsidian"): offline.js says only that the text or
-the index is newer, and of what date (Tigran, 2026-10-14).
+editorial notes ("Ignore .obsidian"): a new revision of either has a line of
+its own in ChangeLog.md, saying what it changed for a reader (Tigran,
+2026-10-23).  Until then offline.js added "The index as of October 23"
+itself, which repeated that line.
 
 Read from git here, when the copy is built, since pi5 has no .git; with no
 git, there is no news.  Not in the manifest's `build`, which is what the copy

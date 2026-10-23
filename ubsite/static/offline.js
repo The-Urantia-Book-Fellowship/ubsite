@@ -136,9 +136,11 @@
   }
 
   // What's new: what changed on the site after this copy was made, from the
-  // manifest an update would fetch (offline/news.py), newest first, by day; and
-  // a line where the text or the index is newer than the copy's, never their
-  // own commits (Tigran, 2026-10-14); the index's not while Settings has it off.  A popup over the menu, which stays open
+  // manifest an update would fetch (offline/news.py), newest first, by day.
+  // Until 2026-10-23 it added a line of its own where the text or the index
+  // was newer than the copy's, "The index as of October 23"; a new revision of
+  // either has a line in the changelog now, which that only repeated (Tigran).
+  // A popup over the menu, which stays open
   // beneath it with its Update button: a popover inside the menu's, so the
   // browser counts it the menu's own.  At its foot, the whole changelog, the
   // page /changelog (2026-10-18).
@@ -165,16 +167,12 @@
       return r.json();
     }).then(function (m) {
       var days = {}, order = [], n = m.news || { items: [] };
-      function put(d, html, first) {
+      function put(d, html) {
         if (!days[d]) { days[d] = []; order.push(d); }
-        days[d][first ? 'unshift' : 'push'](html);
+        days[d].push(html);
       }
       // The times are UTC, written alike, so they compare as strings.
       n.items.forEach(function (x) { if (x.t > have.made) put(x.d, esc(x.s)); });
-      if (m.index && have.index && m.index.commit !== have.index.commit && !noIndex())
-        put(m.index.date, 'The index as of ' + day(m.index.date), true);
-      if (m.text && have.text && m.text.commit !== have.text.commit)
-        put(m.text.date, 'The text as of ' + day(m.text.date), true);
       order.sort().reverse();
       var oldest = n.items[n.items.length - 1];
       out.innerHTML = order.length ? order.map(function (d) {
