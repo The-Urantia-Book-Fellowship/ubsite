@@ -552,6 +552,69 @@
     });
   });
 
+  // Ctrl+X searches (Tigran, 2026-10-23): the words selected go into the
+  // search box, or with none selected the box is simply found, and either way
+  // the page goes up to it and it takes the focus, ready for Enter.  The words
+  // are what the page draws of the selection, without the soft hyphens, which
+  // the search would read as a break in the word, and without a paragraph's
+  // reference, ▶ and 1955 page (.stk), which a triple click takes along and
+  // which would find nothing; unless that was all there was, when the
+  // reference opens its paragraph.  A space where the block changes.  Inside a
+  // field Ctrl+X is still Cut; on the page there is nothing to cut.  Escape in
+  // the box, while it still has the focus Ctrl+X gave it, goes back: what the
+  // box held, the place, the selection (Tigran's choice).
+  function clean(s) { return s.replace(/[\u00ad\u2060\u200b]/g, '').replace(/\s+/g, ' ').trim(); }
+  function chosen() {
+    var sel = getSelection(), out = '', last = null, i, r, root, w, n, b;
+    for (i = 0; i < sel.rangeCount; i++) {
+      r = sel.getRangeAt(i);
+      root = r.commonAncestorContainer;
+      w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (n = root.nodeType === 3 ? root : w.nextNode(); n; n = w.nextNode()) {
+        if (!r.intersectsNode(n) || !n.parentNode.getClientRects().length ||
+            n.parentNode.closest('.stk, button')) continue;
+        b = n.parentNode.closest('p, li, dt, dd, td, th, h1, h2, h3, h4, div, summary');
+        out += (b === last ? '' : ' ') + n.data.slice(n === r.startContainer ? r.startOffset : 0,
+                                                     n === r.endContainer ? r.endOffset : n.length);
+        last = b;
+      }
+    }
+    return clean(out) || clean(sel.toString());
+  }
+  var box = document.querySelector('.find input'), back = null;
+  if (box) {
+    document.addEventListener('keydown', function (ev) {
+      var t = ev.target, sel = getSelection(), words = '', i;
+      // Or where X is, on a keyboard that writes no Latin letters (Armenian,
+      // Russian): the browser's Cut is there too.
+      if (!(/^x$/i.test(ev.key) || (ev.code === 'KeyX' && !/^[a-z]$/i.test(ev.key))) ||
+          !ev.ctrlKey || ev.altKey || ev.shiftKey || ev.metaKey || ev.repeat || ev.defaultPrevented ||
+          (t.closest && t.closest('input, textarea, select, [contenteditable]')) ||
+          document.querySelector('dialog[open]')) return;
+      ev.preventDefault();
+      back = { value: box.value, y: scrollY, ranges: [] };
+      for (i = 0; i < sel.rangeCount; i++) back.ranges.push(sel.getRangeAt(i).cloneRange());
+      if (!sel.isCollapsed) words = chosen();
+      if (words) box.value = words;
+      scrollTo({ top: 0, behavior: 'instant' });
+      box.focus({ preventScroll: true });
+      if (words) box.setSelectionRange(words.length, words.length); else box.select();
+    });
+    box.addEventListener('keydown', function (ev) {
+      var b = back, sel = getSelection();
+      if (ev.key !== 'Escape' || !b) return;
+      ev.preventDefault();
+      box.value = b.value;
+      box.blur();
+      scrollTo({ top: b.y, behavior: 'instant' });
+      sel.removeAllRanges();
+      b.ranges.forEach(function (r) {
+        if (r.startContainer.isConnected && r.endContainer.isConnected) sel.addRange(r);
+      });
+    });
+    box.addEventListener('blur', function () { back = null; });
+  }
+
   // Work offline, at the header's corner where a service worker can run: an
   // icon that says whether this page is online or offline, and whether a copy
   // is kept (ub.css .top .offline), and opens its menu (#offmenu, a popover).
