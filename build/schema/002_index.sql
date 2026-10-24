@@ -10,6 +10,11 @@ CREATE TABLE index_entry (
   level INTEGER NOT NULL CHECK (level BETWEEN 1 AND 5),
   letter TEXT,                                -- the \idivider it falls under
   headword TEXT,                              -- level 1 only
+  -- The HTML of `headword`, and of `path_plain` and of xref.target and
+  -- chronology_event.label: the same words with an ordinal's suffix superior,
+  -- as the index sets it (\ts) -- `December 25<sup>th</sup>` -- and nothing
+  -- else.  Gated: stripping the tags returns the plain column.
+  headword_html TEXT,
   text TEXT NOT NULL,                         -- printed text, rendered
   -- Derived cache, like paragraph.html: keeps the italics uindex.sty gives
   -- \ab/\see/\qv/\cf/\versus, and makes every citation a link.  Gated:
@@ -18,6 +23,7 @@ CREATE TABLE index_entry (
   text_expanded TEXT NOT NULL,                -- \ab{} expanded; the FTS column
   path TEXT NOT NULL,                         -- 'Adam > Eve > created'
   path_plain TEXT NOT NULL,                   -- same, citations stripped: the chip
+  path_html TEXT NOT NULL,
   path_fold TEXT NOT NULL,
   qv INTEGER NOT NULL DEFAULT 0,
   source_file TEXT NOT NULL,
@@ -71,6 +77,7 @@ CREATE TABLE xref (
   kind TEXT NOT NULL CHECK (kind IN ('see','seealso','qv')),
   ord INTEGER NOT NULL,
   target TEXT NOT NULL,
+  target_html TEXT NOT NULL,
   target_fold TEXT NOT NULL,
   -- How the target resolves.  Most name a headword directly; a few are a
   -- conjunction ("Creator Sons, local universe Mother Spirits") and exactly one
@@ -97,6 +104,7 @@ CREATE TABLE chronology_event (
   -- events are finished by their date in print ('Paul dies prior to', under
   -- 82 A.D.), and for those the date follows: reads_on.  See chronology.one_line.
   label TEXT NOT NULL,
+  label_html TEXT NOT NULL,                   -- with its superscripts, as headword_html
   reads_on INTEGER NOT NULL DEFAULT 0,
   -- The same with its citations as printed, each a link to its place in the
   -- text: '800,000,000,000 years ago: Andronover well established <a

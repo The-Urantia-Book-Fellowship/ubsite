@@ -91,3 +91,17 @@ F:XII.8
 191:2.5secs
 101:4.2.3
 101: 4.2
+# Hits whose text holds a superscript (611,121st), in the text, the index
+# and the committee's reasons, each set as the page sets it.
+Architect
+original concept
+octillion
+diameter
+temple dues
+tower
+appearance
+December 25th
+mansion
+1st
+Britannica 11th
+edition

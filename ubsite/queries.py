@@ -20,8 +20,9 @@ import sqlite3
 # its date (chronology_event.label), and its place in Appendix A (ev_ord) for
 # its window (windows, below); and an entry its own id, its headword's and its
 # parent's, for standing with the others of its headword (groups, below).
-CHIP_COLS = ("e.path_plain AS path, e.level, e.anchor, e.scope, r.slug AS rslug,"
-             " r.anchor AS ranchor, a.title AS appendix, ev.label AS event, ev.ord AS ev_ord,"
+# Its words are HTML, an ordinal's suffix superior (index_entry.path_html).
+CHIP_COLS = ("e.path_html AS path, e.level, e.anchor, e.scope, r.slug AS rslug,"
+             " r.anchor AS ranchor, a.title AS appendix, ev.label_html AS event, ev.ord AS ev_ord,"
              " e.id AS eid, e.root_id AS root, e.parent_id AS parent")
 CHIP_JOIN = (" LEFT JOIN appendix a ON a.letter=e.scope"
              " LEFT JOIN chronology_event ev ON ev.entry_id=e.id")
@@ -223,7 +224,7 @@ def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     """The 1955 readings `where` selects, in the order of the book.
 
     Each as the press gives it (the footnote's own columns), in its paragraph
-    (para_ref, para_text, paper_n, section_n, para_n, paper_title), with the
+    (para_ref, para_text, para_html, paper_n, section_n, para_n, paper_title), with the
     SRT Committee's reasons for the change where it gives them (verdict,
     srt_why, srt_href) and the note it refers to (see_*).  `key` is the note's
     in section.html, fn<key> and fnref<key>.  Never the committee's quotation
@@ -233,7 +234,8 @@ def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     """
     out = []
     for f in con.execute(
-            "SELECT f.*, p.ref AS para_ref, p.text AS para_text, p.paper_n, p.section_n,"
+            "SELECT f.*, p.ref AS para_ref, p.text AS para_text, p.html AS para_html,"
+            " p.paper_n, p.section_n,"
             " p.para_n, pa.title AS paper_title, s.verdict, s.why_html AS srt_why,"
             " s.why_html_hy AS srt_why_hy, t.why_html_hy AS see_why_hy,"
             " (SELECT commit_url FROM build_source WHERE repo='srt') || '#' || s.name AS srt_href,"
@@ -324,7 +326,7 @@ def concept(con: sqlite3.Connection, root_id: int) -> dict:
     # Every See, See also and q.v. is linked where it stands, in the tree; this
     # list gathers the See and See also, each by the link it has there.
     xrefs = con.execute(
-        "SELECT x.kind, x.target, x.href FROM xref x"
+        "SELECT x.kind, x.target_html, x.href FROM xref x"
         " WHERE x.entry_id IN (SELECT id FROM index_entry WHERE root_id=?)"
         "   AND x.kind IN ('see','seealso')"
         " ORDER BY x.kind, x.ord", (root_id,)).fetchall()
@@ -335,7 +337,7 @@ def concept(con: sqlite3.Connection, root_id: int) -> dict:
         " JOIN index_entry e ON e.id=h.entry_id JOIN appendix a ON a.letter=e.scope"
         " WHERE h.head_entry_id=? ORDER BY e.scope", (root_id,)).fetchall()
     near = con.execute(
-        "SELECT o.slug, o.headword, c.shared,"
+        "SELECT o.slug, o.headword_html, c.shared,"
         "  (SELECT n_descendants FROM entry_stats WHERE entry_id=o.id) AS kids"
         " FROM cocitation c"
         " JOIN index_entry o ON o.id = CASE WHEN c.a_root_id=? THEN c.b_root_id"
@@ -359,8 +361,9 @@ SEP = " › "
 
 def _label(e, depth: int) -> str:
     """An entry named from where it stands: its path less the first `depth`
-    parts.  Under prayer, "prayer › private prayer" is "private prayer"."""
-    return SEP.join(e["path_plain"].split(SEP)[depth:])
+    parts.  Under prayer, "prayer › private prayer" is "private prayer".  As
+    HTML, an ordinal's suffix superior (index_entry.path_html)."""
+    return SEP.join(e["path_html"].split(SEP)[depth:])
 
 
 def _add(d: dict, k, e) -> None:
@@ -421,7 +424,7 @@ def reading_path(con: sqlite3.Connection, root_id: int, by: str = "book") -> dic
     """
     root = con.execute("SELECT * FROM index_entry WHERE id=?", (root_id,)).fetchone()
     entries = con.execute(
-        "SELECT id, parent_id, level, anchor, path_plain FROM index_entry"
+        "SELECT id, parent_id, level, anchor, path_html FROM index_entry"
         " WHERE root_id=? ORDER BY ord", (root_id,)).fetchall()
     by_id = {e["id"]: e for e in entries}
     level2: dict[int, int] = {}                     # in print order, a parent first
@@ -467,7 +470,7 @@ def reading_path(con: sqlite3.Connection, root_id: int, by: str = "book") -> dic
     def why(es, depth, whole=""):
         out = []
         for e in es:
-            label = _label(e, depth) or (e["path_plain"] if e["level"] == 1 else "")
+            label = _label(e, depth) or (e["path_html"] if e["level"] == 1 else "")
             if label or whole:
                 out.append({"label": label, "whole": whole, "level": e["level"],
                             "anchor": e["anchor"]})
@@ -549,7 +552,7 @@ def reading_path(con: sqlite3.Connection, root_id: int, by: str = "book") -> dic
     chapters = []
     for i, (e, ts) in enumerate(groups):
         own = e is None or e["id"] == root_id
-        name = "" if e is None else root["headword"] if own else _label(e, 1)
+        name = "" if e is None else root["headword_html"] if own else _label(e, 1)
         full, again = tally["n_full"], tally["n_again"]
         items = run(_Sel(ts, by_id), 1 if own else 2, name)
         chapters.append({"id": f"ch{i + 1}", "entry": e, "name": name, "own": own,

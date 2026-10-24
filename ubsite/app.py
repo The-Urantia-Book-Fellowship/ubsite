@@ -16,6 +16,7 @@ import datetime
 import functools
 import gzip
 import hashlib
+import html
 import json
 import pathlib
 import re
@@ -167,7 +168,7 @@ def _phrase(text: str, star: bool) -> str:
 TOKENIZE = "unicode61 remove_diacritics 2"
 
 
-def mark_terms(texts: list[str], q: str) -> list[Markup]:
+def mark_terms(texts: list[str], q: str, at: list | None = None) -> list[Markup]:
     """Each text with what the search matched in <mark>, as snippet() marks a paragraph.
 
     An index hit is shown by its chip -- `path_plain`, or a Chronology event's
@@ -177,11 +178,14 @@ def mark_terms(texts: list[str], q: str) -> list[Markup]:
     with the same tokenizer and FTS5's own highlight() marks them.  The terms are
     OR'd: a hit can match one of them only in a citation, and its chip should
     still show the others.  The marks go in as control characters and become
-    tags only after the text is escaped, so "6. & 7." stays text.
+    tags only after the text is escaped, so "6. & 7." stays text.  `at`, one
+    list to a text, says where its superscripts stand (sups()), so that a chip
+    shows "1st" as it stands beside the text.
     """
+    at = at or [()] * len(texts)
     terms = _terms(q)
     if not terms or not texts:
-        return [escape(t) for t in texts]
+        return [_snip(t, t, a) for t, a in zip(texts, at)]
     con = sqlite3.connect(":memory:")
     con.execute(f"CREATE VIRTUAL TABLE t USING fts5(x, tokenize='{TOKENIZE}')")
     con.executemany("INSERT INTO t(rowid, x) VALUES (?, ?)", enumerate(texts))
@@ -189,19 +193,89 @@ def mark_terms(texts: list[str], q: str) -> list[Markup]:
     marked = dict(con.execute(
         "SELECT rowid, highlight(t, 0, char(2), char(3)) FROM t WHERE t MATCH ?", (anyq,)))
     con.close()
-    return [_marked(marked.get(i, t)) for i, t in enumerate(texts)]
+    return [_snip(marked.get(i, t), t, at[i]) for i, t in enumerate(texts)]
 
 
-def _marked(s: str) -> Markup:
-    """Text with FTS5's marks, \\x02 and \\x03, as <mark> tags, escaped first."""
-    return Markup(str(escape(s)).replace("\x02", "<mark>").replace("\x03", "</mark>"))
+RE_SUP = re.compile(r"(</?sup>)")
+RE_TAG = re.compile(r"<[^>]+>")
+
+
+def sups(h: str | None) -> list[tuple[int, int]]:
+    """Where the superscripts of an HTML fragment stand in its text, as
+    (start, end): in the fragment's tags stripped and its entities read, which
+    the round-trip gates hold to the stored text (render.strip_tags)."""
+    out: list[tuple[int, int]] = []
+    if not h or "<sup>" not in h:
+        return out
+    n = start = 0
+    for piece in RE_SUP.split(h):
+        if piece == "<sup>":
+            start = n
+        elif piece == "</sup>":
+            out.append((start, n))
+        else:
+            n += len(html.unescape(RE_TAG.sub("", piece)))
+    return out
+
+
+def _html(s: str, base: int = 0, at=()) -> Markup:
+    """`s`, a stretch of a text from `base` on, as HTML: escaped, FTS5's marks
+    \\x02 and \\x03 as <mark> tags and a snippet's cut \\x04 as an ellipsis, and
+    the text's superscripts (`at`, as sups() gives them) set as the page sets
+    them, 611,121<sup>st</sup>.  FTS5 marks whole tokens and a superscript stands
+    inside one, so each <sup> falls within a <mark> or outside them all."""
+    n = sum(c not in "\x02\x03\x04" for c in s)
+    opens = {max(a - base, 0) for a, b in at if a < base + n and b > base}
+    closes = {min(b - base, n) for a, b in at if a < base + n and b > base}
+    if not opens:
+        return Markup(str(escape(s)).replace("\x02", "<mark>").replace("\x03", "</mark>")
+                      .replace("\x04", "…"))
+    out, i = [], 0
+    for c in s:
+        if c == "\x02":
+            out.append("<mark>")
+        elif c == "\x03":
+            out.append("</mark>")
+        elif c == "\x04":
+            out.append("…")
+        else:
+            if i in opens:
+                out.append("<sup>")
+            out.append(str(escape(c)))
+            i += 1
+            if i in closes:
+                out.append("</sup>")
+    return Markup("".join(out))
+
+
+def _snip(s: str, text: str = "", at=()) -> Markup:
+    """What FTS5's highlight() or snippet() made of `text`, as HTML (_html).  A
+    snippet is the text verbatim between its cuts, so where it stands, which
+    places the superscripts, is found by looking."""
+    base = 0
+    if at:
+        core = s.replace("\x02", "").replace("\x03", "").strip("\x04")
+        base = text.find(core)
+        if base < 0:
+            raise ValueError(f"a search hit is not in its text: {core[:60]!r}")
+    return _html(s, base, at)
+
+
+def _reasons_at(a_text, a_html, b_text, b_html) -> list[tuple[int, int]]:
+    """Where the superscripts of a 1955 note's reasons stand in footnote_fts's
+    `reasons`: the committee's two joined as derive.fts joins them,
+    TRIM(a || ' ' || b)."""
+    joined = f"{a_text or ''} {b_text or ''}"
+    lead = len(joined) - len(joined.lstrip(" "))
+    return [(x - lead, y - lead) for x, y in sups(f"{a_html or ''} {b_html or ''}")]
 
 
 RE_WORD = re.compile(r"\S+")
 RE_GLUE = re.compile(r"(.*?)(\S*)\Z", re.S)
 
 
-def _around(text: str, at: int, before: int = 8, after: int = 6) -> tuple[str, str, str, str]:
+def _around(text: str, at: int, before: int = 8, after: int = 6,
+            sup=()) -> tuple[Markup, Markup, Markup, Markup]:
     """Today's words on either side of a 1955 note's ring, `at` in `text`.
 
     The ring stands after the words that changed, so what shows is what
@@ -210,14 +284,17 @@ def _around(text: str, at: int, before: int = 8, after: int = 6) -> tuple[str, s
     As (lead, word, glue, rest): `word` and `glue` touch the ring on either
     side -- "forgo" and "", "mussels" and "," -- and the page keeps them on
     one line with it, which the browser would otherwise break around it.
+    Each as HTML, with the text's superscripts where `sup` (sups()) puts them.
     """
     head, tail = text[:at], text[at:]
     hw, tw = list(RE_WORD.finditer(head)), list(RE_WORD.finditer(tail))
-    left = "…" + head[hw[-before].start():] if len(hw) > before else head
-    right = tail[:tw[after - 1].end()] + "…" if len(tw) > after else tail
-    lead, word = RE_GLUE.match(left).groups()
-    glue = re.match(r"\S*", right).group(0)
-    return lead, word, glue, right[len(glue):]
+    a = hw[-before].start() if len(hw) > before else 0
+    b = at + tw[after - 1].end() if len(tw) > after else len(text)
+    w = at - len(RE_GLUE.match(text[a:at]).group(2))
+    g = at + len(re.match(r"\S*", text[at:b]).group(0))
+    piece = lambda i, j: _html(text[i:j], i, sup)
+    return (Markup("…" if a else "") + piece(a, w), piece(w, at), piece(at, g),
+            piece(g, b) + Markup("…" if b < len(text) else ""))
 
 
 def db() -> sqlite3.Connection:
@@ -692,7 +769,7 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
         # An Appendix B-F name counts as a headword when the A-Z has none by that
         # name -- 'Sumeria', 'widow in Rome' -- and links to its appendix line.
         heads = con.execute(
-            "SELECT e.id, e.slug, e.headword, e.scope, e.anchor, a.title AS appendix,"
+            "SELECT e.id, e.slug, e.headword, e.headword_html, e.scope, e.anchor, a.title AS appendix,"
             "  (SELECT n_descendants FROM entry_stats WHERE entry_id=e.id) AS kids"
             " FROM index_entry e LEFT JOIN appendix a ON a.letter=e.scope"
             " WHERE (e.scope='az' AND e.level=1" + APP_OWN + ")"
@@ -713,43 +790,55 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
         n = con.execute("SELECT COUNT(*)" + where, (fq, *shown)).fetchone()[0]
         size, off = _window(scope == "index", "index", number, n)
         rows = con.execute(
-            "SELECT e.path_plain AS path, e.level, e.anchor, e.scope,"
+            "SELECT e.path_plain AS path, e.path_html, e.level, e.anchor, e.scope,"
             "  (SELECT slug FROM index_entry WHERE id=e.root_id) AS rslug,"
             "  (SELECT title FROM appendix WHERE letter=e.scope) AS appendix,"
-            "  (SELECT label FROM chronology_event WHERE entry_id=e.id) AS event"
+            "  (SELECT label FROM chronology_event WHERE entry_id=e.id) AS event,"
+            "  (SELECT label_html FROM chronology_event WHERE entry_id=e.id) AS event_html"
             + where + " ORDER BY rank LIMIT ? OFFSET ?",
             (fq, *shown, size, off)).fetchall()
-        # What each hit shows, with the reader's words marked as in the text hits.
-        marked = mark_terms([r["event"] or r["path"] for r in rows], q)
+        # What each hit shows, with the reader's words marked as in the text hits,
+        # and its superscripts as beside the text.
+        marked = mark_terms([r["event"] or r["path"] for r in rows], q,
+                            [sups(r["event_html"] or r["path_html"]) for r in rows])
         idx = _hits(n, off, [dict(r, marked=m) for r, m in zip(rows, marked)])
     if fq and scope in ("", "text"):
         n = con.execute("SELECT COUNT(*) FROM paragraph_fts WHERE paragraph_fts MATCH ?",
                         (fq,)).fetchone()[0]
         size, off = _window(scope == "text", "text", number, n)
-        txt = _hits(n, off, con.execute(
-            "SELECT p.ref, snippet(paragraph_fts, 0, '<mark>', '</mark>', '…', 24) AS s"
+        # Each with its superscripts, as the page sets them: "611,121st".
+        txt = _hits(n, off, [{"ref": r["ref"], "s": _snip(r["s"], r["text"], sups(r["html"]))}
+                             for r in con.execute(
+            "SELECT p.ref, p.text, p.html,"
+            "  snippet(paragraph_fts, 0, char(2), char(3), char(4), 24) AS s"
             " FROM paragraph_fts f JOIN paragraph p ON p.id=f.rowid"
             " WHERE paragraph_fts MATCH ? ORDER BY p.ord LIMIT ? OFFSET ?",
-            (fq, size, off)).fetchall())
+            (fq, size, off)).fetchall()])
     if fq and scope in ("", "notes"):
         # What the 1955 cards say: the reading, and the committee's reasons beneath
         # it.  Always looked up, and shown only when Settings asks (ub.css
         # .by1955, off by default), for settings never reach the server.
         where = (" FROM footnote_fts x JOIN footnote f ON f.id=x.rowid"
                  " JOIN paragraph p ON p.id=f.paragraph_id"
+                 " LEFT JOIN srt_item s ON s.id=f.srt_item_id"
+                 " LEFT JOIN srt_item t ON t.id=s.see_id"
                  " WHERE footnote_fts MATCH ? AND f.kind='variant-1955'")
         n = con.execute("SELECT COUNT(*)" + where, (fq,)).fetchone()[0]
         size, off = _window(scope == "notes", "notes", number, n)
         hits = con.execute(
             "SELECT f.id, highlight(footnote_fts, 0, char(2), char(3)) AS reading,"
-            "  snippet(footnote_fts, 1, char(2), char(3), '…', 20) AS reasons"
+            "  snippet(footnote_fts, 1, char(2), char(3), char(4), 20) AS reasons,"
+            "  x.reading AS reading_text, f.html AS reading_html, x.reasons AS reasons_text,"
+            "  s.why_text AS a_text, s.why_html AS a_html, t.why_text AS b_text, t.why_html AS b_html"
             + where + " ORDER BY p.ord, f.ord LIMIT ? OFFSET ?", (fq, size, off)).fetchall()
         found = {n["id"]: n for n in queries.notes(
             con, f"f.id IN ({','.join('?' * len(hits))})", tuple(h["id"] for h in hits))}
         old = _hits(n, off, [
-            _old_hit(found[h["id"]], _marked(h["reading"]),
+            _old_hit(found[h["id"]], _snip(h["reading"], h["reading_text"], sups(h["reading_html"])),
                      # Only where the search found something in them.
-                     reasons=_marked(h["reasons"]) if "\x02" in h["reasons"] else None)
+                     reasons=_snip(h["reasons"], h["reasons_text"],
+                                   _reasons_at(h["a_text"], h["a_html"], h["b_text"], h["b_html"]))
+                     if "\x02" in h["reasons"] else None)
             for h in hits])
     if q:
         # For the visit counter: a search that finds nothing is one the index might
@@ -768,7 +857,8 @@ def _old_hit(n: dict, reading: Markup, **more) -> dict:
     is what that list alone shows -- `dec`, the verdict on the line, and
     `reasons`, a search's snippet -- under keys of their own: the note's
     columns are what its card is made from."""
-    return {**n, "reading": reading, "now": _around(n["para_text"], n["anchor"]), **more}
+    return {**n, "reading": reading,
+            "now": _around(n["para_text"], n["anchor"], sup=sups(n["para_html"])), **more}
 
 
 def _window(whole: bool, kind: str, number: int, n: int) -> tuple[int, int]:
@@ -798,7 +888,7 @@ def index_front(request: Request):
 def index_letter(request: Request, letter: str):
     con = db()
     rows = con.execute(
-        "SELECT e.slug, e.headword, e.text, s.n_descendants"
+        "SELECT e.slug, e.headword_html, s.n_descendants"
         " FROM index_entry e JOIN entry_stats s ON s.entry_id=e.id"
         " WHERE e.scope='az' AND e.level=1 AND e.letter=? ORDER BY e.ord",
         (letter.upper(),)).fetchall()

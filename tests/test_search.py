@@ -16,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from test_appendix_pages import DB, get  # noqa: E402
-from ubsite.app import TOKENIZE, _around, _marked, fts_query, mark_terms  # noqa: E402
+from ubsite.app import TOKENIZE, _around, _snip, fts_query, mark_terms, sups  # noqa: E402
 
 ROWS = ["the self-conscious mind", "Adam and Eve", "the Adamic mission",
         "Jesus’ words", "a Thought Adjuster indwells", "God-knowing men"]
@@ -134,8 +134,36 @@ class NoteHit(unittest.TestCase):
         self.assertEqual(_around("one two", 7), ("one ", "two", "", ""))
 
     def test_the_marks_after_escaping(self):
-        self.assertEqual(str(_marked("Webster\u2019s & <b> \x02forego\x03")),
+        self.assertEqual(str(_snip("Webster\u2019s & <b> \x02forego\x03")),
                          "Webster\u2019s &amp; &lt;b&gt; <mark>forego</mark>")
+
+    def test_a_superscript_beside_a_ring(self):
+        text = "a little more than 1/2,000th of the smallest atom"
+        at = text.index("more") + len("more")
+        self.assertEqual(_around(text, at, sup=sups("a little more than 1/2,000<sup>th</sup> of"))[3],
+                         " than 1/2,000<sup>th</sup> of the smallest atom")
+
+
+class Superscripts(unittest.TestCase):
+    """A hit's superscripts are set where its text has them: 611,121st."""
+
+    TEXT = "Our Creator Son is the 611,121st original concept"
+
+    def test_where_they_stand_in_the_text(self):
+        self.assertEqual(sups("a 1<sup>st</sup> &amp; <i>b</i><sup>2</sup>"), [(3, 5), (9, 10)])
+        self.assertEqual(sups("no superscript"), [])
+
+    def test_inside_a_mark_and_beside_a_cut(self):
+        at = [(self.TEXT.index("st original"), self.TEXT.index(" original"))]
+        self.assertEqual(str(_snip("\x04the \x02611,121st\x03 original\x04", self.TEXT, at)),
+                         "\u2026the <mark>611,121<sup>st</sup></mark> original\u2026")
+        self.assertEqual(str(_snip("\x04121st original concept", self.TEXT, at)),
+                         "\u2026121<sup>st</sup> original concept")
+        self.assertEqual(str(_snip("\x04Son is the\x04", self.TEXT, at)), "\u2026Son is the\u2026")
+
+    def test_a_chip(self):
+        self.assertEqual(str(mark_terms(["1st tower built"], "tower", [[(1, 3)]])[0]),
+                         "1<sup>st</sup> <mark>tower</mark> built")
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")

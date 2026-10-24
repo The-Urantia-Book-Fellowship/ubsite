@@ -123,9 +123,10 @@ def load_index(con, az, apps, para_key, report) -> None:
         root_of[eid] = root
         for deeper in [k for k in list(stack) if k > e.level]:
             del stack[deeper]
-        con.execute("INSERT INTO index_entry VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (eid, scope, parent, root, e.level, e.letter, e.headword,
-                     e.text, render_html(e.src_text), e.text_expanded, e.path, e.path_plain, xref.fold(e.path),
+        con.execute("INSERT INTO index_entry VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (eid, scope, parent, root, e.level, e.letter, e.headword, e.headword_html,
+                     e.text, render_html(e.src_text), e.text_expanded, e.path, e.path_plain,
+                     e.path_html, xref.fold(e.path),
                      int(e.qv), e.where.split(":")[0], int(e.where.split(":")[1]),
                      e.ord))
         by_where[e.where] = eid
@@ -168,21 +169,22 @@ def load_index(con, az, apps, para_key, report) -> None:
         for v in a.events:
             eid += 1
             h = render_html(v.src_text)
-            con.execute("INSERT INTO index_entry VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        (eid, a.letter, None, eid, 1, None, None, v.text,
-                         h, v.text, v.text, v.label, xref.fold(v.text), 0,
+            con.execute("INSERT INTO index_entry VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        (eid, a.letter, None, eid, 1, None, None, None, v.text,
+                         h, v.text, v.text, v.label, v.label_html, xref.fold(v.text), 0,
                          v.where.split(":")[0], int(v.where.split(":")[1]), v.ord))
             ysort, approx = parse_year(v.year_label)
             if ysort is None:
                 report.hard("chron-unparsed-year", v.where, v.year_label)
             evid += 1
             line, reads_on = one_line(v.year_label, v.month_label, v.label)
+            line_sup, _ = one_line(v.year_label, v.month_label, v.label_html)
             lh = line_html(v.year_label, v.month_label, h, reads_on)
             if lh is None:
                 report.hard("chron-cites-not-last", v.where, v.text[:70])
-            con.execute("INSERT INTO chronology_event VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            con.execute("INSERT INTO chronology_event VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                         (evid, eid, v.ord, v.year_label, ysort, int(approx),
-                         v.month_label, v.text, line, int(reads_on), lh or line))
+                         v.month_label, v.text, line, line_sup, int(reads_on), lh or line))
             cites_of(eid, v.where, v.cites)
 
     # Cross-references, resolved once the whole tree exists.
@@ -197,14 +199,14 @@ def load_index(con, az, apps, para_key, report) -> None:
 
     for e in list(az) + [x for a in apps for x in a.entries]:
         src = by_where.get(e.where)
-        for i, (kind, target) in enumerate(e.xrefs):
+        for i, (kind, target, target_html) in enumerate(e.xrefs):
             xid += 1
             route, head_id = _resolve(target, heads)
             if route is None:
                 report.hard("xref-unresolved", e.where,
                             f"\\{kind}{{...}} -> {target!r}")
-            con.execute("INSERT INTO xref VALUES (?,?,?,?,?,?,?,?,?)",
-                        (xid, src, kind, i, target, xref.fold(target), route,
+            con.execute("INSERT INTO xref VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        (xid, src, kind, i, target, target_html, xref.fold(target), route,
                          head_id, paths.get(_path_key_target(target))))
 
     # A q.v.: the entry's own text names a headword.  The same routes as a See,
@@ -218,9 +220,9 @@ def load_index(con, az, apps, para_key, report) -> None:
         if route is None:
             report.hard("qv-unresolved", e.where, f"{e.qv_target!r} q.v. names no headword")
         qv_head[e.where] = head_id
-        con.execute("INSERT INTO xref VALUES (?,?,?,?,?,?,?,?,?)",
+        con.execute("INSERT INTO xref VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (xid, by_where[e.where], "qv", len(e.xrefs), e.qv_target,
-                     xref.fold(e.qv_target), route, head_id, None))
+                     e.qv_target_html, xref.fold(e.qv_target), route, head_id, None))
 
     # Which A-Z headword each Appendix B-F row names: by its q.v., or by being
     # the same name.  Only an exact name counts here -- no list marker to strip,

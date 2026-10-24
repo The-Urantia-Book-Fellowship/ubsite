@@ -17,9 +17,9 @@
   {% for c in diagnose[1] %}<a href="/search?q={{ c|urlencode }}">{{ c }}</a>{% if not loop.last %} or {% endif %}{% endfor %}?</p>{% endif %}
 {% if heads %}<section{% if not scope %} class="ix"{% endif %}><h2>Headwords</h2>
 <ul class="hits heads-hit">{% for h in heads %}<li>
-  {%- if h.slug %}<a href="/i/{{ h.slug }}">{{ h.headword }}</a>
+  {%- if h.slug %}<a href="/i/{{ h.slug }}">{{ h.headword_html|safe }}</a>
   {% if h.kids %}<span>{{ h.kids }} {{ 'subentry' if h.kids == 1 else 'subentries' }}</span>{% endif %}
-  {%- else %}<a href="{{ appendix_href(h.scope, h.anchor) }}">{{ h.headword }}</a>
+  {%- else %}<a href="{{ appendix_href(h.scope, h.anchor) }}">{{ h.headword_html|safe }}</a>
   <span>Appendix {{ h.scope }}, {{ h.appendix }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
 {% if scope in ('', 'index') %}<section{% if not scope %} class="ix"{% endif %}><h2>In the index {% if idx %}{{ count(idx) }}{% else %}<span>(0)</span>{% endif %}</h2>
 {% if idx and idx.rows %}<ul class="hits">{% for e in idx.rows %}<li>

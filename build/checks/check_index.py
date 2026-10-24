@@ -85,7 +85,7 @@ def check_xrefs(az_entries, app_entries, report) -> dict:
 
     n = dangling = strict_only = 0
     for e in list(az_entries) + list(app_entries):
-        for kind, target in e.xrefs:
+        for kind, target, _html in e.xrefs:
             n += 1
             if xref.resolves(heads, target):
                 # The print gate verifies only the segment before the first
@@ -100,7 +100,7 @@ def check_xrefs(az_entries, app_entries, report) -> dict:
                 report.hard("xref-dangling", e.where,
                             f"\\{kind}{{...}} -> {target!r} resolves to nothing")
     qualified = sum(1 for e in list(az_entries) + list(app_entries)
-                    for _k, t in e.xrefs if ":" in t)
+                    for _k, t, _h in e.xrefs if ":" in t)
     return {"targets": n, "dangling": dangling,
             "qualified": qualified,
             "deep_linkable": qualified - strict_only,

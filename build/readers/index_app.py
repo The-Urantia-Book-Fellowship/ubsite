@@ -25,7 +25,7 @@ import pathlib
 import re
 
 from ..index_macros import (CHRON_MACROS, RE_CIT, RE_XREF, balanced, label,
-                            render, unescape)
+                            render)
 from ._io import read_tex
 from .index_az import Entry
 
@@ -42,6 +42,7 @@ class ChronEvent:
     text: str
     src_text: str
     label: str                   # the event without its citations: the chip
+    label_html: str              # the same with its superscripts (index_macros.render)
     cites: list[str]
     ord: int
 
@@ -110,6 +111,7 @@ def read_appendices(texdir: pathlib.Path, report,
                     # chrontext hangs off the year; only chronsubtext takes the month
                     month_label=month if macro == "chronsubtext" else None,
                     text=text, src_text=raw_arg, label=label(raw_arg, where, report),
+                    label_html=label(raw_arg, where, report, sup=True),
                     cites=RE_CIT.findall(line), ord=ordinal))
                 continue
 
@@ -124,22 +126,24 @@ def read_appendices(texdir: pathlib.Path, report,
             xrefs = []
             for kind, targets in RE_XREF.findall(line):
                 for t in targets.split(";"):
-                    t = unescape(t).strip()
-                    if t:
-                        xrefs.append((kind, t))
+                    if t.strip():
+                        xrefs.append((kind, render(t, where, report),
+                                      render(t, where, report, sup=True)))
             ordinal += 1
             # The headword is the name alone.  It used to be the whole printed
             # line less a final period -- "actors (44:2.10)", "abandonters q.v"
             # -- which no reader would type and no search could match.
             name = label(src, where, report)
+            name_html = label(src, where, report, sup=True)
             qv = bool(re.search(r"\\qv\b", line))
             entries.append(Entry(
                 where=where, scope=letter.upper(), letter=letter.upper(), level=1,
-                headword=name, text=text, text_expanded=text,
-                chain=[text], path=text, path_plain=name,
+                headword=name, headword_html=name_html, text=text, text_expanded=text,
+                chain=[text], path=text, path_plain=name, path_html=name_html,
                 cites=RE_CIT.findall(line), xrefs=xrefs,
                 qv=qv, raw=line, src_text=src, ord=ordinal,
-                qv_target=name if qv else None))
+                qv_target=name if qv else None,
+                qv_target_html=name_html if qv else None))
 
         out.append(Appendix(letter.upper(), name, title, entries, events))
     return out

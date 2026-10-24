@@ -285,11 +285,46 @@
   }
   function phrase(t, star) { return '"' + t.replace(/"/g, '""') + '"' + (star ? '*' : ''); }
   function ftsQuery(q) { return terms(q).map(function (t) { return phrase(t[0], t[1]); }).join(' ') || null; }
-  function marked(s) { return esc(s).replace(/\x02/g, '<mark>').replace(/\x03/g, '</mark>'); }
+  // app.py _html: a stretch of a text from `base` on, as HTML: escaped, FTS5's
+  // marks \x02 and \x03 as <mark>, a snippet's cut \x04 as an ellipsis, and the
+  // text's superscripts (`at`, [[start, end], ...]) set as the page sets them.
+  function supped(s, base, at) {
+    var cs = Array.from(s), n = 0, opens = {}, closes = {}, any = false, out = '', i = 0;
+    cs.forEach(function (c) { if ('\x02\x03\x04'.indexOf(c) < 0) n++; });
+    at.forEach(function (r) {
+      if (r[0] < base + n && r[1] > base) {
+        opens[Math.max(r[0] - base, 0)] = true; closes[Math.min(r[1] - base, n)] = true; any = true;
+      }
+    });
+    if (!any) return esc(s).replace(/\x02/g, '<mark>').replace(/\x03/g, '</mark>').replace(/\x04/g, '…');
+    cs.forEach(function (c) {
+      if (c === '\x02') out += '<mark>';
+      else if (c === '\x03') out += '</mark>';
+      else if (c === '\x04') out += '…';
+      else {
+        if (opens[i]) out += '<sup>';
+        out += esc(c);
+        i++;
+        if (closes[i]) out += '</sup>';
+      }
+    });
+    return out;
+  }
+  // app.py _snip: what highlight() or snippet() made of `text`, its
+  // superscripts where `sups` (offline/searchdb.py, "start-end ...") puts them.
+  function snip(s, text, sups) {
+    var at = sups ? sups.split(' ').map(function (r) { return r.split('-').map(Number); }) : [], base = 0;
+    if (at.length) {
+      var core = s.replace(/[\x02\x03]/g, '').replace(/^\x04+|\x04+$/g, ''), k = text.indexOf(core);
+      if (k < 0) throw new Error('a search hit is not in its text: ' + core.slice(0, 60));
+      base = Array.from(text.slice(0, k)).length;
+    }
+    return supped(s, base, at);
+  }
 
-  function markTerms(mem, texts, q) {
+  function markTerms(mem, texts, q, sups) {
     var ts = terms(q);
-    if (!ts.length || !texts.length) return texts.map(esc);
+    if (!ts.length || !texts.length) return texts.map(function (t, i) { return snip(t, t, sups[i]); });
     var con = mem(), got = {};
     try {
       con.exec("CREATE VIRTUAL TABLE t USING fts5(x, tokenize='" + TOKENIZE + "')");
@@ -298,7 +333,7 @@
       con.exec({ sql: 'SELECT rowid, highlight(t, 0, char(2), char(3)) FROM t WHERE t MATCH ?', bind: [anyq],
                  rowMode: 'array', callback: function (r) { got[r[0]] = r[1]; } });
     } finally { con.close(); }
-    return texts.map(function (t, i) { return marked(i in got ? got[i] : t); });
+    return texts.map(function (t, i) { return snip(i in got ? got[i] : t, t, sups[i]); });
   }
   function rows(db, sql, bind) { return db.exec({ sql: sql, bind: bind, rowMode: 'object', returnValue: 'resultRows' }); }
   function count(db, sql, bind) { return db.selectValue(sql, bind); }
@@ -331,7 +366,7 @@
     var fq = ftsQuery(q), heads = [], idx = null, txt = null, old = null, w, where;
     if (q && (scope === '' || scope === 'index'))
       heads = rows(db,
-        "SELECT e.id, e.slug, e.headword, e.scope, e.anchor, a.title AS appendix," +
+        "SELECT e.id, e.slug, e.headword, e.headword_html, e.scope, e.anchor, a.title AS appendix," +
         "  (SELECT n_descendants FROM entry_stats WHERE entry_id=e.id) AS kids" +
         " FROM index_entry e LEFT JOIN appendix a ON a.letter=e.scope" +
         " WHERE (e.scope='az' AND e.level=1" + APP_OWN + ")" +
@@ -348,12 +383,14 @@
       var ni = count(db, 'SELECT COUNT(*)' + where, [fq].concat(shown));
       w = window_(scope === 'index', 'index', number, ni);
       var ir = rows(db,
-        "SELECT e.path_plain AS path, e.level, e.anchor, e.scope," +
+        "SELECT e.path_plain AS path, e.path_sups, e.level, e.anchor, e.scope," +
         "  (SELECT slug FROM index_entry WHERE id=e.root_id) AS rslug," +
         "  (SELECT title FROM appendix WHERE letter=e.scope) AS appendix," +
-        "  (SELECT label FROM chronology_event WHERE entry_id=e.id) AS event" +
+        "  (SELECT label FROM chronology_event WHERE entry_id=e.id) AS event," +
+        "  (SELECT label_sups FROM chronology_event WHERE entry_id=e.id) AS event_sups" +
         where + " ORDER BY rank LIMIT ? OFFSET ?", [fq].concat(shown, [w[0], w[1]]));
-      var mk = markTerms(mem, ir.map(function (r) { return r.event || r.path; }), q);
+      var mk = markTerms(mem, ir.map(function (r) { return r.event || r.path; }), q,
+                         ir.map(function (r) { return r.event ? r.event_sups : r.path_sups; }));
       ir.forEach(function (r, i) { r.marked = mk[i]; });
       idx = hits(ni, w[1], ir);
     }
@@ -361,9 +398,11 @@
       var nt = count(db, 'SELECT COUNT(*) FROM paragraph_fts WHERE paragraph_fts MATCH ?', [fq]);
       w = window_(scope === 'text', 'text', number, nt);
       txt = hits(nt, w[1], rows(db,
-        "SELECT p.ref, snippet(paragraph_fts, 0, '<mark>', '</mark>', '…', 24) AS s" +
+        "SELECT p.ref, p.text, p.sups, snippet(paragraph_fts, 0, char(2), char(3), char(4), 24) AS s" +
         " FROM paragraph_fts f JOIN paragraph p ON p.id=f.rowid" +
-        " WHERE paragraph_fts MATCH ? ORDER BY p.ord LIMIT ? OFFSET ?", [fq, w[0], w[1]]));
+        " WHERE paragraph_fts MATCH ? ORDER BY p.ord LIMIT ? OFFSET ?", [fq, w[0], w[1]]).map(function (r) {
+          return { ref: r.ref, s: snip(r.s, r.text, r.sups) };
+        }));
     }
     if (fq && (scope === '' || scope === 'notes')) {
       where = " FROM footnote_fts x JOIN footnote f ON f.id=x.rowid" +
@@ -373,12 +412,14 @@
       w = window_(scope === 'notes', 'notes', number, nn);
       var nr = rows(db,
         "SELECT f.id, highlight(footnote_fts, 0, char(2), char(3)) AS reading," +
-        "  snippet(footnote_fts, 1, char(2), char(3), '…', 20) AS reasons," +
+        "  snippet(footnote_fts, 1, char(2), char(3), char(4), 20) AS reasons," +
+        "  x.reading AS reading_text, x.reasons AS reasons_text, h.reading_sups, h.reasons_sups," +
         "  h.pre, h.post, h.mid, h.tail, h.card" + where.replace(' WHERE', ' JOIN note_html h ON h.id=f.id WHERE') +
         " ORDER BY p.ord, f.ord LIMIT ? OFFSET ?", [fq, w[0], w[1]]);
       old = hits(nn, w[1], nr.map(function (r) {
-        var line = r.pre + marked(r.reading) +
-                   (r.reasons.indexOf('\x02') >= 0 ? r.mid + marked(r.reasons) + r.tail : r.post);
+        var line = r.pre + snip(r.reading, r.reading_text, r.reading_sups) +
+                   (r.reasons.indexOf('\x02') >= 0
+                    ? r.mid + snip(r.reasons, r.reasons_text, r.reasons_sups) + r.tail : r.post);
         return { line: line, card: r.card };
       }));
     }
@@ -415,9 +456,9 @@
       o += '<section' + (scope ? '' : ' class="ix"') + '><h2>Headwords</h2>\n<ul class="hits heads-hit">';
       heads.forEach(function (h) {
         o += '<li>';
-        if (h.slug) o += '<a href="/i/' + esc(h.slug) + '">' + esc(h.headword) + '</a>\n  ' +
+        if (h.slug) o += '<a href="/i/' + esc(h.slug) + '">' + h.headword_html + '</a>\n  ' +
                          (h.kids ? '<span>' + h.kids + ' ' + (h.kids === 1 ? 'subentry' : 'subentries') + '</span>' : '');
-        else o += '<a href="/appendix/' + esc(h.scope) + '#' + esc(h.anchor) + '">' + esc(h.headword) + '</a>\n  ' +
+        else o += '<a href="/appendix/' + esc(h.scope) + '#' + esc(h.anchor) + '">' + h.headword_html + '</a>\n  ' +
                   '<span>Appendix ' + esc(h.scope) + ', ' + esc(h.appendix) + '</span>';
         o += '</li>';
       });

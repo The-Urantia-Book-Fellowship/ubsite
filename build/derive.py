@@ -208,7 +208,7 @@ def links(con, report) -> int:
         html[eid] = linked + sep + tail
 
     for eid, h, name, head, where, line in con.execute(
-            "SELECT e.id, e.text_html, e.headword, a.head_entry_id,"
+            "SELECT e.id, e.text_html, e.headword_html, a.head_entry_id,"
             "       e.source_file, e.source_line"
             "  FROM appendix_head a JOIN index_entry e ON e.id = a.entry_id"
             " WHERE a.via = 'name'"):
@@ -223,12 +223,13 @@ def links(con, report) -> int:
     # "God" inside "God the Father", or "love" inside an href just written.
     # The line named is linked only when it is a subentry of the headword
     # reached: `load._clean` drops parentheses, so "Jupiter (planet)" names
-    # "Jupiter (god)" as its line.
+    # "Jupiter (god)" as its line.  A target is found and linked as its HTML,
+    # which `text_html` holds: "mansion worlds: 1<sup>st</sup>".
     con.execute("ALTER TABLE xref ADD COLUMN href TEXT")
     hrefs = []
     at: dict[int, int] = {}
     for xid, eid, h, kind, target, head, danchor, where, line in con.execute(
-            "SELECT x.id, e.id, e.text_html, x.kind, x.target, x.head_entry_id,"
+            "SELECT x.id, e.id, e.text_html, x.kind, x.target_html, x.head_entry_id,"
             "       d.anchor, e.source_file, e.source_line"
             "  FROM xref x JOIN index_entry e ON e.id = x.entry_id"
             "  LEFT JOIN index_entry d ON d.id = x.deep_entry_id"

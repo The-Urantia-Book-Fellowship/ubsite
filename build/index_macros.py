@@ -1,7 +1,7 @@
 """The closed macro set of the Index sources, and the renderer for entry text.
 
 Every macro occurring in ``tex/idx-*.tex`` and ``tex/app-*.tex`` is listed here.
-There are 24, and the set really is closed -- ``emit_tex.py`` generates these
+There are 25, and the set really is closed -- ``emit_tex.py`` generates these
 files from a reconciled extraction, so an unknown control sequence means either
 that generator changed or somebody hand-edited something new in.  Either way the
 build must stop rather than guess.
@@ -42,6 +42,10 @@ IGNORE_FILES = {"app-pins.tex", "breaks.tex", "note.tex"}
 KNOWN_ENVIRONMENTS = {"indexbody"}
 
 # --- rendering -------------------------------------------------------------
+# An ordinal's suffix set superior, as the book sets it: `611,121\ts{st}' (the
+# index's 0aeae38).  Plain text reads `1st', as it did before, so a slug, an
+# anchor and a search are what they were; HTML, `1<sup>st</sup>'.
+RE_TS = re.compile(r"\\ts\{([^}]*)\}")
 RENDER = [
     (re.compile(r"\\cit\{([^}]*)\}"), r"(\1)"),
     (re.compile(r"\\seealso\{"), "See also "),
@@ -57,10 +61,11 @@ RENDER = [
 RE_LEFTOVER = re.compile(r"\\[a-zA-Z@]+")
 RE_ESCAPE = re.compile(r"\\([#$%&_^~{}])")
 RE_CIT = re.compile(r"\\cit\{([^}]*)\}")
-RE_XREF = re.compile(r"\\(see|seealso)\{([^}]*)\}")
+# A target may hold one braced group, a superscript: `mansion worlds: 1\ts{st}'.
+RE_XREF = re.compile(r"\\(see|seealso)\{((?:[^{}]|\{[^{}]*\})*)\}")
 RE_AB = re.compile(r"\\ab\{([^}]*)\}")
 # A See clause, with the period that introduces it: "death. See also atonement".
-RE_XREF_CLAUSE = re.compile(r"\.?\s*\\(?:see|seealso)\{[^}]*\}")
+RE_XREF_CLAUSE = re.compile(r"\.?\s*\\(?:see|seealso)\{(?:[^{}]|\{[^{}]*\})*\}")
 RE_QV = re.compile(r"\\qv\b")
 
 
@@ -68,8 +73,15 @@ def unescape(s: str) -> str:
     return RE_ESCAPE.sub(r"\1", s)
 
 
-def render(s: str, where: str = "", report=None) -> str:
-    """Entry source -> printed text.  Raises on anything outside the closed set."""
+def render(s: str, where: str = "", report=None, sup: bool = False) -> str:
+    """Entry source -> printed text.  Raises on anything outside the closed set.
+
+    With `sup`, the same text as HTML with its superscripts and nothing else,
+    `1<sup>st</sup>`: for what the site shows as plain words -- a headword, a
+    chip, a See target, a Chronology event's label -- where render_html's
+    italics and links have no place.  Its tags stripped, it is the plain text.
+    """
+    s = RE_TS.sub("\x01\\1\x02" if sup else r"\1", s)
     for pat, rep in RENDER:
         s = pat.sub(rep, s)
     # Check for survivors BEFORE braces are stripped, so the message names the
@@ -84,10 +96,14 @@ def render(s: str, where: str = "", report=None) -> str:
             report.hard("index-unknown-macro", where, msg)
         else:
             raise ValueError(f"{where}: {msg}")
-    return re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"\s+", " ", s).strip()
+    if sup:
+        # As render_html escapes: no entry contains < or >.
+        s = s.replace("&", "&amp;").replace("\x01", "<sup>").replace("\x02", "</sup>")
+    return s
 
 
-def label(s: str, where: str = "", report=None) -> str:
+def label(s: str, where: str = "", report=None, sup: bool = False) -> str:
     r"""What an entry names, without what it points at: the margin chip.
 
     Exactly \cit{}, \see{}, \seealso{} and \qv come out, with the period
@@ -99,7 +115,7 @@ def label(s: str, where: str = "", report=None) -> str:
     Advisers.
     """
     return render(RE_QV.sub("", RE_XREF_CLAUSE.sub("", RE_CIT.sub("", s))),
-                  where, report)
+                  where, report, sup)
 
 
 # The HTML rendering.  Same closed set, same order, but it keeps what the plain
@@ -130,6 +146,7 @@ def _cit_href(raw: str) -> str | None:
 
 RE_URLREF = re.compile(r"^\d+:\d+(?:\.\d+(?:-\d+)?)?$")
 _HTML = [
+    (RE_TS, r"<sup>\1</sup>"),
     (re.compile(r"\\seealso\{"), "<i>See also</i> "),
     (re.compile(r"\\see\{"), "<i>See</i> "),
     (re.compile(r"\\ab\{([^}]*)\}"), r"<i>\1</i>"),

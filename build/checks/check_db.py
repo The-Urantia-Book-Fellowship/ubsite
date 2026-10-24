@@ -206,6 +206,25 @@ def run(con) -> int:
           + ("" if not ioff else f"   {ioff} FAIL"))
     if ioff:
         bad += 1
+    # What the site shows of the index as words -- a headword, a chip, a See
+    # target, a Chronology label -- has its HTML beside it, with an ordinal's
+    # suffix superior: the same words, a chip in as many parts.
+    m = soff = 0
+    for where, text, h in con.execute(
+            "SELECT 'headword ' || id, headword, headword_html FROM index_entry"
+            "  WHERE headword IS NOT NULL"
+            " UNION ALL SELECT 'chip ' || id, path_plain, path_html FROM index_entry"
+            " UNION ALL SELECT 'xref ' || id, target, target_html FROM xref"
+            " UNION ALL SELECT 'event ' || id, label, label_html FROM chronology_event"):
+        m += 1
+        if strip_tags(h) != text or h.count(" \u203a ") != text.count(" \u203a "):
+            soff += 1
+            if soff <= 5:
+                print(f"            {where}: {h!r} is not {text!r}")
+    print(f"            {m - soff}/{m} headwords, chips, targets and events round-trip"
+          + ("" if not soff else f"   {soff} FAIL"))
+    if soff:
+        bad += 1
     k = foff = 0
     for text, h in con.execute("SELECT text, html FROM footnote"):
         k += 1
@@ -313,7 +332,7 @@ def run(con) -> int:
     # by the link the concept page's Cross-references gives it.
     want: dict[int, list[str]] = {}
     for eid, target, href in con.execute(
-            "SELECT entry_id, target, href FROM xref"
+            "SELECT entry_id, target_html, href FROM xref"
             " WHERE kind IN ('see', 'seealso') ORDER BY entry_id, ord"):
         want.setdefault(eid, []).append(f'<a class="hw" href="{href}">{target}</a>')
     k = woff = 0
@@ -357,7 +376,12 @@ def run(con) -> int:
             " UNION ALL SELECT 'SRT ' || name, then_html || why_html FROM srt_item"
             " UNION ALL SELECT 'section ' || paper_n || ':' || n, title_html FROM section"
             "  WHERE title_html IS NOT NULL"
-            " UNION ALL SELECT 'entry ' || id, text_html FROM index_entry"):
+            " UNION ALL SELECT 'entry ' || id, text_html FROM index_entry"
+            " UNION ALL SELECT 'headword ' || id, headword_html FROM index_entry"
+            "  WHERE headword_html IS NOT NULL"
+            " UNION ALL SELECT 'chip ' || id, path_html FROM index_entry"
+            " UNION ALL SELECT 'xref ' || id, target_html FROM xref"
+            " UNION ALL SELECT 'event ' || id, label_html FROM chronology_event"):
         k += 1
         try:
             ET.fromstring(f"<x>{h}</x>")

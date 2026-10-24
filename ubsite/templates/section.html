@@ -15,12 +15,12 @@
 {% macro chip(c) -%}
 {% if c.window %}<div class="win">
   {%- if c.before %}<span class="nb">{{ c.before.line_html|safe }}</span>{% endif %}
-  {%- for e in c.events %}<a class="here" href="{{ appendix_href(e.scope, e.anchor) }}">{{ e.event }}</a>{% endfor %}
+  {%- for e in c.events %}<a class="here" href="{{ appendix_href(e.scope, e.anchor) }}">{{ e.event|safe }}</a>{% endfor %}
   {%- if c.after %}<span class="nb">{{ c.after.line_html|safe }}</span>{% endif %}</div>
-{%- elif c.group %}<span class="grp"><a href="{{ entry_href(c.rslug, c.head.level, c.head.anchor) }}">{{ c.head.label }}</a> ›
-  {%- for t in c.tails %}{% if not loop.first %};{% endif %} <a href="{{ entry_href(c.rslug, t.level, t.anchor) }}">{{ t.label }}</a>{% endfor %}</span>
-{%- elif c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path }}</a>
-{%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ c.event or c.path }}</a>{% endif %}
+{%- elif c.group %}<span class="grp"><a href="{{ entry_href(c.rslug, c.head.level, c.head.anchor) }}">{{ c.head.label|safe }}</a> ›
+  {%- for t in c.tails %}{% if not loop.first %};{% endif %} <a href="{{ entry_href(c.rslug, t.level, t.anchor) }}">{{ t.label|safe }}</a>{% endfor %}</span>
+{%- elif c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path|safe }}</a>
+{%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ (c.event or c.path)|safe }}</a>{% endif %}
 {%- endmacro %}
 {% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
 {% block body %}

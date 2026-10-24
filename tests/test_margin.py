@@ -172,7 +172,7 @@ class Margin(unittest.TestCase):
         con.row_factory = sqlite3.Row
         want: dict[int, set] = {}
         for n, path in con.execute(
-                "SELECT DISTINCT p.paper_n, e.path_plain FROM para_citers c"
+                "SELECT DISTINCT p.paper_n, e.path_html FROM para_citers c"
                 " JOIN index_entry e ON e.id=c.entry_id JOIN paragraph p ON p.id=c.paragraph_id"
                 " WHERE c.precision='paper' AND p.section_n=0" + queries.CHIP_NEW):
             want.setdefault(n, set()).add(path)

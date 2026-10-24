@@ -6,7 +6,7 @@
     to its line on the concept page (queries.reading_path). #}
 {% macro cites(es) -%}
 <ul class="cites">{% for e in es %}<li><a href="{{ entry_href(root.slug, e.level, e.anchor) }}">
-  {%- if e.label %}{{ e.label }}{% if e.whole %} <i>({{ e.whole }})</i>{% endif %}{% else %}<i>{{ e.whole }}</i>{% endif %}</a></li>{% endfor %}</ul>
+  {%- if e.label %}{{ e.label|safe }}{% if e.whole %} <i>({{ e.whole }})</i>{% endif %}{% else %}<i>{{ e.whole }}</i>{% endif %}</a></li>{% endfor %}</ul>
 {%- endmacro %}
 {#- The line above a fold, and below it once open: either folds it away. #}
 {% macro gapline(f) -%}
@@ -30,7 +30,7 @@
 <div class="row"><div class="stars" role="separator" data-stars="{{ it.stars }}"></div></div>
 {%- elif it.kind == 'again' %}
 <div class="row again"><p class="t"><span class="stk"><a class="num" href="#{{ it.anchor }}">{{ it.p.ref }}</a></span>
-  <span class="back">read <a href="#{{ it.anchor }}">above</a>{% if it.where %}, under <i>{{ it.where }}</i>{% endif %}</span></p></div>
+  <span class="back">read <a href="#{{ it.anchor }}">above</a>{% if it.where %}, under <i>{{ it.where|safe }}</i>{% endif %}</span></p></div>
 {%- elif it.kind == 'p' %}
 <div class="row">{% if it.why %}{{ afold(it.why|length) }}{{ cites(it.why) }}{% endif %}
 {{ para(it.p, anchor=it.id, opening=false) }}</div>
@@ -47,7 +47,7 @@
   {{ indexfold() }}
   <header class="pathtop">
     <p class="kicker">Read through</p>
-    <h1><a href="/i/{{ root.slug }}">{{ root.headword }}</a></h1>
+    <h1><a href="/i/{{ root.slug }}">{{ root.headword_html|safe }}</a></h1>
     <p class="stat">{{ n_full }} paragraph{{ 's' if n_full != 1 }} · {{ reading_time(n_words) }}
       {%- if by == 'theme' %} · {{ chapters|length }} chapters{% endif %}</p>
     {%- if path.n_chapters > 1 %}
@@ -60,20 +60,20 @@
     <p class="desc">The paragraphs in the index’s own groups, a chapter to each, in the order the index
       prints them, and in the order of the book within each. A paragraph read in an earlier chapter is named in one line.</p>
     {%- else %}
-    <p class="desc">Every paragraph the index cites under <i>{{ root.headword }}</i>, once, in the order
+    <p class="desc">Every paragraph the index cites under <i>{{ root.headword_html|safe }}</i>, once, in the order
       of the book. Beside each stand the entries that cite it.</p>
     {%- endif %}
   </header>
 
   {%- if by == 'theme' %}
   <nav class="chapters" aria-label="Chapters">
-    <ol>{% for ch in chapters %}<li><a href="#{{ ch.id }}">{{ ch.name }}</a> <span class="count">{{ ch.n_full }}</span></li>{% endfor %}</ol>
+    <ol>{% for ch in chapters %}<li><a href="#{{ ch.id }}">{{ ch.name|safe }}</a> <span class="count">{{ ch.n_full }}</span></li>{% endfor %}</ol>
   </nav>
   {%- endif %}
 
   {%- for ch in chapters %}
   {%- if ch.name %}
-  <h2 class="chap" id="{{ ch.id }}"><a href="{{ entry_href(root.slug, ch.entry.level, ch.entry.anchor) }}">{{ ch.name }}</a>
+  <h2 class="chap" id="{{ ch.id }}"><a href="{{ entry_href(root.slug, ch.entry.level, ch.entry.anchor) }}">{{ ch.name|safe }}</a>
     {%- if ch.own %} <span class="own">its own citations</span>{% endif %}
     <span class="count">{{ ch.n_full }} paragraph{{ 's' if ch.n_full != 1 }}{% if ch.n_again %}, {{ ch.n_again }} read above{% endif %}</span></h2>
   {%- endif %}
@@ -96,10 +96,10 @@
     <h2>Onward</h2>
     {%- for kind, xs in xrefs|groupby('kind') %}
     <p><i>{{ 'See also' if kind == 'seealso' else 'See' }}</i>
-      {% for x in xs %}{% if x.href %}<a href="{{ x.href }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}{% if not loop.last %}; {% endif %}{% endfor %}</p>
+      {% for x in xs %}{% if x.href %}<a href="{{ x.href }}">{{ x.target_html|safe }}</a>{% else %}{{ x.target_html|safe }}{% endif %}{% if not loop.last %}; {% endif %}{% endfor %}</p>
     {%- endfor %}
     {%- if near %}
-    <p>Cited alongside: {% for n in near %}<a href="/i/{{ n.slug }}">{{ n.headword }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+    <p>Cited alongside: {% for n in near %}<a href="/i/{{ n.slug }}">{{ n.headword_html|safe }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
     {%- endif %}
   </section>
   {%- endif %}

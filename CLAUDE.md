@@ -81,7 +81,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
 - `build/` — LaTeX → `var/ub.db`, stdlib only
   - `expand.py` — the span-emitting expander. Plain text plus code-point spans.
   - `press_macros.py` — derived from press's own table, with 5 overrides; asserts key-set equality, so a new macro upstream fails our build too
-  - `index_macros.py` — the index's closed 24-macro set, plain and HTML renderers
+  - `index_macros.py` — the index's closed 25-macro set, plain and HTML renderers
   - `readers/` — pure file → dataclasses; `_io.py` is the only module allowed to open a source path, always mode `'r'`
   - `render.py` — `(text, spans) → HTML`. **The only renderer.**
   - `load.py`, `derive.py`, `schema/*.sql`, `oracle.py`, `fonts.py`, `slugs.py`
@@ -282,6 +282,10 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
   - **The words** are what the page draws of the selection (`ub.js chosen()`), without two things. The soft hyphens go, which `unicode61` reads as a break in the word, so that "supernatural", with one in it, would be searched as "super natural". So does a paragraph's `.stk`: a triple click takes its reference along, which would match nothing; only a selection of the reference alone keeps it, and opens the paragraph.
   - **Cut is left alone** inside a field. On the page there is nothing to cut, so Ctrl+X costs nothing there. A layout that writes no Latin letters (Armenian, Russian) is caught by `ev.code`, as the browser's Cut is.
 - **Index chips carry concepts, not numbers.** `path_plain` strips the citations and the terminal period; on paper the numbers *are* the entry, on screen the chip is a link.
+- **An ordinal's suffix is a superscript in the index, as in the text** (Tigran, 2026-10-24). The index sets it `1\ts{st}` since its 0aeae38: 427 of them, in the A–Z and Appendix A.
+  - **Every plain column reads `1st`, as before**, so slugs, anchors and search are unchanged. Each one the site shows as words has an `_html` sibling, `December 25<sup>th</sup>`: `headword_html`, `path_html`, `xref.target_html` and `chronology_event.label_html`, made by `index_macros.render(…, sup=True)`, with the superscript and nothing else, so a chip gains no italics. `check_db` holds each to strip back to its plain column. `text_html` and `line_html` have it too.
+  - **A See is found and linked by its HTML** (`derive.links`), since `text_html` holds `mansion worlds: 1<sup>st</sup>`. A q.v. needs nothing: `xref.readings` drops a `1st.` list marker, and the name's end is matched.
+  - **Every search hit shows its superscripts, the text's too** (Tigran's choice). An FTS5 snippet is its text verbatim between its cuts, so `app.py _snip` finds it in the text and sets each `<sup>` where `sups()` says it stands. FTS5 marks whole tokens and a superscript stands inside one, so a `<sup>` nests in a `<mark>`. The committee's reasons and today's words beside a 1955 reading (`_around`) are set the same way. Offline, `offline-core.js snip` does it from the places `offline/searchdb.py` stores, held to the server by the offline gate.
 - **Blanket citations appear once** at the section head, never repeated under every paragraph. This is `read_pack.py`'s rule and the reason Paper 15's 470 citations are readable.
   - **An entry citing a whole paper appears once, above §0** (Tigran, 2026-10-17), and in no other section's box, as a range stands beside its first paragraph only. Until then *God* and *Universal Father* stood above 1:0, 1:1, 1:2 …: 4,457 of the boxes' 7,344 chips were such repeats, and 272 sections had a box for nothing else.
     - §0's box is one box with two headings, "Cited across this whole paper" and then "Cited across this whole section" (23 introductions have both). On a phone it folds to "… across this whole paper", "… across this whole section" or "… across the whole paper and this section".

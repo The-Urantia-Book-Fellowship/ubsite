@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% block title %}{{ root.headword }}{% endblock %}
 {% block body %}<main class="prose concept">
-<h1>{{ root.headword }}</h1>
+<h1>{{ root.headword_html|safe }}</h1>
 {#- What kind of thing this is, when an appendix lists it: a being, a person, a place. #}
 {% if listed %}<p class="listed">Listed in {% for l in listed %}<a href="{{ appendix_href(l.scope, l.anchor) }}">Appendix {{ l.scope }}, {{ l.title }}</a>{% if not loop.last %} and {% endif %}{% endfor %}</p>{% endif %}
 {% set n = tree|length - 1 %}{% if n %}<p class="hint">{{ n }} {{ 'subentry' if n == 1 else 'subentries' }}</p>{% endif %}
@@ -14,13 +14,13 @@
 </ul>
 {% if xrefs %}<h2>Cross-references</h2><ul class="xrefs">
 {% for x in xrefs %}<li><i>{{ 'See also' if x.kind=='seealso' else 'See' }}</i>
-  {% if x.href %}<a href="{{ x.href }}">{{ x.target }}</a>{% else %}{{ x.target }}{% endif %}</li>{% endfor %}
+  {% if x.href %}<a href="{{ x.href }}">{{ x.target_html|safe }}</a>{% else %}{{ x.target_html|safe }}{% endif %}</li>{% endfor %}
 </ul>{% endif %}
 {% if near %}<h2>Cited alongside</h2>
 <p class="hint">Headwords that cite the same paragraphs as this one, commonest
 first. The number is how many subentries each has.</p>
 <ul class="near">
-{% for n in near %}<li><a href="/i/{{ n.slug }}">{{ n.headword }}</a>
+{% for n in near %}<li><a href="/i/{{ n.slug }}">{{ n.headword_html|safe }}</a>
   <span title="{{ n.shared }} paragraphs in common">{{ n.kids }}</span></li>{% endfor %}
 </ul>{% endif %}
 </main>{% endblock %}

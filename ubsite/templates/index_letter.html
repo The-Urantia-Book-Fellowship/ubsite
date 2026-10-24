@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% block title %}Index — {{ letter }}{% endblock %}
 {% block body %}<main class="prose"><h1>{{ letter }}</h1>
 <p class="hint">The number is how many subentries each headword has.</p>
-<ul class="heads">{% for r in rows %}<li><a href="/i/{{ r.slug }}">{{ r.headword }}</a>
+<ul class="heads">{% for r in rows %}<li><a href="/i/{{ r.slug }}">{{ r.headword_html|safe }}</a>
   {% if r.n_descendants %}<span>{{ r.n_descendants }}</span>{% endif %}</li>{% endfor %}</ul>
 </main>{% endblock %}

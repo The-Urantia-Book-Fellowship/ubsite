@@ -31,6 +31,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The index and the appendices set the suffix of an ordinal as a superscript, as the book does, in 1st, 6th and December 25th: on their own pages, beside the text, in the reading paths and in search.
+- Search results show a superscript where the text has one, as in 33:3.2's 611,121st, and so do the committee's reasons among the 1955 readings, and today's words beside each reading on the List of 1955 readings.
 - The index is revised from its reading of Papers 20 to 28: entries reworded to say more exactly what the book says, numbers given as the book gives them, citations corrected, the creature-trinitized sons in the three kinds the book names, the Magisterial Sons' magisterial missions apart from their bestowals, and the college of the ethics of law and the technique of Supremacy and the transport personalities under the names the book gives them.
 - The index is revised from its reading of Papers 17 to 19: entries reworded to say more exactly what the book says, the numbers of beings given as the book gives them, for Orvonton or for one superuniverse, citations corrected, and the Advisory Commission of Interuniverse Ethics and Self-government under the name the book gives it.
 - What's new no longer adds a line of its own, "The index as of" a date, when the index or the text has changed: its lines from the changelog say what changed.
@@ -58,6 +60,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- `index_entry` has two new columns, `headword_html` and `path_html`, `xref` one, `target_html`, and `chronology_event` one, `label_html`: each the HTML of the plain column beside it, the same words with an ordinal's suffix in `<sup>`, as the index now sets it (`\ts`, its 0aeae38). The plain columns read `1st` as before. The offline search databases carry where each hit's superscripts stand.
 - `chronology_event` has a new column, `line_html`: the event on one line with its citations as printed, each a link to its place in the text.
 - The EPUB is retired: `epub/`, `make epub` and its epubcheck, `tests/test_epub.py` and `tools/make_cover.py` are gone, and nothing here needs Java any more. Work offline keeps the whole site in the browser, search and the reading paths with it. The last commit that builds the EPUB is tagged `epub-last`.
 - `deploy.sh` no longer ships a file git neither tracks nor ignores, a draft or an editor's swap file, being in no commit; what the build makes is ignored and still goes.
