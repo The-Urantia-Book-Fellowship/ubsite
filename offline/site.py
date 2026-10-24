@@ -30,17 +30,18 @@ class Page:
         return self.body.decode("utf-8")
 
 
-def get(path: str, query: str = "") -> Page:
-    """GET `path`?`query` from the app, as the server would answer it."""
-    return asyncio.run(_get(path, query))
+def get(path: str, query: str = "", host: str = HOST) -> Page:
+    """GET `path`?`query` from the app, as the server would answer it, asked
+    at `host`."""
+    return asyncio.run(_get(path, query, host))
 
 
-async def _get(path: str, query: str) -> Page:
+async def _get(path: str, query: str, host: str = HOST) -> Page:
     scope = {"type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1",
              "method": "GET", "scheme": "https", "path": path, "raw_path": path.encode(),
              "root_path": "", "query_string": query.encode(),
-             "headers": [(b"host", HOST.encode()), (b"accept", b"text/html")],
-             "server": (HOST, 443), "client": ("127.0.0.1", 0)}
+             "headers": [(b"host", host.encode()), (b"accept", b"text/html")],
+             "server": (host, 443), "client": ("127.0.0.1", 0)}
     out = {"status": 0, "headers": {}, "body": []}
     sent = False
 

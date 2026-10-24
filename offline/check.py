@@ -150,7 +150,10 @@ def run(con: sqlite3.Connection) -> int:
     xs = extras(con, shell)
     job = {"copy": str(copy), "engine": str(ROOT / "vendor" / "sqlite-wasm"),
            "core": str(ROOT / "ubsite" / "static" / "offline-core.js"),
-           "pages": json.loads((copy / "expect.json").read_text()), "extras": xs}
+           "pages": json.loads((copy / "expect.json").read_text()), "extras": xs,
+           # Where the copy is read, as the worker's location.origin: the host
+           # the pages it is held to were asked at.
+           "origin": f"https://{site.HOST}"}
     r = subprocess.run([node, str(pathlib.Path(__file__).with_name("check.mjs"))],
                        input=json.dumps(job), capture_output=True, text=True)
     if r.returncode != 0:

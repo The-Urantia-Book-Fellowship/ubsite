@@ -18,6 +18,10 @@
   // once for every host, so it never answers these: from it, one site's
   // installed app could be told that it was the other's.
   var HOSTED = ['/manifest.webmanifest', '/apple-touch-icon.png'];
+  // The page about the text API names the address it is read at (app.py
+  // api_docs), and the copy is one for every host: it is kept with API_BASE
+  // there (offline/pages.py API_HOST), and given the copy's own address.
+  var API_BASE = 'https://ubsite.offline.invalid/';
 
   // markupsafe's escape, Jinja's autoescape.
   function esc(s) {
@@ -86,13 +90,17 @@
   // What the copy answers for a GET of `path` (decoded, as the server routes
   // it), in app.py's order: {res} now, {chunk, make(data)} from a chunk, {search},
   // or null where the copy has no say (the API, the recordings, the worker's
-  // own files), so the network's failure stands.
-  function resolve(path, sh) {
+  // own files), so the network's failure stands.  `origin` is where the copy
+  // is read, as location.origin gives it.
+  function resolve(path, sh, origin) {
     var m, d;
     if (sh.miscset === undefined) {
       sh.miscset = {};
       sh.misc.forEach(function (p) { sh.miscset[p] = true; });
     }
+    if (path === '/api' && sh.miscset[path]) return { chunk: 'misc', make: function (d) {
+      return html(200, stored(sh, d.pages[path]).split(API_BASE).join(origin + '/'));
+    } };
     if (sh.miscset[path]) return { chunk: 'misc', make: function (d) { return html(200, stored(sh, d.pages[path])); } };
     if (path === '/search') return { search: true };
     if ((m = /^\/speech\/(.*)$/.exec(path))) {
@@ -105,6 +113,7 @@
       } };
     }
     if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
+    // A copy made before 2026-10-24 does not keep it.
     if (path === '/api') return { res: away(sh, 'The page about the text API is read online.') };
     if (path === '/stats') return { res: away(sh, 'This page is read online.') };
     if ((m = /^\/index\/([^\/]+)$/.exec(path))) {

@@ -302,6 +302,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok("theme" in pg.title(), "and by theme")
         pg.goto(BASE + "/i/no-such-headword")
         ok("No headword" in pg.inner_text("main"), "an address the index lacks says so")
+        pg.goto(BASE + "/api")
+        ok(f"GET {BASE}/api/v1/text?since=0" in pg.inner_text("main") and "offline.invalid" not in pg.content(),
+           "the page about the text API reads offline, naming the address it is read at")
         pg.goto(BASE + "/101:4")
         pg.locator("p.t .playp").first.click()
         pg.wait_for_function("(document.querySelector('.player .who') || {}).textContent"

@@ -48,6 +48,13 @@ SPOKEN = 20
 # has a chunk of its own (Jesus: 2.7 MB in each order).
 PATHS = 1_000_000
 
+# The page about the text API names the address it is read at (app.py
+# api_docs: request.base_url), and the copy is one for every host.  So it is
+# kept as asked at API_HOST, a name no site can have, and the worker puts its
+# own address where API_BASE stands (offline-core.js knows it too).
+API_HOST = "ubsite.offline.invalid"
+API_BASE = f"https://{API_HOST}/"
+
 # The not-found page's words, to cut it at: its message and the path it names.
 PROBE = "/offline-missing-probe"
 PROBE_MSG = "There is no page at this address."
@@ -122,7 +129,7 @@ def universe(con: sqlite3.Connection) -> dict:
         "SELECT paper_n, section_n, MAX(para_n) FROM paragraph GROUP BY paper_n, section_n")}
     misc = (["/", "/read", "/index", "/appendix"]
             + [f"/appendix/{r[0]}" for r in con.execute("SELECT letter FROM appendix ORDER BY letter")]
-            + ["/lists", "/lists/1955", "/lists/notes", "/lists/bibliography", "/changelog"]
+            + ["/lists", "/lists/1955", "/lists/notes", "/lists/bibliography", "/changelog", "/api"]
             + [f"/part/{r[0]}" for r in con.execute("SELECT n FROM part ORDER BY n")])
     return {"papers": papers, "letters": letters, "slugs": slugs, "paths": paths,
             "lasts": lasts, "misc": misc}
@@ -232,6 +239,15 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
     # Everything else that is a page of its own.
     chunks["misc"] = {"pages": {path: own(path, pg)
                                 for path, pg in zip(u["misc"], site.get_many([(m, "") for m in u["misc"]]))}}
+    # /api, asked again at API_HOST: the page at HOST but for its address, or the
+    # address is not all of it that depends on the host.  The gate holds what
+    # the worker makes of it to the page at HOST.
+    api = site.get("/api", host=API_HOST)
+    api_sh, api_rec = cut(api.text)
+    if (api.status != 200 or api_sh != shell or api_rec.pop("q") != ""
+            or api.text.replace(API_BASE, f"https://{site.HOST}/") != site.get("/api").text):
+        raise Shape("/api depends on the host it is asked at other than by its address")
+    chunks["misc"]["pages"]["/api"] = api_rec
 
     # The not-found page, as the server draws it for any message and path, cut
     # around both; and the page that says an address is read online.

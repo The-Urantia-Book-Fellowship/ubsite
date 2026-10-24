@@ -112,10 +112,11 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # it is edited.  One page more since 2026-10-19: the Bibliography.  One fewer
 # since 2026-10-23, at index 5e357f6: the Zone of Infinity cites two paragraphs
 # now, too few for a reading path.  One fewer again the same day, at index
-# c0db98c: one headword fewer, two gone and one new.
+# c0db98c: one headword fewer, two gone and one new.  One more since
+# 2026-10-24: the page about the text API, kept with the address it is read at.
 [offline]
 measured_on = "2026-10-23"
-pages       = 10284      # 1,626 sections, 4,735 headwords, 27 index letters, 19 more, 3,877 reading paths
+pages       = 10285      # 1,626 sections, 4,735 headwords, 27 index letters, 20 more, 3,877 reading paths
 paths       = 3877       # 2,057 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
 chunks      = 400        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's

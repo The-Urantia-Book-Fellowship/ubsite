@@ -47,7 +47,7 @@ const mem = () => new sqlite3.oo1.DB(':memory:');
 
 // What the copy answers for an address: {status, body?, location?}.
 function answer(p, query) {
-  const plan = core.resolve(p, sh);
+  const plan = core.resolve(p, sh, job.origin);
   if (plan === null) return { status: 0 };
   if (plan.search) return core.search(db, mem, sh, new URLSearchParams(query || ''));
   if (plan.res) return plan.res;
@@ -93,6 +93,7 @@ for (const h of hrefs) {
   out.links++;
   const [pq] = h.split('#');
   const [p, query] = pq.split('?');
+  if (p.startsWith('/api/')) continue;        // the API itself, which only the server answers
   if (core.HOSTED.includes(p)) {               // the server's alone, by its host
     if (assets.has(pq)) out.broken.push({ href: h, why: 'kept in the copy, though it depends on the host' });
     continue;

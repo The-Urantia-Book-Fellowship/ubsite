@@ -188,7 +188,7 @@ function fromCopy(c, url) {
   });
   var path;
   try { path = decodeURIComponent(url.pathname); } catch (e) { return Promise.resolve(null); }
-  var plan = self.ubOffline.resolve(path, c.shell);
+  var plan = self.ubOffline.resolve(path, c.shell, location.origin);
   if (plan === null) return Promise.resolve(null);
   if (plan.res) return Promise.resolve(respond(c, plan.res));
   if (plan.search) return database(c).then(function (d) {
