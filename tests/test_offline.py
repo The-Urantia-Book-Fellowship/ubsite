@@ -101,7 +101,8 @@ class Worker(unittest.TestCase):
     def test_each_site_names_itself_and_its_icons(self):
         # The same build at two addresses, and an installed app of each that
         # says which it is (app.py SITES): the full name names the site, the
-        # label under the icon does not, and sigmaai.au's book is burgundy.
+        # label under the icon does not, and ddns.net's book is burgundy, the
+        # main site, sigmaai.au, having the blue (Tigran, 2026-10-24).
         def site(host):
             m = json.loads(call("/manifest.webmanifest", headers={"host": host})[2])
             pngs = [(ROOT / "ubsite" / i["src"].lstrip("/")).read_bytes() for i in m["icons"]
@@ -112,12 +113,13 @@ class Worker(unittest.TestCase):
         self.assertEqual(ddns[0]["name"], "The Urantia Book · ubsite.ddns.net")
         self.assertEqual(sigma[0]["name"], "The Urantia Book · ubsite.sigmaai.au")
         self.assertEqual({here[0]["short_name"], ddns[0]["short_name"], sigma[0]["short_name"]}, {"Urantia Book"})
-        self.assertEqual(here[1:], ddns[1:])
-        self.assertEqual(len(sigma[1]), 2)
-        self.assertTrue(set(sigma[1]).isdisjoint(ddns[1]))
-        self.assertNotEqual(sigma[2], ddns[2])
-        self.assertTrue(sigma[2].startswith(b"\x89PNG"))
-        self.assertNotIn("favicon.svg", json.dumps(sigma[0]["icons"]))   # the blue book
+        self.assertEqual(here[1:], sigma[1:])
+        self.assertEqual(len(ddns[1]), 2)
+        self.assertTrue(set(ddns[1]).isdisjoint(sigma[1]))
+        self.assertNotEqual(ddns[2], sigma[2])
+        self.assertTrue(ddns[2].startswith(b"\x89PNG"))
+        self.assertNotIn("favicon.svg", json.dumps(ddns[0]["icons"]))    # the blue book
+        self.assertIn("favicon.svg", json.dumps(sigma[0]["icons"]))
 
     def test_a_page_chooses_its_tab_icon_by_its_address(self):
         # The same page at both addresses, and in the offline copy: base.html's

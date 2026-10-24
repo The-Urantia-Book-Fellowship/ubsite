@@ -39,9 +39,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 STATIC = ROOT / "ubsite" / "static"
 PAPER = "#f8f5f0"                     # --paper in ub.css
 BOOK = ("#1b4a76", "#84afdc")         # the book's colours in favicon.svg, light and dark
-# Each variant's book, light and dark.  Burgundy is ubsite.sigmaai.au's, the
-# site's other colour (the red letter's), chosen by Tigran from a comparison with
-# green, the two colours swapped, and a lighter blue
+# Each variant's book, light and dark.  Burgundy is ubsite.ddns.net's since
+# 2026-10-24, ubsite.sigmaai.au being the main site, and was ubsite.sigmaai.au's
+# until then: the site's other colour (the red letter's), chosen by Tigran from
+# a comparison with green, the two colours swapped, and a lighter blue
 # (https://claude.ai/artifact/1LdhRdAb9kPoQb5CkGY4B6).  Its dark colour is lifted
 # from it as the blue's is in oklch: +0.34 lightness, chroma x0.89.
 VARIANTS = {"burgundy": ("#7a2230", "#e58c92")}

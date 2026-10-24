@@ -106,7 +106,7 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # chunks: 197 papers, 27 index letters, 10 of spoken text, the misc pages, the
 # shell, two databases and 11 files (13 until 2026-10-15, when the app's
 # manifest, the touch icon and the two icons the manifest names left the copy,
-# since they differ by host, and ubsite.sigmaai.au's tab icons came in, which
+# since they differ by host, and the burgundy tab icons came in, which
 # the page chooses), and 13 since 2026-10-18, when the math font of the study
 # notes came in with its licence.  The sizes are bands, since the index grows as
 # it is edited.  One page more since 2026-10-19: the Bibliography.  One fewer

@@ -32,6 +32,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- ubsite.sigmaai.au, the main site, now has the blue book as the icon of its tab and of its app, and ubsite.ddns.net the burgundy one; an app installed before keeps its old icon until it is installed again.
 - The index and the appendices set the suffix of an ordinal as a superscript, as the book does, in 1st, 6th and December 25th: on their own pages, beside the text, in the reading paths and in search.
 - Search results show a superscript where the text has one, as in 33:3.2's 611,121st, and so do the committee's reasons among the 1955 readings, and today's words beside each reading on the List of 1955 readings.
 - The index is revised from its reading of Papers 20 to 28: entries reworded to say more exactly what the book says, numbers given as the book gives them, citations corrected, the creature-trinitized sons in the three kinds the book names, the Magisterial Sons' magisterial missions apart from their bestowals, and the college of the ethics of law and the technique of Supremacy and the transport personalities under the names the book gives them.
