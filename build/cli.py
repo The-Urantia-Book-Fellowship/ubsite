@@ -201,6 +201,10 @@ def main(argv: list[str]) -> int:
                         (st["commit"], int(st["dirty"]), st["rev"], st["date"], st["commit_url"]))
             con.execute("INSERT INTO build_source VALUES ('block', ?, 0, 'manifest', NULL, NULL)",
                         (block["sha256"],))
+            # And the library's pages the Bibliography links, by LIBRARY.tsv's SHA-256.
+            if block["library_sha256"]:
+                con.execute("INSERT INTO build_source VALUES ('library', ?, 0, 'LIBRARY.tsv', NULL, NULL)",
+                            (block["library_sha256"],))
         # The SRT snapshot is no repository: its "commit" is the file's SHA-256,
         # its date the day it was fetched, its page the committee's.
         if srt_stats:

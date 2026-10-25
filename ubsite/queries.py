@@ -267,9 +267,10 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     """The study notes `where` selects, in the order of the book.
 
     Each as reviewed (build/study.py): its number in the paper (num), its HTML,
-    the sources it cites, in full and in the order of its [1], [2] (sources),
-    and its credit.  Credit goes only where a note rests on someone's research
-    (Tigran, 2026-10-18): Block's chart for the paper, by its own date (Tigran,
+    the sources it cites, in full and in the order of its [1], [2] (sources:
+    each its html, and its url where it can be read freely), and its credit.
+    Credit goes only where a note rests on someone's research (Tigran,
+    2026-10-18): Block's chart for the paper, by its own date (Tigran,
     2026-10-19: the address's month is when it was uploaded) and with
     its address (block, block_url), and what the note corrects in it from the
     original (corrects, HTML), or a contributor's line as written (credit).
@@ -286,8 +287,8 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
             " JOIN study_paper x ON x.paper_n = s.paper_n"
             " WHERE (" + where + ") ORDER BY p.ord, f.anchor, f.ord", params):
         n = dict(f)
-        n["sources"] = [h for (h,) in con.execute(
-            "SELECT x.html FROM study_cite c JOIN study_source x ON x.id = c.source_id"
+        n["sources"] = [{"html": h, "url": u} for h, u in con.execute(
+            "SELECT x.html, x.url FROM study_cite c JOIN study_source x ON x.id = c.source_id"
             " WHERE c.footnote_id = ? ORDER BY c.ord", (n["id"],))]
         n["block"] = None
         if n["credit"] == "block" and n["block_date"]:
@@ -301,17 +302,18 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
 def bibliography(con: sqlite3.Connection) -> list[dict]:
     """Every work the study notes on the site cite, once, in the order of its
     key, the author's surname (Tigran, 2026-10-19): its entry as reviewed
-    (html) and the notes citing it (cited_by), in the order of the book, each
+    (html), its page where it can be read freely (url, Tigran's library, or
+    None), and the notes citing it (cited_by), in the order of the book, each
     with its paragraph (para_ref), its number in its paper (num) and its key.
     A key names one work in every paper (build/study.py one_work_one_key)."""
     works: dict[str, dict] = {}
-    for key, html, ref, num, note in con.execute(
-            "SELECT x.key, x.html, p.ref, s.num, s.key FROM study_source x"
+    for key, html, url, ref, num, note in con.execute(
+            "SELECT x.key, x.html, x.url, p.ref, s.num, s.key FROM study_source x"
             " JOIN study_cite c ON c.source_id = x.id"
             " JOIN study_note s ON s.footnote_id = c.footnote_id"
             " JOIN footnote f ON f.id = s.footnote_id JOIN paragraph p ON p.id = f.paragraph_id"
             " ORDER BY p.ord, f.anchor, f.ord"):
-        w = works.setdefault(key, {"key": key, "html": html, "cited_by": []})
+        w = works.setdefault(key, {"key": key, "html": html, "url": url, "cited_by": []})
         w["cited_by"].append({"para_ref": ref, "num": num, "key": note})
     return sorted(works.values(), key=lambda w: w["key"].casefold())
 

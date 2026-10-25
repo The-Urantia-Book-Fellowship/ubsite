@@ -117,6 +117,31 @@ class Bibliography(unittest.TestCase):
             cited = re.findall(r'<a href="/[^"#]+#note(st[\d_]+)">', item)
             self.assertEqual(sorted(cited), sorted(n for k, n in WORKS if k == key), key)
 
+    def test_a_work_that_can_be_read_freely_links_its_page(self):
+        """Under the work, and after it wherever a card cites it, and nowhere
+        else (Tigran, 2026-10-25): its page in the library, LIBRARY.tsv's."""
+        with sqlite3.connect(f"file:{DB}?mode=ro", uri=True) as con:
+            url = dict(con.execute("SELECT key, url FROM study_source"))
+            cards = con.execute(
+                "SELECT DISTINCT p.paper_n, p.section_n, x.html, x.url FROM study_source x"
+                " JOIN study_cite c ON c.source_id = x.id JOIN footnote f ON f.id = c.footnote_id"
+                " JOIN paragraph p ON p.id = f.paragraph_id").fetchall()
+        if not any(url.values()):
+            self.skipTest("no work on the site has a page in the library")
+        page = get("/lists/bibliography")[2]
+        items = re.findall(r"<li><p class=\"work\">(.*?)</li>", page, re.S)
+        for key, item in zip(sorted(url, key=str.casefold), items):
+            links = re.findall(r'<a class="lib" href="([^"]*)" target="_blank" rel="noopener">'
+                               r'Read it in the Urantia Library&nbsp;↗</a>', item)
+            self.assertEqual(links, [url[key]] if url[key] else [], key)
+        self.assertEqual(page.count('class="lib"'), 2 * sum(1 for u in url.values() if u))
+        sections: dict[tuple, str] = {}
+        for paper, section, html, u in cards:
+            body = sections.setdefault((paper, section), get(f"/{paper}:{section}")[2])
+            linked = f'{html} <a class="lib" href="{u}" target="_blank" rel="noopener">'
+            self.assertEqual(linked in body, bool(u), (paper, section, u))
+            self.assertIn(html, body)
+
     def test_named_on_the_lists_and_the_home_page_by_its_switch(self):
         self.assertIn('<li class="nst"><a href="/lists/bibliography">Bibliography</a>', get("/lists")[2])
         n = len({k for k, _ in WORKS})

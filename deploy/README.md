@@ -85,18 +85,19 @@ sudo -n systemctl restart ubsite && echo AUTHORISED
 
 The VPS is the machine that serves sigmaai.au, and `deploy.sh` reaches it by that name (x86_64, 8 cores, 31 GB, Ubuntu 26.04). ubsite runs there exactly as on pi5: the same unit, the same tree at `/home/tigran/ubsite`, port 8130, and the same build from every deploy. It went live on 2026-10-14.
 
-nginx there serves one other site, `sigmaai.au`, by path: Open WebUI at `/`, urantia-library at `/library/`, TAIR at `/tair/`, CashReconAI at `/cashreconai/`. ubsite has a name of its own instead of a path. It assumes it lives at `/`: its links, its service worker's scope and the links stored in `ub.db` all do. And under a name of its own its offline copy and settings live in an origin of their own, apart from those apps.
+nginx there serves two other sites. `sigmaai.au` serves by path: Open WebUI at `/`, CashReconAI at `/cashreconai/`. urantia-library has a name of its own, `ulib.sigmaai.au`, since 2026-10-25, as pi5's is `ulib.ddns.net`; until then it was at `sigmaai.au/library/`, which now only redirects there. ubsite has a name of its own instead of a path. It assumes it lives at `/`: its links, its service worker's scope and the links stored in `ub.db` all do. And under a name of its own its offline copy and settings live in an origin of their own, apart from those apps.
 
 ```
-sigmaai.au         ->  Open WebUI, /library/, /tair/, /cashreconai/   (the default, implicitly)
+sigmaai.au         ->  Open WebUI, /cashreconai/   (the default, implicitly; /library/ redirects)
 ubsite.sigmaai.au  ->  127.0.0.1:8130   ubsite
+ulib.sigmaai.au    ->  127.0.0.1:8000   urantia-library
 ```
 
 * **No `default_server`.** The VPS declares none: `sigmaai.au` is the default on 80 and 443 only because `sites-enabled/` is read in name order and it comes first. `ubsite-sigmaai.nginx` must never claim it.
 * **The name is an A record at GoDaddy**, which holds sigmaai.au's DNS (`ns43`/`ns44.domaincontrol.com`): `ubsite` → `187.77.167.246`. No AAAA: nginx there listens on IPv4 only.
 * **Port 80 is open** (a VPS has no router to forget it), and sigmaai.au's own certificate renews over HTTP-01 through it, as this one does.
 * Merritt Horn's recordings are at `/Audio/Urantia/Urantia-MH-Audio-DVD`, as on pi5.
-* sudo asks for a password there.
+* tigran has no sudo there beyond what step 4's drop-in grants, so the steps below that need root are run as root, without `sudo`.
 
 ### The four privileged steps on the VPS
 

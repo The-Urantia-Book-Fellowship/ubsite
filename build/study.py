@@ -32,6 +32,11 @@ a machine can:
   * A note credited to Block that corrects his chart from the original says
     what it gives for his, `corrects`, and the card's credit says so (Tigran,
     2026-10-19): at 2:7.6, p. 788 for his 610.  Only such a note may.
+  * A work that can be read freely in Tigran's library has its page there, the
+    `url` of its line in `../block-sources/originals/LIBRARY.tsv` with `public`
+    yes, which the Bibliography and a card link (Tigran, 2026-10-25).  An
+    anonymous request answered that, which the build cannot ask: it holds the
+    line to its form, its page to its file, and the column to yes or no.
   * A note stands in the press text after the words its `after` gives, which
     occur once in the paragraph and end a word.  The study text is British
     and metricated (23:3.2 "299,789 kilometres" for "186,280 miles"), so an
@@ -52,6 +57,7 @@ import hashlib
 import pathlib
 import re
 import tomllib
+import urllib.parse
 
 from . import texmath
 from .expand import Expander, Note, Span, _raw
@@ -169,6 +175,7 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
     originals = reader.read(repo["tex"], repo["at"], sorted(curated), report)
     paras = {q.ref: q for p in papers for q in p.paragraphs}
     order = {q.ref: i for i, q in enumerate(q for p in papers for q in p.paragraphs)}
+    library = _library(block, report)
     for n, cur in sorted(curated.items()):
         where = f"data/study/{cur.path.name}"
         orig = originals.get(n)
@@ -178,7 +185,7 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
             continue
         _account(cur, orig, where, report)
         dated = _chart(cur, block, where, report)
-        sources = _sources(cur, paras, where, report)
+        sources = _sources(cur, paras, library, where, report)
         notes = _notes(cur, paras, order, sources, orig, where, report, hyphenator)
         built.papers.append({"paper_n": n, "file_sha256": cur.sha256, "study_commit": repo["at"],
                              "block_url": None if cur.chart == "none" else cur.chart,
@@ -271,7 +278,44 @@ def _chart(cur: Curated, block: dict, where: str, report) -> str | None:
     return d.isoformat()
 
 
-def _sources(cur: Curated, paras, where: str, report) -> dict[str, dict]:
+LIBRARY_COLUMNS = ("key", "file", "url", "public")
+LIBRARY_ROOT = "/Books/"            # the library's root: a file's page is #/item/ and its path under it
+
+
+def _library(block: dict, report) -> dict[str, str]:
+    """{key: page} for the works of originals/LIBRARY.tsv an anonymous reader
+    can open.  Each line is held to its form: its key once, `public` yes or no,
+    and its page the library's for its file, `#/item/` and the file's path under
+    /Books, so that the two columns cannot drift apart.  The host is the
+    file's to name: no address is written here."""
+    rows = block.get("library")
+    if rows is None:
+        return {}
+    where = f"{block['path']}/originals/LIBRARY.tsv"
+    if rows and not set(LIBRARY_COLUMNS) <= set(rows[0]):
+        report.hard("library-columns", where, f"needs the columns {', '.join(LIBRARY_COLUMNS)}")
+        return {}
+    out: dict[str, str] = {}
+    seen: set[str] = set()
+    for r in rows:
+        at = f"{where} {r['key']}"
+        if r["key"] in seen:
+            report.hard("library-key-twice", at, "a work has one line")
+        seen.add(r["key"])
+        if r["public"] not in ("yes", "no"):
+            report.hard("library-public", at, f"public = {r['public']!r}: yes or no")
+            continue
+        page = "#/item/" + urllib.parse.quote(r["file"].removeprefix(LIBRARY_ROOT))
+        if not r["file"].startswith(LIBRARY_ROOT) or not r["url"].startswith("https://") \
+                or not r["url"].endswith(page):
+            report.hard("library-url", at, f"{r['url']} is not the page of {r['file']}, https://…/{page}")
+            continue
+        if r["public"] == "yes":
+            out[r["key"]] = r["url"]
+    return out
+
+
+def _sources(cur: Curated, paras, library: dict[str, str], where: str, report) -> dict[str, dict]:
     out: dict[str, dict] = {}
     for s in cur.sources:
         if s["key"] in out:
@@ -280,7 +324,7 @@ def _sources(cur: Curated, paras, where: str, report) -> dict[str, dict]:
         text, html, _ = expand(s["tex"], paras, {}, f"{where} {s['key']}", report)
         out[s["key"]] = {"paper_n": cur.paper, "key": s["key"],
                          "origin": None if s["origin"] == ADDED else s["origin"],
-                         "text": text, "html": html, "cited": 0}
+                         "text": text, "html": html, "url": library.get(s["key"]), "cited": 0}
     return out
 
 
@@ -455,8 +499,8 @@ def store(con, built: Built) -> None:
         " :block_date, :n_notes, :n_dropped)", built.papers)
     source_id = {}
     for i, s in enumerate(built.sources, 1):
-        con.execute("INSERT INTO study_source VALUES (?,?,?,?,?,?)",
-                    (i, s["paper_n"], s["key"], s["origin"], s["text"], s["html"]))
+        con.execute("INSERT INTO study_source VALUES (?,?,?,?,?,?,?)",
+                    (i, s["paper_n"], s["key"], s["origin"], s["text"], s["html"], s["url"]))
         source_id[(s["paper_n"], s["key"])] = i
     for nt in built.notes:
         (fid,) = con.execute(

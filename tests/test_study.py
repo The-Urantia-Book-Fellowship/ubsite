@@ -247,6 +247,35 @@ class Study(unittest.TestCase):
         self.toml(sources=[white], notes=cited)
         self.assertIn("study-unaccounted", codes(self.attach()[2]))
 
+    def test_a_work_that_can_be_read_freely_has_its_page(self):
+        """originals/LIBRARY.tsv gives a work its page in Tigran's library when
+        `public` is yes, and only then; a line out of form fails: `public`
+        other than yes or no, a key twice, or a page that is not its file's."""
+        self.toml()
+        page = "https://ulib.example/#/item/Science/Philosophy/Hart/Man's Vision.pdf"
+        line = {"key": "Hart", "file": "/Books/Science/Philosophy/Hart/Man's Vision.pdf",
+                "url": "https://ulib.example/#/item/Science/Philosophy/Hart/Man%27s%20Vision.pdf",
+                "public": "yes"}
+        other = {"key": "Other", "file": "/Books/Other.pdf",
+                 "url": "https://ulib.example/#/item/Other.pdf", "public": "no"}
+        for rows, url, want in [(None, None, []),
+                                ([line, other], line["url"], []),
+                                ([{**line, "public": "no"}], None, []),
+                                ([{**line, "public": "Yes"}], None, ["library-public"]),
+                                ([line, line], line["url"], ["library-key-twice"]),
+                                ([{**line, "url": page}], None, ["library-url"]),
+                                ([{**line, "url": line["url"].replace("https", "http")}], None,
+                                 ["library-url"]),
+                                ([{**line, "file": line["file"].replace("/Books/", "/Other/")}], None,
+                                 ["library-url"]),
+                                ([{"key": "Hart", "file": line["file"], "url": line["url"]}], None,
+                                 ["library-columns"])]:
+            with self.subTest(rows=rows):
+                self.block = {"path": self.data, "charts": {0: {"url": CHART}}, "library": rows}
+                _, built, report = self.attach()
+                self.assertEqual(codes(report), want)
+                self.assertEqual([s["url"] for s in built.sources], [url])
+
     def test_a_key_names_one_work_in_every_paper(self):
         """The Bibliography lists a work once, by its key, whichever paper
         cites it: the same key for two works fails, and two keys for one."""

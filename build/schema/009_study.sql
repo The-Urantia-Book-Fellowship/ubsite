@@ -24,6 +24,8 @@ CREATE TABLE study_source (
                                        -- NULL: added in review
     text    TEXT NOT NULL,
     html    TEXT NOT NULL,
+    url     TEXT,                      -- its page where it can be read freely: Tigran's library,
+                                       -- from block-sources' originals/LIBRARY.tsv; NULL if none
     UNIQUE (paper_n, key)
 );
 

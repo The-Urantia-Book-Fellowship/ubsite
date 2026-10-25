@@ -180,6 +180,10 @@ INVARIANTS = [
                  WHERE NOT EXISTS (SELECT 1 FROM study_cite c WHERE c.source_id = x.id))
             + (SELECT COUNT(*) FROM study_cite c JOIN study_note s ON s.footnote_id = c.footnote_id
                  JOIN study_source x ON x.id = c.source_id WHERE x.paper_n <> s.paper_n)"""),
+    ("a study source's page not https, or a work with two pages",
+     """SELECT (SELECT COUNT(*) FROM study_source WHERE url NOT LIKE 'https://%')
+            + (SELECT COUNT(*) FROM (SELECT key FROM study_source GROUP BY key
+                 HAVING COUNT(DISTINCT COALESCE(url, '')) > 1))"""),
     ("no orphan paragraph in para_density",
      "SELECT COUNT(*) FROM paragraph p LEFT JOIN para_density d ON d.paragraph_id=p.id WHERE d.paragraph_id IS NULL"),
 ]

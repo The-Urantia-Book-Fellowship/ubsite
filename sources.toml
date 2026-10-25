@@ -55,7 +55,10 @@ path = "data/srt/considerations.html"
 # notes are reviewed against it (build/study.py).  tools/study/ reads the PDFs.
 # Its originals/ holds, by hand, the works themselves where a note was checked
 # against one (Ellen G. White's, for Paper 1), with a MANIFEST.tsv of where
-# each was downloaded from; nothing here reads it yet.
+# each was downloaded from, and a LIBRARY.tsv of the works checked in Tigran's
+# own copies, each with its page in his library and whether a reader who has
+# not logged in can open it: the build reads LIBRARY.tsv, and the Bibliography
+# links the page of each work that is public (build/study.py).
 [block]
 path = "../block-sources"
 

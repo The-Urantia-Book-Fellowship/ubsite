@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The Bibliography links each work that can be read freely in the Urantia Library to its page there, and so does a study note's card where it cites one.
 - The offline copy now keeps itself up to date whenever the site is open and online, then shows what is new and reloads the page once that is closed; Settings can turn this off, leaving Update now to you.
 - The page about the text API is in the offline copy too, so it can be read without a connection, naming the site it is read at; the API itself still needs one.
 - Ctrl+X puts the words selected into the search box, ready to search with Enter or to be changed first, or with nothing selected goes to the search box; Escape there goes back to where you were reading.
@@ -64,6 +65,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- `study_source` has a new column, `url`: the work's page where it can be read freely, in Tigran's library at https://ulib.sigmaai.au, or NULL. The build reads it from `originals/LIBRARY.tsv` in the block-sources directory, a line whose new column `public` is `yes`, and records that file's SHA-256 in `build_source` as `library`.
 - `index_entry` has two new columns, `headword_html` and `path_html`, `xref` one, `target_html`, and `chronology_event` one, `label_html`: each the HTML of the plain column beside it, the same words with an ordinal's suffix in `<sup>`, as the index now sets it (`\ts`, its 0aeae38). The plain columns read `1st` as before. The offline search databases carry where each hit's superscripts stand.
 - `chronology_event` has a new column, `line_html`: the event on one line with its citations as printed, each a link to its place in the text.
 - The EPUB is retired: `epub/`, `make epub` and its epubcheck, `tests/test_epub.py` and `tools/make_cover.py` are gone, and nothing here needs Java any more. Work offline keeps the whole site in the browser, search and the reading paths with it. The last commit that builds the EPUB is tagged `epub-last`.

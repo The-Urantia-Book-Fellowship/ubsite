@@ -766,8 +766,10 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 :is(.note, .pop) p:not(.src) { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
       hyphenate-character: "-"; -webkit-hyphenate-character: "-"; -webkit-hyphenate-limit-lines: 1; }
 :root[data-align="ragged"] :is(.note, .pop) p { text-align: start; hyphens: none; -webkit-hyphens: none; }
-/* The sources a study note cites, in full, under it. */
+/* The sources a study note cites, in full, under it, each with its page where
+   it can be read freely, grey as the card's other link, Block's chart. */
 :is(.note, .pop) .cite { font-size: .88em; }
+.cite a.lib { color: var(--faint); }
 .pop .at { display: none; }                     /* the card stands at its paragraph */
 .pop .lbl { pointer-events: none; }
 /* A note's first paragraph is a .lead, which the prose pages set at 1.05rem
@@ -1195,6 +1197,7 @@ main.results { position: relative; }
 .bib li { padding: .45rem 0; border-bottom: 1px solid var(--rule); }
 .bib .work { margin: 0; padding-left: 1.5em; text-indent: -1.5em; }
 .bib .by { margin: .15rem 0 0 1.5em; font-size: .9em; color: var(--faint); }
+.bib p.lib { margin: .15rem 0 0 1.5em; font-size: .9em; }  /* its page in the library */
 
 /* ---- appendices -------------------------------------------------------- */
 .listed { color: var(--faint); font-size: 1.02rem; margin: -.2rem 0 .3rem; }

@@ -157,13 +157,19 @@ def sbl() -> dict[str, dict]:
 
 
 def block() -> dict:
-    """Return {path, manifest, sha256, charts} for Matthew Block's parallel charts.
+    """Return {path, manifest, sha256, charts, library, library_sha256} for
+    Matthew Block's parallel charts and the originals beside them.
 
     A directory of PDFs, one per paper, kept by ../explore-tools/block_fetch.py,
     and no repository.  What the build reads is its MANIFEST.tsv: `charts` maps
     a paper's number to its row (url, uploaded, sha256, ...).  A chart is
     revised under a new address, so the url is the chart's version, and a paper
     without a chart has no row.  None for each if the directory is absent.
+
+    And originals/LIBRARY.tsv, kept by hand: the works the notes were checked
+    against in Tigran's copies, each with its page in his library and whether an
+    anonymous reader can open it.  `library` is its rows as written, which
+    build/study.py holds to their form; None if the file is absent.
     """
     import csv
     import hashlib
@@ -174,13 +180,20 @@ def block() -> dict:
         cfg = tomllib.load(fh)["block"]
     path = (ROOT / cfg["path"]).resolve()
     manifest = path / "MANIFEST.tsv"
+    library = path / "originals" / "LIBRARY.tsv"
+    out = {"key": "block", "path": path, "manifest": None, "sha256": None, "charts": None,
+           "library": None, "library_sha256": None}
+    if library.is_file():
+        raw = read_bytes(library)
+        out["library"] = list(csv.DictReader(raw.decode("utf-8").splitlines(), delimiter="\t",
+                                             quoting=csv.QUOTE_NONE))
+        out["library_sha256"] = hashlib.sha256(raw).hexdigest()
     if not manifest.is_file():
-        return {"key": "block", "path": path, "manifest": None, "sha256": None, "charts": None}
+        return out
     raw = read_bytes(manifest)
     rows = csv.DictReader(raw.decode("utf-8").splitlines(), delimiter="\t")
-    return {"key": "block", "path": path, "manifest": manifest,
-            "sha256": hashlib.sha256(raw).hexdigest(),
-            "charts": {int(r["paper"]): r for r in rows}}
+    return out | {"manifest": manifest, "sha256": hashlib.sha256(raw).hexdigest(),
+                  "charts": {int(r["paper"]): r for r in rows}}
 
 
 def describe(repos: dict) -> str:
