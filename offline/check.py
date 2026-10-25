@@ -29,6 +29,7 @@ import hashlib
 import json
 import pathlib
 import random
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -115,6 +116,26 @@ def consistent(copy: pathlib.Path, manifest: dict) -> list[str]:
     return bad
 
 
+RE_CSS_URL = re.compile(r"url\((/static/[^)\s]+)\)")
+RE_SRC = re.compile(r'<script src="([^"]+)"')
+
+
+def assets(copy: pathlib.Path, manifest: dict) -> list[str]:
+    """What a page loads besides itself, held to the copy: every url(/static/…)
+    in its stylesheet, a font among them, and every script the shell names.
+    The link check reads href= alone, and a font missing from the copy would
+    be drawn offline in whatever face the device had."""
+    names = {c["name"] for c in manifest["chunks"]}
+    read = lambda name: gzip.decompress((copy / next(c["file"] for c in manifest["chunks"]
+                                                     if c["name"] == name)).read_bytes()).decode()
+    css = [n for n in names if n.startswith("/static/ub.css?")]
+    if len(css) != 1:
+        return [f"the copy holds {len(css)} stylesheets"]
+    shell = "".join(json.loads(read("shell"))["shell"])
+    want = set(RE_CSS_URL.findall(read(css[0]))) | set(RE_SRC.findall(shell))
+    return [f"{u}: named by the copy's pages, not in it" for u in sorted(want - names)]
+
+
 def bands(manifest: dict) -> list[str]:
     exp = tomllib.loads((ROOT / "verify" / "expectations.toml").read_text())["offline"]
     bad = []
@@ -140,7 +161,8 @@ def run(con: sqlite3.Connection) -> int:
         return 1
     manifest = json.loads((copy / "manifest.json").read_text())
     rc = 0
-    for title, bad in (("the copy", consistent(copy, manifest)), ("its size", bands(manifest))):
+    for title, bad in (("the copy", consistent(copy, manifest)), ("what it loads", assets(copy, manifest)),
+                       ("its size", bands(manifest))):
         print(f"{title}: {'ok' if not bad else 'FAILED'}")
         for b in bad:
             print(f"  {b}")

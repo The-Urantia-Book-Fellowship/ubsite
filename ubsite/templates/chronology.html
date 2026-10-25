@@ -1,13 +1,11 @@
-{% extends "base.html" %}{% block title %}Appendix A: {{ app.title }}{% endblock %}
+{% extends "base.html" %}{% set title = tr('Appendix {x}: {title}', x='A', title=app.title) %}
 {% block body %}<main class="prose appendix chron">
 {% include "_appnav.html" %}
-<p class="papernum">Appendix A</p>
+<p class="papernum">{{ t('Appendix {x}', x='A') }}</p>
 <h1>{{ app.title }}</h1>
-<p class="hint">{{ '{:,}'.format(app.n_events) }} events under {{ years|length }} dates, as
-printed. A ± after a date means that it is approximate, and a reference opens the
-text there.</p>
-<nav class="letters bands" aria-label="Periods">
-  {%- for b in bands %}<a href="#{{ b.id }}"><b>{{ b.name }}</b><span>{{ b.events }} events</span></a>{% endfor %}</nav>
+<p class="hint">{{ t('chronology:hint', n=app.n_events, d=years|length) }}</p>
+<nav class="letters bands" {{ ta('aria-label', 'Periods') }}>
+  {%- for b in bands %}<a href="#{{ b.id }}"><b>{{ t(b.name) }}</b><span>{{ t('{n} events', n=b.events) }}</span></a>{% endfor %}</nav>
 {#- A year's events, then its months, each with its own; y["items"], because
     y.items is the dict's method. #}
 {% for y in years %}

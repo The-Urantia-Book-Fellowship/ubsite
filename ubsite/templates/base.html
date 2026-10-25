@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}The Urantia Book{% endblock %}</title>
+{#- A page's title is `title`, which it sets: a key of ru.toml, the words in
+    each language (tr()), or the book's own words (same()).  Its Russian, where
+    it has one, goes in data-ru, for the head script. #}
+<title{{ ru(title|default('The Urantia Book')) }}>{{ tt(title|default('The Urantia Book')) }}</title>
 <link rel="stylesheet" href="{{ asset('ub.css') }}">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
@@ -19,9 +22,27 @@
 // paper in the left rail is only openable with them (ub.css .lazy).  A site
 // may have defaults of its own (settings.py SITE_DEFAULTS): ubBase is
 // settings.py's, which the CSS is written against, and ubDefaults this site's,
-// which is what a reader has who never chose.
+// which is what a reader has who never chose.  ubSpared is what ↺ keeps.
 window.ubBase = {{ settings_defaults|tojson }};
 window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[location.hostname]);
+window.ubSpared = {{ settings_spared|tojson }};
+// The interface's language (settings.py `lang`), v: a flag tapped, or until one
+// is ('auto'), the browser's own, Russian where it is Russian (Tigran,
+// 2026-10-25).  data-lang="ru" or nothing, as CSS shows the words of one
+// language (ubsite/l10n.py); ub.js says it again whenever a setting changes.
+// And the tab's title, where the page has one in Russian (data-ru), its
+// English kept as data-en for a flag tapped (ubTitle).
+window.ubLang = function (r, v) {
+  if (v === 'auto') v = /^ru\b/i.test((navigator.languages || [navigator.language])[0] || '') ? 'ru' : 'en';
+  if (v === 'ru') r.dataset.lang = 'ru'; else delete r.dataset.lang;
+  window.ubTitle();
+};
+window.ubTitle = function () {
+  var t = document.querySelector('title');
+  if (!t || !t.dataset.ru) return;
+  if (!t.dataset.en) t.dataset.en = t.textContent;
+  document.title = document.documentElement.dataset.lang === 'ru' ? t.dataset.ru : t.dataset.en;
+};
 (function (r, D, B) {
   r.classList.add('js');
   // The tab's icon says which site this is, the book burgundy on one of them
@@ -39,24 +60,25 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
     var x = k in s ? s[k] : D[k];
     if (x !== B[k]) r.dataset[k] = x === false ? 'off' : x;
   }
+  window.ubLang(r, 'lang' in s ? s.lang : D.lang);
 })(document.documentElement, window.ubDefaults, window.ubBase);
 </script>
 {% block head %}{% endblock %}
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="/">{{ mark }}The Urantia Book</a>
+  <a class="brand" href="/">{{ mark }}{{ t('The Urantia Book') }}</a>
   <form class="find" action="/search" role="search">
     <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>
-    <input name="q" value="{{ q|default('') }}" aria-label="Search"
-    title="Search (Ctrl+X, with any words selected)" aria-keyshortcuts="Control+X"
-    placeholder="a word, or a citation like 101:4.2" autocomplete="off"></form>
+    <input name="q" value="{{ q|default('') }}" {{ ta('aria-label', 'Search') }}
+    {{ ta('title', 'Search (Ctrl+X, with any words selected)') }} aria-keyshortcuts="Control+X"
+    {{ ta('placeholder', 'a word, or a citation like 101:4.2') }} autocomplete="off"></form>
   <nav>
-    <a href="/read">Contents</a>
-    <a class="ix" href="/index">Index</a>
-    <button class="theme" type="button" aria-label="Theme">◐</button>
+    <a href="/read">{{ t('Contents') }}</a>
+    <a class="ix" href="/index">{{ t('Index') }}</a>
+    <button class="theme" type="button" {{ ta('aria-label', 'Theme') }}>◐</button>
     {#- Hidden until ub.js runs: with JavaScript off there is nothing to set. #}
-    <button class="gear" type="button" aria-label="Settings" title="Settings (Ctrl+,)"
+    <button class="gear" type="button" {{ ta('aria-label', 'Settings') }} {{ ta('title', 'Settings (Ctrl+,)') }}
             aria-keyshortcuts="Control+Comma" aria-haspopup="dialog" hidden>
       <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.67 3.03L6.97 1.08A7 7 0 0 1 9.03 1.08L9.33 3.03A5.15 5.15 0 0 1 10.58 3.54L12.16 2.37A7 7 0 0 1 13.63 3.84L12.46 5.43A5.15 5.15 0 0 1 12.97 6.67L14.92 6.97A7 7 0 0 1 14.92 9.03L12.97 9.33A5.15 5.15 0 0 1 12.46 10.57L13.63 12.16A7 7 0 0 1 12.16 13.63L10.58 12.46A5.15 5.15 0 0 1 9.33 12.97L9.03 14.92A7 7 0 0 1 6.97 14.92L6.67 12.97A5.15 5.15 0 0 1 5.43 12.46L3.84 13.63A7 7 0 0 1 2.37 12.16L3.54 10.57A5.15 5.15 0 0 1 3.03 9.33L1.08 9.03A7 7 0 0 1 1.08 6.97L3.03 6.67A5.15 5.15 0 0 1 3.54 5.42L2.37 3.84A7 7 0 0 1 3.84 2.37L5.42 3.54A5.15 5.15 0 0 1 6.67 3.03Z"/>
         <circle cx="8" cy="8" r="2.2"/></svg></button>
@@ -64,7 +86,7 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
         is kept, drawn as one cloud whose parts ub.css shows by data-net and
         data-have; it opens #offmenu.  Shown by ub.js only where a service
         worker can run. #}
-    <button class="offline" type="button" popovertarget="offmenu" aria-label="Online" title="Online"
+    <button class="offline" type="button" popovertarget="offmenu" {{ ta('aria-label', 'Online') }} {{ ta('title', 'Online') }}
       hidden data-net="on" data-have="none" data-src="{{ asset('offline.js') }}">
       <svg viewBox="0 0 20 16" aria-hidden="true" focusable="false">
         <path class="cloud" d="M5.6 13.4h9a3.4 3.4 0 0 0 .5-6.75A4.9 4.9 0 0 0 5.8 5.3a4.05 4.05 0 0 0-.2 8.1z"/>
@@ -73,6 +95,26 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
         <path class="slash" d="M3.2 1.8l13.6 13"/>
         <circle class="dot" cx="16.6" cy="3.4" r="2.4"/></svg></button>
   </nav>
+  {#- The interface's language, at the corner, after the nav: the Union Jack and the Russian
+      tricolour, each named in its own language, the one chosen full and the
+      other faded (Tigran, 2026-10-25).  Drawn, never emoji, which Windows
+      has none of.  Hidden until ub.js runs, and while the site has only
+      English (ubsite/l10n.py BILINGUAL); ub.js says which is pressed, since
+      the offline copy holds one shell for every reader. #}
+  <span class="langs" hidden>
+    <button class="flag" type="button" data-to="en" lang="en" aria-label="English" title="English">
+      <svg viewBox="0 0 60 30" aria-hidden="true" focusable="false">
+        <clipPath id="uk-a"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath>
+        <path d="M0 0h60v30H0z" fill="#012169"/>
+        <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/>
+        <path d="M0 0l60 30m0-30L0 30" clip-path="url(#uk-a)" stroke="#c8102e" stroke-width="4"/>
+        <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
+        <path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6"/></svg></button>
+    <button class="flag" type="button" data-to="ru" lang="ru" aria-label="Русский" title="Русский">
+      <svg viewBox="0 0 45 30" aria-hidden="true" focusable="false">
+        <path d="M0 0h45v10H0z" fill="#fff"/><path d="M0 10h45v10H0z" fill="#0039a6"/>
+        <path d="M0 20h45v10H0z" fill="#d52b1e"/></svg></button>
+  </span>
 </header>
 {#- The offline icon's menu: Work offline, the copy, and installing the site as
     an app (static/offline.js).  A popover, so the browser closes it on Escape
@@ -85,11 +127,11 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
     ub.js reads from the page's own address: never written here, since the
     offline copy's pages are made under one name for both hosts. #}
 <div id="offmenu" class="offmenu" popover hidden>
-  <p class="net"><span class="conn">Online</span> <span class="host"></span></p>
-  <p class="what">Work offline:
-    <small>full functionality except Merritt Horn audio recordings</small></p>
+  <p class="net"><span class="conn">{{ t('Online') }}</span> <span class="host"></span></p>
+  <p class="what">{{ t('Work offline:') }}
+    <small>{{ t('full functionality except Merritt Horn audio recordings') }}</small></p>
   <p class="state" aria-live="polite"></p>
-  <p class="remove" hidden><button type="button" class="drop">Remove the offline copy</button></p>
+  <p class="remove" hidden><button type="button" class="drop">{{ t('Remove the offline copy') }}</button></p>
   <p class="install" hidden></p>
 </div>
 <dialog class="settings" aria-labelledby="settings-title">
@@ -103,20 +145,20 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
       close the dialog. #}
   <form method="dialog">
     <div class="bar">
-      <h2 id="settings-title">Settings</h2>
-      <button class="reset" type="button" aria-label="Restore the defaults" title="Restore the defaults">
+      <h2 id="settings-title">{{ t('Settings') }}</h2>
+      <button class="reset" type="button" {{ ta('aria-label', 'Restore the defaults') }} {{ ta('title', 'Restore the defaults') }}>
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
           <path d="M3.3 6.2A5.1 5.1 0 1 1 3.4 10.4"/><path d="M2.6 2.9v3.6h3.6"/></svg></button>
-      <button class="x" value="close" aria-label="Close" title="Close" autofocus>
+      <button class="x" value="close" {{ ta('aria-label', 'Close') }} {{ ta('title', 'Close') }} autofocus>
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
     </div>
     {%- set setgroups = settings_groups(voices()) %}
     {#- A group with a class is hidden until ub.js finds it can run: Offline's. #}
-    <div class="tabs" role="tablist" aria-label="Settings">
+    <div class="tabs" role="tablist" {{ ta('aria-label', 'Settings') }}>
       {%- for g in setgroups %}
       <button type="button" role="tab" id="set-t-{{ g.key }}" aria-controls="set-p-{{ g.key }}"
               aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}"
-              {%- if g.cls %} class="{{ g.cls }}" hidden{% endif %}>{{ g.legend }}</button>
+              {%- if g.cls %} class="{{ g.cls }}" hidden{% endif %}>{{ t(g.legend ~ '|tab') }}</button>
       {%- endfor %}
     </div>
     <div class="panels">
@@ -129,33 +171,35 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
       {%- set needs = ((' data-needs="' ~ it.needs ~ '"') if it.needs else '') ~
                       ((' data-is="' ~ it.needs_is ~ '"') if it.needs_is else '') %}
       {%- if it.kind == 'switch' %}
-      <label{{ needs|safe }}><input type="checkbox" name="{{ it.key }}"> {{ it.label }}
+      <label{{ needs|safe }}><input type="checkbox" name="{{ it.key }}"> {{ t(it.label) }}
         {%- if it.key == 'pilcrow' %} <span class="pcm" aria-hidden="true"></span>{% endif %}
-        {%- if it.hint %} <small>{{ it.hint }}</small>{% endif %}</label>
+        {%- if it.hint %} <small>{{ t(it.hint) }}</small>{% endif %}</label>
       {%- elif it.kind == 'segmented' %}
-      <div class="row"{{ needs|safe }}><span id="set-{{ it.key }}">{{ it.label }}</span>
+      <div class="row"{{ needs|safe }}><span id="set-{{ it.key }}">{{ t(it.label) }}</span>
         <div class="seg" role="radiogroup" aria-labelledby="set-{{ it.key }}">
         {%- for c in it.choices %}
-          <label class="{{ c.cls }}"{% if c.hint %} title="{{ c.hint }}"{% endif %}><input type="radio"
-            name="{{ it.key }}" value="{{ c.value }}"{% if c.label == 'A' or not c.label %} aria-label="{{ c.hint }}"{% endif %}><span>{{ c.label }}</span></label>
+          {#- A choice drawn, not named, the size's A or the spacing's bars, is named by
+            its hint. #}
+          <label class="{{ c.cls }}"{% if c.hint %} {{ ta('title', c.hint) }}{% endif %}><input type="radio"
+            name="{{ it.key }}" value="{{ c.value }}"{% if c.label == 'A' or not c.label %} {{ ta('aria-label', c.hint) }}{% endif %}><span>{{ c.label if c.label == 'A' or not c.label else t(c.label) }}</span></label>
         {%- endfor %}
         </div></div>
       {%- elif it.kind == 'radio' %}
-      {%- if it.key != 'voice' %}<p class="sub">{{ it.label }}</p>{% endif %}
+      {%- if it.key != 'voice' %}<p class="sub">{{ t(it.label) }}</p>{% endif %}
       {%- for c in it.choices %}
-      <label class="{{ c.cls }}"{{ needs|safe }}><input type="radio" name="{{ it.key }}" value="{{ c.value }}"> {{ c.label }}
-        {%- if c.hint %} <small>{{ c.hint }}</small>{% endif %}</label>
+      <label class="{{ c.cls }}"{{ needs|safe }}><input type="radio" name="{{ it.key }}" value="{{ c.value }}"> {{ t(c.label) }}
+        {%- if c.hint %} <small>{{ t(c.hint) }}</small>{% endif %}</label>
       {%- endfor %}
       {%- elif it.kind == 'select' %}
-      <label class="row set-{{ it.key }}"{{ needs|safe }}>{{ it.label }} <select name="{{ it.key }}">
-        {%- for c in it.choices %}<option value="{{ c.value }}">{{ c.label }}</option>{% endfor %}
+      <label class="row set-{{ it.key }}"{{ needs|safe }}>{{ t(it.label) }} <select name="{{ it.key }}">
+        {%- for c in it.choices %}{% set w = tr('{r}×', r=dec(c.value)) if it.key == 'rate' else c.label %}<option value="{{ c.value }}"{{ ru(w) }}>{{ tt(w) }}</option>{% endfor %}
       </select></label>
       {%- endif %}
       {%- endfor %}
     </div>
     {%- endfor %}
     </div>
-    <p class="kept">Kept in this browser only.</p>
+    <p class="kept">{{ t('Kept in this browser only.') }}</p>
   </form>
 </dialog>
 {% block body %}{% endblock %}
@@ -169,12 +213,13 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
       the home page's link to /api says; named the typeface the text is in,
       whose licence is now beside it in Settings; and said how visits are
       counted. #}
-  <p>The Uversa Press edition of <i>The Urantia Book</i>, with the Index and Appendices
-     as revised for the third edition, is licensed as a whole under
-     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">CC&nbsp;BY-NC-SA&nbsp;4.0</a>;
-     its text is in the public domain. <a href="/changelog">Changelog</a>.</p>
-  <p class="disclaim">Not affiliated with, or endorsed by, Urantia Foundation.</p>
+  {#- The licence's link stands once, outside both languages' words. #}
+  <p>{{ t('footer:licence') }}
+     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">CC&nbsp;BY-NC-SA&nbsp;4.0</a>{{ t('footer:public') }}
+     <a href="/changelog">{{ t('Changelog') }}</a>.</p>
+  <p class="disclaim">{{ t('Not affiliated with, or endorsed by, Urantia Foundation.') }}</p>
 </footer>
+<script src="{{ l10n_url() }}" defer></script>
 <script src="{{ asset('ub.js') }}" defer></script>
 {% block scripts %}{% endblock %}
 </body>

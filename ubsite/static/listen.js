@@ -25,7 +25,7 @@
 // (`P`) and the section being heard (`D`) are then two different things.
 (function () {
   var data = document.getElementById('ub-audio');
-  var S = window.ubSettings;
+  var S = window.ubSettings, T = window.ubT;   // T: the interface's words (ubsite/l10n.js)
   if (!data || !S) return;
   var P = JSON.parse(data.textContent);  // the section the page shows; null on any other page
   var D = null;                          // the section being heard
@@ -45,11 +45,12 @@
     s.appendChild(p);
     return s;
   }
+  // `label` a key of ru.toml, or its words made (T.tr()).
   function button(cls, label, name) {
     var b = document.createElement('button');
     b.type = 'button';
     b.className = cls;
-    b.setAttribute('aria-label', label);
+    T.attr(b, 'aria-label', label);
     b.appendChild(icon(name));
     return b;
   }
@@ -89,7 +90,7 @@
   // Offline a recording cannot be had: the voice Settings names is not changed
   // for another (Tigran, 2026-10-13), the bar says why it does not play, and
   // its voice menu stands beside the message.
-  var NEEDS_NET = 'The recordings need a connection. Offline, your browser\u2019s voice can read it.';
+  var NEEDS_NET = T.k('The recordings need a connection. Offline, your browser\u2019s voice can read it.');
   // Section d's voice kk; the browser's is made from its paragraphs, d.ids.
   function voiceOf(d, kk) {
     return kk === 'browser' ? spoken(d.ids, href(d)) : kk ? d.voices[kk] : null;
@@ -97,13 +98,17 @@
   function href(d) { return '/' + d.paper + ':' + d.section; }
   function same(a, b) { return !!(a && b && a.paper === b.paper && a.section === b.section); }
   function rate() { var r = S.get().rate; return RATES.indexOf(r) < 0 ? 1 : r; }
-  // What the bar and the lock screen call the voice: for the browser's, the
-  // name of the one it speaks with, once the browser has said.
+  // What the bar and the lock screen call the voice, in each language: for
+  // the browser's, the name of the one it speaks with, once the browser has
+  // said, which is the same in both.
   function vname() {
-    if (V.kind !== 'browser') return V.label;
+    if (V.kind !== 'browser') return word(V.label);
     var v = S.voice();
-    return v ? v.name : 'Your browser\u2019s voice';
+    return v ? T.same(v.name) : T.tr('Your browser\u2019s voice');
   }
+  // A name from the database (a voice's, its credit): its words where ru.toml
+  // has them (app.py puts them in l10n.js), else as it is.
+  function word(s) { return T.has(s) ? T.tr(s) : T.same(s); }
 
   // ---- controls in the page ------------------------------------------------
   // A play button beside each paragraph, the first paragraph's reading the
@@ -121,7 +126,7 @@
     if (PV.credit) {
       var row = document.createElement('p'), c = document.createElement(PV.credit_url ? 'a' : 'span');
       row.className = 'voicecredit';
-      c.textContent = PV.credit;
+      c.innerHTML = T(word(PV.credit));
       if (PV.credit_url) { c.href = PV.credit_url; c.rel = 'noopener'; c.target = '_blank'; }
       row.appendChild(c);
       head.parentNode.appendChild(row);
@@ -141,15 +146,15 @@
     // until then the first paragraph's button starts the section.
     if (PV.by !== 'paragraph') {
       var p0 = document.querySelector('p.t[id]');
-      if (p0) place(p0, 0, 'Listen to this section');
+      if (p0) place(p0, 0, T.k('Listen to this section'));
       return;
     }
     var first = true;
     PV.segs.forEach(function (s, i) {
       var p = s[0] && paras[s[0]];
       if (!p) return;
-      if (first && PV.segs[0][0] === null) place(p, 0, 'Listen to this section, from its heading');
-      else place(p, i, 'Listen from ' + s[0]);
+      if (first && PV.segs[0][0] === null) place(p, 0, T.k('Listen to this section, from its heading'));
+      else place(p, i, T.tr('Listen from {r}', { r: s[0] }));
       first = false;
     });
   }
@@ -173,11 +178,11 @@
     bar = document.createElement('div');
     bar.className = 'player';
     bar.setAttribute('role', 'region');
-    bar.setAttribute('aria-label', 'Listening');
-    var prev = button('prev', 'Back to the start of this paragraph (twice: the one before)', 'prev');
-    prev.title = prev.getAttribute('aria-label');
-    var tog = button('toggle', 'Play', 'play');
-    var nxt = button('next', 'Next paragraph', 'next');
+    T.attr(bar, 'aria-label', 'Listening');
+    var prev = button('prev', T.k('Back to the start of this paragraph (twice: the one before)'), 'prev');
+    T.attr(prev, 'title', 'Back to the start of this paragraph (twice: the one before)');
+    var tog = button('toggle', T.k('Play'), 'play');
+    var nxt = button('next', T.k('Next paragraph'), 'next');
     // What is being read, and by whom.  A tap on the reference brings its
     // paragraph into view.
     var where = document.createElement('span');
@@ -185,7 +190,7 @@
     var at = document.createElement('button');
     at.type = 'button';
     at.className = 'at';
-    at.title = 'Show this paragraph';
+    T.attr(at, 'title', 'Show this paragraph');
     at.addEventListener('click', function () { toReading(true); });
     var who = document.createElement('span');
     who.className = 'who';
@@ -207,7 +212,7 @@
       ev.preventDefault();
       carryOn();
     });
-    var x = button('close', 'Stop and close', 'close');
+    var x = button('close', T.k('Stop and close'), 'close');
     prev.addEventListener('click', back);
     nxt.addEventListener('click', forward);
     tog.addEventListener('click', toggle);
@@ -218,21 +223,22 @@
   }
   // A button in the bar and the list a tap on it opens above the bar: the
   // speed, the voice.  entries() is asked each time it opens, so that what it
-  // lists and which is checked are current: [{text, on, pick, note}, ...],
-  // with {group} for a heading over the entries after it.
+  // lists and which is checked are current: [{html, on, pick, note}, ...], each
+  // its words as HTML (T()), with {group}, a key, for a heading over the
+  // entries after it.  `label` a key.
   function dropup(boxCls, btnCls, menuCls, label, entries) {
     var box = document.createElement('span');
     box.className = boxCls;
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = btnCls;
-    btn.setAttribute('aria-label', label);
+    T.attr(btn, 'aria-label', label);
     btn.setAttribute('aria-haspopup', 'menu');
     btn.setAttribute('aria-expanded', 'false');
     var menu = document.createElement('div');
     menu.className = menuCls;
     menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', label);
+    T.attr(menu, 'aria-label', label);
     menu.hidden = true;
     var items = [];
     // The entries, drawn afresh; the index of the one checked.
@@ -244,19 +250,19 @@
         if (e.group) {
           into = menu.appendChild(document.createElement('div'));
           into.setAttribute('role', 'group');
-          into.setAttribute('aria-label', e.group);
+          T.attr(into, 'aria-label', e.group);
           var h = into.appendChild(document.createElement('div'));
           h.className = 'group';
           h.setAttribute('aria-hidden', 'true');
-          h.textContent = e.group;
+          h.innerHTML = T(e.group);
           return;
         }
         var b = into.appendChild(document.createElement('button'));
         b.type = 'button';
         b.setAttribute('role', 'menuitemradio');
         b.setAttribute('aria-checked', String(!!e.on));
-        b.textContent = e.text;
-        if (e.note) b.appendChild(document.createElement('small')).textContent = e.note;
+        b.innerHTML = e.html;
+        if (e.note) b.appendChild(document.createElement('small')).innerHTML = e.note;
         b.addEventListener('click', function () {
           shut(true);
           e.pick();
@@ -303,10 +309,10 @@
     return box;
   }
   function speeds() {
-    return dropup('ratebox', 'rate', 'speeds', 'Speed', function () {
+    return dropup('ratebox', 'rate', 'speeds', T.k('Speed'), function () {
       var now = rate();
       return RATES.map(function (r) {
-        return { text: r + '×', on: r === now, pick: function () { S.set('rate', r); } };
+        return { html: T('{r}×', { r: T.dec(r) }), on: r === now, pick: function () { S.set('rate', r); } };
       });
     });
   }
@@ -314,20 +320,20 @@
   // and each of the browser's under its own (Tigran, 2026-10-18).  Its
   // "Automatic" stays in Settings: here the voice it speaks with is checked.
   function voices() {
-    var box = dropup('voicebox', 'voice', 'voices', 'Voice', function () {
+    var box = dropup('voicebox', 'voice', 'voices', T.k('Voice'), function () {
       var out = [];
       for (var kk in D.voices) (function (kk, v) {
-        out.push({ text: v.label, on: key === kk, pick: function () { S.set('voice', kk); },
-                   note: v.credit || (v.kind === 'synthetic' ? 'an AI voice' : '') });
+        out.push({ html: T(word(v.label)), on: key === kk, pick: function () { S.set('voice', kk); },
+                   note: v.credit ? T(word(v.credit)) : v.kind === 'synthetic' ? T('an AI voice') : '' });
       })(kk, D.voices[kk]);
       if (!synth) return out;
       var all = S.usable(), cur = key === 'browser' && S.voice();
       function browser() { if (S.get().voice !== 'browser') S.set('voice', 'browser'); }
       if (!all.length)
-        return out.concat({ text: 'Your browser’s voice', on: key === 'browser', pick: browser });
-      out.push({ group: 'Your browser’s voice' });
+        return out.concat({ html: T('Your browser’s voice'), on: key === 'browser', pick: browser });
+      out.push({ group: T.k('Your browser’s voice') });
       all.forEach(function (v) {
-        out.push({ text: v.name, on: !!cur && cur.name === v.name,
+        out.push({ html: T.esc(v.name), on: !!cur && cur.name === v.name,
                    pick: function () { S.set('bvoice', v.name); browser(); } });
       });
       return out;
@@ -343,7 +349,7 @@
     return !s ? null : s[0] ? paras[s[0]] || null : same(P, D) ? head : null;
   }
   // A message in the bar in place of what is being read, until something is
-  // played again.  Kept, not only written: a recording that cannot be loaded
+  // played again, as HTML (T()).  Kept, not only written: a recording that cannot be loaded
   // fires its error, then rejects play(), whose catch renders the bar, and the
   // message went with it.
   var trouble = null;
@@ -351,25 +357,29 @@
     trouble = msg;
     if (!bar) return;
     bar.querySelector('.at').hidden = true;
-    bar.querySelector('.who').textContent = msg;
+    bar.querySelector('.who').innerHTML = msg;
   }
   function render() {
     if (!bar) return;
     var tog = bar.querySelector('.toggle'), paused = !playing();
     tog.replaceChild(icon(paused ? 'play' : 'pause'), tog.firstChild);
-    tog.setAttribute('aria-label', paused ? 'Play' : 'Pause');
-    bar.querySelector('.rate').textContent = rate() + '×';
+    T.attr(tog, 'aria-label', paused ? T.k('Play') : T.k('Pause'));
+    bar.querySelector('.rate').innerHTML = T('{r}×', { r: T.dec(rate()) });
     var s = k >= 0 ? V.segs[k] : null, at = bar.querySelector('.at');
     at.hidden = !s;
     if (s) at.textContent = s[0] || D.paper + ':' + D.section;
-    bar.querySelector('.who').textContent = s ? '' : 'End of the section';
-    bar.querySelector('.voice span').textContent = vname();
+    bar.querySelector('.who').innerHTML = s ? '' : T('End of the section');
+    bar.querySelector('.voice span').innerHTML = T(vname());
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
-    if (D.next) { on.href = D.next.href + '#listen'; on.textContent = 'Next: ' + D.next.label + ' ›'; }
+    // The next section's name, as app.py makes it in each language.
+    if (D.next) {
+      on.href = D.next.href + '#listen';
+      on.innerHTML = T('Next: {l} ›', { l: { en: T.esc(D.next.label), ru: T.esc(D.next.label_ru || D.next.label) } });
+    }
     if (trouble) {
       at.hidden = true;
-      bar.querySelector('.who').textContent = trouble;
+      bar.querySelector('.who').innerHTML = trouble;
     }
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
   }
@@ -397,7 +407,7 @@
       return render();
     }
     if (navigator.onLine === false) {
-      tell(NEEDS_NET);
+      tell(T(NEEDS_NET));
       return render();
     }
     var s = V.segs[i], t = s[2] / 1000;
@@ -523,7 +533,12 @@
   }
   function swap(doc) {
     document.querySelector('main').replaceWith(document.adoptNode(doc.querySelector('main')));
-    document.title = doc.title;
+    // The tab's title, its element whole, with its Russian (base.html), and in
+    // the reader's language (ubLang).
+    var nt = doc.querySelector('title'), ot = document.querySelector('title');
+    if (nt && ot) ot.replaceWith(document.adoptNode(nt));
+    else document.title = doc.title;
+    if (window.ubTitle) window.ubTitle();
     var q = document.querySelector('.find input'), nq = doc.querySelector('.find input');
     if (q && nq) q.value = nq.value;
     var json = doc.getElementById('ub-audio');
@@ -667,8 +682,8 @@
   audio.addEventListener('pause', render);
   audio.addEventListener('error', function () {
     if (audio.getAttribute('src'))
-      tell(navigator.onLine === false ? NEEDS_NET
-                                      : 'The recording could not be loaded. Your browser\u2019s voice can read without it.');
+      tell(navigator.onLine === false ? T(NEEDS_NET)
+                                      : T('The recording could not be loaded. Your browser\u2019s voice can read without it.'));
   });
 
   // ---- the browser's own voice -----------------------------------------------
@@ -749,7 +764,7 @@
     t.wait.then(function (m) { if (gen === said.gen) begin(gen, m); }, function () {
       if (gen !== said.gen) return;
       hush();
-      tell(navigator.onLine === false ? 'Offline, this needs Work offline: the cloud at the top of the page.' : 'The text could not be loaded.');
+      tell(navigator.onLine === false ? T('Offline, this needs Work offline: the cloud at the top of the page.') : T('The text could not be loaded.'));
     });
   }
   function begin(gen, m) {
@@ -783,8 +798,8 @@
       // Chrome's Google voices and Edge's Natural ones are spoken by a server.
       var bv = S.voice();
       tell(navigator.onLine === false && bv && !bv.localService
-           ? bv.name + ' needs a connection, and this browser has no voice of its own.'
-           : 'Your browser could not speak (' + e.error + ').');
+           ? T('{v} needs a connection, and this browser has no voice of its own.', { v: bv.name })
+           : T('Your browser could not speak ({e}).', { e: e.error }));
     };
     said.u = u;                     // Chrome drops the events of an utterance nothing holds
     synth.speak(u);
@@ -856,7 +871,7 @@
   function meta() {
     if (!('mediaSession' in navigator) || !window.MediaMetadata) return;
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: D.title, artist: vname(), album: 'The Urantia Book',
+      title: D.title, artist: T.plain(vname()[T.lang()]), album: T.text('The Urantia Book'),
       artwork: [{ src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }]
     });
   }

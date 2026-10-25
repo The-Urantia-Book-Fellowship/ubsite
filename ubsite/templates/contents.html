@@ -1,5 +1,5 @@
-{% extends "base.html" %}{% block title %}Contents{% endblock %}
-{% block body %}<main class="prose"><h1>Contents</h1>
+{% extends "base.html" %}{% set title = 'Contents' %}
+{% block body %}<main class="prose"><h1>{{ t('Contents') }}</h1>
 
 {# The Foreword belongs at the head of the book, where it is printed. It carries
    no part number -- the four parts begin at Paper 1 -- so it is listed on its

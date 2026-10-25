@@ -1,0 +1,396 @@
+# The interface in Russian (Tigran, 2026-10-25; ROADMAP item 15), read by
+# ubsite/l10n.py, which says how: one line to a string, keyed by its English,
+# a context after | where one English says two things, a plural as
+# { en = [one, other], ru = [one, few, many] }, a long one by a name with its
+# English beside it.  A key and its words are HTML.  {n:,} is a number grouped
+# by thousands.  Not translated: the book, its index and appendices, the
+# changelog, the API's documentation.
+#
+# The words chosen, for review:
+#   The Urantia Book      Книга Урантии (the site's name; the book's own
+#                         titles, "Foreword" among them, stay as printed:
+#                         «Предисловие» is the Russian translation's, Tigran,
+#                         2026-10-25)
+#   Paper / section       документ / раздел;  paragraph  абзац
+#   index entry           рубрика указателя;  subentry  подрубрика;
+#                         headword  заглавное слово
+#   1955 reading          разночтение 1955 года
+#   study note            примечание
+#   offline copy          офлайн-копия
+
+# --- Every page: the header, the offline menu, Settings, the footer (base.html)
+
+"The Urantia Book" = "Книга Урантии"
+"Search" = "Поиск"
+"Search (Ctrl+X, with any words selected)" = "Поиск (Ctrl+X, когда выделены слова)"
+"a word, or a citation like 101:4.2" = "слово или ссылка, например 101:4.2"
+"Contents" = "Содержание"
+"Index" = "Указатель"
+"Theme" = "Тема"
+"Settings" = "Настройки"
+"Settings (Ctrl+,)" = "Настройки (Ctrl+,)"
+"Online" = "В сети"
+"Work offline:" = "Работа без сети:"
+"full functionality except Merritt Horn audio recordings" = "всё работает, кроме записей чтения Мерритта Хорна"
+"Remove the offline copy" = "Удалить офлайн-копию"
+"Restore the defaults" = "Восстановить настройки по умолчанию"
+"Close" = "Закрыть"
+"Kept in this browser only." = "Хранятся только в этом браузере."
+"footer:licence" = { en = 'The Uversa Press edition of <i>The Urantia Book</i>, with the Index and Appendices as revised for the third edition, is licensed as a whole under', ru = 'Издание <i>The Urantia Book</i> от Uversa Press, вместе с Указателем и Приложениями в редакции третьего издания, распространяется целиком по лицензии' }
+"footer:public" = { en = "; its text is in the public domain.", ru = "; его текст является общественным достоянием." }
+"Changelog" = "История изменений"
+"Not affiliated with, or endorsed by, Urantia Foundation." = "Сайт не связан с Фондом Урантия и не одобрен им."
+
+# --- Settings (settings.py): the tabs, then each setting, its choices, its hint
+
+"Reading|tab" = "Чтение"
+"Show|tab" = "Показ"
+"Listening|tab" = "Аудио"
+"Offline|tab" = "Офлайн"
+
+"System" = "Системная"
+"as this device is set" = "как настроено устройство"
+"Light" = "Светлая"
+"Dark" = "Тёмная"
+"Text size" = "Размер текста"
+"Smaller" = "Меньше"
+"Standard" = "Обычный"
+"Larger" = "Больше"
+"Line spacing" = "Межстрочный интервал"
+"Tightest" = "Самый плотный"
+"Tighter" = "Плотнее"
+"Looser" = "Свободнее"
+"Typeface" = "Шрифт"
+"Goudy" = "Goudy"
+'the book’s own typeface (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>)' = 'шрифт самой книги (<a href="/static/fonts/OFL.txt">OFL&nbsp;1.1</a>)'
+"A plainer serif" = "Попроще, с засечками"
+"Sans-serif" = "Без засечек"
+"Width" = "Ширина"
+"Measured" = "Умеренная"
+"about 68 characters to a line" = "около 68 знаков в строке"
+"Full" = "Полная"
+"the whole width of the window" = "вся ширина окна"
+"Alignment" = "Выравнивание"
+"Justified" = "По ширине"
+"hyphenated where the book hyphenates" = "с переносами там, где их делает книга"
+"Ragged right" = "По левому краю"
+"even spaces, no hyphens" = "ровные пробелы, без переносов"
+"Tap to turn the page" = "Листать касанием"
+"on a phone or a tablet: the lower half of the screen goes on, the upper half back" = "на телефоне или планшете: нижняя половина экрана — вперёд, верхняя — назад"
+
+"Index and appendices" = "Указатель и приложения"
+"beside the text, in search results, and every link to them" = "рядом с текстом, в результатах поиска, и все ссылки на них"
+"Words of Jesus in red" = "Слова Иисуса красным"
+"Paragraph references" = "Номера абзацев"
+"such as 0:1.2, beside each paragraph" = "например 0:1.2, у каждого абзаца"
+"1955 page references" = "Страницы издания 1955 года"
+"such as (1109.3): page, and paragraph on it" = "например (1109.3): страница и абзац на ней"
+"Pilcrows" = "Знаки абзаца"
+"where the 1955 text leaves a blank line" = "там, где в тексте 1955 года пустая строка"
+"Notes" = "Примечания"
+"from The British Study Edition (ed. Tigran Aivazian)" = "из The British Study Edition (под ред. Тиграна Айвазяна)"
+"1955 readings" = "Разночтения 1955 года"
+"1955 readings in search results" = "Разночтения 1955 года в результатах поиска"
+"their wording, such as Badanon, and the committee’s reasons" = "их слова, например Badanon, и доводы комитета"
+"Tooltips" = "Подсказки"
+"a few words on a button or a link, where the pointer rests" = "несколько слов о кнопке или ссылке под указателем мыши"
+
+"Merritt Horn" = "Мерритт Хорн"
+"Your browser’s voice" = "Голос вашего браузера"
+"spoken by this browser, which keeps the screen on while it reads" = "читает сам браузер; пока он читает, экран не гаснет"
+"an AI voice" = "голос ИИ"
+"Off" = "Выкл."
+"no listening controls" = "без кнопок прослушивания"
+"Browser voice" = "Голос браузера"
+"Automatic" = "Автоматически"
+"Speed" = "Скорость"
+"{r}×" = "{r}×"
+"Follow along" = "Следить за чтением"
+"keep the paragraph being read in view" = "держать читаемый абзац на виду"
+"Carry on into the next section" = "Продолжать со следующего раздела"
+"and so on through the book" = "и так далее, по всей книге"
+
+"Keep the offline copy up to date" = "Обновлять офлайн-копию"
+"by itself, whenever the site is open and online, then shows what is new" = "само, когда сайт открыт и есть сеть, а затем показывать, что нового"
+
+# --- Titles of pages
+
+"Appendix {x}: {title}" = "Приложение {x}: {title}"
+"Appendices" = "Приложения"
+"List of 1955 readings" = "Список разночтений 1955 года"
+"Bibliography" = "Библиография"
+"List of study notes" = "Список примечаний"
+"Index — {l}" = "Указатель — {l}"
+"Part {r} — {title}" = "Часть {r} — {title}"
+"Not found" = "Не найдено"
+"Lists" = "Списки"
+"Paper {n} — {title}" = "Документ {n} — {title}"
+"{h} — read through" = "{h} — читать подряд"
+"{h} — read through, by theme" = "{h} — читать подряд, по темам"
+"Not in the offline copy" = "Нет в офлайн-копии"
+
+# --- A section's page (section.html, _fold.html, _transport.html, _rail.html)
+
+"Paper {n}" = "Документ {n}"
+"{a} and {b}" = "{a} и {b}"
+"{n} index entries" = { en = ["{n} index entry", "{n} index entries"], ru = ["{n} рубрика указателя", "{n} рубрики указателя", "{n} рубрик указателя"] }
+"{n} index entries across this whole paper" = { en = ["{n} index entry across this whole paper", "{n} index entries across this whole paper"], ru = ["{n} рубрика указателя на весь документ", "{n} рубрики указателя на весь документ", "{n} рубрик указателя на весь документ"] }
+"{n} index entries across this whole section" = { en = ["{n} index entry across this whole section", "{n} index entries across this whole section"], ru = ["{n} рубрика указателя на весь раздел", "{n} рубрики указателя на весь раздел", "{n} рубрик указателя на весь раздел"] }
+"{n} index entries across the whole paper and this section" = { en = ["{n} index entry across the whole paper and this section", "{n} index entries across the whole paper and this section"], ru = ["{n} рубрика указателя на весь документ и этот раздел", "{n} рубрики указателя на весь документ и этот раздел", "{n} рубрик указателя на весь документ и этот раздел"] }
+"Cited across this whole paper" = "Ссылки на весь документ"
+"Cited across this whole section" = "Ссылки на весь раздел"
+"The 1955 readings" = "Разночтения 1955 года"
+"Study notes" = "Примечания"
+"Papers and sections" = "Документы и разделы"
+"Previous paper: the Foreword" = "Предыдущий документ: Foreword"
+"Next paper: the Foreword" = "Следующий документ: Foreword"
+"Previous paper: {p}" = "Предыдущий документ: {p}"
+"Next paper: {p}" = "Следующий документ: {p}"
+"Previous section: {s}" = "Предыдущий раздел: {s}"
+"Next section: {s}" = "Следующий раздел: {s}"
+"The book" = "Книга"
+"0. Introduction" = "0. Введение"
+"Part {r}." = "Часть {r}."
+"a new group begins here, as in the 1955 printing" = "здесь начинается новая группа, как в издании 1955 года"
+
+# --- The notes' cards and the lists of them (_note.html, _old.html, _papers.html)
+
+"Source" = "Источник"
+"SRT Committee table" = "таблица Комитета SRT"
+"Note {n}" = "Примечание {n}"
+"Read it in the Urantia Library" = "Читать в Urantia Library"
+"Identified by Matthew Block" = "Найдено Мэтью Блоком"
+"parallel chart, Paper {n}, {date}" = "таблица параллелей, документ {n}, {date}"
+"corrected here from the original:" = "исправлено здесь по оригиналу:"
+"now" = "сейчас"
+"1955 reading" = "Разночтение 1955 года"
+"SRT Committee" = "Комитет SRT"
+"Go to a paper" = "Перейти к документу"
+"Papers" = "Документы"
+"Paper {n}. {title} ({k})" = "Документ {n}. {title} ({k})"
+
+# --- A reading path (path.html), and a headword's page (concept.html)
+
+"zero one two three four five six seven eight nine ten eleven twelve" = "ноль один два три четыре пять шесть семь восемь девять десять одиннадцать двенадцать"
+"the whole paper" = "весь документ"
+"the whole section" = "весь раздел"
+"{w} paragraphs not cited here" = { en = ["{w} paragraph not cited here", "{w} paragraphs not cited here"], ru = ["{w} абзац, не цитируемый здесь", "{w} абзаца, не цитируемых здесь", "{w} абзацев, не цитируемых здесь"] }
+"Paper {n}, <i>{title}</i>, is cited whole." = "Документ {n}, <i>{title}</i>, цитируется целиком."
+"The <i>{title}</i> is cited whole." = "<i>{title}</i> цитируется целиком."
+"Read it in the reader ›" = "Читать в книге ›"
+'read <a href="#{a}">above</a>' = 'прочитан <a href="#{a}">выше</a>'
+'read <a href="#{a}">above</a>, under <i>{w}</i>' = 'прочитан <a href="#{a}">выше</a>, под рубрикой <i>{w}</i>'
+"Read through" = "Читать подряд"
+"{n} paragraphs" = { en = ["{n} paragraph", "{n} paragraphs"], ru = ["{n} абзац", "{n} абзаца", "{n} абзацев"] }
+"about {n} minutes" = { en = ["about {n} minute", "about {n} minutes"], ru = ["около {n} минуты", "около {n} минут", "около {n} минут"] }
+"about {n} hours" = { en = ["about {n} hours", "about {n} hours"], ru = ["около {n} часа", "около {n} часов", "около {n} часов"] }
+"{n} chapters" = { en = ["{n} chapter", "{n} chapters"], ru = ["{n} глава", "{n} главы", "{n} глав"] }
+"Order" = "Порядок"
+"Book order" = "По порядку книги"
+"By theme" = "По темам"
+"path:theme" = { en = "The paragraphs in the index’s own groups, a chapter to each, in the order the index prints them, and in the order of the book within each. A paragraph read in an earlier chapter is named in one line.", ru = "Абзацы по группам самого указателя, по главе на группу, в том порядке, в каком их печатает указатель, а внутри каждой — в порядке книги. Абзац, прочитанный в одной из прежних глав, назван одной строкой." }
+"path:book" = { en = "Every paragraph the index cites under <i>{h}</i>, once, in the order of the book. Beside each stand the entries that cite it.", ru = "Каждый абзац, на который указатель ссылается под рубрикой <i>{h}</i>, по одному разу, в порядке книги. Рядом с каждым — рубрики, которые на него ссылаются." }
+"Chapters" = "Главы"
+"its own citations" = "её собственные ссылки"
+", {n} read above" = { en = [", {n} read above", ", {n} read above"], ru = [", {n} прочитан выше", ", {n} прочитаны выше", ", {n} прочитаны выше"] }
+"Onward" = "Далее"
+"See also" = "См. также"
+"See" = "См."
+"Cited alongside:" = "Цитируются вместе:"
+"Listed in" = "Указан в"
+"Appendix {x}, {title}|in" = "Приложении {x}, {title}"
+"and" = "и"
+"{n} subentries" = { en = ["{n} subentry", "{n} subentries"], ru = ["{n} подрубрика", "{n} подрубрики", "{n} подрубрик"] }
+"Read it through" = "Читать подряд"
+"Cross-references" = "Перекрёстные ссылки"
+"Cited alongside" = "Цитируются вместе"
+"concept:near" = { en = "Headwords that cite the same paragraphs as this one, commonest first. The number is how many subentries each has.", ru = "Заглавные слова, которые ссылаются на те же абзацы, что и это, начиная с самых частых. Число — сколько у каждого подрубрик." }
+"{n} paragraphs in common" = { en = ["{n} paragraph in common", "{n} paragraphs in common"], ru = ["{n} общий абзац", "{n} общих абзаца", "{n} общих абзацев"] }
+
+# --- Search (search.html; static/offline-core.js draws the same offline)
+
+"({a:,}–{b:,} of {n:,})" = "({a:,}–{b:,} из {n:,})"
+"({b} of {n:,})" = "({b} из {n:,})"
+"({n:,})" = "({n:,})"
+"Earlier" = "Ранее"
+"Later" = "Далее"
+"Show all {n:,} index entries" = "Все рубрики указателя ({n:,})"
+"Show all {n:,} paragraphs" = "Все абзацы ({n:,})"
+"Show all {n:,} readings" = "Все разночтения ({n:,})"
+"All results for “{q}”" = "Все результаты для «{q}»"
+"Did you mean" = "Может быть, вы имели в виду"
+"or" = "или"
+"Headwords" = "Заглавные слова"
+"Appendix {x}, {title}" = "Приложение {x}, {title}"
+"In the index" = "В указателе"
+"In the text" = "В тексте"
+"In the 1955 readings" = "В разночтениях 1955 года"
+"nothing" = "ничего"
+
+# --- The home page (home.html)
+
+"home:lead" = { en = "The Uversa Press text, read together with the Uversa Press index. Every paragraph carries in its margin the index entries that cite it, so the index works in both directions at once: from a concept into the text, and from any passage back to everything the index has to say about it.", ru = "Текст Uversa Press, который читается вместе с указателем Uversa Press. На полях каждого абзаца стоят рубрики указателя, которые на него ссылаются, так что указатель работает сразу в обе стороны: от понятия к тексту и от любого места текста ко всему, что говорит о нём указатель." }
+"Definitions and terminology" = "Определения и терминология"
+"Papers {a}&ndash;{b}" = "Документы {a}&ndash;{b}"
+"Other ways in" = "Другие пути в книгу"
+"home:index" = { en = '<a href="/index">The index</a> — {e:,} entries under {h:,} headwords, each opening onto the passages it cites.', ru = '<a href="/index">Указатель</a> — рубрик: {e:,}, заглавных слов: {h:,}; каждая рубрика открывает места текста, на которые ссылается.' }
+"home:appendices" = { en = '<a href="/appendix">The appendices</a> — a chronology of {e:,} dated events, and the {m:,} beings, persons and places the book names.', ru = '<a href="/appendix">Приложения</a> — хронология датированных событий ({e:,}) и названные в книге существа, лица и места ({m:,}).' }
+'<a href="/lists">Lists</a> — ' = '<a href="/lists">Списки</a> — '
+"home:lists-1955" = { en = "of the <a href=\"/lists/1955\">1955 readings</a>, the {n} places where the text departs from the first printing, with the SRT Committee's reasons", ru = "<a href=\"/lists/1955\">разночтений 1955 года</a> — мест, где текст отличается от первого издания ({n}), с доводами Комитета SRT" }
+", and |lists" = { en = ", and ", ru = " и " }
+"home:lists-notes" = { en = "of the <a href=\"/lists/notes\">study notes</a> of The British Study Edition, {n} so far", ru = "<a href=\"/lists/notes\">примечаний</a> из The British Study Edition (пока их {n})" }
+"home:lists-bib" = { en = [", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} work they cite", ", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} works they cite"], ru = [", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})"] }
+"home:citation" = { en = '<a href="/search?q=101%3A4.2">A citation</a> — type any reference such as <code>101:4.2</code>, <code>86:5.14-15</code>, <code>Paper 100</code> or <code>76:2sec</code> into the search box and it opens there.', ru = '<a href="/search?q=101%3A4.2">Ссылка</a> — введите в поле поиска любую ссылку, например <code>101:4.2</code>, <code>86:5.14-15</code>, <code>Paper 100</code> или <code>76:2sec</code>, и она откроется.' }
+"home:contents" = { en = '<a href="/read">The contents</a> — all {n} papers with their authors.', ru = '<a href="/read">Содержание</a> — все документы ({n}) и их авторы.' }
+"home:listening" = { en = ["<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hour, timed to the paragraph: start from any paragraph, and the page follows the voice.", "<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hours, timed to the paragraph: start from any paragraph, and the page follows the voice."], ru = ["<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} час, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часа, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часов, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом."] }
+"home:api" = { en = '<a href="/api">The text API</a> — for other sites and AI: keep your own copy of the text in step with the most up to date SRT text, used for the Uversa Press edition.', ru = '<a href="/api">API текста</a> — для других сайтов и ИИ: держите свою копию текста в соответствии с самым свежим текстом SRT, по которому сделано издание Uversa Press.' }
+"About this edition" = "Об этом издании"
+"home:edition" = { en = "The text is the Uversa Press edition of <i>The Urantia Book</i>, published by the Urantia Book Fellowship: {p} papers in {s:,} sections and {g:,} paragraphs, each with a reference of its own. This site shows the words of Jesus in red, in {r:,} paragraphs; the printed book does not. The edition's textual apparatus notes every place where the text differs from the first printing of 1955, {v} in all, and gives the 1955 reading beneath each.", ru = "Текст — издание <i>The Urantia Book</i> от Uversa Press, выпущенное Urantia Book Fellowship: документов — {p}, разделов — {s:,}, абзацев — {g:,}, и у каждого своя ссылка. Этот сайт выделяет слова Иисуса красным (абзацев с ними: {r:,}); в печатной книге этого нет. Текстологический аппарат издания отмечает каждое место, где текст отличается от первого издания 1955 года (всего их {v}), и под каждым даёт чтение 1955 года." }
+"home:the-index" = { en = "The index is the Uversa Press index, revised with numerous corrections for the third edition, 2026, where it is bound together with the text in a single volume. Its {c:,} references, reaching {x:,} places in the text, compiled and checked over many years, are what make the margins of this reader possible. The printed volume remains the book; this is an additional way to move through it.", ru = "Указатель — это указатель Uversa Press, выверенный с многочисленными исправлениями для третьего издания 2026 года, где он переплетён вместе с текстом в одном томе. Его ссылки ({c:,}), ведущие к местам текста ({x:,}), собранные и проверенные за многие годы, — вот что делает возможными поля этой читалки. Книгой остаётся печатный том; это ещё один способ двигаться по ней." }
+
+# --- The lists (lists.html, list_1955.html, list_notes.html, list_bibliography.html)
+
+"lists:1955" = { en = "<a href=\"/lists/1955\">List of 1955 readings</a> — the {n} places where the text departs from the first printing of 1955, with the SRT Committee’s reasons where it gives them.", ru = "<a href=\"/lists/1955\">Список разночтений 1955 года</a> — места, где текст отличается от первого издания 1955 года (их {n}), с доводами Комитета SRT, где он их приводит." }
+"lists:notes" = { en = ["<a href=\"/lists/notes\">List of study notes</a> — the {k} notes of The British Study Edition (ed. Tigran Aivazian) on the site so far, in {n} paper, each read, checked and edited before it is shown.", "<a href=\"/lists/notes\">List of study notes</a> — the {k} notes of The British Study Edition (ed. Tigran Aivazian) on the site so far, in {n} papers, each read, checked and edited before it is shown."], ru = ["<a href=\"/lists/notes\">Список примечаний</a> — примечания из The British Study Edition (под ред. Тиграна Айвазяна), которые уже есть на сайте (их {k}, в {n} документе); каждое прочитано, проверено и отредактировано, прежде чем показано.", "<a href=\"/lists/notes\">Список примечаний</a> — примечания из The British Study Edition (под ред. Тиграна Айвазяна), которые уже есть на сайте (их {k}, в {n} документах); каждое прочитано, проверено и отредактировано, прежде чем показано.", "<a href=\"/lists/notes\">Список примечаний</a> — примечания из The British Study Edition (под ред. Тиграна Айвазяна), которые уже есть на сайте (их {k}, в {n} документах); каждое прочитано, проверено и отредактировано, прежде чем показано."] }
+"lists:bib" = { en = "<a href=\"/lists/bibliography\">Bibliography</a> — the works the study notes cite, {n} so far, by author, each with the notes that cite it.", ru = "<a href=\"/lists/bibliography\">Библиография</a> — труды, которые цитируют примечания (пока их {n}), по авторам, у каждого — примечания, которые его цитируют." }
+"The 1955 readings and the study notes are both turned off in Settings." = "И разночтения 1955 года, и примечания выключены в настройках."
+"The 1955 readings are turned off in Settings." = "Разночтения 1955 года выключены в настройках."
+"list1955:hint" = { en = "Every place where the text departs from the first printing of 1955, {n} in all, in the order of the book: the 1955 reading as the press gives it, today’s words around the ring, and the SRT Committee’s decision where it gives one. A ring opens its note, with the committee’s reasons; a reference opens its paragraph.", ru = "Каждое место, где текст отличается от первого издания 1955 года (всего их {n}), в порядке книги: чтение 1955 года, как его даёт издание, нынешние слова вокруг кружка и решение Комитета SRT, где он его приводит. Кружок открывает примечание с доводами комитета; ссылка открывает абзац." }
+"Paper {n}." = "Документ {n}."
+"listnotes:hint" = { en = "The notes of The British Study Edition (ed. Tigran Aivazian) on the site so far, {n} in all, each read, checked and edited before it is shown, one paper at a time: in the order of the book, the words each stands after, then the note. A reference opens its paragraph, with the note.", ru = "Примечания из The British Study Edition (под ред. Тиграна Айвазяна), которые уже есть на сайте (всего их {n}); каждое прочитано, проверено и отредактировано, прежде чем показано, по документу за раз. В порядке книги: слова, после которых стоит примечание, затем само примечание. Ссылка открывает абзац вместе с примечанием." }
+"bib:hint" = { en = "The works cited by the notes of The British Study Edition (ed. Tigran Aivazian) on the site so far, {n} in all, by author, each with the notes that cite it. It grows as each paper’s notes are reviewed. A reference opens its paragraph, with the note.", ru = "Труды, которые цитируют примечания из The British Study Edition (под ред. Тиграна Айвазяна), уже есть на сайте (всего их {n}), по авторам, у каждого — примечания, которые его цитируют. Список растёт по мере того, как выверяются примечания каждого документа. Ссылка открывает абзац вместе с примечанием." }
+"Cited at" = "Цитируется в"
+", note {n}" = ", примечание {n}"
+
+# --- The appendices and the index's own pages
+
+"Appendix {x}" = "Приложение {x}"
+"appendix:hint" = { en = "{n:,} entries, as printed. A name opens its entry in the index, and a reference opens the text there.", ru = "Записей: {n:,}, как в печатном издании. Имя открывает свою рубрику в указателе, а ссылка — текст." }
+"Initials" = "Начальные буквы"
+"appendices:hint" = { en = "Bound after the index in the printed volume: a chronology, and the beings, persons and places the book names.", ru = "В печатном томе они идут после указателя: хронология и названные в книге существа, лица и места." }
+"{n:,} events" = { en = ["{n:,} event", "{n:,} events"], ru = ["{n:,} событие", "{n:,} события", "{n:,} событий"] }
+"{n:,} entries" = { en = ["{n:,} entry", "{n:,} entries"], ru = ["{n:,} запись", "{n:,} записи", "{n:,} записей"] }
+"{n} events" = { en = ["{n} event", "{n} events"], ru = ["{n} событие", "{n} события", "{n} событий"] }
+"chronology:hint" = { en = "{n:,} events under {d} dates, as printed. A ± after a date means that it is approximate, and a reference opens the text there.", ru = "Событий: {n:,}, дат: {d}, как в печатном издании. Знак ± после даты означает, что она приблизительна, а ссылка открывает текст." }
+"Periods" = "Периоды"
+"Billions of years ago" = "Миллиарды лет назад"
+"Millions of years ago" = "Миллионы лет назад"
+"Thousands of years ago" = "Тысячи лет назад"
+"B.C." = "До н. э."
+"The life of Jesus" = "Жизнь Иисуса"
+"A.D." = "Н. э."
+"The number is how many subentries each headword has." = "Число — сколько подрубрик у каждого заглавного слова."
+
+# --- Not found (notfound.html, app.py's messages; offline-core.js says the same)
+
+"notfound:two" = { en = "The <a href=\"/read\">contents</a> and the <a href=\"/index\">index</a> are the two ways in.", ru = "<a href=\"/read\">Содержание</a> и <a href=\"/index\">указатель</a> — два пути в книгу." }
+"notfound:one" = { en = "The <a href=\"/read\">contents</a> are the way in.", ru = "<a href=\"/read\">Содержание</a> — путь в книгу." }
+"notfound:box" = { en = "The search box above also opens a citation directly: type one such as <i>101:4.2</i> or <i>Paper 100</i>.", ru = "Поле поиска вверху тоже сразу открывает ссылку: введите, например, <i>101:4.2</i> или <i>Paper 100</i>." }
+"There is no page at this address." = "По этому адресу страницы нет."
+"The index has no section headed “{l}”." = "В указателе нет раздела «{l}»."
+"No headword in the index has this address." = "Ни у одного заглавного слова указателя нет такого адреса."
+"The appendices are lettered A to F." = "Приложения обозначены буквами от A до F."
+"There are four parts, I to IV." = "Частей четыре, от I до IV."
+"There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196." = "Документа {n} нет. Foreword — это документ 0, а документы идут до 196-го."
+"Paper {n} has no section {s}." = "В документе {n} нет раздела {s}."
+"There is no paragraph {p}: {s} runs from {a} to {b}." = "Абзаца {p} нет: в {s} абзацы с {a} по {b}."
+"A range runs forwards, in the order of the book: {a}, not {b}." = "Диапазон идёт вперёд, в порядке книги: {a}, а не {b}."
+'The <a href="/read">contents</a>' = '<a href="/read">Содержание</a>'
+', the <a href="/index">index</a>' = ', <a href="/index">указатель</a>'
+" and the search box above all work offline." = " и поле поиска вверху работают и без сети."
+"The page about the text API is read online." = "Страница об API текста читается только в сети."
+"This page is read online." = "Эта страница читается только в сети."
+"offline:path" = { en = 'A reading path is read online: it is made of paragraphs this copy has, read in another order. The headword’s <a href="/i/{s}">page in the index</a> is here.', ru = 'Путь чтения читается только в сети: он состоит из абзацев, которые в этой копии есть, но в другом порядке. <a href="/i/{s}">Страница</a> этого заглавного слова в указателе здесь есть.' }
+
+# --- Work offline: the worker's words (sw.js), the menu (offline.js) and the cloud (ub.js)
+
+"the site has no offline copy ({s})" = "на сайте нет офлайн-копии ({s})"
+"this browser has an older worker; reload the page and try again" = "в этом браузере старый обработчик; перезагрузите страницу и попробуйте снова"
+"{x} could not be fetched ({s})" = "{x} не удалось загрузить ({s})"
+"{x} arrived damaged" = "{x} пришёл повреждённым"
+"Offline" = "Не в сети"
+"Offline: reading the copy kept in this browser" = "Не в сети: читается копия, сохранённая в этом браузере"
+"Online, with a copy kept for working offline" = "В сети; копия для работы без сети сохранена"
+"Offline · the copy of {d}" = "Не в сети · копия от {d}"
+
+# --- ub.js: Settings, the folds, a note's card
+
+"Automatic: {v}" = "Автоматически: {v}"
+"Restore every setting to its default?" = "Вернуть все настройки к значениям по умолчанию?"
+"Show the contents" = "Показать содержание"
+"Fold the contents away" = "Свернуть содержание"
+"Fold the index away" = "Свернуть указатель"
+"Show the index" = "Показать указатель"
+
+# --- Listening: the player (listen.js)
+
+"The recordings need a connection. Offline, your browser’s voice can read it." = "Записям нужна сеть. Без сети её может прочитать голос вашего браузера."
+"Listen to this section" = "Слушать этот раздел"
+"Listen to this section, from its heading" = "Слушать этот раздел, начиная с заголовка"
+"Listen from {r}" = "Слушать с {r}"
+"Listening" = "Прослушивание"
+"Back to the start of this paragraph (twice: the one before)" = "К началу этого абзаца (дважды — к предыдущему)"
+"Play" = "Играть"
+"Pause" = "Пауза"
+"Next paragraph" = "Следующий абзац"
+"Show this paragraph" = "Показать этот абзац"
+"Stop and close" = "Остановить и закрыть"
+"Voice" = "Голос"
+"End of the section" = "Конец раздела"
+"Next: {l} ›" = "Далее: {l} ›"
+"The recording could not be loaded. Your browser’s voice can read without it." = "Запись не удалось загрузить. Голос вашего браузера может читать без неё."
+"Offline, this needs Work offline: the cloud at the top of the page." = "Без сети для этого нужна работа без сети: облачко вверху страницы."
+"The text could not be loaded." = "Текст не удалось загрузить."
+"{v} needs a connection, and this browser has no voice of its own." = "Голосу {v} нужна сеть, а своего голоса у этого браузера нет."
+"Your browser could not speak ({e})." = "Ваш браузер не смог прочитать ({e})."
+
+# --- The offline menu and What's new (offline.js)
+
+"{x} MB" = "{x} МБ"
+"Updating: {a} of {b}" = "Обновляется: {a} из {b}"
+"Updating…" = "Обновляется…"
+"Downloading: {a} of {b}" = "Загружается: {a} из {b}"
+"Downloading…" = "Загружается…"
+"Updating the offline copy: {a} of {b}" = "Офлайн-копия обновляется: {a} из {b}"
+"Updating the offline copy…" = "Офлайн-копия обновляется…"
+"Downloading the offline copy: {a} of {b}" = "Офлайн-копия загружается: {a} из {b}"
+"Downloading the offline copy…" = "Офлайн-копия загружается…"
+"The download stopped: {e}." = "Загрузка остановилась: {e}."
+"The download did not finish." = "Загрузка не завершилась."
+"Try again" = "Попробовать снова"
+"Online; the offline copy did not finish downloading" = "В сети; офлайн-копия загрузилась не до конца"
+"Out of date: kept as the site was on {d}, which has changed since." = "Устарела: сохранена такой, каким сайт был {d}, а с тех пор он изменился."
+"Update now ({s})" = "Обновить ({s})"
+"What’s new" = "Что нового"
+"It updates by itself once online." = "Она обновится сама, когда появится сеть."
+"It can be updated once online." = "Её можно будет обновить, когда появится сеть."
+"The last update stopped: {e}." = "Последнее обновление остановилось: {e}."
+"An update to the offline copy is waiting ({s})" = "Офлайн-копию можно обновить ({s})"
+"Up to date: kept as the site was on {d}, with the text of {t}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t}; в этом браузере занимает {s}."
+"Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t} и указателем от {i}; в этом браузере занимает {s}."
+"Without a connection, the site reads from it by itself." = "Без сети сайт сам читается из неё."
+"About {s} to download and keep in this browser." = "Около {s} — загрузить и хранить в этом браузере."
+"Download it" = "Загрузить"
+"It can be downloaded only online." = "Загрузить её можно только в сети."
+"This site has no offline copy yet." = "У этого сайта пока нет офлайн-копии."
+"And earlier changes." = "И более ранние изменения."
+"The offline copy has just been updated. New since its last update, on {d}:" = "Офлайн-копия только что обновилась. Нового с прошлого обновления, {d}:"
+"Since your copy, kept as the site was on {d}:" = "С вашей копии, сохранённой такой, каким сайт был {d}:"
+"The next page you open is the new one." = "Следующая страница, которую вы откроете, будет уже новой."
+"Closing this reloads the page, so that it is the new one too." = "Когда вы это закроете, страница перезагрузится и тоже станет новой."
+"The whole changelog" = "Вся история изменений"
+"Nothing is listed for this update." = "Для этого обновления ничего не указано."
+"The list could not be fetched just now." = "Список сейчас не удалось загрузить."
+"Starting…" = "Начинаем…"
+"This browser would not keep it: {e}" = "Этот браузер не сохранил её: {e}"
+"Remove the offline copy from this browser? It can be downloaded again at any time." = "Удалить офлайн-копию из этого браузера? Её можно снова загрузить в любое время."
+"Install as an app" = "Установить как приложение"
+"it opens on its own, from the home screen or the dock" = "оно открывается отдельно — с главного экрана или из панели"
+"offline:ios" = { en = "On an iPhone or iPad, add it to the Home Screen too (Share, then Add to Home Screen): Safari deletes what a site keeps after seven days without a visit, but not for an app on the Home Screen.", ru = "На iPhone или iPad добавьте его ещё и на экран «Домой» («Поделиться», затем «На экран «Домой»»): Safari удаляет то, что хранит сайт, если его не открывали семь дней, но не для приложения на экране «Домой»." }
+"Paper {n}. {title}" = "Документ {n}. {title}"
+
+# --- Drawn by ub.css itself, which tests/test_l10n.py holds to these
+
+"css:copy" = { en = 'This page is from the offline copy of {d}.', ru = 'Эта страница — из офлайн-копии от {d}.' }
+"css:show" = { en = "show", ru = "показать" }
+"css:fold" = { en = "fold away", ru = "свернуть" }

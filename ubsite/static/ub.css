@@ -6,6 +6,19 @@
              font-weight: 400; font-style: normal; font-display: swap; }
 @font-face { font-family: "UB Goudy"; src: url(/static/fonts/UBGoudy-Italic.woff2) format("woff2");
              font-weight: 400; font-style: italic; font-display: swap; }
+/* The Cyrillic of the interface in Russian (ubsite/ru.toml), which UB Goudy has
+   none of: EB Garamond, OFL 1.1, from TeX Live (vendor/fonts/), the face the
+   math font is drawn to, subset by build/fonts.py to these ranges, which it
+   holds to its own.  Two more faces of "UB Goudy", so whatever is set in Goudy
+   draws its Cyrillic from them; after Goudy's own, since the face declared
+   last is tried first.  Scaled to Goudy's x-height, 442 to its 400, which
+   puts its capitals within a unit of Goudy's (Tigran, 2026-10-25). */
+@font-face { font-family: "UB Goudy"; src: url(/static/fonts/EBGaramond-Cyrillic.woff2) format("woff2");
+             font-weight: 400; font-style: normal; font-display: swap;
+             unicode-range: U+0400-045F, U+2116; size-adjust: 110.5%; }
+@font-face { font-family: "UB Goudy"; src: url(/static/fonts/EBGaramond-Cyrillic-Italic.woff2) format("woff2");
+             font-weight: 400; font-style: italic; font-display: swap;
+             unicode-range: U+0400-045F, U+2116; size-adjust: 110.5%; }
 /* A study note's math (build/texmath.py, MathML): Garamond-Math, OFL, subset
    by build/fonts.py to what the notes draw; fetched only by a page with math. */
 @font-face { font-family: "Garamond Math"; src: url(/static/fonts/GaramondMath.woff2) format("woff2");
@@ -149,6 +162,24 @@ a:hover { text-decoration-thickness: 2px; }
 .gear svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
 .gear path, .gear circle { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
 .gear:hover, .theme:hover, .top .offline:hover { color: var(--ink); }
+/* The flags beside it (base.html .langs): the interface in English or in
+   Russian, the one chosen full, the other faded, each in its own proportions,
+   edged so that the white of the tricolour shows on the paper. */
+.top .langs { display: inline-flex; gap: .5rem; align-self: center; }
+.top .flag { background: none; border: 0; padding: 0; cursor: pointer; opacity: .4; display: block; }
+.top .flag svg { display: block; height: .82rem; box-shadow: 0 0 0 1px var(--rule); }
+.top .flag[data-to="en"] svg { width: 1.64rem; }
+.top .flag[data-to="ru"] svg { width: 1.23rem; }
+.top .flag[aria-pressed="true"] { opacity: 1; }
+@media (hover: hover) { .top .flag:hover { opacity: .8; } }
+/* On a phone the corner is the end of the name's line, which has room: the
+   nav under the search box has none, the more in Russian.  So the flags come
+   second, the search box after them on a line of its own. */
+@media (max-width: 40rem) {
+  .top .langs { order: 1; margin-left: auto; }
+  .top .find { order: 2; flex-basis: 100%; }
+  .top nav { order: 3; }
+}
 /* Work offline's icon, at the header's corner: a cloud, struck through while
    offline; a check in it while a copy is kept, an arrow while one downloads,
    and the flame's dot when an update is waiting.  One drawing, its parts shown
@@ -525,6 +556,13 @@ p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
    left empty, so that nothing moves between the two. */
 :root[data-index="off"] :is(.ix, .a, .blanket, .reader .marginhead) { display: none; }
 :root:not([data-index="off"]) .noix { display: none; }
+/* The interface in English or Russian (ubsite/l10n.py, Tigran, 2026-10-25):
+   every word of it is in the page in both, and the reader's is shown, as the
+   head script marks <html> (settings.py `lang`).  Custom elements, not spans:
+   a dozen rules here style a span in a button or a list.  EB Garamond, which
+   draws the Cyrillic of "UB Goudy" (above), has no small capitals of its own. */
+:root:not([data-lang="ru"]) x-ru, :root[data-lang="ru"] x-en { display: none; }
+x-ru { font-synthesis: small-caps; }
 :root:is([data-margin="off"], [data-index="off"]) .grid { grid-template-columns: minmax(0, var(--measure)); }
 /* Text size scales the root, so everything set in rem follows, as with the
    browser's zoom.  Standard is 112.5% (settings.py); "largest" was the step
@@ -1105,6 +1143,9 @@ dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5
 /* A page the offline copy answered (static/sw.js) says so, and of when. */
 footer[data-copy]::before { content: "This page is from the offline copy of " attr(data-copy) ".";
   display: block; margin-bottom: .3rem; }
+/* In Russian, from the date sw.js writes in Russian too (ru.toml, by its key). */
+:root[data-lang="ru"] footer[data-copy-ru]::before {
+  content: "Эта страница — из офлайн-копии от " attr(data-copy-ru) "."; }
 
 /* ---- prose pages ------------------------------------------------------- */
 .prose { max-width: 62ch; margin: 0 auto; padding: 2rem 1rem 0; }
@@ -1394,6 +1435,8 @@ details.gap[open] > summary { margin-bottom: .7rem; }
 .gl .act { color: var(--link); }
 .gl .act::after { content: "show"; }
 details.gap[open] .gl .act::after { content: "fold away"; }
+:root[data-lang="ru"] .gl .act::after { content: "показать"; }
+:root[data-lang="ru"] details.gap[open] .gl .act::after { content: "свернуть"; }
 summary:hover .gl, .foldup:hover .gl { color: var(--ink); }
 summary:hover .act, .foldup:hover .act { text-decoration: underline; }
 button.foldup { width: 100%; font: inherit; line-height: inherit; color: inherit; text-align: inherit;

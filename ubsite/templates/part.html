@@ -4,7 +4,7 @@
 {#- A part's own page, as the book's divider sets it (\\part in the press style):
     the part, its title on its printed lines, and the note of who sponsored its
     papers.  No text: its first paper is the next page. #}
-{% block title %}Part {{ roman }} — {{ part.title }}{% endblock %}
+{% set title = tr('Part {r} — {title}', r=roman, title=part.title) %}
 {% block body %}
 <main class="reader">
   {{ rail(book(), none, none, part.n) }}
@@ -16,7 +16,7 @@
       <p class="sponsor">{{ part.sponsor }}</p>
     </header>
     {#- On to the first paper: the transport bar's ⏭, alone, at the right. #}
-    <nav class="transport" aria-label="Papers and sections">{{ step('next', nxt) }}</nav>
+    <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>{{ step('next', nxt) }}</nav>
   </article>
 </main>
 {% endblock %}

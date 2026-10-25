@@ -13,6 +13,9 @@
   'use strict';
 
   var HTML = 'text/html; charset=utf-8', TEXT = 'text/plain; charset=utf-8';
+  // The interface's words (ubsite/l10n.js), which the worker and the check
+  // load first: the same words, drawn the same way, as the templates'.
+  var T = root.ubT;
   // What the server answers by the host it is asked at (app.py SITES): the
   // app's manifest, which names the site, and the touch icon.  The copy is made
   // once for every host, so it never answers these: from it, one site's
@@ -37,8 +40,6 @@
     }
     return out;
   }
-  // '{:,}'.format(n)
-  function num(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   // The first `at` in `s` replaced by `what`, taken as it is: String.replace
   // would read a $ in it.
   function put(s, at, what) {
@@ -62,7 +63,7 @@
     var m = sh.missing;
     return html(404, compose(sh, m.t, m.h, '', m.b[0] + msg + m.b[1] + esc(path) + m.b[2], m.s));
   }
-  var NOPAGE = 'There is no page at this address.';
+  var NOPAGE = T.k('There is no page at this address.');
   // templates/offline.html: an address the copy does not hold, read online.
   function away(sh, msg) {
     var a = sh.away;
@@ -107,24 +108,24 @@
       // The text the browser's voice reads (app.py speech()), twenty papers to a
       // chunk (offline/pages.py SPOKEN).
       var sm = /^([0-9]+):([0-9]+)$/.exec(m[1]), sk = sm && parseInt(sm[1], 10) + ':' + parseInt(sm[2], 10);
-      if (!sm || !sh.lasts[sk]) return { res: missing(sh, esc(NOPAGE), path) };
+      if (!sm || !sh.lasts[sk]) return { res: missing(sh, T(NOPAGE), path) };
       return { chunk: 'speech-' + Math.floor(parseInt(sm[1], 10) / 20), make: function (d) {
-        return d[sk] === undefined ? missing(sh, esc(NOPAGE), path) : { status: 200, type: 'application/json', body: d[sk] };
+        return d[sk] === undefined ? missing(sh, T(NOPAGE), path) : { status: 200, type: 'application/json', body: d[sk] };
       } };
     }
     if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
     // A copy made before 2026-10-24 does not keep it.
-    if (path === '/api') return { res: away(sh, 'The page about the text API is read online.') };
-    if (path === '/stats') return { res: away(sh, 'This page is read online.') };
+    if (path === '/api') return { res: away(sh, T('The page about the text API is read online.')) };
+    if (path === '/stats') return { res: away(sh, T('This page is read online.')) };
     if ((m = /^\/index\/([^\/]+)$/.exec(path))) {
       var L = m[1].toUpperCase();
-      if (sh.letters.indexOf(L) < 0) return { res: missing(sh, esc('The index has no section headed “' + m[1] + '”.'), path) };
+      if (sh.letters.indexOf(L) < 0) return { res: missing(sh, T('The index has no section headed “{l}”.', { l: m[1] }), path) };
       return { chunk: 'index-' + L, make: function (d) { return html(200, stored(sh, d.page)); } };
     }
     if ((m = /^\/i\/([^\/]+)(\/read(\/theme)?)?$/.exec(path))) {
       var slug = m[1];
       if (!Object.prototype.hasOwnProperty.call(sh.slugs, slug))
-        return { res: missing(sh, esc('No headword in the index has this address.'), path) };
+        return { res: missing(sh, T('No headword in the index has this address.'), path) };
       if (!m[2]) return { chunk: 'index-' + sh.slugs[slug], make: function (d) { return html(200, stored(sh, d.heads[slug])); } };
       // A reading path: app.py _reading_path's redirects, then the page, from
       // the chunk the shell names: [chapters, chunk].  A copy made before
@@ -133,20 +134,19 @@
       if (pth === undefined) return { res: redirect('/i/' + slug, 307) };
       if (m[3] && nch < 2) return { res: redirect('/i/' + slug + '/read', 307) };
       if (typeof pth === 'number')
-        return { res: away(sh, 'A reading path is read online: it is made of paragraphs this copy has, read in another order. ' +
-                               'The headword’s <a href="/i/' + esc(slug) + '">page in the index</a> is here.') };
+        return { res: away(sh, T('offline:path', { s: slug })) };
       var key = '/i/' + slug + (m[3] ? '/read/theme' : '/read');
       return { chunk: pth[1], make: function (d) { return html(200, stored(sh, d[key])); } };
     }
     if ((m = /^\/appendix\/([^\/]+)$/.exec(path))) {
       var a = m[1];
       if (a.toUpperCase() !== a && a.length === 1) return { res: redirect('/appendix/' + a.toUpperCase(), 301) };
-      return { res: missing(sh, esc('The appendices are lettered A to F.'), path) };
+      return { res: missing(sh, T('The appendices are lettered A to F.'), path) };
     }
     if ((m = /^\/part\/([0-9]+)$/.exec(path))) {
       var part = '/part/' + parseInt(m[1], 10);
       if (sh.miscset[part]) return { chunk: 'misc', make: function (d) { return html(200, stored(sh, d.pages[part])); } };
-      return { res: missing(sh, esc('There are four parts, I to IV.'), path) };
+      return { res: missing(sh, T('There are four parts, I to IV.'), path) };
     }
     if ((m = /^\/rail\/([0-9]+)$/.exec(path))) {
       var pr = String(parseInt(m[1], 10));
@@ -155,30 +155,30 @@
     }
     if ((m = /^\/([0-9]+)$/.exec(path))) {
       var pn = parseInt(m[1], 10), secs = sh.papers[String(pn)];
-      if (!secs) return { res: missing(sh, esc('There is no Paper ' + pn + '. The Foreword is Paper 0, and the papers run to 196.'), path) };
+      if (!secs) return { res: missing(sh, T('There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196.', { n: pn }), path) };
       return { res: redirect('/' + pn + ':' + Math.min.apply(null, secs), 307) };
     }
     if ((m = /^\/([^\/]+)$/.exec(path))) {
       var r = RE_REF.exec(m[1]);
-      if (!r) return { res: missing(sh, esc(NOPAGE), path) };
+      if (!r) return { res: missing(sh, T(NOPAGE), path) };
       var paper = parseInt(r[1], 10), sec = parseInt(r[2], 10);
       var focus = r[3] ? parseInt(r[3], 10) : null, last = r[4] ? parseInt(r[4], 10) : focus;
       var ss = sh.papers[String(paper)];
-      if (!ss) return { res: missing(sh, esc('There is no Paper ' + paper + '. The Foreword is Paper 0, and the papers run to 196.'), path) };
-      if (ss.indexOf(sec) < 0) return { res: missing(sh, esc('Paper ' + paper + ' has no section ' + sec + '.'), path) };
+      if (!ss) return { res: missing(sh, T('There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196.', { n: paper }), path) };
+      if (ss.indexOf(sec) < 0) return { res: missing(sh, T('Paper {n} has no section {s}.', { n: paper, s: sec }), path) };
       if (focus !== null) {
         var here = paper + ':' + sec, n = sh.lasts[here], ends = [focus, last];
         for (var i = 0; i < 2; i++)
           if (!(ends[i] >= 1 && ends[i] <= n))
-            return { res: missing(sh, 'There is no paragraph ' + esc(here + '.' + ends[i]) + ': ' + esc(here) + ' runs from ' +
-                                      go(here + '.1') + ' to ' + go(here + '.' + n) + '.', path) };
+            return { res: missing(sh, T('There is no paragraph {p}: {s} runs from {a} to {b}.', {
+              p: here + '.' + ends[i], s: here, a: T.html(go(here + '.1')), b: T.html(go(here + '.' + n)) }), path) };
         if (last < focus)
-          return { res: missing(sh, 'A range runs forwards, in the order of the book: ' + go(here + '.' + last + '-' + focus) +
-                                    ', not ' + esc(here + '.' + focus + '-' + last) + '.', path) };
+          return { res: missing(sh, T('A range runs forwards, in the order of the book: {a}, not {b}.', {
+            a: T.html(go(here + '.' + last + '-' + focus)), b: here + '.' + focus + '-' + last }), path) };
       }
       return { chunk: 'paper-' + paper, make: function (d) { return section(sh, d, paper, sec, focus, last); } };
     }
-    return { res: missing(sh, esc(NOPAGE), path) };
+    return { res: missing(sh, T(NOPAGE), path) };
   }
 
   // ---- The citation grammar, as much of vendor/index/cite.py as the search
@@ -433,49 +433,52 @@
       }));
     }
     var body = draw(q, scope, heads, idx, txt, old, q ? suggest(q) : []);
-    return html(200, compose(sh, esc(q), sh.search.h, esc(q), body, sh.search.s));
+    // The title piece begins inside its tag (offline/pages.py cut): a search's
+    // has no Russian of its own, being what was typed.
+    return html(200, compose(sh, '>' + esc(q), sh.search.h, esc(q), body, sh.search.s));
   }
 
   // templates/search.html's body, whitespace and all.
   function draw(q, scope, heads, idx, txt, old, didyou) {
     var uq = quote(q);
     function count(h) {
-      return '<span>(' + (h.first > 1 || h.more ? (scope ? num(h.first) + '–' + num(h.last) : String(h.last)) + ' of ' : '') +
-             num(h.n) + ')</span>';
+      return '<span>' + (h.first > 1 || h.more
+        ? (scope ? T('({a:,}–{b:,} of {n:,})', { a: h.first, b: h.last, n: h.n }) : T('({b} of {n:,})', { b: h.last, n: h.n }))
+        : T('({n:,})', { n: h.n })) + '</span>';
     }
-    function more(h, name, noun) {
+    function more(h, name, all) {
       var mid;
       if (scope) mid = (h.first > 1 || h.more
         ? '<nav class="pager">\n  ' +
-          (h.first > 1 ? '<a href="/search?q=' + uq + '&amp;in=' + name + '&amp;page=' + (h.page - 1) + '">Earlier</a>' : '') + '\n  ' +
-          (h.more ? '<a class="next" href="/search?q=' + uq + '&amp;in=' + name + '&amp;page=' + (h.page + 1) + '">Later</a>' : '') +
+          (h.first > 1 ? '<a href="/search?q=' + uq + '&amp;in=' + name + '&amp;page=' + (h.page - 1) + '">' + T('Earlier') + '</a>' : '') + '\n  ' +
+          (h.more ? '<a class="next" href="/search?q=' + uq + '&amp;in=' + name + '&amp;page=' + (h.page + 1) + '">' + T('Later') + '</a>' : '') +
           '\n</nav>' : '') + '\n';
-      else mid = h.more ? '<p class="more"><a href="/search?q=' + uq + '&amp;in=' + name + '">Show all ' + num(h.n) + ' ' + noun + '</a></p>' : '';
+      else mid = h.more ? '<p class="more"><a href="/search?q=' + uq + '&amp;in=' + name + '">' + T(all, { n: h.n }) + '</a></p>' : '';
       return '\n' + mid + '\n';
     }
     var o = '<main class="prose results">\n<h1>' + esc(q) + '</h1>\n';
-    if (scope) o += '<p class="hint"><a href="/search?q=' + uq + '">All results for “' + esc(q) + '”</a></p>';
+    if (scope) o += '<p class="hint"><a href="/search?q=' + uq + '">' + T('All results for “{q}”', { q: q }) + '</a></p>';
     o += '\n';
     if (didyou.length)
-      o += '<p class="didyou">Did you mean\n  ' + didyou.map(function (c) {
+      o += '<p class="didyou">' + T('Did you mean') + '\n  ' + didyou.map(function (c) {
         return '<a href="/search?q=' + quote(c) + '">' + esc(c) + '</a>';
-      }).join(' or ') + '?</p>';
+      }).join(' ' + T('or') + ' ') + '?</p>';
     o += '\n';
     if (heads.length) {
-      o += '<section' + (scope ? '' : ' class="ix"') + '><h2>Headwords</h2>\n<ul class="hits heads-hit">';
+      o += '<section' + (scope ? '' : ' class="ix"') + '><h2>' + T('Headwords') + '</h2>\n<ul class="hits heads-hit">';
       heads.forEach(function (h) {
         o += '<li>';
         if (h.slug) o += '<a href="/i/' + esc(h.slug) + '">' + h.headword_html + '</a>\n  ' +
-                         (h.kids ? '<span>' + h.kids + ' ' + (h.kids === 1 ? 'subentry' : 'subentries') + '</span>' : '');
+                         (h.kids ? '<span>' + T('{n} subentries', { n: h.kids }) + '</span>' : '');
         else o += '<a href="/appendix/' + esc(h.scope) + '#' + esc(h.anchor) + '">' + h.headword_html + '</a>\n  ' +
-                  '<span>Appendix ' + esc(h.scope) + ', ' + esc(h.appendix) + '</span>';
+                  '<span>' + T('Appendix {x}, {title}', { x: h.scope, title: h.appendix }) + '</span>';
         o += '</li>';
       });
       o += '</ul></section>';
     }
     o += '\n';
     if (scope === '' || scope === 'index') {
-      o += '<section' + (scope ? '' : ' class="ix"') + '><h2>In the index ' + (idx ? count(idx) : '<span>(0)</span>') + '</h2>\n';
+      o += '<section' + (scope ? '' : ' class="ix"') + '><h2>' + T('In the index') + ' ' + (idx ? count(idx) : '<span>(0)</span>') + '</h2>\n';
       if (idx && idx.rows.length) {
         o += '<ul class="hits">';
         idx.rows.forEach(function (e) {
@@ -485,29 +488,29 @@
                     esc(e.appendix) + '</span> ' + e.marked + '</a>';
           o += '</li>';
         });
-        o += '</ul>\n' + more(idx, 'index', 'index entries') + '\n';
-      } else o += '<p class="none">nothing</p>';
+        o += '</ul>\n' + more(idx, 'index', T.k('Show all {n:,} index entries')) + '\n';
+      } else o += '<p class="none">' + T('nothing') + '</p>';
       o += '</section>';
     }
     o += '\n';
     if (scope === '' || scope === 'text') {
-      o += '<section><h2>In the text ' + (txt ? count(txt) : '<span>(0)</span>') + '</h2>\n';
+      o += '<section><h2>' + T('In the text') + ' ' + (txt ? count(txt) : '<span>(0)</span>') + '</h2>\n';
       if (txt && txt.rows.length) {
         o += '<ul class="hits">';
         txt.rows.forEach(function (t) { o += '<li><a href="/' + esc(t.ref) + '">' + esc(t.ref) + '</a> ' + t.s + '</li>'; });
-        o += '</ul>\n' + more(txt, 'text', 'paragraphs') + '\n';
-      } else o += '<p class="none">nothing</p>';
+        o += '</ul>\n' + more(txt, 'text', T.k('Show all {n:,} paragraphs')) + '\n';
+      } else o += '<p class="none">' + T('nothing') + '</p>';
       o += '</section>';
     }
     o += '\n';
     if (old && old.rows.length) {
-      o += '<section' + (scope ? '' : ' class="by1955"') + '><h2>In the 1955 readings ' + count(old) + '</h2>\n' +
+      o += '<section' + (scope ? '' : ' class="by1955"') + '><h2>' + T('In the 1955 readings') + ' ' + count(old) + '</h2>\n' +
            '<ul class="hits old">' + old.rows.map(function (r) { return r.line; }).join('') + '</ul>\n' +
-           more(old, 'notes', 'readings') + '\n' +
-           '<section class="notes" aria-label="The 1955 readings">\n      <h3>The 1955 readings</h3>\n      ' +
+           more(old, 'notes', T.k('Show all {n:,} readings')) + '\n' +
+           '<section class="notes" ' + T.a('aria-label', 'The 1955 readings') + '>\n      <h3>' + T('The 1955 readings') + '</h3>\n      ' +
            old.rows.map(function (r) { return r.card + '\n      '; }).join('') + '\n    </section>' + '\n</section>';
     } else if (scope === 'notes')
-      o += '<section><h2>In the 1955 readings <span>(0)</span></h2><p class="none">nothing</p></section>';
+      o += '<section><h2>' + T('In the 1955 readings') + ' <span>(0)</span></h2><p class="none">' + T('nothing') + '</p></section>';
     return o + '\n</main>';
   }
 

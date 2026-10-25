@@ -10,9 +10,10 @@ Nothing here knows about requests, URLs or FastAPI.
 
 from __future__ import annotations
 
-import datetime
 import re
 import sqlite3
+
+from ubsite import l10n
 
 # What a margin chip needs.  An appendix entry -- a Chronology event, a named
 # being, person or place -- has no headword of its own and so no slug; it links
@@ -259,10 +260,6 @@ def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
     return out
 
 
-MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August",
-          "September", "October", "November", "December")
-
-
 def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:
     """The study notes `where` selects, in the order of the book.
 
@@ -292,8 +289,7 @@ def study(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list
             " WHERE c.footnote_id = ? ORDER BY c.ord", (n["id"],))]
         n["block"] = None
         if n["credit"] == "block" and n["block_date"]:
-            d = datetime.date.fromisoformat(n["block_date"])
-            n["block"] = f"{MONTHS[d.month - 1]} {d.day}, {d.year}"
+            n["block"] = l10n.date(n["block_date"])
             n["credit"] = None
         out.append(n)
     return out

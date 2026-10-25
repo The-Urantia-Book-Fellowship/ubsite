@@ -1,6 +1,6 @@
-{% extends "base.html" %}{% block title %}Index{% endblock %}
-{% block body %}<main class="prose"><h1>Index</h1>
+{% extends "base.html" %}{% set title = 'Index' %}
+{% block body %}<main class="prose"><h1>{{ t('Index') }}</h1>
 <div class="letters">{% for l in letters %}<a href="/index/{{ l.letter }}"><b>{{ l.letter }}</b><span>{{ l.n }}</span></a>{% endfor %}</div>
-<h2>Appendices</h2>
+<h2>{{ t('Appendices') }}</h2>
 {% include "_appendices.html" %}
 </main>{% endblock %}

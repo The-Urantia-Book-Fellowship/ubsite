@@ -34,6 +34,8 @@ import sqlite3
 from markupsafe import Markup
 from starlette.requests import Request
 
+from ubsite import l10n
+
 from . import site
 
 # Where each piece of the shell ends, in base.html's order.  Each is searched
@@ -55,9 +57,10 @@ PATHS = 1_000_000
 API_HOST = "ubsite.offline.invalid"
 API_BASE = f"https://{API_HOST}/"
 
-# The not-found page's words, to cut it at: its message and the path it names.
+# The not-found page's words, to cut it at: its message, as the page draws it
+# in both languages (ubsite/l10n.py), and the path it names.
 PROBE = "/offline-missing-probe"
-PROBE_MSG = "There is no page at this address."
+NOPAGE = "There is no page at this address."
 
 
 class Shape(Exception):
@@ -66,8 +69,10 @@ class Shape(Exception):
 
 def cut(html: str) -> tuple[tuple[str, ...], dict]:
     """(the shell's six pieces, the page's own) for one rendered page."""
+    # The title piece begins inside its tag, so that it carries the title's
+    # Russian, data-ru, where it has one (base.html): ` data-ru="…">Lists`.
     try:
-        i0 = html.index("<title>") + len("<title>")
+        i0 = html.index("<title") + len("<title")
         i1 = html.index("</title>", i0)
         i2 = html.index("</script>\n", i1) + len("</script>\n")      # the settings script
         i3 = html.index("</head>", i2)
@@ -255,10 +260,10 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
     nf_sh, nf_rec = cut(nf.text)
     if nf.status != 404 or nf_sh != shell:
         raise Shape(f"{PROBE} answered {nf.status}, or with another shell")
-    body = nf_rec["b"]
-    if body.count(PROBE_MSG) != 1 or body.count(PROBE) != 1 or body.index(PROBE_MSG) > body.index(PROBE):
+    body, probe_msg = nf_rec["b"], str(l10n.t(NOPAGE))
+    if body.count(probe_msg) != 1 or body.count(PROBE) != 1 or body.index(probe_msg) > body.index(PROBE):
         raise Shape("the not-found page does not name its message, then its path, once each")
-    pre, rest = body.split(PROBE_MSG)
+    pre, rest = body.split(probe_msg)
     mid, post = rest.split(PROBE)
     missing = {"t": nf_rec["t"], "h": nf_rec["h"], "s": nf_rec["s"], "b": [pre, mid, post]}
 

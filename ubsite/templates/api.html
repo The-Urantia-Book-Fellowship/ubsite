@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% block title %}The text API{% endblock %}
+{% extends "base.html" %}{#- The API's documentation is English, its title too. #}{% set title = same('The text API') %}
 {% block head %}
 {#- Only this page uses these, so they live here rather than in ub.css, which
     every reader downloads. #}

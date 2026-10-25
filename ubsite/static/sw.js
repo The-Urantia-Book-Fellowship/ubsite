@@ -24,11 +24,12 @@
 // is so a change to this file, which is what makes a browser install it anew.
 'use strict';
 var V = __VERSIONS__;
-importScripts(V.js, V.core);
+importScripts(V.js, V.l10n, V.core);
+var T = self.ubT;               // the interface's words (ubsite/l10n.js)
 
 var WAIT = 4000;                 // ms the network has before the copy answers
 var CHECK = 3600 * 1000;         // how often to ask whether the copy is current
-var META = 'ub-meta', ENGINE = 'ub-engine', COPY = 'ub-copy-', FORMAT = 1;
+var META = 'ub-meta', ENGINE = 'ub-engine', COPY = 'ub-copy-', FORMAT = 2;   // offline/pack.py FORMAT
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(ENGINE).then(function (c) { return c.add(V.wasm); })
@@ -165,19 +166,16 @@ function database(c) {
 }
 
 // ---- Answering -----------------------------------------------------------
-var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-              'October', 'November', 'December'];
-// "October 18, 2026", in the American order, as offline.js writes it.
-function day(iso) {
-  var d = new Date(iso);
-  return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
-}
 function respond(c, r) {
   if (r.location) return Response.redirect(new URL(r.location, location).href, r.status);
   var body = r.body;
-  // A page from the copy says so: ub.css draws its date in the footer.
-  if (/^text\/html/.test(r.type))
-    body = body.replace('\n<footer>', '\n<footer data-copy="' + day(c.made) + '">');
+  // A page from the copy says so: ub.css draws its date in the footer,
+  // "October 18, 2026", and in Russian «18 октября 2026 г.» (static l10n.js).
+  if (/^text\/html/.test(r.type)) {
+    var d = T.date(c.made, true);
+    body = body.replace('\n<footer>', '\n<footer data-copy="' + d.en + '"' +
+                        (T.bilingual ? ' data-copy-ru="' + d.ru + '"' : '') + '>');
+  }
   return new Response(body, { status: r.status, headers: { 'Content-Type': r.type } });
 }
 // What the copy answers for this request, or null.
@@ -239,7 +237,8 @@ function state() {
     var meta = got[0], c = got[1], m = c && c.manifest;
     return {
       have: m ? { build: m.build, made: m.made, text: m.text, index: m.index, bytes: m.bytes, raw: m.raw } : null,
-      latest: meta.latest || null, checked: meta.checked || 0, busy: busy, error: meta.error || null
+      latest: meta.latest || null, checked: meta.checked || 0, busy: busy, error: meta.error || null,
+      words: meta.error && meta.words || null
     };
   });
 }
@@ -261,12 +260,19 @@ function away(why) {
   e.away = true;
   return e;
 }
+// Why a download stopped, as the menu says it (offline.js): its words in both
+// languages beside the message, by their key in ru.toml.
+function stopped(key, p) {
+  var w = T.tr(key, p), e = new Error(T.plain(w.en));
+  e.words = w;
+  return e;
+}
 function check(force) {
   return readMeta().then(function (meta) {
     if (!force && meta.checked && Date.now() - meta.checked < CHECK) return null;
     return fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
       if (r.status >= 500) throw away('the server answered ' + r.status);
-      if (!r.ok) throw new Error('the site has no offline copy (' + r.status + ')');
+      if (!r.ok) throw stopped(T.k('the site has no offline copy ({s})'), { s: r.status });
       return r.json();
     }, function (err) { throw away(err); }).then(function (m) {
       return copy().then(function (c) {
@@ -293,10 +299,10 @@ function download() {
   if (running) return running;
   busy = { done: 0, total: 0 };
   running = fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
-    if (!r.ok) throw new Error('the site has no offline copy (' + r.status + ')');
+    if (!r.ok) throw stopped(T.k('the site has no offline copy ({s})'), { s: r.status });
     return r.json();
   }).then(function (m) {
-    if (m.format !== FORMAT) throw new Error('this browser has an older worker; reload the page and try again');
+    if (m.format !== FORMAT) throw stopped(T.k('this browser has an older worker; reload the page and try again'));
     // A copy turned off and on again in one page keeps its worker, which is
     // then not installed again: the engine it fetched at install is gone.
     var engine = caches.open(ENGINE).then(function (c) {
@@ -326,7 +332,7 @@ function download() {
           var x = todo[i++];
           var gz;
           return fetch('/offline/' + x.file).then(function (r) {
-            if (!r.ok) throw new Error(x.name + ' could not be fetched (' + r.status + ')');
+            if (!r.ok) throw stopped(T.k('{x} could not be fetched ({s})'), { x: x.name, s: r.status });
             return r.arrayBuffer();
           }).then(function (got) {
             gz = got;
@@ -336,7 +342,7 @@ function download() {
               var h = Array.prototype.map.call(new Uint8Array(d), function (b) {
                 return (b < 16 ? '0' : '') + b.toString(16);
               }).join('').slice(0, 16);
-              if (h !== x.hash) throw new Error(x.name + ' arrived damaged');
+              if (h !== x.hash) throw stopped(T.k('{x} arrived damaged'), { x: x.name });
               return target.put(key(x.hash), new Response(gz));
             });
           }).then(function () {
@@ -354,7 +360,7 @@ function download() {
           meta.current = m.build;
           meta.checked = Date.now();
           meta.latest = null;
-          meta.error = null;
+          meta.error = meta.words = null;
         });
       }).then(function () {
         var was = held;
@@ -371,7 +377,10 @@ function download() {
     return tell();
   }, function (err) {
     busy = running = null;
-    return updateMeta(function (meta) { meta.error = String(err && err.message || err); }).then(tell);
+    return updateMeta(function (meta) {
+      meta.error = String(err && err.message || err);
+      meta.words = err && err.words || null;
+    }).then(tell);
   });
   return running;
 }

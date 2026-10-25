@@ -141,8 +141,11 @@ HOUR_LATER = """async () => { const c = await caches.open('ub-meta');
 # What the page shows while an update runs, in the menu and on the icon's
 # label, each line once, as it changes; in sessionStorage too, which the
 # reload at its end keeps.
+# An element's words as a reader of English has them: the interface is in the
+# page in Russian too (ubsite/l10n.py), which CSS hides; its textContent has both.
+EN = "(el => { const c = el.cloneNode(true); c.querySelectorAll('x-ru').forEach(x => x.remove()); return c.textContent; })"
 WATCH = """() => { window.shown = []; sessionStorage.shown = '[]';
-  const keep = () => { for (const t of [document.querySelector('#offmenu .state').textContent,
+  const keep = () => { for (const t of [""" + EN + """(document.querySelector('#offmenu .state')),
                                         document.querySelector('.top .offline').title])
     if (!window.shown.includes(t)) window.shown.push(t);
     sessionStorage.shown = JSON.stringify(window.shown); };
@@ -152,7 +155,7 @@ WATCH = """() => { window.shown = []; sessionStorage.shown = '[]';
 
 def wait_state(pg, test: str, timeout: int = 30000) -> None:
     """Until the menu's line passes `test`, a JavaScript expression in t."""
-    pg.wait_for_function(f"(t => {test})(document.querySelector('{STATE}').textContent)", timeout=timeout)
+    pg.wait_for_function(f"(t => {test})({EN}(document.querySelector('{STATE}')))", timeout=timeout)
 
 
 def update(pg, pressed=None, timeout: int = 60000) -> None:
@@ -278,8 +281,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ctx.set_offline(True)
         for u in urls:
             got = pg.evaluate("u => fetch(u).then(r => r.arrayBuffer()).then(b => Array.from(new Uint8Array(b)))", u)
-            # The one thing the worker adds: the footer's note of the copy's date.
-            got = re.sub(rb'\n<footer data-copy="[^"]*">', b"\n<footer>", bytes(got))
+            # The one thing the worker adds: the footer's note of the copy's date,
+            # in Russian too (2026-10-25).
+            got = re.sub(rb'\n<footer data-copy="[^"]*"(?: data-copy-ru="[^"]*")?>', b"\n<footer>", bytes(got))
             ok(got == want[u], f"{u}: as the server sends it ({len(got):,} bytes)")
         t = time.time()
         pg.goto(BASE + "/search?q=thought+adjuster")
@@ -329,7 +333,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.inner_text(".player .voice") == "Merritt Horn", "and the bar still names the voice Settings chose")
         pg.click(".player .voice")
         pg.locator(".player .voices [role=group] button,"
-                   " .player .voices button:text-is('Your browser\u2019s voice')").first.click()
+                   " .player .voices button:has-text('Your browser\u2019s voice')").first.click()
         pg.wait_for_function("JSON.parse(localStorage.ub_settings || '{}').voice === 'browser'", timeout=5000)
         pg.wait_for_timeout(500)
         ok("connection" not in pg.inner_text(".player .who") and pg.inner_text(".player .voice") != "Merritt Horn",
@@ -348,7 +352,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
             pg.goto(BASE + u)
             ok(words in pg.title() or words in pg.inner_text("main"), f"offline, {u} reads from it")
         ctx.set_offline(False)
-        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, packed"), d)[1])
+        change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, packed"), d)[1])
         pg.goto(BASE + "/read")
         menu(pg)
         wait_state(pg, "t.includes('changed since')")
@@ -379,7 +383,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
 
         print("A newer copy")
         ctx.set_offline(False)
-        changed = change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, changed"), d)[1])
+        changed = change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, changed"), d)[1])
         pg.goto(BASE + "/read")
         menu(pg)
         wait_state(pg, "t.includes('changed since')")
@@ -454,7 +458,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
 
         print("An update that fails")
         ctx.set_offline(False)
-        gone = change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, again"), d)[1])
+        gone = change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, again"), d)[1])
         kept = (copy / gone["file"]).read_bytes()
         (copy / gone["file"]).unlink()
         pg.goto(BASE + "/read")
@@ -524,7 +528,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         # new opens at its end, over the menu, with what changed since the copy
         # kept: this build's change, and the one that stopped's.
         (copy / gone["file"]).write_bytes(kept)
-        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, by itself"), d)[1])
+        change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, by itself"), d)[1])
         before = log.read_text().count("/offline/c/")
         pg.evaluate(HOUR_LATER)
         pg.goto(BASE + "/read")
@@ -547,7 +551,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/")
         ok(pg.title() == "The Urantia Book, by itself", "offline, the copy is the newer one")
         # Out of date while offline: coming online updates it.
-        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, online again"), d)[1])
+        change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, online again"), d)[1])
         pg.goto(BASE + "/read")
         menu(pg)
         wait_state(pg, "t.startsWith('Up to date')")
@@ -560,7 +564,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
             pg.keyboard.press("Escape")
         ok(not pg.evaluate("window.ubStay"), "and Escape closes What's new, reloading the page")
         # A build with nothing for a reader in its news: updated, and nothing said.
-        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, quietly"), d)[1], news=False)
+        change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, quietly"), d)[1], news=False)
         build = json.loads((copy / "manifest.json").read_text())["build"]
         pg.evaluate(HOUR_LATER)
         pg.goto(BASE + "/read")
@@ -573,7 +577,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         # While listening, and with the page out of view: nothing until it is in
         # view again; then What's new, and closing it does not stop the reading.
         pg.evaluate("ubSettings.set('autoupdate', false)")
-        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, listening"), d)[1])
+        change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, listening"), d)[1])
         pg.goto(BASE + "/101:4")
         pg.locator("p.t .playp").first.click()
         pg.wait_for_selector(".player", timeout=5000)

@@ -7,11 +7,11 @@ import { createRequire } from 'node:module';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 import zlib from 'node:zlib';
 
 const require = createRequire(import.meta.url);
 const job = JSON.parse(fs.readFileSync(0, 'utf8'));
-const core = require(job.core);
 
 const manifest = JSON.parse(fs.readFileSync(path.join(job.copy, 'manifest.json'), 'utf8'));
 const raw = {};
@@ -21,6 +21,12 @@ for (const c of manifest.chunks) {
   if (h !== c.hash) throw new Error(`${c.name}: its file holds ${h}, the manifest says ${c.hash}`);
   raw[c.name] = data;
 }
+// The interface's words, the copy's own /l10n.js, as the worker imports it
+// before the core (sw.js): the core draws its pages' words with it.
+const words = Object.keys(raw).filter((n) => n.startsWith('/l10n.js?'));
+if (words.length !== 1) throw new Error(`the copy holds ${words.length} /l10n.js`);
+vm.runInThisContext(raw[words[0]].toString('utf8'), { filename: words[0] });
+const core = require(job.core);
 const chunk = {};
 const get = (name) => chunk[name] || (chunk[name] = JSON.parse(raw[name].toString('utf8')));
 const sh = get('shell');

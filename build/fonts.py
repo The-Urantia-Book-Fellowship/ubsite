@@ -25,6 +25,7 @@ import html
 import io
 import pathlib
 import re
+import tomllib
 import unicodedata
 
 from fontTools import subset
@@ -50,6 +51,19 @@ MATH_BASE = "0123456789+−=()[],./"
 # is copied here byte for byte, never subset, and must have every character a
 # note draws in its script.  The other scripts are still the device's.
 SBL = {"grc": "SBL_grk.ttf", "he": "SBL_Hbrw.ttf"}
+# The Cyrillic of the interface in Russian (ubsite/ru.toml), which UB Goudy has
+# none of: EB Garamond, OFL 1.1, from TeX Live, vendored by value, declared in
+# ub.css as more faces of "UB Goudy" over these ranges alone (Tigran,
+# 2026-10-25).  Subset to the ranges whole, not to what is drawn: the file
+# never moves with a word, and the translations to come need the alphabet.
+CYRILLIC = ((0x0400, 0x045F), (0x2116, 0x2116))        # the alphabet, ё and the rest; №
+CYRILLIC_FACES = [(MATH[0].parent / "EBGaramond-Regular.otf", "EBGaramond-Cyrillic.woff2"),
+                  (MATH[0].parent / "EBGaramond-Italic.otf", "EBGaramond-Cyrillic-Italic.woff2")]
+RE_RANGE = re.compile(r"EBGaramond-Cyrillic[^;]*;[^}]*unicode-range:\s*([^;]+);")
+
+
+def cyrillic(c: str) -> bool:
+    return any(a <= ord(c) <= b for a, b in CYRILLIC)
 FORBIDDEN = "Goudy-Handtooled-BT.ttf"
 ASCII = "".join(map(chr, range(0x20, 0x7F)))
 
@@ -137,17 +151,36 @@ def study_codepoints(con) -> tuple[set[str], dict[str, set[str]], list[str]]:
     return goudy, other, maths
 
 
+RE_SLOT = re.compile(r"\{\w+(?::,)?\}")
+
+
+def catalog_text(site: pathlib.Path, lang: str) -> str:
+    """Every word of the interface in one language, from ubsite/ru.toml
+    (ubsite/l10n.py): the English of each entry, its key where it has no other,
+    or the Russian; tags and placeholders out, entities decoded."""
+    out = []
+    for key, v in tomllib.loads((site / "ru.toml").read_text(encoding="utf-8")).items():
+        v = {"ru": v} if isinstance(v, str) else v
+        w = v.get(lang, key.split("|", 1)[0] if lang == "en" else None)
+        for x in (w if isinstance(w, list) else [w] if w else []):
+            out.append(html.unescape(RE_TAG.sub(" ", RE_SLOT.sub(" ", x))))
+    return "\n".join(out)
+
+
 def chrome_codepoints(site: pathlib.Path) -> set[str]:
     """What the templates and the stylesheet draw themselves.
 
     The text of each template with its Jinja, its scripts and its tags taken
-    out, entities decoded -- so `&nbsp;` counts and `{% if %}` does not -- and
-    every string a stylesheet `content:` puts on the page.
+    out, entities decoded -- so `&nbsp;` counts and `{% if %}` does not -- the
+    English of the interface's words, which the templates draw from ru.toml,
+    and every string a stylesheet `content:` puts on the page.
     """
     cps: set[str] = set()
     for f in sorted((site / "templates").glob("*.html")):
         src = RE_CODE.sub(" ", RE_JINJA.sub(" ", f.read_text(encoding="utf-8")))
         cps.update(html.unescape(RE_TAG.sub(" ", src)))
+    cps.update(catalog_text(site, "en"))
+    cps.update(catalog_text(site, "ru"))
     for f in sorted((site / "static").glob("*.css")):
         for s in RE_CSS_CONTENT.findall(f.read_text(encoding="utf-8")):
             # "\2060" is the one character it stands for, not five.
@@ -166,6 +199,16 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
     # whatever a reader typed, and | \ ` would otherwise come from another face.
     wanted = {c for c in corpus_codepoints(con) | chrome_codepoints(site) | set(ASCII)
               if unicodedata.category(c) != "Cc" and c not in ELSEWHERE}
+    # The Cyrillic goes to EB Garamond's faces, and ub.css must say so over
+    # exactly the ranges they are subset to.
+    cyr_wanted = {c for c in wanted if cyrillic(c)}
+    wanted -= cyr_wanted
+    css = (site / "static" / "ub.css").read_text(encoding="utf-8")
+    ranges = {", ".join(f"U+{a:04X}" + (f"-{b:04X}" if b != a else "") for a, b in CYRILLIC)}
+    said = {r.strip() for r in RE_RANGE.findall(css)}
+    if len(RE_RANGE.findall(css)) != len(CYRILLIC_FACES) or said != ranges:
+        report.hard("font-cyrillic-range", "ub.css",
+                    f"the Cyrillic faces' unicode-range is {sorted(said)}, the subset {sorted(ranges)}")
     _, other, maths = study_codepoints(con)
     for lang, chars in sorted(other.items()):
         spans = SCRIPTS.get(lang, ())
@@ -222,6 +265,23 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
     if "MATH" not in font:
         report.hard("font-math-table", MATH[1], "the subset lost its MATH table")
     subsets.append((font, opts, MATH[1], len(have)))
+    cyr_all = {chr(c) for a, b in CYRILLIC for c in range(a, b + 1)}
+    for src, dst in CYRILLIC_FACES:
+        font = TTFont(src, recalcTimestamp=False)
+        opts = subset.Options()
+        opts.flavor = "woff2"
+        opts.layout_features = ["*"]
+        opts.name_IDs = ["*"]
+        opts.notdef_outline = True
+        s = subset.Subsetter(options=opts)
+        s.populate(text="".join(sorted(cyr_all)))
+        s.subset(font)
+        have = {chr(c) for table in font["cmap"].tables for c in table.cmap}
+        missing = (cyr_all | cyr_wanted) - have
+        if missing:
+            report.hard("font-missing-glyph", dst,
+                        " ".join(f"{c} U+{ord(c):04X}" for c in sorted(missing))[:200])
+        subsets.append((font, opts, dst, len(have)))
     if report.blocking:
         return stats
     outdir.mkdir(parents=True, exist_ok=True)

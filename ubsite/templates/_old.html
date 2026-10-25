@@ -8,12 +8,12 @@
 {% from "_note.html" import note %}
 {% macro old_hit(o) %}<li><a href="/{{ o.para_ref }}#note{{ o.key }}">{{ o.para_ref }}</a>
   <span class="then"><span class="lbl">1955</span> {{ o.reading }}</span>
-  <span class="today"><span class="lbl">now</span> {{ o.now[0] }}<span class="nw">{{ o.now[1] }}<a class="fn" href="#fn{{ o.key }}" id="fnref{{ o.key }}" data-k="1955" aria-label="1955 reading"></a>{{ o.now[2] }}</span>{{ o.now[3] }}</span>
+  <span class="today"><span class="lbl">{{ t('now') }}</span> {{ o.now[0] }}<span class="nw">{{ o.now[1] }}<a class="fn" href="#fn{{ o.key }}" id="fnref{{ o.key }}" data-k="1955" {{ ta('aria-label', '1955 reading') }}></a>{{ o.now[2] }}</span>{{ o.now[3] }}</span>
   {%- if o.dec %} <span class="dec">{{ o.dec }}</span>{% endif %}
-  {%- if o.reasons %}<span class="reason"><span class="lbl">SRT Committee</span> {{ o.reasons }}</span>{% endif %}</li>{% endmacro %}
+  {%- if o.reasons %}<span class="reason"><span class="lbl">{{ t('SRT Committee') }}</span> {{ o.reasons }}</span>{% endif %}</li>{% endmacro %}
 {#- The notes the rings above open, as section.html keeps its own. #}
-{% macro notes_after(rows) %}<section class="notes" aria-label="The 1955 readings">
-      <h3>The 1955 readings</h3>
+{% macro notes_after(rows) %}<section class="notes" {{ ta('aria-label', 'The 1955 readings') }}>
+      <h3>{{ t('The 1955 readings') }}</h3>
       {% for o in rows %}{{ note(o) }}
       {% endfor %}
     </section>{% endmacro %}

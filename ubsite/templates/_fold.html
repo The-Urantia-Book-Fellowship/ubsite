@@ -8,10 +8,15 @@
     drawn without JavaScript, which alone can work them (ub.js, ub.css). -#}
 
 {% macro indexfold() -%}
-<div class="marginhead"><button class="indexfold" type="button" aria-expanded="true"><span>Index</span></button></div>
+<div class="marginhead"><button class="indexfold" type="button" aria-expanded="true"><span>{{ t('Index') }}</span></button></div>
 {%- endmacro %}
 
-{#- A box of entries, folded on a phone: how many it holds. -#}
-{% macro afold(n, tail='') -%}
-<button class="afold" type="button" aria-expanded="false">{{ n }} index entr{{ 'y' if n == 1 else 'ies' }}{{ tail }}</button>
+{#- A box of entries, folded on a phone: how many it holds, and above a
+    section's text whether they cite the whole paper, the section, or both. -#}
+{% macro afold(n, whole='') -%}
+{%- set key = {'': '{n} index entries',
+                'paper': '{n} index entries across this whole paper',
+                'section': '{n} index entries across this whole section',
+                'paper+section': '{n} index entries across the whole paper and this section'}[whole] -%}
+<button class="afold" type="button" aria-expanded="false">{{ t(key, n=n) }}</button>
 {%- endmacro %}

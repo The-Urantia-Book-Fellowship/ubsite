@@ -22,7 +22,7 @@
 {%- elif c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path|safe }}</a>
 {%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ (c.event or c.path)|safe }}</a>{% endif %}
 {%- endmacro %}
-{% block title %}{{ paper.n }}:{{ section.n }} — {{ section.title or paper.title }}{% endblock %}
+{% set title = same(paper.n ~ ':' ~ section.n ~ ' — ' ~ (section.title or paper.title)) %}
 {% block body %}
 <main class="reader">
   {{ rail(book(), paper.n, section.n, paper.part_n) }}
@@ -33,33 +33,31 @@
       {#- The Foreword is not a paper: the book heads it FOREWORD alone (Tigran,
           2026-10-20). #}
       {%- if paper.n %}
-      <p class="papernum">Paper {{ paper.n }}</p>
+      <p class="papernum">{{ t('Paper {n}', n=paper.n) }}</p>
       {%- endif %}
       <h1>{{ paper.title }}</h1>
       {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
       {#- An introduction has no title of its own: the paper's stands over it, and
           "0. Introduction" is the rail's name for it, not the book's. #}
       {%- if section.n %}
-      <h2>{{ section.n }}{% if section.combined_with %} and {{ section.combined_with }}{% endif %}. {{ section.title_html|safe }}</h2>
+      <h2>{% if section.combined_with %}{{ t('{a} and {b}', a=section.n, b=section.combined_with) }}{% else %}{{ section.n }}{% endif %}. {{ section.title_html|safe }}</h2>
       {%- endif %}
     </header>
 
     {% if paperwide or blanket %}
     <aside class="blanket">
-      {{ afold(nwhole,
-               ' across the whole paper and this section' if paperwide and blanket
-               else ' across this whole paper' if paperwide else ' across this whole section') }}
+      {{ afold(nwhole, 'paper+section' if paperwide and blanket else 'paper' if paperwide else 'section') }}
       {# read_pack's rule: a blanket citation is listed ONCE here, never repeated
          under every paragraph -- otherwise Paper 15's 470 citations print some
          entries forty times over and the eye stops reading.  An entry citing the
          whole paper is listed once, above section 0, under a heading of its own
          (Tigran, 2026-10-17). #}
       {%- if paperwide %}
-      <h3>Cited across this whole paper</h3>
+      <h3>{{ t('Cited across this whole paper') }}</h3>
       <ul>{% for b in paperwide %}<li>{{ chip(b) }}</li>{% endfor %}</ul>
       {%- endif %}
       {%- if blanket %}
-      <h3>Cited across this whole section</h3>
+      <h3>{{ t('Cited across this whole section') }}</h3>
       <ul>{% for b in blanket %}<li>{{ chip(b) }}</li>{% endfor %}</ul>
       {%- endif %}
     </aside>
@@ -118,8 +116,8 @@
         JavaScript each opens as a card at its ring (ub.js) and this block is
         hidden; without it, and in print, they are the section's endnotes. #}
     {% if notes %}
-    <section class="notes" aria-label="The 1955 readings">
-      <h3><a href="/lists/1955">The 1955 readings</a></h3>
+    <section class="notes" {{ ta('aria-label', 'The 1955 readings') }}>
+      <h3><a href="/lists/1955">{{ t('The 1955 readings') }}</a></h3>
       {% for p in paras %}{% for n in notes.get(p.id, []) %}
       {{ note(n) }}
       {% endfor %}{% endfor %}
@@ -128,8 +126,8 @@
     {#- The study notes, as reviewed (build/study.py): numbered through the
         paper, each opened as a card at its number. #}
     {%- if study %}
-    <section class="notes st" aria-label="Study notes">
-      <h3>Study notes</h3>
+    <section class="notes st" {{ ta('aria-label', 'Study notes') }}>
+      <h3>{{ t('Study notes') }}</h3>
       {% for p in paras %}{% for n in study.get(p.id, []) %}
       {{ snote(n) }}
       {% endfor %}{% endfor %}
@@ -139,7 +137,7 @@
     {#- The transport bar: ⏪ ⏮ ⏭ ⏩, across papers in the order of the book
         (app.py transport, templates/_transport.html).  At the book's ends a
         greyed icon in its place, so the four never move. #}
-    <nav class="transport" aria-label="Papers and sections">
+    <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>
       {%- for k in ('fb', 'prev', 'next', 'ff') %}
       {{ step(k, go[k]) }}
       {%- endfor %}

@@ -1,9 +1,7 @@
-{% extends "base.html" %}{% block title %}Not found{% endblock %}
+{% extends "base.html" %}{% set title = 'Not found' %}
 {% block body %}<main class="prose">
-<h1>Not found</h1>
-<p>{{ msg }}</p>
+<h1>{{ t('Not found') }}</h1>
+<p>{{ t(msg) }}</p>
 <p class="hint"><code>{{ path }}</code></p>
-<p><span class="ix">The <a href="/read">contents</a> and the <a href="/index">index</a> are the
-two ways in.</span><span class="noix">The <a href="/read">contents</a> are the way in.</span> The search box above also opens a citation directly: type one such
-as <i>101:4.2</i> or <i>Paper 100</i>.</p>
+<p><span class="ix">{{ t('notfound:two') }}</span><span class="noix">{{ t('notfound:one') }}</span> {{ t('notfound:box') }}</p>
 </main>{% endblock %}

@@ -8,7 +8,10 @@
   // DEF is this site's defaults, what is stored is what differs from them, and
   // ↺ restores them; the data- attributes say where a value differs from
   // settings.py's own, BASE, which the CSS is written against (SITE_DEFAULTS).
-  var KEY = 'ub_settings', DEF = window.ubDefaults || {}, BASE = window.ubBase || DEF;
+  var KEY = 'ub_settings', DEF = window.ubDefaults || {}, BASE = window.ubBase || DEF,
+      SPARED = window.ubSpared || [];
+  // The interface's words (ubsite/l10n.js, loaded before this).
+  var T = window.ubT;
   function stored() {
     var s = {};
     try {
@@ -31,13 +34,15 @@
       localStorage.removeItem('ub_theme');
     } catch (e) {}
   }
-  // As the head script does: data-<key> for each value that is not settings.py's default.
+  // As the head script does: data-<key> for each value that is not settings.py's
+  // default, and the language resolved (ubLang).
   function apply(o) {
     var r = document.documentElement;
     for (var k in DEF) {
       if (o[k] === BASE[k]) delete r.dataset[k];
       else r.dataset[k] = o[k] === false ? 'off' : String(o[k]);
     }
+    if (window.ubLang) window.ubLang(r, o.lang);
   }
   function announce(k, o) {
     document.dispatchEvent(new CustomEvent('ub:settings', { detail: { key: k, all: o } }));
@@ -92,8 +97,11 @@
       apply(o);
       announce(k, o);
     },
+    // Every setting but the spared (settings.py SPARED): the language.
     reset: function () {
-      save({});
+      var s = stored(), keep = {};
+      SPARED.forEach(function (k) { if (k in s) keep[k] = s[k]; });
+      save(keep);
       var o = load();
       apply(o);
       for (var k in DEF) announce(k, o);
@@ -122,7 +130,7 @@
       if (!bsel) return;
       var all = voices();
       bsel.length = 1;
-      bsel.options[0].text = all.length ? 'Automatic: ' + all[0].name : 'Automatic';
+      bsel.options[0].text = all.length ? T.text('Automatic: {v}', { v: all[0].name }) : T.text('Automatic');
       all.forEach(function (v) { bsel.add(new Option(v.name, v.name)); });
     };
     // Each control shows its setting's value; a radio group whose value has no
@@ -145,9 +153,12 @@
       });
       idle(o);
     };
-    // ↺ is greyed while every setting is its default: only what differs is kept.
+    // ↺ is greyed while every setting is its default: only what differs is
+    // kept.  The language it spares does not count.
     var reset = form.querySelector('.reset');
-    var resettable = function () { reset.disabled = !Object.keys(stored()).length; };
+    var resettable = function () {
+      reset.disabled = !Object.keys(stored()).some(function (k) { return SPARED.indexOf(k) < 0; });
+    };
     // A setting that means nothing while the one it needs is off (settings.py
     // NEEDS) is shown, greyed, and cannot be changed: 'off', or a switch's false,
     // or, where it needs a value (data-is), any other.
@@ -173,9 +184,12 @@
     });
     // Ctrl+, opens Settings from any page, as it opens an application's
     // preferences, and closes it again (Tigran, 2026-10-20).  On a Mac, ⌘, is
-    // the browser's own and never reaches the page.
+    // the browser's own and never reaches the page.  Or where the comma is, on
+    // a keyboard that writes no Latin there: on a Russian one it is б, as
+    // Ctrl+X below takes the key where X is.
     document.addEventListener('keydown', function (ev) {
-      if (ev.key !== ',' || !ev.ctrlKey || ev.altKey || ev.shiftKey || ev.metaKey) return;
+      if (!(ev.key === ',' || (ev.code === 'Comma' && !/^[\x20-\x7e]$/.test(ev.key))) ||
+          !ev.ctrlKey || ev.altKey || ev.shiftKey || ev.metaKey) return;
       ev.preventDefault();
       if (dlg.open) dlg.close(); else gear.click();
     });
@@ -190,7 +204,7 @@
     });
     // It stands beside ×, so it asks first (Tigran, 2026-10-14).
     reset.addEventListener('click', function () {
-      if (!window.confirm('Restore every setting to its default?')) return;
+      if (!window.confirm(T.text('Restore every setting to its default?'))) return;
       window.ubSettings.reset();
       fill();
       resettable();
@@ -320,8 +334,9 @@
     if (!b) return;
     shut = railShut(b.parentNode);
     b.setAttribute('aria-expanded', String(!shut));
-    b.title = shut ? 'Show the contents' : 'Fold the contents away';
-    b.setAttribute('aria-label', b.title);
+    var w = shut ? T.k('Show the contents') : T.k('Fold the contents away');
+    T.attr(b, 'title', w);
+    T.attr(b, 'aria-label', w);
   }
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('.railfold'), rail, shut;
@@ -345,8 +360,9 @@
     var on = load().margin !== false, b = document.querySelector('.indexfold');
     if (b) {
       b.setAttribute('aria-expanded', String(on));
-      b.title = on ? 'Fold the index away' : 'Show the index';
-      b.setAttribute('aria-label', b.title);
+      var w = on ? T.k('Fold the index away') : T.k('Show the index');
+      T.attr(b, 'title', w);
+      T.attr(b, 'aria-label', w);
     }
     Array.prototype.forEach.call(document.querySelectorAll('.afold'), function (x) {
       x.setAttribute('aria-expanded', String(on || x.parentNode.classList.contains('shown')));
@@ -370,44 +386,120 @@
     swapped();
   });
 
+  // The interface in English or Russian (ubsite/l10n.py).  Its words are in
+  // the page in both, and CSS shows the reader's; an attribute cannot hold
+  // both, so the Russian stands beside it, data-ru-<name>, and here it is put
+  // in place, the English kept as data-en-<name> and put back for English.  A
+  // title's place is data-tip while Tooltips are off (below).  An <option>'s
+  // words and the tab's title have theirs in data-ru.  The book's own marks
+  // carry their labels in the stored text (build/render.py), so theirs are
+  // found here by what they are: a pilcrow's title, a 1955 ring's and a study
+  // note's name.  Run on the whole page at load and when the language
+  // changes, and on whatever is added to it after (watch).
+  var NAMES = ['title', 'aria-label', 'placeholder'], each = Array.prototype.forEach;
+  var MARKS = [['.pcm', 'title', function () { return T.tr('a new group begins here, as in the 1955 printing'); }],
+               ['a.fn[data-k="1955"]', 'aria-label', function () { return T.tr('1955 reading'); }],
+               ['a.fn[data-k="st"]', 'aria-label', function (el) { return T.tr('Note {n}', { n: +el.dataset.n }); }]];
+  var SPOKEN = NAMES.map(function (n) { return '[data-ru-' + n + ']'; }).concat('option[data-ru]').join(',');
+  function within(root, sel) {
+    var out = Array.prototype.slice.call(root.querySelectorAll(sel));
+    if (root.matches && root.matches(sel)) out.unshift(root);
+    return out;
+  }
+  function speak(root) {
+    if (!T.bilingual) return;
+    var ru = T.lang() === 'ru';
+    MARKS.forEach(function (m) {
+      each.call(within(root, m[0] + ':not([data-ru-' + m[1] + '])'), function (el) {
+        el.setAttribute('data-ru-' + m[1], T.plain(m[2](el).ru));
+      });
+    });
+    each.call(within(root, SPOKEN), function (el) {
+      if (el.tagName === 'OPTION') {
+        if (!el.hasAttribute('data-en')) el.setAttribute('data-en', el.text);
+        el.text = el.getAttribute(ru ? 'data-ru' : 'data-en');
+        return;
+      }
+      NAMES.forEach(function (n) {
+        var to = el.getAttribute('data-ru-' + n);
+        if (to === null) return;
+        var at = n === 'title' && !el.hasAttribute('title') && el.hasAttribute('data-tip') ? 'data-tip' : n;
+        if (!el.hasAttribute('data-en-' + n)) el.setAttribute('data-en-' + n, el.getAttribute(at) || '');
+        el.setAttribute(at, ru ? to : el.getAttribute('data-en-' + n));
+      });
+    });
+    if (root === document && window.ubTitle) window.ubTitle();
+  }
   // Tooltips off (Settings): the browser draws one from a title, and no
   // stylesheet can hide it, so every title on the page is moved to data-tip,
-  // where none is drawn, and back when they are turned on.  A watcher moves
-  // those set later: the player's, a <main> listen.js swaps in, a paper the
-  // rail fetches, the folds' and the cloud's labels as they change.  Every
-  // icon keeps its aria-label, so nothing goes unnamed.
-  var tipWatch = null;
+  // where none is drawn, and back when they are turned on.  Every icon keeps
+  // its aria-label, so nothing goes unnamed.
   function untip(el) {
     if (!el.hasAttribute('title')) return;
     el.setAttribute('data-tip', el.getAttribute('title'));
     el.removeAttribute('title');
   }
   function tips() {
-    var r = document.documentElement, each = Array.prototype.forEach;
-    if (load().tips === false) {
-      each.call(r.querySelectorAll('[title]'), untip);
-      if (tipWatch || !window.MutationObserver) return;
-      tipWatch = new MutationObserver(function (ms) {
-        ms.forEach(function (m) {
-          if (m.type === 'attributes') return untip(m.target);
-          each.call(m.addedNodes, function (n) {
-            if (n.nodeType !== 1) return;
-            untip(n);
-            each.call(n.querySelectorAll('[title]'), untip);
-          });
+    var r = document.documentElement;
+    if (load().tips === false) each.call(r.querySelectorAll('[title]'), untip);
+    else each.call(r.querySelectorAll('[data-tip]'), function (el) {
+      el.setAttribute('title', el.getAttribute('data-tip'));
+      el.removeAttribute('data-tip');
+    });
+    watching();
+  }
+  // What is added to the page later is spoken and untipped as it comes: the
+  // player's controls, a <main> listen.js swaps in, a paper the rail fetches,
+  // a note's card, the offline menu's words; and a title set later is moved
+  // to data-tip, the folds' and the cloud's as they change.  Watched only
+  // while there is something to do: both languages drawn, or Tooltips off.
+  var watch = null;
+  function watching() {
+    var off = load().tips === false, need = T.bilingual || off, r = document.documentElement;
+    if (!need || !window.MutationObserver) {
+      if (watch) { watch.disconnect(); watch = null; }
+      return;
+    }
+    if (watch) return;
+    watch = new MutationObserver(function (ms) {
+      var off = load().tips === false;
+      ms.forEach(function (m) {
+        if (m.type === 'attributes') { if (off) untip(m.target); return; }
+        each.call(m.addedNodes, function (n) {
+          if (n.nodeType !== 1) return;
+          speak(n);
+          if (off) { untip(n); each.call(n.querySelectorAll('[title]'), untip); }
         });
       });
-      tipWatch.observe(r, { subtree: true, childList: true, attributes: true, attributeFilter: ['title'] });
-    } else {
-      if (tipWatch) { tipWatch.disconnect(); tipWatch = null; }
-      each.call(r.querySelectorAll('[data-tip]'), function (el) {
-        el.setAttribute('title', el.getAttribute('data-tip'));
-        el.removeAttribute('data-tip');
-      });
-    }
+    });
+    watch.observe(r, { subtree: true, childList: true, attributes: true, attributeFilter: ['title'] });
   }
+  speak(document);
   tips();
-  document.addEventListener('ub:settings', function (ev) { if (ev.detail.key === 'tips') tips(); });
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail.key === 'tips') tips();
+    if (ev.detail.key === 'lang') { speak(document); flags(); }
+  });
+
+  // The flags at the header's corner (base.html .langs): the interface in
+  // English or in Russian, kept as the setting 'lang' (settings.py KEPT).
+  // Shown only while the site draws both.
+  var langs = document.querySelector('.top .langs');
+  function flags() {
+    if (!langs) return;
+    var now = T.lang();
+    each.call(langs.querySelectorAll('.flag'), function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.to === now));
+    });
+  }
+  if (langs && T.bilingual) {
+    langs.hidden = false;
+    flags();
+    langs.addEventListener('click', function (ev) {
+      var b = ev.target.closest('.flag');
+      if (b) window.ubSettings.set('lang', b.dataset.to);
+    });
+  }
 
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
   // endnote's words (section.html), which are hidden while this runs, and a
@@ -440,10 +532,10 @@
     var el = document.createElement('div');
     el.className = mark.dataset.k === 'st' ? 'pop st' : 'pop';
     el.setAttribute('role', 'dialog');
-    el.setAttribute('aria-label', mark.getAttribute('aria-label') || '1955 reading');
+    el.setAttribute('aria-label', mark.getAttribute('aria-label') || T.text('1955 reading'));
     el.tabIndex = -1;
     el.innerHTML = '<span class="arrow"></span>' +
-      '<button type="button" class="x" aria-label="Close">×</button>' +
+      '<button type="button" class="x" ' + T.a('aria-label', 'Close') + '>×</button>' +
       '<div class="body">' + note.innerHTML + '</div>';
     host.appendChild(el);
     card = { mark: mark, el: el, host: host };
@@ -684,14 +776,17 @@
     // Which site this is: the same build is at ubsite.ddns.net and
     // ubsite.sigmaai.au, and an app installed from either shows no address.
     menu.querySelector('.net .host').textContent = location.host;
+    // What offline.js says of the copy is cloud.ubSay, its words in each
+    // language; the date sw.js writes on the footer is in each too.
     var label = function () {
       var on = cloud.dataset.net === 'on', none = cloud.dataset.have === 'none';
-      var t = !on ? (none ? 'Offline' : 'Offline: reading the copy kept in this browser')
-            : cloud.dataset.say || (none ? 'Online' : 'Online, with a copy kept for working offline');
-      cloud.title = t;
-      cloud.setAttribute('aria-label', t);
-      menu.querySelector('.net .conn').textContent = on ? 'Online' : 'Offline' +
-        (fromCopy ? ' · the copy of ' + fromCopy.dataset.copy : '');
+      var t = !on ? (none ? T.k('Offline') : T.k('Offline: reading the copy kept in this browser'))
+            : cloud.ubSay || (none ? T.k('Online') : T.k('Online, with a copy kept for working offline'));
+      T.attr(cloud, 'title', t);
+      T.attr(cloud, 'aria-label', t);
+      menu.querySelector('.net .conn').innerHTML = on ? T('Online') : !fromCopy ? T('Offline')
+        : T('Offline · the copy of {d}', { d: { en: T.esc(fromCopy.dataset.copy),
+                                                ru: T.esc(fromCopy.dataset.copyRu || fromCopy.dataset.copy) } });
     };
     var net = function (on) { cloud.dataset.net = on ? 'on' : 'off'; label(); };
     var script = function () {

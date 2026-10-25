@@ -37,16 +37,15 @@
   window.ubOfflineUI = true;
   var sw = navigator.serviceWorker, line = box.querySelector('.state'), drop = box.querySelector('p.remove'),
       inst = box.querySelector('.install'), kept = false;
-  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-                'October', 'November', 'December'];
+  // The interface's words (ubsite/l10n.js): what the menu says is HTML in
+  // both languages, which CSS chooses between (T()).
+  var T = window.ubT;
 
-  function mb(n) { return Math.max(0.1, n / 1e6).toFixed(1) + ' MB'; }
-  // "October 18": the American order, as the site writes every date in words
-  // (Tigran, 2026-10-18).
-  function day(iso) {
-    var d = new Date(iso);
-    return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate();
-  }
+  // A size, "44.8 MB", and a day, "October 18": the American order, as the
+  // site writes every date in words (Tigran, 2026-10-18); in Russian «44,8 МБ»
+  // and «18 октября».  Each in both languages, for T().
+  function mb(n) { return T.tr('{x} MB', { x: T.dec(Math.max(0.1, n / 1e6).toFixed(1)) }); }
+  function day(iso) { return T.date(iso, false); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
   // The index turned off in Settings: what the menu says of the copy leaves it
   // out, as the page does (settings.py `index`).
@@ -67,11 +66,12 @@
     });
   }
 
-  // The icon: what the copy is, and while online, what it would say of it.
-  // ub.js words the rest of its label, by whether this page is online.
+  // The icon: what the copy is, and while online, what it would say of it, its
+  // words in each language (T.tr()).  ub.js words the rest of its label, by
+  // whether this page is online.
   function mark(have, say) {
     icon.dataset.have = have;
-    if (say) icon.dataset.say = say; else delete icon.dataset.say;
+    icon.ubSay = say || null;
     document.dispatchEvent(new Event('ub:offline'));
   }
 
@@ -98,28 +98,32 @@
       mark('none');
       return sized();
     }
-    var have = s.have, up = s.latest, err = s.error ? esc(s.error) : '';
+    // Why a download stopped: its words as the worker kept them, or the
+    // browser's own.
+    var have = s.have, up = s.latest, err = s.error ? s.words || T.same(s.error) : null;
     if (s.busy) {
-      line.textContent = (have ? 'Updating' : 'Downloading') + (s.busy.total
-        ? ': ' + mb(s.busy.done) + ' of ' + mb(s.busy.total) : '…');
-      mark('busy', (have ? 'Updating the offline copy' : 'Downloading the offline copy') + (s.busy.total
-        ? ': ' + mb(s.busy.done) + ' of ' + mb(s.busy.total) : '…'));
+      var of = s.busy.total && { a: mb(s.busy.done), b: mb(s.busy.total) };
+      line.innerHTML = have ? (of ? T('Updating: {a} of {b}', of) : T('Updating…'))
+                            : (of ? T('Downloading: {a} of {b}', of) : T('Downloading…'));
+      mark('busy', have ? (of ? T.tr('Updating the offline copy: {a} of {b}', of) : T.tr('Updating the offline copy…'))
+                        : (of ? T.tr('Downloading the offline copy: {a} of {b}', of) : T.tr('Downloading the offline copy…')));
     } else if (!have) {
-      line.innerHTML = (err ? 'The download stopped: ' + err + '.' : 'The download did not finish.') +
-                       (online() ? ' <button type="button" class="get"><span>Try again</span></button>' : '');
-      mark('none', 'Online; the offline copy did not finish downloading');
+      line.innerHTML = (err ? T('The download stopped: {e}.', { e: err }) : T('The download did not finish.')) +
+                       (online() ? ' <button type="button" class="get"><span>' + T('Try again') + '</span></button>' : '');
+      mark('none', T.tr('Online; the offline copy did not finish downloading'));
     } else if (up) {
-      line.innerHTML = 'Out of date: kept as the site was on ' + day(have.made) + ', which has changed since. ' +
-                       (online() ? '<br><button type="button" class="get"><span>Update now (' + mb(up.fetch) + ')</span></button>' +
-                                   ' <button type="button" class="newsbtn" popovertarget="offnews"><span>What’s new</span></button>'
-                                 : byItself() ? 'It updates by itself once online.' : 'It can be updated once online.') +
-                       (err ? '<br>The last update stopped: ' + err + '.' : '');
-      mark('stale', 'An update to the offline copy is waiting (' + mb(up.fetch) + ')');
+      line.innerHTML = T('Out of date: kept as the site was on {d}, which has changed since.', { d: day(have.made) }) + ' ' +
+                       (online() ? '<br><button type="button" class="get"><span>' + T('Update now ({s})', { s: mb(up.fetch) }) +
+                                   '</span></button> <button type="button" class="newsbtn" popovertarget="offnews"><span>' +
+                                   T('What’s new') + '</span></button>'
+                                 : byItself() ? T('It updates by itself once online.') : T('It can be updated once online.')) +
+                       (err ? '<br>' + T('The last update stopped: {e}.', { e: err }) : '');
+      mark('stale', T.tr('An update to the offline copy is waiting ({s})', { s: mb(up.fetch) }));
     } else {
-      line.textContent = 'Up to date: kept as the site was on ' + day(have.made) + ', with the text of ' +
-                         day(have.text.date) + (noIndex() ? '' : ' and the index of ' + day(have.index.date)) + ', ' +
-                         mb(have.bytes) + ' in this browser. ' +
-                         'Without a connection, the site reads from it by itself.';
+      var at = { d: day(have.made), t: day(have.text.date), i: day(have.index.date), s: mb(have.bytes) };
+      line.innerHTML = (noIndex() ? T('Up to date: kept as the site was on {d}, with the text of {t}, {s} in this browser.', at)
+                                  : T('Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser.', at)) +
+                       ' ' + T('Without a connection, the site reads from it by itself.');
       mark('kept');
     }
   }
@@ -141,11 +145,11 @@
       if (!r.ok) throw new Error(r.status);
       return r.json();
     }, gone).then(function (m) {
-      if (!kept) line.innerHTML = 'About ' + mb(m.bytes) + ' to download and keep in this browser.' +
-                                  '<br><button type="button" class="keep"><span>Download it</span></button>';
+      if (!kept) line.innerHTML = T('About {s} to download and keep in this browser.', { s: mb(m.bytes) }) +
+                                  '<br><button type="button" class="keep"><span>' + T('Download it') + '</span></button>';
     }, function () {
       if (kept) return;
-      line.textContent = !online() ? 'It can be downloaded only online.' : 'This site has no offline copy yet.';
+      line.innerHTML = !online() ? T('It can be downloaded only online.') : T('This site has no offline copy yet.');
       mark('none');
     });
   }
@@ -188,28 +192,28 @@
     order.sort().reverse();
     var oldest = n.items[n.items.length - 1];
     return order.length ? order.map(function (d) {
-      return '<h3>' + day(d) + '</h3><ul><li>' + days[d].join('</li><li>') + '</li></ul>';
-    }).join('') + (n.earlier && oldest && made < oldest.t ? '<p class="earlier">And earlier changes.</p>' : '') : '';
+      return '<h3>' + T(day(d)) + '</h3><ul><li>' + days[d].join('</li><li>') + '</li></ul>';
+    }).join('') + (n.earlier && oldest && made < oldest.t ? '<p class="earlier">' + T('And earlier changes.') + '</p>' : '') : '';
   }
   function whatsNew() {
     var made = since || (last && last.have && last.have.made);
-    news.innerHTML = '<div class="bar"><h2 id="offnews-title">What’s new</h2>' +
-      '<button type="button" class="x" popovertarget="offnews" popovertargetaction="hide" aria-label="Close" ' +
-      'title="Close"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>' +
+    news.innerHTML = '<div class="bar"><h2 id="offnews-title">' + T('What’s new') + '</h2>' +
+      '<button type="button" class="x" popovertarget="offnews" popovertargetaction="hide" ' + T.a('aria-label', 'Close') + ' ' +
+      T.a('title', 'Close') + '><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>' +
       '</svg></button></div><p class="since">' +
-      (since ? 'The offline copy has just been updated. New since its last update, on ' + day(since) + ':'
-             : made ? 'Since your copy, kept as the site was on ' + day(made) + ':' : '') +
+      (since ? T('The offline copy has just been updated. New since its last update, on {d}:', { d: day(since) })
+             : made ? T('Since your copy, kept as the site was on {d}:', { d: day(made) }) : '') +
       '</p><div class="days">…</div>' +
-      (since ? '<p class="then">' + (listening() ? 'The next page you open is the new one.'
-                                                 : 'Closing this reloads the page, so that it is the new one too.') + '</p>'
+      (since ? '<p class="then">' + (listening() ? T('The next page you open is the new one.')
+                                                 : T('Closing this reloads the page, so that it is the new one too.')) + '</p>'
              : '') +
-      '<p class="all"><a href="/changelog">The whole changelog</a></p>';
+      '<p class="all"><a href="/changelog">' + T('The whole changelog') + '</a></p>';
     var out = news.querySelector('.days');
     if (!made) { out.textContent = ''; return; }
     manifest().then(function (m) {
-      out.innerHTML = listed(m, made) || '<p>Nothing is listed for this update.</p>';
+      out.innerHTML = listed(m, made) || '<p>' + T('Nothing is listed for this update.') + '</p>';
     }, function () {
-      out.textContent = 'The list could not be fetched just now.';
+      out.innerHTML = T('The list could not be fetched just now.');
     });
   }
 
@@ -253,16 +257,16 @@
     }).catch(function () {});
   }
   function on() {
-    line.textContent = 'Starting…';
+    line.innerHTML = T('Starting…');
     sw.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then(function () {
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
       return get();
     }).catch(function (e) {
-      line.textContent = 'This browser would not keep it: ' + (e && e.message || e);
+      line.innerHTML = T('This browser would not keep it: {e}', { e: e && e.message || e });
     });
   }
   function off() {
-    if (!window.confirm('Remove the offline copy from this browser? It can be downloaded again at any time.')) return;
+    if (!window.confirm(T.text('Remove the offline copy from this browser? It can be downloaded again at any time.'))) return;
     ask('remove').then(function () {
       return sw.getRegistration('/');
     }).then(function (reg) { return reg && reg.unregister(); }).then(function () { show(null); });
@@ -355,11 +359,9 @@
     var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     if (app) inst.innerHTML = '';
-    else if (window.ubInstall) inst.innerHTML = '<button type="button" class="app"><span>Install as an app</span></button> ' +
-      '<small>it opens on its own, from the home screen or the dock</small>';
-    else if (ios) inst.innerHTML = '<small>On an iPhone or iPad, add it to the Home Screen too (Share, then Add to ' +
-      'Home Screen): Safari deletes what a site keeps after seven days without a visit, but not for an app ' +
-      'on the Home Screen.</small>';
+    else if (window.ubInstall) inst.innerHTML = '<button type="button" class="app"><span>' + T('Install as an app') + '</span></button> ' +
+      '<small>' + T('it opens on its own, from the home screen or the dock') + '</small>';
+    else if (ios) inst.innerHTML = '<small>' + T('offline:ios') + '</small>';
     else inst.innerHTML = '';
     inst.hidden = !inst.innerHTML;
   }

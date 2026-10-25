@@ -156,7 +156,15 @@ OFFLINE = [
 KEPT = [
     ("rail", "kept", "Contents", "open", [], ""),
     ("margin", "kept", "Index", True, [], ""),
+    # The interface's language, set by the flags at the header's corner:
+    # "en", "ru", or until a flag is tapped "auto", the browser's own, Russian
+    # where it is Russian (Tigran, 2026-10-25; ubsite/l10n.py).  base.html's
+    # head script resolves it, as ubLang(), to data-lang="ru" or nothing.
+    ("lang", "kept", "Language", "auto", [], ""),
 ]
+# Kept through ↺ "Restore the defaults": a reader who chose Russian and resets
+# the settings is not handed an English page (Tigran, 2026-10-25).
+SPARED = ["lang"]
 
 
 # A site's own defaults, by the host a page is read at, where they differ from

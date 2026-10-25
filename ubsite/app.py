@@ -35,7 +35,7 @@ from fastapi.templating import Jinja2Templates  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import api, queries, settings, stats, visits  # noqa: E402
+from ubsite import api, l10n, queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 STATIC = ROOT / "ubsite" / "static"
@@ -51,6 +51,8 @@ app.include_router(api.router)
 # (ubsite/visits.py).  The page carries nothing for it.
 app.add_middleware(visits.Counter)
 T = Jinja2Templates(directory=str(ROOT / "ubsite" / "templates"))
+# Every word around the book in English and Russian (ubsite/l10n.py, ru.toml).
+l10n.install(T.env)
 
 
 def entry_href(rslug: str, level: int, anchor: str) -> str:
@@ -83,6 +85,39 @@ def asset(name: str) -> str:
 T.env.globals["asset"] = asset
 
 
+# The scripts' words (ubsite/l10n.js): the entries of ru.toml the scripts name,
+# and the voices' names, which a page's player draws (listen.js), put in its
+# place of __CATALOG__.  Made again when any of them changes, as the dev
+# server runs; named by a hash of what it sends, so a build that changes
+# nothing moves nothing (CLAUDE.md trap 29).
+L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js")
+L10N_JS = ROOT / "ubsite" / "l10n.js"
+
+
+@functools.lru_cache(maxsize=4)
+def _l10n_js(stamp: tuple) -> tuple[bytes, bytes, str]:
+    keys = l10n.script_keys([(STATIC / n).read_text() for n in L10N_SCRIPTS])
+    keys |= {v[k] for v in voices() for k in ("label", "credit") if v[k]}
+    src = L10N_JS.read_text()
+    if src.count("var L10N = __CATALOG__;") != 1:
+        raise RuntimeError("ubsite/l10n.js has lost its `var L10N = __CATALOG__;`")
+    data = src.replace("var L10N = __CATALOG__;", f"var L10N = {l10n.script_catalog(keys)};").encode()
+    return data, gzip.compress(data, 9, mtime=0), hashlib.sha256(data).hexdigest()[:10]
+
+
+def l10n_js() -> tuple[bytes, bytes, str]:
+    """/l10n.js: (its bytes, gzipped, the hash its address carries)."""
+    files = [L10N_JS, l10n.CATALOG, DB, *(STATIC / n for n in L10N_SCRIPTS)]
+    return _l10n_js((l10n.BILINGUAL, *(f.stat().st_mtime_ns if f.exists() else 0 for f in files)))
+
+
+def l10n_url() -> str:
+    return f"/l10n.js?v={l10n_js()[2]}"
+
+
+T.env.globals["l10n_url"] = l10n_url
+
+
 def _mark() -> Markup:
     """The site's mark, inline, from the one drawing in static/favicon.svg.
 
@@ -106,13 +141,13 @@ def appendix_href(scope: str, anchor: str) -> str:
 T.env.globals["appendix_href"] = appendix_href
 
 
-def reading_time(words: int) -> str:
+def reading_time(words: int) -> l10n.L:
     """How long a reading path takes, at 230 words a minute: "about 12
     minutes", and in hours from an hour and a half."""
     minutes = max(1, round(words / 230))
     if minutes < 90:
-        return f"about {minutes} minute{'s' if minutes > 1 else ''}"
-    return f"about {round(minutes / 60)} hours"
+        return l10n.tr("about {n} minutes", n=minutes)
+    return l10n.tr("about {n} hours", n=round(minutes / 60))
 
 
 T.env.globals["reading_time"] = reading_time
@@ -317,8 +352,9 @@ def page(request, template, status_code=200, **ctx):
     return T.TemplateResponse(request, template, ctx, status_code=status_code)
 
 
-def missing(request, msg: str):
-    """A 404 that is still a page of the site, with its header and search box."""
+def missing(request, msg):
+    """A 404 that is still a page of the site, with its header and search box:
+    `msg` a key of ru.toml, or its words made (l10n.tr())."""
     return page(request, "notfound.html", status_code=404, msg=msg,
                 path=request.url.path)
 
@@ -398,10 +434,12 @@ def db_version() -> int:
 
 
 ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV"}
+# What the left rail says itself (templates/_rail.html), which its version holds.
+RAIL_WORDS = ("Contents", "The book", "0. Introduction", "Part {r}.", "{a} and {b}")
 
 
 @functools.lru_cache(maxsize=4)
-def _book(mtime_ns: int) -> dict:
+def _book(mtime_ns: int, bilingual: bool) -> dict:
     con = db()
     sections: dict[int, list[dict]] = {}
     for r in con.execute("SELECT paper_n, n, title_html, combined_with FROM section"
@@ -415,8 +453,11 @@ def _book(mtime_ns: int) -> dict:
     # it (/rail/N?v=...), so a browser may keep the answer for good and still
     # never show a stale one.  Not the database's mtime, which every build
     # moves: every section page carries it, and the offline copy would change
-    # every paper's chunk with each deploy, the book unchanged.
-    v = hashlib.sha256(json.dumps([papers, sections], sort_keys=True).encode()).hexdigest()[:12]
+    # every paper's chunk with each deploy, the book unchanged.  With the words
+    # the rail says itself, in each language (ubsite/l10n.py), so that a fragment
+    # kept from before they changed is not drawn again.
+    said = [l10n.BILINGUAL] + [l10n.tr(k, r="", a="", b="").by for k in RAIL_WORDS]
+    v = hashlib.sha256(json.dumps([papers, sections, said], sort_keys=True).encode()).hexdigest()[:12]
     return {"foreword": [p for p in papers if p["part_n"] is None],
             "parts": parts, "sections": sections, "v": v}
 
@@ -425,13 +466,15 @@ def book() -> dict:
     """The whole book as the left rail draws it: the Foreword, the four parts
     with their papers, and every paper's sections.  Cached on the database's
     mtime, as sources() is."""
-    return _book(db_version())
+    return _book(db_version(), l10n.BILINGUAL)
 
 
 T.env.globals["book"] = book
 T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
 T.env.globals["site_defaults"] = settings.site_defaults()
+T.env.globals["settings_spared"] = settings.SPARED
+T.env.globals["bilingual"] = lambda: l10n.BILINGUAL
 
 
 # The same build is live at two addresses, and an app installed from each looked
@@ -594,13 +637,25 @@ def service_worker(request: Request):
     whole site.  The scripts it loads are named with their hashes, put in place
     of __VERSIONS__ here, so that a change to any of them is a change to this
     file, which is what makes a browser install the worker again."""
-    v = {"core": asset("offline-core.js"),
+    v = {"core": asset("offline-core.js"), "l10n": l10n_url(),
          **{k.split(".")[1]: f"/offline/{k}?v={engine(k)[1]}" for k in ENGINE}}
     src = (STATIC / "sw.js").read_text()
     if src.count("var V = __VERSIONS__;") != 1:
         raise RuntimeError("static/sw.js has lost its `var V = __VERSIONS__;`")
     body = src.replace("var V = __VERSIONS__;", f"var V = {json.dumps(v)};")
     return _etagged(request, body.encode(), "text/javascript")
+
+
+@app.get("/l10n.js", include_in_schema=False)
+def l10n_script(request: Request, v: str = ""):
+    """The scripts' words (l10n_js()), kept for good under its hash.  Gzipped
+    here: nginx compresses only under /static/."""
+    data, gz, h = l10n_js()
+    headers = {"Cache-Control": "public, max-age=31536000, immutable" if v == h else "no-cache",
+               "Vary": "Accept-Encoding"}
+    if "gzip" in request.headers.get("accept-encoding", ""):
+        return Response(gz, media_type="text/javascript", headers={**headers, "Content-Encoding": "gzip"})
+    return Response(data, media_type="text/javascript", headers=headers)
 
 
 @app.get("/offline/manifest.json", include_in_schema=False)
@@ -895,7 +950,7 @@ def index_letter(request: Request, letter: str):
         " WHERE e.scope='az' AND e.level=1 AND e.letter=? ORDER BY e.ord",
         (letter.upper(),)).fetchall()
     if not rows:
-        return missing(request, f"The index has no section headed “{letter}”.")
+        return missing(request, l10n.tr("The index has no section headed “{l}”.", l=letter))
     return page(request, "index_letter.html", letter=letter.upper(), rows=rows)
 
 
@@ -1117,8 +1172,11 @@ def part_page(request: Request, n: int):
     # section (Tigran, 2026-10-14).
     fp = part["first_paper"]
     first = con.execute("SELECT MIN(n) FROM section WHERE paper_n=?", (fp,)).fetchone()[0]
-    nxt = {"href": f"/{fp}:{first}", "label": f"Next section: {fp}:{first}"}
+    nxt = {"href": f"/{fp}:{first}", "label": l10n.tr("Next section: {s}", s=f"{fp}:{first}")}
     return page(request, "part.html", part=part, roman=ROMAN[n], nxt=nxt)
+
+
+NO_PAPER = "There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196."
 
 
 @app.get("/{paper:int}")
@@ -1133,8 +1191,7 @@ def paper_page(request: Request, paper: int):
     first = con.execute(
         "SELECT MIN(n) FROM section WHERE paper_n=?", (paper,)).fetchone()[0]
     if first is None:
-        return missing(request, f"There is no Paper {paper}. The Foreword is Paper 0,"
-                                " and the papers run to 196.")
+        return missing(request, l10n.tr(NO_PAPER, n=paper))
     return RedirectResponse(f"/{paper}:{first}", status_code=307)
 
 
@@ -1151,10 +1208,9 @@ def read(request: Request, ref: str):
     s = con.execute("SELECT * FROM section WHERE paper_n=? AND n=?",
                     (paper, sec)).fetchone()
     if p is None:
-        return missing(request, f"There is no Paper {paper}. The Foreword is Paper 0,"
-                                " and the papers run to 196.")
+        return missing(request, l10n.tr(NO_PAPER, n=paper))
     if s is None:
-        return missing(request, f"Paper {paper} has no section {sec}.")
+        return missing(request, l10n.tr("Paper {n} has no section {s}.", n=paper, s=sec))
     # The paragraphs named must exist and a range run forwards, as the API
     # requires: /0:0.0-1 or /86:5.15-14 once opened the section with nothing
     # marked and nothing said.  Every section numbers its paragraphs 1..N.
@@ -1166,12 +1222,11 @@ def read(request: Request, ref: str):
         go = Markup('<a href="/{0}">{0}</a>').format
         for k in (focus, last):
             if not 1 <= k <= n:
-                return missing(request, Markup("There is no paragraph {}: {} runs from {} to {}.")
-                               .format(f"{here}.{k}", here, go(f"{here}.1"), go(f"{here}.{n}")))
+                return missing(request, l10n.tr("There is no paragraph {p}: {s} runs from {a} to {b}.",
+                                                p=f"{here}.{k}", s=here, a=go(f"{here}.1"), b=go(f"{here}.{n}")))
         if last < focus:
-            return missing(request, Markup("A range runs forwards, in the order of the book:"
-                                           " {}, not {}.")
-                           .format(go(f"{here}.{last}-{focus}"), f"{here}.{focus}-{last}"))
+            return missing(request, l10n.tr("A range runs forwards, in the order of the book: {a}, not {b}.",
+                                            a=go(f"{here}.{last}-{focus}"), b=f"{here}.{focus}-{last}"))
     rows = queries.section(con, paper, sec)
     go = transport(con, paper, sec)
     # Where listening goes on to: the next section, or from a paper's last
@@ -1179,8 +1234,13 @@ def read(request: Request, ref: str):
     onward = None
     if go["next"]:
         n = go["next"]
-        onward = {"href": n["href"], "label": f"{n['n']}. {n['title']}" if n["paper_n"] == paper
-                  else f"Paper {n['paper_n']}. {n['ptitle']}"}
+        onward = {"href": n["href"], "label": f"{n['n']}. {n['title']}"}
+        if n["paper_n"] != paper:
+            # Text, as listen.js sets it: in Russian too, where both are drawn.
+            w = l10n.tr("Paper {n}. {title}", n=n["paper_n"], title=n["ptitle"])
+            onward["label"] = w.en.unescape()
+            if l10n.BILINGUAL:
+                onward["label_ru"] = w["ru"].unescape()
     return page(request, "section.html", paper=p, section=s, **rows,
                 focus=focus, last=last, go=go, onward=onward,
                 audio=section_audio(con, s["id"]))
@@ -1195,8 +1255,6 @@ def transport(con, paper: int, sec: int) -> dict:
     not stops.  None at the book's ends.  The label is the tooltip and the
     accessible name alike (Tigran, 2026-10-14).
     """
-    def paper_name(n):
-        return "the Foreword" if n == 0 else str(n)
 
     def at(row, label):
         return row and {**dict(row), "href": f"/{row['paper_n']}:{row['n']}", "label": label}
@@ -1210,7 +1268,9 @@ def transport(con, paper: int, sec: int) -> dict:
                      " GROUP BY paper_n ORDER BY paper_n DESC LIMIT 1", (paper,)).fetchone()
     ff = con.execute("SELECT paper_n, MIN(n) AS n FROM section WHERE paper_n > ?"
                      " GROUP BY paper_n ORDER BY paper_n LIMIT 1", (paper,)).fetchone()
-    return {"fb": at(fb, fb and f"Previous paper: {paper_name(fb['paper_n'])}"),
-            "prev": at(prev, prev and f"Previous section: {prev['paper_n']}:{prev['n']}"),
-            "next": at(nxt, nxt and f"Next section: {nxt['paper_n']}:{nxt['n']}"),
-            "ff": at(ff, ff and f"Next paper: {paper_name(ff['paper_n'])}")}
+    def paper(row, foreword, numbered):
+        return row and (l10n.tr(foreword) if row["paper_n"] == 0 else l10n.tr(numbered, p=row["paper_n"]))
+    return {"fb": at(fb, paper(fb, "Previous paper: the Foreword", "Previous paper: {p}")),
+            "prev": at(prev, prev and l10n.tr("Previous section: {s}", s=f"{prev['paper_n']}:{prev['n']}")),
+            "next": at(nxt, nxt and l10n.tr("Next section: {s}", s=f"{nxt['paper_n']}:{nxt['n']}")),
+            "ff": at(ff, paper(ff, "Next paper: the Foreword", "Next paper: {p}"))}

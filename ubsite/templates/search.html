@@ -1,41 +1,41 @@
-{% extends "base.html" %}{% from "_old.html" import old_hit, notes_after %}{% block title %}{{ q }}{% endblock %}
+{% extends "base.html" %}{% from "_old.html" import old_hit, notes_after %}{% set title = same(q) %}
 {# One list's heading count, in parentheses, so that it cannot be read as part
    of the heading: "In the 1955 readings (4)".  On the overview a list cut short
    says "(25 of 58)"; opened whole it says which hundred this page holds. #}
-{% macro count(h) %}<span>({% if h.first > 1 or h.more %}{% if scope %}{{ '{:,}'.format(h.first) }}–{{ '{:,}'.format(h.last) }}{% else %}{{ h.last }}{% endif %} of {% endif %}{{ '{:,}'.format(h.n) }})</span>{% endmacro %}
-{% macro more(h, name, noun) %}
+{% macro count(h) %}<span>{% if h.first > 1 or h.more %}{% if scope %}{{ t('({a:,}–{b:,} of {n:,})', a=h.first, b=h.last, n=h.n) }}{% else %}{{ t('({b} of {n:,})', b=h.last, n=h.n) }}{% endif %}{% else %}{{ t('({n:,})', n=h.n) }}{% endif %}</span>{% endmacro %}
+{% macro more(h, name, all) %}
 {% if scope %}{% if h.first > 1 or h.more %}<nav class="pager">
-  {% if h.first > 1 %}<a href="/search?q={{ q|urlencode }}&amp;in={{ name }}&amp;page={{ h.page - 1 }}">Earlier</a>{% endif %}
-  {% if h.more %}<a class="next" href="/search?q={{ q|urlencode }}&amp;in={{ name }}&amp;page={{ h.page + 1 }}">Later</a>{% endif %}
+  {% if h.first > 1 %}<a href="/search?q={{ q|urlencode }}&amp;in={{ name }}&amp;page={{ h.page - 1 }}">{{ t('Earlier') }}</a>{% endif %}
+  {% if h.more %}<a class="next" href="/search?q={{ q|urlencode }}&amp;in={{ name }}&amp;page={{ h.page + 1 }}">{{ t('Later') }}</a>{% endif %}
 </nav>{% endif %}
-{% elif h.more %}<p class="more"><a href="/search?q={{ q|urlencode }}&amp;in={{ name }}">Show all {{ '{:,}'.format(h.n) }} {{ noun }}</a></p>{% endif %}
+{% elif h.more %}<p class="more"><a href="/search?q={{ q|urlencode }}&amp;in={{ name }}">{{ t(all, n=h.n) }}</a></p>{% endif %}
 {% endmacro %}
 {% block body %}<main class="prose results">
 <h1>{{ q }}</h1>
-{% if scope %}<p class="hint"><a href="/search?q={{ q|urlencode }}">All results for “{{ q }}”</a></p>{% endif %}
-{% if diagnose and diagnose[1] %}<p class="didyou">Did you mean
-  {% for c in diagnose[1] %}<a href="/search?q={{ c|urlencode }}">{{ c }}</a>{% if not loop.last %} or {% endif %}{% endfor %}?</p>{% endif %}
-{% if heads %}<section{% if not scope %} class="ix"{% endif %}><h2>Headwords</h2>
+{% if scope %}<p class="hint"><a href="/search?q={{ q|urlencode }}">{{ t('All results for “{q}”', q=q) }}</a></p>{% endif %}
+{% if diagnose and diagnose[1] %}<p class="didyou">{{ t('Did you mean') }}
+  {% for c in diagnose[1] %}<a href="/search?q={{ c|urlencode }}">{{ c }}</a>{% if not loop.last %} {{ t('or') }} {% endif %}{% endfor %}?</p>{% endif %}
+{% if heads %}<section{% if not scope %} class="ix"{% endif %}><h2>{{ t('Headwords') }}</h2>
 <ul class="hits heads-hit">{% for h in heads %}<li>
   {%- if h.slug %}<a href="/i/{{ h.slug }}">{{ h.headword_html|safe }}</a>
-  {% if h.kids %}<span>{{ h.kids }} {{ 'subentry' if h.kids == 1 else 'subentries' }}</span>{% endif %}
+  {% if h.kids %}<span>{{ t('{n} subentries', n=h.kids) }}</span>{% endif %}
   {%- else %}<a href="{{ appendix_href(h.scope, h.anchor) }}">{{ h.headword_html|safe }}</a>
-  <span>Appendix {{ h.scope }}, {{ h.appendix }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
-{% if scope in ('', 'index') %}<section{% if not scope %} class="ix"{% endif %}><h2>In the index {% if idx %}{{ count(idx) }}{% else %}<span>(0)</span>{% endif %}</h2>
+  <span>{{ t('Appendix {x}, {title}', x=h.scope, title=h.appendix) }}</span>{% endif %}</li>{% endfor %}</ul></section>{% endif %}
+{% if scope in ('', 'index') %}<section{% if not scope %} class="ix"{% endif %}><h2>{{ t('In the index') }} {% if idx %}{{ count(idx) }}{% else %}<span>(0)</span>{% endif %}</h2>
 {% if idx and idx.rows %}<ul class="hits">{% for e in idx.rows %}<li>
   {%- if e.rslug %}<a href="{{ entry_href(e.rslug, e.level, e.anchor) }}">{{ e.marked }}</a>
   {%- else %}<a class="app" href="{{ appendix_href(e.scope, e.anchor) }}"><span class="lbl">{{ e.appendix }}</span> {{ e.marked }}</a>{% endif %}</li>{% endfor %}</ul>
-{{ more(idx, 'index', 'index entries') }}
-{% else %}<p class="none">nothing</p>{% endif %}</section>{% endif %}
-{% if scope in ('', 'text') %}<section><h2>In the text {% if txt %}{{ count(txt) }}{% else %}<span>(0)</span>{% endif %}</h2>
+{{ more(idx, 'index', 'Show all {n:,} index entries') }}
+{% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endif %}
+{% if scope in ('', 'text') %}<section><h2>{{ t('In the text') }} {% if txt %}{{ count(txt) }}{% else %}<span>(0)</span>{% endif %}</h2>
 {% if txt and txt.rows %}<ul class="hits">{% for t in txt.rows %}<li><a href="/{{ t.ref }}">{{ t.ref }}</a> {{ t.s|safe }}</li>{% endfor %}</ul>
-{{ more(txt, 'text', 'paragraphs') }}
-{% else %}<p class="none">nothing</p>{% endif %}</section>{% endif %}
+{{ more(txt, 'text', 'Show all {n:,} paragraphs') }}
+{% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endif %}
 {#- What the 1955 cards say: on the overview only when something matched, and
     shown only when Settings asks (ub.css .by1955); opened whole, always. #}
-{% if old and old.rows %}<section{% if not scope %} class="by1955"{% endif %}><h2>In the 1955 readings {{ count(old) }}</h2>
+{% if old and old.rows %}<section{% if not scope %} class="by1955"{% endif %}><h2>{{ t('In the 1955 readings') }} {{ count(old) }}</h2>
 <ul class="hits old">{% for o in old.rows %}{{ old_hit(o) }}{% endfor %}</ul>
-{{ more(old, 'notes', 'readings') }}
+{{ more(old, 'notes', 'Show all {n:,} readings') }}
 {{ notes_after(old.rows) }}
-</section>{% elif scope == 'notes' %}<section><h2>In the 1955 readings <span>(0)</span></h2><p class="none">nothing</p></section>{% endif %}
+</section>{% elif scope == 'notes' %}<section><h2>{{ t('In the 1955 readings') }} <span>(0)</span></h2><p class="none">{{ t('nothing') }}</p></section>{% endif %}
 </main>{% endblock %}

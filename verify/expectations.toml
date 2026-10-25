@@ -119,7 +119,11 @@ measured_on = "2026-10-23"
 pages       = 10285      # 1,626 sections, 4,735 headwords, 27 index letters, 20 more, 3,877 reading paths
 paths       = 3877       # 2,057 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
-chunks      = 400        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
-                         # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages
+chunks      = 417        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
+                         # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages;
+                         # 417 since the interface in Russian too (2026-10-25): the scripts'
+                         # words, /l10n.js, EB Garamond's Cyrillic, two faces and their licence,
+                         # and 13 more chunks of reading paths, 8% more of them to hold
+                         # (404 with UB_BILINGUAL=0)
 download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement
-raw_mb      = [160.0, 220.0] # unpacked: 198.2 at measurement
+raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25)

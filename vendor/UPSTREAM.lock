@@ -56,6 +56,22 @@
     "commit": null
   },
   {
+    "repo": "texlive",
+    "path": "fonts/opentype/public/ebgaramond/EBGaramond-Regular.otf",
+    "dest": "fonts/EBGaramond-Regular.otf",
+    "sha256": "d3e1471a4a0f836716bad35326d3c0ab5caddb74ae5c1917f99f8225abf43a7d",
+    "bytes": 379308,
+    "commit": null
+  },
+  {
+    "repo": "texlive",
+    "path": "fonts/opentype/public/ebgaramond/EBGaramond-Italic.otf",
+    "dest": "fonts/EBGaramond-Italic.otf",
+    "sha256": "31f03b4e31c5eecfce383c49f66c592e061ddda394f4bb62de42a784cb59d95a",
+    "bytes": 306080,
+    "commit": null
+  },
+  {
     "repo": "sqlite_wasm",
     "path": "jswasm/sqlite3.js",
     "dest": "sqlite-wasm/sqlite3.js",

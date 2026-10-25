@@ -135,8 +135,9 @@ class Worker(unittest.TestCase):
 @unittest.skipUnless(DB.exists(), "var/ub.db has not been built")
 class Pages(unittest.TestCase):
     def test_a_page_names_its_assets_by_their_hashes(self):
+        from test_appendix_pages import en
         from ubsite.app import STATIC
-        body = call("/101:4")[2].decode()
+        body = en(call("/101:4")[2].decode())
         for name in ("ub.css", "ub.js", "listen.js", "offline.js"):
             h = hashlib.sha256((STATIC / name).read_bytes()).hexdigest()[:10]
             self.assertIn(f"/static/{name}?v={h}", body)
@@ -192,7 +193,7 @@ class Copy(unittest.TestCase):
         status, h, body = call("/offline/manifest.json")
         self.assertEqual((status, h["cache-control"]), (200, "no-cache"))
         m = json.loads(body)
-        self.assertEqual(m["format"], 1)
+        self.assertEqual(m["format"], 2)    # the title piece begins inside its tag (2026-10-25)
         self.assertEqual(call("/offline/manifest.json", headers={"if-none-match": h["etag"]})[0], 304)
 
     def test_its_build_is_the_hash_of_what_it_holds(self):

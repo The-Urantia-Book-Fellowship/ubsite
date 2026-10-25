@@ -84,7 +84,7 @@ class ListOfNotes(unittest.TestCase):
         self.assertIn('<li class="nst"><a href="/lists/notes">List of study notes</a>', lists)
         self.assertIn('<li class="n1955"><a href="/lists/1955">', lists)
         home = get("/")[2]
-        self.assertIn('<span class="nst">of the\n      <a href="/lists/notes">study notes</a>', home)
+        self.assertIn('<span class="nst">of the <a href="/lists/notes">study notes</a>', home)
         self.assertIn('<span class="n1955">of the <a href="/lists/1955">1955 readings</a>', home)
 
 

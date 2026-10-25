@@ -17,10 +17,21 @@ sys.path.insert(0, str(ROOT))
 DB = ROOT / "var" / "ub.db"
 
 RE_ID = re.compile(r'\bid="([^"]+)"')
+# The page as a reader of English is sent it (ubsite/l10n.py): the Russian of
+# the interface out, its elements and its attributes, and the English as it
+# was before both were drawn.  What UB_BILINGUAL=0 sends, byte for byte.
+RE_RU = re.compile(r'<x-ru lang="ru">.*?</x-ru>|</?x-en>|\sdata-ru(?:-[\w-]+)?="[^"]*"'
+                   r'|, "label_ru": "(?:[^"\\]|\\.)*"', re.S)
+
+
+def en(body: str) -> str:
+    return RE_RU.sub("", body)
 RE_APP_HREF = re.compile(r'href="/appendix/([A-F])#([^"]+)"')
 
 
-def get(url: str) -> tuple[int, dict, str]:
+def get(url: str, raw: bool = False) -> tuple[int, dict, str]:
+    """(status, headers, body) for a GET of url: the body in English (en()),
+    or with `raw` as sent, in both languages."""
     from ubsite.app import app
     path, _, query = url.partition("?")
     scope = {"type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1",
@@ -41,7 +52,8 @@ def get(url: str) -> tuple[int, dict, str]:
             out["body"] += m.get("body", b"")
 
     asyncio.run(app(scope, receive, send))
-    return out["status"], out["headers"], out["body"].decode()
+    body = out["body"].decode()
+    return out["status"], out["headers"], body if raw else en(body)
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")

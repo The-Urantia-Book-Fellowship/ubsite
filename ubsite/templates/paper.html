@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% block title %}Paper {{ paper.n }} — {{ paper.title }}{% endblock %}
+{% extends "base.html" %}{% set title = tr('Paper {n} — {title}', n=paper.n, title=paper.title) %}
 {% block body %}<main class="prose">
 <p class="papernum">Paper {{ paper.n }}</p><h1>{{ paper.title }}</h1>
 {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}

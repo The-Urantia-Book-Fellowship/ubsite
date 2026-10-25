@@ -1,23 +1,18 @@
-{% extends "base.html" %}{% block title %}Lists{% endblock %}
+{% extends "base.html" %}{% set title = 'Lists' %}
 {#- Every list the edition keeps, as a book's front matter names them, and
     the Bibliography of the study notes; the illustrations join with Phase 6.  Each is marked with the setting that shows
     what it lists (ub.css .n1955, .nst), as the home page's line is. #}
-{% block body %}<main class="prose lists"><h1>Lists</h1>
+{% block body %}<main class="prose lists"><h1>{{ t('Lists') }}</h1>
 <ul class="ways">
-  <li class="n1955"><a href="/lists/1955">List of 1955 readings</a> — the {{ stats.variants_1955 }} places
-    where the text departs from the first printing of 1955, with the SRT Committee’s
-    reasons where it gives them.</li>
+  <li class="n1955">{{ t('lists:1955', n=stats.variants_1955) }}</li>
   {%- if stats.study_notes %}
-  <li class="nst"><a href="/lists/notes">List of study notes</a> — the {{ stats.study_notes }}
-    notes of The British Study Edition (ed. Tigran Aivazian) on the site so far, in
-    {{ stats.study_papers }} paper{{ 's' if stats.study_papers != 1 }}, each read, checked and edited before it is shown.</li>
+  <li class="nst">{{ t('lists:notes', n=stats.study_papers, k=stats.study_notes) }}</li>
   {%- endif %}
   {%- if stats.study_sources %}
-  <li class="nst"><a href="/lists/bibliography">Bibliography</a> — the works the study notes
-    cite, {{ stats.study_sources }} so far, by author, each with the notes that cite it.</li>
+  <li class="nst">{{ t('lists:bib', n=stats.study_sources) }}</li>
   {%- endif %}
 </ul>
 {#- Said only when every list here is turned off. #}
-{% if stats.study_notes %}<p class="nolists both">The 1955 readings and the study notes are both turned off in Settings.</p>
-{% else %}<p class="nolists one">The 1955 readings are turned off in Settings.</p>{% endif %}
+{% if stats.study_notes %}<p class="nolists both">{{ t('The 1955 readings and the study notes are both turned off in Settings.') }}</p>
+{% else %}<p class="nolists one">{{ t('The 1955 readings are turned off in Settings.') }}</p>{% endif %}
 </main>{% endblock %}

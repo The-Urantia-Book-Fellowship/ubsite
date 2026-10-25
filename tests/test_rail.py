@@ -106,11 +106,12 @@ class Rail(unittest.TestCase):
                                 r'</button>\n<ol id="rail-tree">', url)
 
     def test_folded_is_kept_but_not_in_the_dialog(self):
-        # The rail's fold, and the index's: each button is its only control.
+        # The rail's fold, and the index's: each button is its only control;
+        # and the language, the flags' (2026-10-25).
         d = settings.defaults()
         self.assertEqual((d["rail"], d["margin"]), ("open", True))
         shown = [it["key"] for g in settings.groups([]) for it in g["items"]]
-        self.assertEqual(sorted(set(d) - set(shown)), ["margin", "rail"])
+        self.assertEqual(sorted(set(d) - set(shown)), ["lang", "margin", "rail"])
         self.assertEqual(len(shown), len(set(shown)))
 
     def test_139_names_its_combined_section(self):

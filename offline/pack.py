@@ -28,7 +28,9 @@ from . import news, pages, searchdb, site
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "var" / "offline"
-FORMAT = 1
+# 2 since 2026-10-25: a page's title piece begins inside its tag (pages.cut),
+# which a worker before cannot join a search page to.
+FORMAT = 2
 
 # What a page loads besides itself, and the tab's icons, each by the address a
 # page names it with.  The scripts a stored page names carry their hash, as
@@ -41,7 +43,9 @@ FORMAT = 1
 ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js"]
 PLAIN = ["/static/favicon.svg", "/static/fonts/UBGoudy.woff2", "/static/fonts/UBGoudy-Italic.woff2",
          "/static/fonts/OFL.txt", "/static/fonts/GaramondMath.woff2",
-         "/static/fonts/OFL-GaramondMath.txt", "/static/fonts/SBL_grk.ttf",
+         "/static/fonts/OFL-GaramondMath.txt", "/static/fonts/EBGaramond-Cyrillic.woff2",
+         "/static/fonts/EBGaramond-Cyrillic-Italic.woff2", "/static/fonts/OFL-EBGaramond.txt",
+         "/static/fonts/SBL_grk.ttf",
          "/static/fonts/SBL_Hbrw.ttf", "/favicon.ico"]
 
 
@@ -72,7 +76,8 @@ def build(con: sqlite3.Connection) -> dict:
     add("text.db", "db", searchdb.text_db(con))
     add("index.db", "db", searchdb.index_db(con))
     tabs = [f"/static/favicon{v}.{x}" for v in sorted(set(A.SITES.values()) - {""}) for x in ("svg", "ico")]
-    for url in [A.asset(a) for a in ASSETS] + PLAIN + tabs:
+    # The scripts' words, which a page loads before ub.js (app.py l10n_url).
+    for url in [A.asset(a) for a in ASSETS] + [A.l10n_url()] + PLAIN + tabs:
         path, _, query = url.partition("?")
         got = site.get(path, query)
         if got.status != 200:

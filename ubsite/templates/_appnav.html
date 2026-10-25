@@ -1,6 +1,6 @@
 {# Across the top of each appendix: the way back to the index, and the other five. #}
-<nav class="appnav" aria-label="Appendices"><a href="/index">Index</a> ·
-  <a href="/appendix">Appendices</a>
+<nav class="appnav" {{ ta('aria-label', 'Appendices') }}><a href="/index">{{ t('Index') }}</a> ·
+  <a href="/appendix">{{ t('Appendices') }}</a>
   {%- for a in apps %} {% if a.letter == app.letter -%}
     <span class="l" title="{{ a.title }}" aria-current="page">{{ a.letter }}</span>
     {%- else -%}

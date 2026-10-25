@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% block title %}Changelog{% endblock %}
+{% extends "base.html" %}{#- The changelog is the file as written, its title too. #}{% set title = same('Changelog') %}
 {#- ChangeLog.md as written, as app.py changelog() arranges it (Tigran,
     2026-10-18): every block in the file's order, each entry in a version with
     the day it was written, and what is for developers folded where it stands.

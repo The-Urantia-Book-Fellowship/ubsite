@@ -1,16 +1,14 @@
-{% extends "base.html" %}{% from "_note.html" import libref %}{% block title %}Bibliography{% endblock %}
+{% extends "base.html" %}{% from "_note.html" import libref %}{% set title = 'Bibliography' %}
 {#- Every work the study notes on the site cite (app.py list_bibliography):
     once each, by its author's surname, as its note gives it in full, with its
     page where it can be read freely, and the notes that cite it in the order
     of the book. #}
 {% block body %}<main class="prose lists">
-<h1>Bibliography</h1>
-<p class="hint">The works cited by the notes of The British Study Edition (ed. Tigran Aivazian)
-on the site so far, {{ works|length }} in all, by author, each with the notes that cite it. It grows
-as each paper’s notes are reviewed. A reference opens its paragraph, with the note.</p>
+<h1>{{ t('Bibliography') }}</h1>
+<p class="hint">{{ t('bib:hint', n=works|length) }}</p>
 <ul class="bib">{% for w in works %}
 <li><p class="work">{{ w.html|safe }}</p>{% if w.url %}
   <p class="lib">{{ libref(w.url) }}</p>{% endif %}
-  <p class="by">Cited at {% for c in w.cited_by %}<a href="/{{ c.para_ref }}#note{{ c.key }}">{{ c.para_ref }}</a>, note {{ c.num }}{{ '; ' if not loop.last else '.' }}{% endfor %}</p></li>{% endfor %}
+  <p class="by">{{ t('Cited at') }} {% for c in w.cited_by %}<a href="/{{ c.para_ref }}#note{{ c.key }}">{{ c.para_ref }}</a>{{ t(', note {n}', n=c.num) }}{{ '; ' if not loop.last else '.' }}{% endfor %}</p></li>{% endfor %}
 </ul>
 </main>{% endblock %}

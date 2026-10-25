@@ -1,10 +1,9 @@
-{% extends "base.html" %}{% block title %}Not in the offline copy{% endblock %}
+{% extends "base.html" %}{% set title = 'Not in the offline copy' %}
 {#- What the offline copy shows for an address it does not hold, while the
     network does not answer (static/sw.js): a reading path, the API's page.
     Rendered once, by offline/pages.py, with a NUL for the message. #}
 {% block body %}<main class="prose">
-<h1>Not in the offline copy</h1>
+<h1>{{ t('Not in the offline copy') }}</h1>
 <p>{{ msg }}</p>
-<p>The <a href="/read">contents</a><span class="ix">, the <a href="/index">index</a></span> and the
-search box above all work offline.</p>
+<p>{{ t('The <a href="/read">contents</a>') }}<span class="ix">{{ t(', the <a href="/index">index</a>') }}</span>{{ t(' and the search box above all work offline.') }}</p>
 </main>{% endblock %}

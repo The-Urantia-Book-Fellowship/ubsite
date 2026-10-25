@@ -44,6 +44,11 @@ MANIFEST = [
     # The face a study note's math is set in, subset by build/fonts.py: OFL 1.1,
     # drawn to match EB Garamond, the nearest of TeX Live's math fonts to Goudy.
     ("texlive", "fonts/opentype/public/garamond-math/Garamond-Math.otf", "fonts/Garamond-Math.otf"),
+    # The Cyrillic of the interface in Russian, which UB Goudy has none of: EB
+    # Garamond, OFL 1.1, the face Garamond-Math is drawn to, subset by
+    # build/fonts.py to the Russian alphabet (Tigran, 2026-10-25).
+    ("texlive", "fonts/opentype/public/ebgaramond/EBGaramond-Regular.otf", "fonts/EBGaramond-Regular.otf"),
+    ("texlive", "fonts/opentype/public/ebgaramond/EBGaramond-Italic.otf", "fonts/EBGaramond-Italic.otf"),
     # SQLite's WebAssembly build, which searches the offline copy in a reader's
     # browser (ubsite/static/sw.js): the classic script and its binary.
     ("sqlite_wasm", "jswasm/sqlite3.js",               "sqlite-wasm/sqlite3.js"),

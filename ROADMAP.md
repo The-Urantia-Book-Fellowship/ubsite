@@ -81,8 +81,16 @@ The press text is authoritative American; the British Study Edition is revised, 
 **14. The concept graph.** `[partly built]`
 9,721 co-citation pairs over level-1 headwords. The "cited alongside" strip exists. Do **not** build a force-directed graph of 4,736 nodes first — it will be pretty and say nothing. Earn it with the strip.
 
-**15. Parallel translations.**
-~15 translations sit in sibling directories, all `\vs`-addressed, so the address space is already language-independent — the hard part is done. The index stays English; a Russian reader gets Russian text with English index chips, clearly labelled. That is honest, and still more than anyone else offers.
+**15. Parallel translations.** `[under way]`
+~15 translations sit in sibling directories, all `\vs`-addressed, so the address space is already language-independent — the hard part is done. The plan of work (Tigran, 2026-10-25), in two steps over several sessions, Russian first:
+
+1. **The interface in Russian.** `[built]` (2026-10-25) Switched by a UK and a Russian flag at the header's top right, and in the browser's language until a flag is tapped. Both languages are in every page and CSS shows one, as the index switch hides the index, so no setting reaches the server and the offline copy stays one copy for every reader. Everything a reader sees is translated but the book, its index and appendices, the changelog and the API's documentation. A Paper is «Документ», and the site's name «Книга Урантии».
+2. **Translations beside the text.** Under each paragraph, folded to one line, "› 2 translations", as the index's boxes fold on a phone; opened, each translation of that paragraph, named by its translator. The English stays the text, and the index stays English. The Russian ones first:
+   - Tigran's own, «Урантийские документы», in `../ud`;
+   - the late Lila's, with Sergey Prokopov's corrections (urantia.nyc), in `../urantia-ru`;
+   - the Foundation's, from the latest HTML on urantia.org, never the old copy in `../urantia-rus`.
+
+   To settle then: the rights (the Foundation's translation is its copyright, and urantia.nyc's is the Society of Greater New York's); how each source's numbering joins ours (the Foundation's is `uf_ref`, trap 18 in CLAUDE.md); which translations a reader sees, as a Setting; whether they are in the offline copy, each being about another book; whether search reaches them. The Cyrillic typeface of step 1 sets them.
 
 **16. A public API and stable permalinks.** `[text built]`
 `/101:4.2` resolves. **`/api/v1/text`** (2026-10-11) is built: a versioned sync of the whole text, which other sites use to keep their copies in step. It serves the text as public domain, and gives each paragraph the Foundation's numbering beside ours. Still to come: `/api/v1/reverse/101:4.2`, the entries citing a paragraph, and `cite.parse` as a service. Together they would make the data a commons. The index's licence is settled (2026-10-14): CC BY-NC-SA 4.0, with the edition as a whole, so they can be built, the licence marked on what they send. NC still rules out commercial reuse.

@@ -7,7 +7,7 @@
         {% if n.verdict %}
         <p class="why"><span class="dec">{{ n.verdict }}.</span> {{ n.srt_why_hy|safe }}</p>
         {% if n.see_why %}<p class="why see"><a href="/{{ n.see_ref }}">{{ n.see_ref }}</a>: <span class="dec">{{ n.see_verdict }}.</span> {{ n.see_why_hy|safe }}</p>{% endif %}
-        <p class="src">Source · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">SRT Committee table ↗</a></p>
+        <p class="src">{{ t('Source') }} · <a href="{{ n.srt_href }}" target="_blank" rel="noopener">{{ t('SRT Committee table') }} ↗</a></p>
         {% endif %}
       </aside>{% endmacro %}
 
@@ -18,17 +18,17 @@
     contributor's line.  Opened as a card at its number, as a 1955 reading is
     at its ring; endnotes without JavaScript and in print. #}
 {% macro snote(n) %}<aside class="note st" id="fn{{ n.key }}">
-        <p class="lead"><a class="lbl" href="#fnref{{ n.key }}"><span class="at">{{ n.para_ref }} </span>Note {{ n.num }}</a> {{ n.html_hy|safe }}</p>
+        <p class="lead"><a class="lbl" href="#fnref{{ n.key }}"><span class="at">{{ n.para_ref }} </span>{{ t('Note {n}', n=n.num) }}</a> {{ n.html_hy|safe }}</p>
         {{ sfoot(n) }}
       </aside>{% endmacro %}
 {#- A work's page in Tigran's library, where it can be read freely (Tigran,
     2026-10-25): under a work in the Bibliography, and after a source in a
     note's card. #}
-{% macro libref(url) %}<a class="lib" href="{{ url }}" target="_blank" rel="noopener">Read it in the Urantia Library&nbsp;↗</a>{% endmacro %}
+{% macro libref(url) %}<a class="lib" href="{{ url }}" target="_blank" rel="noopener">{{ t('Read it in the Urantia Library') }}&nbsp;↗</a>{% endmacro %}
 {#- What stands under a study note: the sources it cites, each with its page
     where it can be read freely (Tigran's library, 2026-10-25), and its credit.
     The card and the List of study notes alike. #}
 {% macro sfoot(n) %}{% for c in n.sources %}<p class="cite">[{{ loop.index }}] {{ c.html|safe }}{% if c.url %} {{ libref(c.url) }}{% endif %}</p>{% endfor %}
-        {% if n.block %}<p class="src">Identified by Matthew Block · <a href="{{ n.block_url }}" target="_blank" rel="noopener">parallel chart, Paper {{ n.paper_n }}, {{ n.block }} ↗</a>
-          {%- if n.corrects %} · corrected here from the original: {{ n.corrects|safe }}{% endif %}</p>{% endif %}
+        {% if n.block %}<p class="src">{{ t('Identified by Matthew Block') }} · <a href="{{ n.block_url }}" target="_blank" rel="noopener">{{ t('parallel chart, Paper {n}, {date}', n=n.paper_n, date=n.block) }} ↗</a>
+          {%- if n.corrects %} · {{ t('corrected here from the original:') }} {{ n.corrects|safe }}{% endif %}</p>{% endif %}
         {% if n.credit %}<p class="src">{{ n.credit }}</p>{% endif %}{% endmacro %}

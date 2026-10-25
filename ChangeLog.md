@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The site can be read with its interface in Russian: the flags at the top right switch between English and Russian, and a browser set to Russian starts in Russian. The text, the index and the appendices stay as the book prints them, in English.
 - The Bibliography links each work that can be read freely in the Urantia Library to its page there, and so does a study note's card where it cites one.
 - The offline copy now keeps itself up to date whenever the site is open and online, then shows what is new and reloads the page once that is closed; Settings can turn this off, leaving Update now to you.
 - The page about the text API is in the offline copy too, so it can be read without a connection, naming the site it is read at; the API itself still needs one.
@@ -58,6 +59,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- Ctrl+, opens Settings on a Russian keyboard too, where that key types б.
 - Beside a paper's first paragraph, on a wide screen, the index entries stand level with its text again, not with the line of its reference above it.
 - The Foreword is headed Foreword alone, as the book heads it, not Paper 0.
 - The Bibliography gives the publisher of Illingworth's Personality Human and Divine as its 1894 title page does, Macmillan and Co., not The Macmillan Company.
@@ -65,6 +67,9 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The interface is in English and Russian. Every word around the book is an entry of `ubsite/ru.toml`, keyed by its English, which `ubsite/l10n.py` draws in the templates and `/l10n.js` in the scripts. A page carries both languages, in `<x-en>` and `<x-ru>` elements and `data-ru-*` attributes, and CSS shows the reader's, by `data-lang` on `<html>`: no setting reaches the server, and the offline copy is still one copy for every reader. A string the site draws that `ru.toml` lacks is an error. `UB_BILINGUAL=0` in the environment draws English alone, as before.
+- The offline copy's format is 2: a page's title piece begins inside its `<title` tag, so as to carry its Russian, `data-ru`. A worker from before refuses a copy of format 2 and asks for a reload.
+- EB Garamond Regular and Italic, OFL 1.1, are vendored from TeX Live (`vendor/fonts/`), and `build/fonts.py` subsets them to the Cyrillic alphabet and № as more faces of UB Goudy, which has no Cyrillic. Its glyph gate now reads the words of `ru.toml` in both languages.
 - `study_source` has a new column, `url`: the work's page where it can be read freely, in Tigran's library at https://ulib.sigmaai.au, or NULL. The build reads it from `originals/LIBRARY.tsv` in the block-sources directory, a line whose new column `public` is `yes`, and records that file's SHA-256 in `build_source` as `library`.
 - `index_entry` has two new columns, `headword_html` and `path_html`, `xref` one, `target_html`, and `chronology_event` one, `label_html`: each the HTML of the plain column beside it, the same words with an ordinal's suffix in `<sup>`, as the index now sets it (`\ts`, its 0aeae38). The plain columns read `1st` as before. The offline search databases carry where each hit's superscripts stand.
 - `chronology_event` has a new column, `line_html`: the event on one line with its citations as printed, each a link to its place in the text.

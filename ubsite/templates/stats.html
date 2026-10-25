@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% block title %}Visits{% endblock %}
+{% extends "base.html" %}{#- The owner's page, in English. #}{% set title = same('Visits') %}
 {#- The owner's page (ubsite/stats.py).  Its styles live here, not in ub.css,
     so that no reader downloads them. #}
 {% block head %}<meta name="robots" content="noindex">
