@@ -21,6 +21,16 @@
 // dot.  Until 2026-10-14 all this was in Settings, a switch turned on or off,
 // and a reader who turned it off to be "online" again lost the copy; a stale
 // copy was announced by a line under the header too (Tigran).
+//
+// Unless Settings' "Keep the offline copy up to date" is off (settings.py
+// OFFLINE), an out-of-date copy is updated by itself, as if Update now had
+// been tapped, whenever a check finds it so with the site reached and this
+// page in view: as a page loads, as the browser comes online, and as the page
+// comes into view again (keepUp).  Only from a page the reader has open, never
+// in the background.  At its end What's new opens, saying what changed since
+// the copy before, and the page reloads once it is closed (told).  Update now
+// is for a reader who keeps the copy as it was until they choose; most would
+// forget it, and find the copy "broken" (Tigran, 2026-10-25).
 (function () {
   var box = document.getElementById('offmenu'), icon = document.querySelector('.top .offline');
   if (!box || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
@@ -41,6 +51,10 @@
   // The index turned off in Settings: what the menu says of the copy leaves it
   // out, as the page does (settings.py `index`).
   function noIndex() { return !!window.ubSettings && window.ubSettings.get().index === false; }
+  // Kept up to date by itself (settings.py `autoupdate`), on unless turned off.
+  function byItself() { return !window.ubSettings || window.ubSettings.get().autoupdate !== false; }
+  // Listening: closing What's new then reloads nothing, which would stop it.
+  function listening() { return !!document.querySelector('.player'); }
   function ask(cmd, more) {
     return sw.ready.then(function (reg) {
       return new Promise(function (resolve) {
@@ -71,6 +85,7 @@
   function heard(s) {
     if (s && 'reached' in s) reach(s.reached);
     show(s);
+    keepUp(s);
   }
   var last = null;
   function show(s) {
@@ -97,7 +112,7 @@
       line.innerHTML = 'Out of date: kept as the site was on ' + day(have.made) + ', which has changed since. ' +
                        (online() ? '<br><button type="button" class="get"><span>Update now (' + mb(up.fetch) + ')</span></button>' +
                                    ' <button type="button" class="newsbtn" popovertarget="offnews"><span>What’s new</span></button>'
-                                 : 'It can be updated once online.') +
+                                 : byItself() ? 'It updates by itself once online.' : 'It can be updated once online.') +
                        (err ? '<br>The last update stopped: ' + err + '.' : '');
       mark('stale', 'An update to the offline copy is waiting (' + mb(up.fetch) + ')');
     } else {
@@ -143,8 +158,10 @@
   // A popup over the menu, which stays open
   // beneath it with its Update button: a popover inside the menu's, so the
   // browser counts it the menu's own.  At its foot, the whole changelog, the
-  // page /changelog (2026-10-18).
-  var news = document.createElement('div');
+  // page /changelog (2026-10-18).  After an update made by itself, it says so,
+  // and lists what changed since the copy before, whose date is `since` until
+  // it closes (told).
+  var news = document.createElement('div'), since = null;
   news.id = 'offnews';
   news.className = 'offnews';
   news.setAttribute('popover', '');
@@ -152,33 +169,45 @@
   news.setAttribute('aria-labelledby', 'offnews-title');
   box.appendChild(news);
   news.addEventListener('beforetoggle', function (ev) { if (ev.newState === 'open') whatsNew(); });
+  news.addEventListener('toggle', function (ev) { if (ev.newState === 'closed') since = null; });
+  function manifest() {
+    return fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    });
+  }
+  // What the manifest lists after `made`, by day, newest first: '' for nothing.
+  function listed(m, made) {
+    var days = {}, order = [], n = m.news || { items: [] };
+    function put(d, html) {
+      if (!days[d]) { days[d] = []; order.push(d); }
+      days[d].push(html);
+    }
+    // The times are UTC, written alike, so they compare as strings.
+    n.items.forEach(function (x) { if (x.t > made) put(x.d, esc(x.s)); });
+    order.sort().reverse();
+    var oldest = n.items[n.items.length - 1];
+    return order.length ? order.map(function (d) {
+      return '<h3>' + day(d) + '</h3><ul><li>' + days[d].join('</li><li>') + '</li></ul>';
+    }).join('') + (n.earlier && oldest && made < oldest.t ? '<p class="earlier">And earlier changes.</p>' : '') : '';
+  }
   function whatsNew() {
-    var have = last && last.have;
+    var made = since || (last && last.have && last.have.made);
     news.innerHTML = '<div class="bar"><h2 id="offnews-title">What’s new</h2>' +
       '<button type="button" class="x" popovertarget="offnews" popovertargetaction="hide" aria-label="Close" ' +
       'title="Close"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>' +
-      '</svg></button></div><p class="since">' + (have ? 'Since your copy, kept as the site was on ' + day(have.made) + ':'
-                                                       : '') + '</p><div class="days">…</div>' +
+      '</svg></button></div><p class="since">' +
+      (since ? 'The offline copy has just been updated. New since its last update, on ' + day(since) + ':'
+             : made ? 'Since your copy, kept as the site was on ' + day(made) + ':' : '') +
+      '</p><div class="days">…</div>' +
+      (since ? '<p class="then">' + (listening() ? 'The next page you open is the new one.'
+                                                 : 'Closing this reloads the page, so that it is the new one too.') + '</p>'
+             : '') +
       '<p class="all"><a href="/changelog">The whole changelog</a></p>';
     var out = news.querySelector('.days');
-    if (!have) { out.textContent = ''; return; }
-    fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
-      if (!r.ok) throw new Error(r.status);
-      return r.json();
-    }).then(function (m) {
-      var days = {}, order = [], n = m.news || { items: [] };
-      function put(d, html) {
-        if (!days[d]) { days[d] = []; order.push(d); }
-        days[d].push(html);
-      }
-      // The times are UTC, written alike, so they compare as strings.
-      n.items.forEach(function (x) { if (x.t > have.made) put(x.d, esc(x.s)); });
-      order.sort().reverse();
-      var oldest = n.items[n.items.length - 1];
-      out.innerHTML = order.length ? order.map(function (d) {
-        return '<h3>' + day(d) + '</h3><ul><li>' + days[d].join('</li><li>') + '</li></ul>';
-      }).join('') + (n.earlier && oldest && have.made < oldest.t ? '<p class="earlier">And earlier changes.</p>' : '')
-        : '<p>Nothing is listed for this update.</p>';
+    if (!made) { out.textContent = ''; return; }
+    manifest().then(function (m) {
+      out.innerHTML = listed(m, made) || '<p>Nothing is listed for this update.</p>';
     }, function () {
       out.textContent = 'The list could not be fetched just now.';
     });
@@ -188,10 +217,15 @@
   // buttons go with it, rather than come back to do nothing again.  An update
   // that ends whole reloads this page, so that it is the new one too, playing
   // or not (Tigran, 2026-10-18); while What's new is open, once it closes.
-  function get(update) {
+  // One made by itself (`was`, the date of the copy before) says so first
+  // (told).  One that stops is not made by itself again for an hour (failed).
+  function get(update, was) {
     return ask('get').then(function (s) {
       show(s);
-      if (s && s.error) fresh();
+      if (s && s.error) {
+        failed(s.latest && s.latest.build);
+        fresh();
+      } else if (was) told(was);
       else if (update) reload();
     });
   }
@@ -233,18 +267,80 @@
       return sw.getRegistration('/');
     }).then(function (reg) { return reg && reg.unregister(); }).then(function () { show(null); });
   }
+  // Update now, tapped (or Try again), or made by itself (keepUp).  Said here
+  // at once, not left to the worker: the button goes, so a second tap cannot
+  // look as if it did nothing.  `going` while this page has one under way.
+  var going = false;
+  function update(itself) {
+    var have = last && last.have;
+    going = true;
+    show(Object.assign({}, last || {}, { busy: { done: 0, total: 0 }, removed: false }));
+    return newest().then(function () { return get(!!have, itself && have && have.made); })
+      .then(function () { going = false; }, function () { going = false; });
+  }
+
+  // An update made by itself, where Settings has not turned that off: when a
+  // check finds the copy out of date, with the site reached and this page in
+  // view, unless the browser is saving data, or this browser tried the same
+  // update by itself within the hour and it stopped (Update now still offers
+  // it).  A download already under way, from the page before a link was
+  // followed, or from Update now there, is this page's to finish: asking the
+  // worker for it again waits for the one running.
+  var TRIED = 'ub_offline_auto', HOUR = 3600 * 1000, tried = null;
+  function failed(build) {
+    if (!build) return;
+    tried = { build: build, at: Date.now() };
+    try { localStorage.setItem(TRIED, JSON.stringify(tried)); } catch (e) {}
+  }
+  function triedLately(build) {
+    var t = tried;
+    try { t = JSON.parse(localStorage.getItem(TRIED)) || t; } catch (e) {}
+    return !!t && t.build === build && Date.now() - t.at < HOUR;
+  }
+  function keepUp(s) {
+    if (going || !byItself() || !s || !s.have || document.hidden || !online()) return;
+    if (s.busy) {
+      going = true;
+      return get(true, s.have.made).then(function () { going = false; }, function () { going = false; });
+    }
+    if (!s.latest || triedLately(s.latest.build)) return;
+    if (navigator.connection && navigator.connection.saveData) return;
+    update(true);
+  }
+  // Its end: What's new, opened over the menu, says that the copy has just
+  // been updated and lists what changed since the copy before (`was`), and the
+  // page reloads once it is closed, as after Update now; while listening, it
+  // does not, which would stop the reading.  With nothing listed, no reader
+  // would see a difference: nothing is said and nothing reloaded, and the
+  // next page is the new one.  It waits for the page to be in view, and for
+  // Settings to close.
+  function told(was) {
+    var dlg = document.querySelector('dialog[open]');
+    if (dlg) return dlg.addEventListener('close', function () { told(was); }, { once: true });
+    if (document.hidden) {
+      var seen = function () {
+        if (document.hidden) return;
+        document.removeEventListener('visibilitychange', seen);
+        told(was);
+      };
+      return document.addEventListener('visibilitychange', seen);
+    }
+    manifest().then(function (m) {
+      if (!listed(m, was)) return;
+      since = was;
+      if (!box.matches(':popover-open')) box.showPopover();
+      if (news.matches(':popover-open')) whatsNew(); else news.showPopover();
+      if (!listening()) reload();
+    }, function () {});
+  }
+
   box.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('button');
     if (!b) return;
     if (b.classList.contains('keep')) on();
     else if (b.classList.contains('drop')) off();
-    else if (b.classList.contains('get')) {
-      // Said here at once, not left to the worker: the button goes, so a
-      // second tap cannot look as if it did nothing.
-      var update = !!(last && last.have);
-      show(Object.assign({}, last || {}, { busy: { done: 0, total: 0 }, removed: false }));
-      newest().then(function () { return get(update); });
-    } else if (b.classList.contains('app') && window.ubInstall) {
+    else if (b.classList.contains('get')) update(false);
+    else if (b.classList.contains('app') && window.ubInstall) {
       window.ubInstall.prompt();
       window.ubInstall.userChoice.then(function () { window.ubInstall = null; installed(); });
     }
@@ -282,5 +378,11 @@
   function fresh() { if (kept && navigator.onLine !== false) ask('check', { force: true }).then(heard); }
   box.addEventListener('toggle', function (ev) { if (ev.newState === 'open') fresh(); });
   window.addEventListener('online', fresh);
+  // Coming into view again, as an app brought back to the front, whose page
+  // does not load again: asked as a page load asks, at most once an hour,
+  // so that the copy is kept up to date by itself there too (keepUp).
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && kept && navigator.onLine !== false) ask('check').then(heard);
+  });
   window.addEventListener('offline', function () { if (last) show(last); });
 })();

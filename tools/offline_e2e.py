@@ -1,7 +1,8 @@
 """Work offline, end to end, in Chrome: turn it on, read and search with the
 network off, learn of a newer copy and take it, with the site's newer worker,
 the page reloading itself after, survive an update that fails, say offline
-while the site is gone though the browser is online, and turn it off.
+while the site is gone though the browser is online, keep it up to date by
+itself, with What's new at the end, and turn it off.
 
     make e2e          (make offline, then .venv/bin/python tools/offline_e2e.py)
 
@@ -79,10 +80,10 @@ def ok(cond, what):
         fails.append(what)
 
 
-def change(copy: pathlib.Path, edit, names=("misc",)) -> dict:
+def change(copy: pathlib.Path, edit, names=("misc",), news: bool = True) -> dict:
     """A newer build of the scratch copy: each chunk named passed through `edit`,
-    renamed by its new hash, and the manifest made to say so.  Returns the
-    last chunk changed."""
+    renamed by its new hash, and the manifest made to say so, with a line in
+    its news unless `news` is false.  Returns the last chunk changed."""
     m = json.loads((copy / "manifest.json").read_text())
     for c in m["chunks"]:
         if c["name"] not in names:
@@ -98,10 +99,11 @@ def change(copy: pathlib.Path, edit, names=("misc",)) -> dict:
     # Each newer build a day after the last, from Christmas, with one change
     # made that morning, after any copy before it, for What's new to list.
     change.n = getattr(change, "n", 0) + 1
-    d = f"2026-12-{24 + change.n}"
+    d = (datetime.date(2026, 12, 24) + datetime.timedelta(days=change.n)).isoformat()
     m["made"] = f"{d}T12:00:00Z"
-    m.setdefault("news", {"items": [], "earlier": False})["items"].insert(
-        0, {"t": f"{d}T11:00:00Z", "d": d, "s": f"A change made for this test, number {change.n}"})
+    if news:
+        m.setdefault("news", {"items": [], "earlier": False})["items"].insert(
+            0, {"t": f"{d}T11:00:00Z", "d": d, "s": f"A change made for this test, number {change.n}"})
     m["bytes"] = sum(x["bytes"] for x in m["chunks"])
     (copy / "manifest.json").write_text(json.dumps(m))
     return changed
@@ -129,6 +131,12 @@ KEPT = """async () => { const out = {gz: 0, have: 0};
       const m = /^\/offline\/(gz|have)\//.exec(new URL(req.url).pathname);
       if (m) out[m[1]]++; }
   return out; }"""
+
+# An hour later, as the worker counts it: the next page loaded asks the site
+# whether its copy is current, as it does at most once an hour.
+HOUR_LATER = """async () => { const c = await caches.open('ub-meta');
+  const m = await (await c.match('/offline/meta')).json(); m.checked = 0;
+  await c.put('/offline/meta', new Response(JSON.stringify(m), {headers: {'Content-Type': 'application/json'}})); }"""
 
 # What the page shows while an update runs, in the menu and on the icon's
 # label, each line once, as it changes; in sessionStorage too, which the
@@ -248,6 +256,10 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         used =pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
         print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
         ok(used < m["bytes"] * 1.25, "it keeps the copy gzipped, as it came")
+        ok(pg.evaluate("!document.querySelector('dialog.settings fieldset.offline').hidden"),
+           "Settings offers to keep it up to date by itself, where Work offline can run")
+        # Updated by hand, with Update now, until "Kept up to date by itself".
+        pg.evaluate("ubSettings.set('autoupdate', false)")
 
         # What the server sends, to hold the worker's answers to.
         want = {}
@@ -492,6 +504,98 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(i["net"] == "on" and pg.inner_text("#offmenu .net").lower().startswith("online"),
            f"the site back, a page from the copy says online, and Update now is back ({i['title']!r})")
         pg.keyboard.press("Escape")
+
+        print("Kept up to date by itself")
+        ctx.set_offline(False)
+        pg.goto(BASE + "/read")
+        pg.evaluate("ubSettings.set('autoupdate', true)")
+        # The update that stopped above, tapped, is not made by itself again
+        # within the hour.
+        tries = log.read_text().count(gone["file"])
+        pg.reload()
+        menu(pg)
+        wait_state(pg, "t.includes('changed since')")
+        pg.wait_for_timeout(1500)
+        ok(log.read_text().count(gone["file"]) == tries and pg.is_visible("#offmenu .get"),
+           "an update that stopped is not made by itself again within the hour, and Update now offers it")
+        pg.keyboard.press("Escape")
+        # A newer build: a page loaded starts the update with no tap, and What's
+        # new opens at its end, over the menu, with what changed since the copy
+        # kept: this build's change, and the one that stopped's.
+        (copy / gone["file"]).write_bytes(kept)
+        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, by itself"), d)[1])
+        before = log.read_text().count("/offline/c/")
+        pg.evaluate(HOUR_LATER)
+        pg.goto(BASE + "/read")
+        pg.evaluate("window.ubStay = 1")
+        pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=60000)
+        said = pg.inner_text("#offnews")
+        print("  " + " | ".join(said.split("\n")))
+        ok("just been updated" in said and f"number {change.n}" in said and f"number {change.n - 1}" in said
+           and pg.locator("#offnews li").count() == 2,
+           "with no tap, the copy is updated, and What's new says so, listing what changed since the copy kept")
+        ok("Closing this reloads the page" in said and pg.is_visible("#offmenu"), "over the menu, saying what closing it does")
+        fetched = log.read_text().count("/offline/c/") - before
+        ok(fetched == 1, f"it fetched only what changed ({fetched} chunk)")
+        pg.wait_for_timeout(500)
+        ok(pg.evaluate("window.ubStay") == 1, "the page waits for What's new to close")
+        with pg.expect_event("load", timeout=10000):
+            pg.click("#offnews .x")
+        ok(not pg.evaluate("window.ubStay") and icon(pg)["have"] == "kept", "and reloads once it is closed")
+        ctx.set_offline(True)
+        pg.goto(BASE + "/")
+        ok(pg.title() == "The Urantia Book, by itself", "offline, the copy is the newer one")
+        # Out of date while offline: coming online updates it.
+        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, online again"), d)[1])
+        pg.goto(BASE + "/read")
+        menu(pg)
+        wait_state(pg, "t.startsWith('Up to date')")
+        pg.keyboard.press("Escape")
+        pg.evaluate("window.ubStay = 1")
+        ctx.set_offline(False)
+        pg.wait_for_selector("#offnews", state="visible", timeout=60000)
+        ok(f"number {change.n}" in pg.inner_text("#offnews"), "coming online, the copy is updated by itself")
+        with pg.expect_event("load", timeout=10000):
+            pg.keyboard.press("Escape")
+        ok(not pg.evaluate("window.ubStay"), "and Escape closes What's new, reloading the page")
+        # A build with nothing for a reader in its news: updated, and nothing said.
+        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, quietly"), d)[1], news=False)
+        build = json.loads((copy / "manifest.json").read_text())["build"]
+        pg.evaluate(HOUR_LATER)
+        pg.goto(BASE + "/read")
+        pg.evaluate("window.ubStay = 1")
+        pg.wait_for_function("async b => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())"
+                             ".current === b", arg=build, timeout=60000)
+        pg.wait_for_timeout(1000)
+        ok(pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews") and icon(pg)["have"] == "kept",
+           "with nothing listed for it, the copy is updated without a word, and the page not reloaded")
+        # While listening, and with the page out of view: nothing until it is in
+        # view again; then What's new, and closing it does not stop the reading.
+        pg.evaluate("ubSettings.set('autoupdate', false)")
+        change(copy, lambda d: (d["pages"]["/"].update(t="The Urantia Book, listening"), d)[1])
+        pg.goto(BASE + "/101:4")
+        pg.locator("p.t .playp").first.click()
+        pg.wait_for_selector(".player", timeout=5000)
+        pg.evaluate("ubSettings.set('autoupdate', true); window.ubStay = 1")
+        before = log.read_text().count("/offline/c/")
+        pg.evaluate("Object.defineProperty(document, 'hidden', {value: true, configurable: true});"
+                    " Object.defineProperty(document, 'visibilityState', {value: 'hidden', configurable: true});"
+                    " dispatchEvent(new Event('online'))")
+        pg.wait_for_timeout(1500)
+        ok(log.read_text().count("/offline/c/") == before, "out of view, the copy is not updated by itself")
+        pg.evaluate("delete document.hidden; delete document.visibilityState;"
+                    " document.dispatchEvent(new Event('visibilitychange'))")
+        pg.wait_for_selector("#offnews", state="visible", timeout=60000)
+        said = pg.inner_text("#offnews")
+        ok(f"number {change.n}" in said and "The next page you open is the new one" in said,
+           "in view again, it is, and What's new says that the next page is the new one")
+        pg.click("#offnews .x")
+        pg.wait_for_timeout(1000)
+        ok(pg.evaluate("window.ubStay") == 1 and pg.locator(".player").count() == 1,
+           "closing it, while listening, does not reload the page")
+        pg.click(".player button.close") if pg.locator(".player button.close").count() else None
+        pg.keyboard.press("Escape")
+        ok(not errors, f"no script errors ({errors[:2]})")
 
         print("Turning it off")
         ctx.set_offline(False)

@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The offline copy now keeps itself up to date whenever the site is open and online, then shows what is new and reloads the page once that is closed; Settings can turn this off, leaving Update now to you.
 - The page about the text API is in the offline copy too, so it can be read without a connection, naming the site it is read at; the API itself still needs one.
 - Ctrl+X puts the words selected into the search box, ready to search with Enter or to be changed first, or with nothing selected goes to the search box; Escape there goes back to where you were reading.
 - Paper 8, The Infinite Spirit, has study notes too, 16 of them, and the Bibliography lists the work they add.

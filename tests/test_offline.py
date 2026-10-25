@@ -146,7 +146,14 @@ class Pages(unittest.TestCase):
         self.assertRegex(body, r'<button class="offline" type="button" popovertarget="offmenu"[^>]*\n?[^>]*'
                                r'data-src="/static/offline\.js\?v=')
         self.assertIn('<div id="offmenu" class="offmenu" popover hidden>', body)
-        self.assertNotIn('fieldset class="offline"', body)
+        # Settings has no switch for the copy itself, only whether it keeps
+        # itself up to date, on unless turned off (2026-10-25): hidden until
+        # ub.js finds that Work offline can run here.
+        from ubsite import settings
+        fs = re.search(r'<fieldset class="offline" hidden>(.*?)</fieldset>', body, re.S)
+        self.assertTrue(fs)
+        self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), ["autoupdate"])
+        self.assertIs(settings.defaults()["autoupdate"], True)
 
     def test_every_kind_of_page_cuts_and_joins_again(self):
         from offline import pages, site

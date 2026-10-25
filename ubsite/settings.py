@@ -129,6 +129,16 @@ LISTEN = [
     # carries on, across papers, through the whole book (2026-10-08).
     ("onward", "switch", "Carry on into the next section", False, [], "and so on through the book"),
 ]
+# Work offline's copy, updated by itself whenever the site is open and online
+# (static/offline.js auto()), then What's new, and the page reloaded once that
+# is closed.  Update now suits a reader who keeps a copy as it was until they
+# choose; most would forget it, and find the copy "broken" (Tigran,
+# 2026-10-25).  So on, unless a reader turns it off.  Shown only where Work
+# offline can run: ub.js unhides the group with the cloud.
+OFFLINE = [
+    ("autoupdate", "switch", "Keep the offline copy up to date", True, [],
+     "by itself, whenever the site is open and online, then shows what is new"),
+]
 
 
 # Remembered like the rest, but set where it is used, not in the dialog.  The
@@ -196,12 +206,13 @@ def groups(voices: list[dict]) -> list[dict]:
         for v in voices] + [BROWSER, {"value": "off", "label": "Off", "hint": "no listening controls", "cls": ""}]
     return [{"legend": "Reading", "items": [_item(*s) for s in READING]},
             {"legend": "Show", "items": [_item(*s) for s in SHOW]},
-            {"legend": "Listening", "items": items}]
+            {"legend": "Listening", "items": items},
+            {"legend": "Work offline", "items": [_item(*s) for s in OFFLINE], "cls": "offline"}]
 
 
 def defaults() -> dict:
     """{key: default} for every setting, for the head script and ub.js."""
-    return {s[0]: s[3] for s in READING + SHOW + LISTEN + KEPT}
+    return {s[0]: s[3] for s in READING + SHOW + LISTEN + OFFLINE + KEPT}
 
 
 def site_defaults() -> dict:

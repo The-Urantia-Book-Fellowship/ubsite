@@ -107,7 +107,8 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
     </div>
     {%- for g in settings_groups(voices()) %}
-    <fieldset>
+    {#- A group with a class is hidden until ub.js finds it can run: Work offline's. #}
+    <fieldset{% if g.cls %} class="{{ g.cls }}" hidden{% endif %}>
       <legend>{{ g.legend }}</legend>
       {%- for it in g["items"] %}
       {#- Built inside the tag, so fonts.py, which reads a template's text for the

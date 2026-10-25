@@ -627,6 +627,9 @@
   if (cloud && menu && 'serviceWorker' in navigator && window.isSecureContext &&
       'popover' in HTMLElement.prototype) {
     cloud.hidden = menu.hidden = false;
+    // And its setting, keeping the copy up to date by itself (settings.py OFFLINE).
+    var offset = document.querySelector('dialog.settings fieldset.offline');
+    if (offset) offset.hidden = false;
     // Offline (data-net) is the site out of reach: the browser says so, or the
     // worker answered for this page from its copy, which sw.js writes on the
     // footer; after that, as the browser says, and as the worker's check of

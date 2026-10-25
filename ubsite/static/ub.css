@@ -1062,6 +1062,8 @@ dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5
 .offnews li { margin: .2rem 0; }
 .offnews .earlier, .offnews .days > p { margin: .8rem 0 0; color: var(--faint); font-size: .88rem; }
 .offnews .all { margin: .8rem 0 0; font-size: .88rem; }
+/* After an update made by itself: what closing it does (offline.js told). */
+.offnews .then { margin: .8rem 0 0; font-size: .88rem; }
 /* A page the offline copy answered (static/sw.js) says so, and of when. */
 footer[data-copy]::before { content: "This page is from the offline copy of " attr(data-copy) ".";
   display: block; margin-bottom: .3rem; }
