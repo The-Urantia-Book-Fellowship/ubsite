@@ -234,7 +234,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         i = icon(pg)
         ok(i["shown"] and i["net"] == "on" and i["have"] == "none" and i["title"] == "Online",
            f"the icon at the header's corner says online, with no copy ({i})")
-        ok(not pg.locator("dialog.settings input[name=offline]").count(), "Settings has no Offline section")
+        ok(not pg.locator("dialog.settings input[name=offline]").count(), "Settings has no switch for the copy itself")
         ok(not pg.locator("#offmenu input").count(), "and the menu has no switch to turn off")
         pg.click(ICON)
         ok(pg.is_visible("#offmenu"), "the icon opens its menu")
@@ -256,8 +256,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         used =pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
         print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
         ok(used < m["bytes"] * 1.25, "it keeps the copy gzipped, as it came")
-        ok(pg.evaluate("!document.querySelector('dialog.settings fieldset.offline').hidden"),
-           "Settings offers to keep it up to date by itself, where Work offline can run")
+        ok(pg.evaluate("!document.querySelector('#set-t-offline').hidden && "
+                       "!document.querySelector('dialog.settings .panel.offline').hidden"),
+           "Settings offers to keep it up to date by itself, in its Offline tab, where Work offline can run")
         # Updated by hand, with Update now, until "Kept up to date by itself".
         pg.evaluate("ubSettings.set('autoupdate', false)")
 

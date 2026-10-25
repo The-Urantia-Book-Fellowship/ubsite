@@ -147,10 +147,14 @@ class Pages(unittest.TestCase):
                                r'data-src="/static/offline\.js\?v=')
         self.assertIn('<div id="offmenu" class="offmenu" popover hidden>', body)
         # Settings has no switch for the copy itself, only whether it keeps
-        # itself up to date, on unless turned off (2026-10-25): hidden until
-        # ub.js finds that Work offline can run here.
+        # itself up to date, on unless turned off (2026-10-25), in a tab of its
+        # own: tab and panel hidden until ub.js finds that Work offline can run
+        # here.
         from ubsite import settings
-        fs = re.search(r'<fieldset class="offline" hidden>(.*?)</fieldset>', body, re.S)
+        self.assertRegex(body, r'<button type="button" role="tab" id="set-t-offline"[^>]*'
+                               r' class="offline" hidden>Offline</button>')
+        fs = re.search(r'<div class="panel offline" role="tabpanel"\s+id="set-p-offline"'
+                       r' aria-labelledby="set-t-offline" hidden>(.*?)</div>', body, re.S)
         self.assertTrue(fs)
         self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), ["autoupdate"])
         self.assertIs(settings.defaults()["autoupdate"], True)

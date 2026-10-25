@@ -94,9 +94,13 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
 </div>
 <dialog class="settings" aria-labelledby="settings-title">
   {#- Rendered from ubsite/settings.py; ub.js fills in the values and keeps them.
-      Its top row stays in view as it scrolls, since on a phone it is taller
-      than the screen: × closes it (method="dialog" needs no script), and ↺
-      restores the defaults, asking first (Tigran, 2026-10-14). #}
+      × closes it (method="dialog" needs no script), and ↺ restores the
+      defaults, asking first (Tigran, 2026-10-14).  A tab to each group, the
+      dialog as tall as the tallest, so that it never changes size as the tabs
+      change (Tigran, 2026-10-25): the panels share one grid cell, the others
+      hidden by visibility (ub.css).  On a phone the panel scrolls, under the
+      top row and the tabs.  A tab is a button of type button, or it would
+      close the dialog. #}
   <form method="dialog">
     <div class="bar">
       <h2 id="settings-title">Settings</h2>
@@ -106,10 +110,19 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
       <button class="x" value="close" aria-label="Close" title="Close" autofocus>
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
     </div>
-    {%- for g in settings_groups(voices()) %}
-    {#- A group with a class is hidden until ub.js finds it can run: Work offline's. #}
-    <fieldset{% if g.cls %} class="{{ g.cls }}" hidden{% endif %}>
-      <legend>{{ g.legend }}</legend>
+    {%- set setgroups = settings_groups(voices()) %}
+    {#- A group with a class is hidden until ub.js finds it can run: Offline's. #}
+    <div class="tabs" role="tablist" aria-label="Settings">
+      {%- for g in setgroups %}
+      <button type="button" role="tab" id="set-t-{{ g.key }}" aria-controls="set-p-{{ g.key }}"
+              aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}"
+              {%- if g.cls %} class="{{ g.cls }}" hidden{% endif %}>{{ g.legend }}</button>
+      {%- endfor %}
+    </div>
+    <div class="panels">
+    {%- for g in setgroups %}
+    <div class="panel{% if loop.first %} on{% endif %}{% if g.cls %} {{ g.cls }}{% endif %}" role="tabpanel"
+         id="set-p-{{ g.key }}" aria-labelledby="set-t-{{ g.key }}"{% if g.cls %} hidden{% endif %}>
       {%- for it in g["items"] %}
       {#- Built inside the tag, so fonts.py, which reads a template's text for the
           characters to subset, does not count it as words on the page. #}
@@ -139,8 +152,9 @@ window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[
       </select></label>
       {%- endif %}
       {%- endfor %}
-    </fieldset>
+    </div>
     {%- endfor %}
+    </div>
     <p class="kept">Kept in this browser only.</p>
   </form>
 </dialog>

@@ -921,15 +921,30 @@ body.listening footer { padding-bottom: 5.5rem; }
 
 /* ---- Settings ---------------------------------------------------------- */
 dialog.settings { width: min(29rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem);
-  overflow-y: auto; padding: 0; color: var(--ink);
+  overflow: hidden; padding: 0; color: var(--ink); container-type: inline-size;
   background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
   box-shadow: 0 12px 40px rgb(0 0 0 / .28); }
+dialog.settings[open] { display: flex; flex-direction: column; }
+/* The page stays where it is behind it: Home, End, the arrows, the page keys
+   and the wheel over the backdrop moved the reader underneath, to the end of
+   the section with End (Tigran, 2026-10-25).  A panel taller than the dialog
+   still scrolls.  The scrollbar's room is kept, as padding as wide as the
+   scrollbar was (--sbw, set by ub.js as it opens; none where a scrollbar is
+   an overlay, or a page has none), or the section would be justified again,
+   a scrollbar wider, behind the backdrop.  Not by scrollbar-gutter, which
+   Chrome takes off 100vw, and with it a little off the text's size (--size),
+   so that every line moved. */
+html:has(dialog.settings[open]) { overflow: hidden; padding-right: var(--sbw, 0px); }
+html:has(dialog.settings[open]) .player { left: calc(50% - var(--sbw, 0px) / 2); }
 dialog.settings::backdrop { background: rgb(0 0 0 / .35); }
-dialog.settings form { display: flex; flex-direction: column; padding: 0 1.4rem 1rem; }
-/* The title, ↺ and ×, in view however far the dialog scrolls: the dialog is
-   the scroll box, and on a phone it is taller than the screen. */
-dialog.settings .bar { position: sticky; top: 0; z-index: 1; display: flex; align-items: center;
-  gap: .6rem; margin: 0 -1.4rem; padding: .75rem .8rem .45rem 1.4rem; background: var(--paper); }
+/* The title, ↺ and ×, the tabs, and "Kept in this browser only" stay where
+   they are; only a panel scrolls, on a phone, where the tallest is taller than
+   the screen.  Until 2026-10-25 the dialog was one long scroll of every group,
+   under a sticky top row. */
+dialog.settings form { flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column;
+  padding: 0 1.4rem; }
+dialog.settings .bar { flex: none; display: flex; align-items: center;
+  gap: .6rem; margin: 0 -1.4rem; padding: .75rem .8rem .45rem 1.4rem; }
 dialog.settings h2 { margin: 0 auto 0 0; }
 dialog.settings .bar button { display: grid; place-items: center; width: 2.2rem; height: 2.2rem;
   padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--faint);
@@ -943,18 +958,39 @@ dialog.settings .reset:disabled { opacity: .35; cursor: default; }
   dialog.settings .bar button:not(:disabled):hover {
     background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
 }
-/* As wide as the dialog, never its widest line: a fieldset is min-content wide
-   at least, unless told otherwise, and so a row could not wrap within it. */
-dialog.settings fieldset { min-width: 0; border: 0; border-top: 1px solid var(--rule); margin: 0;
-  padding: .55rem 0 .7rem; }
-dialog.settings legend { padding: 0 .4rem 0 0; font-size: .82rem; letter-spacing: .06em;
-  font-variant-caps: small-caps; color: var(--faint); }
+/* A tab to each group (Tigran, 2026-10-25), across the dialog, the one shown
+   underlined.  Their words are 13em and a little, so where the dialog is too
+   narrow for them, on a phone 320px wide or at Larger on one of 360px, they
+   are set smaller with it (cqi, of the dialog's width), rather than run into
+   each other. */
+dialog.settings .tabs { flex: none; display: flex; margin: 0 -1.4rem; padding: 0 .9rem;
+  padding: 0 min(.9rem, 3cqi); border-bottom: 1px solid var(--rule); }
+dialog.settings .tabs button { flex: 1 1 auto; margin: 0 0 -1px; padding: .35rem .3em .4rem;
+  border: 0; border-bottom: 2px solid transparent; background: none; color: var(--faint);
+  font: inherit; font-size: .98rem; font-size: min(.98rem, 6cqi); line-height: 1.4; cursor: pointer; }
+dialog.settings .tabs [aria-selected="true"] { color: var(--ink); border-bottom-color: var(--link); }
+dialog.settings .tabs button:focus-visible { outline: 2px solid var(--link); outline-offset: -3px; }
+@media (hover: hover) {
+  dialog.settings .tabs button:hover { color: var(--ink); }
+}
+/* The panels in one grid cell, which is as tall as the tallest of them, so
+   the dialog keeps one size whichever is shown: the others are hidden by
+   visibility, never by display, which would take them out of the cell.  Each
+   is as tall as the cell, and scrolls in it when the dialog is held to the
+   screen's height, so a short one never scrolls into the room a tall one
+   needs.  min-width: 0, or a row could not wrap within its panel. */
+dialog.settings .panels { flex: 0 1 auto; min-height: 0; display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr); margin: 0 -1.4rem; }
+dialog.settings .panel { grid-area: 1 / 1; min-width: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: .55rem 1.4rem .7rem; }
+dialog.settings .panel:not(.on) { visibility: hidden; }
 dialog.settings label { display: block; padding: .16rem 0; font-size: 1.02rem; cursor: pointer; }
 dialog.settings small { color: var(--faint); font-size: .85rem; }
 dialog.settings input { margin: 0 .45rem 0 0; accent-color: var(--link); }
 dialog.settings select { margin-left: .5rem; font: .9rem system-ui, sans-serif; color: inherit;
   background: var(--paper); border: 1px solid var(--rule); border-radius: 3px; }
-dialog.settings .kept { margin: .3rem 0 .7rem; font-size: .85rem; color: var(--faint); }
+dialog.settings .kept { flex: none; margin: 0; padding: .5rem 0 .9rem; border-top: 1px solid var(--rule);
+  font-size: .85rem; color: var(--faint); }
 dialog.settings .row { display: flex; align-items: center; justify-content: space-between;
   gap: .8rem; padding: .2rem 0; font-size: 1.02rem; }
 /* A row of pills: its label takes what the pills leave, on two lines if it must,

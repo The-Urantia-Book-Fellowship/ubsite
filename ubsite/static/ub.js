@@ -162,7 +162,15 @@
     if (synth && synth.addEventListener) synth.addEventListener('voiceschanged', function () {
       if (dlg.open) fill();
     });
-    gear.addEventListener('click', function () { fill(); resettable(); dlg.showModal(); });
+    // The page stays still behind it (ub.css), keeping its scrollbar's room
+    // only where it has a scrollbar to lose: an overlay one takes none, and a
+    // page shorter than the window has none.
+    gear.addEventListener('click', function () {
+      fill();
+      resettable();
+      document.documentElement.style.setProperty('--sbw', (window.innerWidth - document.documentElement.clientWidth) + 'px');
+      dlg.showModal();
+    });
     // Ctrl+, opens Settings from any page, as it opens an application's
     // preferences, and closes it again (Tigran, 2026-10-20).  On a Mac, ⌘, is
     // the browser's own and never reaches the page.
@@ -189,6 +197,43 @@
     });
     // A click on the backdrop closes it, as Escape does.
     dlg.addEventListener('click', function (ev) { if (ev.target === dlg) dlg.close(); });
+    // Opened by Ctrl+, there was no focus to give back, and Chrome left it in
+    // the closed dialog, where Space and End did nothing to the page.
+    dlg.addEventListener('close', function () {
+      if (dlg.contains(document.activeElement)) document.activeElement.blur();
+    });
+    // A tab to each group (Tigran, 2026-10-25), opened by a click, or by ←, →,
+    // Home and End among those shown.  From anywhere in the dialog, not only
+    // from the tabs, as a tablist would have it: the dialog opens with × in
+    // focus, and keys that did nothing there seemed broken (Tigran, the same
+    // day).  Not on a menu, whose own keys they all are, nor the arrows on a
+    // radio button: Theme's still go from Light to Dark.  The focus goes to the tab, so that
+    // it is never left on a panel now hidden.  The dialog opens again at the
+    // tab it was closed at, until the page is left.
+    var tabs = form.querySelector('.tabs');
+    var show = function (t) {
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        var on = b === t;
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        b.tabIndex = on ? 0 : -1;
+        document.getElementById(b.getAttribute('aria-controls')).classList.toggle('on', on);
+      });
+    };
+    tabs.addEventListener('click', function (ev) {
+      var t = ev.target.closest('[role="tab"]');
+      if (t) show(t);
+    });
+    dlg.addEventListener('keydown', function (ev) {
+      if (!dlg.open || ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey || ev.defaultPrevented ||
+          ev.target.closest('select') || (/^Arrow/.test(ev.key) && ev.target.type === 'radio')) return;
+      var all = Array.prototype.filter.call(tabs.children, function (b) { return !b.hidden; });
+      var i = all.indexOf(tabs.querySelector('[aria-selected="true"]')), n = all.length;
+      var to = { ArrowRight: i + 1, ArrowLeft: i - 1 + n, Home: 0, End: n - 1 }[ev.key];
+      if (i < 0 || to === undefined) return;
+      ev.preventDefault();
+      show(all[to % n]);
+      all[to % n].focus();
+    });
   }
 
   // Bring the page's focus into view.  /61:7.18 renders the whole of 61:7 with
@@ -627,9 +672,9 @@
   if (cloud && menu && 'serviceWorker' in navigator && window.isSecureContext &&
       'popover' in HTMLElement.prototype) {
     cloud.hidden = menu.hidden = false;
-    // And its setting, keeping the copy up to date by itself (settings.py OFFLINE).
-    var offset = document.querySelector('dialog.settings fieldset.offline');
-    if (offset) offset.hidden = false;
+    // And Settings' tab for it, keeping the copy up to date by itself
+    // (settings.py OFFLINE): the tab and its panel.
+    document.querySelectorAll('dialog.settings .offline').forEach(function (el) { el.hidden = false; });
     // Offline (data-net) is the site out of reach: the browser says so, or the
     // worker answered for this page from its copy, which sw.js writes on the
     // footer; after that, as the browser says, and as the worker's check of

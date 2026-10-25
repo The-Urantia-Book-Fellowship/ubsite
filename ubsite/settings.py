@@ -2,7 +2,7 @@
 
 Every setting is declared here, once:
 
-  - base.html renders the dialog from SETTINGS;
+  - base.html renders the dialog from them, a tab to each group (groups());
   - the head script in base.html gets each default (`defaults`) and, before
     first paint, sets data-<key> on <html> for every stored value that differs
     from its default ('off' for a switch turned off, else the value itself);
@@ -134,7 +134,7 @@ LISTEN = [
 # is closed.  Update now suits a reader who keeps a copy as it was until they
 # choose; most would forget it, and find the copy "broken" (Tigran,
 # 2026-10-25).  So on, unless a reader turns it off.  Shown only where Work
-# offline can run: ub.js unhides the group with the cloud.
+# offline can run: ub.js unhides its tab with the cloud.
 OFFLINE = [
     ("autoupdate", "switch", "Keep the offline copy up to date", True, [],
      "by itself, whenever the site is open and online, then shows what is new"),
@@ -198,16 +198,16 @@ BROWSER = {"value": "browser", "label": "Your browser\u2019s voice", "cls": "v-b
 
 
 def groups(voices: list[dict]) -> list[dict]:
-    """The dialog's fieldsets, in order."""
+    """The dialog's tabs, in order, each with its key for the ids (base.html)."""
     items = [_item(*s) for s in LISTEN]
     items[0]["choices"] = [
         {"value": v["key"], "label": v["label"], "cls": "",
          "hint": v.get("credit") or ("an AI voice" if v["kind"] == "synthetic" else "")}
         for v in voices] + [BROWSER, {"value": "off", "label": "Off", "hint": "no listening controls", "cls": ""}]
-    return [{"legend": "Reading", "items": [_item(*s) for s in READING]},
-            {"legend": "Show", "items": [_item(*s) for s in SHOW]},
-            {"legend": "Listening", "items": items},
-            {"legend": "Work offline", "items": [_item(*s) for s in OFFLINE], "cls": "offline"}]
+    return [{"key": "reading", "legend": "Reading", "items": [_item(*s) for s in READING]},
+            {"key": "show", "legend": "Show", "items": [_item(*s) for s in SHOW]},
+            {"key": "listening", "legend": "Listening", "items": items},
+            {"key": "offline", "legend": "Offline", "items": [_item(*s) for s in OFFLINE], "cls": "offline"}]
 
 
 def defaults() -> dict:

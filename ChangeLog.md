@@ -33,6 +33,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Settings is in four tabs, Reading, Show, Listening and Offline, so that it no longer runs off the screen, and it keeps one size whichever tab is open.
 - ubsite.sigmaai.au, the main site, now has the blue book as the icon of its tab and of its app, and ubsite.ddns.net the burgundy one; an app installed before keeps its old icon until it is installed again.
 - The index and the appendices set the suffix of an ordinal as a superscript, as the book does, in 1st, 6th and December 25th: on their own pages, beside the text, in the reading paths and in search.
 - Search results show a superscript where the text has one, as in 33:3.2's 611,121st, and so do the committee's reasons among the 1955 readings, and today's words beside each reading on the List of 1955 readings.
