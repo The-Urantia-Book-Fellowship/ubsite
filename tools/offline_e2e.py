@@ -368,6 +368,32 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.locator(".tf .trfold").first.inner_text() == "1 translation",
            "a section one of them lacks counts the other alone")
 
+        print("Compare")
+        pg.goto(BASE + "/1:1")
+        pg.click(".cmphead .cmpbtn")
+        pg.wait_for_selector("article.cmp .rc .rt")
+        cols = pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
+        ok(pg.url.endswith("/1:1/compare") and cols == ["en", "urantia-ru", "ud"],
+           f"Compare draws the English and each one ticked, a column each, in the reader's order ({cols})")
+        ok(pg.locator(".tf").first.is_hidden(), "and the folds give way to the columns")
+        pg.locator('.rc[data-k=ud] a.fn[data-k="tn"]').first.click()
+        pg.wait_for_selector(".pop.tn")
+        ok("Note 6" in pg.inner_text(".pop.tn"), "a translator's number in its column opens its card")
+        pg.keyboard.press("Escape")
+        pg.go_back()
+        pg.wait_for_function("!document.querySelector('article.cmp')")
+        ok(pg.url.endswith("/1:1") and pg.locator(".tf").first.is_visible(), "Back leaves it, in place")
+        pg.go_forward()
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.url.endswith("/1:1/compare"), "and Forward comes back to it")
+        pg.click(".transport .next")
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.url.endswith("/1:2/compare"), "the transport bar keeps it on")
+        pg.goto(BASE + "/140:4/compare")
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
+           == ["en", "urantia-ru"], "a translation without the section has no column")
+
         # What the server sends, to hold the worker's answers to.
         want = {}
         urls = ["/101:4", "/101:4.2-3", "/i/god", "/appendix/A", "/lists/1955", "/index/G", "/", "/read",
@@ -430,6 +456,11 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),
            "the footer says the page is from the offline copy")
+        pg.goto(BASE + "/1:2/compare")
+        pg.wait_for_selector("article.cmp .rc[data-k=ud] .rt")
+        ok("not in the offline copy" in pg.inner_text("article.cmp .cmphd > .ch[data-k=urantia-ru] .gap")
+           and pg.locator("article.cmp .rc[data-k=urantia-ru] .rt").count() == 0,
+           "Compare offline draws the one kept, and one not kept says so over its column")
         pg.goto(BASE + "/1:1")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .rt")

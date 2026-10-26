@@ -157,6 +157,8 @@
 
 "Paper {n}" = "Документ {n}"
 "{a} and {b}" = "{a} и {b}"
+"Compare translations" = "Сравнить переводы"
+"Compare" = "Сравнить"
 "{n} index entries" = { en = ["{n} index entry", "{n} index entries"], ru = ["{n} рубрика указателя", "{n} рубрики указателя", "{n} рубрик указателя"] }
 "{n} index entries across this whole paper" = { en = ["{n} index entry across this whole paper", "{n} index entries across this whole paper"], ru = ["{n} рубрика указателя на весь документ", "{n} рубрики указателя на весь документ", "{n} рубрик указателя на весь документ"] }
 "{n} index entries across this whole section" = { en = ["{n} index entry across this whole section", "{n} index entries across this whole section"], ru = ["{n} рубрика указателя на весь раздел", "{n} рубрики указателя на весь раздел", "{n} рубрик указателя на весь раздел"] }

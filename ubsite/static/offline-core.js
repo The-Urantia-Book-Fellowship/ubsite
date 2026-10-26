@@ -174,12 +174,16 @@
       if (!sh.papers[pr]) return { res: text(404, 'No such paper.\n') };
       return { chunk: 'paper-' + pr, make: function (d) { return { status: 200, type: HTML, body: d.railsecs }; } };
     }
-    if ((m = /^\/([0-9]+)$/.exec(path))) {
+    // Compare's address (app.py read_compare) is the page's with /compare
+    // after it, the same page; a paper's number goes to its first section in
+    // Compare.
+    var cm = /^(\/[^\/]+)\/compare$/.exec(path), at = cm ? cm[1] : path, then = cm ? '/compare' : '';
+    if ((m = /^\/([0-9]+)$/.exec(at))) {
       var pn = parseInt(m[1], 10), secs = sh.papers[String(pn)];
       if (!secs) return { res: missing(sh, T('There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196.', { n: pn }), path) };
-      return { res: redirect('/' + pn + ':' + Math.min.apply(null, secs), 307) };
+      return { res: redirect('/' + pn + ':' + Math.min.apply(null, secs) + then, 307) };
     }
-    if ((m = /^\/([^\/]+)$/.exec(path))) {
+    if ((m = /^\/([^\/]+)$/.exec(at))) {
       var r = RE_REF.exec(m[1]);
       if (!r) return { res: missing(sh, T(NOPAGE), path) };
       var paper = parseInt(r[1], 10), sec = parseInt(r[2], 10);

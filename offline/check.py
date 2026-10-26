@@ -15,7 +15,8 @@ Node runs static/offline-core.js on the copy, as the service worker does
     one paragraph each, which puts back each section's rail and marks;
   - addresses the server explains or redirects: a paragraph that is not there,
     a range that runs backwards, a paper or section there is none of, a
-    reading path a headword does not have, or not by theme;
+    reading path a headword does not have, or not by theme, and Compare's
+    address, a section's page with /compare after it;
   - search: every query in tests/fixtures/offline-queries.txt and every one a
     reader has typed into this machine's dev server (var/visits.db), in each of
     its lists and a page past the first, byte for byte with app.search();
@@ -80,7 +81,9 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               "/index/q", "/index/QQ", "/index/a", "/appendix/a", "/appendix/G", "/appendix/AB",
               "/part/9", "/part/01", "/part/x", "/rail/300", "/rail/007", "/nothing", "/i/god/more",
               "/101:4.2:3", "/café", "/speech/01:4", "/speech/999:1", "/speech/1:99", "/speech/x",
-              "/speech/1:4:5", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2"]:
+              "/speech/1:4:5", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2",
+              "/1:1/compare", "/1:1.3-4/compare", "/1/compare", "/300/compare", "/1:99/compare",
+              "/x/compare", "/1:1/compare/x", "/search/compare", "/i/god/compare"]:
         jobs.append((p, "", True))
     # Every list a search has, by its `in`: each translation's too, by its key.
     keys = [t["key"] for t in shell["tr"]["order"]]

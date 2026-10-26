@@ -358,8 +358,12 @@
         d.querySelector('ol')) return;
     var rail = li.closest('.rail'), a = d.querySelector('summary a');
     if (!rail || !a) return;
-    var n = a.getAttribute('href').slice(1);
-    var put = function (html) { if (!d.querySelector('ol')) d.insertAdjacentHTML('beforeend', html); };
+    var n = a.getAttribute('href').slice(1).replace(/\/compare$/, '');   // /4, or in Compare /4/compare
+    var put = function (html) {
+      if (d.querySelector('ol')) return;
+      d.insertAdjacentHTML('beforeend', html);
+      if (/\/compare$/.test(location.pathname)) cmpLinks(d, true);
+    };
     if (railGot[n]) return put(railGot[n]);
     fetch('/rail/' + n + '?v=' + encodeURIComponent(rail.dataset.v || ''))
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
@@ -472,10 +476,14 @@
       trGot[key] = fetch('/tr/' + sec + '?v=' + encodeURIComponent(v))
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
         .then(function (h) {
-          var t = document.createElement('template'), got = { t: {}, n: {} };
+          var t = document.createElement('template'), got = { t: {}, n: {}, h: {} };
           t.innerHTML = h;
           Array.prototype.forEach.call(t.content.querySelectorAll('[data-k][data-ref]'), function (d) {
             (got.t[d.dataset.k] = got.t[d.dataset.k] || {})[d.dataset.ref] = d.innerHTML;
+          });
+          // Its titles, which Compare heads its columns with.
+          Array.prototype.forEach.call(t.content.querySelectorAll('[data-k][data-head]'), function (d) {
+            (got.h[d.dataset.k] = got.h[d.dataset.k] || {})[d.dataset.head] = d.innerHTML;
           });
           Array.prototype.forEach.call(t.content.querySelectorAll('aside[data-k][data-of]'), function (d) {
             var at = got.n[d.dataset.k] = got.n[d.dataset.k] || {};
@@ -492,6 +500,21 @@
     var r = h.split('<span class="leader"></span>');
     return r.length === 2 ? '<span class="leadrow"><span class="lab">' + r[0] + '</span><span class="fig">' +
                             '<span class="leader"></span>' + r[1] + '</span></span>' : h;
+  }
+  // One translation's words for the lines of a row, as a fold and Compare both
+  // draw them, {h, notes}: a heading in the text (0:12.10) centred, and a
+  // paper's first paragraph its first letter dropped, as the English's are and
+  // as each translation's own TeX sets them (\lettrine); and the notes of those
+  // lines, which their numbers open as cards.
+  function trLines(got, k, lines) {
+    var x = trBy[k], h = '', notes = '';
+    Array.prototype.forEach.call(lines, function (q) {
+      var t = (got.t[k] || {})[q.id], c = q.classList;
+      if (t != null) h += '<p class="rt' + (c.contains('head') ? ' head' : '') + (c.contains('opening') ? ' opening' : '') +
+                          '" lang="' + x.lang + '">' + trLead(t) + '</p>';
+      notes += (got.n[k] || {})[q.id] || '';
+    });
+    return { h: h, notes: notes };
   }
   // `tab`, where a search's hit names one (arriveTr), opens the fold at it in
   // place of the one last chosen, which it does not change.  Its promise is kept
@@ -527,15 +550,9 @@
         // Every one the fold counts is in the fragment the server sends, so one
         // missing is offline, and not kept in the copy.
         if (!got.t[k]) return (h += '<p class="gap">' + T('tr:notkept') + '</p>');
-        // A heading in the text (0:12.10) is centred, and a paper's first
-        // paragraph drops its first letter, as the English's do and each
-        // translation's own TeX does (\lettrine).
-        refs.forEach(function (ref, i) {
-          var t = (got.t[k] || {})[ref], c = lines[i].classList;
-          if (t != null) h += '<p class="rt' + (c.contains('head') ? ' head' : '') + (c.contains('opening') ? ' opening' : '') +
-                              '" lang="' + x.lang + '">' + trLead(t) + '</p>';
-          notes += (got.n[k] || {})[ref] || '';
-        });
+        var w = trLines(got, k, lines);
+        h += w.h;
+        notes += w.notes;
       });
       if (card && panel.contains(card.mark)) shut(false);
       panel.innerHTML = h + (notes && '<div class="tnotes" hidden>' + notes + '</div>');
@@ -550,6 +567,7 @@
   // again when the fonts are in and the text has reflowed, as arriveNote()
   // places a study note's.
   function arriveTr() {
+    if (/\/compare$/.test(location.pathname)) return;      // in their columns (cmpArrive)
     var m = /^#(?:tr-([a-z0-9-]+)|note(tn_([a-z0-9-]+)_\d+_\d+_\d+_\d+))$/.exec(location.hash),
         hit = m && document.querySelector('p.t.hit'), row = hit && hit.closest('.row'),
         tf = row && row.querySelector('.tf'), k = m && (m[1] || m[3]), b = tf && tf.querySelector('.trfold');
@@ -600,7 +618,170 @@
     if (ev.detail.key === 'translations' || ev.detail.key === 'trtab') trSync();
   });
   document.addEventListener('ub:swap', trSync);
-  document.addEventListener('ub:trkept', function () { trGot = {}; trSync(); });
+  document.addEventListener('ub:trkept', function () { trGot = {}; trSync(); cmpDraw(); });
+
+  // Compare (ROADMAP item 15, step 2; templates/_fold.html compare): the page
+  // drawn again, the English and each translation ticked side by side, a
+  // column each in the reader's order, a row to a paragraph, which the grid
+  // aligns as it aligns a paragraph and its entries (ub.css article.cmp).  A
+  // translation with no paragraph in the section has no column.  Over the
+  // columns a line naming each, which stays at the window's top while they
+  // are in view, and under it each one's own paper and section titles, as its
+  // TeX sets them (/tr/'s data-head).  Drawn from the fragment the folds
+  // fetch, and again whenever what it shows changes.
+  //
+  // It has an address of its own, the page's with /compare after it, the same
+  // page (app.py read_compare), which the head script marks on <html> before
+  // first paint (.compare).  The toggle pushes it, and Back leaves it, drawn
+  // in place, the paragraph at the window's top kept there.  The transport
+  // bar and the Contents keep it on; the text's own links and the index's
+  // leave it.  In a section none of the ticked translations has, the page
+  // reads as usual, the address kept, so that the columns come back where
+  // one resumes (Tigran, 2026-10-26).
+  var CMP = /\/compare$/, cmpN = 0, cmpAt = location.pathname.replace(CMP, '');
+  function cmpOn() { return CMP.test(location.pathname); }
+  function cmpArt() { return document.querySelector('main.reader > article'); }
+  // The ticked translations that have any paragraph here, in the reader's order.
+  function cmpKeys(art) {
+    var has = {};
+    Array.prototype.forEach.call(art.querySelectorAll('.tf[data-has]'), function (tf) {
+      tf.dataset.has.split(' ').forEach(function (k) { has[k] = true; });
+    });
+    return String(load().translations || '').split(' ').filter(function (k) { return trBy[k] && has[k]; });
+  }
+  // The transport bar's links and the rail's, to a section or a paper, with
+  // /compare after them while it is on (a paper's goes to its first section).
+  function cmpLinks(root, on) {
+    Array.prototype.forEach.call(root.querySelectorAll('.transport a[href], .rail a[href]'), function (a) {
+      var m = /^(\/\d+(?::\d+)?)(?:\/compare)?$/.exec(a.getAttribute('href'));
+      if (m) a.setAttribute('href', m[1] + (on ? '/compare' : ''));
+    });
+  }
+  function cmpUndraw(art) {
+    if (!art.classList.contains('cmp')) return;
+    if (card && card.mark.closest('.rc')) shut(false);
+    Array.prototype.forEach.call(art.querySelectorAll('.cmpnames, .cmphd, .rc, .stars > .rs'), function (el) {
+      el.remove();
+    });
+    art.classList.remove('cmp');
+    art.style.removeProperty('--cols');
+  }
+  // Draws what the address and Settings say; its promise is kept once drawn.
+  function cmpDraw() {
+    var art = cmpArt(), on = cmpOn(), n = ++cmpN;
+    document.documentElement.classList.toggle('compare', on);
+    cmpLinks(document, on);
+    if (!art) return Promise.resolve();
+    var b = art.querySelector('.cmphead .cmpbtn'), ks = on ? cmpKeys(art) : [],
+        first = art.querySelector('.grid p.t[id]');
+    if (b) b.setAttribute('aria-pressed', String(on));
+    if (!ks.length || !first) { cmpUndraw(art); return Promise.resolve(); }
+    var draw = function (got, failed) {
+      if (n !== cmpN || !art.isConnected) return;
+      cmpUndraw(art);
+      // The folds' words go, so that no note's number stands twice.
+      Array.prototype.forEach.call(art.querySelectorAll('.tf.open'), trShut);
+      Array.prototype.forEach.call(art.querySelectorAll('.tf .tr'), function (el) { el.remove(); });
+      var grid = art.querySelector('.grid'), top = art.querySelector('.papertop');
+      art.classList.add('cmp');
+      art.style.setProperty('--cols', ks.length + 1);
+      // A column's name, as Settings names a translation, and over the English
+      // the book's own title, which no language translates.
+      var names = '<div class="row cmpnames"><p class="cn" style="--c:1" lang="en"><b>The Urantia Book</b> (Uversa Press)</p>',
+          heads = '<div class="row cmphd">';
+      ks.forEach(function (k, i) {
+        var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 2) + '"';
+        names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> (' + x.label + ')</p>';
+        heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
+                 (g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (g.title ? '<h1>' + g.title + '</h1>' : '') +
+                 (g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +
+                 // Every one counted is in the fragment the server sends, so one
+                 // missing is offline, and not kept in the copy.
+                 (got.t[k] ? '' : '<p class="gap">' + T(failed ? 'tr:unreachable' : 'tr:notkept') + '</p>') + '</header>';
+      });
+      grid.insertAdjacentHTML('afterbegin', names + '</div>' + heads + '</div>');
+      var en = top.cloneNode(true);
+      en.classList.add('ch');
+      en.style.setProperty('--c', 1);
+      grid.querySelector('.cmphd').prepend(en);
+      Array.prototype.forEach.call(grid.children, function (row) {
+        if (row.classList.contains('stars')) {
+          row.insertAdjacentHTML('beforeend', ks.map(function (k, i) {
+            return '<i class="rs" style="--c:' + (i + 2) + '" data-stars="' + row.dataset.stars + '" aria-hidden="true"></i>';
+          }).join(''));
+          return;
+        }
+        var text = row.querySelector(':scope > p.t, :scope > .verse');
+        if (!text) return;
+        var lines = row.querySelectorAll('p.t[id]');
+        text.insertAdjacentHTML('afterend', ks.map(function (k, i) {
+          var x = trBy[k], w = trLines(got, k, lines);
+          return '<div class="rc" style="--c:' + (i + 2) + '" data-k="' + k + '" lang="' + x.lang + '">' +
+                 (w.h && '<p class="who">' + x.label + '</p>' + w.h) +
+                 (w.notes && '<div class="tnotes" hidden>' + w.notes + '</div>') + '</div>';
+        }).join(''));
+      });
+    };
+    return trFetch(art, first.id.split('.')[0]).then(function (got) { draw(got, false); },
+                                                      function () { draw({ t: {}, n: {}, h: {} }, true); });
+  }
+  // The paragraph at the window's top, kept there as the page is drawn again,
+  // from its start, below the columns' names; at the page's head, the head.  A
+  // paragraph is its row, with its translations under it on a phone.
+  function cmpGo() {
+    var at = null, rows = document.querySelectorAll('main .grid > .row:has(p.t[id])'), i, r;
+    if (scrollY > 0)
+      for (i = 0; i < rows.length; i++)
+        if ((r = rows[i].getBoundingClientRect()).bottom > 40) { at = { el: rows[i].querySelector('p.t[id]'), top: r.top }; break; }
+    return cmpDraw().then(function () {
+      var row = at && at.el.isConnected && at.el.closest('.row'), names = document.querySelector('article.cmp .cmpnames'),
+          floor = names && names.offsetHeight;
+      if (row) scrollBy({ top: row.getBoundingClientRect().top - Math.max(floor || 0, Math.min(at.top, 120)), behavior: 'instant' });
+    });
+  }
+  // The browser would put back, a frame after Back, where the page was
+  // scrolled when Compare was turned on or off, over the paragraph kept: its
+  // two entries are left to this, as listen.js leaves its own.  Leaving the
+  // page, a reload puts back its place again.
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('.cmphead .cmpbtn');
+    if (!b) return;
+    history.scrollRestoration = 'manual';
+    history.pushState(null, '', location.pathname.replace(CMP, '') + (cmpOn() ? '' : '/compare') +
+                                location.search + location.hash);
+    cmpGo();
+  });
+  addEventListener('pagehide', function () { history.scrollRestoration = 'auto'; });
+  // Back and Forward between this page and itself in Compare.  Any other
+  // address is listen.js's to show, or the browser's.
+  addEventListener('popstate', function () {
+    if (location.pathname.replace(CMP, '') !== cmpAt ||
+        document.documentElement.classList.contains('compare') === cmpOn()) return;
+    cmpGo();
+  });
+  // Opened at Compare's address: drawn, then the paragraph cited brought into
+  // view again, as the rows have changed height, unless the reader has
+  // scrolled meanwhile; and a translator's note's card opened from its column.
+  function cmpArrive() {
+    if (!cmpOn()) return;
+    var y = scrollY;
+    cmpDraw().then(function () {
+      if (scrollY === y) arrive();
+      var m = /^#note(tn_[a-z0-9-]+_\d+_\d+_\d+_\d+)$/.exec(location.hash),
+          mark = m && document.getElementById('fnref' + m[1]);
+      if (!mark || !mark.closest('.rc')) return;
+      shut(false);
+      open(mark);
+    });
+  }
+  cmpArrive();
+  document.addEventListener('ub:swap', function () {
+    cmpAt = location.pathname.replace(CMP, '');
+    cmpDraw();
+  });
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail.key === 'translations') cmpGo();
+  });
   function swapped() { railSync(); indexSync(); }
   document.addEventListener('ub:swap', swapped);
   document.addEventListener('ub:settings', function (ev) {

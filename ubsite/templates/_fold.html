@@ -29,3 +29,16 @@
 {% macro trfold(has) -%}
 {%- if has %}<div class="tf" data-has="{{ has }}"><button class="trfold" type="button" aria-expanded="false"></button></div>{% endif %}
 {%- endmacro %}
+
+{#- Compare (ROADMAP item 15, step 2): the toggle at the head of the text,
+    between the Contents' button and the Index's, that draws the page again
+    with the English and each translation ticked side by side (ub.js), at the
+    address /P:S/compare.  Drawn where the section has any translation, shown
+    only where one the reader has ticked has it (base.html ubTr), and not
+    drawn without JavaScript, which alone can work it.  A pill with two
+    columns drawn in it, as the mockup Tigran settled on draws it, its words
+    shorter on a phone; it scrolls away with the paper's head (Tigran,
+    2026-10-26). -#}
+{% macro compare() -%}
+<div class="cmphead"><button class="cmpbtn" type="button" aria-pressed="false"><svg viewBox="0 0 20 16" aria-hidden="true" focusable="false"><rect x="1" y="1.5" width="7.5" height="13" rx="1"/><rect x="11.5" y="1.5" width="7.5" height="13" rx="1"/><path d="M3 5h3.5M3 8h3.5M3 11h3.5M13.5 5h3.5M13.5 8h3.5M13.5 11h3.5"/></svg><span class="long">{{ t('Compare translations') }}</span><span class="short">{{ t('Compare') }}</span></button></div>
+{%- endmacro %}

@@ -119,7 +119,8 @@ def classify(ua: str) -> dict:
 
 
 # ---- pages -------------------------------------------------------------------------
-RE_SECTION = re.compile(r"^/(\d+):(\d+)(?:\.\d+(?:-\d+)?)?$")
+# A section read in Compare, /1:1/compare, is a view of the section.
+RE_SECTION = re.compile(r"^/(\d+):(\d+)(?:\.\d+(?:-\d+)?)?(?:/compare)?$")
 
 
 def page_kind(path: str) -> tuple[str, str]:

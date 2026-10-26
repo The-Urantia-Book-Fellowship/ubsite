@@ -107,7 +107,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
 - **Work offline** (2026-10-13): `offline/` keeps the site's own pages in `var/offline/`; `sw.js`, `offline-core.js`, `offline.js`; its gate, `python -m offline check`.
 - **Study notes** (2026-10-18): one reviewed paper at a time, `data/study/NNN.toml`, whose README holds the rules; `build/study.py`, `tools/study/draft.py`.
 - **The interface in Russian** (2026-10-25): `ubsite/ru.toml`, `ubsite/l10n.py`, `/l10n.js`.
-- **Translations beside the text** (2026-10-26): ud and urantia-ru under our numbering (`build/translation.py`, `tests/known-tr-*.tsv`), in a fold under each paragraph, with the translator's notes, offline and in search. Compare is still to come.
+- **Translations beside the text** (2026-10-26): ud and urantia-ru under our numbering (`build/translation.py`, `tests/known-tr-*.tsv`), in a fold under each paragraph, with the translator's notes, offline and in search, and side by side in Compare, `/1:1/compare` (`ub.js cmpDraw`).
 
 ---
 

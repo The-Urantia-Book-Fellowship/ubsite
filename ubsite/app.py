@@ -1429,12 +1429,35 @@ def paper_page(request: Request, paper: int):
     101:0 -- the first words of the text.  The section list is always in the
     left rail, so a separate page for it was a click that bought nothing.
     """
+    return _first_section(request, paper, "")
+
+
+def _first_section(request: Request, paper: int, then: str):
     con = db()
     first = con.execute(
         "SELECT MIN(n) FROM section WHERE paper_n=?", (paper,)).fetchone()[0]
     if first is None:
         return missing(request, l10n.tr(NO_PAPER, n=paper))
-    return RedirectResponse(f"/{paper}:{first}", status_code=307)
+    return RedirectResponse(f"/{paper}:{first}{then}", status_code=307)
+
+
+# Compare, the text and the translations a reader has ticked side by side
+# (ROADMAP item 15, step 2), has an address of its own, /1:1/compare, so that
+# Back leaves it and a reload or a link keeps it.  It is the same page as
+# /1:1, byte for byte: ub.js draws the columns from /tr/, as a fold draws its
+# translations, so no setting reaches the server and the offline copy holds
+# no page more (offline-core.js resolve).  The rail's papers link /N, which
+# goes to the paper's first section, and in Compare /N/compare.
+@app.get("/{paper:int}/compare")
+def paper_compare(request: Request, paper: int):
+    return _first_section(request, paper, "/compare")
+
+
+@app.get("/{ref}/compare", response_class=HTMLResponse)
+def read_compare(request: Request, ref: str):
+    if ref == "api":
+        raise HTTPException(404)               # a program's, answered in JSON (http_error)
+    return read(request, ref)
 
 
 @app.get("/{ref}", response_class=HTMLResponse)

@@ -13,6 +13,8 @@ from __future__ import annotations
 import re
 import sqlite3
 
+from markupsafe import escape
+
 from ubsite import l10n
 
 # What a margin chip needs.  An appendix entry -- a Chronology event, a named
@@ -227,8 +229,11 @@ def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
 
     has    paragraph id -> the keys of the translations that have it, in
            Settings' order, separated by spaces: the fold's data-has
-    heads  its titles there, each translation's: the paper's title and
-           author, and the section's.  A translation with no paragraph here has none
+    heads  its titles there, each translation's, for Compare's columns, as its
+           style sets them: its word for a Paper and the paper's number
+           ('paper', not over the Foreword), the paper's title and author, and
+           the section's title, its number added where its style adds it
+           (translation.numbers).  A translation with no paragraph here has none
     rows   every translation's paragraphs of the section, each with its key, our
            reference, its language and its notes: the translator's, each with
            its number in the paper, the works it cites, and the translation's
@@ -245,11 +250,18 @@ def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     for r in rows:
         has.setdefault(r["pid"], []).append(r["k"])
     keys = list(dict.fromkeys(r["k"] for r in rows))
-    heads = [dict(h) for h in con.execute(
-        "SELECT h.translation AS k, h.kind, h.html, r.lang FROM tr_heading h"
-        " JOIN translation r ON r.key = h.translation"
-        " WHERE h.paper_n = ? AND (h.section_n IS NULL OR h.section_n = ?)"
-        " ORDER BY r.ord, h.section_n IS NOT NULL, h.kind DESC", (paper, sec)) if h["k"] in keys]
+    heads = []
+    for h in con.execute(
+            "SELECT h.translation AS k, h.kind, h.html, r.lang, r.paper, r.numbers FROM tr_heading h"
+            " JOIN translation r ON r.key = h.translation"
+            " WHERE h.paper_n = ? AND (h.section_n IS NULL OR h.section_n = ?)"
+            " ORDER BY r.ord, h.section_n IS NOT NULL, h.kind DESC", (paper, sec)):
+        if h["k"] not in keys:
+            continue
+        if h["kind"] == "title" and paper:
+            heads.append({"k": h["k"], "kind": "paper", "html": f"{escape(h['paper'])} {paper}", "lang": h["lang"]})
+        html = f"{sec}. {h['html']}" if h["kind"] == "section" and h["numbers"] else h["html"]
+        heads.append({"k": h["k"], "kind": h["kind"], "html": html, "lang": h["lang"]})
     row_of = {(r["k"], r["pid"]): r for r in rows}
     for n in con.execute(
             "SELECT n.id, n.translation AS k, n.paragraph_id AS pid, n.num, n.key, n.html_hy,"

@@ -16,7 +16,13 @@ CREATE TABLE translation (
     -- each language of the interface, and its short name, in none: "Aivazian".
     by_en        TEXT NOT NULL,
     by_ru        TEXT NOT NULL,
-    label        TEXT NOT NULL
+    label        TEXT NOT NULL,
+    -- How its style heads a paper and a section (build/translation.py STYLE),
+    -- for Compare's columns: its word for a Paper, as its \papertxt writes
+    -- it, 'ДОКУМЕНТ'; and whether it numbers a section's title itself, so
+    -- that the title is written without its number (1) or with it (0).
+    paper        TEXT NOT NULL,
+    numbers      INTEGER NOT NULL CHECK (numbers IN (0, 1))
 );
 
 -- A rowid table, not WITHOUT ROWID: its rows are long, and stored by key they

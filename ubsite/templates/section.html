@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% from "_note.html" import note, snote %}
 {% from "_para.html" import para %}
 {% from "_rail.html" import rail %}
-{% from "_fold.html" import indexfold, afold, trfold %}
+{% from "_fold.html" import indexfold, afold, trfold, compare %}
 {% from "_transport.html" import step %}
 {# An index entry beside the text.  A headword or subentry links to its line on
    the concept page; an appendix entry to its line on the appendix page, named
@@ -31,6 +31,9 @@
       it has any. #}
   <article{% if trv %} data-trv="{{ trv }}"{% endif %}>
     {{ indexfold() }}
+    {%- if trv %}
+    {{ compare() }}
+    {%- endif %}
     <header class="papertop">
       {#- The Foreword is not a paper: the book heads it FOREWORD alone (Tigran,
           2026-10-20). #}

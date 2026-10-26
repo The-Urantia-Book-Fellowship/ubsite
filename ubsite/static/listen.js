@@ -496,7 +496,7 @@
       file = -1;
       if (same(P, D)) {
         // The page shows the section that has ended: the next one takes its place.
-        push(to.href);
+        push(to.href + (CMP.test(location.pathname) ? '/compare' : ''));   // ub.js: Compare goes on
         swap(doc);
         scrollTo(0, 0);
         D = P; V = PV; key = pkey;
@@ -520,7 +520,11 @@
   // along is off, the site's own pages are fetched and swapped in instead
   // (every page has one <main>).  With Follow along on, a link loads its page
   // as ever, and playing stops.  Anything that goes wrong falls back to that.
-  var moved = false, visiting = 0, shown = location.pathname + location.search;
+  // A page and the same page in Compare (ub.js) are one page here: Compare
+  // draws itself in place, and its own entries in the history are its own.
+  var CMP = /\/compare$/;
+  function bare(path, search) { return path.replace(CMP, '') + search; }
+  var moved = false, visiting = 0, shown = bare(location.pathname, location.search);
   function roaming() { return !!bar && !S.get().follow; }
   // The address for what is now to be shown.  The page being left keeps its
   // scroll position, for Back.
@@ -529,7 +533,7 @@
     history.pushState(null, '', url);
     history.scrollRestoration = 'manual';
     moved = true;
-    shown = location.pathname + location.search;
+    shown = bare(location.pathname, location.search);
   }
   function swap(doc) {
     document.querySelector('main').replaceWith(document.adoptNode(doc.querySelector('main')));
@@ -563,7 +567,7 @@
       if (!doc.querySelector('main')) throw new Error('not a page');
       // A redirect (/101 to /101:0, a citation searched for) lands at its real address.
       if (isNew) push(got.url.split('#')[0] + hash);
-      else shown = location.pathname + location.search;
+      else shown = bare(location.pathname, location.search);
       swap(doc);
       if (y != null) scrollTo(0, y);
       else {
@@ -585,7 +589,7 @@
     if (!a || a.target || a.hasAttribute('download')) return;
     var u = new URL(a.href, location.href);
     if (u.origin !== location.origin || SKIP.test(u.pathname)) return;
-    if (u.pathname + u.search === shown && u.hash) return;   // a place on this page
+    if (bare(u.pathname, u.search) === shown && u.hash) return;   // a place on this page
     ev.preventDefault();
     visit(u.href, true);
   });
@@ -598,7 +602,7 @@
   // Back and Forward: the address has changed, so the page must too -- in the
   // page while listening, else by loading it.
   addEventListener('popstate', function (ev) {
-    if (!moved || location.pathname + location.search === shown) return;
+    if (!moved || bare(location.pathname, location.search) === shown) return;
     if (bar) visit(location.href, false, ev.state ? ev.state.y : null);
     else { history.scrollRestoration = 'auto'; location.reload(); }
   });

@@ -620,9 +620,9 @@ x-ru { font-synthesis: small-caps; }
      or half of what the gap leaves where that is more: the grid's two tracks grow
      alike until the margin's is 26ch.  The head above it and the box of what the
      whole section cites are as wide, so that the head is centred over the text. */
-  :root:not([data-margin="off"], [data-index="off"]) :is(.papertop, .blanket) {
+  :root:not([data-margin="off"], [data-index="off"]) :is(.papertop, .blanket, .cmphead) {
          max-width: min(var(--measure), max(100% - 26ch - 2rem, (100% - 2rem) / 2)); }
-  :root[data-width="full"]:not([data-margin="off"], [data-index="off"]) .papertop {
+  :root[data-width="full"]:not([data-margin="off"], [data-index="off"]) :is(.papertop, .cmphead) {
          max-width: calc(100% - 26ch - 2rem); }
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
@@ -673,7 +673,7 @@ x-ru { font-synthesis: small-caps; }
   :root[data-margin="off"][data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
          grid-template-columns: minmax(0, 1fr); }
 }
-:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .transport, .prose) { max-width: none; }
+:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .transport, .prose, .cmphead) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
 :root[data-width="full"] .applist { columns: 24rem; }
 /* A superscript (28,012th, a card's "11th edition") raised above its line's
@@ -773,18 +773,79 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
   color: var(--faint); border-bottom: 1.5px solid transparent; }
 .tf .trtabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--link); }
 @media (hover: hover) { .tf .trtabs button:hover { color: var(--ink); } }
-.tf .who { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint);
+.tf .who, .cmp .who { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint);
   margin: .5rem 0 .15rem; }
 .tf .who:first-child { margin-top: .1rem; }
-.tf .rt { margin: 0 0 .5rem; font-size: var(--size); line-height: var(--lead); color: var(--text);
+:is(.tf, .rc) .rt { margin: 0 0 .5rem; font-size: var(--size); line-height: var(--lead); color: var(--text);
   text-wrap: pretty; text-align: justify; hyphens: manual; -webkit-hyphens: manual;
   hyphenate-character: "-"; -webkit-hyphenate-character: "-"; -webkit-hyphenate-limit-lines: 1; }
-.tf .rt.head { text-align: center; }
-.tf .rt .leadrow { display: flex; align-items: baseline; }
-.tf .rt .leadrow .fig { margin-left: auto; white-space: nowrap; }
-.tf .gap { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
+:is(.tf, .rc) .rt.head { text-align: center; }
+:is(.tf, .rc) .rt .leadrow { display: flex; align-items: baseline; }
+:is(.tf, .rc) .rt .leadrow .fig { margin-left: auto; white-space: nowrap; }
+:is(.tf, .cmp) .gap { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
 .frac { font-variant-numeric: diagonal-fractions; }
-:root[data-align="ragged"] .tf .rt { text-align: start; hyphens: none; -webkit-hyphens: none; }
+:root[data-align="ragged"] :is(.tf, .rc) .rt { text-align: start; hyphens: none; -webkit-hyphens: none; }
+
+/* Compare (ROADMAP item 15, step 2; templates/_fold.html compare, ub.js): the
+   English and each translation ticked, a column each, a row to a paragraph,
+   laid on the grid's columns as a paragraph and its entries are, the margin's
+   last.  Its toggle stands at the head of the text, centred over it, between
+   the Contents' button and the Index's, and scrolls away with the paper's head
+   (Tigran, 2026-10-26): a pill with two columns drawn in it, as in the mockup
+   he settled on, filled when pressed.  Shown only where a ticked translation
+   has the section (base.html ubTr), so with none ticked nothing moves.  On a
+   phone it stands at the end of the Index's line, its words shorter. */
+.cmphead { display: none; justify-content: center; max-width: var(--measure); margin: -.35rem 0 1rem; }
+.cmpbtn { display: inline-flex; align-items: center; gap: .45em; font: inherit; font-size: .95rem;
+  color: var(--faint); background: none; border: 1px solid var(--rule); border-radius: 999px;
+  padding: .2em .85em .18em; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.cmpbtn span { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; }
+.cmpbtn svg { width: 1.15em; height: .95em; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.cmpbtn svg path { stroke-width: 1.1; }
+.cmpbtn .short { display: none; }
+@media (hover: hover) { .cmpbtn:hover { color: var(--ink); } }
+.cmpbtn[aria-pressed="true"] { color: var(--link); border-color: var(--link); background: var(--card); }
+/* In Compare the folds give way to the columns, from first paint (the head
+   script marks <html> from the address), and the paper's head to the heads of
+   the columns. */
+:root.compare .grid > .row > .tf, article.cmp > .papertop { display: none; }
+/* Over the columns, a line naming each, which stays at the window's top, level
+   with the Contents' and the Index's buttons, while the columns are in view,
+   on the paper, which hides the text passing under it.  Under it each column's
+   paper and section titles, as its TeX sets them, centred over it. */
+article.cmp .cmpnames { position: sticky; top: 0; z-index: 2; background: var(--paper);
+  padding: 1rem 0 .3rem; margin-top: -1rem; border-bottom: 1px solid var(--rule);
+  font-size: .8rem; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+article.cmp .cmpnames .cn { margin: 0; }
+article.cmp .cmpnames b { font-weight: inherit; color: var(--ink); }
+article.cmp .grid > .cmphd > .papertop { max-width: none; margin: 1.2rem 0 1.6rem; }
+article.cmp .cmphd h1 { font-size: 1.6rem; }
+article.cmp .cmphd .who, article.cmp .rc .who { display: none; }
+/* Small capitals in Cyrillic, which EB Garamond has none of, as x-ru's are. */
+article.cmp [lang="ru"] { font-synthesis: small-caps; }
+article.cmp .rc { min-width: 0; }
+/* A list's label in a translation's column is set as the English's is (.mark,
+   above), each item's words beginning at one place, since a column runs a
+   list's items one under another as the text does; not in a fold, which
+   shows one paragraph at a time (Tigran, 2026-10-26).  Translations write
+   their labels as the press does, the listmark span.  No stack stands
+   beside it here, so the box starts at the column's edge. */
+:root:not(.copying) article.cmp .rc p.rt > .mark { float: left; display: flex; justify-content: flex-end;
+      width: 2.2em; margin-right: .6em; }
+/* A separator stands over each column, where each translation has its own. */
+article.cmp .stars > .rs { grid-column: var(--c); text-align: center; line-height: var(--lead); }
+article.cmp .stars > .rs::before { content: attr(data-stars); content: attr(data-stars) / ""; }
+article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; }
+@media (min-width: 62.01rem) {
+  article.cmp .grid { grid-template-columns: repeat(var(--cols), minmax(0, var(--measure))) minmax(0, 26ch); }
+  :root[data-width="full"] article.cmp .grid { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)) minmax(0, 26ch); }
+  :root:is([data-margin="off"], [data-index="off"]) article.cmp .grid {
+         grid-template-columns: repeat(var(--cols), minmax(0, var(--measure))); }
+  :root[data-width="full"]:is([data-margin="off"], [data-index="off"]) article.cmp .grid {
+         grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+  article.cmp .grid > .row > :is(.rc, .cn, .ch) { grid-column: var(--c); grid-row: 1; }
+  article.cmp .grid > .row > .a { grid-column: -2; }
+}
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
 .chips > li > a { color: var(--faint); text-decoration: none; display: block;
@@ -1480,6 +1541,24 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   .grid > .row .tr { order: 4; }
   .verse + .a:not(:empty) { margin-top: -.4rem; }
   .blanket ul { columns: 1; }
+  /* Compare: its toggle at the end of the Index's line, its words shorter;
+     and each paragraph with its translations under it, each named, boxed as
+     a fold is, then its entries.  The English's head alone, as in the
+     mockup: three would fill the screen before the text.  A translation's
+     only where it says it is not at hand, named. */
+  .cmphead { position: absolute; top: .1rem; right: 0; z-index: 1; margin: 0; }
+  :root[data-index="off"] .cmphead { position: static; justify-content: flex-end; max-width: none; margin: 0 0 .6rem; }
+  .cmpbtn .long { display: none; }
+  .cmpbtn .short { display: inline; }
+  article.cmp .cmpnames, article.cmp .stars > .rs { display: none; }
+  article.cmp .grid > .cmphd > .papertop { margin: 0 0 1.2rem; }
+  article.cmp .cmphd > .ch + .ch:not(:has(> .gap)), article.cmp .cmphd > .ch + .ch > :not(.who, .gap) { display: none; }
+  article.cmp .cmphd .who, article.cmp .rc .who { display: block; }
+  article.cmp .cmphd .who { margin-top: 0; text-align: left; }
+  article.cmp .rc { margin: -.45rem 0 .9rem 1rem; border-left: 2px solid var(--rule); padding-left: .7rem;
+                    font-size: .9rem; }
+  article.cmp .rc:empty { display: none; }
+  article.cmp .rc .who:first-child { margin-top: .1rem; }
 }
 
 /* ---- print ------------------------------------------------------------- */
@@ -1490,7 +1569,8 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }
   .reader, .grid, .grid > .row { display: block; }
-  .trfold { display: none; }
+  .trfold, .cmpnames { display: none; }
+  .cmphead { display: none !important; }        /* over ubTr's rule, which names the translations */
   p.t { orphans: 3; widows: 3; max-width: none; }
   /* A margin column does not survive a page break, so the apparatus prints as
      notes after its paragraph instead. */

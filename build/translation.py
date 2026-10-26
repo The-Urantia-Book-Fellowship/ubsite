@@ -67,11 +67,21 @@ SCOPES = ("index", "text", "notes", "study")
 # file writes it: ud's p000.tex writes \usection{БЛАГОДАРНОСТЬ}, and ud.sty's
 # \usection sets in italic the one title that is its \ackn,
 # \ifx\secname\ackn\itshape.  urantia-ru writes its own italic, \bibemph.
+#
+# And how it heads a paper and a section, for Compare's columns: where its word
+# for a Paper is, its \papertxt (ud ДОКУМЕНТ, urantia-ru ТЕКСТ), and whether its
+# \usection numbers a section's title itself.  ud.sty's sets
+# \thesecnum.\bibnobreakspace before the title, so ud writes none of its 326
+# with its number; urantia-ru writes every one of its 1,429 with it ("1. Имя
+# Отца", the Foreword's "IX. Бог Предельный"), and its \usection adds none.
 STYLE = {
-    "ud": {"hyphenation": "ud.sty", "ackn": "ud.sty"},
+    "ud": {"hyphenation": "ud.sty", "ackn": "ud.sty", "paper": "ud.sty", "numbers": True},
     "urantia-ru": {"hyphenation": "tex/urantia-hyphen-ru.tex",
-                   "foreword": ("urantia-ru.sty", "forewordtoc")},
+                   "foreword": ("urantia-ru.sty", "forewordtoc"), "paper": "urantia-ru.sty"},
 }
+# A section's title that begins with its number: 1., 9 и 10., the Foreword's IX.
+# urantia-ru writes the Foreword's X with a Cyrillic Х.
+RE_NUMBERED = re.compile(r"(?:\d+(?: и \d+)?|[IVXХ]+)\.\s")
 # Words that stand in for a paragraph not yet translated.
 PLACEHOLDERS = {"Бла-бла..."}
 # Characters a translation has that the site sets otherwise, each declared,
@@ -243,6 +253,10 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
         if not m:
             report.hard("tr-foreword-untitled", f"{key}:{f}", f"no \\def\\{name}")
         foreword = m.group(1) if m else None
+    m = re.search(r"\\def\\papertxt\{([^{}]*)\}", read_at_rev(repo["path"], style["paper"], repo["at"]))
+    if not m or not RE_CYRILLIC.search(m.group(1)):
+        report.hard("tr-paper-unnamed", f"{key}:{style['paper']}", "no \\def\\papertxt in Russian")
+    info = dict(info, paper=m.group(1) if m else "", numbers=bool(style.get("numbers")))
     papers = reader.read(key, repo["tex"], repo["at"], report, foreword)
     hyph = Hyphenator(hyphenation(key, repo, report), RUSSIAN)
     mapping, titles = _mapping(load_known().get(key, []))
@@ -350,6 +364,13 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
         report.hard("tr-label-gone", f"{key} {x[0]}",
                     f"{KNOWN_LABELS.name} declares its label {x[1]} for our {x[2]}, and that is no longer so")
     _separators(key, theirs_seps, {_fmt(k) for k, v in ours.items() if v["sep"]}, report)
+    # Its section titles, as STYLE says its \usection numbers them: Compare
+    # heads a column with its number added, or as written.
+    for p, s, kind, text, _ in headings:
+        if kind == "section" and bool(RE_NUMBERED.match(text)) == info["numbers"]:
+            report.hard("tr-section-number", f"{key} {p}:{s}",
+                        f"its title {text[:40]!r} is written {'with' if info['numbers'] else 'without'}"
+                        f" its number, and its style {'numbers it' if info['numbers'] else 'does not'}")
     paras.sort(key=lambda p: p.key)
     sources = _notes(key, paras, papers, mapping, ours, hyph, report)
     return Built(key, info, repo["commit"], paras, headings, len(theirs_seps), sources)
@@ -499,9 +520,9 @@ def ours(con) -> dict[Key, dict]:
 def store(con, built: list[Built], ours_: dict[Key, dict]) -> None:
     for i, b in enumerate(built):
         m = b.meta
-        con.execute("INSERT INTO translation VALUES (?,?,?,?,?,?,?,?,?,?)",
+        con.execute("INSERT INTO translation VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                     (b.key, m["lang"], m["title"], len(b.paras), sum(len(p.notes) for p in b.paras),
-                     b.commit, i, m["by"]["en"], m["by"]["ru"], m["label"]))
+                     b.commit, i, m["by"]["en"], m["by"]["ru"], m["label"], m["paper"], int(m["numbers"])))
         source_id = {}
         for s in b.sources:
             cur = con.execute("INSERT INTO tr_source (translation, paper_n, key, text, html) VALUES (?,?,?,?,?)",
