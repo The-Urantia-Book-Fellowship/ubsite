@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% from "_note.html" import note, snote %}
 {% from "_para.html" import para %}
 {% from "_rail.html" import rail %}
-{% from "_fold.html" import indexfold, afold %}
+{% from "_fold.html" import indexfold, afold, trfold %}
 {% from "_transport.html" import step %}
 {# An index entry beside the text.  A headword or subentry links to its line on
    the concept page; an appendix entry to its line on the appendix page, named
@@ -27,7 +27,9 @@
 <main class="reader">
   {{ rail(book(), paper.n, section.n, paper.part_n) }}
 
-  <article>
+  {#- The version its translations are asked for under (/tr/, app.py), where
+      it has any. #}
+  <article{% if trv %} data-trv="{{ trv }}"{% endif %}>
     {{ indexfold() }}
     <header class="papertop">
       {#- The Foreword is not a paper: the book heads it FOREWORD alone (Tigran,
@@ -64,7 +66,9 @@
     {% endif %}
 
     {#- The longest reference here, in characters: on a phone the reference stands
-        at the start of each paragraph, and the text beside it is set that far in. #}
+        at the start of each paragraph, and the text beside it is set that far in.
+        Each paragraph, or block of verse, is a row with what stands beside it
+        and its translations' fold under it (ub.css .row). #}
     <div class="grid" style="--refw: {{ paras|map(attribute='ref')|map('length')|max }}">
     {% for r in rows %}
       {%- set first = r.p if 'p' in r else r.lines[0] %}
@@ -74,6 +78,7 @@
       <div class="stars" role="separator" data-stars="{{ first.sep_before }}"></div>
       {%- endif %}
       {%- if 'p' in r %}
+      <div class="row">
       {{ para(r.p, focus and r.p.para_n >= focus and r.p.para_n <= last) }}
       {#- Nothing at all inside when nothing stands beside the paragraph, so
           that .a:empty holds and a phone draws no box for it. #}
@@ -86,11 +91,14 @@
           </ul>
         {%- endif -%}
       </div>
+      {{ trfold(tr_has.get(r.p.id)) }}
+      </div>
       {%- else %}
       {#- A block of verse, as the book sets it: indented as one, its lines close,
           a wrapped line hanging (ub.css .verse).  The entries citing its lines
           stand beside the block, each line's under its reference, so that a
           line cited many times opens no gap in the verse. #}
+      <div class="row">
       <div class="verse">
       {%- for q in r.lines %}
       {{ para(q, focus and q.para_n >= focus and q.para_n <= last) }}
@@ -105,6 +113,9 @@
         {% for c in citers[q.id] %}<li>{{ chip(c) }}</li>{% endfor %}
         </ul>
       {%- endfor -%}
+      </div>
+      {%- set ks = [] %}{% for q in r.lines %}{% for k in tr_has.get(q.id, '').split() %}{% if k not in ks %}{% set _ = ks.append(k) %}{% endif %}{% endfor %}{% endfor %}
+      {{ trfold(ks|join(' ')) }}
       </div>
       {%- endif %}
     {% endfor %}

@@ -241,6 +241,9 @@ class Pages(unittest.TestCase):
         words = set(re.findall(r"[A-Za-z]{2,}", html.unescape(" ".join(said))))
         names = {"Ctrl", "OFL", "CC", "BY", "NC", "SA", "Goudy", "Uversa", "Press", "The", "Urantia", "Book",
                  "British", "Study", "Edition", "Badanon", "English", "localhost"}
+        # And the translations' short names, which no language translates (data/translations.toml).
+        with open(ROOT / "data" / "translations.toml", "rb") as fh:
+            names |= {w for x in tomllib.load(fh).values() for w in re.findall(r"[A-Za-z]{2,}", x["label"])}
         self.assertEqual(words - names, set())
 
 

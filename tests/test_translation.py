@@ -132,6 +132,13 @@ class Database(unittest.TestCase):
         self.assertEqual(self.text("ud", "0:12.10"), "БЛАГОДАРНОСТЬ")
         self.assertEqual(self.text("urantia-ru", "0:12.10"), "Заключительные замечания")
 
+    def test_it_is_set_in_italic_as_its_style_sets_it(self):
+        # ud.sty's \usection italicises its \ackn; urantia-ru writes \bibemph itself.
+        for key, want in (("ud", "<em>БЛАГОДАРНОСТЬ</em>"), ("urantia-ru", "<em>Заключительные замечания</em>")):
+            got = self.con.execute("SELECT t.html_hy FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id"
+                                   " WHERE t.translation = ? AND p.ref = '0:12.10'", (key,)).fetchone()[0]
+            self.assertEqual(got, want, key)
+
     def test_a_paragraph_reads_as_written(self):
         self.assertTrue(self.text("ud", "1:1.1").startswith("Из всех имён, под которыми Бог Отец известен"))
         self.assertIn("признаю\u0301т", self.text("ud", "1:0.3"))

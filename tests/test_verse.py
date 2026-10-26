@@ -99,7 +99,7 @@ class Built(unittest.TestCase):
         self.assertEqual(re.findall(r'<p class="at"><a href="/(144:3\.\d+)">', side), cited)
         status, _, body = get("/144:5")
         self.assertEqual(len(re.findall(r'<div class="verse">', body)), 7)
-        self.assertRegex(body, r'data-stars="\* \* \*"></div>\s*<div class="verse">\s*'
+        self.assertRegex(body, r'data-stars="\* \* \*"></div>\s*<div class="row">\s*<div class="verse">\s*'
                                r'<p class="t verse"\s+id="144:5\.11">')
 
 

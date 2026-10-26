@@ -20,3 +20,12 @@
                 'paper+section': '{n} index entries across the whole paper and this section'}[whole] -%}
 <button class="afold" type="button" aria-expanded="false">{{ t(key, n=n) }}</button>
 {%- endmacro %}
+
+{#- A row's translations, folded under it (ROADMAP item 15, step 2): the keys
+    of those that have it.  Shown only for a translation a reader has ticked in
+    Settings, by the rule base.html's head script makes of them before first
+    paint, so that the line has its place before ub.js writes how many it holds
+    and opens it.  Empty until then; with none ticked, not drawn at all. -#}
+{% macro trfold(has) -%}
+{%- if has %}<div class="tf" data-has="{{ has }}"><button class="trfold" type="button" aria-expanded="false"></button></div>{% endif %}
+{%- endmacro %}

@@ -37,6 +37,21 @@ window.ubLang = function (r, v) {
   if (v === 'ru') r.dataset.lang = 'ru'; else delete r.dataset.lang;
   window.ubTitle();
 };
+// The translations a reader has ticked (settings.py `translations`, a list of
+// keys): the fold under every row of the text one of them has, its place there
+// before first paint (ub.css .tf), and on a phone with the index folded, a row's
+// entries and its translations on one line (Tigran, 2026-10-26).  One rule,
+// since the keys are the reader's own list; ub.js says it again on a change.
+window.ubTr = function (v) {
+  var st = document.getElementById('ub-tr');
+  if (!st) { st = document.createElement('style'); st.id = 'ub-tr'; document.head.appendChild(st); }
+  var ks = String(v || '').split(' ').filter(function (k) { return /^[a-z0-9-]+$/.test(k); });
+  var f = ks.map(function (k) { return '.tf[data-has~="' + k + '"]'; }).join(),
+      r = ':root[data-margin="off"] .grid>.row:has(>:is(' + f + '))';
+  st.textContent = ks.length ? f + '{display:block}@media (max-width:62rem){' + r +
+    '{flex-flow:row wrap;align-items:baseline}' + r + '>:is(.a,.tf){display:contents}' +
+    r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold::after{content:"·";margin:0 .45em}}' : '';
+};
 window.ubTitle = function () {
   var t = document.querySelector('title');
   if (!t || !t.dataset.ru) return;
@@ -61,6 +76,7 @@ window.ubTitle = function () {
     if (x !== B[k]) r.dataset[k] = x === false ? 'off' : x;
   }
   window.ubLang(r, 'lang' in s ? s.lang : D.lang);
+  window.ubTr('translations' in s ? s.translations : D.translations);
 })(document.documentElement, window.ubDefaults, window.ubBase);
 </script>
 {% block head %}{% endblock %}
@@ -190,6 +206,33 @@ window.ubTitle = function () {
       <label class="{{ c.cls }}"{{ needs|safe }}><input type="radio" name="{{ it.key }}" value="{{ c.value }}"> {{ t(c.label) }}
         {%- if c.hint %} <small>{{ t(c.hint) }}</small>{% endif %}</label>
       {%- endfor %}
+      {%- elif it.kind == 'translations' %}
+      {#- Those shown, in the reader's order, and the others, by language: ub.js
+          moves each row between the two lists as it is ticked or hidden, and
+          keeps their order (settings.py TRANSLATIONS).  Drawn all as others, as
+          before any is ticked; the hidden input is the setting's value, which
+          ub.js keeps.  A tick shows one; once shown, × hides it, and its card is
+          no switch (Tigran, 2026-10-26).  Its short name, never translated,
+          after its title: what a fold calls it. #}
+      <input type="hidden" name="{{ it.key }}">
+      <p class="trintro">{{ t('tr:intro') }}</p>
+      <p class="sub">{{ t('Shown, in this order') }}</p>
+      <p class="trnone">{{ t('tr:none') }}</p>
+      <ol class="trlist trshown"></ol>
+      <p class="sub trothers">{{ t('Other translations') }}</p>
+      {%- for lang, rows in translations()|groupby('lang') %}
+      <p class="trlang">{{ t(LANGUAGES[lang]) }}</p>
+      <ul class="trlist trother" data-lang="{{ lang }}">
+        {%- for x in rows %}
+        <li data-k="{{ x.key }}"><label><input type="checkbox" value="{{ x.key }}">
+          <span class="w"><span lang="{{ x.lang }}">{{ x.title }}</span> ({{ x.label }}) <span class="lang">{{ t(LANGUAGES[lang]) }}</span></span>
+          <small class="d">{{ t(x.by) }} · {{ t(x.cover) }}</small></label>
+          <span class="mv"><button type="button" class="up" {{ ta('aria-label', 'Move up') }} {{ ta('title', 'Move up') }}>↑</button><button type="button" class="down" {{ ta('aria-label', 'Move down') }} {{ ta('title', 'Move down') }}>↓</button><button type="button" class="drop" {{ ta('aria-label', 'Hide this translation') }} {{ ta('title', 'Hide this translation') }}>×</button></span></li>
+        {%- endfor %}
+      </ul>
+      {%- endfor %}
+      {#- What a fold needs of each: its name in a tab, and who made it. #}
+      <script type="application/json" id="ub-translations">{{ translations_json()|safe }}</script>
       {%- elif it.kind == 'select' %}
       <label class="row set-{{ it.key }}"{{ needs|safe }}>{{ t(it.label) }} <select name="{{ it.key }}">
         {%- for c in it.choices %}{% set w = tr('{r}×', r=dec(c.value)) if it.key == 'rate' else c.label %}<option value="{{ c.value }}"{{ ru(w) }}>{{ tt(w) }}</option>{% endfor %}

@@ -6,7 +6,11 @@
 #   title   the work's own title, as it calls itself: never translated
 #   lang    the language it is in, as a tag (BCP 47)
 #   by      who made it, and who publishes it, in each language of the interface
-#   label   its short name, for a tab: in each language of the interface
+#   label   its short name, the same in every language of the interface, never
+#           translated: a fold names it so, in its tab and over its text, where
+#           who made it would take two lines on a phone, and Settings puts it
+#           after the title, "Книга Урантии (USGNY)", so that the one can be
+#           known by the other (Tigran, 2026-10-26)
 #
 # What it covers ("the whole book", "Papers 0–39 ...") is counted from the
 # data, never written here.  Words from the mockup Tigran settled on 2026-10-26.
@@ -15,12 +19,12 @@
 title = "Урантийские документы"
 lang  = "ru"
 by    = { en = "translated by Tigran Aivazian", ru = "перевод Тиграна Айвазяна" }
-label = { en = "Aivazian", ru = "Айвазян" }
+label = "Aivazian"
 
 [urantia-ru]
 title = "Книга Урантии"
 lang  = "ru"
-label = { en = "Lila & Prokopov", ru = "Лила и Прокопов" }
+label = "USGNY"         # the Urantia Book Society of Greater New York
 [urantia-ru.by]
-en = "translated by Lila, corrected by Sergey Prokopov; Urantia Book Society of Greater New York"
-ru = "перевод Лилы, с исправлениями Сергея Прокопова; Общество Книги Урантии Большого Нью-Йорка"
+en = "translated by Lila Dogim, corrected by Sergey Prokopov; Urantia Book Society of Greater New York"
+ru = "перевод Лилы Догим, с исправлениями Сергея Прокопова; Общество Книги Урантии Большого Нью-Йорка"

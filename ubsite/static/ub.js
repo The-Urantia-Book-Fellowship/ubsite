@@ -43,6 +43,7 @@
       else r.dataset[k] = o[k] === false ? 'off' : String(o[k]);
     }
     if (window.ubLang) window.ubLang(r, o.lang);
+    if (window.ubTr) window.ubTr(o.translations);
   }
   function announce(k, o) {
     document.dispatchEvent(new CustomEvent('ub:settings', { detail: { key: k, all: o } }));
@@ -152,7 +153,73 @@
         }
       });
       idle(o);
+      trFill();
     };
+    // The Translations tab (settings.py TRANSLATIONS): those shown, in the
+    // reader's order, numbered, each with ↑ and ↓, then the others, by
+    // language, in the order the page drew them.  A tick puts one at the end of
+    // the order, or back among the others (Tigran, 2026-10-26).
+    var trShown = form.querySelector('.trshown');
+    var trOrder = function () {
+      return String(load().translations || '').split(' ').filter(function (k) {
+        return k && form.querySelector('.trlist li[data-k="' + k + '"]');
+      });
+    };
+    var trFill = function () {
+      if (!trShown) return;
+      var order = trOrder();
+      Array.prototype.slice.call(form.querySelectorAll('.trlist li[data-k]'))
+        .sort(function (x, y) { return x.dataset.i - y.dataset.i; })
+        .forEach(function (li) {
+          var at = order.indexOf(li.dataset.k);
+          li.querySelector('input').checked = at >= 0;
+          li.querySelector('.up').disabled = at <= 0;
+          li.querySelector('.down').disabled = at < 0 || at === order.length - 1;
+          if (at < 0) form.querySelector('.trother[data-lang="' + li.dataset.lang + '"]').appendChild(li);
+        });
+      order.forEach(function (k) { trShown.appendChild(form.querySelector('.trlist li[data-k="' + k + '"]')); });
+      // A language's label goes with its list, and Other translations with the last of them.
+      Array.prototype.forEach.call(form.querySelectorAll('.trother'), function (ul) {
+        ul.hidden = ul.previousElementSibling.hidden = !ul.children.length;
+      });
+      form.querySelector('.trnone').hidden = order.length > 0;
+      form.querySelector('.trothers').hidden = !form.querySelector('.trother li');
+    };
+    var trSet = function (order) {
+      window.ubSettings.set('translations', order.join(' '));
+      trFill();
+      resettable();
+    };
+    if (trShown) {
+      // Each row's first place, to go back to when it is unticked.
+      Array.prototype.forEach.call(form.querySelectorAll('.trlist li[data-k]'), function (li, i) {
+        li.dataset.lang = li.closest('.trlist').dataset.lang;
+        li.dataset.i = i;
+      });
+      form.addEventListener('change', function (ev) {
+        var el = ev.target;
+        if (el.type !== 'checkbox' || !el.closest('.trlist')) return;
+        var order = trOrder().filter(function (k) { return k !== el.value; });
+        if (el.checked) order.push(el.value);
+        trSet(order);
+      });
+      form.addEventListener('click', function (ev) {
+        var b = ev.target.closest('.trlist .up, .trlist .down, .trlist .drop');
+        if (!b || b.disabled) return;
+        // × hides it: the card itself is not a switch once shown (Tigran, 2026-10-26).
+        if (b.classList.contains('drop')) {
+          var gone = b.closest('li').dataset.k;
+          trSet(trOrder().filter(function (k) { return k !== gone; }));
+          return (form.querySelector('.trshown .drop') || form.querySelector('.trother li[data-k="' + gone + '"] input')).focus();
+        }
+        var k = b.closest('li').dataset.k, order = trOrder(), i = order.indexOf(k), j = i + (b.classList.contains('up') ? -1 : 1);
+        if (i < 0 || j < 0 || j >= order.length) return;
+        order[i] = order[j];
+        order[j] = k;
+        trSet(order);
+        b.disabled ? b.closest('li').querySelector('input').focus() : b.focus();
+      });
+    }
     // ↺ is greyed while every setting is its default: only what differs is
     // kept.  The language it spares does not count.
     var reset = form.querySelector('.reset');
@@ -376,6 +443,119 @@
     indexSync();
   });
   indexSync();
+  // A row's translations, folded under it (ROADMAP item 15, step 2; templates/
+  // _fold.html trfold).  Its line says how many of those ticked in Settings it
+  // has; opened, it shows them, in the reader's order, one at a time in tabs or
+  // All, stacked, each named, fetched with the rest of the section's the first
+  // time one is opened (/tr/<paper>:<section>, under the article's version, as
+  // /rail/N is), and kept for the page.  The tab chosen opens the next fold
+  // (settings.py KEPT `trtab`).  Offline the fetch fails, until the copy holds
+  // them: a download of their own, to come (Tigran, 2026-10-26).
+  var TRS = [], trBy = {}, trGot = {};
+  try { TRS = JSON.parse((document.getElementById('ub-translations') || {}).textContent || '[]'); } catch (e) {}
+  TRS.forEach(function (x) { trBy[x.key] = x; });
+  function trKeys(tf) {
+    var has = (tf.dataset.has || '').split(' ');
+    return String(load().translations || '').split(' ').filter(function (k) {
+      return trBy[k] && has.indexOf(k) >= 0;
+    });
+  }
+  function trFetch(art, sec) {
+    var v = (art && art.dataset.trv) || '', key = sec + '?' + v;
+    if (!trGot[key]) {
+      trGot[key] = fetch('/tr/' + sec + '?v=' + encodeURIComponent(v))
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+        .then(function (h) {
+          var t = document.createElement('template'), got = {};
+          t.innerHTML = h;
+          Array.prototype.forEach.call(t.content.querySelectorAll('[data-k][data-ref]'), function (d) {
+            (got[d.dataset.k] = got[d.dataset.k] || {})[d.dataset.ref] = d.innerHTML;
+          });
+          return got;
+        });
+      trGot[key].catch(function () { delete trGot[key]; });
+    }
+    return trGot[key];
+  }
+  // A table row's words and its figure, as _para.html splits the English's.
+  function trLead(h) {
+    var r = h.split('<span class="leader"></span>');
+    return r.length === 2 ? '<span class="leadrow"><span class="lab">' + r[0] + '</span><span class="fig">' +
+                            '<span class="leader"></span>' + r[1] + '</span></span>' : h;
+  }
+  function trDraw(tf, ks) {
+    var panel = tf.querySelector('.tr');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.className = 'tr';
+      tf.appendChild(panel);
+    }
+    panel.hidden = false;
+    var lines = tf.parentNode.querySelectorAll('p.t[id]'),
+        refs = Array.prototype.map.call(lines, function (q) { return q.id; });
+    if (!refs.length) return;
+    trFetch(tf.closest('article'), refs[0].split('.')[0]).then(function (got) {
+      if (!tf.classList.contains('open')) return;
+      var want = load().trtab, h = '',
+          cur = want === 'all' && ks.length > 1 ? 'all' : ks.indexOf(want) >= 0 ? want : ks[0];
+      if (ks.length > 1) {
+        h += '<div class="trtabs" role="group">' + ks.map(function (k) {
+          return '<button type="button" data-tab="' + k + '" aria-pressed="' + (cur === k) + '">' +
+                 trBy[k].label + '</button>';
+        }).join('') + '<button type="button" data-tab="all" aria-pressed="' + (cur === 'all') + '">' +
+                 T('All|translations') + '</button></div>';
+      }
+      // Each named by its short name, as its tab is: who made it, in full,
+      // would take two lines on a phone, and Settings says it (Tigran,
+      // 2026-10-26).
+      (cur === 'all' ? ks : [cur]).forEach(function (k) {
+        var x = trBy[k];
+        if (cur === 'all' || ks.length === 1) h += '<p class="who">' + x.label + '</p>';
+        // A heading in the text (0:12.10) is centred, and a paper's first
+        // paragraph drops its first letter, as the English's do and each
+        // translation's own TeX does (\lettrine).
+        refs.forEach(function (ref, i) {
+          var t = (got[k] || {})[ref], c = lines[i].classList;
+          if (t != null) h += '<p class="rt' + (c.contains('head') ? ' head' : '') + (c.contains('opening') ? ' opening' : '') +
+                              '" lang="' + x.lang + '">' + trLead(t) + '</p>';
+        });
+      });
+      panel.innerHTML = h;
+    }, function () {
+      if (tf.classList.contains('open')) panel.innerHTML = '<p class="gap">' + T('tr:unreachable') + '</p>';
+    });
+  }
+  function trShut(tf) {
+    tf.classList.remove('open');
+    var b = tf.querySelector('.trfold'), panel = tf.querySelector('.tr');
+    if (b) b.setAttribute('aria-expanded', 'false');
+    if (panel) panel.hidden = true;
+  }
+  function trSync() {
+    Array.prototype.forEach.call(document.querySelectorAll('.tf'), function (tf) {
+      var ks = trKeys(tf), b = tf.querySelector('.trfold');
+      if (!b) return;
+      b.innerHTML = ks.length ? T('{n} translations', { n: ks.length }) : '';
+      if (!tf.classList.contains('open')) return;
+      if (ks.length) trDraw(tf, ks); else trShut(tf);
+    });
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('.trfold, .trtabs button'), tf = b && b.closest('.tf');
+    if (!tf) return;
+    if (b.classList.contains('trfold')) {
+      if (tf.classList.contains('open')) return trShut(tf);
+      tf.classList.add('open');
+      b.setAttribute('aria-expanded', 'true');
+      return trDraw(tf, trKeys(tf));
+    }
+    window.ubSettings.set('trtab', b.dataset.tab);
+  });
+  trSync();
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail.key === 'translations' || ev.detail.key === 'trtab') trSync();
+  });
+  document.addEventListener('ub:swap', trSync);
   function swapped() { railSync(); indexSync(); }
   document.addEventListener('ub:swap', swapped);
   document.addEventListener('ub:settings', function (ev) {
@@ -634,7 +814,7 @@
     var t = ev.target;
     if (document.documentElement.dataset.tappage !== 'true' || !touch || ev.button ||
         !t.closest || !t.closest('main') || !getSelection().isCollapsed ||
-        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .blanket, .marginhead, .player')) return;
+        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .blanket, .marginhead, .player')) return;
     if (turn(ev.clientY < innerHeight / 2 ? -1 : 1)) ev.preventDefault();
   }
 

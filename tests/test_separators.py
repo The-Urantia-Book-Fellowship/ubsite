@@ -76,7 +76,7 @@ class Built(unittest.TestCase):
         status, _, body = get("/134:6")
         self.assertEqual(status, 200)
         self.assertRegex(body, r'<div class="stars" role="separator" data-stars="\* \* \*">'
-                               r'</div>\s*<p class="t"\s+id="134:6\.14">')
+                               r'</div>\s*<div class="row">\s*<p class="t"\s+id="134:6\.14">')
         self.assertEqual(len(re.findall(r'class="stars"', body)), 1)
         status, _, body = get("/144:5")
         self.assertEqual(len(re.findall(r'class="stars"', body)), 6)

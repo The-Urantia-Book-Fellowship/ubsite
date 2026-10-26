@@ -10,7 +10,13 @@ CREATE TABLE translation (
     title        TEXT NOT NULL,         -- the work's own title
     n_paragraphs INTEGER NOT NULL,      -- of ours it translates
     n_notes      INTEGER NOT NULL,      -- the translator's
-    commit_id    TEXT NOT NULL          -- of its repository, as read
+    commit_id    TEXT NOT NULL,         -- of its repository, as read
+    ord          INTEGER NOT NULL,      -- in data/translations.toml: Settings lists them so
+    -- What a reader is told of it (data/translations.toml): who made it, in
+    -- each language of the interface, and its short name, in none: "Aivazian".
+    by_en        TEXT NOT NULL,
+    by_ru        TEXT NOT NULL,
+    label        TEXT NOT NULL
 );
 
 -- A rowid table, not WITHOUT ROWID: its rows are long, and stored by key they

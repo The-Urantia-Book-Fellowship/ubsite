@@ -52,8 +52,13 @@ KNOWN_LABELS = ROOT / "tests" / "known-tr-labels.tsv"
 # How each translation's TeX is read, beyond its paper files: where its own
 # hyphenation list is, and the Foreword's title, which urantia-ru's \uforeword
 # takes from its style rather than writing.
+#
+# And where its style sets the Acknowledgment's heading otherwise than the paper
+# file writes it: ud's p000.tex writes \usection{БЛАГОДАРНОСТЬ}, and ud.sty's
+# \usection sets in italic the one title that is its \ackn,
+# \ifx\secname\ackn\itshape.  urantia-ru writes its own italic, \bibemph.
 STYLE = {
-    "ud": {"hyphenation": "ud.sty"},
+    "ud": {"hyphenation": "ud.sty", "ackn": "ud.sty"},
     "urantia-ru": {"hyphenation": "tex/urantia-hyphen-ru.tex",
                    "foreword": ("urantia-ru.sty", "forewordtoc")},
 }
@@ -95,9 +100,9 @@ def meta() -> dict[str, dict]:
         raw = tomllib.load(fh)
     for k, v in raw.items():
         missing = {"title", "lang", "by", "label"} - set(v)
-        if missing or any(set(v[f]) != {"en", "ru"} for f in ("by", "label")):
-            raise SystemExit(f"translation: data/translations.toml [{k}] wants title, lang,"
-                             f" and by and label in en and ru")
+        if missing or set(v["by"]) != {"en", "ru"} or not isinstance(v["label"], str):
+            raise SystemExit(f"translation: data/translations.toml [{k}] wants title, lang, label,"
+                             f" and by in en and ru")
     return raw
 
 
@@ -303,6 +308,8 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                 text, spans, notes = _expand(key, hs[1].body, report, f"{where}:{hs[1].line}")
                 if notes:
                     report.hard("tr-note-in-heading", f"{where}:{hs[1].line}", "a note in a heading")
+                if "ackn" in STYLE[key]:
+                    spans = _ackn(key, repo, hs[1].body, text, spans, report, f"{where}:{hs[1].line}")
                 if text and o in ours:
                     paras.append(TPara(o, f"title {n}:{s}", text, render(text, spans), []))
             if s in done_secs:
@@ -323,6 +330,24 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
     _separators(key, theirs_seps, {_fmt(k) for k, v in ours.items() if v["sep"]}, report)
     paras.sort(key=lambda p: p.key)
     return Built(key, info, repo["commit"], paras, headings, len(theirs_seps))
+
+
+def _ackn(key, repo, body, text, spans, report, where):
+    """The Acknowledgment's heading as the translation's style sets it: in
+    italic, where its \\usection italicises the title that is its \\ackn.  A
+    heading there that is not its \\ackn would be set as an ordinary numbered
+    section, which none is, and fails."""
+    f = STYLE[key]["ackn"]
+    sty = read_at_rev(repo["path"], f, repo["at"])
+    m = re.search(r"\\def\\ackn\{([^{}]*)\}", sty)
+    if not m or body.strip() != m.group(1):
+        report.hard("tr-ackn", where, f"the heading {body!r} is not {f}'s \\ackn"
+                    + (f" {m.group(1)!r}" if m else ", which it does not define"))
+        return spans
+    if "\\ifx\\secname\\ackn\\itshape" in sty and not any(
+            x.kind == "em" and x.start == 0 and x.end == len(text) for x in spans):
+        spans = [Span(0, len(text), "em"), *spans]
+    return spans
 
 
 def hyphenation(key: str, repo: dict, report) -> list[str]:
@@ -374,10 +399,11 @@ def ours(con) -> dict[Key, dict]:
 
 
 def store(con, built: list[Built], ours_: dict[Key, dict]) -> None:
-    for b in built:
-        con.execute("INSERT INTO translation VALUES (?,?,?,?,?,?)",
-                    (b.key, b.meta["lang"], b.meta["title"], len(b.paras),
-                     sum(len(p.notes) for p in b.paras), b.commit))
+    for i, b in enumerate(built):
+        m = b.meta
+        con.execute("INSERT INTO translation VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (b.key, m["lang"], m["title"], len(b.paras), sum(len(p.notes) for p in b.paras),
+                     b.commit, i, m["by"]["en"], m["by"]["ru"], m["label"]))
         num: dict[int, int] = {}
         for p in b.paras:
             pid = ours_[p.key]["id"]

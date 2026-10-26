@@ -70,7 +70,7 @@ figures_free         = 26
 # its separators where ours are, but for tests/known-tr-separators.tsv; its
 # list labels as ours, but for tests/known-tr-labels.tsv.
 [translation.ud]
-source_commit = "51f3039"
+source_commit = "cc37b29"
 measured_on   = "2026-10-26"
 vs_lines             = 14595     # 14,586 of ours + the ten separators it numbers - 0:12.10,
                                  # which is a \usection, its Acknowledgment's heading
@@ -81,7 +81,7 @@ papers               = 45        # with a paragraph translated, so with their ti
 notes                = 346       # \fnst, the translator's
 numbered_otherwise   = 2         # 31:10.22 (its 31:10.23) and 0:12.10 (its heading);
                                  # the rest it numbers otherwise it has not yet translated
-labels_differ        = 1         # 29:4.27, its 3. for our 4. (tests/known-tr-labels.tsv)
+labels_differ        = 0         # 29:4.27's 3. for our 4., mended in cc37b29
 [translation.urantia-ru]
 source_commit = "a6525fe"
 measured_on   = "2026-10-26"

@@ -51,10 +51,11 @@ def entries(items: list) -> list:
 
 def margin(body: str, ref: str) -> str:
     """What stands beside paragraph `ref` of a section page."""
-    # Up to what follows the margin -- the next paragraph, a block of verse,
-    # a separator, the grid's end -- since a Chronology window is a div too.
+    # Up to what follows the margin -- its row's fold of translations, the
+    # row's end, the next paragraph, a block of verse, a separator, the grid's
+    # end -- since a Chronology window is a div too.
     m = re.search(r'id="' + re.escape(ref) + r'">.*?</p>\s*<div class="a">(.*?)</div>'
-                  r'\s*(?=<p class="t|<div class="(?:verse|stars)"|</div>)', body, re.S)
+                  r'\s*(?=<p class="t|<div class="(?:verse|stars|tf|row)"|</div>)', body, re.S)
     assert m, f"no margin after {ref}"
     return m.group(1)
 
@@ -121,7 +122,7 @@ class Margin(unittest.TestCase):
         for url in ("/1:0", "/144:3", "/i/ice-ages/read", "/i/prayer/read/theme"):
             body = get(url)[2]
             self.assertEqual(body.count(head), 1, url)
-        self.assertRegex(get("/1:0")[2], r"<article>\s*" + re.escape(head))
+        self.assertRegex(get("/1:0")[2], r"<article[^>]*>\s*" + re.escape(head))
         self.assertNotIn("marginhead", get("/part/4")[2])          # a part's page has no index
 
     def test_each_box_says_how_many_entries_it_holds(self):
@@ -134,7 +135,7 @@ class Margin(unittest.TestCase):
             want = [n for n in (sum(rows["nciters"].get(q["id"], 0) for q in ([r["p"]] if "p" in r else r["lines"]))
                                 for r in rows["rows"]) if n]
             got = []
-            for a in re.findall(r'<div class="a">(.*?)</div>\s*(?=<p class="t|<div class="(?:verse|stars)"|</div>)',
+            for a in re.findall(r'<div class="a">(.*?)</div>\s*(?=<p class="t|<div class="(?:verse|stars|tf|row)"|</div>)',
                                 body, re.S):
                 if not a:
                     continue

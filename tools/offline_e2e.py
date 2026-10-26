@@ -265,6 +265,30 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         # Updated by hand, with Update now, until "Kept up to date by itself".
         pg.evaluate("ubSettings.set('autoupdate', false)")
 
+        print("Translations beside the text")
+        pg.goto(BASE + "/1:1")
+        ok(not pg.locator(".tf").first.is_visible(), "none is shown until a reader ticks one")
+        pg.evaluate("ubSettings.set('translations', 'urantia-ru ud')")
+        pg.goto(BASE + "/1:1")
+        ok(pg.locator(".tf .trfold").first.inner_text() == "2 translations",
+           f"ticked, a fold under each paragraph says how many ({pg.locator('.tf .trfold').first.inner_text()!r})")
+        pg.locator(".tf .trfold").first.click()
+        pg.wait_for_selector(".tf.open .rt")
+        # Its words, without the soft hyphens of its own hyphenation.
+        words = lambda i: pg.evaluate("i => document.querySelectorAll('.tf.open .rt')[i].textContent"
+                                      ".replace(/\u00ad/g, '')", i)
+        ok("Из всех имен, под которыми" in words(0),
+           "opened, it shows the first in the reader's order, the USGNY's")
+        pg.locator(".tf.open .trtabs button[data-tab=ud]").click()
+        pg.wait_for_function("document.querySelector('.tf.open .rt').textContent.includes('Из всех имён')")
+        ok(True, "a tab shows another, Aivazian's")
+        pg.locator(".tf .trfold").nth(1).click()
+        pg.wait_for_function("document.querySelectorAll('.tf.open .rt').length > 1")
+        ok("Всеобщий Отец никогда" in words(1), "and the next fold opens at the tab chosen")
+        pg.goto(BASE + "/140:4")
+        ok(pg.locator(".tf .trfold").first.inner_text() == "1 translation",
+           "a section one of them lacks counts the other alone")
+
         # What the server sends, to hold the worker's answers to.
         want = {}
         urls = ["/101:4", "/101:4.2-3", "/i/god", "/appendix/A", "/lists/1955", "/index/G", "/", "/read",
@@ -309,6 +333,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),
            "the footer says the page is from the offline copy")
+        pg.goto(BASE + "/2:1")
+        pg.locator(".tf .trfold").first.click()
+        pg.wait_for_selector(".tf.open .gap")
+        ok("need a connection" in pg.inner_text(".tf.open .gap"),
+           "a fold of translations says offline that they need a connection")
+        pg.evaluate("ubSettings.set('translations', '')")
         pg.goto(BASE + "/search?q=101:4.2")
         ok(pg.url.endswith("/101:4.2"), f"a citation typed into the box opens it ({pg.url})")
         pg.goto(BASE + "/101")

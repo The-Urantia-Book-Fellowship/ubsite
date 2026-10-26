@@ -425,6 +425,106 @@ def voices() -> list[dict]:
 T.env.globals["voices"] = voices
 
 
+def _runs(ns: list[int]) -> str:
+    """[0, 1, 2, 3, 5] -> "0–3, 5"."""
+    out, a = [], None
+    for i, n in enumerate(ns):
+        if a is None:
+            a = n
+        if i + 1 == len(ns) or ns[i + 1] != n + 1:
+            out.append(f"{a}–{n}" if n > a else f"{a}")
+            a = None
+    return ", ".join(out)
+
+
+def _cover(whole: list[int], part: list[int]) -> l10n.L:
+    """What a translation covers, from its papers: "the whole book", or
+    "Papers 0–40, and 41, 43, 195 and 196 in part"."""
+    if not part and len(whole) == 197:
+        return l10n.tr("the whole book")
+    some = l10n.tr("{a} and {b}", a=", ".join(map(str, part[:-1])), b=part[-1]) if len(part) > 1 \
+        else l10n.L.same(part[0]) if part else None
+    if whole and some:
+        return l10n.tr("Papers {r}, and {p} in part", r=_runs(whole), p=some)
+    return l10n.tr("Papers {r}", r=_runs(whole)) if whole else l10n.tr("Papers {p} in part", p=some)
+
+
+@functools.lru_cache(maxsize=4)
+def _translations(mtime_ns: int, bilingual: bool) -> list[dict]:
+    try:
+        con = db()
+        rows = con.execute("SELECT * FROM translation ORDER BY ord").fetchall()
+        n = dict(con.execute("SELECT paper_n, COUNT(*) FROM paragraph GROUP BY paper_n").fetchall())
+        out = []
+        for r in rows:
+            have = dict(con.execute(
+                "SELECT p.paper_n, COUNT(*) FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id"
+                " WHERE t.translation = ? GROUP BY p.paper_n", (r["key"],)).fetchall())
+            whole = [k for k in sorted(have) if have[k] == n[k]]
+            part = [k for k in sorted(have) if have[k] < n[k]]
+            out.append({"key": r["key"], "lang": r["lang"], "title": r["title"],
+                        "by": l10n.L({"en": escape(r["by_en"]), "ru": escape(r["by_ru"])}),
+                        "label": escape(r["label"]),
+                        "cover": _cover(whole, part)})
+        return out
+    except sqlite3.Error:
+        return []                                  # a database from before 010_translation.sql
+
+
+def translations() -> list[dict]:
+    """The translations this database carries, in the order Settings lists them
+    (data/translations.toml): each with its words in both languages, an l10n.L,
+    and what it covers, counted from what it has."""
+    return _translations(db_version(), l10n.BILINGUAL)
+
+
+T.env.globals["translations"] = translations
+# A translation's language, as Settings names it.
+T.env.globals["LANGUAGES"] = {"ru": "Russian"}
+
+
+def translations_json() -> Markup:
+    """What a fold needs of each translation (ub.js): its key, title and
+    language, its short name, and who made it in each language, as {en, ru},
+    which l10n.js's T() takes as words made.  HTML, escaped.  In the dialog,
+    so in the shell."""
+    out = [{"key": x["key"], "lang": x["lang"], "title": str(escape(x["title"])),
+            "label": str(x["label"]), "by": dict(x["by"].by)} for x in translations()]
+    return Markup(json.dumps(out, ensure_ascii=False).replace("</", "<\\/"))
+
+
+T.env.globals["translations_json"] = translations_json
+
+
+@functools.lru_cache(maxsize=256)
+def _translated(mtime_ns: int, paper: int, sec: int) -> dict:
+    try:
+        return queries.translated(db(), paper, sec)
+    except sqlite3.Error:
+        return {"has": {}, "html": "", "v": ""}       # a database from before 010_translation.sql
+
+
+def translated(paper: int, sec: int) -> dict:
+    """queries.translated(), kept per database: the section page reads its
+    version and its folds' data-has, /tr/ its fragment."""
+    return _translated(db_version(), paper, sec)
+
+
+@app.get("/tr/{ref}", include_in_schema=False)
+def translations_of(ref: str, v: str = ""):
+    """A section's translations, for the folds under its paragraphs (ub.js),
+    which fetch it the first time one is opened: every translation the section
+    has, not only those a reader ticked, so that no setting reaches the server.
+    Asked for under its version (the article's data-trv), the answer is kept
+    for good, as /rail/N's is."""
+    m = re.fullmatch(r"(\d+):(\d+)", ref)
+    got = translated(int(m[1]), int(m[2])) if m else None
+    if not got or not got["v"]:
+        return Response("No translation has this section.\n", status_code=404, media_type="text/plain")
+    cache = "public, max-age=31536000, immutable" if v == got["v"] else "no-cache"
+    return HTMLResponse(got["html"], headers={"Cache-Control": cache})
+
+
 def db_version() -> int:
     """Which database this is: its mtime, which every cache here keys on."""
     try:
@@ -1241,9 +1341,10 @@ def read(request: Request, ref: str):
             onward["label"] = w.en.unescape()
             if l10n.BILINGUAL:
                 onward["label_ru"] = w["ru"].unescape()
+    tr = translated(paper, sec)
     return page(request, "section.html", paper=p, section=s, **rows,
                 focus=focus, last=last, go=go, onward=onward,
-                audio=section_audio(con, s["id"]))
+                audio=section_audio(con, s["id"]), tr_has=tr["has"], trv=tr["v"])
 
 
 def transport(con, paper: int, sec: int) -> dict:

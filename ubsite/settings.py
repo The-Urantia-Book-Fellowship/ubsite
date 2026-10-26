@@ -22,7 +22,8 @@ from __future__ import annotations
 from markupsafe import Markup
 
 # (key, kind, label, default, choices, hint).  kind: 'switch' (a checkbox),
-# 'segmented' (a row of radio buttons), 'radio' (a list of them), 'select'.
+# 'segmented' (a row of radio buttons), 'radio' (a list of them), 'select',
+# 'translations' (the list of them, ordered, below).
 # A choice is (value, label, hint, css class).
 READING = [
     ("theme", "segmented", "Theme", "system",
@@ -113,6 +114,16 @@ SHOW = [
     # back (Tigran, 2026-10-14).  The icons keep their aria-labels.
     ("tips", "switch", "Tooltips", True, [], "a few words on a button or a link, where the pointer rests"),
 ]
+# The translations shown beside the text (ROADMAP item 15, step 2; Tigran,
+# 2026-10-26): those a reader ticks, in the order they set, the keys of
+# data/translations.toml separated by spaces, which a fold's tabs follow.  None
+# unless a reader asks: until one is ticked, every page is as it was.  A string,
+# not a list, so that every path here and in ub.js takes it as it takes the
+# rest.  The dialog draws the list of them from the database (app.py
+# translations()), and ub.js keeps it.
+TRANSLATIONS = [
+    ("translations", "translations", "Translations", "", [], ""),
+]
 SPEEDS = (0.8, 0.9, 1, 1.1, 1.25, 1.5)
 LISTEN = [
     # The choices are the database's voices (app.voices), the browser's own,
@@ -161,6 +172,9 @@ KEPT = [
     # where it is Russian (Tigran, 2026-10-25; ubsite/l10n.py).  base.html's
     # head script resolves it, as ubLang(), to data-lang="ru" or nothing.
     ("lang", "kept", "Language", "auto", [], ""),
+    # The tab last chosen in a fold of translations, which the next fold opens
+    # at (Tigran, 2026-10-26): a translation's key, "all", or "" for the first.
+    ("trtab", "kept", "Translation", "", [], ""),
 ]
 # Kept through ↺ "Restore the defaults": a reader who chose Russian and resets
 # the settings is not handed an English page (Tigran, 2026-10-25).
@@ -214,13 +228,14 @@ def groups(voices: list[dict]) -> list[dict]:
         for v in voices] + [BROWSER, {"value": "off", "label": "Off", "hint": "no listening controls", "cls": ""}]
     return [{"key": "reading", "legend": "Reading", "items": [_item(*s) for s in READING]},
             {"key": "show", "legend": "Show", "items": [_item(*s) for s in SHOW]},
+            {"key": "translations", "legend": "Translations", "items": [_item(*s) for s in TRANSLATIONS]},
             {"key": "listening", "legend": "Listening", "items": items},
             {"key": "offline", "legend": "Offline", "items": [_item(*s) for s in OFFLINE], "cls": "offline"}]
 
 
 def defaults() -> dict:
     """{key: default} for every setting, for the head script and ub.js."""
-    return {s[0]: s[3] for s in READING + SHOW + LISTEN + OFFLINE + KEPT}
+    return {s[0]: s[3] for s in READING + SHOW + TRANSLATIONS + LISTEN + OFFLINE + KEPT}
 
 
 def site_defaults() -> dict:

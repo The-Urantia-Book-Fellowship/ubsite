@@ -315,6 +315,18 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
    taller, and there is no JS position-syncing to break on resize. */
 .grid { display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(0, 26ch);
         gap: 0 2rem; }
+/* A paragraph, or a block of verse, is a row of the grid with what stands
+   beside it, laid on the grid's own columns, and under it the fold of its
+   translations (ROADMAP item 15, step 2; templates/_fold.html trfold): the text
+   and the fold in the first, the entries in the second beside both.  The
+   second of its own rows takes what the entries need beyond the text's, so a
+   tall margin never opens a gap between a paragraph and its fold; with no fold,
+   the row is as tall as it was, and nothing moves. */
+.grid > .row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid;
+               grid-template-rows: auto 1fr; }
+.grid > .row > :is(p.t, .verse, .tf) { grid-column: 1; }
+.grid > .row > .a { grid-column: 2; grid-row: 1 / span 2; }
+.grid > .row > .tf { grid-row: 2; }
 p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); color: var(--text);
       --line: var(--lead); line-height: var(--line); }
 /* Justified, as the book is set, and hyphenated where the book hyphenates: the
@@ -334,7 +346,7 @@ p.t { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
    Goudy's J (ten papers) hang its tail into the space above the third line,
    as the press does, instead of pushing that line in; at -.3em every letter
    still clears the second line, and the tail the third, at every spacing. */
-p.t.opening::first-letter { -webkit-initial-letter: 2; initial-letter: 2;
+p.t.opening::first-letter, .tf .rt.opening::first-letter { -webkit-initial-letter: 2; initial-letter: 2;
       font-size-adjust: none; margin: 0 .06em -.3em 0; }
 /* A verse, one to a line (48:6, 122:9, 144:5), is a line, not a paragraph to
    fill: when one wraps, its first line keeps its own spaces. */
@@ -731,6 +743,42 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 @media (hover: hover) { a.fn[data-k="st"]:hover::after { background: var(--link); color: var(--paper); } }
 
 .a { font-size: 1rem; line-height: 1.45; color: var(--faint); }
+/* A row's translations, folded to a line under it, "› 2 translations", as a
+   box of entries folds on a phone (Tigran, 2026-10-26).  Not drawn until a
+   reader ticks a translation it has: base.html's head script (ubTr) shows the
+   line, its height kept before ub.js writes in it.  Opened, one translation at
+   a time in tabs, in the reader's order, or All, stacked, each named; set as
+   the text is, justified, broken where its own TeX breaks it, in the text's
+   own leading.  A fraction its font has no character for, n⁄d, is drawn as
+   one by the font's own (`frac`). */
+.tf { display: none; margin: -.45rem 0 .85rem; font-size: 1rem; line-height: 1.45; }
+.trfold { display: flex; align-items: baseline; min-height: 1.45em; font: inherit; color: var(--faint);
+  background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.trfold::before { content: ""; display: inline-block; flex: none; width: .34em; height: .34em;
+  margin: 0 .5em .1em .26em; border: solid currentColor; border-width: 0 1.5px 1.5px 0;
+  transform: rotate(-45deg); transition: transform .12s; }
+.trfold[aria-expanded="true"]::before { transform: rotate(45deg); }
+@media (hover: hover) { .trfold:hover { color: var(--ink); } }
+.tf .tr { border-left: 2px solid var(--rule); padding: .1rem 0 .1rem .8rem; margin: .3rem 0 .4rem; }
+.tf .tr[hidden] { display: none; }
+.tf .trtabs { display: flex; flex-wrap: wrap; gap: .2rem 1rem; margin: 0 0 .35rem; font-size: .95rem; }
+.tf .trtabs button { font: inherit; background: none; border: 0; padding: 0 0 .1rem; cursor: pointer;
+  color: var(--faint); border-bottom: 1.5px solid transparent; }
+.tf .trtabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--link); }
+@media (hover: hover) { .tf .trtabs button:hover { color: var(--ink); } }
+.tf .who { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint);
+  margin: .5rem 0 .15rem; }
+.tf .who:first-child { margin-top: .1rem; }
+.tf .rt { margin: 0 0 .5rem; font-size: var(--size); line-height: var(--lead); color: var(--text);
+  text-wrap: pretty; text-align: justify; hyphens: manual; -webkit-hyphens: manual;
+  hyphenate-character: "-"; -webkit-hyphenate-character: "-"; -webkit-hyphenate-limit-lines: 1; }
+.tf .rt.head { text-align: center; }
+.tf .rt .leadrow { display: flex; align-items: baseline; }
+.tf .rt .leadrow .fig { margin-left: auto; white-space: nowrap; }
+.tf .gap { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
+.frac { font-variant-numeric: diagonal-fractions; }
+:root[data-align="ragged"] .tf .rt { text-align: start; hyphens: none; -webkit-hyphens: none; }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
 .chips > li > a { color: var(--faint); text-decoration: none; display: block;
@@ -999,15 +1047,16 @@ dialog.settings .reset:disabled { opacity: .35; cursor: default; }
     background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
 }
 /* A tab to each group (Tigran, 2026-10-25), across the dialog, the one shown
-   underlined.  Their words are 13em and a little, so where the dialog is too
-   narrow for them, on a phone 320px wide or at Larger on one of 360px, they
-   are set smaller with it (cqi, of the dialog's width), rather than run into
-   each other. */
+   underlined.  Five since Translations came (2026-10-26), whose words are
+   about 21em with their padding, so where the dialog is too narrow for them,
+   on any phone, they are set smaller with it (cqi, of the dialog's width),
+   rather than run past its edge: 14px on a phone 375px wide, at every text
+   size. */
 dialog.settings .tabs { flex: none; display: flex; margin: 0 -1.4rem; padding: 0 .9rem;
   padding: 0 min(.9rem, 3cqi); border-bottom: 1px solid var(--rule); }
-dialog.settings .tabs button { flex: 1 1 auto; margin: 0 0 -1px; padding: .35rem .3em .4rem;
+dialog.settings .tabs button { flex: 1 1 auto; margin: 0 0 -1px; padding: .35rem .15em .4rem;
   border: 0; border-bottom: 2px solid transparent; background: none; color: var(--faint);
-  font: inherit; font-size: .98rem; font-size: min(.98rem, 6cqi); line-height: 1.4; cursor: pointer; }
+  font: inherit; font-size: .98rem; font-size: min(.98rem, 4.5cqi); line-height: 1.4; cursor: pointer; }
 dialog.settings .tabs [aria-selected="true"] { color: var(--ink); border-bottom-color: var(--link); }
 dialog.settings .tabs button:focus-visible { outline: 2px solid var(--link); outline-offset: -3px; }
 @media (hover: hover) {
@@ -1041,6 +1090,40 @@ dialog.settings div.row { flex-wrap: wrap; row-gap: .3rem; }
 dialog.settings div.row > span { flex: 1 1 0; }
 dialog.settings div.row > .seg { margin-left: auto; }
 dialog.settings .sub { margin: .35rem 0 .05rem; font-size: 1.02rem; }
+/* The Translations tab (base.html; Tigran's mockup, 2026-10-26): those shown,
+   numbered in the reader's order, each in a box with ↑ and ↓; then the others,
+   by language.  A translation's title, and under it who made it and what it
+   covers. */
+dialog.settings .trintro { color: var(--faint); font-size: .95rem; margin: 0 0 .6rem; }
+dialog.settings .trnone { color: var(--faint); font-style: italic; font-size: .95rem; margin: .1rem 0 .7rem; }
+dialog.settings .trlist { list-style: none; margin: .3rem 0 .9rem; padding: 0; display: grid; gap: .5rem; }
+dialog.settings .trlist[hidden] { display: none; }
+dialog.settings .trlist li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; align-items: start; }
+dialog.settings ol.trlist { counter-reset: tr; }
+dialog.settings ol.trlist li { grid-template-columns: 1.1em minmax(0, 1fr) auto; counter-increment: tr;
+  border: 1px solid var(--rule); border-radius: 6px; padding: .4rem .45rem .4rem .55rem; background: var(--paper); }
+dialog.settings ol.trlist li::before { content: counter(tr); color: var(--faint); font-size: .85rem; padding-top: .2rem; }
+dialog.settings .trlist label { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .1rem 0;
+  align-items: baseline; padding: 0; }
+dialog.settings .trlist .d { grid-column: 2; line-height: 1.35; }
+dialog.settings .trlist .lang { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+dialog.settings .trother :is(.lang, .mv) { display: none; }
+/* Shown, a card is no switch: × hides it.  Its buttons stand beside its
+   title, and who made it and what it covers under both, across the card, so
+   that on a phone the line is not cut into a column of words. */
+dialog.settings .trshown input { display: none; }
+dialog.settings .trshown label { display: contents; cursor: default; pointer-events: none; }
+dialog.settings .trshown li::before { grid-row: 1 / span 2; }
+dialog.settings .trshown .w { grid-column: 2; grid-row: 1; align-self: center; }
+dialog.settings .trshown .mv { grid-column: 3; grid-row: 1; }
+dialog.settings .trshown .d { grid-column: 2 / -1; grid-row: 2; margin-top: .15rem; }
+dialog.settings .trlang { margin: .2rem 0 0; font-size: .95rem; }
+dialog.settings .mv { display: flex; gap: .2rem; }
+dialog.settings .mv button { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0;
+  font: 1rem system-ui, sans-serif; color: var(--ink); background: var(--card, var(--paper));
+  border: 1px solid var(--rule); border-radius: 4px; cursor: pointer; }
+dialog.settings .mv button:disabled { opacity: .3; cursor: default; }
+@media (hover: hover) { dialog.settings .mv button:not(:disabled):hover { border-color: var(--link); color: var(--link); } }
 dialog.settings .face-serif { font-family: var(--serif); font-size-adjust: .43; }
 dialog.settings .face-sans { font-family: var(--sans); font-size-adjust: .43; }
 dialog.settings label.face-serif, dialog.settings label.face-sans { padding-left: 0; }
@@ -1334,8 +1417,28 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
      grows to its widest item's least width, and one long dot-leader row once
      pushed all of 15:2 off the side. */
   .grid { grid-template-columns: minmax(0, 1fr); }
+  /* A column, whose parts keep their margins and their boxes as they did
+     while each stood on the grid: none collapses into the next, a list's
+     margins stay inside its box of entries, and a paragraph's reference,
+     which floats, inside the paragraph. */
+  .grid > .row { display: flex; flex-direction: column; }
   .a:not(:empty) { margin: -.4rem 0 1rem 1rem; border-left: 2px solid var(--rule);
                    padding-left: .7rem; }
+  /* The fold stands under the entries, as a box of them does under the text,
+     set in as far.  With the index folded, a row's entries and its translations
+     fold to one line, "› 2 index entries · 3 translations", each half opening
+     its own box (Tigran, 2026-10-26): base.html's head script lays the row out
+     so for the translations a reader has ticked, and here each part takes its
+     place on it. */
+  .tf { margin: -.6rem 0 .9rem 1rem; border-left: 2px solid var(--rule); padding-left: .7rem;
+        font-size: .9rem; }
+  .a:not(:empty) + .tf { margin-top: -.9rem; }
+  .tf .tr { border-left: 0; padding-left: 0; }
+  .grid > .row > p.t, .grid > .row .chips, .grid > .row .tr { width: 100%; }
+  .grid > .row .afold { order: 1; }
+  .grid > .row .trfold { order: 2; }
+  .grid > .row .chips { order: 3; }
+  .grid > .row .tr { order: 4; }
   .verse + .a:not(:empty) { margin-top: -.4rem; }
   .blanket ul { columns: 1; }
 }
@@ -1347,7 +1450,8 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }
-  .reader, .grid { display: block; }
+  .reader, .grid, .grid > .row { display: block; }
+  .trfold { display: none; }
   p.t { orphans: 3; widows: 3; max-width: none; }
   /* A margin column does not survive a page break, so the apparatus prints as
      notes after its paragraph instead. */

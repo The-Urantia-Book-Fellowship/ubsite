@@ -303,9 +303,10 @@ class Counter:
             if status != 200:
                 return
             kind, rest = "listen", ("browser", path[len("/speech/"):])
-        elif path in SKIP or path.startswith(("/rail/", "/offline/")):
+        elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/")):
             return                                 # /rail/N: a paper opened in the left rail;
-                                                   # /offline/: a copy downloading (sw.js)
+                                                   # /offline/: a copy downloading (sw.js);
+                                                   # /tr/: a section's translations, for a fold
         elif path.startswith("/api/"):
             kind = "api"                           # another site's program, not a reader
         else:

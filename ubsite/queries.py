@@ -221,6 +221,44 @@ def section(con: sqlite3.Connection, paper: int, sec: int) -> dict:
             "notes": by_para, "study": by_para_st}
 
 
+def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
+    """What the translations have of one section (build/translation.py), for
+    the fold under each paragraph (ROADMAP item 15, step 2).
+
+    has    paragraph id -> the keys of the translations that have it, in
+           Settings' order, separated by spaces: the fold's data-has
+    html   the fragment /tr/<paper>:<section> sends, every translation's
+           paragraphs of the section, each with its key, our reference and
+           its language, and its titles there: the paper's title and author,
+           and the section's.  A translation with no paragraph here has none
+    v      a hash of it, the version it is asked for under: a reader's browser
+           keeps it for good, and a build that changes nothing moves nothing
+    """
+    rows = con.execute(
+        "SELECT t.translation AS k, p.id AS pid, p.ref, t.html_hy, r.lang FROM tr_paragraph t"
+        " JOIN paragraph p ON p.id = t.paragraph_id JOIN translation r ON r.key = t.translation"
+        " WHERE p.paper_n = ? AND p.section_n = ? ORDER BY r.ord, p.para_n", (paper, sec)).fetchall()
+    has: dict[int, list[str]] = {}
+    for r in rows:
+        has.setdefault(r["pid"], []).append(r["k"])
+    keys = list(dict.fromkeys(r["k"] for r in rows))
+    heads = con.execute(
+        "SELECT h.translation AS k, h.kind, h.html, r.lang FROM tr_heading h"
+        " JOIN translation r ON r.key = h.translation"
+        " WHERE h.paper_n = ? AND (h.section_n IS NULL OR h.section_n = ?)"
+        " ORDER BY r.ord, h.section_n IS NOT NULL, h.kind DESC", (paper, sec)).fetchall()
+    out = ['<div class="trs">']
+    out += [f'<div data-k="{h["k"]}" data-head="{h["kind"]}" lang="{h["lang"]}">{h["html"]}</div>'
+            for h in heads if h["k"] in keys]
+    out += [f'<div data-k="{r["k"]}" data-ref="{r["ref"]}" lang="{r["lang"]}">{r["html_hy"]}</div>'
+            for r in rows]
+    out.append("</div>\n")
+    html = "\n".join(out)
+    import hashlib
+    return {"has": {pid: " ".join(ks) for pid, ks in has.items()}, "html": html,
+            "v": hashlib.sha256(html.encode()).hexdigest()[:12] if rows else ""}
+
+
 def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:
     """The 1955 readings `where` selects, in the order of the book.
 

@@ -45,8 +45,24 @@
 
 "Reading|tab" = "Чтение"
 "Show|tab" = "Показ"
+"Translations|tab" = "Переводы"
 "Listening|tab" = "Аудио"
 "Offline|tab" = "Офлайн"
+
+# The Translations tab (Tigran's mockup, 2026-10-26).  Compare is not yet built,
+# so neither sentence names it yet.
+"tr:intro" = { en = "The translations shown under the text, folded. Their order here is the order of a fold’s tabs.", ru = "Переводы, которые показываются под текстом в свёрнутом виде. В этом же порядке идут вкладки под абзацем." }
+"Shown, in this order" = "Показываются, в этом порядке"
+"tr:none" = { en = "None yet: tick one below to show it under the text.", ru = "Пока ни одного: отметьте перевод ниже, чтобы он показывался под текстом." }
+"Other translations" = "Другие переводы"
+"Russian" = "Русский"
+"Move up" = "Выше"
+"Move down" = "Ниже"
+"Hide this translation" = "Не показывать этот перевод"
+"the whole book" = "вся книга"
+"Papers {r}" = "документы {r}"
+"Papers {r}, and {p} in part" = "документы {r}, а также частично {p}"
+"Papers {p} in part" = "частично документы {p}"
 
 "System" = "Системная"
 "as this device is set" = "как настроено устройство"
@@ -321,6 +337,9 @@
 "Fold the contents away" = "Свернуть содержание"
 "Fold the index away" = "Свернуть указатель"
 "Show the index" = "Показать указатель"
+"{n} translations" = { en = ["{n} translation", "{n} translations"], ru = ["{n} перевод", "{n} перевода", "{n} переводов"] }
+"All|translations" = "Все"
+"tr:unreachable" = { en = "The translations could not be fetched: they need a connection, and are not in the offline copy yet.", ru = "Переводы не удалось загрузить: для них нужно подключение к сети, а в офлайн-копии их пока нет." }
 
 # --- Listening: the player (listen.js)
 

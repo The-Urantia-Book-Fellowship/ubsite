@@ -74,6 +74,9 @@ ASCII = "".join(map(chr, range(0x20, 0x7F)))
 # excuses these and nothing else.
 ELSEWHERE = {
     "◐": "the theme button, set in the system UI face (ub.css .theme)",
+    "↑": "Settings' Translations: one moved up the order, set in the system UI face"
+         " (ub.css dialog.settings .mv button)",
+    "↓": "and moved down",
     "↗": "a 1955 card's link to the committee's table, set in the system UI face"
          " (ub.css :is(.note, .pop) .src)",
     "γ": "42:5.1's SRT note names the Greek letter that became the 1955 'Y';"
