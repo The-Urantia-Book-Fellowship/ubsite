@@ -41,6 +41,9 @@ MANIFEST = [
     ("index", "xref.py",                              "index/xref.py"),
     # Data, not code: the patterns the book is hyphenated with (build/hyphen.py).
     ("texlive", "tex/generic/hyphen/hyphen.tex",      "tex/hyphen.tex"),
+    # And the patterns the Russian translations are set with: polyglossia's
+    # `russian` loads hyph-ru, as both translations' TeX does (build/hyphen.py).
+    ("texlive", "tex/generic/hyph-utf8/patterns/tex/hyph-ru.tex", "tex/hyph-ru.tex"),
     # The face a study note's math is set in, subset by build/fonts.py: OFL 1.1,
     # drawn to match EB Garamond, the nearest of TeX Live's math fonts to Goudy.
     ("texlive", "fonts/opentype/public/garamond-math/Garamond-Math.otf", "fonts/Garamond-Math.otf"),

@@ -1,0 +1,26 @@
+# What a reader is told about each translation the site shows beside the text
+# (ROADMAP item 15, step 2; build/translation.py).  The table's name is its key
+# in sources.toml, where its repository and the commit read are, and what a
+# reader's Settings store: it never changes once deployed.
+#
+#   title   the work's own title, as it calls itself: never translated
+#   lang    the language it is in, as a tag (BCP 47)
+#   by      who made it, and who publishes it, in each language of the interface
+#   label   its short name, for a tab: in each language of the interface
+#
+# What it covers ("the whole book", "Papers 0–39 ...") is counted from the
+# data, never written here.  Words from the mockup Tigran settled on 2026-10-26.
+
+[ud]
+title = "Урантийские документы"
+lang  = "ru"
+by    = { en = "translated by Tigran Aivazian", ru = "перевод Тиграна Айвазяна" }
+label = { en = "Aivazian", ru = "Айвазян" }
+
+[urantia-ru]
+title = "Книга Урантии"
+lang  = "ru"
+label = { en = "Lila & Prokopov", ru = "Лила и Прокопов" }
+[urantia-ru.by]
+en = "translated by Lila, corrected by Sergey Prokopov; Urantia Book Society of Greater New York"
+ru = "перевод Лилы, с исправлениями Сергея Прокопова; Общество Книги Урантии Большого Нью-Йорка"

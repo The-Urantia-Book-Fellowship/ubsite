@@ -26,18 +26,45 @@ The rules, all TeX's:
 pyphen and the browsers' dictionaries do something else: pyphen's en_US,
 which is LibreOffice's and Firefox's, disagrees with 387 of the list's 523
 words (su-per-crea-t-u-ral, mo-ron-ti-aize).
+
+A translation is set by its own TeX, and so hyphenated as that TeX would
+(Tigran, 2026-10-26): both Russian ones load polyglossia's `russian`, which is
+hyph-ru with hyphenmins 2/2 (gloss-russian.ldf), plus each translation's own
+\\hyphenation list (build/translation.py reads it).  `RUSSIAN` is that model.
+A word written with a stress mark, U+0301, is left whole: TeX's lccode for the
+mark is 0, and how it would cut the word around it is not worth the copy.
 """
 
 from __future__ import annotations
 
+import dataclasses
+import functools
 import pathlib
 import re
 
 LEFT, RIGHT = 2, 3                 # \lefthyphenmin, \righthyphenmin for english
 PATTERNS = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "tex" / "hyphen.tex"
+RU_PATTERNS = PATTERNS.with_name("hyph-ru.tex")
 
 _WORD = re.compile(r"[^\W\d_]+")   # a run of letters, any script
 _ASCII = re.compile(r"[A-Za-z]+")
+# A Russian word, with any stress mark written in it (U+0301 is no letter to \w).
+_RU_WORD = re.compile(r"[^\W\d_](?:[^\W\d_]|\u0301)*")
+STRESS = "\u0301"
+
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class Language:
+    """A pattern file, its minimums, and which letter runs it breaks."""
+    patterns: pathlib.Path
+    encoding: str
+    left: int
+    right: int
+    ascii_only: bool         # English: a run with an accented letter is left whole
+
+
+ENGLISH = Language(PATTERNS, "latin-1", LEFT, RIGHT, True)
+RUSSIAN = Language(RU_PATTERNS, "utf-8", 2, 2, False)
 
 
 def points_of(entry: str) -> frozenset[int]:
@@ -46,8 +73,9 @@ def points_of(entry: str) -> frozenset[int]:
     return frozenset(len("".join(parts[:k])) for k in range(1, len(parts)))
 
 
-def _load_knuth(path: pathlib.Path = PATTERNS):
-    src = path.read_text(encoding="latin-1")
+@functools.lru_cache(maxsize=None)
+def _load_knuth(path: pathlib.Path = PATTERNS, encoding: str = "latin-1"):
+    src = path.read_text(encoding=encoding)
     body = re.sub(r"%.*", "", src.split("\\patterns{")[1].split("}")[0])
     pats = {}
     for p in body.split():
@@ -66,10 +94,12 @@ def _load_knuth(path: pathlib.Path = PATTERNS):
 
 
 class Hyphenator:
-    """The book's hyphenation.  `entries` is the press's list, in file order."""
+    """The book's hyphenation.  `entries` is the press's list, in file order;
+    for a translation, its own, with `language` the one its TeX loads."""
 
-    def __init__(self, entries):
-        self.pats, self.knuth_exc = _load_knuth()
+    def __init__(self, entries, language: Language = ENGLISH):
+        self.lang = language
+        self.pats, self.knuth_exc = _load_knuth(language.patterns, language.encoding)
         self.entries: dict[str, frozenset[int]] = {}
         for raw in entries:                      # a later entry wins, as in TeX
             self.entries[raw.replace("-", "").lower()] = points_of(raw)
@@ -95,7 +125,8 @@ class Hyphenator:
         got = self._cache.get(lw)
         if got is None:
             written = self.entries[lw] if lw in self.entries else self.patterns(lw)
-            got = frozenset(p for p in written if LEFT <= p <= len(lw) - RIGHT)
+            got = frozenset(p for p in written
+                            if self.lang.left <= p <= len(lw) - self.lang.right)
             self._cache[lw] = got
         return got
 
@@ -109,8 +140,10 @@ class Hyphenator:
         """
         shy = sorted(s.start for s in spans if s.kind == "shy")
         out = []
-        for m in _WORD.finditer(text):
-            if not _ASCII.fullmatch(m.group()):
+        for m in (_WORD if self.lang.ascii_only else _RU_WORD).finditer(text):
+            if self.lang.ascii_only and not _ASCII.fullmatch(m.group()):
+                continue
+            if STRESS in m.group():
                 continue
             a, b = m.span()
             own = [p for p in shy if a < p < b]

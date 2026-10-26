@@ -121,6 +121,20 @@ def main(argv: list[str]) -> int:
         print("loading ...")
         para_key = load.load_text(con, papers, parts, repos["press"], hyphenator, report)
         study.store(con, study_built)
+        # The translations, each joined to our numbering (build/translation.py).
+        from . import translation
+        ours = translation.ours(con)
+        tr_built = []
+        for k in translation.meta():
+            if k not in repos:
+                report.hard("tr-no-source", k, "data/translations.toml names it, and config has no such source")
+                continue
+            print(f"translation {k}, at {at(repos[k])} ...")
+            tr_built.append(b := translation.build(k, repos[k], ours, report))
+            print(f"  {len(b.paras):,} paragraphs, {sum(len(p.notes) for p in b.paras)} notes,"
+                  f" {len(b.headings)} titles")
+        translation.store(con, tr_built, ours)
+        translation.roundtrip(con, report)
         print("the Foundation's numbering ...")
         from . import foundation
         n_uf = foundation.load(con, repos["press"], report,
@@ -193,6 +207,10 @@ def main(argv: list[str]) -> int:
         con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
                         [(k, repos[k]["commit"], int(repos[k]["dirty"]), repos[k]["rev"],
                           repos[k]["date"], repos[k]["commit_url"]) for k in ("press", "index")])
+        # And each translation read (build/translation.py).
+        con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
+                        [(b.key, repos[b.key]["commit"], int(repos[b.key]["dirty"]), repos[b.key]["rev"],
+                          repos[b.key]["date"], repos[b.key]["commit_url"]) for b in tr_built])
         # The study edition, and Block's charts by their manifest's SHA-256, once
         # a paper's notes are on the site: until then the build reads neither.
         if study_built.papers:
@@ -246,7 +264,10 @@ def main(argv: list[str]) -> int:
                 ("appendix_heads", "SELECT COUNT(*) FROM appendix_head"),
                 ("para_citers", "SELECT COUNT(*) FROM para_citers"),
                 ("cocitation_pairs", "SELECT COUNT(*) FROM cocitation"),
-                ("reading_paths", "SELECT COUNT(*) FROM reading_path")]:
+                ("reading_paths", "SELECT COUNT(*) FROM reading_path"),
+                ("translations", "SELECT COUNT(*) FROM translation"),
+                ("tr_paragraphs", "SELECT COUNT(*) FROM tr_paragraph"),
+                ("tr_notes", "SELECT COUNT(*) FROM tr_note")]:
             con.execute("INSERT INTO stat VALUES (?,?)",
                         (k, con.execute(q).fetchone()[0]))
         con.executemany("INSERT INTO stat VALUES (?,?)", sorted(audio_stats.items()))
@@ -347,6 +368,10 @@ def main(argv: list[str]) -> int:
             from .readers.press import read_hyphenation
             print("\n== hyphenation ==")
             rc |= hyphen_run(_db.connect(dbf), read_hyphenation(repos["press"]["tex"], report))
+            from . import translation
+            from .checks.check_hyphen import run_translations
+            rc |= run_translations(_db.connect(dbf), {k: translation.hyphenation(k, repos[k], report)
+                                                      for k in translation.meta() if k in repos})
             from .checks.check_audio import run as audio_run
             print("\n== audio ==")
             rc |= audio_run(_db.connect(dbf))

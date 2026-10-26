@@ -1,0 +1,49 @@
+# Where a translation numbers a paragraph otherwise than we do, as
+# build/translation.py joins it to ours: every translation is mapped to our
+# numbering, the press's, which the English uses (Tigran, 2026-10-26).
+#
+# Columns: the translation's key; its first and last address; our first and
+# last.  "-" where its paragraph is none of ours: a separator it numbers.
+# "title 0:12" is a section's title standing inside the section, after its
+# first paragraphs, which is our heading paragraph there.  A run lies within
+# one section, and every address not listed is ours.  The build requires
+# exactly these: one that matches nothing is out of date, and fails.
+
+# ud numbers ten of the press's eleven separators, as the study edition did
+# until 2026-09-21 (8af25c5): 31:10.22 as \separatorline, the other nine as
+# empty paragraphs.  Everything after one, in its section, is one ahead.
+ud	31:10.22	31:10.22	-	-
+ud	31:10.23	31:10.23	31:10.22	31:10.22
+ud	56:10.23	56:10.23	-	-
+ud	56:10.24	56:10.24	56:10.23	56:10.23
+ud	120:3.12	120:3.12	-	-
+ud	120:3.13	120:3.13	120:3.12	120:3.12
+ud	134:6.14	134:6.14	-	-
+ud	134:6.15	134:6.17	134:6.14	134:6.16
+ud	144:5.11	144:5.11	-	-
+ud	144:5.12	144:5.24	144:5.11	144:5.23
+ud	144:5.25	144:5.25	-	-
+ud	144:5.26	144:5.37	144:5.24	144:5.35
+ud	144:5.38	144:5.38	-	-
+ud	144:5.39	144:5.53	144:5.36	144:5.50
+ud	144:5.54	144:5.54	-	-
+ud	144:5.55	144:5.72	144:5.51	144:5.68
+ud	144:5.73	144:5.73	-	-
+ud	144:5.74	144:5.86	144:5.69	144:5.81
+ud	144:5.87	144:5.87	-	-
+ud	144:5.88	144:5.108	144:5.82	144:5.102
+# Its Acknowledgment's heading is a \usection, БЛАГОДАРНОСТЬ, which ud.sty's
+# \ackn names as the Acknowledgment's: our 0:12.10.
+ud	title 0:12	title 0:12	0:12.10	0:12.10
+
+# urantia-ru numbers 144:5 as the Urantia Foundation does (tests/known-uf-refs.tsv):
+# a number skipped at each of the six separators between the prayers.
+urantia-ru	144:5.12	144:5.24	144:5.11	144:5.23
+urantia-ru	144:5.26	144:5.37	144:5.24	144:5.35
+urantia-ru	144:5.39	144:5.53	144:5.36	144:5.50
+urantia-ru	144:5.55	144:5.72	144:5.51	144:5.68
+urantia-ru	144:5.74	144:5.86	144:5.69	144:5.81
+urantia-ru	144:5.88	144:5.108	144:5.82	144:5.102
+# Its Acknowledgment's heading is a \usection, «Заключительные замечания»,
+# which urantia-ru.sty's \ackn names as the Acknowledgment's: our 0:12.10.
+urantia-ru	title 0:12	title 0:12	0:12.10	0:12.10

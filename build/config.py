@@ -198,10 +198,11 @@ def block() -> dict:
 
 def describe(repos: dict) -> str:
     lines = []
+    w = max(6, *(len(k) for k in repos))
     for r in repos.values():
         mark = " +dirty" if r["dirty"] else ""
         rel = r["path"]
-        lines.append(f"  {r['key']:<6} {str(rel):<52} "
+        lines.append(f"  {r['key']:<{w}} {str(rel):<52} "
                      f"{(r['commit'] or '-')[:8]} {r['date'] or ''}{mark}")
     return "\n".join(lines)
 

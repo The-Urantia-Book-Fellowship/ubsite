@@ -128,6 +128,26 @@ INVARIANTS = [
      "SELECT 2 - COUNT(*) FROM build_source WHERE repo IN ('press','index')"),
     ("the SRT snapshot recorded (missing)",
      "SELECT 1 - COUNT(*) FROM build_source WHERE repo = 'srt'"),
+    # The translations (build/translation.py), each under our numbering.
+    ("each translation's commit recorded (missing)",
+     "SELECT COUNT(*) FROM translation t WHERE NOT EXISTS (SELECT 1 FROM build_source b"
+     " WHERE b.repo = t.key AND b.commit_id = t.commit_id)"),
+    ("a translated paragraph is one of ours, with words",
+     """SELECT COUNT(*) FROM tr_paragraph t LEFT JOIN paragraph p ON p.id = t.paragraph_id
+         WHERE p.id IS NULL OR t.text = '' OR t.html_hy = ''"""),
+    ("a translation's count is its paragraphs",
+     """SELECT COUNT(*) FROM translation t WHERE n_paragraphs <>
+         (SELECT COUNT(*) FROM tr_paragraph WHERE translation = t.key)
+         OR n_notes <> (SELECT COUNT(*) FROM tr_note WHERE translation = t.key)"""),
+    ("a translator's note stands inside its paragraph, numbered once in its paper",
+     """SELECT (SELECT COUNT(*) FROM tr_note n LEFT JOIN tr_paragraph t
+                 ON t.translation = n.translation AND t.paragraph_id = n.paragraph_id
+               WHERE t.text IS NULL OR n.at < 0 OR n.at > LENGTH(t.text))
+             + (SELECT COUNT(*) FROM (SELECT 1 FROM tr_note n JOIN paragraph p ON p.id = n.paragraph_id
+               GROUP BY n.translation, p.paper_n, n.num HAVING COUNT(*) > 1))"""),
+    ("no backslash in a translation's text or titles",
+     """SELECT (SELECT COUNT(*) FROM tr_paragraph WHERE text GLOB '*\\*')
+             + (SELECT COUNT(*) FROM tr_heading WHERE text GLOB '*\\*')"""),
     # A note's marker stands in its paragraph, and each marker has its note.
     ("every note's anchor lies inside its paragraph",
      """SELECT COUNT(*) FROM footnote f JOIN paragraph p ON p.id = f.paragraph_id
@@ -209,6 +229,15 @@ def run(con) -> int:
     print(f"            {m - ioff}/{m} index entries round-trip"
           + ("" if not ioff else f"   {ioff} FAIL"))
     if ioff:
+        bad += 1
+    m = toff = 0
+    for text, hy in con.execute("SELECT text, html_hy FROM tr_paragraph"):
+        m += 1
+        if strip_tags(hy.replace("\u00ad", "")) != text:
+            toff += 1
+    print(f"            {m - toff}/{m} translated paragraphs round-trip, less their soft hyphens"
+          + ("" if not toff else f"   {toff} FAIL"))
+    if toff:
         bad += 1
     # What the site shows of the index as words -- a headword, a chip, a See
     # target, a Chronology label -- has its HTML beside it, with an ordinal's

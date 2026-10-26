@@ -49,6 +49,14 @@
   },
   {
     "repo": "texlive",
+    "path": "tex/generic/hyph-utf8/patterns/tex/hyph-ru.tex",
+    "dest": "tex/hyph-ru.tex",
+    "sha256": "ce988fcc66e5e29d7474df5ab5b489d3f52a50ebccf570997f992d84221b922a",
+    "bytes": 68421,
+    "commit": null
+  },
+  {
+    "repo": "texlive",
     "path": "fonts/opentype/public/garamond-math/Garamond-Math.otf",
     "dest": "fonts/Garamond-Math.otf",
     "sha256": "c6161377e97084152b948f62abe874cbe27405938956346b54a4c6488a5009f1",

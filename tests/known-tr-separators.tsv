@@ -1,0 +1,12 @@
+# Where a translation's separators, joined to our numbering, differ from the
+# press's (build/translation.py): the translation's key; the paragraph the
+# separator stands before, ours ("end" after the book's last); which has it,
+# "ours" or "theirs".  The build requires exactly these.
+#
+# A separator is checked for its place, not its stars: ud's numbered ones are
+# empty paragraphs, and urantia-ru sets every one as \separatorline, five stars.
+
+# ud has none before 119:8.9, Part III's closing note: the press's own (tests/known-separator-deltas.tsv).
+ud	119:8.9	ours
+# urantia-ru sets one after the book's last paragraph, 196:3.35.
+urantia-ru	end	theirs

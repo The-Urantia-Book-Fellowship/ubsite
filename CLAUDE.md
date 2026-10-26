@@ -10,9 +10,9 @@ Read §0 and §1 here first; `ROADMAP.md` for where this is going; the plan for 
 
 ## 0. The one thing to understand
 
-**The product is the database.** The website, a future API, and any export are views over `var/ub.db`. Three LaTeX projects are read, verified against independent evidence, and loaded into one queryable store. If you are tempted to put logic in a template or a route that belongs in the build, don't.
+**The product is the database.** The website, a future API, and any export are views over `var/ub.db`. Three LaTeX projects are read, verified against independent evidence, and loaded into one queryable store, with the translations beside the text since 2026-10-26. If you are tempted to put logic in a template or a route that belongs in the build, don't.
 
-The second thing: **the three source repos are masters and are never written to.** Not their `tex/`, not even their gitignored derived directories. This is enforced mechanically, not by good intentions — see §6.
+The second thing: **the source repos are masters and are never written to**, the translations' among them. Not their `tex/`, not even their gitignored derived directories. This is enforced mechanically, not by good intentions — see §6.
 
 ---
 
@@ -26,6 +26,8 @@ Paths live in `sources.toml` and **nowhere else**; `build/config.py` is the only
 | `study` | `../urantia-study-edition` | apparatus: footnotes, human sources, KJV, quiz, images. Its notes reach the site one reviewed paper at a time (§3, Study notes); the rest is not yet imported |
 | `index` | `../index` | the Uversa Press index, revised for the third edition |
 | `block` | `../block-sources` | Matthew Block's parallel charts of the human sources, one PDF per paper, and `MANIFEST.tsv` naming each chart's address, its version. No git; kept by `../explore-tools/block_fetch.py`. The build reads the manifest and `originals/LIBRARY.tsv`, `tools/study/` the PDFs. Its `originals/`, kept by hand, holds the works themselves where a note was checked against one, each with its official address in `originals/MANIFEST.tsv`, and in `originals/LIBRARY.tsv` the works checked in Tigran's own copies in `/Books`, by path, SHA-256 and their page in his library at ulib.sigmaai.au (sigmaai.au/library until 2026-10-25), with whether a reader who has not logged in can open it (`public`) |
+| `ud` | `../ud` | Tigran's own Russian translation, «Урантийские документы», with notes of his own (`\fnst`): Papers 0–40, and 41, 43, 195 and 196 in part. GPL v3. Read at HEAD |
+| `urantia-ru` | `../urantia-ru` | the late Lila's Russian translation, with Sergey Prokopov's corrections, as the Urantia Book Society of Greater New York publishes it (urantia.nyc): the whole book, no notes. Read at HEAD |
 | `audio.mh` | `/Audio/Urantia/Urantia-MH-Audio-DVD` | Merritt Horn's reading, one MP3 per section, 121 h, as on the Uversa Press DVD (2006): 128 kbps stereo, 44.1 kHz. On pi5 too, same path |
 
 All three share one address space: the `\vs` macro addresses `\vs p133 1:3` (a Urantia paragraph) and `\vs Gen 1:1` (a Bible verse) alike.
@@ -34,7 +36,7 @@ The index is read **at HEAD** and the revision recorded in the build, because th
 
 Until 2026-10-06 the first half of that was not true. The readers opened the working tree, while `config` reported HEAD as clean. Now `config` resolves `rev` to one SHA (`at`), `_io.read_tex` reads `tex/` at it, and `build_source` records it. `tests/test_read_tex.py` proves that worktree edits do not get through.
 
-The study edition is read at HEAD too, since 2026-10-18, when its notes began to reach the site (`_io.read_tex_many`, one `git cat-file --batch` for all 197 papers).
+The study edition is read at HEAD too, since 2026-10-18, when its notes began to reach the site (`_io.read_tex_many`, one `git cat-file --batch` for all 197 papers), and so are the translations, since 2026-10-26: a translator's uncommitted paragraph never reaches the site.
 
 Careful: there are three `urantia-study-edition` trees on this machine. `urantia-study-edition-latest` is the **oldest**. `sources.toml` pins the right one.
 
@@ -47,12 +49,12 @@ make venv           create .venv (uv) and sync requirements-dev.txt -- run this 
 make lock           recompile requirements.txt and requirements-dev.txt from their .in files
 make sources        the three repos and the revisions in use
 make vendor-check   re-hash the vendored copies against upstream (fails with a diff)
-make data           build var/ub.db          (~20 s)
+make data           build var/ub.db          (~30 s)
 make check          every gate               (~8 s; rebuilds the oracles first)
 make offline        the copy Work offline keeps -> var/offline/  (~22 s, ~20 s more for its gates; needs Node)
 make e2e            make offline, then Work offline end to end in Chrome  (~2 min more)
 make test           the never-write-to-a-master guards
-make paranoid       fingerprint all three trees, build, and prove nothing moved
+make paranoid       fingerprint every source tree, build, and prove nothing moved
 make srt-snapshot   refetch the SRT Committee's page into data/srt/ (review the diff)
 make serve          the reader on 127.0.0.1:8130 (HOST=0.0.0.0 to reach it from a phone)
 make stop           stop it (by pid — never by pattern, see §6)
@@ -159,6 +161,15 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
   - **`UB_BILINGUAL=0`** draws English alone, as every page was before, byte for byte but the script's address; the tests read pages through `en()` (`tests/test_appendix_pages.py`), which is that.
   - The rail's version (`book()["v"]`) hashes its own words too, so a fragment kept from before they changed is not drawn again.
 
+- **Translations beside the text** (2026-10-26; ROADMAP item 15, step 2, designed that day; plan `~/.claude/plans/let-s-begin-the-work-immutable-sutherland.md`). The data first: both Russian translations in `ub.db`, every paragraph under OUR paragraph, the press's numbering (Tigran: "map everything to SRT numbering"). Nothing shows them yet; the fold under each paragraph comes next, then the translator's notes, Compare and the offline download.
+  - **Read** by `build/readers/translation.py` (pure, one file a paper: headings, paragraphs, separators, bibliographies; any other line fails) and expanded by `build/translation.py` with a closed table to each, `build/tr_macros.py`, never the press's: they share an entry only where their styles define it alike (trap 1). A translator's note is kept as written, at its place (`tr_note`), for the reader to render.
+  - **Joined** by `tests/known-tr-numbering.tsv`, which the build requires exactly. Once applied, a translation's addresses must be ours one to one, paper by paper; its separators where ours are, but for `known-tr-separators.tsv`; and where our paragraph and its open with a numbered label, the numbers agree, but for `known-tr-labels.tsv`, its own slips (ud 29:4.27, urantia-ru 112:0.12 and 112:1.6–8), to be mended in the translation. English and Russian cannot be aligned word by word as `foundation.py` aligns two Englishes, so these three hold the join to the text.
+  - **Translated** means it has words: ud leaves the rest empty, and writes «Бла-бла...» in a skeleton paper's first. A translated paragraph without Cyrillic fails. Each paper's title and author, and each section's title, are stored as written (`tr_heading`), for the papers it translates.
+  - **Hyphenated as its own TeX would set it** (Tigran): hyph-ru (vendored from TeX Live, `vendor/tex/hyph-ru.tex`), hyphenmins 2/2, and its own `\hyphenation` list (ud.sty; urantia-ru's `tex/urantia-hyphen-ru.tex`), by `build/hyphen.py` `RUSSIAN`. A word with a stress mark is left whole. `check_hyphen` holds each as it holds the English.
+  - **Its characters** join the font gate: the stress mark U+0301 is in EB Garamond's range, so that its letter's face draws it; « » „ “, the thin spaces, ½ and the fraction slash are Goudy's. A fraction Goudy has no character for, ud's 3\bibfrac{1}{8}, is n⁄d in a span (`frac`) for Goudy's `frac` feature, after a word joiner.
+  - `render()` now writes from one span boundary to the next, not character by character: the same bytes in every rendered column (checked), and a build 11 s shorter.
+  - The database is 137 MB, 44 more; `tr_paragraph` is a rowid table, which halved it against WITHOUT ROWID.
+
 Next: Phase 6 (the study-edition apparatus — `\fnst` notes, now under way, then KJV, the quiz, figures behind the rights gate), then 7 (human sources), 8 (the timeline, the map).
 
 ---
@@ -181,6 +192,7 @@ headwords with a reading path 2,058 (3+ paragraphs), 1,820 of them with 2+ chapt
 paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at version 8 (2026-10-13)
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
+translations 2: ud 3,579 paragraphs (45 papers) and 346 notes at 51f3039, urantia-ru 14,586 at a6525fe (2026-10-26); ud numbers 2 of them otherwise, urantia-ru 93
 offline copy 10,285 pages (3,877 reading paths, and /changelog and /lists/notes since 2026-10-18, /lists/bibliography since 2026-10-19, /api since 2026-10-24) + 1,626 spoken texts in 417 chunks: 47.4 MB to download and keep, 218 MB unpacked (2026-10-25, with the interface in Russian too: 400 chunks, 45.2 MB and 199 MB until then; 2026-10-24, index 0aeae38, with /api; 10,284 at index c0db98c, a headword fewer; 10,285 at index 5e357f6, the Zone of Infinity's path gone; 10,286 pages until then; 394 chunks since 2026-10-18, with the math font of the study notes, 396 since 2026-10-19, with the SBL Greek and SBL Hebrew fonts, 400 since 2026-10-20, with every paragraph's reference in a `.stk`)
 ```
 
@@ -272,6 +284,9 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 32. **The study edition writes Hebrew word by word reversed**, visual order, for XeTeX without bidi: its Shema at 1:7.6 begins with אֶחָד. `tools/mktext.php` turned it round; `tools/study/draft.py` does now, and a reviewed note holds Hebrew in logical order, which nothing can check.
 33. **A wrapper for the interface's words is never a span.** `ub.css` has a dozen rules for a span inside something: `.letters span {display:block}`, `.seg span` placed relative, `.railfold span` set small. Two spans for each string's two languages would have restyled every one of them, so they are `<x-en>` and `<x-ru>`. And `textContent` of anything holding them has both languages: read the English as `tools/offline_e2e.py` `EN` does, without the `x-ru`.
 34. **The language is resolved from the setting, never from `data-lang`.** `ubLang()` first read the attribute and, where it found none, the browser's language; a tapped English removed the attribute, and the next call, from `ub.js` on the same tap, put Russian back from a Russian browser. It is handed `lang` itself now, `auto`, `en` or `ru`.
+35. **A translation numbers the book as its source did, not as we do.** ud is the study edition's numbering before 2026-09-21: ten separators take a paragraph number (31:10.22 written `\separatorline`, the rest left empty), and everything after one in its section runs one ahead, six in 144:5. urantia-ru numbers 144:5 as the Foundation does, skipping a number at each separator. Neither has a 0:12.10: each sets the Acknowledgment's heading as a `\usection` inside 0:12, which its style's `\ackn` names. So a section's number is taken from the next paragraph's address, never by counting `\usection`.
+36. **A translation's `\pc` comes after the address, and takes no argument.** The press's `\pc` has an optional one and stands before `\vs`; read with the press's spec, urantia-ru's `\vs p031 10:21 \pc [Под объединенным покровительством ...]` lost the whole paragraph as its argument (trap 2 again), and three more. Both styles define `\def\pc{...}`.
+37. **TeX's `\'` stresses the letter after it.** ud's `призна\'ют` is признаю́т, not призна́ют, as ROADMAP's example first had it.
 
 ---
 

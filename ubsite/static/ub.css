@@ -15,10 +15,10 @@
    puts its capitals within a unit of Goudy's (Tigran, 2026-10-25). */
 @font-face { font-family: "UB Goudy"; src: url(/static/fonts/EBGaramond-Cyrillic.woff2) format("woff2");
              font-weight: 400; font-style: normal; font-display: swap;
-             unicode-range: U+0400-045F, U+2116; size-adjust: 110.5%; }
+             unicode-range: U+0301, U+0400-045F, U+2116; size-adjust: 110.5%; }
 @font-face { font-family: "UB Goudy"; src: url(/static/fonts/EBGaramond-Cyrillic-Italic.woff2) format("woff2");
              font-weight: 400; font-style: italic; font-display: swap;
-             unicode-range: U+0400-045F, U+2116; size-adjust: 110.5%; }
+             unicode-range: U+0301, U+0400-045F, U+2116; size-adjust: 110.5%; }
 /* A study note's math (build/texmath.py, MathML): Garamond-Math, OFL, subset
    by build/fonts.py to what the notes draw; fetched only by a page with math. */
 @font-face { font-family: "Garamond Math"; src: url(/static/fonts/GaramondMath.woff2) format("woff2");

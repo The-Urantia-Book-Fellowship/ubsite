@@ -30,6 +30,7 @@ WRAP = {
     "url":       ("a", "url"),
     "nobreak":   ("span", "nobreak"),
     "chg":       ("mark", "chg"),     # the SRT Committee's 1955 text: the changed words
+    "frac":      ("span", "frac"),    # a translation's n⁄d, drawn by the font's `frac` (build/tr_macros.py)
 }
 POINT = {
     "dotleader": '<span class="leader"></span>',
@@ -66,7 +67,12 @@ def render(text: str, spans, note_key: str = "", shy=()) -> str:
 
     out = []
     stack = []
-    for i in range(len(text) + 1):
+    # Only where something opens, closes, stands or breaks does anything but
+    # the text go out: from one such place to the next, the text is escaped
+    # whole.  The same output as a walk of every character, which took most of
+    # a build once the translations were in.
+    cuts = sorted({i for i in (*opens, *closes, *points, *shy, 0, len(text)) if 0 <= i <= len(text)})
+    for at, i in enumerate(cuts):
         # close innermost-first
         for _s in sorted(closes.get(i, []), key=lambda x: -x.start):
             while stack:
@@ -95,7 +101,7 @@ def render(text: str, spans, note_key: str = "", shy=()) -> str:
         if i < len(text):
             if i in shy:
                 out.append("\u00ad")
-            out.append(html.escape(text[i], quote=False))
+            out.append(html.escape(text[i:cuts[at + 1]], quote=False))
     while stack:
         out.append(f"</{WRAP[stack.pop().kind][0]}>")
     return "".join(out)

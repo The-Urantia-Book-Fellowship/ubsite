@@ -63,6 +63,36 @@ figures              = 84
 figures_private      = 58
 figures_free         = 26
 
+# The translations beside the text (build/translation.py), each joined to our
+# numbering.  Reported bands, as the index's are: ud is being written, and its
+# counts move with each commit of it.  What holds hard is the structure: every
+# address of each joined one to one onto ours, by tests/known-tr-numbering.tsv;
+# its separators where ours are, but for tests/known-tr-separators.tsv; its
+# list labels as ours, but for tests/known-tr-labels.tsv.
+[translation.ud]
+source_commit = "51f3039"
+measured_on   = "2026-10-26"
+vs_lines             = 14595     # 14,586 of ours + the ten separators it numbers - 0:12.10,
+                                 # which is a \usection, its Acknowledgment's heading
+paragraphs           = 3579      # translated: Papers 0-40, 41 (to 3:10) and 43 (to 7:5) in part,
+                                 # 195:0.1-3, 196:0.1-4, and 0:12.10; the rest empty, or
+                                 # "Бла-бла..." in a skeleton paper's first
+papers               = 45        # with a paragraph translated, so with their titles
+notes                = 346       # \fnst, the translator's
+numbered_otherwise   = 2         # 31:10.22 (its 31:10.23) and 0:12.10 (its heading);
+                                 # the rest it numbers otherwise it has not yet translated
+labels_differ        = 1         # 29:4.27, its 3. for our 4. (tests/known-tr-labels.tsv)
+[translation.urantia-ru]
+source_commit = "a6525fe"
+measured_on   = "2026-10-26"
+vs_lines             = 14585     # 14,586 of ours - 0:12.10, a \usection
+paragraphs           = 14586     # the whole book
+notes                = 0
+numbered_otherwise   = 93        # 144:5.11-102, as the Foundation numbers them, and 0:12.10
+separators           = 12        # ours, and one after the book's last paragraph
+labels_differ        = 4         # 112:0.12, 112:1.6-8 (tests/known-tr-labels.tsv)
+substituted          = 3         # U+3000 at 44:3.5, 53:4.6, 70:10.12, set as spaces
+
 [index]
 # Read at HEAD; these drift legitimately as the index is edited, so they are
 # REPORTED as a band, never asserted.  check_tex.py's own EXPECT_ENTRIES moved

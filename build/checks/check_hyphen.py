@@ -14,6 +14,12 @@ break (build/hyphen.py).  This holds it to that, from the outside:
 
 That the model's breaks are the ones the book printed is tools/hyphen_print.py,
 against a PDF of the book: not a gate, because that PDF is built, not kept.
+
+A translation's paragraphs (tr_paragraph.html_hy) are held the same way to
+their own model, its TeX's (build/hyphen.py RUSSIAN): its text the HTML less
+its soft hyphens and tags, which build/translation.py gates; a soft hyphen
+only inside a word, and never in one with a stress mark; 2 letters before it
+and 2 after; and every word of the translation's own list broken as listed.
 """
 
 from __future__ import annotations
@@ -21,11 +27,12 @@ from __future__ import annotations
 import html
 import re
 
-from ..hyphen import LEFT, RIGHT, points_of
+from ..hyphen import LEFT, RIGHT, RUSSIAN, STRESS, points_of
 
 SHY = "­"
 _TAG = re.compile(r"<[^>]+>")
 _WORD = re.compile(r"[^\W\d_]+")
+_RU_WORD = re.compile(r"[^\W\d_](?:[^\W\d_]|\u0301)*")
 
 
 def _offsets(h: str) -> list[int]:
@@ -96,4 +103,48 @@ def run(con, entries) -> int:
     for name, where in fails.items():
         print(f"  {name:52} {len(where)}{'' if not where else '   FAIL  ' + ', '.join(where[:5])}")
         bad += bool(where)
+    return 1 if bad else 0
+
+
+def run_translations(con, lists: dict[str, list[str]]) -> int:
+    """Each translation's soft hyphens, against its own list (`lists`, by key)."""
+    left, right = RUSSIAN.left, RUSSIAN.right
+    bad = 0
+    for key, in con.execute("SELECT key FROM translation ORDER BY key"):
+        listed = {}
+        for raw in lists.get(key, []):
+            listed[raw.replace("-", "").lower()] = points_of(raw)
+        fails: dict[str, list[str]] = {k: [] for k in (
+            "a soft hyphen outside a word",
+            "a soft hyphen in a word with a stress mark",
+            "a break under the minimums",
+            "a listed word not broken as listed")}
+        n = total = words_listed = 0
+        for pid, text, hy in con.execute(
+                "SELECT paragraph_id, text, html_hy FROM tr_paragraph WHERE translation=?", (key,)):
+            n += 1
+            at = _offsets(hy)
+            total += len(at)
+            got, inside = set(at), set()
+            for m in _RU_WORD.finditer(text):
+                a, b = m.span()
+                here = {p - a for p in got if a < p < b}
+                inside |= {a + p for p in here}
+                w = m.group().lower()
+                if STRESS in w:
+                    if here:
+                        fails["a soft hyphen in a word with a stress mark"].append(f"{pid} {m.group()}")
+                    continue
+                if any(p < left or p > len(w) - right for p in here):
+                    fails["a break under the minimums"].append(f"{pid} {m.group()}")
+                if w in listed:
+                    words_listed += 1
+                    if here != {p for p in listed[w] if left <= p <= len(w) - right}:
+                        fails["a listed word not broken as listed"].append(f"{pid} {m.group()}")
+            for p in sorted(got - inside):
+                fails["a soft hyphen outside a word"].append(f"{pid} @{p}")
+        print(f"{key}: {total:,} soft hyphens in {n:,} paragraphs; {words_listed:,} listed words as listed")
+        for name, where in fails.items():
+            print(f"  {name:52} {len(where)}{'' if not where else '   FAIL  ' + ', '.join(where[:5])}")
+            bad += bool(where)
     return 1 if bad else 0

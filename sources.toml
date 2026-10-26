@@ -36,6 +36,31 @@ tex  = "tex"
 rev  = "HEAD"
 url  = "https://github.com/The-Urantia-Book-Fellowship/index"   # PRIVATE, as above
 
+# The translations shown beside the text, a paragraph at a time (ROADMAP item
+# 15, step 2; build/translation.py).  MASTERS like the others, read at a commit,
+# since both are worked on: a translator's uncommitted paragraph never reaches
+# the site.  Each is joined to OUR numbering, the press's, by a fixed list of
+# its differences (tests/known-tr-numbering.tsv); what a reader is told about it
+# is data/translations.toml.  The table's name is the translation's key, which
+# a reader's Settings store: it never changes once deployed.
+#
+# Tigran's own, «Урантийские документы»: Papers 0 to 41 and more in part, with
+# notes of his own.  GPL v3.
+[ud]
+path = "../ud"
+tex  = "tex"
+rev  = "HEAD"
+url  = "https://github.com/tigran123/ud"
+
+# Lila's, with Sergey Prokopov's corrections, as the Urantia Book Society of
+# Greater New York publishes it (urantia.nyc): the whole book, no notes.  The
+# site is the Fellowship's, and may show it (Tigran, 2026-10-26).
+[urantia-ru]
+path = "../urantia-ru"
+tex  = "tex"
+rev  = "HEAD"
+url  = "https://github.com/tigran123/urantia-ru"
+
 # The SRT Committee's reasons for each change to the 1955 text, which the
 # Fellowship publishes and the printed preface sends readers to
 # ("urantiabook.org/SRT" redirects to an essay that links here).  Not a

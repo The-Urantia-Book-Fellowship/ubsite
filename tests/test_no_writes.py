@@ -101,8 +101,10 @@ class NoWrites(unittest.TestCase):
         """No module may name a sibling repo path in a write context."""
         for rel, src in self._sources():
             # The recordings are a master too: Merritt Horn's reading.
+            # And the translations: ud's name is too short to search for alone.
             for bad in ("urantia-uversa-press-claude", "../index",
-                        "urantia-study-edition", "Urantia-MH-Audio", "block-sources"):
+                        "urantia-study-edition", "Urantia-MH-Audio", "block-sources",
+                        "../ud", "urantia-ru"):
                 for m in WRITE_OPEN.finditer(src):
                     seg = src[max(0, m.start() - 200):m.end() + 200]
                     self.assertNotIn(bad, seg,

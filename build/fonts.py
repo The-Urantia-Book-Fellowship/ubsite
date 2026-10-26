@@ -56,7 +56,10 @@ SBL = {"grc": "SBL_grk.ttf", "he": "SBL_Hbrw.ttf"}
 # ub.css as more faces of "UB Goudy" over these ranges alone (Tigran,
 # 2026-10-25).  Subset to the ranges whole, not to what is drawn: the file
 # never moves with a word, and the translations to come need the alphabet.
-CYRILLIC = ((0x0400, 0x045F), (0x2116, 0x2116))        # the alphabet, ё and the rest; №
+# With them came the stress mark ud writes, призна́ют (2026-10-26): from the
+# face that draws its letter, or it would be placed by another face's metrics.
+# Nothing else on the site has a U+0301.
+CYRILLIC = ((0x0301, 0x0301), (0x0400, 0x045F), (0x2116, 0x2116))   # the stress mark; the alphabet, ё and the rest; №
 CYRILLIC_FACES = [(MATH[0].parent / "EBGaramond-Regular.otf", "EBGaramond-Cyrillic.woff2"),
                   (MATH[0].parent / "EBGaramond-Italic.otf", "EBGaramond-Cyrillic-Italic.woff2")]
 RE_RANGE = re.compile(r"EBGaramond-Cyrillic[^;]*;[^}]*unicode-range:\s*([^;]+);")
@@ -103,6 +106,9 @@ def corpus_codepoints(con) -> set[str]:
               "SELECT text FROM footnote WHERE kind <> 'study'",
               "SELECT text FROM study_source",
               "SELECT text FROM changelog",             # /changelog
+              # The translations beside the text, and their titles (build/translation.py).
+              "SELECT text FROM tr_paragraph",
+              "SELECT text FROM tr_heading",
               # The SRT Committee's reasons a 1955 note shows, and those of the
               # note it refers to.
               "SELECT verdict || why_text FROM srt_item WHERE id IN"
