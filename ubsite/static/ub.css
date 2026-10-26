@@ -785,6 +785,16 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 :is(.tf, .cmp) .gap { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
 .frac { font-variant-numeric: diagonal-fractions; }
 :root[data-align="ragged"] :is(.tf, .rc) .rt { text-align: start; hyphens: none; -webkit-hyphens: none; }
+/* A translation's paragraphs are set in a little, as the book's are, as the
+   English's are where nothing stands at their start: in a fold and in
+   Compare nothing ever does, on a phone as on a wide screen (Tigran,
+   2026-10-26).  Not where the English is not either: a paper's opening, the
+   heading in the text, a block of verse's lines; nor in Compare a list's
+   item, whose label has a box of its own there.  A fold sets the label in
+   the line, so there the item is set in as \ublistelem sets it, the label
+   after the indent. */
+.row:not(:has(> .verse)) > .tf .rt:not(.opening, .head),
+article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark)) { text-indent: 1em; }
 
 /* Compare (ROADMAP item 15, step 2; templates/_fold.html compare, ub.js): the
    English and each translation ticked, a column each, a row to a paragraph,
@@ -862,12 +872,6 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
          margin-top: 0; }
   article.cmp .row:has(> .verse) > :is(.rc, .a) { margin-top: .6rem; }
   :root:not([data-paranum="off"]) article.cmp .row:has(> .verse) > .rc { margin-top: 2.1rem; }
-  /* A column's paragraphs are set in a little, as the book's are, as the
-     English's are where nothing stands at their start (Tigran, 2026-10-26):
-     here nothing ever does.  Not where the English is not either: a paper's
-     opening, the heading in the text, a list's item, whose label has a box of
-     its own; nor a block of verse's lines. */
-  article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark)) { text-indent: 1em; }
 }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
