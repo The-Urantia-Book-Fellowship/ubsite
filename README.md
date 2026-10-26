@@ -2,7 +2,7 @@
 
 The Uversa Press text of *The Urantia Book* read together with the Uversa Press index, live at **https://ubsite.ddns.net** (pi5) and **https://ubsite.sigmaai.au** (the VPS behind sigmaai.au), the same build on both.
 
-This file is the operating manual: how to bring the site up to date when its sources change, and how to deploy it. For how it is built and why, read [`CLAUDE.md`](CLAUDE.md). For where it is going, read [`ROADMAP.md`](ROADMAP.md). The one-time root setup on each host (the unit, the certificate, nginx, sudoers) is in [`deploy/README.md`](deploy/README.md). It is done on both and need not be repeated.
+This file is the operating manual: how to bring the site up to date when its sources change, and how to deploy it. For how it is built, read [`ARCHITECTURE.md`](ARCHITECTURE.md), and for why, [`DECISIONS.md`](DECISIONS.md); [`CLAUDE.md`](CLAUDE.md) is where to start, with the rules and the traps. For where it is going, read [`ROADMAP.md`](ROADMAP.md). The one-time root setup on each host (the unit, the certificate, nginx, sudoers) is in [`deploy/README.md`](deploy/README.md). It is done on both and need not be repeated.
 
 ---
 
