@@ -129,7 +129,7 @@ headwords with a reading path 2,058 (3+ paragraphs), 1,820 of them with 2+ chapt
 paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at version 8 (2026-10-13)
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
-translations 2: ud 3,579 paragraphs (45 papers) and 346 notes, citing 11 works, at cc37b29, urantia-ru 14,586 at a6525fe (2026-10-26); ud numbers 2 of them otherwise, urantia-ru 93
+translations 2: ud 3,579 paragraphs (45 papers) and 346 notes, citing 11 works, at cc37b29, urantia-ru 14,586 at 04146d5 (2026-10-26); ud numbers 2 of them otherwise, urantia-ru 93
 offline copy 10,285 pages (3,877 reading paths) + 1,626 spoken texts in 417 chunks: 47.6 MB to download and keep, 221 MB unpacked, and each translation a download of its own, chosen by the reader: ud 2.0 MB in 5 chunks, urantia-ru 8.9 MB in 11, each with its database for search (2026-10-26; how it grew: `ARCHITECTURE.md`, Work offline)
 ```
 

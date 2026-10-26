@@ -80,8 +80,9 @@ STYLE = {
                    "foreword": ("urantia-ru.sty", "forewordtoc"), "paper": "urantia-ru.sty"},
 }
 # A section's title that begins with its number: 1., 9 и 10., the Foreword's IX.
-# urantia-ru writes the Foreword's X with a Cyrillic Х.
-RE_NUMBERED = re.compile(r"(?:\d+(?: и \d+)?|[IVXХ]+)\.\s")
+# Its Roman numerals are Latin letters: a Cyrillic Х there (urantia-ru's 0:10
+# until 04146d5) fails, as a title without its number.
+RE_NUMBERED = re.compile(r"(?:\d+(?: и \d+)?|[IVX]+)\.\s")
 # Words that stand in for a paragraph not yet translated.
 PLACEHOLDERS = {"Бла-бла..."}
 # Characters a translation has that the site sets otherwise, each declared,

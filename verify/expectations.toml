@@ -86,7 +86,7 @@ sources              = 11        # the works its notes cite, from 5 papers' bibl
 bibrefs_differ       = 2         # 0:1.15 and 15:8.3 (tests/known-tr-bibrefs.tsv)
 substituted          = 1         # 0:5.12's note, Galen's century in Greek capital iotas, set as II
 [translation.urantia-ru]
-source_commit = "a6525fe"
+source_commit = "04146d5"     # the same at a6525fe; 04146d5 mends 0:10's Roman X
 measured_on   = "2026-10-26"
 vs_lines             = 14585     # 14,586 of ours - 0:12.10, a \usection
 paragraphs           = 14586     # the whole book
