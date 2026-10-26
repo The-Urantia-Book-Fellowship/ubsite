@@ -20,3 +20,23 @@ CREATE VIRTUAL TABLE index_entry_fts USING fts5(
 CREATE VIRTUAL TABLE footnote_fts USING fts5(
   reading, reasons,
   tokenize='unicode61 remove_diacritics 2');
+
+-- The translations beside the text (010_translation.sql), their paragraphs and
+-- their translators' notes, each over a view that reads ё as е: Russian is
+-- mostly written without it, ud writes it and urantia-ru never does, and a
+-- reader's е should find both, as a reader's ё should.  One letter for one, so
+-- every offset in the view is the text's, and a snippet of it is turned back
+-- into the translation's own letters by its place (ubsite/app.py _unfold).  A
+-- stress mark (U+0301) needs no view: the tokenizer drops it.  Search filters
+-- on the translation by joining the table; the views are its content.
+CREATE VIEW tr_paragraph_folded AS
+  SELECT id, replace(replace(text, 'ё', 'е'), 'Ё', 'Е') AS text FROM tr_paragraph;
+CREATE VIRTUAL TABLE tr_paragraph_fts USING fts5(
+  text, content='tr_paragraph_folded', content_rowid='id',
+  tokenize='unicode61 remove_diacritics 2');
+
+CREATE VIEW tr_note_folded AS
+  SELECT id, replace(replace(text, 'ё', 'е'), 'Ё', 'Е') AS text FROM tr_note;
+CREATE VIRTUAL TABLE tr_note_fts USING fts5(
+  text, content='tr_note_folded', content_rowid='id',
+  tokenize='unicode61 remove_diacritics 2');

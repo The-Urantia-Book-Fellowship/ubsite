@@ -1,0 +1,18 @@
+{#- Lines among the search results (app.py search), beside _old.html's 1955
+    readings, each drawn here once, so that offline/searchdb.py draws the
+    offline copy's by the same macros, with a placeholder where the snippet
+    goes.
+
+    study_hit: a study note, as the List of study notes has it -- its
+    paragraph, which opens with its card (#note… names no element, so ub.js
+    opens it), its number, the words it stands after -- and under them what the
+    search found in it.
+
+    tr_note_hit: a translator's note, under its paragraph's line in its
+    translation's list: its number, which opens the paragraph with the fold at
+    that translation and the note's card (ub.js arriveTr), and what the search
+    found in it. #}
+{% macro study_hit(s) %}<li><a href="/{{ s.para_ref }}#note{{ s.key }}">{{ s.para_ref }}</a> <span class="lbl">{{ t('Note {n}', n=s.num) }}</span>
+  <span class="today">{{ s.before }}</span>
+  <div class="snote"><p>{{ s.s }}</p></div></li>{% endmacro %}
+{% macro tr_note_hit(ref, n, lang) %} <span class="tnhit"><a class="lbl" href="/{{ ref }}#note{{ n.key }}">{{ t('Note {n}', n=n.num) }}</a> <span lang="{{ lang }}">{{ n.s }}</span></span>{% endmacro %}

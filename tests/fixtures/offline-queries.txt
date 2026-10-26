@@ -105,3 +105,24 @@ mansion
 1st
 Britannica 11th
 edition
+# The translations beside the text (2026-10-26), each a list of its own, ё read
+# as е and a stress mark dropped, and their translators' notes.
+Бог
+бог
+объединенным
+объединённым
+всё
+большим
+бо́льшим
+Отец*
+"Всеобщий Отец"
+"Отец Всего"
+"Настройщик Мысли"
+Урантия
+греческого
+οὐρανός
+# The study notes (2026-10-26).
+Hume
+Nave
+Torrey
+Hendrix

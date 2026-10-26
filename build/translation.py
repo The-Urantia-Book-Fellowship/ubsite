@@ -55,6 +55,9 @@ KNOWN = ROOT / "tests" / "known-tr-numbering.tsv"
 KNOWN_SEPS = ROOT / "tests" / "known-tr-separators.tsv"
 KNOWN_LABELS = ROOT / "tests" / "known-tr-labels.tsv"
 KNOWN_BIBREFS = ROOT / "tests" / "known-tr-bibrefs.tsv"
+# Search's own lists, by their `in` (ubsite/app.py search), which no
+# translation's key may be.
+SCOPES = ("index", "text", "notes", "study")
 
 # How each translation's TeX is read, beyond its paper files: where its own
 # hyphenation list is, and the Foreword's title, which urantia-ru's \uforeword
@@ -114,6 +117,10 @@ def meta() -> dict[str, dict]:
     with open(META, "rb") as fh:
         raw = tomllib.load(fh)
     for k, v in raw.items():
+        # A key is also what search's `in` opens a translation's list by
+        # (app.py search), beside the lists of its own.
+        if k in SCOPES:
+            raise SystemExit(f"translation: data/translations.toml [{k}] is a list of search's own")
         missing = {"title", "lang", "by", "label"} - set(v)
         if missing or set(v["by"]) != {"en", "ru"} or not isinstance(v["label"], str):
             raise SystemExit(f"translation: data/translations.toml [{k}] wants title, lang, label,"
@@ -502,7 +509,8 @@ def store(con, built: list[Built], ours_: dict[Key, dict]) -> None:
             source_id[(s["paper_n"], s["key"])] = cur.lastrowid
         for p in b.paras:
             pid = ours_[p.key]["id"]
-            con.execute("INSERT INTO tr_paragraph VALUES (?,?,?,?,?)",
+            con.execute("INSERT INTO tr_paragraph (translation, paragraph_id, src_ref, text, html_hy)"
+                        " VALUES (?,?,?,?,?)",
                         (b.key, pid, None if p.src == _fmt(p.key) else p.src, p.text, p.html_hy))
             for nt in p.set_notes:
                 cur = con.execute(

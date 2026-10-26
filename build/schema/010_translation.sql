@@ -20,8 +20,11 @@ CREATE TABLE translation (
 );
 
 -- A rowid table, not WITHOUT ROWID: its rows are long, and stored by key they
--- took twice the room their text does.
+-- took twice the room their text does.  Its rowid is named, `id`, because search
+-- indexes it (tr_paragraph_fts, 004_fts.sql), and the build's closing VACUUM may
+-- renumber the rows of a table without an INTEGER PRIMARY KEY.
 CREATE TABLE tr_paragraph (
+    id           INTEGER PRIMARY KEY,
     translation  TEXT NOT NULL REFERENCES translation(key),
     paragraph_id INTEGER NOT NULL REFERENCES paragraph(id),
     src_ref      TEXT,                  -- its own address, where it numbers otherwise; NULL: ours

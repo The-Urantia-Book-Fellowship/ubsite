@@ -305,3 +305,8 @@ def fts(con) -> None:
                 " FROM footnote f LEFT JOIN srt_item s ON s.id = f.srt_item_id"
                 " LEFT JOIN srt_item t ON t.id = s.see_id")
     con.execute("INSERT INTO footnote_fts(footnote_fts) VALUES('optimize')")
+    # The translations' paragraphs and notes, read through their views, ё as е
+    # (004_fts.sql).
+    for t in ("tr_paragraph_fts", "tr_note_fts"):
+        con.execute(f"INSERT INTO {t}({t}) VALUES('rebuild')")
+        con.execute(f"INSERT INTO {t}({t}) VALUES('optimize')")

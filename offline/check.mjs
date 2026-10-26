@@ -51,6 +51,11 @@ const db = new sqlite3.oo1.DB(':memory:');
 open(db, 'main', raw['text.db']);
 db.exec("ATTACH ':memory:' AS ix");
 open(db, 'ix', raw['index.db']);
+// Every translation's database for search, as sw.js attaches those it keeps.
+for (const t of trs) {
+  db.exec(`ATTACH ':memory:' AS "tr-${t.key}"`);
+  open(db, `tr-${t.key}`, raw[`tr-${t.key}.db`]);
+}
 const mem = () => new sqlite3.oo1.DB(':memory:');
 
 // What the copy answers for an address: {status, body?, location?}, with
@@ -59,7 +64,7 @@ const ALL = trs.map((t) => t.key);
 function answer(p, query, kept = ALL) {
   const plan = core.resolve(p, sh, job.origin, kept);
   if (plan === null) return { status: 0 };
-  if (plan.search) return core.search(db, mem, sh, new URLSearchParams(query || ''));
+  if (plan.search) return core.search(db, mem, sh, new URLSearchParams(query || ''), kept);
   if (plan.res) return plan.res;
   if (plan.chunks) return plan.make(plan.chunks.map(get));
   return plan.make(get(plan.chunk));
@@ -110,6 +115,35 @@ for (const p of Object.keys(job.pages).filter((p) => p.startsWith('/tr/'))) {
     const want = piece ? sh.tr.frame[0] + piece[0] + piece[1] + sh.tr.frame[1] : frame;
     if (got.status !== 200 || got.body !== want)
       out.bad.push({ path: p, kept: kept.join(' ') || 'none', why: 'not its frame around what is kept' });
+  }
+}
+
+// A search with fewer translations kept: each not kept has its list saying
+// so, in its place among the others, wherever the server's might stand (on
+// the overview, or opened whole), and the rest of the page is the server's.
+const RE_TR = /<section data-tr="([a-z0-9-]+)">[\s\S]*?<\/section>/g;
+function lists(body) {
+  const secs = {};
+  const rest = body.replace(RE_TR, (m, k) => { secs[k] = m; return ''; }).replace('<div class="trhits"></div>', '');
+  return { secs, rest };
+}
+const NOTKEPT = globalThis.ubT('tr:notkept');
+for (const x of job.extras.filter((x) => x.path === '/search' && x.status === 200 && x.body !== undefined)) {
+  const q = new URLSearchParams(x.query), scope = q.get('in') || '';
+  if (!(scope === '' || ALL.includes(scope)) || !/[\p{L}\p{N}]/u.test(q.get('q') || '')) continue;
+  const want = lists(x.body);
+  for (const kept of [[], ...ALL.map((k) => [k])]) {
+    out.extras++;
+    const got = answer(x.path, x.query, kept), mine = lists(got.body);
+    const name = `${x.path}?${x.query}`, why = [];
+    if (got.status !== 200 || mine.rest !== want.rest) why.push('not the server\'s page around the lists');
+    for (const t of sh.tr.order) {
+      if (kept.includes(t.key)) {
+        if (mine.secs[t.key] !== want.secs[t.key]) why.push(`${t.key}: not the server's list`);
+      } else if ((scope === '' || scope === t.key)
+                 && !(mine.secs[t.key] || '').includes(NOTKEPT)) why.push(`${t.key}: does not say it is not kept`);
+    }
+    if (why.length) out.bad.push({ path: name, kept: kept.join(' ') || 'none', why: why.join('; ') });
   }
 }
 

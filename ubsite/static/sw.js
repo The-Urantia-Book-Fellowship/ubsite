@@ -167,11 +167,17 @@ function sqlite() {
   engine.catch(function () { engine = null; });
   return engine;
 }
-// The copy's two databases, the index's attached to the text's as `ix`.
+// The copy's databases: the index's attached to the text's as `ix`, and each
+// translation's it keeps as "tr-<key>" (offline/searchdb.py).  A translation
+// kept by a copy made before 2026-10-26 has none, and search counts it as not
+// kept.
 function database(c) {
   if (c.db) return c.db;
-  c.db = Promise.all([sqlite(), bytes(c, 'text.db').then(function (r) { return r.arrayBuffer(); }),
-                      bytes(c, 'index.db').then(function (r) { return r.arrayBuffer(); })]).then(function (got) {
+  var trs = c.kept.filter(function (k) { return c.byName['tr-' + k + '.db']; });
+  var read = function (name) { return bytes(c, name).then(function (r) { return r.arrayBuffer(); }); };
+  c.db = Promise.all([sqlite(), read('text.db'), read('index.db')].concat(trs.map(function (k) {
+    return read('tr-' + k + '.db');
+  }))).then(function (got) {
     var s = got[0], db = new s.oo1.DB(':memory:');
     var open = function (schema, buf) {
       var b = new Uint8Array(buf), p = s.wasm.allocFromTypedArray(b);
@@ -182,7 +188,11 @@ function database(c) {
     open('main', got[1]);
     db.exec("ATTACH ':memory:' AS ix");
     open('ix', got[2]);
-    return { db: db, mem: function () { return new s.oo1.DB(':memory:'); } };
+    trs.forEach(function (k, i) {
+      db.exec("ATTACH ':memory:' AS \"tr-" + k + '"');
+      open('tr-' + k, got[3 + i]);
+    });
+    return { db: db, mem: function () { return new s.oo1.DB(':memory:'); }, kept: trs };
   });
   c.db.catch(function () { c.db = null; });
   return c.db;
@@ -213,7 +223,7 @@ function fromCopy(c, url) {
   if (plan === null) return Promise.resolve(null);
   if (plan.res) return Promise.resolve(respond(c, plan.res));
   if (plan.search) return database(c).then(function (d) {
-    return respond(c, self.ubOffline.search(d.db, d.mem, c.shell, url.searchParams));
+    return respond(c, self.ubOffline.search(d.db, d.mem, c.shell, url.searchParams, d.kept));
   });
   if (plan.chunks) return Promise.all(plan.chunks.map(function (n) { return chunk(c, n); })).then(function (ds) {
     return respond(c, plan.make(ds));

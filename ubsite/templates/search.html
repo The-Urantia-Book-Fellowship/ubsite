@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% from "_old.html" import old_hit, notes_after %}{% set title = same(q) %}
+{% extends "base.html" %}{% from "_old.html" import old_hit, notes_after %}{% from "_hits.html" import study_hit, tr_note_hit %}{% set title = same(q) %}
 {# One list's heading count, in parentheses, so that it cannot be read as part
    of the heading: "In the 1955 readings (4)".  On the overview a list cut short
    says "(25 of 58)"; opened whole it says which hundred this page holds. #}
@@ -31,6 +31,24 @@
 {% if txt and txt.rows %}<ul class="hits">{% for t in txt.rows %}<li><a href="/{{ t.ref }}">{{ t.ref }}</a> {{ t.s|safe }}</li>{% endfor %}</ul>
 {{ more(txt, 'text', 'Show all {n:,} paragraphs') }}
 {% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endif %}
+{#- The study notes (Tigran, 2026-10-26), as the List of study notes has
+    them: on the overview only when something matched, and shown only while
+    Settings shows the notes (ub.css .bystudy); opened whole, always. #}
+{% if stu and stu.rows %}<section{% if not scope %} class="bystudy"{% endif %}><h2>{{ t('In the study notes') }} {{ count(stu) }}</h2>
+<ul class="hits stl">{% for s in stu.rows %}{{ study_hit(s) }}{% endfor %}</ul>
+{{ more(stu, 'study', 'Show all {n:,} notes') }}
+</section>{% elif scope == 'study' %}<section><h2>{{ t('In the study notes') }} <span>(0)</span></h2><p class="none">{{ t('nothing') }}</p></section>{% endif %}
+{#- Each translation beside the text, a list of its own, named as Settings
+    names it (Tigran, 2026-10-26): a line to a paragraph, by our reference,
+    with what the search found in its words, and under them in its
+    translator's notes.  On the overview only those that found something, each
+    shown only while Settings shows its translation, in the reader's order
+    (base.html ubTr); opened whole, always. #}
+{% macro tr_list(x) %}<section data-tr="{{ x.key }}"><h2><bdi lang="{{ x.lang }}">{{ x.title }}</bdi> ({{ x.label }}) {{ count(x.hits) }}</h2>
+{% if x.hits.rows %}<ul class="hits">{% for h in x.hits.rows %}<li><a href="/{{ h.ref }}#tr-{{ x.key }}">{{ h.ref }}</a>{% if h.s %} <span lang="{{ x.lang }}">{{ h.s }}</span>{% endif %}{% for n in h.notes %}{{ tr_note_hit(h.ref, n, x.lang) }}{% endfor %}</li>{% endfor %}</ul>
+{{ more(x.hits, x.key, 'Show all {n:,} paragraphs') }}
+{% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endmacro %}
+{% if scope and trs %}{{ tr_list(trs[0]) }}{% elif trs %}<div class="trhits">{% for x in trs %}{{ tr_list(x) }}{% endfor %}</div>{% endif %}
 {#- What the 1955 cards say: on the overview only when something matched, and
     shown only when Settings asks (ub.css .by1955); opened whole, always. #}
 {% if old and old.rows %}<section{% if not scope %} class="by1955"{% endif %}><h2>{{ t('In the 1955 readings') }} {{ count(old) }}</h2>

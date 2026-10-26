@@ -293,10 +293,11 @@
   }
 
   // ---- Search: app.py search(), on db, which is the text's database with the
-  // index's attached.  mem() makes an empty in-memory database, for marking
-  // the terms in what an index hit shows (app.py mark_terms).
+  // index's attached, and each translation's the copy keeps, as "tr-<key>"
+  // (offline/searchdb.py).  mem() makes an empty in-memory database, for
+  // marking the terms in what an index hit shows (app.py mark_terms).
   var RE_TERM = /"([^"]*)"?|(\S+)/g;
-  var OVERVIEW = { index: 25, text: 40, notes: 10 }, PER_PAGE = 100;
+  var OVERVIEW = { index: 25, text: 40, notes: 10, study: 10, tr: 40 }, PER_PAGE = 100;
   var TOKENIZE = 'unicode61 remove_diacritics 2';
   var APP_OWN = " OR (e.scope IN ('B','C','D','E','F') AND e.id NOT IN (SELECT entry_id FROM appendix_head))";
 
@@ -352,6 +353,18 @@
     return supped(s, base, at);
   }
 
+  // app.py fold and _unfold: ё read as е, as the translations' search reads
+  // their text, and a snippet of it put back into the translation's own letters
+  // by its place, the fold being one letter for one.
+  function fold(s) { return s.replace(/ё/g, 'е').replace(/Ё/g, 'Е'); }
+  function unfold(s, text) {
+    if (!/[ёЁ]/.test(text)) return s;
+    var core = s.replace(/[\x02\x03]/g, '').replace(/^\x04+|\x04+$/g, ''), k = fold(text).indexOf(core);
+    if (k < 0) throw new Error('a search hit is not in its text: ' + core.slice(0, 60));
+    var t = Array.from(text.slice(k)), i = 0;
+    return Array.from(s).map(function (c) { return '\x02\x03\x04'.indexOf(c) >= 0 ? c : t[i++]; }).join('');
+  }
+
   function markTerms(mem, texts, q, sups) {
     var ts = terms(q);
     if (!ts.length || !texts.length) return texts.map(function (t, i) { return snip(t, t, sups[i]); });
@@ -377,9 +390,39 @@
              more: off + rs.length < n };
   }
 
-  // params: a URLSearchParams.  Returns a response: the results page, or the
+  // app.py _tr_hits: one translation's list, from its database, attached as
+  // "tr-<key>": a line to each paragraph whose words or one of whose
+  // translator's notes matched, by ours, in the order of the book.
+  function trHits(db, key, tq, whole, number) {
+    var S = '"tr-' + key + '"';
+    var hit = 'SELECT t.paragraph_id AS pid FROM ' + S + '.tr_paragraph_fts f JOIN ' + S + '.tr_paragraph t ON t.id=f.rowid' +
+              ' WHERE tr_paragraph_fts MATCH ?' +
+              ' UNION SELECT n.paragraph_id FROM ' + S + '.tr_note_fts f JOIN ' + S + '.tr_note n ON n.id=f.rowid' +
+              ' WHERE tr_note_fts MATCH ?';
+    var n = count(db, 'SELECT COUNT(*) FROM (' + hit + ')', [tq, tq]), w = window_(whole, 'tr', number, n);
+    var rs = rows(db, 'SELECT h.pid, p.ref FROM (' + hit + ') h JOIN paragraph p ON p.id=h.pid' +
+                      ' ORDER BY p.ord LIMIT ? OFFSET ?', [tq, tq, w[0], w[1]]);
+    var ids = rs.map(function (r) { return r.pid; }), within = ids.map(function () { return '?'; }).join(',');
+    var said = {}, notes = {};
+    rows(db, 'SELECT t.paragraph_id AS pid, t.text, t.sups,' +
+             '  snippet(tr_paragraph_fts, 0, char(2), char(3), char(4), 24) AS s' +
+             ' FROM ' + S + '.tr_paragraph_fts f JOIN ' + S + '.tr_paragraph t ON t.id=f.rowid' +
+             ' WHERE tr_paragraph_fts MATCH ? AND t.paragraph_id IN (' + within + ')', [tq].concat(ids)).forEach(function (r) {
+      said[r.pid] = snip(unfold(r.s, r.text), r.text, r.sups);
+    });
+    rows(db, 'SELECT n.paragraph_id AS pid, n.text, n.sups, n.pre, n.post,' +
+             '  snippet(tr_note_fts, 0, char(2), char(3), char(4), 24) AS s' +
+             ' FROM ' + S + '.tr_note_fts f JOIN ' + S + '.tr_note n ON n.id=f.rowid' +
+             ' WHERE tr_note_fts MATCH ? AND n.paragraph_id IN (' + within + ') ORDER BY n.num', [tq].concat(ids)).forEach(function (r) {
+      (notes[r.pid] = notes[r.pid] || []).push(r.pre + snip(unfold(r.s, r.text), r.text, r.sups) + r.post);
+    });
+    return hits(n, w[1], rs.map(function (r) { return { ref: r.ref, s: said[r.pid], notes: notes[r.pid] || [] }; }));
+  }
+
+  // params: a URLSearchParams; kept, the keys of the translations whose
+  // databases are attached.  Returns a response: the results page, or the
   // redirect a citation typed into the box gets.
-  function search(db, mem, sh, params) {
+  function search(db, mem, sh, params, kept) {
     var lastOf = function (k, dflt) { var all = params.getAll(k); return all.length ? all[all.length - 1] : dflt; };
     var q = lastOf('q', '').trim(), scope = lastOf('in', ''), pageNo = lastOf('page', '1');
     var jump = q ? parse(q) : null;
@@ -391,9 +434,11 @@
         return redirect(s === null ? '/' + p : '/' + p + ':' + s + (n !== null ? '.' + n : ''), 303);
       }
     }
-    scope = (scope === 'index' || scope === 'text' || scope === 'notes') ? scope : '';
+    var trs = (sh.tr && sh.tr.order) || [];
+    scope = (scope === 'index' || scope === 'text' || scope === 'notes' || scope === 'study' ||
+             trs.some(function (x) { return x.key === scope; })) ? scope : '';
     var number = /^[0-9]+$/.test(pageNo) && parseInt(pageNo, 10) > 0 ? parseInt(pageNo, 10) : 1;
-    var fq = ftsQuery(q), heads = [], idx = null, txt = null, old = null, w, where;
+    var fq = ftsQuery(q), heads = [], idx = null, txt = null, old = null, stu = null, found = [], w, where;
     if (q && (scope === '' || scope === 'index'))
       heads = rows(db,
         "SELECT e.id, e.slug, e.headword, e.headword_html, e.scope, e.anchor, a.title AS appendix," +
@@ -434,6 +479,33 @@
           return { ref: r.ref, s: snip(r.s, r.text, r.sups) };
         }));
     }
+    if (fq && (scope === '' || scope === 'study')) {
+      where = " FROM footnote_fts x JOIN footnote f ON f.id=x.rowid" +
+              " JOIN paragraph p ON p.id=f.paragraph_id" +
+              " WHERE footnote_fts MATCH ? AND f.kind='study'";
+      var ns = count(db, 'SELECT COUNT(*)' + where, [fq]);
+      w = window_(scope === 'study', 'study', number, ns);
+      stu = hits(ns, w[1], rows(db,
+        "SELECT snippet(footnote_fts, 0, char(2), char(3), char(4), 24) AS s, x.reading AS text," +
+        "  h.pre, h.post, h.sups" + where.replace(' WHERE', ' JOIN study_html h ON h.id=f.id WHERE') +
+        " ORDER BY p.ord, f.anchor, f.ord LIMIT ? OFFSET ?", [fq, w[0], w[1]]).map(function (r) {
+          return r.pre + snip(r.s, r.text, r.sups) + r.post;
+        }));
+    }
+    // Each translation, from its database where the copy keeps it; where it
+    // does not, its list says so, opened whole or on the overview of any search
+    // with words in it, and shows where the reader shows the translation
+    // (base.html ubTr), as the server's would.
+    var tq = ftsQuery(fold(q));
+    trs.forEach(function (x) {
+      if (scope !== '' && scope !== x.key) return;
+      if ((kept || []).indexOf(x.key) < 0) {
+        if (tq || scope) found.push({ x: x, hits: null });
+        return;
+      }
+      var got = tq ? trHits(db, x.key, tq, scope === x.key, number) : hits(0, 0, []);
+      if (got.n || scope) found.push({ x: x, hits: got });
+    });
     if (fq && (scope === '' || scope === 'notes')) {
       where = " FROM footnote_fts x JOIN footnote f ON f.id=x.rowid" +
               " JOIN paragraph p ON p.id=f.paragraph_id" +
@@ -453,14 +525,14 @@
         return { line: line, card: r.card };
       }));
     }
-    var body = draw(q, scope, heads, idx, txt, old, q ? suggest(q) : []);
+    var body = draw(q, scope, heads, idx, txt, old, stu, found, q ? suggest(q) : []);
     // The title piece begins inside its tag (offline/pages.py cut): a search's
     // has no Russian of its own, being what was typed.
     return html(200, compose(sh, '>' + esc(q), sh.search.h, esc(q), body, sh.search.s));
   }
 
   // templates/search.html's body, whitespace and all.
-  function draw(q, scope, heads, idx, txt, old, didyou) {
+  function draw(q, scope, heads, idx, txt, old, stu, found, didyou) {
     var uq = quote(q);
     function count(h) {
       return '<span>' + (h.first > 1 || h.more
@@ -523,6 +595,31 @@
       } else o += '<p class="none">' + T('nothing') + '</p>';
       o += '</section>';
     }
+    o += '\n';
+    if (stu && stu.rows.length)
+      o += '<section' + (scope ? '' : ' class="bystudy"') + '><h2>' + T('In the study notes') + ' ' + count(stu) + '</h2>\n' +
+           '<ul class="hits stl">' + stu.rows.join('') + '</ul>\n' + more(stu, 'study', T.k('Show all {n:,} notes')) +
+           '\n</section>';
+    else if (scope === 'study')
+      o += '<section><h2>' + T('In the study notes') + ' <span>(0)</span></h2><p class="none">' + T('nothing') + '</p></section>';
+    o += '\n\n';
+    // A translation's list, as search.html's tr_list draws it, or, where the
+    // copy does not keep the translation, its heading and a line saying so.
+    function trList(e) {
+      var x = e.x, h = e.hits,
+          s = '<section data-tr="' + x.key + '"><h2><bdi lang="' + x.lang + '">' + esc(x.title) + '</bdi> (' + x.label + ')';
+      if (!h) return s + '</h2>\n<p class="none">' + T('tr:notkept') + '</p></section>';
+      s += ' ' + count(h) + '</h2>\n';
+      if (h.rows.length)
+        s += '<ul class="hits">' + h.rows.map(function (r) {
+          return '<li><a href="/' + esc(r.ref) + '#tr-' + x.key + '">' + esc(r.ref) + '</a>' +
+                 (r.s ? ' <span lang="' + x.lang + '">' + r.s + '</span>' : '') + r.notes.join('') + '</li>';
+        }).join('') + '</ul>\n' + more(h, x.key, T.k('Show all {n:,} paragraphs')) + '\n';
+      else s += '<p class="none">' + T('nothing') + '</p>';
+      return s + '</section>';
+    }
+    if (scope && found.length) o += trList(found[0]);
+    else if (found.length) o += '<div class="trhits">' + found.map(trList).join('') + '</div>';
     o += '\n';
     if (old && old.rows.length) {
       o += '<section' + (scope ? '' : ' class="by1955"') + '><h2>' + T('In the 1955 readings') + ' ' + count(old) + '</h2>\n' +

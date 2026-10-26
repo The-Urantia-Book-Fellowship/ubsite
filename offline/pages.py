@@ -215,7 +215,8 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     # paragraphs, in Settings' order, and each translation keeps its two
     # pieces of it, twenty papers to a chunk, as the spoken text is kept.
     from ubsite import app as A
-    order = [x["key"] for x in A.translations()]
+    named = {x["key"]: x for x in A.translations()}
+    order = list(named)
     trs: dict[str, dict] = {k: {} for k in order}
     tr_secs: dict[str, dict] = {k: {} for k in order}
     fragments = 0
@@ -324,9 +325,13 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
         "misc": u["misc"],
         # What /tr/ is made of offline: the fragment's two ends, and each
-        # translation in Settings' order with the sections it has, by paper.
+        # translation in Settings' order with the sections it has, by paper,
+        # and its names and language, which its list among a search's results
+        # is headed by (search.html), its short name as HTML.
         "tr": {"frame": list(A.TR_FRAME),
-               "order": [{"key": k, "secs": tr_secs[k]} for k in order if trs[k]]},
+               "order": [{"key": k, "secs": tr_secs[k], "title": named[k]["title"],
+                          "label": str(named[k]["label"]), "lang": named[k]["lang"]}
+                         for k in order if trs[k]]},
     }
     counts = {"sections": sum(len(s) for s in u["papers"].values()), "papers": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),

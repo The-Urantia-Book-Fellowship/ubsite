@@ -209,7 +209,8 @@ class Copy(unittest.TestCase):
     def test_each_translation_is_a_download_of_its_own(self):
         # Chosen in Settings' Offline tab: listed apart from the copy, whose
         # chunks, build and size are without them, so a worker from before
-        # neither sees nor fetches them, each with a build of its own.
+        # neither sees nor fetches them, each with a build of its own: its
+        # pages, and its database for search (offline/searchdb.py tr_db).
         from offline import pack
         from ubsite import app as A
         m = json.loads((COPY / "manifest.json").read_text())
@@ -218,10 +219,12 @@ class Copy(unittest.TestCase):
             self.assertEqual(set(t), {"key", "build", "bytes", "raw", "chunks"})
             self.assertEqual(t["build"], pack._build(t["chunks"]))
             self.assertEqual(t["bytes"], sum(c["bytes"] for c in t["chunks"]))
+            k = re.escape(t["key"])
             for c in t["chunks"]:
-                self.assertEqual((c["kind"], c["tr"]), ("tr", t["key"]))
-                self.assertRegex(c["name"], rf"^tr-{re.escape(t['key'])}-\d+$")
-        self.assertFalse([c for c in m["chunks"] if c["kind"] == "tr"])
+                self.assertEqual(c["tr"], t["key"])
+                self.assertRegex(f"{c['kind']} {c['name']}", rf"^(tr tr-{k}-\d+|db tr-{k}\.db)$")
+            self.assertEqual(sum(c["kind"] == "db" for c in t["chunks"]), 1)
+        self.assertFalse([c for c in m["chunks"] if "tr" in c])
         self.assertEqual(m["bytes"], sum(c["bytes"] for c in m["chunks"]))
 
     def test_deploy_keeps_every_chunk_the_manifest_names(self):

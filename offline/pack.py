@@ -17,8 +17,10 @@ download of its own, which a reader chooses (Settings' Offline tab), with its
 chunks, their size, and a `build` of their own, the hash of its chunks alone.
 `chunks`, `build`, `bytes` and `raw` are the copy without them, so a worker
 from before 2026-10-26 neither sees nor fetches them, and a translation's
-revision asks nothing of a reader who does not keep it.  deploy.sh keeps
-their chunks on the hosts as it keeps the rest.
+revision asks nothing of a reader who does not keep it.  Its database for
+search is one of them, `tr-<key>.db`, which a worker before 2026-10-26
+fetches with the rest and never reads.  deploy.sh keeps their chunks on the
+hosts as it keeps the rest.
 """
 
 from __future__ import annotations
@@ -102,6 +104,8 @@ def build(con: sqlite3.Connection) -> dict:
         mine: list[dict] = []
         for name, obj in named.items():
             add(name, "tr", _json(obj), into=mine, tr=key)
+        # What search reads of it (searchdb.tr_db), which the worker attaches.
+        add(f"tr-{key}.db", "db", searchdb.tr_db(con, key), into=mine, tr=key)
         translations.append({"key": key, "build": _build(mine), "bytes": sum(e["bytes"] for e in mine),
                              "raw": sum(e["raw"] for e in mine), "chunks": mine})
 

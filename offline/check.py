@@ -82,11 +82,16 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               "/101:4.2:3", "/café", "/speech/01:4", "/speech/999:1", "/speech/1:99", "/speech/x",
               "/speech/1:4:5", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2"]:
         jobs.append((p, "", True))
+    # Every list a search has, by its `in`: each translation's too, by its key.
+    keys = [t["key"] for t in shell["tr"]["order"]]
     for q in queries():
-        for scope in ("", "index", "text", "notes"):
+        for scope in ("", "index", "text", "notes", "study", *keys):
             jobs.append(("/search", urllib.parse.urlencode({"q": q, **({"in": scope} if scope else {})}), True))
     for q in ("god", "prayer", "adjuster"):
         for scope, page in (("index", "2"), ("text", "3"), ("text", "999"), ("text", "0"), ("index", "x")):
+            jobs.append(("/search", urllib.parse.urlencode({"q": q, "in": scope, "page": page}), True))
+    for q in ("бог", "все"):
+        for scope, page in ((keys[0], "2"), (keys[-1], "3"), (keys[-1], "999")):
             jobs.append(("/search", urllib.parse.urlencode({"q": q, "in": scope, "page": page}), True))
     out = []
     for (p, q, body), got in zip(jobs, site.get_many([(p, q) for p, q, _ in jobs])):
@@ -156,7 +161,8 @@ def bands(manifest: dict, con: sqlite3.Connection) -> list[str]:
         if not lo <= val <= hi:
             bad.append(f"{key}: {val:.2f}, expected {lo} to {hi}")
     # Each translation, a download of its own: a chunk to every twenty papers
-    # it has, by the database, as ud's grow as it is written; its size in a band.
+    # it has, by the database, as ud's grow as it is written, and its database
+    # for search; its size in a band.
     got = {t["key"]: t for t in manifest.get("translations", [])}
     if set(got) != set(exp["translations"]):
         bad.append(f"translations: {sorted(got)}, expected {sorted(exp['translations'])}")
@@ -166,9 +172,9 @@ def bands(manifest: dict, con: sqlite3.Connection) -> list[str]:
             continue
         groups = {f"tr-{key}-{g}" for (g,) in con.execute(
             "SELECT DISTINCT p.paper_n / 20 FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id"
-            " WHERE t.translation = ?", (key,))}
+            " WHERE t.translation = ?", (key,))} | {f"tr-{key}.db"}
         if {c["name"] for c in t["chunks"]} != groups:
-            bad.append(f"{key}: {len(t['chunks'])} chunks, for {len(groups)} twenties of papers")
+            bad.append(f"{key}: {len(t['chunks'])} chunks, for {len(groups) - 1} twenties of papers and search")
         lo, hi = want["download_mb"]
         if not lo <= t["bytes"] / 1e6 <= hi:
             bad.append(f"{key}: {t['bytes'] / 1e6:.2f} MB, expected {lo} to {hi}")

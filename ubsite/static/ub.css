@@ -1309,6 +1309,27 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
    the search found something in them. */
 .by1955 { display: none; }
 :root[data-notesearch="true"]:not([data-notes="off"]) .by1955 { display: block; }
+/* The study notes among the results, while Settings shows the notes; and each
+   translation's list, while Settings shows the translation, in the reader's
+   order: base.html's head script (ubTr) shows each, and the column around them
+   while it holds one, for a column with nothing in it would still stand
+   between the margins either side of it. */
+.bystudy { display: none; }
+:root[data-studynotes="true"] .bystudy { display: block; }
+.trhits { display: none; flex-direction: column; gap: 1.6rem; margin: 1.6rem 0; }
+.trhits > section { display: none; margin: 0; }
+/* A column's items keep their children's margins, which in the page's flow
+   fold into the 1.6rem between sections. */
+.trhits > section > h2 { margin-top: 0; }
+.trhits > section > :last-child { margin-bottom: 0; }
+/* A translator's note under its paragraph's line, as the committee's words
+   stand under a 1955 reading; where only notes matched, the first beside the
+   reference. */
+.hits .tnhit { display: block; margin: .1rem 0 .1rem 1.2rem; }
+.hits li > a:first-child + .tnhit { display: inline; margin: 0; }
+.tnhit .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint);
+  text-decoration: none; margin-right: .2em; }
+.tnhit .lbl:hover { color: var(--link); text-decoration: underline; }
 .old .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint); margin-right: .2em; }
 .old .then { margin: 0 .6rem 0 .3rem; }
 .old .today { color: var(--faint); }

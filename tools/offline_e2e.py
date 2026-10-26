@@ -387,6 +387,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
             # The one thing the worker adds: the footer's note of the copy's date,
             # in Russian too (2026-10-25).
             got = re.sub(rb'\n<footer data-copy="[^"]*"(?: data-copy-ru="[^"]*")?>', b"\n<footer>", bytes(got))
+            if u.startswith("/search?q=prayer"):
+                # And among a search's lists, urantia-ru's, ticked and not kept,
+                # saying it is not searched, which the server never sends.
+                got, n = re.subn(rb'<div class="trhits"><section data-tr="urantia-ru">.*?not in the offline copy'
+                                 rb'.*?</section></div>', b"", got, flags=re.S)
+                ok(n == 1, "a search offline says a translation ticked and not kept is not searched")
             ok(got == want[u], f"{u}: as the server sends it ({len(got):,} bytes)")
         t = time.time()
         pg.goto(BASE + "/search?q=thought+adjuster")
@@ -395,6 +401,18 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         t = time.time()
         pg.goto(BASE + "/search?q=morontia+mota")
         print(f"  a second: {(time.time() - t) * 1000:.0f} ms")
+        # The translations among the results (2026-10-26): ud kept, urantia-ru not.
+        pg.goto(BASE + "/search?q=%D0%BE%D0%B1%D1%8A%D0%B5%D0%B4%D0%B8%D0%BD%D0%B5%D0%BD%D0%BD%D1%8B%D0%BC")
+        shown = pg.evaluate("[...document.querySelectorAll('.trhits > section')].filter(s => s.offsetParent)"
+                            ".sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)"
+                            ".map(s => s.dataset.tr)")
+        ok(shown == ["urantia-ru", "ud"], f"a search lists each translation shown, in the reader's order ({shown})")
+        ok("объединённым" in pg.inner_text(".trhits [data-tr=ud]"), "the one kept, from its own database, ё found by е")
+        ok("not in the offline copy" in pg.inner_text(".trhits [data-tr=urantia-ru]"), "and one not kept says so")
+        pg.locator(".trhits [data-tr=ud] li a").first.click()
+        pg.wait_for_selector(".tf.open .rt")
+        ok(pg.url.endswith("#tr-ud") and "объединённым" in words(0),
+           "a hit opens its paragraph, with the fold at that translation")
         pg.goto(BASE + "/101:4.2-3")
         ok(pg.locator("p.t.hit").count() == 2, "/101:4.2-3 marks two paragraphs")
         i = icon(pg)

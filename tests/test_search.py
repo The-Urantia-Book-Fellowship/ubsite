@@ -16,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from test_appendix_pages import DB, get  # noqa: E402
-from ubsite.app import TOKENIZE, _around, _snip, fts_query, mark_terms, sups  # noqa: E402
+from ubsite.app import TOKENIZE, _around, _snip, _unfold, fold, fts_query, mark_terms, sups  # noqa: E402
 
 ROWS = ["the self-conscious mind", "Adam and Eve", "the Adamic mission",
         "Jesus’ words", "a Thought Adjuster indwells", "God-knowing men"]
@@ -76,7 +76,7 @@ class MarkTerms(unittest.TestCase):
 
     def test_the_tokenizer_is_the_builds(self):
         sql = (ROOT / "build" / "schema" / "004_fts.sql").read_text()
-        self.assertEqual(sql.count(f"tokenize='{TOKENIZE}'"), 3)
+        self.assertEqual(sql.count(f"tokenize='{TOKENIZE}'"), 5)
 
     def m(self, text, q):
         return str(mark_terms([text], q)[0])
@@ -201,6 +201,120 @@ class Jump(unittest.TestCase):
                 status, _, body = get(url)
                 self.assertEqual(status, 404)
                 self.assertIn(says, body)
+
+
+class Folded(unittest.TestCase):
+    """The translations' search reads ё as е (app.py fold, 004_fts.sql), and a
+    snippet made of what it read is put back into the translation's own
+    letters (_unfold).  A stress mark the tokenizer drops itself."""
+
+    def test_one_letter_for_one(self):
+        self.assertEqual(fold("Всё, ЁЛКА и ель"), "Все, ЕЛКА и ель")
+
+    def test_a_snippet_in_its_own_letters(self):
+        text = "Он является объединённым изображением, и всё."
+        self.assertEqual(_unfold("\x04является \x02объединенным\x03 изображением, и все\x04", text),
+                         "\x04является \x02объединённым\x03 изображением, и всё\x04")
+        self.assertEqual(_unfold("\x02все\x03", "все"), "\x02все\x03")
+        with self.assertRaises(ValueError):
+            _unfold("\x02нет\x03", "всё")
+
+    def test_a_stress_mark_is_dropped(self):
+        con = sqlite3.connect(":memory:")
+        con.execute(f"CREATE VIRTUAL TABLE t USING fts5(x, tokenize='{TOKENIZE}')")
+        con.execute("INSERT INTO t VALUES ('с бо\u0301льшим искажением')")
+        self.assertEqual(con.execute("SELECT highlight(t, 0, '[', ']') FROM t WHERE t MATCH ?",
+                                     (fts_query("большим"),)).fetchall(),
+                         [("с [бо\u0301льшим] искажением",)])
+
+
+def results(q: str, scope: str = "", page: str = "") -> str:
+    """The <main> of a search's page, in English."""
+    status, _, body = get("/search?q=" + quote(q) + (f"&in={scope}" if scope else "")
+                          + (f"&page={page}" if page else ""))
+    assert status == 200, status
+    return body[body.index("<main"):body.index("</main>")]
+
+
+def section(main: str, key: str) -> str:
+    """A translation's list in a search's page."""
+    a = main.index(f'<section data-tr="{key}">')
+    return main[a:main.index("</section>", a)]
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class Translations(unittest.TestCase):
+    """Each translation beside the text has a list of its own among a search's
+    results: a line to a paragraph, by ours, with what the search found in
+    its words, and under them in its translator's notes (Tigran, 2026-10-26)."""
+
+    def test_e_finds_yo_and_the_hit_keeps_it(self):
+        ud = section(results("объединенным"), "ud")
+        self.assertIn('<a href="/0:1.13#tr-ud">0:1.13</a> <span lang="ru">', ud)
+        self.assertIn("<mark>объединённым</mark>", ud)
+        self.assertNotIn("<mark>объединенным</mark>", ud)
+
+    def test_yo_finds_e(self):
+        self.assertIn("<mark>все</mark>", section(results("всё"), "urantia-ru"))
+
+    def test_a_stress_mark_is_the_translations(self):
+        self.assertIn("<mark>бо\u0301льшим</mark>", section(results("большим"), "ud"))
+
+    def test_in_settings_order_and_only_those_that_found_something(self):
+        main = results("греческого")
+        self.assertLess(main.index('<div class="trhits"><section data-tr="ud">'),
+                        main.index('<section data-tr="urantia-ru">'))
+        self.assertNotIn("trhits", results("Hume"))
+        self.assertNotIn("data-tr=", results("prayer"))
+
+    def test_a_note_under_its_paragraph(self):
+        # Only a note matched at 0:0.1: it stands beside the reference.
+        self.assertIn('<li><a href="/0:0.1#tr-ud">0:0.1</a> <span class="tnhit">'
+                      '<a class="lbl" href="/0:0.1#notetn_ud_0_0_1_0">Note 1</a> <span lang="ru">'
+                      "Синтетическое слово «Ура\u0301нтия», возможно, происходит от <mark>греческого</mark>",
+                      section(results("греческого"), "ud"))
+
+    def test_a_superscript(self):
+        self.assertIn("около 10<sup>9</sup>\u202fкм", section(results("диаметр"), "ud"))
+        self.assertIn("1,392684×10<sup>6</sup>", section(results('"значение диаметра"'), "ud"))
+
+    def test_opened_whole(self):
+        main = results("бог", "urantia-ru")
+        self.assertNotIn("trhits", main)
+        self.assertIn('<section data-tr="urantia-ru"><h2><bdi lang="ru">Книга Урантии</bdi> (USGNY) <span>(1–100 of ', main)
+        self.assertIn('<a class="next" href="/search?q=%D0%B1%D0%BE%D0%B3&amp;in=urantia-ru&amp;page=2">', main)
+        self.assertIn("(101–200 of ", results("бог", "urantia-ru", "2"))
+        self.assertNotIn("data-tr=", results("бог", "text"))
+        # Nothing found, opened whole, says so, as with no words to find.
+        for q in ("Badanon", '"'):
+            self.assertIn('(0)</span></h2>\n<p class="none">nothing</p>', results(q, "ud"))
+
+    def test_a_key_is_never_one_of_search_s_own_lists(self):
+        from build import translation
+        self.assertFalse(set(translation.SCOPES) & set(translation.meta()))
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class StudyNotes(unittest.TestCase):
+    """The study notes among a search's results, as the List of study notes
+    has them, shown while Settings shows the notes (Tigran, 2026-10-26)."""
+
+    def test_on_the_overview_only_when_something_matched(self):
+        self.assertIn('<section class="bystudy"><h2>In the study notes <span>', results("Hume"))
+        self.assertNotIn("In the study notes", results("Nebadonia"))
+
+    def test_a_line(self):
+        self.assertIn('<li><a href="/2:1.2#notest2_1_2_0">2:1.2</a> <span class="lbl">Note 3</span>\n'
+                      '  <span class="today">…God, the infinite Father, who is also a faithful Creator.”</span>\n'
+                      '  <div class="snote"><p>This paragraph is a chain of quotations from <mark>Hume</mark>',
+                      results("Hume"))
+
+    def test_opened_whole(self):
+        main = results("Hume", "study")
+        self.assertIn("<section><h2>In the study notes <span>", main)
+        self.assertNotIn("In the text", main)
+        self.assertIn('<section><h2>In the study notes <span>(0)</span></h2><p class="none">nothing</p>',
+                      results("Nebadonia", "study"))
 
 
 if __name__ == "__main__":

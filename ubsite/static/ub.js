@@ -493,7 +493,10 @@
     return r.length === 2 ? '<span class="leadrow"><span class="lab">' + r[0] + '</span><span class="fig">' +
                             '<span class="leader"></span>' + r[1] + '</span></span>' : h;
   }
-  function trDraw(tf, ks) {
+  // `tab`, where a search's hit names one (arriveTr), opens the fold at it in
+  // place of the one last chosen, which it does not change.  Its promise is kept
+  // once the fold is drawn.
+  function trDraw(tf, ks, tab) {
     var panel = tf.querySelector('.tr');
     if (!panel) {
       panel = document.createElement('div');
@@ -503,10 +506,10 @@
     panel.hidden = false;
     var lines = tf.parentNode.querySelectorAll('p.t[id]'),
         refs = Array.prototype.map.call(lines, function (q) { return q.id; });
-    if (!refs.length) return;
-    trFetch(tf.closest('article'), refs[0].split('.')[0]).then(function (got) {
+    if (!refs.length) return Promise.resolve();
+    return trFetch(tf.closest('article'), refs[0].split('.')[0]).then(function (got) {
       if (!tf.classList.contains('open')) return;
-      var want = load().trtab, h = '', notes = '',
+      var want = tab || load().trtab, h = '', notes = '',
           cur = want === 'all' && ks.length > 1 ? 'all' : ks.indexOf(want) >= 0 ? want : ks[0];
       if (ks.length > 1) {
         h += '<div class="trtabs" role="group">' + ks.map(function (k) {
@@ -540,6 +543,29 @@
       if (tf.classList.contains('open')) panel.innerHTML = '<p class="gap">' + T('tr:unreachable') + '</p>';
     });
   }
+  // A search's hit in a translation opens /0:1.13#tr-ud, and one in a
+  // translator's note /0:5.10#notetn_ud_0_5_10_0 (templates/search.html): the
+  // paragraph marked .hit, which arrive() brings into view, its fold open at
+  // that translation, if the reader shows it, and the note's card.  Placed
+  // again when the fonts are in and the text has reflowed, as arriveNote()
+  // places a study note's.
+  function arriveTr() {
+    var m = /^#(?:tr-([a-z0-9-]+)|note(tn_([a-z0-9-]+)_\d+_\d+_\d+_\d+))$/.exec(location.hash),
+        hit = m && document.querySelector('p.t.hit'), row = hit && hit.closest('.row'),
+        tf = row && row.querySelector('.tf'), k = m && (m[1] || m[3]), b = tf && tf.querySelector('.trfold');
+    if (!b || trKeys(tf).indexOf(k) < 0) return;
+    tf.classList.add('open');
+    b.setAttribute('aria-expanded', 'true');
+    trDraw(tf, trKeys(tf), k).then(function () {
+      var mark = m[2] && document.getElementById('fnref' + m[2]);
+      if (!mark || !tf.contains(mark)) return;
+      shut(false);
+      open(mark);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+        if (card && card.mark === mark) place();
+      });
+    }, function () {});
+  }
   function trShut(tf) {
     if (card && tf.contains(card.mark)) shut(false);
     tf.classList.remove('open');
@@ -568,6 +594,8 @@
     window.ubSettings.set('trtab', b.dataset.tab);
   });
   trSync();
+  arriveTr();
+  document.addEventListener('ub:page', arriveTr);
   document.addEventListener('ub:settings', function (ev) {
     if (ev.detail.key === 'translations' || ev.detail.key === 'trtab') trSync();
   });

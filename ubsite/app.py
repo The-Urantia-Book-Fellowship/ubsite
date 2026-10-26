@@ -161,8 +161,9 @@ RE_REF = re.compile(r"^(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?$")
 RE_TERM = re.compile(r'"([^"]*)"?|(\S+)')
 
 # How many hits each list shows on the overview, and per page once a list is
-# opened on its own with ?in=index, ?in=text or ?in=notes.
-OVERVIEW = {"index": 25, "text": 40, "notes": 10}
+# opened on its own with ?in=index, ?in=text, ?in=notes, ?in=study, or a
+# translation's key, ?in=ud (build/translation.py SCOPES).
+OVERVIEW = {"index": 25, "text": 40, "notes": 10, "study": 10, "tr": 40}
 PER_PAGE = 100
 
 
@@ -294,6 +295,33 @@ def _snip(s: str, text: str = "", at=()) -> Markup:
         if base < 0:
             raise ValueError(f"a search hit is not in its text: {core[:60]!r}")
     return _html(s, base, at)
+
+
+def fold(s: str) -> str:
+    """ё read as е, as the translations' search reads their text
+    (build/schema/004_fts.sql): one letter for one."""
+    return s.replace("ё", "е").replace("Ё", "Е")
+
+
+def _unfold(s: str, text: str) -> str:
+    """What snippet() made of a translation's text read through its view, ё as
+    е, in the translation's own letters: the view folds one letter for one, so
+    the snippet's stretch stands at the same place in `text`, and FTS5's marks
+    \\x02 \\x03 \\x04 stay where they are."""
+    if "ё" not in text and "Ё" not in text:
+        return s
+    core = s.replace("\x02", "").replace("\x03", "").strip("\x04")
+    i = fold(text).find(core)
+    if i < 0:
+        raise ValueError(f"a search hit is not in its text: {core[:60]!r}")
+    out = []
+    for c in s:
+        if c in "\x02\x03\x04":
+            out.append(c)
+        else:
+            out.append(text[i])
+            i += 1
+    return "".join(out)
 
 
 def _reasons_at(a_text, a_html, b_text, b_html) -> list[tuple[int, int]]:
@@ -918,12 +946,15 @@ def contents(request: Request):
 @app.get("/search", response_class=HTMLResponse)
 def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
            page_no: str = Query("1", alias="page")):
-    """Index hits, text hits and the 1955 readings, kept apart.
+    """Index hits, text hits, the study notes, each translation and the 1955
+    readings, kept apart.
 
     With no `in`, an overview: the first few of each list.  `in=index`,
-    `in=text` or `in=notes` opens that one list whole, a hundred to a page.
-    Either way the number beside a heading counts exactly what its list holds,
-    so "Show all" always delivers the number it promised.
+    `in=text`, `in=study`, `in=notes` or a translation's key, `in=ud`, opens
+    that one list whole, a hundred to a page.  Either way the number beside a
+    heading counts exactly what its list holds, so "Show all" always delivers
+    the number it promised.  Every list is sent, and CSS shows those Settings
+    asks for, since no setting reaches the server.
     """
     q = q.strip()
     con = db()
@@ -941,10 +972,11 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             to = (f"/{p}" if s is None else f"/{p}:{s}"
                   + (f".{n}" if n is not None else ""))
             return RedirectResponse(to, status_code=303)
-    scope = scope if scope in ("index", "text", "notes") else ""
+    trs = translations()
+    scope = scope if scope in ("index", "text", "notes", "study", *(x["key"] for x in trs)) else ""
     number = int(page_no) if page_no.isdigit() and int(page_no) > 0 else 1
     fq = fts_query(q)
-    heads, idx, txt, old = [], None, None, None
+    heads, idx, txt, old, stu, found_tr = [], None, None, None, None, []
     if q and scope in ("", "index"):
         # An exact headword match must win.  Full-text rank cannot deliver that
         # -- bm25 scores term statistics and has no notion that the query names
@@ -1000,6 +1032,33 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             " FROM paragraph_fts f JOIN paragraph p ON p.id=f.rowid"
             " WHERE paragraph_fts MATCH ? ORDER BY p.ord LIMIT ? OFFSET ?",
             (fq, size, off)).fetchall()])
+    if fq and scope in ("", "study"):
+        # The study notes' words (Tigran, 2026-10-26), each line as the List of
+        # study notes has it.  Always looked up, and shown only while Settings
+        # shows the notes (ub.css .bystudy), for settings never reach the server.
+        where = (" FROM footnote_fts x JOIN footnote f ON f.id=x.rowid"
+                 " JOIN paragraph p ON p.id=f.paragraph_id"
+                 " WHERE footnote_fts MATCH ? AND f.kind='study'")
+        n = con.execute("SELECT COUNT(*)" + where, (fq,)).fetchone()[0]
+        size, off = _window(scope == "study", "study", number, n)
+        hits = con.execute(
+            "SELECT f.id, snippet(footnote_fts, 0, char(2), char(3), char(4), 24) AS s,"
+            "  x.reading AS text, f.html" + where
+            + " ORDER BY p.ord, f.anchor, f.ord LIMIT ? OFFSET ?", (fq, size, off)).fetchall()
+        found = {n["id"]: n for n in queries.study(
+            con, f"f.id IN ({','.join('?' * len(hits))})", tuple(h["id"] for h in hits))}
+        stu = _hits(n, off, [_study_hit(found[h["id"]], _snip(h["s"], h["text"], sups(h["html"])))
+                             for h in hits])
+    # Each translation beside the text (Tigran, 2026-10-26), its paragraphs and
+    # its translator's notes, ё as е.  Always looked up, every one of them, and
+    # each list shown only for a translation Settings shows (base.html ubTr);
+    # on the overview, only where it found something.
+    tq = fts_query(fold(q))
+    for x in trs:
+        if scope in ("", x["key"]):
+            got = _tr_hits(con, x["key"], tq, scope == x["key"], number) if tq else _hits(0, 0, [])
+            if got["n"] or scope:
+                found_tr.append({**x, "hits": got})
     if fq and scope in ("", "notes"):
         # What the 1955 cards say: the reading, and the committee's reasons beneath
         # it.  Always looked up, and shown only when Settings asks (ub.css
@@ -1028,12 +1087,66 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             for h in hits])
     if q:
         # For the visit counter: a search that finds nothing is one the index might
-        # answer.  So the 1955 readings, which most readers never see, count only
-        # where a reader asked for them alone.
+        # answer.  So the 1955 readings, the study notes and the translations,
+        # which most readers never see, count only where a reader asked for one
+        # of them alone.
         request.state.hits = (len(heads) + (idx["n"] if idx else 0) + (txt["n"] if txt else 0)
-                              + (old["n"] if old and scope == "notes" else 0))
-    return page(request, "search.html", q=q, scope=scope, idx=idx, txt=txt, old=old,
-                heads=heads, diagnose=cite.diagnose(q) if q else None)
+                              + (old["n"] if old and scope == "notes" else 0)
+                              + (stu["n"] if stu and scope == "study" else 0)
+                              + sum(x["hits"]["n"] for x in found_tr if scope == x["key"]))
+    return page(request, "search.html", q=q, scope=scope, idx=idx, txt=txt, old=old, stu=stu,
+                trs=found_tr, heads=heads, diagnose=cite.diagnose(q) if q else None)
+
+
+def _study_hit(n: dict, s: Markup) -> dict:
+    """One study note among the search results (templates/_hits.html
+    study_hit): its note (queries.study), the words it stands after, as the
+    List of study notes shows them, and `s`, what the search found in it."""
+    lead, word, _, _ = _around(n["para_text"], n["anchor"], before=10)
+    return {**n, "before": lead + word, "s": s}
+
+
+# A paragraph a translation's list holds: one whose words matched, or one of
+# whose translator's notes did, for one translation (004_fts.sql).
+TR_HIT = ("SELECT t.paragraph_id AS pid FROM tr_paragraph_fts f JOIN tr_paragraph t ON t.id=f.rowid"
+          " WHERE tr_paragraph_fts MATCH ? AND t.translation=?"
+          " UNION SELECT n.paragraph_id FROM tr_note_fts f JOIN tr_note n ON n.id=f.rowid"
+          " WHERE tr_note_fts MATCH ? AND n.translation=?")
+
+
+def _tr_hits(con: sqlite3.Connection, key: str, tq: str, whole: bool, number: int) -> dict:
+    """One translation's list: a line to each paragraph it holds (TR_HIT), in
+    the order of the book, by our reference.  Each with what the search found
+    in the paragraph's words, `s`, or None where it found nothing there, and in
+    its translator's notes, `notes`, each its key, number and snippet.  `tq` is
+    the reader's words as fts_query() makes them, ё read as е (fold())."""
+    args = (tq, key, tq, key)
+    n = con.execute(f"SELECT COUNT(*) FROM ({TR_HIT})", args).fetchone()[0]
+    size, off = _window(whole, "tr", number, n)
+    rows = con.execute(f"SELECT h.pid, p.ref FROM ({TR_HIT}) h JOIN paragraph p ON p.id=h.pid"
+                       " ORDER BY p.ord LIMIT ? OFFSET ?", (*args, size, off)).fetchall()
+    ids = tuple(r["pid"] for r in rows)
+    within = ",".join("?" * len(ids))
+    said = {r["paragraph_id"]: _snip(_unfold(r["s"], r["text"]), r["text"],
+                                     sups(r["html_hy"].replace("­", "")))
+            for r in con.execute(
+        "SELECT t.paragraph_id, t.text, t.html_hy,"
+        "  snippet(tr_paragraph_fts, 0, char(2), char(3), char(4), 24) AS s"
+        " FROM tr_paragraph_fts f JOIN tr_paragraph t ON t.id=f.rowid"
+        f" WHERE tr_paragraph_fts MATCH ? AND t.translation=? AND t.paragraph_id IN ({within})",
+        (tq, key, *ids))}
+    notes: dict[int, list] = {}
+    for r in con.execute(
+            "SELECT n.paragraph_id, n.key, n.num, n.text, n.html_hy,"
+            "  snippet(tr_note_fts, 0, char(2), char(3), char(4), 24) AS s"
+            " FROM tr_note_fts f JOIN tr_note n ON n.id=f.rowid"
+            f" WHERE tr_note_fts MATCH ? AND n.translation=? AND n.paragraph_id IN ({within})"
+            " ORDER BY n.num", (tq, key, *ids)):
+        notes.setdefault(r["paragraph_id"], []).append(
+            {"key": r["key"], "num": r["num"],
+             "s": _snip(_unfold(r["s"], r["text"]), r["text"], sups(r["html_hy"].replace("­", "")))})
+    return _hits(n, off, [{"ref": r["ref"], "s": said.get(r["pid"]), "notes": notes.get(r["pid"], [])}
+                          for r in rows])
 
 
 def _old_hit(n: dict, reading: Markup, **more) -> dict:

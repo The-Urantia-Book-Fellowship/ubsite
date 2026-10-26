@@ -183,6 +183,17 @@ INVARIANTS = [
             OR (x.reasons <> '') <> (COALESCE(s.why_text, '') || COALESCE(t.why_text, '') <> '')"""),
     ("search rows without their note",
      "SELECT COUNT(*) FROM footnote_fts x LEFT JOIN footnote f ON f.id = x.rowid WHERE f.id IS NULL"),
+    # The translations' search (004_fts.sql) indexes every paragraph and note
+    # once, by its id, and nothing else; run() holds the index to what it reads.
+    ("translated paragraphs or notes not indexed once, or indexed rows that are neither",
+     """SELECT (SELECT COUNT(*) FROM tr_paragraph t LEFT JOIN tr_paragraph_fts_docsize d ON d.id = t.id
+                 WHERE d.id IS NULL)
+            + (SELECT COUNT(*) FROM tr_paragraph_fts_docsize d LEFT JOIN tr_paragraph t ON t.id = d.id
+                 WHERE t.id IS NULL)
+            + (SELECT COUNT(*) FROM tr_note n LEFT JOIN tr_note_fts_docsize d ON d.id = n.id
+                 WHERE d.id IS NULL)
+            + (SELECT COUNT(*) FROM tr_note_fts_docsize d LEFT JOIN tr_note n ON n.id = d.id
+                 WHERE n.id IS NULL)"""),
     # The section page splits a dot-leader row at its leader (section.html), and
     # each half is whole HTML only if no other span is open there.
     ("a dot leader inside another span, or two in a paragraph",
@@ -252,6 +263,15 @@ def run(con) -> int:
           + ("" if not toff else f"   {toff} FAIL"))
     if toff:
         bad += 1
+    # The translations' full-text indexes, each against the view it reads, ё as
+    # е: FTS5's own check, which fails on any word indexed otherwise.
+    import sqlite3
+    for t in ("tr_paragraph_fts", "tr_note_fts"):
+        try:
+            con.execute(f"INSERT INTO {t}({t}, rank) VALUES('integrity-check', 1)")
+        except sqlite3.DatabaseError as e:
+            print(f"            {t}: {e}   FAIL")
+            bad += 1
     # What the site shows of the index as words -- a headword, a chip, a See
     # target, a Chronology label -- has its HTML beside it, with an ordinal's
     # suffix superior: the same words, a chip in as many parts.

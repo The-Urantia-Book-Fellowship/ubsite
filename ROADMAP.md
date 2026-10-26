@@ -101,7 +101,9 @@ The press text is authoritative American; the British Study Edition is revised, 
 
    The data is built (2026-10-26, `build/translation.py`): both are in `var/ub.db`, every paragraph under ours, the press's numbering, which the English uses (Tigran: map everything to it). Where a source numbers otherwise, `tests/known-tr-numbering.tsv` says how, and a gate holds it to exactly that list, with its separators and list labels where ours are. Each is hyphenated as its own TeX would set it (Tigran): hyph-ru and its own exception list. The Cyrillic typeface of step 1 sets them, its subset widened by the stress mark U+0301, which `ud` writes (признаю́т).
 
-   Still to settle: whether search reaches them. Neither Russian translation marks the red letter.
+   Search reaches them (Tigran, 2026-10-26): each translation ticked has a list of its own among the results, after the text's, a line to a paragraph with its translator's notes under it, ё read as е. Built, with the study notes in search too.
+
+   Neither Russian translation marks the red letter.
 
 **16. A public API and stable permalinks.** `[text built]`
 `/101:4.2` resolves. **`/api/v1/text`** (2026-10-11) is built: a versioned sync of the whole text, which other sites use to keep their copies in step. It serves the text as public domain, and gives each paragraph the Foundation's numbering beside ours. Still to come: `/api/v1/reverse/101:4.2`, the entries citing a paragraph, and `cite.parse` as a service. Together they would make the data a commons. The index's licence is settled (2026-10-14): CC BY-NC-SA 4.0, with the edition as a whole, so they can be built, the licence marked on what they send. NC still rules out commercial reuse.

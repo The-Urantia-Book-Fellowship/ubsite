@@ -20,7 +20,14 @@ them as the server does (app.py _snip, offline-core.js snip).
 A 1955 reading among the results is a list line (templates/_old.html) around
 the reading and the committee's words, which a search marks.  Each line is
 rendered here by the site's own macros with placeholders where those go, \x01
-for the reading and \x02 for the reasons, and the worker fills them in.
+for the reading and \x02 for the reasons, and the worker fills them in.  So is
+a study note's (templates/_hits.html), around what the search found in it.
+
+Each translation beside the text has a database of its own, in its own
+download (offline/pack.py): its paragraphs and its translator's notes, each
+note's line drawn around its snippet as a study note's is, and their full-text
+indexes, read through views that take ё as е, all declared as ub.db declares
+them.  The worker attaches each one the copy keeps, by its key.
 """
 
 from __future__ import annotations
@@ -59,7 +66,8 @@ def text_db(con: sqlite3.Connection) -> bytes:
         CREATE TABLE paragraph (id INTEGER PRIMARY KEY, ref TEXT NOT NULL,
                                 ord INTEGER NOT NULL, text TEXT NOT NULL, sups TEXT NOT NULL);
         CREATE TABLE footnote (id INTEGER PRIMARY KEY, kind TEXT NOT NULL,
-                               paragraph_id INTEGER NOT NULL, ord INTEGER NOT NULL);
+                               paragraph_id INTEGER NOT NULL, ord INTEGER NOT NULL,
+                               anchor INTEGER NOT NULL);
         -- A 1955 reading's line among the results: pre + reading + post, or
         -- with the committee's words, pre + reading + mid + reasons + tail.
         -- card is its note, which the line's ring opens; reading_sups and
@@ -67,6 +75,9 @@ def text_db(con: sqlite3.Connection) -> bytes:
         CREATE TABLE note_html (id INTEGER PRIMARY KEY, pre TEXT NOT NULL, post TEXT NOT NULL,
                                 mid TEXT NOT NULL, tail TEXT NOT NULL, card TEXT NOT NULL,
                                 reading_sups TEXT NOT NULL, reasons_sups TEXT NOT NULL);
+        -- A study note's line among the results: pre + what was found + post.
+        CREATE TABLE study_html (id INTEGER PRIMARY KEY, pre TEXT NOT NULL, post TEXT NOT NULL,
+                                 sups TEXT NOT NULL);
     """)
     out.execute(_declared(con, "paragraph_fts"))
     out.execute(_declared(con, "footnote_fts"))
@@ -74,8 +85,8 @@ def text_db(con: sqlite3.Connection) -> bytes:
                     ((i, ref, o, t, _at(A.sups(h))) for i, ref, o, t, h in
                      con.execute("SELECT id, ref, ord, text, html FROM paragraph ORDER BY id")))
     out.execute("INSERT INTO paragraph_fts(paragraph_fts) VALUES('rebuild')")
-    out.executemany("INSERT INTO footnote VALUES (?,?,?,?)",
-                    con.execute("SELECT id, kind, paragraph_id, ord FROM footnote ORDER BY id"))
+    out.executemany("INSERT INTO footnote VALUES (?,?,?,?,?)",
+                    con.execute("SELECT id, kind, paragraph_id, ord, anchor FROM footnote ORDER BY id"))
     out.executemany("INSERT INTO footnote_fts(rowid, reading, reasons) VALUES (?,?,?)",
                     con.execute("SELECT rowid, reading, reasons FROM footnote_fts ORDER BY rowid"))
     old = A.T.env.get_template("_old.html").module
@@ -95,7 +106,56 @@ def text_db(con: sqlite3.Connection) -> bytes:
             raise ValueError(f"a 1955 reading's line does not cut: {n['key']}")
         rows.append((n["id"], pre, post, mid, tail, str(card.note(n)), *at[n["id"]]))
     out.executemany("INSERT INTO note_html VALUES (?,?,?,?,?,?,?,?)", rows)
+    hit = A.T.env.get_template("_hits.html").module
+    rows = []
+    for n in queries.study(con):
+        pre, post = _cut(str(hit.study_hit(A._study_hit(n, Markup("\x01")))), n["key"])
+        rows.append((n["id"], pre, post, _at(A.sups(n["html"]))))
+    out.executemany("INSERT INTO study_html VALUES (?,?,?,?)", rows)
     for t in ("paragraph_fts", "footnote_fts"):
+        out.execute(f"INSERT INTO {t}({t}) VALUES('optimize')")
+    return _done(out)
+
+
+def _cut(line: str, key: str) -> tuple[str, str]:
+    """A line drawn around one placeholder, \x01, as its two ends."""
+    if line.count("\x01") != 1:
+        raise ValueError(f"a search line does not cut: {key}")
+    pre, post = line.split("\x01")
+    return pre, post
+
+
+def tr_db(con: sqlite3.Connection, key: str) -> bytes:
+    """One translation's paragraphs and translator's notes, as search reads
+    them (app.py _tr_hits): each paragraph by ours, whose reference and place
+    the text's database has; each note's line drawn around its snippet; and
+    their full-text indexes, over views that read ё as е."""
+    from ubsite import app as A
+    out = sqlite3.connect(":memory:")
+    out.executescript("""
+        CREATE TABLE tr_paragraph (id INTEGER PRIMARY KEY, paragraph_id INTEGER NOT NULL,
+                                   text TEXT NOT NULL, sups TEXT NOT NULL);
+        CREATE TABLE tr_note (id INTEGER PRIMARY KEY, paragraph_id INTEGER NOT NULL,
+                              num INTEGER NOT NULL, text TEXT NOT NULL, sups TEXT NOT NULL,
+                              pre TEXT NOT NULL, post TEXT NOT NULL);
+    """)
+    for name in ("tr_paragraph_folded", "tr_paragraph_fts", "tr_note_folded", "tr_note_fts"):
+        out.execute(_declared(con, name))
+    out.executemany("INSERT INTO tr_paragraph VALUES (?,?,?,?)", (
+        (i, pid, text, _at(A.sups(hy.replace("\u00ad", "")))) for i, pid, text, hy in con.execute(
+            "SELECT id, paragraph_id, text, html_hy FROM tr_paragraph WHERE translation = ? ORDER BY id",
+            (key,))))
+    hit = A.T.env.get_template("_hits.html").module
+    lang = con.execute("SELECT lang FROM translation WHERE key = ?", (key,)).fetchone()[0]
+    rows = []
+    for i, pid, ref, nkey, num, text, hy in con.execute(
+            "SELECT n.id, n.paragraph_id, p.ref, n.key, n.num, n.text, n.html_hy FROM tr_note n"
+            " JOIN paragraph p ON p.id = n.paragraph_id WHERE n.translation = ? ORDER BY n.id", (key,)):
+        pre, post = _cut(str(hit.tr_note_hit(ref, {"key": nkey, "num": num, "s": Markup("\x01")}, lang)), nkey)
+        rows.append((i, pid, num, text, _at(A.sups(hy.replace("\u00ad", ""))), pre, post))
+    out.executemany("INSERT INTO tr_note VALUES (?,?,?,?,?,?,?)", rows)
+    for t in ("tr_paragraph_fts", "tr_note_fts"):
+        out.execute(f"INSERT INTO {t}({t}) VALUES('rebuild')")
         out.execute(f"INSERT INTO {t}({t}) VALUES('optimize')")
     return _done(out)
 

@@ -241,6 +241,7 @@
 "Show all {n:,} index entries" = "Все рубрики указателя ({n:,})"
 "Show all {n:,} paragraphs" = "Все абзацы ({n:,})"
 "Show all {n:,} readings" = "Все разночтения ({n:,})"
+"Show all {n:,} notes" = "Все примечания ({n:,})"
 "All results for “{q}”" = "Все результаты для «{q}»"
 "Did you mean" = "Может быть, вы имели в виду"
 "or" = "или"
@@ -248,6 +249,7 @@
 "Appendix {x}, {title}" = "Приложение {x}, {title}"
 "In the index" = "В указателе"
 "In the text" = "В тексте"
+"In the study notes" = "В примечаниях"
 "In the 1955 readings" = "В разночтениях 1955 года"
 "nothing" = "ничего"
 
