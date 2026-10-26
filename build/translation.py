@@ -23,10 +23,15 @@ no Cyrillic in it fails: English left in a translation is a defect to fix,
 not to show.  A paper's title and author, and a section's title, are stored as
 the translation writes them, for each paper it translates in part or whole.
 
-A translator's note (ud's \\fnst) is stored as written, at its place in the
-paragraph's text, numbered through its paper; it is rendered when the reader
-shows it.  Each paragraph is hyphenated as its own TeX would set it: hyph-ru,
-hyphenmins 2/2, and the translation's own exception list (build/hyphen.py).
+A translator's note (ud's \\fnst) stands at its place in the paragraph's text,
+numbered through its paper, its marker in the paragraph's HTML, and is set as
+build/study.py sets a study note, by its own table (build/tr_macros.py
+UD_NOTES), with the works it cites from its paper's bibliography.  A
+\\bibref whose words disagree with its target is set as its TeX sets it, the
+words linking the target, and must be exactly tests/known-tr-bibrefs.tsv, a
+slip to mend in the translation.  Each paragraph and note is hyphenated as its
+own TeX would set it: hyph-ru, hyphenmins 2/2, and the translation's own
+exception list (build/hyphen.py).
 """
 
 from __future__ import annotations
@@ -36,18 +41,20 @@ import pathlib
 import re
 import tomllib
 
+from . import study
 from .expand import Expander, Note, Span, _raw
 from .hyphen import RUSSIAN, Hyphenator
 from .readers import translation as reader
 from .readers._io import read_at_rev
 from .render import render, strip_tags
-from .tr_macros import SUBS, TABLES, VULGAR
+from .tr_macros import SUBS, TABLES, UD_NOTES, VULGAR
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 META = ROOT / "data" / "translations.toml"
 KNOWN = ROOT / "tests" / "known-tr-numbering.tsv"
 KNOWN_SEPS = ROOT / "tests" / "known-tr-separators.tsv"
 KNOWN_LABELS = ROOT / "tests" / "known-tr-labels.tsv"
+KNOWN_BIBREFS = ROOT / "tests" / "known-tr-bibrefs.tsv"
 
 # How each translation's TeX is read, beyond its paper files: where its own
 # hyphenation list is, and the Foreword's title, which urantia-ru's \uforeword
@@ -68,6 +75,10 @@ PLACEHOLDERS = {"Бла-бла..."}
 # with the paragraphs it is in, until the translation is mended: the build
 # names each place.
 SUBSTITUTE = {"urantia-ru": {"　": " "}}       # an ideographic space: 44:3.5, 53:4.6, 70:10.12
+# The same in a translator's note, by its words, since its character may be
+# right elsewhere in a note (in \textgreek): ud's at 0:5.12 writes Galen's
+# century in Greek capital iotas, which UB Goudy has not, for the Roman II.
+NOTE_SUBSTITUTE = {"ud": {"Галена ΙΙ века": "Галена II века"}}
 RE_CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 RE_LABEL = re.compile(r"\d+\.")
 RE_REF = re.compile(r"(\d+):(\d+)\.(\d+)")
@@ -80,8 +91,11 @@ class TPara:
     key: Key                     # ours
     src: str                     # its own address, as written
     text: str
-    html_hy: str
+    spans: list[Span]
+    shy: list[int]               # where a word may break (build/hyphen.py)
     notes: list[tuple[int, str]]  # (offset in text, the note as written)
+    html_hy: str = ""            # with the notes' markers, once _notes() has set them
+    set_notes: list[dict] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass(slots=True)
@@ -92,6 +106,7 @@ class Built:
     paras: list[TPara]
     headings: list[tuple[int, int | None, str, str, str]]   # paper, section, kind, text, html
     seps: int
+    sources: list[dict]          # the works its notes cite: paper_n, key, text, html
 
 
 def meta() -> dict[str, dict]:
@@ -271,8 +286,8 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
             if (theirs_label and our_label and RE_LABEL.fullmatch(theirs_label)
                     and RE_LABEL.fullmatch(our_label) and theirs_label != our_label):
                 labels_differ.append((src, theirs_label, our_label))
-            html_hy = render(text, spans, shy=hyph.points(text, spans))
-            paras.append(TPara(o, src, text, html_hy, [(t.offset, t.raw) for t in notes]))
+            paras.append(TPara(o, src, text, spans, hyph.points(text, spans),
+                               [(t.offset, t.raw) for t in notes]))
         for at, before in paper.seps:
             theirs_seps.add("end" if before is None else _fmt(mapping.get((n, *before), (n, *before))))
         # The paper's addresses, once joined, are exactly ours.
@@ -311,7 +326,7 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                 if "ackn" in STYLE[key]:
                     spans = _ackn(key, repo, hs[1].body, text, spans, report, f"{where}:{hs[1].line}")
                 if text and o in ours:
-                    paras.append(TPara(o, f"title {n}:{s}", text, render(text, spans), []))
+                    paras.append(TPara(o, f"title {n}:{s}", text, spans, [], []))
             if s in done_secs:
                 headings.append(_heading(key, n, s, "section", hs[0], report, where))
     for k in sorted(set(mapping) - used):
@@ -329,7 +344,83 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                     f"{KNOWN_LABELS.name} declares its label {x[1]} for our {x[2]}, and that is no longer so")
     _separators(key, theirs_seps, {_fmt(k) for k, v in ours.items() if v["sep"]}, report)
     paras.sort(key=lambda p: p.key)
-    return Built(key, info, repo["commit"], paras, headings, len(theirs_seps))
+    sources = _notes(key, paras, papers, mapping, ours, hyph, report)
+    return Built(key, info, repo["commit"], paras, headings, len(theirs_seps), sources)
+
+
+# Each translation with notes: how they are set (build/study.py expand).
+NOTES = {"ud": UD_NOTES}
+
+
+def _textbf(exp, opts, args, tok):
+    from latex_tokenizer import TokenStream          # on the path once expand is imported
+    start = exp.n
+    exp._expand(TokenStream(args[0]))
+    exp.spans.append(Span(start, exp.n, "strong"))
+
+
+def set_note(key: str, tex: str, refs, bib: dict, where: str, report, hyph=None,
+             ref_of=None, odd: list | None = None) -> tuple[str, str, list[str]]:
+    """A translator's note, or a work it cites, set as build/study.py sets a
+    study note: by the translation's own table and quotes, its Hebrew turned,
+    and with no warning of long ties, which are the translator's to set."""
+    return study.expand(tex, refs, bib, where, report, hyph, table=NOTES[key], subs=SUBS,
+                        ref_of=ref_of, textheb=True, odd=odd, calls={"textbf": _textbf}, ties=False)
+
+
+def _notes(key, paras, papers, mapping, ours, hyph, report) -> list[dict]:
+    """Each paragraph's notes set, numbered 1.. through its paper in reading
+    order, and its HTML with their markers; the works they cite, once a paper.
+
+    A \\bibref's target is as the translation numbers it: where that is not
+    ours, it is not linked but fails, since its words would be its numbering
+    and its link ours.  None does (2026-10-26)."""
+    refs = {_fmt(k) for k in ours}
+    ref_of = lambda p, s, n: None if (p, s, n) in mapping else _fmt((p, s, n))
+    sources: dict[tuple[int, str], dict] = {}
+    odd: list[tuple[str, str, str]] = []
+    num: dict[int, int] = {}
+    for p in paras:
+        n = p.key[0]
+        if p.notes and key not in NOTES:
+            report.hard("tr-notes-unset", f"{key} {_fmt(p.key)}", "a note, and no table to set it by")
+            p.notes = []
+        bib = dict(papers[n].sources) if n in papers else {}
+        markers = []
+        for k, (at, tex) in enumerate(p.notes):
+            num[n] = num.get(n, 0) + 1
+            where = f"{key} {_fmt(p.key)} note {num[n]}"
+            src = tex                            # stored as written
+            for was, to in NOTE_SUBSTITUTE.get(key, {}).items():
+                if was in src:
+                    report.warn("tr-substituted", where, f"{was!r} set as {to!r}: mend it in the translation")
+                    src = src.replace(was, to)
+            got: list[tuple[str, str]] = []
+            text, html_hy, cites = set_note(key, src, refs, bib, where, report, hyph, ref_of, got)
+            odd += [(_fmt(p.key), words, target) for words, target in got]
+            if "\\" in text:
+                report.hard("tr-note-backslash", where, "a backslash in what the note says")
+            for c in cites:
+                if c in bib and (n, c) not in sources:
+                    sources[(n, c)] = {"paper_n": n, "key": c, "tex": bib[c]}
+            nkey = f"tn_{key}_{p.key[0]}_{p.key[1]}_{p.key[2]}_{k}"
+            markers.append(Span(at, at, "fnref", {"kind": "translator", "key": nkey, "n": num[n]}))
+            p.set_notes.append({"num": num[n], "at": at, "key": nkey, "tex": tex, "text": text,
+                                "html_hy": html_hy, "cites": cites})
+        p.html_hy = render(p.text, p.spans + markers, shy=p.shy)
+    known = {tuple(r) for k, *r in _rows(KNOWN_BIBREFS) if k == key}
+    for x in sorted(set(odd) - known):
+        report.hard("tr-bibref-differs", f"{key} {x[0]}",
+                    f"a \\bibref shows {x[1]} and links {x[2]}, not in {KNOWN_BIBREFS.name}")
+    for x in sorted(known - set(odd)):
+        report.hard("tr-bibref-gone", f"{key} {x[0]}",
+                    f"{KNOWN_BIBREFS.name} declares a \\bibref showing {x[1]} for {x[2]}, and that is no longer so")
+    out = []
+    for (n, c), src in sorted(sources.items()):
+        text, html, _ = set_note(key, src["tex"], refs, {}, f"{key} p{n:03d} \\bibitem{{{c}}}", report,
+                                 ref_of=ref_of)
+        out.append({"paper_n": n, "key": c, "text": text, "html": html})
+    return out
 
 
 def _ackn(key, repo, body, text, spans, report, where):
@@ -404,15 +495,23 @@ def store(con, built: list[Built], ours_: dict[Key, dict]) -> None:
         con.execute("INSERT INTO translation VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (b.key, m["lang"], m["title"], len(b.paras), sum(len(p.notes) for p in b.paras),
                      b.commit, i, m["by"]["en"], m["by"]["ru"], m["label"]))
-        num: dict[int, int] = {}
+        source_id = {}
+        for s in b.sources:
+            cur = con.execute("INSERT INTO tr_source (translation, paper_n, key, text, html) VALUES (?,?,?,?,?)",
+                              (b.key, s["paper_n"], s["key"], s["text"], s["html"]))
+            source_id[(s["paper_n"], s["key"])] = cur.lastrowid
         for p in b.paras:
             pid = ours_[p.key]["id"]
             con.execute("INSERT INTO tr_paragraph VALUES (?,?,?,?,?)",
                         (b.key, pid, None if p.src == _fmt(p.key) else p.src, p.text, p.html_hy))
-            for at, tex in p.notes:
-                num[p.key[0]] = num.get(p.key[0], 0) + 1
-                con.execute("INSERT INTO tr_note VALUES (?,?,?,?,?)",
-                            (b.key, pid, num[p.key[0]], at, tex))
+            for nt in p.set_notes:
+                cur = con.execute(
+                    "INSERT INTO tr_note (translation, paragraph_id, num, at, key, tex, text, html_hy)"
+                    " VALUES (?,?,?,?,?,?,?,?)",
+                    (b.key, pid, nt["num"], nt["at"], nt["key"], nt["tex"], nt["text"], nt["html_hy"]))
+                con.executemany("INSERT INTO tr_cite VALUES (?,?,?)",
+                                [(cur.lastrowid, source_id[(p.key[0], c)], j) for j, c in enumerate(nt["cites"])
+                                 if (p.key[0], c) in source_id])
         con.executemany("INSERT INTO tr_heading VALUES (?,?,?,?,?,?)",
                         [(b.key, *h) for h in b.headings])
 

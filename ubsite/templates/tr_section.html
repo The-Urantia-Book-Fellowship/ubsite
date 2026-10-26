@@ -1,0 +1,10 @@
+{#- A section's translations, for the folds under its paragraphs (app.py
+    translations_of; ub.js trFetch): every translation's paragraphs of the
+    section, each with its key, our reference and its language, and its titles
+    there; after a paragraph, its translator's notes, the cards its numbers
+    open (_note.html tnote). -#}
+{% from "_note.html" import tnote %}<div class="trs">
+{% for h in heads %}<div data-k="{{ h.k }}" data-head="{{ h.kind }}" lang="{{ h.lang }}">{{ h.html|safe }}</div>
+{% endfor %}{% for r in rows %}<div data-k="{{ r.k }}" data-ref="{{ r.ref }}" lang="{{ r.lang }}">{{ r.html_hy|safe }}</div>
+{% for n in r.notes %}{{ tnote(n) }}
+{% endfor %}{% endfor %}</div>

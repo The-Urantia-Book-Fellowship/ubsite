@@ -107,7 +107,8 @@ def run(con, entries) -> int:
 
 
 def run_translations(con, lists: dict[str, list[str]]) -> int:
-    """Each translation's soft hyphens, against its own list (`lists`, by key)."""
+    """Each translation's soft hyphens, its paragraphs' and its notes', against
+    its own list (`lists`, by key)."""
     left, right = RUSSIAN.left, RUSSIAN.right
     bad = 0
     for key, in con.execute("SELECT key FROM translation ORDER BY key"):
@@ -119,10 +120,12 @@ def run_translations(con, lists: dict[str, list[str]]) -> int:
             "a soft hyphen in a word with a stress mark",
             "a break under the minimums",
             "a listed word not broken as listed")}
-        n = total = words_listed = 0
+        n = notes = total = words_listed = 0
         for pid, text, hy in con.execute(
-                "SELECT paragraph_id, text, html_hy FROM tr_paragraph WHERE translation=?", (key,)):
-            n += 1
+                "SELECT paragraph_id, text, html_hy FROM tr_paragraph WHERE translation=?"
+                " UNION ALL SELECT key, text, html_hy FROM tr_note WHERE translation=?", (key, key)):
+            n += isinstance(pid, int)
+            notes += isinstance(pid, str)
             at = _offsets(hy)
             total += len(at)
             got, inside = set(at), set()
@@ -143,7 +146,8 @@ def run_translations(con, lists: dict[str, list[str]]) -> int:
                         fails["a listed word not broken as listed"].append(f"{pid} {m.group()}")
             for p in sorted(got - inside):
                 fails["a soft hyphen outside a word"].append(f"{pid} @{p}")
-        print(f"{key}: {total:,} soft hyphens in {n:,} paragraphs; {words_listed:,} listed words as listed")
+        print(f"{key}: {total:,} soft hyphens in {n:,} paragraphs" + (f" and {notes:,} notes" if notes else "")
+              + f"; {words_listed:,} listed words as listed")
         for name, where in fails.items():
             print(f"  {name:52} {len(where)}{'' if not where else '   FAIL  ' + ', '.join(where[:5])}")
             bad += bool(where)

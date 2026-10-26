@@ -186,9 +186,10 @@ class Setting(unittest.TestCase):
         self.assertIn(':root[data-notes="off"] .n1955, :root:not([data-studynotes="true"]) .nst,', css)
 
     def test_the_1955_switch_leaves_study_notes_alone(self):
+        # And a translator's, in a fold, shown whenever its translation is.
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
-        self.assertIn(':root[data-notes="off"] :is(a.fn:not([data-k="st"]), .notes:not(.st),'
-                      ' .pop:not(.st))', css)
+        self.assertIn(':root[data-notes="off"] :is(a.fn:not([data-k="st"]):not([data-k="tn"]), .notes:not(.st),\n'
+                      '                            .pop:not(.st):not(.tn)) { display: none; }', css)
         self.assertIn(':root:not([data-studynotes="true"]) :is(a.fn[data-k="st"], .notes.st, .pop.st)', css)
 
 

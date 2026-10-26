@@ -86,6 +86,35 @@ class Fragment(unittest.TestCase):
         self.assertIn('data-k="urantia-ru"', frag)
         self.assertNotIn('data-k="ud"', frag)
 
+    def test_a_translator_s_notes_follow_their_paragraph_as_cards(self):
+        # Each the card its number opens in the fold (ub.js open()): "Note N",
+        # the note, and last the translation it is of, as Settings names it.
+        frag = get("/tr/1:1", raw=True)[2]
+        asides = re.findall(r'<aside class="note tn" id="fn(tn_ud_1_1_\d+_\d)" data-k="ud" data-of="(1:1\.\d+)">'
+                            r'(.*?)</aside>', frag, re.S)
+        self.assertEqual([(k, ref) for k, ref, _ in asides],
+                         [("tn_ud_1_1_3_0", "1:1.3"), ("tn_ud_1_1_3_1", "1:1.3"), ("tn_ud_1_1_5_0", "1:1.5"),
+                          ("tn_ud_1_1_6_0", "1:1.6"), ("tn_ud_1_1_6_1", "1:1.6")])
+        first = asides[0][2]
+        self.assertIn('<a class="lbl" href="#fnreftn_ud_1_1_3_0"><x-en>Note 6</x-en>'
+                      '<x-ru lang="ru">Примечание 6</x-ru></a> <span lang="ru">', first)
+        self.assertIn("Ан­глий­ское сло­во you", first)
+        self.assertTrue(first.rstrip().endswith(
+            '<p class="src"><span lang="ru">Урантийские документы</span> (Aivazian)</p>'), first)
+        # Each after its paragraph, which carries its marker.
+        para = frag.index('data-ref="1:1.3"')
+        self.assertLess(para, frag.index('id="fnreftn_ud_1_1_3_0"'), frag.index('id="fntn_ud_1_1_3_0"'))
+        self.assertLess(frag.index('id="fntn_ud_1_1_3_1"'), frag.index('data-ref="1:1.4"'))
+
+    def test_a_note_s_sources_are_in_its_card(self):
+        frag = get("/tr/41:3")[2]
+        card = frag[frag.index('id="fntn_ud_41_3_2_1"'):]
+        card = card[:card.index("</aside>")]
+        self.assertEqual(re.findall(r'<p class="cite">\[(\d)\] ([^“]+)\. “', card),
+                         [("1", "T. Aivazian"), ("2", "J. Jeans"), ("3", "Keiichi Ohnaka, Karl-Heinz Hofmann,"
+                                                                                " Dieter Schertl, Gerd Weigelt, Carlo Baffa,"
+                                                                                " Alain Chelli, Romain Petrov, Sylvie Robbe-Dubois")])
+
     def test_a_section_none_has_is_not_found(self):
         self.assertEqual(get("/tr/1:99")[0], 404)
         self.assertEqual(get("/tr/nothing")[0], 404)

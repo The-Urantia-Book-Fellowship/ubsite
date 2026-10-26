@@ -43,14 +43,39 @@ CREATE TABLE tr_heading (
     html         TEXT NOT NULL
 );
 
--- A translator's note, as written, at its place in the paragraph's text:
--- rendered when the reader shows it.
+-- A translator's note (ud's \fnst), at its place in the paragraph's text, set
+-- as build/study.py sets a study note: opened as a card at its number, which its
+-- marker in tr_paragraph.html_hy draws, <a class="fn" data-k="tn" data-n=…>.
 CREATE TABLE tr_note (
+    id           INTEGER PRIMARY KEY,
     translation  TEXT NOT NULL,
     paragraph_id INTEGER NOT NULL,
     num          INTEGER NOT NULL,      -- 1.. through its paper, in reading order
     at           INTEGER NOT NULL,      -- its offset in tr_paragraph.text
-    tex          TEXT NOT NULL,
+    key          TEXT NOT NULL UNIQUE,  -- tn_<translation>_<paper>_<section>_<n>_<k>: fnref<key>, fn<key>
+    tex          TEXT NOT NULL,         -- as written
+    text         TEXT NOT NULL,
+    html_hy      TEXT NOT NULL,         -- with its soft hyphens, as its paragraph's
     FOREIGN KEY (translation, paragraph_id) REFERENCES tr_paragraph(translation, paragraph_id)
 );
 CREATE INDEX tr_note_para ON tr_note(translation, paragraph_id);
+
+-- A work a translator's note cites, from its paper's bibliography: only those
+-- cited.  A key names a work in its paper alone (ud's Eddington1 is three books
+-- in three papers), so its paper is part of it.
+CREATE TABLE tr_source (
+    id           INTEGER PRIMARY KEY,
+    translation  TEXT NOT NULL REFERENCES translation(key),
+    paper_n      INTEGER NOT NULL,
+    key          TEXT NOT NULL,
+    text         TEXT NOT NULL,
+    html         TEXT NOT NULL,
+    UNIQUE (translation, paper_n, key)
+);
+
+CREATE TABLE tr_cite (
+    note_id      INTEGER NOT NULL REFERENCES tr_note(id),
+    source_id    INTEGER NOT NULL REFERENCES tr_source(id),
+    ord          INTEGER NOT NULL,      -- [1], [2] ... in the note, from 0
+    PRIMARY KEY (note_id, ord)
+);

@@ -227,36 +227,40 @@ def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
 
     has    paragraph id -> the keys of the translations that have it, in
            Settings' order, separated by spaces: the fold's data-has
-    html   the fragment /tr/<paper>:<section> sends, every translation's
-           paragraphs of the section, each with its key, our reference and
-           its language, and its titles there: the paper's title and author,
-           and the section's.  A translation with no paragraph here has none
-    v      a hash of it, the version it is asked for under: a reader's browser
-           keeps it for good, and a build that changes nothing moves nothing
+    heads  its titles there, each translation's: the paper's title and
+           author, and the section's.  A translation with no paragraph here has none
+    rows   every translation's paragraphs of the section, each with its key, our
+           reference, its language and its notes: the translator's, each with
+           its number in the paper, the works it cites, and the translation's
+           title and short name, for its card (_note.html tnote)
+
+    The fragment /tr/<paper>:<section> sends is these drawn
+    (templates/tr_section.html), and its version their hash (app.py).
     """
-    rows = con.execute(
+    rows = [dict(r, notes=[]) for r in con.execute(
         "SELECT t.translation AS k, p.id AS pid, p.ref, t.html_hy, r.lang FROM tr_paragraph t"
         " JOIN paragraph p ON p.id = t.paragraph_id JOIN translation r ON r.key = t.translation"
-        " WHERE p.paper_n = ? AND p.section_n = ? ORDER BY r.ord, p.para_n", (paper, sec)).fetchall()
+        " WHERE p.paper_n = ? AND p.section_n = ? ORDER BY r.ord, p.para_n", (paper, sec))]
     has: dict[int, list[str]] = {}
     for r in rows:
         has.setdefault(r["pid"], []).append(r["k"])
     keys = list(dict.fromkeys(r["k"] for r in rows))
-    heads = con.execute(
+    heads = [dict(h) for h in con.execute(
         "SELECT h.translation AS k, h.kind, h.html, r.lang FROM tr_heading h"
         " JOIN translation r ON r.key = h.translation"
         " WHERE h.paper_n = ? AND (h.section_n IS NULL OR h.section_n = ?)"
-        " ORDER BY r.ord, h.section_n IS NOT NULL, h.kind DESC", (paper, sec)).fetchall()
-    out = ['<div class="trs">']
-    out += [f'<div data-k="{h["k"]}" data-head="{h["kind"]}" lang="{h["lang"]}">{h["html"]}</div>'
-            for h in heads if h["k"] in keys]
-    out += [f'<div data-k="{r["k"]}" data-ref="{r["ref"]}" lang="{r["lang"]}">{r["html_hy"]}</div>'
-            for r in rows]
-    out.append("</div>\n")
-    html = "\n".join(out)
-    import hashlib
-    return {"has": {pid: " ".join(ks) for pid, ks in has.items()}, "html": html,
-            "v": hashlib.sha256(html.encode()).hexdigest()[:12] if rows else ""}
+        " ORDER BY r.ord, h.section_n IS NOT NULL, h.kind DESC", (paper, sec)) if h["k"] in keys]
+    row_of = {(r["k"], r["pid"]): r for r in rows}
+    for n in con.execute(
+            "SELECT n.id, n.translation AS k, n.paragraph_id AS pid, n.num, n.key, n.html_hy,"
+            " p.ref, r.lang, r.title, r.label FROM tr_note n JOIN paragraph p ON p.id = n.paragraph_id"
+            " JOIN translation r ON r.key = n.translation"
+            " WHERE p.paper_n = ? AND p.section_n = ? ORDER BY n.num", (paper, sec)):
+        row_of[(n["k"], n["pid"])]["notes"].append(dict(n, sources=[
+            {"html": h, "url": None} for (h,) in con.execute(
+                "SELECT x.html FROM tr_cite c JOIN tr_source x ON x.id = c.source_id"
+                " WHERE c.note_id = ? ORDER BY c.ord", (n["id"],))]))
+    return {"has": {pid: " ".join(ks) for pid, ks in has.items()}, "heads": heads, "rows": rows}
 
 
 def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:

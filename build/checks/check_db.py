@@ -148,6 +148,19 @@ INVARIANTS = [
     ("no backslash in a translation's text or titles",
      """SELECT (SELECT COUNT(*) FROM tr_paragraph WHERE text GLOB '*\\*')
              + (SELECT COUNT(*) FROM tr_heading WHERE text GLOB '*\\*')"""),
+    ("translator's notes not numbered 1.. in each paper in the order of the text",
+     """SELECT COUNT(*) FROM (SELECT n.num, ROW_NUMBER() OVER (PARTITION BY n.translation, p.paper_n
+           ORDER BY p.ord, n.at, n.id) AS rn
+         FROM tr_note n JOIN paragraph p ON p.id = n.paragraph_id) WHERE num <> rn"""),
+    ("a translator's note with a backslash, or a source of its",
+     """SELECT (SELECT COUNT(*) FROM tr_note WHERE text GLOB '*\\*')
+             + (SELECT COUNT(*) FROM tr_source WHERE text GLOB '*\\*')"""),
+    ("a translation's source no note cites, or one cited from another paper or translation",
+     """SELECT (SELECT COUNT(*) FROM tr_source x
+                 WHERE NOT EXISTS (SELECT 1 FROM tr_cite c WHERE c.source_id = x.id))
+            + (SELECT COUNT(*) FROM tr_cite c JOIN tr_note n ON n.id = c.note_id
+                 JOIN paragraph p ON p.id = n.paragraph_id JOIN tr_source x ON x.id = c.source_id
+                 WHERE x.paper_n <> p.paper_n OR x.translation <> n.translation)"""),
     # A note's marker stands in its paragraph, and each marker has its note.
     ("every note's anchor lies inside its paragraph",
      """SELECT COUNT(*) FROM footnote f JOIN paragraph p ON p.id = f.paragraph_id
@@ -406,6 +419,10 @@ def run(con) -> int:
             " UNION ALL SELECT 'hyphenated ' || ref, html_hy FROM paragraph"
             " UNION ALL SELECT 'note ' || id, html FROM footnote"
             " UNION ALL SELECT 'study source ' || paper_n || ' ' || key, html FROM study_source"
+            " UNION ALL SELECT 'translated ' || translation || ' ' || paragraph_id, html_hy FROM tr_paragraph"
+            " UNION ALL SELECT 'translated title ' || translation || ' ' || rowid, html FROM tr_heading"
+            " UNION ALL SELECT 'translator ' || key, html_hy FROM tr_note"
+            " UNION ALL SELECT 'translator source ' || id, html FROM tr_source"
             " UNION ALL SELECT 'SRT ' || name, then_html || why_html FROM srt_item"
             " UNION ALL SELECT 'section ' || paper_n || ':' || n, title_html FROM section"
             "  WHERE title_html IS NOT NULL"
@@ -449,6 +466,7 @@ def run(con) -> int:
 
     bad += _text_api(con)
     bad += _study(con, places)
+    bad += _translator(con, places)
 
     # The 1955 pages run forward through the book, and no two paragraphs begin
     # at one place: a paragraph matched to the wrong one of the Foundation's
@@ -542,6 +560,64 @@ def _study(con, places: set[str]) -> int:
         if odd or strip_tags(h) != text:
             coff += 1
             print(f"            study {where}: {odd or 'does not round-trip'}")
+    print(f"            {k - coff}/{k} notes and sources round-trip, with TeX's quotes set"
+          + ("" if not coff else f"   {coff} FAIL"))
+    bad += bool(coff)
+    return bad
+
+
+def _translator(con, places: set[str]) -> int:
+    """The translator's notes as the folds show them (build/translation.py):
+    each marker in its paragraph's HTML where its note stands, numbered as it
+    is, and every note with its marker; their links landing; each note and
+    source its words, set as TeX sets them."""
+    import re
+
+    from ..render import strip_tags
+
+    bad = 0
+    want = {(k, pid): [(key, num, at) for key, num, at in con.execute(
+                "SELECT key, num, at FROM tr_note WHERE translation = ? AND paragraph_id = ?"
+                " ORDER BY at, id", (k, pid))]
+            for k, pid in con.execute("SELECT DISTINCT translation, paragraph_id FROM tr_note")}
+    marker = re.compile(r'<a class="fn" href="#fn(tn_[0-9a-z_-]+)" id="fnref\1" data-k="tn"'
+                        r' data-n="(\d+)" aria-label="Note \2"></a>')
+    got = {}
+    n = 0
+    for k, pid, hy in con.execute("SELECT translation, paragraph_id, html_hy FROM tr_paragraph"
+                                  " WHERE html_hy LIKE '%data-k=\"tn\"%'"):
+        n += hy.count('data-k="tn"')
+        h, places_at = hy.replace("\u00ad", ""), []
+        for m in marker.finditer(h):
+            places_at.append((m[1], int(m[2]), len(strip_tags(h[:m.start()]))))
+        got[(k, pid)] = places_at
+    total = sum(len(v) for v in want.values())
+    ok = got == want and n == total
+    print(f"translator: {total} notes, each marker where its note stands, numbered as it"
+          + ("" if ok else f"   FAIL: {n} markers, {sum(len(v) for v in got.values())} placed as their notes"))
+    bad += not ok
+    k = loff = 0
+    for (h,) in con.execute("SELECT html_hy FROM tr_note UNION ALL SELECT html FROM tr_source"):
+        for to in re.findall(r'href="/([^"]*)"', h):
+            k += 1
+            m = re.fullmatch(r"(\d+:\d+)\.(\d+)-(\d+)", to)
+            if not (to in places if m is None else
+                    f"{m[1]}.{m[2]}" in places and f"{m[1]}.{m[3]}" in places
+                    and int(m[2]) < int(m[3])):
+                loff += 1
+                print(f"            translator's link to nowhere: /{to}")
+    print(f"            {k - loff}/{k} links in the translator's notes land"
+          + ("" if not loff else f"   {loff} FAIL"))
+    bad += bool(loff)
+    k = coff = 0
+    for where, text, h in con.execute(
+            "SELECT 'note ' || key, text, html_hy FROM tr_note"
+            " UNION ALL SELECT 'source ' || paper_n || ' ' || key, text, html FROM tr_source"):
+        k += 1
+        odd = sorted({c for c in text if c in "`'\"" or 0xE000 <= ord(c) <= 0xF8FF})
+        if odd or strip_tags(h.replace("\u00ad", "")) != text:
+            coff += 1
+            print(f"            translator's {where}: {odd or 'does not round-trip'}")
     print(f"            {k - coff}/{k} notes and sources round-trip, with TeX's quotes set"
           + ("" if not coff else f"   {coff} FAIL"))
     bad += bool(coff)

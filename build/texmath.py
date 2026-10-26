@@ -1,7 +1,8 @@
 """A study note's inline TeX math -> MathML Core, for the closed set it uses.
 
 The notes hold 118 `$...$` in 39 notes (study 2474116), all inline, no
-environment, in about thirty commands.  Each is converted here, at build, so a
+environment, in about thirty commands; ud's, its translator's, 41 more
+(tests/fixtures/tr-math.tsv), in a few more: an integral, a set's braces.  Each is converted here, at build, so a
 page carries MathML the browser lays out itself: no script, the same in the
 offline copy.  A command outside the set fails, as an unknown macro does in the
 text: a converter that guessed would print something else than the editor
@@ -27,9 +28,11 @@ GREEK = {"alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "
 GREEK_UPPER = {"Gamma": "Γ", "Delta": "Δ", "Theta": "Θ", "Lambda": "Λ", "Pi": "Π",
                "Sigma": "Σ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω"}
 OPERATORS = {"times": "×", "approx": "≈", "pm": "±", "neq": "≠", "subset": "⊂",
-             "rightarrow": "→", "geqslant": "⩾", "leqslant": "⩽", "cdot": "⋅"}
+             "rightarrow": "→", "geqslant": "⩾", "leqslant": "⩽", "cdot": "⋅",
+             # ud's notes (build/translation.py), with the braces of a set
+             "in": "∈", "Rightarrow": "⇒", "ldots": "…", "{": "{", "}": "}"}
 CHARS = {"-": "−", "*": "∗"}
-OPCHARS = set("+-=<>()[]/,;:!|*.")
+OPCHARS = set("+-=<>()[]/,;:!|*.×")
 SPACES = {",": "0.1667em", " ": "0.25em"}
 
 # Unicode's mathematical alphanumerics: the letters of \mathbf, \mathcal and
@@ -198,12 +201,13 @@ class _Parser:
             return f"<mo>{OPERATORS[v]}</mo>", False
         if v in SPACES:
             return f'<mspace width="{SPACES[v]}"/>', False
-        if v == "sum":
+        if v in ("sum", "int"):
+            op = "∑" if v == "sum" else "∫"
             limits = self.peek() == ("cmd", "limits")
             if limits:
                 self.i += 1
-                return '<mo movablelimits="false">∑</mo>', True
-            return "<mo>∑</mo>", False
+                return f'<mo movablelimits="false">{op}</mo>', True
+            return f"<mo>{op}</mo>", False
         if v == "sqrt":
             return f"<msqrt>{self.argument()}</msqrt>", False
         if v in ("vec", "overline"):
@@ -216,15 +220,20 @@ class _Parser:
             kind2, _ = self.take()
             if kind2 != "{":
                 raise MathError(f"\\{v} wants its letters in braces")
+            # Its letters and digits in the style; an operator among them, as
+            # \\mathbf{A(r)}'s brackets, stays as it is.
             out = []
             while True:
                 t = self.take()
                 if t[0] == "}":
                     break
+                if t[0] == "op":
+                    out.append(f"<mo>{html.escape(t[1], quote=False)}</mo>")
+                    continue
                 if t[0] not in ("id", "num"):
                     raise MathError(f"\\{v} holds {t[1]!r}, not letters")
-                out.extend(alnum(style, ch) for ch in t[1])
-            return "".join(f"<mi>{ch}</mi>" for ch in out), False
+                out.extend(f"<mi>{alnum(style, ch)}</mi>" for ch in t[1])
+            return "".join(out), False
         raise MathError(f"\\{v} is not in the set")
 
     def argument(self) -> str:

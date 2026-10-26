@@ -449,8 +449,10 @@
   // All, stacked, each named, fetched with the rest of the section's the first
   // time one is opened (/tr/<paper>:<section>, under the article's version, as
   // /rail/N is), and kept for the page.  The tab chosen opens the next fold
-  // (settings.py KEPT `trtab`).  Offline the fetch fails, until the copy holds
-  // them: a download of their own, to come (Tigran, 2026-10-26).
+  // (settings.py KEPT `trtab`).  A translator's note opens as a card at its
+  // number, as a study note does (open(), below), from the fold, where its words
+  // are put hidden with its paragraph's.  Offline the fetch fails, until the
+  // copy holds them: a download of their own, to come (Tigran, 2026-10-26).
   var TRS = [], trBy = {}, trGot = {};
   try { TRS = JSON.parse((document.getElementById('ub-translations') || {}).textContent || '[]'); } catch (e) {}
   TRS.forEach(function (x) { trBy[x.key] = x; });
@@ -466,10 +468,14 @@
       trGot[key] = fetch('/tr/' + sec + '?v=' + encodeURIComponent(v))
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
         .then(function (h) {
-          var t = document.createElement('template'), got = {};
+          var t = document.createElement('template'), got = { t: {}, n: {} };
           t.innerHTML = h;
           Array.prototype.forEach.call(t.content.querySelectorAll('[data-k][data-ref]'), function (d) {
-            (got[d.dataset.k] = got[d.dataset.k] || {})[d.dataset.ref] = d.innerHTML;
+            (got.t[d.dataset.k] = got.t[d.dataset.k] || {})[d.dataset.ref] = d.innerHTML;
+          });
+          Array.prototype.forEach.call(t.content.querySelectorAll('aside[data-k][data-of]'), function (d) {
+            var at = got.n[d.dataset.k] = got.n[d.dataset.k] || {};
+            at[d.dataset.of] = (at[d.dataset.of] || '') + d.outerHTML;
           });
           return got;
         });
@@ -496,7 +502,7 @@
     if (!refs.length) return;
     trFetch(tf.closest('article'), refs[0].split('.')[0]).then(function (got) {
       if (!tf.classList.contains('open')) return;
-      var want = load().trtab, h = '',
+      var want = load().trtab, h = '', notes = '',
           cur = want === 'all' && ks.length > 1 ? 'all' : ks.indexOf(want) >= 0 ? want : ks[0];
       if (ks.length > 1) {
         h += '<div class="trtabs" role="group">' + ks.map(function (k) {
@@ -515,17 +521,20 @@
         // paragraph drops its first letter, as the English's do and each
         // translation's own TeX does (\lettrine).
         refs.forEach(function (ref, i) {
-          var t = (got[k] || {})[ref], c = lines[i].classList;
+          var t = (got.t[k] || {})[ref], c = lines[i].classList;
           if (t != null) h += '<p class="rt' + (c.contains('head') ? ' head' : '') + (c.contains('opening') ? ' opening' : '') +
                               '" lang="' + x.lang + '">' + trLead(t) + '</p>';
+          notes += (got.n[k] || {})[ref] || '';
         });
       });
-      panel.innerHTML = h;
+      if (card && panel.contains(card.mark)) shut(false);
+      panel.innerHTML = h + (notes && '<div class="tnotes" hidden>' + notes + '</div>');
     }, function () {
       if (tf.classList.contains('open')) panel.innerHTML = '<p class="gap">' + T('tr:unreachable') + '</p>';
     });
   }
   function trShut(tf) {
+    if (card && tf.contains(card.mark)) shut(false);
     tf.classList.remove('open');
     var b = tf.querySelector('.trfold'), panel = tf.querySelector('.tr');
     if (b) b.setAttribute('aria-expanded', 'false');
@@ -579,7 +588,8 @@
   var NAMES = ['title', 'aria-label', 'placeholder'], each = Array.prototype.forEach;
   var MARKS = [['.pcm', 'title', function () { return T.tr('a new group begins here, as in the 1955 printing'); }],
                ['a.fn[data-k="1955"]', 'aria-label', function () { return T.tr('1955 reading'); }],
-               ['a.fn[data-k="st"]', 'aria-label', function (el) { return T.tr('Note {n}', { n: +el.dataset.n }); }]];
+               ['a.fn[data-k="st"]', 'aria-label', function (el) { return T.tr('Note {n}', { n: +el.dataset.n }); }],
+               ['a.fn[data-k="tn"]', 'aria-label', function (el) { return T.tr('Note {n}', { n: +el.dataset.n }); }]];
   var SPOKEN = NAMES.map(function (n) { return '[data-ru-' + n + ']'; }).concat('option[data-ru]').join(',');
   function within(root, sel) {
     var out = Array.prototype.slice.call(root.querySelectorAll(sel));
@@ -683,7 +693,8 @@
 
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
   // endnote's words (section.html), which are hidden while this runs, and a
-  // study note at its number the same way, its card .st.  One
+  // study note at its number the same way, its card .st, and a translator's
+  // in a fold, .tn, its words hidden there with its paragraph's.  One
   // card at a time, under the line and scrolling with it; the ring again, its
   // ×, Escape or a click elsewhere closes it.  Listened for on the document,
   // so it holds after listen.js swaps <main>.
@@ -710,7 +721,7 @@
         host = mark.closest('article') || mark.closest('main.results');
     if (!note || !host) return false;
     var el = document.createElement('div');
-    el.className = mark.dataset.k === 'st' ? 'pop st' : 'pop';
+    el.className = { st: 'pop st', tn: 'pop tn' }[mark.dataset.k] || 'pop';
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-label', mark.getAttribute('aria-label') || T.text('1955 reading'));
     el.tabIndex = -1;

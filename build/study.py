@@ -71,6 +71,7 @@ DATA = ROOT / "data" / "study"
 RE_FILE = re.compile(r"\d{3}\.toml")
 RE_TARGET = re.compile(r"p(\d+) (\d+):(\d+)")
 RE_MONTH = re.compile(r"/uploads/(\d{4})/(\d{2})/")
+RE_HEB = re.compile(r"\\textheb\s*\{([^{}]*)\}")
 SENTINEL = 0xE000                    # a private-use character stands for each $...$
 # A hyphen that begins a word, a suffix's or an ending's ("the Latin suffix
 # -tia", "-el/-al"): a browser may break a line after any hyphen, and left
@@ -404,7 +405,9 @@ def _anchor(text: str, after: str, where: str, report) -> int | None:
 
 
 def expand(tex: str, paras, sources: dict, where: str, report,
-           hyphenator=None) -> tuple[str, str, list[str]]:
+           hyphenator=None, *, table: dict = TABLE, subs=SUBS, ref_of=None,
+           textheb: bool = False, odd: list | None = None, calls: dict | None = None,
+           ties: bool = True) -> tuple[str, str, list[str]]:
     """A note's or a source's TeX -> (text, html, the keys it cites, in order).
 
     `$...$` is taken out first, each replaced by one private-use character, and
@@ -413,10 +416,27 @@ def expand(tex: str, paras, sources: dict, where: str, report,
     which makes the round trip hold by construction.  With a `hyphenator`, the
     HTML carries the book's soft hyphens (build/hyphen.py), and `text` is
     still what it says without them.
+
+    A translator's note is set by this too, the same lineage (build/translation.py):
+    with its own `table` and `subs`; `ref_of`, which takes a \\bibref's target,
+    (paper, section, n) as the translation numbers it, to our reference, or
+    None where it is not ours to link; `textheb`, its Hebrew written word by
+    word reversed, as the study edition's is (trap 32), to be turned; and
+    `odd`, a list, which takes each \\bibref whose words disagree with its
+    target as (words, target), set as its TeX sets it, the words linking the
+    target, for the caller to hold to its declared list; `calls` of its own;
+    and no `ties`, the warning of a long run of ties, which a study note's
+    review mends and a translator's TeX is his to set.  Their defaults are the
+    study notes'.
     """
     if any(SENTINEL <= ord(c) < SENTINEL + 0x1000 for c in tex):
         report.hard("study-private-use", where, "the TeX holds a private-use character")
         return "", "", []
+    if textheb:
+        if len(RE_HEB.findall(tex)) != tex.count("\\textheb"):
+            report.hard("study-hebrew", where, "a \\textheb holding a brace: its words cannot be turned")
+            return "", "", []
+        tex = RE_HEB.sub(lambda m: "\\textheb{" + " ".join(reversed(m[1].split())) + "}", tex)
     dollars = reader.unescaped(tex, "$")
     if len(dollars) % 2:
         report.hard("study-math-unpaired", where, "an odd number of $")
@@ -443,18 +463,28 @@ def expand(tex: str, paras, sources: dict, where: str, report,
         if not m:
             report.hard("study-bibref", where, f"\\bibref target {target!r}")
             return
-        ref = f"{int(m[1])}:{int(m[2])}.{int(m[3])}"
+        p, s, n = int(m[1]), int(m[2]), int(m[3])
+        ref = f"{p}:{s}.{n}"
         shown = (opts[0] or ref).strip() if opts else ref
-        href = "/" + ref
-        if shown != ref:
+        ours = ref_of(p, s, n) if ref_of else ref
+        if ours is None:
+            report.hard("study-bibref", where, f"\\bibref target {target!r} is not ours to link")
+            return
+        href = "/" + ours
+        if shown == f"{p}:{s}" and n == 1:
+            href = f"/{p}:{s}"                   # a section, named by its first paragraph
+        elif shown != ref:
             r = re.fullmatch(re.escape(ref) + r"--(\d+)", shown)
-            end = f"{int(m[1])}:{int(m[2])}.{r[1]}" if r else None
-            if not r or end not in paras or int(r[1]) <= int(m[3]):
+            end = f"{p}:{s}.{r[1]}" if r else None
+            if r and end in paras and int(r[1]) > n:
+                href = f"/{ref}-{r[1]}"
+            elif odd is not None:
+                odd.append((shown, ours))
+            else:
                 report.hard("study-bibref", where, f"shows {shown!r} for {target!r}")
                 return
-            href = f"/{ref}-{r[1]}"
-        if ref not in paras:
-            report.hard("study-bibref", where, f"{ref}: no such paragraph")
+        if ours not in paras:
+            report.hard("study-bibref", where, f"{ours}: no such paragraph")
             return
         start = exp.n
         exp._text(shown)
@@ -469,12 +499,13 @@ def expand(tex: str, paras, sources: dict, where: str, report,
     def bibfrac(exp, opts, args, tok):
         exp._emit(f"{_raw(args[0]).strip()}/{_raw(args[1]).strip()}")
 
-    exp = Expander(TABLE, set(), report, where, italic_openers=ITALIC_OPENERS,
-                   calls={"cite": cite, "bibref": bibref, "myurl": myurl, "bibfrac": bibfrac},
-                   subs=SUBS, forbid_comments=True)
+    exp = Expander(table, set(), report, where, italic_openers=ITALIC_OPENERS,
+                   calls={"cite": cite, "bibref": bibref, "myurl": myurl, "bibfrac": bibfrac,
+                          **(calls or {})},
+                   subs=subs, forbid_comments=True)
     ex = exp.run(src)
     ex.spans += [Span(m.start(), m.end(), "nobreak") for m in RE_LEADING_HYPHEN.finditer(ex.text)]
-    for m in RE_TIED.finditer(ex.text):
+    for m in RE_TIED.finditer(ex.text) if ties else ():
         run = m.group().strip("()[],.;:")
         name = len(re.split("[\u00a0\u202f]", run)) >= 3 and not re.search(r"\d:\d", run)
         if name or len(run) > TIED_MAX:

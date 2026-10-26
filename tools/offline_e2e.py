@@ -285,6 +285,17 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.locator(".tf .trfold").nth(1).click()
         pg.wait_for_function("document.querySelectorAll('.tf.open .rt').length > 1")
         ok("Всеобщий Отец никогда" in words(1), "and the next fold opens at the tab chosen")
+        fold = pg.locator(".grid > .row:has(p.t[id='1:1.3']) .tf")
+        fold.locator(".trfold").click()
+        fold.locator('.tr a.fn[data-k="tn"]').first.click()
+        pg.wait_for_selector(".pop.tn")
+        card = pg.evaluate("(() => { const c = document.querySelector('.pop.tn'), x = c.cloneNode(true);"
+                           " x.querySelectorAll('x-ru').forEach(e => e.remove());"
+                           " return x.textContent.replace(/­/g, ''); })()")
+        ok("Note 6" in card and "Английское слово you" in card and "(Aivazian)" in card,
+           "a translator's number opens its note as a card, which names the translation")
+        pg.keyboard.press("Escape")
+        ok(pg.locator(".pop").count() == 0, "and Escape closes it")
         pg.goto(BASE + "/140:4")
         ok(pg.locator(".tf .trfold").first.inner_text() == "1 translation",
            "a section one of them lacks counts the other alone")

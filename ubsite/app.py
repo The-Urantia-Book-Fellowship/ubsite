@@ -497,17 +497,23 @@ T.env.globals["translations_json"] = translations_json
 
 
 @functools.lru_cache(maxsize=256)
-def _translated(mtime_ns: int, paper: int, sec: int) -> dict:
+def _translated(mtime_ns: int, bilingual: bool, paper: int, sec: int) -> dict:
     try:
-        return queries.translated(db(), paper, sec)
+        got = queries.translated(db(), paper, sec)
     except sqlite3.Error:
         return {"has": {}, "html": "", "v": ""}       # a database from before 010_translation.sql
+    html = T.env.get_template("tr_section.html").render(heads=got["heads"], rows=got["rows"])
+    # Its version is a hash of what it sends, the words of its cards in each
+    # language with it: a build that changes nothing moves nothing (trap 29).
+    return {"has": got["has"], "html": html,
+            "v": hashlib.sha256(html.encode()).hexdigest()[:12] if got["rows"] else ""}
 
 
 def translated(paper: int, sec: int) -> dict:
-    """queries.translated(), kept per database: the section page reads its
-    version and its folds' data-has, /tr/ its fragment."""
-    return _translated(db_version(), paper, sec)
+    """A section's translations, kept per database: the section page reads
+    its version and its folds' data-has, /tr/ its fragment, drawn from
+    queries.translated() by templates/tr_section.html."""
+    return _translated(db_version(), l10n.BILINGUAL, paper, sec)
 
 
 @app.get("/tr/{ref}", include_in_schema=False)

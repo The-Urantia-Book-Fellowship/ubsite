@@ -21,6 +21,17 @@
         <p class="lead"><a class="lbl" href="#fnref{{ n.key }}"><span class="at">{{ n.para_ref }} </span>{{ t('Note {n}', n=n.num) }}</a> {{ n.html_hy|safe }}</p>
         {{ sfoot(n) }}
       </aside>{% endmacro %}
+{#- A translator's note (queries.translated, build/translation.py): its number
+    in the paper, the note, the works it cites in full, and last the translation
+    it is of, by its title and short name, as Settings names it, «Урантийские
+    документы (Aivazian)» (Tigran, 2026-10-26).  In the fold's fragment, opened
+    as a card at its number there (ub.js), as a study note's is: never an
+    endnote, the fold being drawn by JavaScript. #}
+{% macro tnote(n) %}<aside class="note tn" id="fn{{ n.key }}" data-k="{{ n.k }}" data-of="{{ n.ref }}">
+        <p class="lead"><a class="lbl" href="#fnref{{ n.key }}">{{ t('Note {n}', n=n.num) }}</a> <span lang="{{ n.lang }}">{{ n.html_hy|safe }}</span></p>
+        {{ sfoot(n) }}
+        <p class="src"><span lang="{{ n.lang }}">{{ n.title }}</span> ({{ n.label }})</p>
+      </aside>{% endmacro %}
 {#- A work's page in Tigran's library, where it can be read freely (Tigran,
     2026-10-25): under a work in the Bibliography, and after a source in a
     note's card. #}

@@ -31,6 +31,7 @@ WRAP = {
     "nobreak":   ("span", "nobreak"),
     "chg":       ("mark", "chg"),     # the SRT Committee's 1955 text: the changed words
     "frac":      ("span", "frac"),    # a translation's n⁄d, drawn by the font's `frac` (build/tr_macros.py)
+    "strong":    ("strong", None),    # a translator's note's \textbf (build/tr_macros.py UD_NOTES)
 }
 POINT = {
     "dotleader": '<span class="leader"></span>',
@@ -126,6 +127,12 @@ def _point(s, note_key: str) -> str:
             hs = ' data-hs="1"' if s.attr.get("hs") else ""
             return (f'<a class="fn" href="#fn{key}" id="fnref{key}" data-k="st"'
                     f' data-n="{num}"{hs} aria-label="Note {num}"></a>')
+        # A translator's note's marker is a study note's, `tn` for its kind
+        # (build/translation.py): its card is in the fold, with its paragraph.
+        if kind == "translator":
+            key, num = s.attr["key"], s.attr["n"]
+            return (f'<a class="fn" href="#fn{key}" id="fnref{key}" data-k="tn"'
+                    f' data-n="{num}" aria-label="Note {num}"></a>')
         if kind == "variant-1955":
             return (f'<a class="fn" href="#fn{k}" id="fnref{k}" data-k="1955"'
                     f' aria-label="1955 reading"></a>')

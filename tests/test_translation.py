@@ -26,6 +26,13 @@ def expand(key: str, body: str):
     return text, spans, notes, [p.code for p in report.problems]
 
 
+def note(tex: str, odd=None, paras=("104:4.1", "2:4.2", "2:4.3")):
+    """A note of ud's set as the build sets it (build/translation.py _notes)."""
+    report = Report()
+    text, html, cites = translation.set_note("ud", tex, set(paras), {"Jeans1": ""}, "test", report, odd=odd)
+    return text, html, cites, [p.code for p in report.problems]
+
+
 class TeX(unittest.TestCase):
     def test_the_stress_mark_is_kept(self):
         text, *_ = expand("ud", "Все миры призна\\'ют Отца")
@@ -65,6 +72,38 @@ class TeX(unittest.TestCase):
 
     def test_an_unknown_macro_fails(self):
         self.assertIn("unknown-macro", expand("urantia-ru", "\\fnst{x}")[3])
+
+
+class Notes(unittest.TestCase):
+    """A translator's note, set as a study note is, by ud's own table."""
+
+    def test_its_quotes_and_its_own_macros_are_set(self):
+        text, html, _, problems = note("<<Бог>>~--- 700\\,000\\dt 3 и \\textbf{У}верса")
+        self.assertEqual(text, "«Бог»\u00a0— 700\u202f000·3 и Уверса")
+        self.assertIn("<strong>У</strong>верса", html)
+        self.assertEqual(problems, [])
+
+    def test_its_hebrew_is_turned_to_logical_order(self):
+        # Written word by word reversed, as the study edition writes it (trap 32).
+        html = note("\\textheb {עוֹלָם אֱלֹהֵי}")[1]
+        self.assertEqual(html, '<span class="lang" lang="he" dir="rtl">אֱלֹהֵי עוֹלָם</span>')
+        self.assertIn("study-hebrew", note("\\textheb {עוֹלָם {אֱלֹהֵי}}")[3])
+
+    def test_a_section_named_by_its_first_paragraph_links_the_section(self):
+        self.assertEqual(note("См. \\bibref [104:4]{p104 4:1}.")[1], 'См. <a href="/104:4">104:4</a>.')
+
+    def test_words_that_disagree_with_their_target_fail_unless_declared(self):
+        self.assertIn("study-bibref", note("\\bibref [2:4.2]{p002 4:3}")[3])
+        odd = []
+        _, html, _, problems = note("\\bibref [2:4.2]{p002 4:3}", odd)
+        self.assertEqual((html, odd, problems), ('<a href="/2:4.3">2:4.2</a>', [("2:4.2", "2:4.3")], []))
+
+    def test_its_math_is_mathml(self):
+        html = note("$\\{\\int x^n\\,d\\mu (x)|n\\in \\mathbb {N}\\}$")[1]
+        self.assertTrue(html.startswith("<math") and "<mo>∫</mo>" in html and "<mo>∈</mo>" in html, html)
+
+    def test_its_citations_are_numbered(self):
+        self.assertEqual(note("по \\cite {Jeans1} и \\cite {Jeans1}")[:3:2], ("по [1] и [1]", ["Jeans1"]))
 
 
 class Reader(unittest.TestCase):
@@ -154,6 +193,41 @@ class Database(unittest.TestCase):
             " WHERE n.translation = 'ud' AND p.paper_n = 1 ORDER BY p.ord, n.at")]
         self.assertEqual(nums, list(range(1, len(nums) + 1)))
         self.assertGreater(len(nums), 5)
+
+    def notes(self, ref: str) -> list[tuple]:
+        return self.con.execute(
+            "SELECT n.num, n.at, n.key, n.text, n.html_hy FROM tr_note n JOIN paragraph p ON p.id = n.paragraph_id"
+            " WHERE n.translation = 'ud' AND p.ref = ? ORDER BY n.num", (ref,)).fetchall()
+
+    def test_a_note_s_marker_stands_where_its_fnst_stood(self):
+        got = self.notes("1:1.3")
+        self.assertEqual([(n, key) for n, _, key, *_ in got], [(6, "tn_ud_1_1_3_0"), (7, "tn_ud_1_1_3_1")])
+        text = self.text("ud", "1:1.3")
+        self.assertEqual(text[:got[0][1]], "Когда ты")
+        (hy,) = self.con.execute("SELECT t.html_hy FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id"
+                                 " WHERE t.translation = 'ud' AND p.ref = '1:1.3'").fetchone()
+        self.assertTrue(hy.startswith('Ко\u00adгда ты<a class="fn" href="#fntn_ud_1_1_3_0" id="fnreftn_ud_1_1_3_0"'
+                                      ' data-k="tn" data-n="6" aria-label="Note 6"></a> на\u00adко\u00adнец'), hy[:200])
+
+    def test_a_note_s_hebrew_is_in_logical_order(self):
+        self.assertIn("Исайя\u00a040:28: אֱלֹהֵי עוֹלָם", self.notes("1:1.6")[0][3])
+
+    def test_a_note_links_the_book(self):
+        self.assertIn('<a href="/2:4.3">2:4.2</a>', self.notes("0:1.15")[0][4])   # a slip, declared
+        self.assertIn('<a href="/158:1.6-7">158:1.6–7</a>', self.notes("35:1.2")[0][4])
+        self.assertIn('<a href="/104:4">104:4</a>', self.notes("10:5.7")[0][4])
+
+    def test_a_note_s_math_is_mathml(self):
+        html = self.notes("19:5.7")[0][4]
+        self.assertIn("<mo>∫</mo>", html)
+        self.assertIn("<mo>∈</mo>", html)
+
+    def test_a_note_s_sources_are_its_paper_s_in_the_order_it_cites_them(self):
+        got = self.con.execute(
+            "SELECT x.key, x.paper_n FROM tr_cite c JOIN tr_note n ON n.id = c.note_id"
+            " JOIN tr_source x ON x.id = c.source_id WHERE n.key = 'tn_ud_41_3_2_1' ORDER BY c.ord").fetchall()
+        self.assertEqual(got, [("Aivazian1", 41), ("Jeans1", 41), ("Ohnaka1", 41)])
+        self.assertIn("[1]", self.notes("41:3.2")[1][3])
 
 
 if __name__ == "__main__":

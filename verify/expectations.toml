@@ -82,6 +82,9 @@ notes                = 346       # \fnst, the translator's
 numbered_otherwise   = 2         # 31:10.22 (its 31:10.23) and 0:12.10 (its heading);
                                  # the rest it numbers otherwise it has not yet translated
 labels_differ        = 0         # 29:4.27's 3. for our 4., mended in cc37b29
+sources              = 11        # the works its notes cite, from 5 papers' bibliographies: 15 citations
+bibrefs_differ       = 2         # 0:1.15 and 15:8.3 (tests/known-tr-bibrefs.tsv)
+substituted          = 1         # 0:5.12's note, Galen's century in Greek capital iotas, set as II
 [translation.urantia-ru]
 source_commit = "a6525fe"
 measured_on   = "2026-10-26"

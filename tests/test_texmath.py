@@ -3,7 +3,9 @@
 tests/fixtures/study-math.tsv holds every `$...$` of the study edition's notes,
 so the converter is held to all of them before their papers are reviewed.  To
 refresh it after the edition changes, read the notes with build.readers.study
-and write each note's ref and each math span, tab-separated.
+and write each note's ref and each math span, tab-separated.  And
+tests/fixtures/tr-math.tsv every one of ud's translator's notes
+(build/translation.py), all on the site.
 """
 
 import pathlib
@@ -28,10 +30,13 @@ def body(tex: str) -> str:
 
 class Corpus(unittest.TestCase):
     def test_every_expression_converts_to_well_formed_mathml(self):
-        rows = [line.split("\t", 1) for line in
-                (ROOT / "tests" / "fixtures" / "study-math.tsv").read_text(encoding="utf-8").splitlines()
-                if line and not line.startswith("#")]
-        self.assertEqual(len(rows), 118)
+        rows = []
+        for name, n in (("study-math.tsv", 118), ("tr-math.tsv", 41)):
+            got = [line.split("\t", 1) for line in
+                   (ROOT / "tests" / "fixtures" / name).read_text(encoding="utf-8").splitlines()
+                   if line and not line.startswith("#")]
+            self.assertEqual(len(got), n, name)
+            rows += got
         for ref, tex in rows:
             with self.subTest(ref=ref, tex=tex):
                 root = ET.fromstring(texmath.convert(tex))
@@ -55,6 +60,18 @@ class Forms(unittest.TestCase):
         self.assertIn("<munderover><mo movablelimits=\"false\">∑</mo>", body("\\sum\\limits_{k=1}^7 N_k"))
         self.assertIn("<msubsup><mo>∑</mo>", body("\\sum_{k=1}^7 N_k"))
 
+    def test_an_integral_and_a_set(self):
+        self.assertEqual(body("\\{\\int x\\,d\\mu|n\\in \\mathbb {N}\\}"),
+                         "<mo>{</mo><mo>∫</mo><mi>x</mi><mspace width=\"0.1667em\"/><mi>d</mi><mi>μ</mi>"
+                         "<mo>|</mo><mi>n</mi><mo>∈</mo><mi>ℕ</mi><mo>}</mo>")
+        self.assertIn('<munderover><mo movablelimits="false">∫</mo>', body("\\int\\limits_0^1 x"))
+
+    def test_a_times_sign_as_written(self):
+        self.assertEqual(body("70×6"), "<mn>70</mn><mo>×</mo><mn>6</mn>")
+
+    def test_a_bold_group_keeps_its_brackets(self):
+        self.assertEqual(body("\\mathbf {A(r)}"), "<mi>𝐀</mi><mo>(</mo><mi>𝐫</mi><mo>)</mo>")
+
     def test_letters_of_a_style_are_their_own_characters(self):
         self.assertEqual(body("\\mathbb{R}"), "<mi>ℝ</mi>")
         self.assertEqual(body("\\mathcal{M}"), "<mi>ℳ</mi>")
@@ -76,7 +93,7 @@ class Forms(unittest.TestCase):
 
 class Refused(unittest.TestCase):
     def test_outside_the_set(self):
-        for tex in ("\\frac{a}{b}", "\\int x", "a'", "\\mathrm{d}", "{a", "a}", "^2", "", "a^2^3",
+        for tex in ("\\frac{a}{b}", "\\oint x", "a'", "\\mathrm{d}", "{a", "a}", "^2", "", "a^2^3",
                     "\\mathbb{1}", "{a \\over b \\over c}"):
             with self.subTest(tex=tex), self.assertRaises(texmath.MathError):
                 texmath.convert(tex)

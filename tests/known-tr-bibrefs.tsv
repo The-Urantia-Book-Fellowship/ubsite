@@ -1,0 +1,7 @@
+# A translator's \bibref whose words name another paragraph than it links
+# (build/translation.py): set as its own TeX sets it, the words linking the
+# target, and each a slip to mend in the translation.  The build requires
+# exactly this list: a new one fails, and so does one mended and left here.
+# translation	the note's paragraph (ours)	its words	its target (ours)
+ud	0:1.15	2:4.2	2:4.3
+ud	15:8.3	23:3.2	23:3.3

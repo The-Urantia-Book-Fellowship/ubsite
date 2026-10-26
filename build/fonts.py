@@ -112,6 +112,7 @@ def corpus_codepoints(con) -> set[str]:
               # The translations beside the text, and their titles (build/translation.py).
               "SELECT text FROM tr_paragraph",
               "SELECT text FROM tr_heading",
+              "SELECT text FROM tr_source",             # what a translator's note cites
               # The SRT Committee's reasons a 1955 note shows, and those of the
               # note it refers to.
               "SELECT verdict || why_text FROM srt_item WHERE id IN"
@@ -142,12 +143,14 @@ RE_MATH = re.compile(r"<math\b.*?</math>", re.S)
 
 
 def study_codepoints(con) -> tuple[set[str], dict[str, set[str]], list[str]]:
-    """What the study notes draw: in UB Goudy, in the device's font by
-    language, and in math (each <math> whole)."""
+    """What the study notes draw, and the translator's, set alike
+    (build/translation.py): in UB Goudy, in the device's font by language, and
+    in math (each <math> whole)."""
     goudy: set[str] = set()
     other: dict[str, set[str]] = {}
     maths: list[str] = []
-    for (h,) in con.execute("SELECT html FROM footnote WHERE kind = 'study'"):
+    for (h,) in con.execute("SELECT html FROM footnote WHERE kind = 'study'"
+                            " UNION ALL SELECT html_hy FROM tr_note"):
         maths += RE_MATH.findall(h)
         h = RE_MATH.sub(" ", h)
         for lang, inner in RE_LANG.findall(h):

@@ -13,13 +13,14 @@ a list's label and a table row's leader.  The rest is the printed page's:
 spacing, line breaks for one device (\\tunemarkup{pgnexus10}{...}), the figures
 (\\tunemarkup{pictures}{...}), which the site does not show from a translation,
 and the 1955 groups (\\pc), which the English carries.  A translator's note,
-\\fnst, is kept as written, where it stands, for build/translation.py to store;
-it is not expanded here.
+\\fnst, is kept as written, where it stands, and set by its own table,
+UD_NOTES, the study notes' with ud.sty's own.
 """
 
 from __future__ import annotations
 
 from .spec import ACCENT, CALL, EMIT_TEXT, FLAG, MARK, SPAN, STRIP, Spec
+from .study_macros import TABLE as STUDY
 
 # Both styles alike.
 SHARED: dict[str, Spec] = {
@@ -65,6 +66,14 @@ UD_ITALIC = frozenset({"em"})
 # but \uforeword, which is a line of its own (build/readers/translation.py).
 URANTIA_RU: dict[str, Spec] = SHARED | {
     "ublistelem": Spec(SPAN, args=1, kind="listmark", note="a list's label; \\bibnobreakspace follows"),
+}
+
+# ud's notes, \fnst, which build/study.py sets as it sets the study edition's,
+# whose lineage they are: its table, with ud.sty's \dt, and one \textbf
+# (15:7.9, \textbf{У}верса).  Its quotes and dashes are this file's SUBS.
+UD_NOTES: dict[str, Spec] = STUDY | {
+    "dt": Spec(EMIT_TEXT, text="·", note="ud.sty: \\ensuremath{\\cdot}, in 700\\,000\\dt 647"),
+    "textbf": Spec(CALL, args=1, note="a `strong` span, which the text never has, so no stored kind"),
 }
 
 TABLES = {"ud": (UD, UD_UNBRACED, UD_ITALIC),

@@ -546,7 +546,10 @@ p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
 :root[data-redletter="off"] .jesus { color: inherit; }
 :root[data-paranum="off"] .num { display: none; }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
-:root[data-notes="off"] :is(a.fn:not([data-k="st"]), .notes:not(.st), .pop:not(.st)) { display: none; }
+/* The 1955 readings' switch, which a study note and a translator's (a fold's,
+   shown whenever its translation is) are not under. */
+:root[data-notes="off"] :is(a.fn:not([data-k="st"]):not([data-k="tn"]), .notes:not(.st),
+                            .pop:not(.st):not(.tn)) { display: none; }
 /* The study notes are off unless a reader asks (Tigran, 2026-10-19), so
    their switch is marked on <html> when it is on. */
 :root:not([data-studynotes="true"]) :is(a.fn[data-k="st"], .notes.st, .pop.st) { display: none; }
@@ -729,10 +732,11 @@ a.fn.on::after { background: currentColor; }
 /* A study note's mark is its number, 1.. in the paper (build/study.py), small
    and raised, drawn from data-n like the ring, so a copy never takes it, and
    held to its word by the same word joiner.  None of the ring's circle; open,
-   or under the pointer, it is the link's colour reversed. */
-a.fn[data-k="st"]::after { content: "\2060" attr(data-n); font-size: .64em; top: -.58em;
+   or under the pointer, it is the link's colour reversed.  A translator's note's
+   is the same, in its fold (build/translation.py). */
+:is(a.fn[data-k="st"], a.fn[data-k="tn"])::after { content: "\2060" attr(data-n); font-size: .64em; top: -.58em;
   padding: 0 .14em; margin-left: .02em; border: 0; border-radius: .3em; }
-a.fn[data-k="st"].on::after { background: var(--link); color: var(--paper); }
+:is(a.fn[data-k="st"], a.fn[data-k="tn"]).on::after { background: var(--link); color: var(--paper); }
 /* A study note on the very words a 1955 reading marks stands after its ring
    (build/render.py keeps the press's markers first).  Each link is padded
    beyond its mark to be easy to tap, and the number's padding, painted over
@@ -740,7 +744,9 @@ a.fn[data-k="st"].on::after { background: var(--link); color: var(--paper); }
    ends.  The selector also takes a number after text that follows a ring,
    which loses only a little of its own padding. */
 a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
-@media (hover: hover) { a.fn[data-k="st"]:hover::after { background: var(--link); color: var(--paper); } }
+@media (hover: hover) {
+  :is(a.fn[data-k="st"], a.fn[data-k="tn"]):hover::after { background: var(--link); color: var(--paper); }
+}
 
 .a { font-size: 1rem; line-height: 1.45; color: var(--faint); }
 /* A row's translations, folded to a line under it, "› 2 translations", as a
