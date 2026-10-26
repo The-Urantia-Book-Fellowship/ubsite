@@ -8,7 +8,7 @@ anyio==4.15.1
     # via
     #   starlette
     #   watchfiles
-brotli==1.2.0
+brotli==1.2.1
     # via fonttools
 click==8.5.0
     # via uvicorn
