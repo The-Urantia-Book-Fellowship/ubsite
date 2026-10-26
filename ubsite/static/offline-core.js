@@ -89,11 +89,12 @@
   var RE_REF = /^(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?$/;
 
   // What the copy answers for a GET of `path` (decoded, as the server routes
-  // it), in app.py's order: {res} now, {chunk, make(data)} from a chunk, {search},
-  // or null where the copy has no say (the API, the recordings, the worker's
-  // own files), so the network's failure stands.  `origin` is where the copy
-  // is read, as location.origin gives it.
-  function resolve(path, sh, origin) {
+  // it), in app.py's order: {res} now, {chunk, make(data)} from a chunk,
+  // {chunks, make(datas)} from several, {search}, or null where the copy has no
+  // say (the API, the recordings, the worker's own files), so the network's
+  // failure stands.  `origin` is where the copy is read, as location.origin
+  // gives it; `kept`, the keys of the translations the reader keeps in it.
+  function resolve(path, sh, origin, kept) {
     var m, d;
     if (sh.miscset === undefined) {
       sh.miscset = {};
@@ -112,6 +113,26 @@
       return { chunk: 'speech-' + Math.floor(parseInt(sm[1], 10) / 20), make: function (d) {
         return d[sk] === undefined ? missing(sh, T(NOPAGE), path) : { status: 200, type: 'application/json', body: d[sk] };
       } };
+    }
+    if ((m = /^\/tr\/(.*)$/.exec(path))) {
+      // A section's translations (app.py translations_of), from those the
+      // reader keeps, each a download of its own (Settings' Offline tab): each
+      // one's headings, then each one's paragraphs, in Settings' order, inside
+      // the fragment's frame (offline/pages.py).  With none of them kept, the
+      // frame alone, which a fold reads as not in the copy.  A copy made before
+      // 2026-10-26 keeps none, and leaves the network's failure standing.
+      if (!sh.tr) return null;
+      var tm = /^([0-9]+):([0-9]+)$/.exec(m[1]), tp = tm && String(parseInt(tm[1], 10)),
+          ts = tm && parseInt(tm[2], 10), at = tp + ':' + ts;
+      var has = !tm ? [] : sh.tr.order.filter(function (x) { return (x.secs[tp] || []).indexOf(ts) >= 0; });
+      if (!has.length) return { res: text(404, 'No translation has this section.\n') };
+      var mine = has.filter(function (x) { return (kept || []).indexOf(x.key) >= 0; });
+      return { chunks: mine.map(function (x) { return 'tr-' + x.key + '-' + Math.floor(parseInt(tp, 10) / 20); }),
+        make: function (ds) {
+          var f = sh.tr.frame;
+          return html(200, f[0] + ds.map(function (d) { return d[at][0]; }).join('') +
+                           ds.map(function (d) { return d[at][1]; }).join('') + f[1]);
+        } };
     }
     if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
     // A copy made before 2026-10-24 does not keep it.

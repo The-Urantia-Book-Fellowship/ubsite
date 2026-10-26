@@ -299,6 +299,8 @@
         b.tabIndex = on ? 0 : -1;
         document.getElementById(b.getAttribute('aria-controls')).classList.toggle('on', on);
       });
+      // The Offline tab's translations are the offline menu's to say (offline.js).
+      if (t.id === 'set-t-offline') document.dispatchEvent(new Event('ub:offtab'));
     };
     tabs.addEventListener('click', function (ev) {
       var t = ev.target.closest('[role="tab"]');
@@ -451,8 +453,10 @@
   // /rail/N is), and kept for the page.  The tab chosen opens the next fold
   // (settings.py KEPT `trtab`).  A translator's note opens as a card at its
   // number, as a study note does (open(), below), from the fold, where its words
-  // are put hidden with its paragraph's.  Offline the fetch fails, until the
-  // copy holds them: a download of their own, to come (Tigran, 2026-10-26).
+  // are put hidden with its paragraph's.  Offline they come from the copy, each
+  // translation a download of its own, chosen in Settings' Offline tab
+  // (offline.js), which tells the folds when what it keeps changes
+  // (`ub:trkept`): one ticked here and not kept there says so in its tab.
   var TRS = [], trBy = {}, trGot = {};
   try { TRS = JSON.parse((document.getElementById('ub-translations') || {}).textContent || '[]'); } catch (e) {}
   TRS.forEach(function (x) { trBy[x.key] = x; });
@@ -517,6 +521,9 @@
       (cur === 'all' ? ks : [cur]).forEach(function (k) {
         var x = trBy[k];
         if (cur === 'all' || ks.length === 1) h += '<p class="who">' + x.label + '</p>';
+        // Every one the fold counts is in the fragment the server sends, so one
+        // missing is offline, and not kept in the copy.
+        if (!got.t[k]) return (h += '<p class="gap">' + T('tr:notkept') + '</p>');
         // A heading in the text (0:12.10) is centred, and a paper's first
         // paragraph drops its first letter, as the English's do and each
         // translation's own TeX does (\lettrine).
@@ -565,6 +572,7 @@
     if (ev.detail.key === 'translations' || ev.detail.key === 'trtab') trSync();
   });
   document.addEventListener('ub:swap', trSync);
+  document.addEventListener('ub:trkept', function () { trGot = {}; trSync(); });
   function swapped() { railSync(); indexSync(); }
   document.addEventListener('ub:swap', swapped);
   document.addEventListener('ub:settings', function (ev) {
@@ -993,6 +1001,8 @@
     window.addEventListener('offline', function () { net(false); });
     document.addEventListener('ub:offline', label);
     if (navigator.serviceWorker.controller) script();
+    // And by Settings' Offline tab, which lists the translations the copy keeps.
+    document.addEventListener('ub:offtab', script);
     // Under the icon, its right edge a little past the icon's, in the page's
     // coordinates: a popover is in the top layer, absolute to the document.
     menu.addEventListener('beforetoggle', function (ev) {

@@ -239,6 +239,26 @@ window.ubTitle = function () {
       </select></label>
       {%- endif %}
       {%- endfor %}
+      {%- if g.key == 'offline' %}
+      {#- The translations kept in the offline copy, each a download of its own
+          (ROADMAP item 15): what the copy holds, which the worker keeps with it
+          (sw.js meta.tr), not a setting, so that ↺ never removes one.  A tick
+          downloads one at once, and an untick lets it go (Tigran, 2026-10-26).
+          Greyed, its last line saying why, until offline.js says what the copy
+          has.  Not .trlist, which is the Translations tab's own (ub.js). #}
+      <div class="offtr">
+      <p class="sub">{{ t('Translations in the offline copy') }}</p>
+      <p class="trintro">{{ t('offline:tr') }}</p>
+      <ul class="offtrs">
+        {%- for x in translations() %}
+        <li><label><input type="checkbox" value="{{ x.key }}" disabled>
+          <span class="w"><span lang="{{ x.lang }}">{{ x.title }}</span> ({{ x.label }})</span>
+          <small class="st"></small></label></li>
+        {%- endfor %}
+      </ul>
+      <p class="why">{{ t('offline:trfirst') }}</p>
+      </div>
+      {%- endif %}
     </div>
     {%- endfor %}
     </div>

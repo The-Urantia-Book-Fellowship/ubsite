@@ -206,8 +206,9 @@ ship() {
         # chunks first, adding and never deleting, so that a reader updating from
         # the copy before still finds every chunk it was told of; then the manifest
         # that names them, by a temp name and mv.  A chunk neither this manifest
-        # nor the one it replaced names is pruned, as the AI voice's files are.
-        local chunks='import json, sys; d = sys.stdin.read().strip(); print("\n".join(c["file"][2:] for c in json.loads(d)["chunks"]) if d else "")'
+        # nor the one it replaced names is pruned, as the AI voice's files are;
+        # the translations' too, which the manifest lists apart (offline/pack.py).
+        local chunks='import json, sys; d = sys.stdin.read().strip(); m = json.loads(d) if d else {}; print("\n".join(c["file"][2:] for c in m.get("chunks", []) + [c for t in m.get("translations", []) for c in t["chunks"]]))'
         local before keep stale
         echo "==> offline copy ($(du -sh var/offline/c | cut -f1))"
         before=$(ssh "$HOST" "cat $DEST/var/offline/manifest.json 2>/dev/null || true" | python3 -c "$chunks")

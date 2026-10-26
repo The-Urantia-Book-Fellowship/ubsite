@@ -128,6 +128,14 @@
 
 "Keep the offline copy up to date" = "Обновлять офлайн-копию"
 "by itself, whenever the site is open and online, then shows what is new" = "само, когда сайт открыт и есть сеть, а затем показывать, что нового"
+# The translations kept in the copy (base.html, offline.js), each a download of
+# its own (2026-10-26).
+"Translations in the offline copy" = "Переводы в офлайн-копии"
+"offline:tr" = { en = "Each is a download of its own, kept with the copy and updated with it.", ru = "Каждый загружается отдельно, хранится вместе с копией и обновляется вместе с ней." }
+"offline:trfirst" = { en = "Download the offline copy first: the cloud at the top of the page.", ru = "Сначала загрузите офлайн-копию: облачко вверху страницы." }
+"offline:trstale" = { en = "The offline copy is out of date: downloading a translation updates it too.", ru = "Офлайн-копия устарела: загрузка перевода обновит и её." }
+"offline:troffline" = { en = "Offline, a translation can be let go, and downloaded once online.", ru = "Без сети перевод можно удалить, а загрузить — когда сеть появится." }
+"kept, {s}" = "сохранён, {s}"
 
 # --- Titles of pages
 
@@ -339,7 +347,8 @@
 "Show the index" = "Показать указатель"
 "{n} translations" = { en = ["{n} translation", "{n} translations"], ru = ["{n} перевод", "{n} перевода", "{n} переводов"] }
 "All|translations" = "Все"
-"tr:unreachable" = { en = "The translations could not be fetched: they need a connection, and are not in the offline copy yet.", ru = "Переводы не удалось загрузить: для них нужно подключение к сети, а в офлайн-копии их пока нет." }
+"tr:unreachable" = { en = "The translations could not be fetched: they need a connection, or to be kept in the offline copy (Settings, in its Offline tab).", ru = "Переводы не удалось загрузить: для них нужно подключение к сети или офлайн-копия с ними (настройки, вкладка „Офлайн“)." }
+"tr:notkept" = { en = "This translation is not in the offline copy: Settings, in its Offline tab, downloads it.", ru = "Этого перевода нет в офлайн-копии: его можно загрузить в настройках, во вкладке „Офлайн“." }
 
 # --- Listening: the player (listen.js)
 

@@ -1,5 +1,6 @@
-"""Work offline, end to end, in Chrome: turn it on, read and search with the
-network off, learn of a newer copy and take it, with the site's newer worker,
+"""Work offline, end to end, in Chrome: turn it on, keep a translation in it,
+read and search with the network off, learn of a newer copy and take it, with
+the site's newer worker,
 the page reloading itself after, survive an update that fails, say offline
 while the site is gone though the browser is online, keep it up to date by
 itself, with What's new at the end, and turn it off.
@@ -109,6 +110,24 @@ def change(copy: pathlib.Path, edit, names=("misc",), news: bool = True) -> dict
     return changed
 
 
+def change_tr(copy: pathlib.Path, key: str, edit) -> None:
+    """A revision of one translation in the scratch copy: its first chunk
+    passed through `edit` and renamed by its new hash, and the translation's
+    own build and size made to say so.  The copy's build does not move."""
+    m = json.loads((copy / "manifest.json").read_text())
+    t = next(x for x in m["translations"] if x["key"] == key)
+    c = t["chunks"][0]
+    data = json.loads(gzip.decompress((copy / c["file"]).read_bytes()))
+    raw = json.dumps(edit(data), ensure_ascii=False, separators=(",", ":")).encode()
+    h = hashlib.sha256(raw).hexdigest()[:16]
+    gz = gzip.compress(raw, 9, mtime=0)
+    (copy / "c" / f"{h}.gz").write_bytes(gz)
+    c.update(file=f"c/{h}.gz", hash=h, bytes=len(gz), raw=len(raw))
+    t["build"] = hashlib.sha256(t["build"].encode() + h.encode()).hexdigest()[:16]
+    t["bytes"] = sum(x["bytes"] for x in t["chunks"])
+    (copy / "manifest.json").write_text(json.dumps(m))
+
+
 # A copy as a worker before 2026-10-14 kept it: each chunk unpacked, under
 # have/ in place of gz/.  Returns how many chunks it unpacked.
 UNPACK = """async () => { let n = 0;
@@ -178,6 +197,26 @@ def menu(pg) -> None:
     pg.wait_for_selector("#offmenu", state="visible")
 
 
+def offline_tab(pg) -> None:
+    """Open Settings at its Offline tab, which lists the translations the copy
+    can keep (base.html .offtr)."""
+    if not pg.is_visible("dialog.settings"):
+        pg.click(".gear")
+    pg.click("#set-t-offline")
+    pg.wait_for_selector("dialog.settings .offtr", state="visible")
+
+
+# A translation's row in it: its words, as a reader of English has them.
+def tr_row(pg, key: str) -> str:
+    return pg.inner_text(f"dialog.settings .offtrs li:has(input[value='{key}']) .st")
+
+
+def tr_kept(pg, key: str, timeout: int = 60000) -> None:
+    """Until the Offline tab says the translation `key` is kept."""
+    pg.wait_for_function("k => document.querySelector(`.offtrs input[value='${k}']`).closest('li')"
+                         ".querySelector('.st').textContent.startsWith('kept')", arg=key, timeout=timeout)
+
+
 def icon(pg) -> dict:
     return pg.evaluate(f"(c => ({{net: c.dataset.net, have: c.dataset.have, title: c.title,"
                        f" shown: !c.hidden}}))(document.querySelector('{ICON}'))")
@@ -239,6 +278,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            f"the icon at the header's corner says online, with no copy ({i})")
         ok(not pg.locator("dialog.settings input[name=offline]").count(), "Settings has no switch for the copy itself")
         ok(not pg.locator("#offmenu input").count(), "and the menu has no switch to turn off")
+        offline_tab(pg)
+        ok(pg.evaluate("[...document.querySelectorAll('.offtrs input')].every(i => i.disabled)")
+           and pg.locator(".offtrs li").count() == 2
+           and "Download the offline copy first" in pg.inner_text("dialog.settings .offtr .why"),
+           "Settings' Offline tab lists the translations, greyed until a copy is kept")
+        pg.keyboard.press("Escape")
         pg.click(ICON)
         ok(pg.is_visible("#offmenu"), "the icon opens its menu")
         ok(pg.inner_text("#offmenu .net .host") == "localhost:8131", "which names the site, from its address")
@@ -264,6 +309,29 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            "Settings offers to keep it up to date by itself, in its Offline tab, where Work offline can run")
         # Updated by hand, with Update now, until "Kept up to date by itself".
         pg.evaluate("ubSettings.set('autoupdate', false)")
+
+        print("A translation kept in it")
+        offline_tab(pg)
+        pg.wait_for_function("[...document.querySelectorAll('.offtrs input')].every(i => !i.disabled)", timeout=10000)
+        sizes = [tr_row(pg, t["key"]) for t in m["translations"]]
+        ok(all(x.endswith(" MB") for x in sizes) and pg.is_hidden("dialog.settings .offtr .why"),
+           f"with a copy kept, it offers each, with its size ({sizes})")
+        ud = next(t for t in m["translations"] if t["key"] == "ud")
+        before = log.read_text().count("/offline/c/")
+        pg.check(".offtrs input[value=ud]")
+        tr_kept(pg, "ud")
+        print("  " + tr_row(pg, "ud"))
+        fetched = log.read_text().count("/offline/c/") - before
+        ok(fetched == len(ud["chunks"]), f"a tick downloads one at once, and only it ({fetched} chunks)")
+        kept = pg.evaluate(KEPT)
+        ok(kept["gz"] == len(m["chunks"]) + len(ud["chunks"]), f"into the copy's own cache, beside the rest ({kept})")
+        ok(not pg.is_checked(".offtrs input[value=urantia-ru]"), "the other is not kept")
+        pg.keyboard.press("Escape")
+        menu(pg)
+        wait_state(pg, "t.startsWith('Up to date')")
+        ok(f"{(m['bytes'] + ud['bytes']) / 1e6:.1f} MB in this browser" in pg.inner_text(STATE),
+           "the menu counts it in what the browser keeps")
+        pg.keyboard.press("Escape")
 
         print("Translations beside the text")
         pg.goto(BASE + "/1:1")
@@ -344,11 +412,36 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),
            "the footer says the page is from the offline copy")
+        pg.goto(BASE + "/1:1")
+        pg.locator(".tf .trfold").first.click()
+        pg.wait_for_selector(".tf.open .rt")
+        ok("Из всех имён" in words(0), "a fold shows the translation kept, at the tab chosen")
+        pg.locator(".tf.open .trtabs button[data-tab=urantia-ru]").click()
+        pg.wait_for_selector(".tf.open .gap")
+        ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "one not kept says so in its tab")
+        pg.locator(".tf.open .trtabs button[data-tab=ud]").click()
+        fold = pg.locator(".grid > .row:has(p.t[id='1:1.3']) .tf")
+        fold.locator(".trfold").click()
+        fold.locator('.tr a.fn[data-k="tn"]').first.click()
+        pg.wait_for_selector(".pop.tn")
+        ok("Note 6" in pg.inner_text(".pop.tn"), "and its notes open as cards")
+        pg.keyboard.press("Escape")
+        offline_tab(pg)
+        ok("can be let go" in pg.inner_text("dialog.settings .offtr .why")
+           and pg.is_disabled(".offtrs input[value=urantia-ru]") and pg.is_enabled(".offtrs input[value=ud]"),
+           "offline, the Offline tab lets one kept go, and offers none to download")
+        pg.uncheck(".offtrs input[value=ud]")
+        pg.wait_for_function("document.querySelector('.offtrs input[value=ud]').closest('li')"
+                             ".querySelector('.st').textContent.startsWith('kept') === false", timeout=10000)
+        kept = pg.evaluate(KEPT)
+        ok(kept["gz"] == len(m["chunks"]), f"unticked, offline too, it is let go ({kept})")
+        pg.keyboard.press("Escape")
+        pg.wait_for_function("(document.querySelector('.tf.open .gap') || {}).textContent", timeout=10000)
+        ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "and the folds open say so at once")
         pg.goto(BASE + "/2:1")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .gap")
-        ok("need a connection" in pg.inner_text(".tf.open .gap"),
-           "a fold of translations says offline that they need a connection")
+        ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "as does a fold opened after")
         pg.evaluate("ubSettings.set('translations', '')")
         pg.goto(BASE + "/search?q=101:4.2")
         ok(pg.url.endswith("/101:4.2"), f"a citation typed into the box opens it ({pg.url})")
@@ -496,6 +589,42 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == len(papers), f"it fetched only what changed ({fetched} chunks)")
         pg.keyboard.press("Escape")
+
+        print("A translation kept, and revised")
+        ctx.set_offline(False)
+        pg.goto(BASE + "/read")
+        offline_tab(pg)
+        pg.wait_for_function("!document.querySelector('.offtrs input[value=ud]').disabled", timeout=10000)
+        pg.check(".offtrs input[value=ud]")
+        tr_kept(pg, "ud")
+        pg.keyboard.press("Escape")
+        change_tr(copy, "ud", lambda d: (d.__setitem__("1:1", [d["1:1"][0],
+                                                               d["1:1"][1].replace("Из всех имён", "ИСПРАВЛЕНО Из всех имён", 1)]), d)[1])
+        m2 = json.loads((copy / "manifest.json").read_text())
+        pg.evaluate(HOUR_LATER)
+        pg.goto(BASE + "/read")
+        menu(pg)
+        wait_state(pg, "t.includes('changed since')")
+        ok(True, "a revision of a translation kept puts the copy out of date, though its own build is the same")
+        before = log.read_text().count("/offline/c/")
+        update(pg)
+        fetched = log.read_text().count("/offline/c/") - before
+        ok(fetched == 1, f"the update fetches only its chunk revised ({fetched})")
+        kept = pg.evaluate(KEPT)
+        ok(kept["gz"] == len(m2["chunks"]) + len(ud["chunks"]), f"and lets the one before it go ({kept})")
+        ud2 = next(t for t in m2["translations"] if t["key"] == "ud")
+        ok(f"{(m2['bytes'] + ud2['bytes']) / 1e6:.1f} MB in this browser" in pg.inner_text(STATE),
+           "the menu counting it still")
+        pg.keyboard.press("Escape")
+        ctx.set_offline(True)
+        pg.evaluate("ubSettings.set('translations', 'ud')")
+        pg.goto(BASE + "/1:1")
+        pg.locator(".tf .trfold").first.click()
+        pg.wait_for_selector(".tf.open .rt")
+        ok("ИСПРАВЛЕНО" in pg.evaluate("document.querySelector('.tf.open .rt').textContent"),
+           "offline, the fold reads the revision")
+        pg.evaluate("ubSettings.set('translations', '')")
+        ctx.set_offline(False)
 
         print("An update that fails")
         ctx.set_offline(False)
@@ -649,7 +778,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         menu(pg)
         pg.click("#offmenu .drop")
         wait_state(pg, "t.includes('MB to download')")
-        ok(pg.evaluate("caches.keys().then(k => k.length)") == 0, "nothing is kept")
+        ok(pg.evaluate("caches.keys().then(k => k.length)") == 0, "nothing is kept, the translation kept with it")
         ok(icon(pg)["have"] == "none", "and the icon says so")
 
         print("On again in the same page, which keeps its worker")

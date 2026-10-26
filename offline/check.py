@@ -8,6 +8,9 @@ Node runs static/offline-core.js on the copy, as the service worker does
   - every stored page, byte for byte: the sha256 the build took of it as the
     server sent it, and what the core joins from the copy's pieces; and the
     text the browser's voice reads, section by section, as /speech/ sends it;
+  - every section's translations, /tr/, with every translation kept, as the
+    server sends them, and with none kept or one alone, the fragment's frame
+    around what is kept;
   - every section with all its paragraphs marked (/101:4.1-N), and a sample of
     one paragraph each, which puts back each section's rail and marks;
   - addresses the server explains or redirects: a paragraph that is not there,
@@ -77,7 +80,7 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               "/index/q", "/index/QQ", "/index/a", "/appendix/a", "/appendix/G", "/appendix/AB",
               "/part/9", "/part/01", "/part/x", "/rail/300", "/rail/007", "/nothing", "/i/god/more",
               "/101:4.2:3", "/café", "/speech/01:4", "/speech/999:1", "/speech/1:99", "/speech/x",
-              "/speech/1:4:5"]:
+              "/speech/1:4:5", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2"]:
         jobs.append((p, "", True))
     for q in queries():
         for scope in ("", "index", "text", "notes"):
@@ -99,9 +102,14 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
     return out
 
 
+def every(manifest: dict) -> list[dict]:
+    """Every chunk the manifest names: the copy's, and each translation's."""
+    return manifest["chunks"] + [c for t in manifest.get("translations", []) for c in t["chunks"]]
+
+
 def consistent(copy: pathlib.Path, manifest: dict) -> list[str]:
     bad = []
-    for c in manifest["chunks"]:
+    for c in every(manifest):
         f = copy / c["file"]
         if not f.is_file():
             bad.append(f"{c['name']}: {c['file']} is missing")
@@ -109,7 +117,7 @@ def consistent(copy: pathlib.Path, manifest: dict) -> list[str]:
         data = f.read_bytes()
         if len(data) != c["bytes"] or len(gzip.decompress(data)) != c["raw"]:
             bad.append(f"{c['name']}: its size is not the manifest's")
-    files = {c["file"].split("/")[1] for c in manifest["chunks"]}
+    files = {c["file"].split("/")[1] for c in every(manifest)}
     stray = sorted(p.name for p in (copy / "c").iterdir() if p.name not in files)
     if stray:
         bad.append(f"files no chunk names: {stray[:5]}")
@@ -136,7 +144,7 @@ def assets(copy: pathlib.Path, manifest: dict) -> list[str]:
     return [f"{u}: named by the copy's pages, not in it" for u in sorted(want - names)]
 
 
-def bands(manifest: dict) -> list[str]:
+def bands(manifest: dict, con: sqlite3.Connection) -> list[str]:
     exp = tomllib.loads((ROOT / "verify" / "expectations.toml").read_text())["offline"]
     bad = []
     for key, val in (("pages", manifest["counts"]["pages"]), ("paths", manifest["counts"]["paths"]),
@@ -147,6 +155,23 @@ def bands(manifest: dict) -> list[str]:
         lo, hi = exp[key]
         if not lo <= val <= hi:
             bad.append(f"{key}: {val:.2f}, expected {lo} to {hi}")
+    # Each translation, a download of its own: a chunk to every twenty papers
+    # it has, by the database, as ud's grow as it is written; its size in a band.
+    got = {t["key"]: t for t in manifest.get("translations", [])}
+    if set(got) != set(exp["translations"]):
+        bad.append(f"translations: {sorted(got)}, expected {sorted(exp['translations'])}")
+    for key, want in exp["translations"].items():
+        t = got.get(key)
+        if t is None:
+            continue
+        groups = {f"tr-{key}-{g}" for (g,) in con.execute(
+            "SELECT DISTINCT p.paper_n / 20 FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id"
+            " WHERE t.translation = ?", (key,))}
+        if {c["name"] for c in t["chunks"]} != groups:
+            bad.append(f"{key}: {len(t['chunks'])} chunks, for {len(groups)} twenties of papers")
+        lo, hi = want["download_mb"]
+        if not lo <= t["bytes"] / 1e6 <= hi:
+            bad.append(f"{key}: {t['bytes'] / 1e6:.2f} MB, expected {lo} to {hi}")
     return bad
 
 
@@ -162,7 +187,7 @@ def run(con: sqlite3.Connection) -> int:
     manifest = json.loads((copy / "manifest.json").read_text())
     rc = 0
     for title, bad in (("the copy", consistent(copy, manifest)), ("what it loads", assets(copy, manifest)),
-                       ("its size", bands(manifest))):
+                       ("its size", bands(manifest, con))):
         print(f"{title}: {'ok' if not bad else 'FAILED'}")
         for b in bad:
             print(f"  {b}")
@@ -183,7 +208,7 @@ def run(con: sqlite3.Connection) -> int:
         return 1
     res = json.loads(r.stdout)
     searches = sum(1 for x in xs if x["path"] == "/search")
-    print(f"stored: {res['pages']:,} pages and spoken texts, {res['extras'] - searches:,} more addresses,"
+    print(f"stored: {res['pages']:,} pages, spoken texts and translations, {res['extras'] - searches:,} more addresses,"
           f" {searches:,} searches: {'ok' if not res['bad'] else f'{len(res['bad'])} FAILED'}")
     for b in res["bad"][:12]:
         print(f"  {b.get('path')}: " + ", ".join(f"{k} {v!r}" for k, v in b.items() if k != "path"))

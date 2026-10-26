@@ -31,6 +31,13 @@
 // the copy before, and the page reloads once it is closed (told).  Update now
 // is for a reader who keeps the copy as it was until they choose; most would
 // forget it, and find the copy "broken" (Tigran, 2026-10-25).
+//
+// The translations beside the text are each a download of their own, chosen
+// in Settings' Offline tab (base.html .offtr; Tigran, 2026-10-26): a tick
+// downloads one at once, with an update of the copy if it is out of date, and
+// an untick lets it go, online or not.  What the copy keeps is the worker's
+// (sw.js meta.tr), not a setting, so ↺ never removes one; and it is kept up to
+// date with the copy.  `ub:trkept` tells ub.js's folds when it changes.
 (function () {
   var box = document.getElementById('offmenu'), icon = document.querySelector('.top .offline');
   if (!box || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
@@ -91,6 +98,7 @@
   function show(s) {
     last = s;
     watch(s);
+    trs(s);
     kept = !!s && !s.removed;
     // Not while it downloads, nor offline, when it is all the site there is.
     drop.hidden = !kept || !!(s && s.busy) || !online();
@@ -127,6 +135,51 @@
       mark('kept');
     }
   }
+  // Settings' Offline tab: each translation, its tick what the copy keeps or is
+  // fetching, and its size, or how far its download has gone.  Greyed without
+  // a copy, while any download runs, and offline for those not kept; its last
+  // line says why, or that a download would update the copy too.
+  var trBox = document.querySelector('dialog.settings .offtr'), trSig = null;
+  function trs(s) {
+    if (!trBox) return;
+    var have = s && !s.removed && s.have, busy = s && s.busy, on = online(), by = {};
+    var mine = (have && have.tr) || [], err = s && s.error ? s.words || T.same(s.error) : null;
+    ((have && have.trs) || []).forEach(function (t) { by[t.key] = t; });
+    var of = busy && busy.total && { a: mb(busy.done), b: mb(busy.total) };
+    Array.prototype.forEach.call(trBox.querySelectorAll('.offtrs li'), function (li) {
+      var box = li.querySelector('input'), k = box.value, t = by[k], kept = mine.indexOf(k) >= 0,
+          adding = !!busy && (busy.adding || []).indexOf(k) >= 0;
+      box.checked = kept || adding;
+      box.disabled = !have || !!busy || (!kept && !on);
+      li.querySelector('.st').innerHTML = adding ? (of ? T('Downloading: {a} of {b}', of) : T('Downloading…'))
+        : kept && t ? T('kept, {s}', { s: mb(t.bytes) }) : t ? T(mb(t.bytes)) : '';
+    });
+    var why = trBox.querySelector('.why');
+    why.innerHTML = !have ? T('offline:trfirst') : busy ? '' : err ? T('The download stopped: {e}.', { e: err })
+                  : !on ? T('offline:troffline') : s.latest ? T('offline:trstale') : '';
+    why.hidden = !why.innerHTML;
+    var sig = mine.join(' ');
+    if (trSig !== null && sig !== trSig) document.dispatchEvent(new Event('ub:trkept'));
+    trSig = sig;
+  }
+  // A tick: the copy's translations and this one, fetched now, the site's
+  // worker asked for first, as an update asks; an update of the copy with it
+  // ends as one made by itself does (told).  An untick: let go at once.
+  if (trBox) trBox.addEventListener('change', function (ev) {
+    var box = ev.target, have = last && !last.removed && last.have;
+    if (box.type !== 'checkbox' || !have) return;
+    if (!box.checked) return ask('drop', { tr: box.value }).then(function (s) { show(s); fresh(); });
+    var was = last.latest ? have.made : null;
+    going = true;
+    show(Object.assign({}, last, { busy: { done: 0, total: 0, adding: [box.value], copy: !!was } }));
+    newest().then(function () { return ask('get', { tr: (have.tr || []).concat(box.value) }); }).then(function (s) {
+      going = false;
+      show(s);
+      if (s && s.error) fresh();
+      else if (was) told(was);
+    }, function () { going = false; });
+  });
+
   // While a download goes on, the worker says how far it is.  A worker can be
   // stopped by the browser mid-way and say nothing more; if it is quiet for a
   // while, ask it, and show what it says: the copy before, and the button.

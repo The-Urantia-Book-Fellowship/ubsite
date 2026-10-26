@@ -23,6 +23,13 @@ A headword's reading path (/i/<slug>/read, and /read/theme) is a page like any
 other, and the largest part of the copy: 132 MB of the 191 unpacked, though
 it is made of paragraphs the copy has already, because each paragraph comes
 with its captions and the folds around it.
+
+The translations beside the text are each a download of their own (ROADMAP
+item 15), which a reader chooses in Settings' Offline tab: a section's
+fragment, /tr/<paper>:<section>, holds every translation it has, so each
+translation's share of it is kept apart, its headings and its paragraphs
+(app.py tr_pieces), twenty papers to a chunk, and the worker joins the shares
+of those the reader keeps inside the fragment's frame, which the shell holds.
 """
 
 from __future__ import annotations
@@ -146,9 +153,10 @@ def _request(path: str) -> Request:
                     "root_path": "", "app": site.app})
 
 
-def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
+def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     """(chunks by name, the sha256 of every page the copy answers by its path,
-    counts).  Each chunk is JSON-able; pack.py writes them."""
+    counts, each translation's chunks by name, in Settings' order).  Each chunk
+    is JSON-able; pack.py writes them."""
     u = universe(con)
     shell = None
     expect: dict[str, str] = {}
@@ -201,6 +209,35 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
             expect[f"/speech/{p}:{s}"] = sha(got.text)
             chunks.setdefault(f"speech-{p // SPOKEN}", {})[f"{p}:{s}"] = got.text
             spoken += 1
+
+    # The translations, each apart: a section's fragment as the server sends it
+    # is the frame around every translation's headings, then every one's
+    # paragraphs, in Settings' order, and each translation keeps its two
+    # pieces of it, twenty papers to a chunk, as the spoken text is kept.
+    from ubsite import app as A
+    order = [x["key"] for x in A.translations()]
+    trs: dict[str, dict] = {k: {} for k in order}
+    tr_secs: dict[str, dict] = {k: {} for k in order}
+    fragments = 0
+    for p, secs in u["papers"].items():
+        frags = site.get_many([(f"/tr/{p}:{s}", "") for s in secs])
+        for s, got in zip(secs, frags):
+            parts = A.tr_pieces(p, s)
+            if not parts:
+                if got.status != 404:
+                    raise Shape(f"/tr/{p}:{s} answered {got.status}, with no translation of it")
+                continue
+            if list(parts) != [k for k in order if k in parts]:
+                raise Shape(f"/tr/{p}:{s}'s translations are not in Settings' order")
+            joined = (A.TR_FRAME[0] + "".join(h for h, _ in parts.values())
+                      + "".join(r for _, r in parts.values()) + A.TR_FRAME[1])
+            if got.status != 200 or joined != got.text:
+                raise Shape(f"/tr/{p}:{s} is not its translations' pieces joined in their frame")
+            expect[f"/tr/{p}:{s}"] = sha(got.text)
+            fragments += 1
+            for k, piece in parts.items():
+                trs[k].setdefault(f"tr-{k}-{p // SPOKEN}", {})[f"{p}:{s}"] = list(piece)
+                tr_secs[k].setdefault(str(p), []).append(s)
 
     # The index: a chunk to a letter, its page and its headwords' pages.
     by_letter: dict[str, list[str]] = {}
@@ -267,7 +304,6 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
     mid, post = rest.split(PROBE)
     missing = {"t": nf_rec["t"], "h": nf_rec["h"], "s": nf_rec["s"], "b": [pre, mid, post]}
 
-    from ubsite import app as A
     away_text = A.page(_request("/"), "offline.html", msg=Markup(RAIL)).body.decode("utf-8")
     away_sh, away_rec = cut(away_text)
     if away_sh != shell or away_rec["b"].count(RAIL) != 1:
@@ -287,9 +323,13 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict]:
         "papers": {str(p): secs for p, secs in u["papers"].items()},
         "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
         "misc": u["misc"],
+        # What /tr/ is made of offline: the fragment's two ends, and each
+        # translation in Settings' order with the sections it has, by paper.
+        "tr": {"frame": list(A.TR_FRAME),
+               "order": [{"key": k, "secs": tr_secs[k]} for k in order if trs[k]]},
     }
     counts = {"sections": sum(len(s) for s in u["papers"].values()), "papers": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
               "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
-              "pages": len(expect) - spoken, "spoken": spoken}
-    return chunks, expect, counts
+              "pages": len(expect) - spoken - fragments, "spoken": spoken, "fragments": fragments}
+    return chunks, expect, counts, {k: c for k, c in trs.items() if c}

@@ -15,7 +15,9 @@ const job = JSON.parse(fs.readFileSync(0, 'utf8'));
 
 const manifest = JSON.parse(fs.readFileSync(path.join(job.copy, 'manifest.json'), 'utf8'));
 const raw = {};
-for (const c of manifest.chunks) {
+// The translations' chunks too, each a download of its own (offline/pack.py).
+const trs = manifest.translations || [];
+for (const c of manifest.chunks.concat(...trs.map((t) => t.chunks))) {
   const data = zlib.gunzipSync(fs.readFileSync(path.join(job.copy, c.file)));
   const h = crypto.createHash('sha256').update(data).digest('hex').slice(0, 16);
   if (h !== c.hash) throw new Error(`${c.name}: its file holds ${h}, the manifest says ${c.hash}`);
@@ -51,12 +53,15 @@ db.exec("ATTACH ':memory:' AS ix");
 open(db, 'ix', raw['index.db']);
 const mem = () => new sqlite3.oo1.DB(':memory:');
 
-// What the copy answers for an address: {status, body?, location?}.
-function answer(p, query) {
-  const plan = core.resolve(p, sh, job.origin);
+// What the copy answers for an address: {status, body?, location?}, with
+// `kept` the translations kept in it, all of them unless it says.
+const ALL = trs.map((t) => t.key);
+function answer(p, query, kept = ALL) {
+  const plan = core.resolve(p, sh, job.origin, kept);
   if (plan === null) return { status: 0 };
   if (plan.search) return core.search(db, mem, sh, new URLSearchParams(query || ''));
   if (plan.res) return plan.res;
+  if (plan.chunks) return plan.make(plan.chunks.map(get));
   return plan.make(get(plan.chunk));
 }
 const sha = (s) => crypto.createHash('sha256').update(s, 'utf8').digest('hex');
@@ -89,6 +94,22 @@ for (const x of job.extras) {
   }
   if (x.sha !== undefined && sha(got.body) !== x.sha) {
     out.bad.push({ path: name, why: 'not the page the server sends', ...(x.body ? where(x.body, got.body) : {}) });
+  }
+}
+
+// A section's translations with fewer of them kept: with none, the fragment's
+// frame alone; with one, the frame around that one's pieces where it has the
+// section, else the frame alone.  With all of them, it is the server's, above.
+const frame = sh.tr ? sh.tr.frame.join('') : '';
+for (const p of Object.keys(job.pages).filter((p) => p.startsWith('/tr/'))) {
+  out.extras++;
+  const at = p.slice(4), [pn, sn] = at.split(':');
+  for (const kept of [[], ...ALL.map((k) => [k])]) {
+    const got = answer(p, '', kept), x = sh.tr.order.find((t) => t.key === kept[0]);
+    const piece = x && (x.secs[pn] || []).includes(+sn) && get(`tr-${x.key}-${Math.floor(+pn / 20)}`)[at];
+    const want = piece ? sh.tr.frame[0] + piece[0] + piece[1] + sh.tr.frame[1] : frame;
+    if (got.status !== 200 || got.body !== want)
+      out.bad.push({ path: p, kept: kept.join(' ') || 'none', why: 'not its frame around what is kept' });
   }
 }
 

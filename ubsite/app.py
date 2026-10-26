@@ -516,6 +516,29 @@ def translated(paper: int, sec: int) -> dict:
     return _translated(db_version(), l10n.BILINGUAL, paper, sec)
 
 
+# The fragment's frame: tr_section.html with nothing in it.  Between its ends
+# stand every translation's headings, then every translation's paragraphs, each
+# in Settings' order, as queries.translated() orders them.
+TR_FRAME = ('<div class="trs">\n', "</div>")
+
+
+def tr_pieces(paper: int, sec: int) -> dict[str, tuple[str, str]]:
+    """Each translation's share of /tr/<paper>:<section>, {key: (its headings,
+    its paragraphs and their notes)}, in Settings' order, for the offline copy,
+    which keeps each translation apart (offline/pages.py): the frame around
+    them all, joined in order, is the fragment."""
+    got = queries.translated(db(), paper, sec)
+    tpl = T.env.get_template("tr_section.html")
+    if tpl.render(heads=[], rows=[]) != "".join(TR_FRAME):
+        raise ValueError("tr_section.html's frame is not TR_FRAME")
+
+    def inner(**what) -> str:
+        return tpl.render(**what)[len(TR_FRAME[0]):-len(TR_FRAME[1])]
+    return {k: (inner(heads=[h for h in got["heads"] if h["k"] == k], rows=[]),
+                inner(heads=[], rows=[r for r in got["rows"] if r["k"] == k]))
+            for k in dict.fromkeys(r["k"] for r in got["rows"])}
+
+
 @app.get("/tr/{ref}", include_in_schema=False)
 def translations_of(ref: str, v: str = ""):
     """A section's translations, for the folds under its paragraphs (ub.js),

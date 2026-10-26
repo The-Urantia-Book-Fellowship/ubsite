@@ -1124,6 +1124,18 @@ dialog.settings .trshown .w { grid-column: 2; grid-row: 1; align-self: center; }
 dialog.settings .trshown .mv { grid-column: 3; grid-row: 1; }
 dialog.settings .trshown .d { grid-column: 2 / -1; grid-row: 2; margin-top: .15rem; }
 dialog.settings .trlang { margin: .2rem 0 0; font-size: .95rem; }
+/* The Offline tab's translations, kept in the offline copy (base.html .offtr):
+   a tick and a title, and under the title its size, or how far its download
+   has gone; greyed where it cannot be changed, its last line saying why. */
+dialog.settings .offtr { margin-top: .8rem; }
+dialog.settings .offtrs { list-style: none; margin: .3rem 0 .5rem; padding: 0; display: grid; gap: .4rem; }
+dialog.settings .offtrs label { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .05rem 0;
+  align-items: baseline; padding: 0; }
+dialog.settings .offtrs .st { grid-column: 2; }
+dialog.settings .offtrs .st:empty { display: none; }
+dialog.settings .offtrs label:has(input:disabled) { cursor: default; }
+dialog.settings .offtrs label:has(input:disabled) .w { color: var(--faint); }
+dialog.settings .offtr .why { color: var(--faint); font-size: .9rem; margin: 0; }
 dialog.settings .mv { display: flex; gap: .2rem; }
 dialog.settings .mv button { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0;
   font: 1rem system-ui, sans-serif; color: var(--ink); background: var(--card, var(--paper));

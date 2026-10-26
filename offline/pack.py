@@ -11,6 +11,14 @@ that has it need not fetch it again.  The manifest lists them all, and its
 copy holds does.  `format` is the shape of the chunks; a worker that cannot
 read a copy's format fetches the whole of a new one.  `news` is what changed
 on the site, for the cloud's "What's new" (news.py), and not in `build`.
+
+The translations are apart, in `translations`, in Settings' order: each a
+download of its own, which a reader chooses (Settings' Offline tab), with its
+chunks, their size, and a `build` of their own, the hash of its chunks alone.
+`chunks`, `build`, `bytes` and `raw` are the copy without them, so a worker
+from before 2026-10-26 neither sees nor fetches them, and a translation's
+revision asks nothing of a reader who does not keep it.  deploy.sh keeps
+their chunks on the hosts as it keeps the rest.
 """
 
 from __future__ import annotations
@@ -57,19 +65,24 @@ def _hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()[:16]
 
 
+def _build(entries: list[dict]) -> str:
+    """A build: the hash of its chunks' names and hashes."""
+    return _hash("\n".join(sorted(f"{e['name']} {e['hash']}" for e in entries)).encode())
+
+
 def build(con: sqlite3.Connection) -> dict:
     """Build the copy into var/offline/; return its manifest."""
     from ubsite import app as A
-    chunks, expect, counts = pages.build(con)
+    chunks, expect, counts, trs = pages.build(con)
     entries: list[dict] = []
     files: dict[str, bytes] = {}
 
-    def add(name: str, kind: str, data: bytes, **more):
+    def add(name: str, kind: str, data: bytes, into: list | None = None, **more):
         h = _hash(data)
         gz = gzip.compress(data, 9, mtime=0)
         files[f"{h}.gz"] = gz
-        entries.append({"name": name, "kind": kind, "file": f"c/{h}.gz", "hash": h,
-                        "bytes": len(gz), "raw": len(data), **more})
+        (entries if into is None else into).append({"name": name, "kind": kind, "file": f"c/{h}.gz", "hash": h,
+                                                    "bytes": len(gz), "raw": len(data), **more})
 
     for name, obj in chunks.items():
         add(name, "pages", _json(obj))
@@ -84,15 +97,23 @@ def build(con: sqlite3.Connection) -> dict:
             raise pages.Shape(f"{url} answered {got.status}")
         add(url, "asset", got.body, type=got.headers.get("content-type", "application/octet-stream"))
 
+    translations = []
+    for key, named in trs.items():
+        mine: list[dict] = []
+        for name, obj in named.items():
+            add(name, "tr", _json(obj), into=mine, tr=key)
+        translations.append({"key": key, "build": _build(mine), "bytes": sum(e["bytes"] for e in mine),
+                             "raw": sum(e["raw"] for e in mine), "chunks": mine})
+
     src = {r[0]: {"commit": r[1], "date": r[2]} for r in con.execute(
         "SELECT repo, commit_id, committed_at FROM build_source WHERE repo IN ('press', 'index')")}
     manifest = {
         "format": FORMAT,
-        "build": _hash("\n".join(sorted(f"{e['name']} {e['hash']}" for e in entries)).encode()),
+        "build": _build(entries),
         "made": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "text": src.get("press", {}), "index": src.get("index", {}),
         "bytes": sum(e["bytes"] for e in entries), "raw": sum(e["raw"] for e in entries),
-        "counts": counts, "news": news.news(), "chunks": entries,
+        "counts": counts, "news": news.news(), "chunks": entries, "translations": translations,
     }
     write(files, json.dumps(manifest, ensure_ascii=False, indent=1).encode("utf-8"), _json(expect))
     return manifest

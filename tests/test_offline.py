@@ -206,6 +206,37 @@ class Copy(unittest.TestCase):
         self.assertEqual((status, h["cache-control"]), (200, "public, max-age=31536000, immutable"))
         self.assertEqual(hashlib.sha256(gzip.decompress(body)).hexdigest()[:16], c["hash"])
 
+    def test_each_translation_is_a_download_of_its_own(self):
+        # Chosen in Settings' Offline tab: listed apart from the copy, whose
+        # chunks, build and size are without them, so a worker from before
+        # neither sees nor fetches them, each with a build of its own.
+        from offline import pack
+        from ubsite import app as A
+        m = json.loads((COPY / "manifest.json").read_text())
+        self.assertEqual([t["key"] for t in m["translations"]], [x["key"] for x in A.translations()])
+        for t in m["translations"]:
+            self.assertEqual(set(t), {"key", "build", "bytes", "raw", "chunks"})
+            self.assertEqual(t["build"], pack._build(t["chunks"]))
+            self.assertEqual(t["bytes"], sum(c["bytes"] for c in t["chunks"]))
+            for c in t["chunks"]:
+                self.assertEqual((c["kind"], c["tr"]), ("tr", t["key"]))
+                self.assertRegex(c["name"], rf"^tr-{re.escape(t['key'])}-\d+$")
+        self.assertFalse([c for c in m["chunks"] if c["kind"] == "tr"])
+        self.assertEqual(m["bytes"], sum(c["bytes"] for c in m["chunks"]))
+
+    def test_deploy_keeps_every_chunk_the_manifest_names(self):
+        # deploy.sh prunes on the hosts what neither manifest names: the
+        # translations' chunks, listed apart, must be among what it keeps.
+        import subprocess
+        code = re.search(r"local chunks='(.*)'", (ROOT / "deploy" / "deploy.sh").read_text()).group(1)
+        text = (COPY / "manifest.json").read_text()
+        m = json.loads(text)
+        got = subprocess.run([sys.executable, "-c", code], input=text, capture_output=True, text=True,
+                             check=True).stdout.split()
+        want = [c["file"][2:] for c in m["chunks"]] + [c["file"][2:] for t in m["translations"] for c in t["chunks"]]
+        self.assertTrue(m["translations"])
+        self.assertEqual(sorted(got), sorted(want))
+
     def test_it_holds_nothing_that_depends_on_the_host(self):
         # The copy is one for both hosts; what each host answers otherwise is
         # left to the server (offline-core.js HOSTED).

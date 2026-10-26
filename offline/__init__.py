@@ -26,6 +26,12 @@ index's, which changes as the index is edited.  The results page is the one
 thing drawn in JavaScript, and the check holds it to app.search() for every
 query in its list, byte for byte.
 
+**The translations beside the text** are each a download of their own,
+which a reader chooses in Settings' Offline tab: a section's fragment, /tr/,
+holds every translation it has, so each translation's share of it is kept
+apart (pages.py), and listed apart in the manifest, and the worker joins the
+shares of those kept.
+
 **What is built** goes into var/offline/: manifest.json, which lists every
 chunk by the hash of its bytes, and c/<hash>.gz, each chunk gzipped.  A copy
 knows which build it is, so a worker learns that its copy is stale by asking

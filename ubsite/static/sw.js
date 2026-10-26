@@ -19,6 +19,12 @@
 // most once an hour while online, says whether the site's is another, and by
 // how many bytes.  offline.js tells the reader, and updates when asked.
 //
+// The translations are each a download of their own, which a reader chooses
+// in Settings' Offline tab (offline.js): the manifest lists them apart from the
+// copy (offline/pack.py), and the worker keeps those chosen in the copy's own
+// cache beside the rest, updates them with it, and joins a section's from them
+// (offline-core.js, /tr/).  A copy with none is the copy as it was before.
+//
 // app.py serves this file with __VERSIONS__ filled in: the addresses of the
 // scripts and the binary below, with their hashes.  A change to any of them
 // is so a change to this file, which is what makes a browser install it anew.
@@ -46,8 +52,9 @@ self.addEventListener('activate', function (e) {
 
 // ---- What is kept --------------------------------------------------------
 // meta: {current: build, checked: ms, latest: {build, made, text, index,
-// bytes, raw, fetch, full} or null, error}.  `fetch` is what an update to
-// `latest` would download.
+// bytes, raw, fetch, full} or null, error, tr: {key: build}}.  `fetch` is what
+// an update to `latest` would download; `tr`, the translations kept, each at
+// the build of its own it was fetched at.
 function readMeta() {
   return caches.open(META).then(function (c) { return c.match('/offline/meta'); })
     .then(function (r) { return r ? r.json() : {}; });
@@ -89,10 +96,14 @@ function copy() {
       return cache.match('/offline/manifest.json').then(function (r) {
         if (!r) return null;
         return r.json().then(function (m) {
-          var c = { build: m.build, made: m.made, cache: cache, manifest: m, byName: {}, byUrl: {}, chunks: {}, used: [] };
+          var c = { build: m.build, made: m.made, cache: cache, manifest: m, byName: {}, byUrl: {}, chunks: {}, used: [],
+                    kept: kept(m, meta) };
           m.chunks.forEach(function (x) {
             c.byName[x.name] = x;
             if (x.kind === 'asset') c.byUrl[x.name] = x;
+          });
+          (m.translations || []).forEach(function (t) {
+            t.chunks.forEach(function (x) { c.byName[x.name] = x; });
           });
           return chunk(c, 'shell').then(function (sh) { c.shell = sh; return c; });
         });
@@ -101,6 +112,18 @@ function copy() {
   }).catch(function () { return null; });
   held.then(function (c) { if (!c) held = null; });
   return held;
+}
+// The translations a copy keeps: those meta names that its manifest lists, in
+// the manifest's order, which is Settings'.
+function kept(m, meta) {
+  var tr = meta.tr || {};
+  return (m.translations || []).filter(function (t) { return tr[t.key]; }).map(function (t) { return t.key; });
+}
+// The chunks a manifest holds for a copy keeping the translations `keys`: the
+// copy's own, and each of theirs.
+function wanted(m, keys) {
+  return (m.translations || []).filter(function (t) { return keys.indexOf(t.key) >= 0; })
+    .reduce(function (all, t) { return all.concat(t.chunks); }, m.chunks);
 }
 function bytes(c, name) {
   var h = c.byName[name].hash;
@@ -186,11 +209,14 @@ function fromCopy(c, url) {
   });
   var path;
   try { path = decodeURIComponent(url.pathname); } catch (e) { return Promise.resolve(null); }
-  var plan = self.ubOffline.resolve(path, c.shell, location.origin);
+  var plan = self.ubOffline.resolve(path, c.shell, location.origin, c.kept);
   if (plan === null) return Promise.resolve(null);
   if (plan.res) return Promise.resolve(respond(c, plan.res));
   if (plan.search) return database(c).then(function (d) {
     return respond(c, self.ubOffline.search(d.db, d.mem, c.shell, url.searchParams));
+  });
+  if (plan.chunks) return Promise.all(plan.chunks.map(function (n) { return chunk(c, n); })).then(function (ds) {
+    return respond(c, plan.make(ds));
   });
   return chunk(c, plan.chunk).then(function (data) { return respond(c, plan.make(data)); });
 }
@@ -229,14 +255,24 @@ self.addEventListener('fetch', function (e) {
 });
 
 // ---- Keeping it current --------------------------------------------------
-// {done, total} in bytes while a copy is downloading: sent to the pages as it
-// is, so plain data.  The download itself is `running`.
+// {done, total} in bytes while a copy is downloading, with `adding`, the
+// translations it fetches that were not kept, and `copy`, whether the copy
+// itself is updated too: sent to the pages as it is, so plain data.  The
+// download itself is `running`.
 var busy = null, running = null;
+// What the copy is: its build, its date, the text's and the index's, and its
+// size with the translations kept (`tr`), and every translation its manifest
+// lists, with its size (`trs`), for Settings' Offline tab.
 function state() {
   return Promise.all([readMeta(), copy()]).then(function (got) {
     var meta = got[0], c = got[1], m = c && c.manifest;
+    var mine = m ? (m.translations || []).filter(function (t) { return c.kept.indexOf(t.key) >= 0; }) : [];
+    var sum = function (k) { return mine.reduce(function (n, t) { return n + t[k]; }, m[k]); };
     return {
-      have: m ? { build: m.build, made: m.made, text: m.text, index: m.index, bytes: m.bytes, raw: m.raw } : null,
+      have: m ? { build: m.build, made: m.made, text: m.text, index: m.index, bytes: sum('bytes'), raw: sum('raw'),
+                  tr: c.kept.slice(), trs: (m.translations || []).map(function (t) {
+                    return { key: t.key, bytes: t.bytes, raw: t.raw };
+                  }) } : null,
       latest: meta.latest || null, checked: meta.checked || 0, busy: busy, error: meta.error || null,
       words: meta.error && meta.words || null
     };
@@ -276,33 +312,53 @@ function check(force) {
       return r.json();
     }, function (err) { throw away(err); }).then(function (m) {
       return copy().then(function (c) {
-        var have = {};
-        if (c) c.manifest.chunks.forEach(function (x) { have[x.hash] = true; });
+        var have = {}, keys = c ? c.kept : [];
+        if (c) wanted(c.manifest, keys).forEach(function (x) { have[x.hash] = true; });
         var full = !c || m.format !== FORMAT || (c.manifest.format !== m.format);
         var cost = 0;
-        m.chunks.forEach(function (x) { if (full || !have[x.hash]) cost += x.bytes; });
+        wanted(m, keys).forEach(function (x) { if (full || !have[x.hash]) cost += x.bytes; });
         var latest = { build: m.build, made: m.made, text: m.text, index: m.index, bytes: m.bytes,
                        raw: m.raw, fetch: cost, full: full };
         return updateMeta(function (meta) {
+          // Out of date where the copy is another build, or a translation kept
+          // has a build of its own that is not the site's, or has gone.
+          var tr = meta.tr || {}, by = {};
+          (m.translations || []).forEach(function (t) { by[t.key] = t.build; });
           meta.checked = Date.now();
-          meta.latest = meta.current !== m.build ? latest : null;
+          meta.latest = meta.current !== m.build || Object.keys(tr).some(function (k) { return by[k] !== tr[k]; })
+            ? latest : null;
         });
       });
     });
   });
 }
-// Fetch the site's copy into a cache of its own: each chunk this browser holds
-// already, in any copy, the one in use, one before it or an update that
-// stopped, is carried over, and the rest is fetched.  Then make it the copy,
-// and let the others go.
-function download() {
+// Fetch the site's copy into a cache of its own, with the translations `want`
+// (their keys; those kept until now, if it is not given): each chunk this
+// browser holds already, in any copy, the one in use, one before it or an
+// update that stopped, is carried over, and the rest is fetched.  Then make it
+// the copy, and let the others go.  Where the copy's build has not moved, as
+// when a translation is chosen, the cache is the copy's own, and only what it
+// lacks is fetched; what it holds and no longer wants is let go, a
+// translation's chunks from before it was revised.
+function download(want) {
   if (running) return running;
-  busy = { done: 0, total: 0 };
-  running = fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
+  busy = { done: 0, total: 0, adding: [], copy: false };
+  var had = {}, was = null;
+  running = readMeta().then(function (meta) {
+    had = meta.tr || {};
+    was = meta.current || null;
+    if (!want) want = Object.keys(had);
+    return fetch('/offline/manifest.json', { cache: 'no-cache' });
+  }).then(function (r) {
     if (!r.ok) throw stopped(T.k('the site has no offline copy ({s})'), { s: r.status });
     return r.json();
   }).then(function (m) {
     if (m.format !== FORMAT) throw stopped(T.k('this browser has an older worker; reload the page and try again'));
+    var trs = (m.translations || []).filter(function (t) { return want.indexOf(t.key) >= 0; });
+    var all = wanted(m, want), keep = {};
+    all.forEach(function (x) { keep[x.hash] = true; });
+    busy.adding = trs.filter(function (t) { return !had[t.key]; }).map(function (t) { return t.key; });
+    busy.copy = was !== m.build;
     // A copy turned off and on again in one page keeps its worker, which is
     // then not installed again: the engine it fetched at install is gone.
     var engine = caches.open(ENGINE).then(function (c) {
@@ -310,7 +366,7 @@ function download() {
     });
     return Promise.all([caches.open(COPY + m.build), engine]).then(function (got) {
       var target = got[0], todo = [];
-      return m.chunks.reduce(function (p, x) {
+      return all.reduce(function (p, x) {
         return p.then(function () {
           return target.match(key(x.hash)).then(function (here) {
             if (here) return;
@@ -356,11 +412,20 @@ function download() {
         return target.put('/offline/manifest.json', new Response(JSON.stringify(m),
                                                                  { headers: { 'Content-Type': 'application/json' } }));
       }).then(function () {
+        return target.keys().then(function (ks) {
+          return Promise.all(ks.filter(function (k) {
+            var h = /^\/offline\/(?:gz|have)\/([0-9a-f]+)$/.exec(new URL(k.url).pathname);
+            return h && !keep[h[1]];
+          }).map(function (k) { return target.delete(k); }));
+        });
+      }).then(function () {
         return updateMeta(function (meta) {
           meta.current = m.build;
           meta.checked = Date.now();
           meta.latest = null;
           meta.error = meta.words = null;
+          meta.tr = {};
+          trs.forEach(function (t) { meta.tr[t.key] = t.build; });
         });
       }).then(function () {
         var was = held;
@@ -385,6 +450,28 @@ function download() {
   return running;
 }
 
+// A translation let go, from Settings' Offline tab: its chunks out of the
+// copy, and out of meta.  Not while a download runs, whose end would write
+// meta again.
+function drop(k) {
+  if (running) return Promise.reject(new Error('a download is under way'));
+  return copy().then(function (c) {
+    return updateMeta(function (meta) {
+      if (meta.tr) delete meta.tr[k];
+      meta.checked = 0;                // the next check asks again, without it
+    }).then(function () {
+      held = null;
+      var t = c && (c.manifest.translations || []).filter(function (x) { return x.key === k; })[0];
+      if (!t) return;
+      var keep = {};
+      wanted(c.manifest, c.kept.filter(function (x) { return x !== k; })).forEach(function (x) { keep[x.hash] = true; });
+      return Promise.all(t.chunks.filter(function (x) { return !keep[x.hash]; }).map(function (x) {
+        return Promise.all([c.cache.delete(key(x.hash)), c.cache.delete(unpackedKey(x.hash))]);
+      }));
+    });
+  }).then(tell);
+}
+
 // Everything this worker keeps, for a reader who turns Work offline off.
 function remove() {
   held = null;
@@ -394,13 +481,17 @@ function remove() {
   });
 }
 
-// offline.js asks: {cmd: 'state' | 'check' | 'get' | 'remove', force}, and the
-// answer, the state, comes back on the message's port.  A check's says too
+// offline.js asks: {cmd: 'state' | 'check' | 'get' | 'drop' | 'remove', force,
+// tr}, and the answer, the state, comes back on the message's port.  `get`
+// may name the translations to keep, `tr`, a list of their keys, and `drop`
+// names the one to let go.  A check's says too
 // whether it reached the site: `reached` true or false, or none where it did
 // not ask, or failed otherwise (a 404: the site is there, with no copy).
 self.addEventListener('message', function (e) {
   var cmd = e.data && e.data.cmd, port = e.ports && e.ports[0];
-  var p = cmd === 'get' ? download()
+  var tr = e.data && e.data.tr;
+  var p = cmd === 'get' ? download(Array.isArray(tr) ? tr.filter(function (k) { return typeof k === 'string'; }) : undefined)
+        : cmd === 'drop' ? drop(String(tr))
         : cmd === 'check' ? check(!!e.data.force).then(function (asked) {
             return state().then(function (s) { if (asked) s.reached = true; return s; });
           }, function (err) {

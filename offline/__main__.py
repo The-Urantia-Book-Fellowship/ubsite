@@ -28,6 +28,9 @@ def main() -> int:
         for k, (n, gz, raw) in kinds.items():
             print(f"  {k:6} {n:4}  {gz / 1e6:6.2f} MB to download and keep, {raw / 1e6:6.2f} MB unpacked")
         print(f"  total        {m['bytes'] / 1e6:6.2f} MB to download and keep, {m['raw'] / 1e6:6.2f} MB unpacked")
+        for x in m["translations"]:
+            print(f"  translation {x['key']}: {len(x['chunks'])} chunks, {x['bytes'] / 1e6:.2f} MB to download"
+                  f" and keep, {x['raw'] / 1e6:.2f} MB unpacked, if a reader chooses it")
         return 0
     from . import check
     return check.run(A.db())
