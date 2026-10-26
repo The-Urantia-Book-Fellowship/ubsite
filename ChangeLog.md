@@ -65,6 +65,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- In Compare, each translation's first paragraph drops its first letter as the English's does, its other paragraphs are set in a little as the book's are, and every column's first line stands level with the English's, at a paper's opening and at a block of verse alike, whether paragraph references are shown or not; and the words on its button stand centred in it.
 - Ctrl+, opens Settings on a Russian keyboard too, where that key types б.
 - Beside a paper's first paragraph, on a wide screen, the index entries stand level with its text again, not with the line of its reference above it.
 - The Foreword is headed Foreword alone, as the book heads it, not Paper 0.

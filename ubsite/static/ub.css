@@ -346,7 +346,7 @@ p.t { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
    Goudy's J (ten papers) hang its tail into the space above the third line,
    as the press does, instead of pushing that line in; at -.3em every letter
    still clears the second line, and the tail the third, at every spacing. */
-p.t.opening::first-letter, .tf .rt.opening::first-letter { -webkit-initial-letter: 2; initial-letter: 2;
+p.t.opening::first-letter, :is(.tf, .rc) .rt.opening::first-letter { -webkit-initial-letter: 2; initial-letter: 2;
       font-size-adjust: none; margin: 0 .06em -.3em 0; }
 /* A verse, one to a line (48:6, 122:9, 144:5), is a line, not a paragraph to
    fill: when one wraps, its first line keeps its own spaces. */
@@ -798,8 +798,14 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .cmphead { display: none; justify-content: center; max-width: var(--measure); margin: -.35rem 0 1rem; }
 .cmpbtn { display: inline-flex; align-items: center; gap: .45em; font: inherit; font-size: .95rem;
   color: var(--faint); background: none; border: 1px solid var(--rule); border-radius: 999px;
-  padding: .2em .85em .18em; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-.cmpbtn span { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; }
+  padding: .28em .85em; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+/* Its words are capitals, which a line box centres too high, keeping room for
+   descenders they never have: trimmed to the capitals' own height, each
+   language's face its own, they stand centred in the pill, level with the
+   drawn columns (Tigran, 2026-10-26).  A browser without text-box sets them
+   a pixel or so high, as before. */
+.cmpbtn span { font-size: .8em; letter-spacing: .12em; text-transform: uppercase;
+               text-box: trim-both cap alphabetic; }
 .cmpbtn svg { width: 1.15em; height: .95em; fill: none; stroke: currentColor; stroke-width: 1.5; }
 .cmpbtn svg path { stroke-width: 1.1; }
 .cmpbtn .short { display: none; }
@@ -845,6 +851,23 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
          grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
   article.cmp .grid > .row > :is(.rc, .cn, .ch) { grid-column: var(--c); grid-row: 1; }
   article.cmp .grid > .row > .a { grid-column: -2; }
+  /* Each column's first line level with the English's (Tigran, 2026-10-26):
+     at a paper's opening, below the line its reference and ▶ stand in, where
+     the English has one (p.t.opening, above); at a block of verse, below the
+     block's own space and, with the references on, that line (.verse).  The
+     entries keep their own places beside them, which their rules give them
+     as the paragraph's next sibling, as the cells now are. */
+  article.cmp .row:has(> p.t.opening) > :is(.rc, .a) { margin-top: 1.5rem; }
+  :root[data-paranum="off"][data-voice="off"]:not([data-pages="true"]) article.cmp .row:has(> p.t.opening) > :is(.rc, .a) {
+         margin-top: 0; }
+  article.cmp .row:has(> .verse) > :is(.rc, .a) { margin-top: .6rem; }
+  :root:not([data-paranum="off"]) article.cmp .row:has(> .verse) > .rc { margin-top: 2.1rem; }
+  /* A column's paragraphs are set in a little, as the book's are, as the
+     English's are where nothing stands at their start (Tigran, 2026-10-26):
+     here nothing ever does.  Not where the English is not either: a paper's
+     opening, the heading in the text, a list's item, whose label has a box of
+     its own; nor a block of verse's lines. */
+  article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark)) { text-indent: 1em; }
 }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
