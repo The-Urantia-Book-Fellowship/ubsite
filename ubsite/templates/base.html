@@ -80,6 +80,8 @@ window.ubTitle = function () {
   try {
     var s = JSON.parse(localStorage.getItem('ub_settings') || '{}') || {};
     if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
+    // Off was once a voice, the English's (settings.py `listen`).
+    if (s.voice === 'off') { delete s.voice; s.listen = false; }
   } catch (e) { s = {}; }
   for (var k in B) {
     var x = k in s ? s[k] : D[k];
@@ -181,7 +183,7 @@ window.ubTitle = function () {
       <button class="x" value="close" {{ ta('aria-label', 'Close') }} {{ ta('title', 'Close') }} autofocus>
         <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button>
     </div>
-    {%- set setgroups = settings_groups(voices()) %}
+    {%- set setgroups = settings_groups(voices(), translations()) %}
     {#- A group with a class is hidden until ub.js finds it can run: Offline's. #}
     <div class="tabs" role="tablist" {{ ta('aria-label', 'Settings') }}>
       {%- for g in setgroups %}
@@ -214,7 +216,7 @@ window.ubTitle = function () {
         {%- endfor %}
         </div></div>
       {%- elif it.kind == 'radio' %}
-      {%- if it.key != 'voice' %}<p class="sub">{{ t(it.label) }}</p>{% endif %}
+      <p class="sub">{{ t(it.label) }}</p>
       {%- for c in it.choices %}
       <label class="{{ c.cls }}"{{ needs|safe }}><input type="radio" name="{{ it.key }}" value="{{ c.value }}"> {{ t(c.label) }}
         {%- if c.hint %} <small>{{ t(c.hint) }}</small>{% endif %}</label>
@@ -246,6 +248,18 @@ window.ubTitle = function () {
       {%- endfor %}
       {#- What a fold needs of each: its name in a tab, and who made it. #}
       <script type="application/json" id="ub-translations">{{ translations_json()|safe }}</script>
+      {%- elif it.kind == 'trvoices' %}
+      {#- A menu of the browser's voices for each translation, which its ▶ in
+          Compare reads with, by its short name, as Compare names it: filled in
+          by ub.js, which shows those ticked and keeps them all in the hidden
+          input, the setting's value (settings.py trvoices). #}
+      <div class="trvoices"{{ needs|safe }} hidden><input type="hidden" name="{{ it.key }}">
+      <p class="sub">{{ t(it.label) }}</p>
+      {%- for c in it.choices %}
+      <label class="row set-bvoice" data-k="{{ c.value }}" data-lang="{{ c.lang }}" hidden>{{ c.label }} <select>
+        <option value=""{{ ru('Automatic') }}>{{ tt('Automatic') }}</option></select></label>
+      {%- endfor %}
+      </div>
       {%- elif it.kind == 'select' %}
       <label class="row set-{{ it.key }}"{{ needs|safe }}>{{ t(it.label) }} <select name="{{ it.key }}">
         {%- for c in it.choices %}{% set w = tr('{r}×', r=dec(c.value)) if it.key == 'rate' else c.label %}<option value="{{ c.value }}"{{ ru(w) }}>{{ tt(w) }}</option>{% endfor %}

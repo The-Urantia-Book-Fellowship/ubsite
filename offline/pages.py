@@ -240,6 +240,21 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
                 trs[k].setdefault(f"tr-{k}-{p // SPOKEN}", {})[f"{p}:{s}"] = list(piece)
                 tr_secs[k].setdefault(str(p), []).append(s)
 
+    # What the browser's voice reads of each (app.py speech_tr), as the server
+    # sends it, in its own download, twenty papers to a chunk as its pieces of
+    # /tr/ are, so that a translation kept can be heard offline (Tigran,
+    # 2026-10-27), as the English is.
+    tr_spoken = 0
+    for k in order:
+        addrs = [f"/speech/{k}/{p}:{s}" for p, secs in tr_secs[k].items() for s in secs]
+        for path, got in zip(addrs, site.get_many([(a, "") for a in addrs])):
+            if got.status != 200 or not got.headers.get("content-type", "").startswith("application/json"):
+                raise Shape(f"{path} answered {got.status}")
+            at = path.rsplit("/", 1)[1]
+            expect[path] = sha(got.text)
+            trs[k].setdefault(f"tr-{k}-speech-{int(at.split(':')[0]) // SPOKEN}", {})[at] = got.text
+            tr_spoken += 1
+
     # Each one's own contents, which the left rail shows when a reader chooses
     # it (app.py toc_of): /rail/<key> as the server sends it, a chunk of its
     # own in its download, so that a translation not kept leaves the rail in
@@ -345,11 +360,12 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         # is headed by (search.html), its short name as HTML.
         "tr": {"frame": list(A.TR_FRAME),
                "order": [{"key": k, "secs": tr_secs[k], "title": named[k]["title"],
-                          "label": str(named[k]["label"]), "lang": named[k]["lang"]}
+                          "label": str(named[k]["label"]), "lang": named[k]["lang"], "speech": True}
                          for k in order if trs[k]]},
     }
     counts = {"sections": sum(len(s) for s in u["papers"].values()), "papers": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
               "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
-              "pages": len(expect) - spoken - fragments - tocs, "spoken": spoken, "fragments": fragments}
+              "pages": len(expect) - spoken - fragments - tocs - tr_spoken, "spoken": spoken,
+              "fragments": fragments, "tr_spoken": tr_spoken}
     return chunks, expect, counts, {k: c for k, c in trs.items() if c}

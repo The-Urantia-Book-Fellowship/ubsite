@@ -129,6 +129,18 @@ for (const p of Object.keys(job.pages).filter((p) => /^\/rail\/[^0-9]/.test(p)))
   }
 }
 
+// What the browser's voice reads of a translation, with fewer kept: from its
+// own download, or not at all, the network's failure standing; with all, the
+// server's, above.
+for (const p of Object.keys(job.pages).filter((p) => /^\/speech\/[^\/]+\//.test(p))) {
+  out.extras++;
+  for (const kept of [[], ...ALL.map((k) => [k])]) {
+    const got = answer(p, '', kept), mine = kept.includes(p.split('/')[2]);
+    if (mine ? got.status !== 200 || sha(got.body) !== job.pages[p] : got.status !== 0)
+      out.bad.push({ path: p, kept: kept.join(' ') || 'none', why: 'not its own download, or not left to the network' });
+  }
+}
+
 // A search with fewer translations kept: each not kept has its list saying
 // so, in its place among the others, wherever the server's might stand (on
 // the overview, or opened whole), and the rest of the page is the server's.

@@ -157,4 +157,64 @@ def run(con) -> int:
           f"{'' if not odd else '   FAIL'}")
     for ref, t in odd[:8]:
         print(f"      {ref:10} {sorted(set(c for c in t if not ALLOWED.match(c)))}  {t[:70]!r}")
+    bad += translations(con)
     return 1 if bad else 0
+
+
+# The translations' spoken text (build/speech.py derive_tr), which the browser's
+# voice reads: every paragraph a translation has, in its section, at most one
+# heading to a section, and nothing in it but its language's words, digits and
+# punctuation (speech.ALLOWED_TR).
+TR_INVARIANTS = [
+    ("every translated paragraph has its spoken text",
+     """SELECT COUNT(*) FROM tr_paragraph t LEFT JOIN tr_speech x
+           ON x.translation = t.translation AND x.paragraph_id = t.paragraph_id
+         WHERE x.id IS NULL"""),
+    ("a spoken paragraph is one the translation has",
+     """SELECT COUNT(*) FROM tr_speech x LEFT JOIN tr_paragraph t
+           ON t.translation = x.translation AND t.paragraph_id = x.paragraph_id
+         WHERE x.paragraph_id IS NOT NULL AND t.id IS NULL"""),
+    ("a spoken paragraph is in its row's section",
+     """SELECT COUNT(*) FROM tr_speech x JOIN paragraph p ON p.id = x.paragraph_id
+         WHERE p.section_id <> x.section_id"""),
+    ("a spoken heading is over a section the translation has",
+     """SELECT COUNT(*) FROM tr_speech x WHERE x.paragraph_id IS NULL AND NOT EXISTS (
+          SELECT 1 FROM tr_speech y WHERE y.translation = x.translation
+             AND y.section_id = x.section_id AND y.paragraph_id IS NOT NULL)"""),
+    ("no more than one spoken heading per section and translation",
+     """SELECT COUNT(*) FROM (SELECT 1 FROM tr_speech WHERE paragraph_id IS NULL
+         GROUP BY translation, section_id HAVING COUNT(*) > 1)"""),
+]
+
+
+def translations(con) -> int:
+    from ..speech import ALLOWED_TR
+    try:
+        rows = con.execute("SELECT key, lang FROM translation ORDER BY ord").fetchall()
+        con.execute("SELECT 1 FROM tr_speech").fetchone()
+    except Exception:                                   # noqa: BLE001
+        print("  no tr_speech -- a database from before the translations were spoken   FAIL")
+        return 1
+    bad = 0
+    print("\nthe translations, spoken (all must be 0)")
+    for key, lang in rows:
+        n, h = con.execute("SELECT COUNT(paragraph_id), SUM(paragraph_id IS NULL) FROM tr_speech"
+                           " WHERE translation = ?", (key,)).fetchone()
+        print(f"  {key:12} {n:>9,} paragraphs, {h or 0:,} headings")
+    for name, q in TR_INVARIANTS:
+        got = con.execute(q).fetchone()[0]
+        bad += bool(got)
+        print(f"  {name:56} {got}{'' if not got else '   FAIL'}")
+    odd = []
+    for key, lang in rows:
+        ok = ALLOWED_TR.get(lang)
+        odd += [(key, ok, r, t) for r, t in con.execute(
+            "SELECT COALESCE(p.ref, s.paper_n || ':' || s.n), x.text FROM tr_speech x"
+            " JOIN section s ON s.id = x.section_id LEFT JOIN paragraph p ON p.id = x.paragraph_id"
+            " WHERE x.translation = ?", (key,)) if not ok or not ok.match(t)]
+    bad += bool(odd)
+    print(f"  {'nothing but words, digits and punctuation in them':56} {len(odd)}"
+          f"{'' if not odd else '   FAIL'}")
+    for key, ok, ref, t in odd[:8]:
+        print(f"      {key} {ref:10} {sorted(set(c for c in t if not ok or not ok.match(c)))}  {t[:70]!r}")
+    return bad

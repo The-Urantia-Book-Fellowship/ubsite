@@ -302,7 +302,9 @@ class Counter:
         elif path.startswith("/speech/"):
             if status != 200:
                 return
-            kind, rest = "listen", ("browser", path[len("/speech/"):])
+            # /speech/<P:S> the English, /speech/<key>/<P:S> a translation's.
+            tr, _, ref = path[len("/speech/"):].rpartition("/")
+            kind, rest = "listen", ("browser:" + tr if tr else "browser", ref)
         elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/")):
             return                                 # /rail/N: a paper opened in the left rail;
                                                    # /offline/: a copy downloading (sw.js);

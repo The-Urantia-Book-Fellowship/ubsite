@@ -20,6 +20,9 @@
       if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
       // The text size's steps moved up one (settings.py): Largest is Larger.
       if (s.size === 'largest') s.size = 'larger';
+      // Off was once a voice, the English's; it is Listening controls now
+      // (settings.py `listen`, 2026-10-27).
+      if (s.voice === 'off') { delete s.voice; s.listen = false; }
     } catch (e) {}
     return s;
   }
@@ -48,44 +51,61 @@
   function announce(k, o) {
     document.dispatchEvent(new CustomEvent('ub:settings', { detail: { key: k, all: o } }));
   }
-  // The browser's own voices (Web Speech), English ones, best first: an online
-  // voice (Google's in Chrome, Microsoft's "Natural" ones in Edge) or Apple's
-  // Premium and Enhanced ones sound better than the rest, and the book is
-  // American.  Not macOS's novelty voices.  The list can be empty until the
-  // browser's voiceschanged.
+  // The browser's own voices (Web Speech) in a language, English unless
+  // another is asked for (a translation's, read aloud: listen.js), best
+  // first: an online voice (Google's in Chrome, Microsoft's "Natural" ones in
+  // Edge) or Apple's Premium and Enhanced ones sound better than the rest, and
+  // the book is American, a Russian translation Russia's.  Not macOS's
+  // novelty voices.  The list can be empty until the browser's voiceschanged.
   var synth = window.speechSynthesis;
   var NOVELTY = /^(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox)\b/;
-  function score(v) {
-    return (/natural|neural|premium|enhanced|online/i.test(v.name) ? 4 : 0) +
-           (/^Google/.test(v.name) ? 2 : 0) + (/^en[-_]US/i.test(v.lang) ? 1 : 0) + (v.default ? 0.5 : 0);
+  var HOME = { en: 'US' };
+  function score(v, lang) {
+    return (/natural|neural|premium|enhanced|online/i.test(v.name) ? 4 : 0) + (/^Google/.test(v.name) ? 2 : 0) +
+           (new RegExp('^' + lang + '[-_]' + (HOME[lang] || lang.toUpperCase()), 'i').test(v.lang) ? 1 : 0) +
+           (v.default ? 0.5 : 0);
   }
-  function voices() {
+  function voices(lang) {
+    lang = lang || 'en';
     if (!synth) return [];
+    var re = new RegExp('^' + lang + '([-_]|$)', 'i');
     return synth.getVoices().filter(function (v) {
-      return /^en([-_]|$)/i.test(v.lang) && !NOVELTY.test(v.name);
-    }).sort(function (a, b) { return score(b) - score(a) || (a.name < b.name ? -1 : 1); });
+      return re.test(v.lang) && !NOVELTY.test(v.name);
+    }).sort(function (a, b) { return score(b, lang) - score(a, lang) || (a.name < b.name ? -1 : 1); });
   }
 
   // The voices that can speak now.  Offline, this device's own: Chrome's Google
   // voices and Edge's Natural ones are spoken by a server, and fall silent
   // without it.
-  function usable() {
-    var all = voices();
+  function usable(lang) {
+    var all = voices(lang);
     if (navigator.onLine === false) {
       var here = all.filter(function (v) { return v.localService; });
       if (here.length) all = here;
     }
     return all;
   }
+  // Each translation's browser voice, {key: name}, those not Automatic
+  // (settings.py trvoices, JSON in a string).
+  function trVoices() {
+    try { return JSON.parse(load().trvoices || '{}') || {}; } catch (e) { return {}; }
+  }
 
   window.ubSettings = {
     voices: voices,
     // What the player's list of voices offers (listen.js).
     usable: usable,
-    // The browser voice Settings names, else the best there is; null with none.
-    voice: function () {
-      var all = usable(), want = load().bvoice;
+    // The browser voice Settings names, else the best there is; null with
+    // none.  The English's, or with `tr` that translation's, in its language.
+    voice: function (lang, tr) {
+      var all = usable(lang), want = tr ? trVoices()[tr] : load().bvoice;
       return all.filter(function (v) { return v.name === want; })[0] || all[0] || null;
+    },
+    // Translation tr's voice, by its name; '' for Automatic.
+    setTrVoice: function (tr, name) {
+      var m = trVoices();
+      if (name) m[tr] = name; else delete m[tr];
+      window.ubSettings.set('trvoices', Object.keys(m).length ? JSON.stringify(m) : '');
     },
     get: load,
     set: function (k, v) {
@@ -121,19 +141,38 @@
   if (gear && dlg && dlg.showModal) {
     gear.hidden = false;
     var form = dlg.querySelector('form');
+    // A menu of the browser's voices for the English, and one for each
+    // translation in its language (settings.py trvoices), each shown while it
+    // is ticked (Tigran, 2026-10-27).
     var bsel = form.querySelector('select[name="bvoice"]'), bopt = form.querySelector('.v-browser');
+    var trvs = form.querySelector('.trvoices');
     // A browser that cannot speak is not offered its voice, nor a choice of them.
     if (bopt && !synth) {
       bopt.hidden = true;
       if (bsel) bsel.closest('label').hidden = true;
     }
-    var listVoices = function () {
-      if (!bsel) return;
-      var all = voices();
-      bsel.length = 1;
-      bsel.options[0].text = all.length ? T.text('Automatic: {v}', { v: all[0].name }) : T.text('Automatic');
-      all.forEach(function (v) { bsel.add(new Option(v.name, v.name)); });
+    var fillVoices = function (sel, all, want) {
+      sel.length = 1;
+      sel.options[0].text = all.length ? T.text('Automatic: {v}', { v: all[0].name }) : T.text('Automatic');
+      all.forEach(function (v) { sel.add(new Option(v.name, v.name)); });
+      if (want !== undefined) sel.value = all.some(function (v) { return v.name === want; }) ? want : '';
     };
+    var listVoices = function () {
+      if (bsel) fillVoices(bsel, voices());
+      if (!trvs) return;
+      var ticked = String(load().translations || '').split(' '), m = trVoices(), any = false;
+      Array.prototype.forEach.call(trvs.querySelectorAll('label[data-k]'), function (l) {
+        l.hidden = ticked.indexOf(l.dataset.k) < 0;
+        any = any || !l.hidden;
+        fillVoices(l.querySelector('select'), voices(l.dataset.lang), m[l.dataset.k] || '');
+      });
+      trvs.hidden = !synth || !any;
+    };
+    if (trvs) trvs.addEventListener('change', function (ev) {
+      var l = ev.target.closest('label[data-k]');
+      if (l) window.ubSettings.setTrVoice(l.dataset.k, ev.target.value);
+      resettable();
+    });
     // Each control shows its setting's value; a radio group whose value has no
     // button (the voice before one is chosen) shows its first, and a menu
     // whose value is gone (a voice this device no longer has) its first.
@@ -187,7 +226,7 @@
     };
     var trSet = function (order) {
       window.ubSettings.set('translations', order.join(' '));
-      trFill();
+      fill();                          // and Listening's menus of their voices
       resettable();
     };
     if (trShown) {
@@ -229,10 +268,16 @@
     // A setting that means nothing while the one it needs is off (settings.py
     // NEEDS) is shown, greyed, and cannot be changed: 'off', or a switch's false,
     // or, where it needs a value (data-is), any other.
+    // And a setting whose own needs are not met greys those that need it.
+    var unmet = function (o, el) {
+      var v = o[el.dataset.needs];
+      if (el.dataset.is ? String(v) !== el.dataset.is : v === 'off' || v === false) return true;
+      var dep = form.querySelector('[data-needs] [name="' + el.dataset.needs + '"]');
+      return !!dep && unmet(o, dep.closest('[data-needs]'));
+    };
     var idle = function (o) {
       Array.prototype.forEach.call(form.querySelectorAll('[data-needs]'), function (el) {
-        var v = o[el.dataset.needs];
-        var off = el.dataset.is ? String(v) !== el.dataset.is : v === 'off' || v === false;
+        var off = unmet(o, el);
         el.classList.toggle('idle', off);
         Array.prototype.forEach.call(el.querySelectorAll('input, select'), function (c) { c.disabled = off; });
       });
@@ -606,7 +651,7 @@
     Array.prototype.forEach.call(lines, function (q) {
       var t = (got.t[k] || {})[q.id], c = q.classList;
       if (t != null) h += '<p class="rt' + (c.contains('head') ? ' head' : '') + (c.contains('opening') ? ' opening' : '') +
-                          '" lang="' + x.lang + '">' + trLead(t) + '</p>';
+                          '" lang="' + x.lang + '" data-k="' + k + '" data-ref="' + q.id + '">' + trLead(t) + '</p>';
       notes += (got.n[k] || {})[q.id] || '';
     });
     return { h: h, notes: notes };
@@ -706,6 +751,45 @@
     }
     window.ubSettings.set('trtab', b.dataset.tab);
   });
+  // The line a translation's voice is reading (listen.js; Tigran, 2026-10-27),
+  // for it to mark: in Compare its column's, else the fold's under the
+  // paragraph, where the fold shows that translation.  With `open` (Follow
+  // along), a fold that is shut is opened at it, as a search's hit opens one,
+  // without changing the tab last chosen, and the fold the reading opened
+  // before is shut again; a fold the reader opened is never shut.  ref null is
+  // the heading, which only Compare gives a translation; k null shuts the fold
+  // the reading opened.  A promise of the element, or of null.
+  var trMine = null;
+  window.ubTrRead = function (ref, k, open) {
+    var art = cmpArt(), q = ref && document.getElementById(ref), row = q && q.closest('.row');
+    var tf = row && row.querySelector('.tf');
+    var pick = function (root) { return root && root.querySelector('p.rt[data-k="' + k + '"][data-ref="' + ref + '"]'); };
+    var shutMine = function () {
+      if (trMine && trMine !== tf && trMine.classList.contains('open')) trShut(trMine);
+      if (trMine !== tf) trMine = null;
+    };
+    if (!k) {
+      tf = null;
+      shutMine();
+      return Promise.resolve(null);
+    }
+    if (art && art.classList.contains('cmp'))
+      return Promise.resolve(ref ? pick(row) : art.querySelector('header.ch[data-k="' + k + '"]'));
+    if (!tf) return Promise.resolve(null);
+    if (tf.classList.contains('open')) {
+      shutMine();
+      // Its own fold, at another translation: a voice chosen anew.
+      if (tf === trMine && !pick(tf))
+        return trDraw(tf, trKeys(tf), k).then(function () { return pick(tf); }, function () { return null; });
+      return Promise.resolve(pick(tf));
+    }
+    if (!open || trKeys(tf).indexOf(k) < 0) return Promise.resolve(null);
+    shutMine();
+    trMine = tf;
+    tf.classList.add('open');
+    tf.querySelector('.trfold').setAttribute('aria-expanded', 'true');
+    return trDraw(tf, trKeys(tf), k).then(function () { return pick(tf); }, function () { return null; });
+  };
   trSync();
   arriveTr();
   document.addEventListener('ub:page', arriveTr);
@@ -816,6 +900,8 @@
                  (w.notes && '<div class="tnotes" hidden>' + w.notes + '</div>') + '</div>';
         }).join(''));
       });
+      // listen.js puts each translation's ▶ in its cells.
+      document.dispatchEvent(new CustomEvent('ub:cmp', { detail: art }));
     };
     return trFetch(art, first.id.split('.')[0]).then(function (got) { draw(got, false); },
                                                       function () { draw({ t: {}, n: {}, h: {} }, true); });

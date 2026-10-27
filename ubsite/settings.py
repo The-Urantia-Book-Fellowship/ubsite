@@ -126,14 +126,27 @@ TRANSLATIONS = [
 ]
 SPEEDS = (0.8, 0.9, 1, 1.1, 1.25, 1.5)
 LISTEN = [
-    # The choices are the database's voices (app.voices), the browser's own,
-    # then Off; '' is the first voice the section has.
-    ("voice", "radio", "Listen with", "", [], ""),
+    # Every listening control, the English text's and each translation's, on
+    # or off at once (Tigran, 2026-10-27).  Until then Off was one of the
+    # English's voices, stored as voice "off", which ub.js and the head script
+    # read as this turned off.
+    ("listen", "switch", "Listening controls", True, [],
+     "the play buttons beside each paragraph, for the English text and the translations"),
+    # How the English text is read (Tigran, 2026-10-27: "so it is clear that it
+    # refers to English text"): the database's voices (app.voices), then the
+    # browser's own; '' is the first voice the section has.
+    ("voice", "radio", "English text", "", [], ""),
     # Which of the browser's voices: its English ones, filled in by ub.js,
     # which also says which '' picks.  Always shown, and greyed unless that
     # voice is chosen: until 2026-10-16 it was shown only then, and the dialog
     # jumped as the line came and went (Tigran).
     ("bvoice", "select", "Browser voice", "", [("", "Automatic", "", "")], ""),
+    # And each translation's, which reads it aloud from its ▶ in Compare
+    # (Tigran, 2026-10-27): a menu for each, of the browser's voices in its
+    # language, filled in by ub.js, shown while it is ticked (groups()).  One
+    # value for them all, as `translations` is: {key: voice's name} as JSON,
+    # only those not Automatic, "" for none.
+    ("trvoices", "trvoices", "Browser voices for the translations", "", [], ""),
     ("rate", "select", "Speed", 1, [(r, f"{r}×", "", "") for r in SPEEDS], ""),
     ("follow", "switch", "Follow along", True, [], "keep the paragraph being read in view"),
     # Off, playing stops at the end of a section (Tigran, 2026-10-07); on, it
@@ -199,12 +212,13 @@ SITE_DEFAULTS: dict[str, dict] = {}
 
 # A setting that means nothing while another is off ('off', or a switch turned
 # off): shown, greyed, and not to be changed (ub.js disables it).  With
-# Listening off there is no speed to set (Tigran, 2026-10-08), and with the 1955
-# readings off no reading to search for.  A pair is a setting that means
-# something only while another has that value: which of the browser's voices,
-# while the browser's voice is chosen.
-NEEDS = {"bvoice": ("voice", "browser"), "rate": "voice", "follow": "voice", "onward": "voice",
-         "notesearch": "notes"}
+# Listening off there is no voice or speed to set (Tigran, 2026-10-08), and with
+# the 1955 readings off no reading to search for.  A pair is a setting that
+# means something only while another has that value: which of the browser's
+# voices, while the browser's voice is chosen.  A setting whose own needs are
+# not met greys those that need it too: the browser's voices with Listening off.
+NEEDS = {"voice": "listen", "bvoice": ("voice", "browser"), "trvoices": "listen", "rate": "listen",
+         "follow": "listen", "onward": "listen", "notesearch": "notes"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:
@@ -223,13 +237,20 @@ BROWSER = {"value": "browser", "label": "Your browser\u2019s voice", "cls": "v-b
            "hint": "spoken by this browser, which keeps the screen on while it reads"}
 
 
-def groups(voices: list[dict]) -> list[dict]:
-    """The dialog's tabs, in order, each with its key for the ids (base.html)."""
+def groups(voices: list[dict], translations: list[dict] = ()) -> list[dict]:
+    """The dialog's tabs, in order, each with its key for the ids (base.html).
+    `translations` are app.translations(), each with a menu of its own in
+    `trvoices`; with none, it is not drawn."""
     items = [_item(*s) for s in LISTEN]
-    items[0]["choices"] = [
-        {"value": v["key"], "label": v["label"], "cls": "",
-         "hint": v.get("credit") or ("an AI voice" if v["kind"] == "synthetic" else "")}
-        for v in voices] + [BROWSER, {"value": "off", "label": "Off", "hint": "no listening controls", "cls": ""}]
+    for it in items:
+        if it["key"] == "voice":
+            it["choices"] = [
+                {"value": v["key"], "label": v["label"], "cls": "",
+                 "hint": v.get("credit") or ("an AI voice" if v["kind"] == "synthetic" else "")}
+                for v in voices] + [BROWSER]
+        if it["kind"] == "trvoices":
+            it["choices"] = [{"value": x["key"], "label": x["label"], "lang": x["lang"]} for x in translations]
+    items = [it for it in items if it["kind"] != "trvoices" or it["choices"]]
     return [{"key": "reading", "legend": "Reading", "items": [_item(*s) for s in READING]},
             {"key": "show", "legend": "Show", "items": [_item(*s) for s in SHOW]},
             {"key": "translations", "legend": "Translations", "items": [_item(*s) for s in TRANSLATIONS]},

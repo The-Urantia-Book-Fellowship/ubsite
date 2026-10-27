@@ -210,7 +210,8 @@ class Copy(unittest.TestCase):
         # Chosen in Settings' Offline tab: listed apart from the copy, whose
         # chunks, build and size are without them, so a worker from before
         # neither sees nor fetches them, each with a build of its own: its
-        # pages, and its database for search (offline/searchdb.py tr_db).
+        # pages, its spoken text (2026-10-27), and its database for search
+        # (offline/searchdb.py tr_db).
         from offline import pack
         from ubsite import app as A
         m = json.loads((COPY / "manifest.json").read_text())
@@ -222,7 +223,7 @@ class Copy(unittest.TestCase):
             k = re.escape(t["key"])
             for c in t["chunks"]:
                 self.assertEqual(c["tr"], t["key"])
-                self.assertRegex(f"{c['kind']} {c['name']}", rf"^(tr tr-{k}-(\d+|toc)|db tr-{k}\.db)$")
+                self.assertRegex(f"{c['kind']} {c['name']}", rf"^(tr tr-{k}-(\d+|speech-\d+|toc)|db tr-{k}\.db)$")
             self.assertEqual(sum(c["kind"] == "db" for c in t["chunks"]), 1)
         self.assertFalse([c for c in m["chunks"] if "tr" in c])
         self.assertEqual(m["bytes"], sum(c["bytes"] for c in m["chunks"]))

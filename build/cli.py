@@ -181,6 +181,8 @@ def main(argv: list[str]) -> int:
         print("speech ...")
         from . import speech
         n_speech = speech.derive(con)
+        for k, n in speech.derive_tr(con).items():
+            print(f"  {k}: {n:,} spoken, paragraphs and headings")
         print("audio ...")
         from . import audio
         audio_stats = audio.load_audio(con, report)

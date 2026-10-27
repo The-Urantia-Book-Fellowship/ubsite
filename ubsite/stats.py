@@ -338,13 +338,18 @@ def report(ub: sqlite3.Connection, days: int, recent: int = 50) -> dict:
     # -- listening
     voices = {row[0]: row[1] for row in ub.execute("SELECT key, label FROM audio_source")}
     voices["browser"] = "Your browser's voice"
+    try:
+        for k, label in ub.execute("SELECT key, label FROM translation"):
+            voices[f"browser:{k}"] = f"Your browser's voice, {label}"
+    except sqlite3.Error:
+        pass                                        # a database from before 010_translation.sql
     files = audio_sections(ub)
     by_voice, heard, listeners = Counter(), Counter(), defaultdict(set)
     for row in con.execute(
             "SELECT l.day, l.visitor, l.voice, l.item FROM listen l WHERE l.day >= ?"
             " AND EXISTS (SELECT 1 FROM browser b WHERE b.day = l.day AND b.visitor = l.visitor)",
             (start,)):
-        ref = row["item"] if row["voice"] == "browser" else files.get(row["item"], row["item"])
+        ref = row["item"] if row["voice"].startswith("browser") else files.get(row["item"], row["item"])
         by_voice[row["voice"]] += 1
         heard[ref] += 1
         listeners[row["voice"]].add((row["day"], row["visitor"]))

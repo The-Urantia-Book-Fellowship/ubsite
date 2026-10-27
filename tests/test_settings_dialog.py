@@ -11,7 +11,7 @@ import re
 import unittest
 
 from test_appendix_pages import DB, get
-from ubsite import settings
+from ubsite import app, settings
 
 RE_DIALOG = re.compile(r'<dialog class="settings".*?</dialog>', re.S)
 RE_TAB = re.compile(r'<button type="button" role="tab" id="set-t-(\w+)" aria-controls="set-p-(\w+)"\s+'
@@ -51,7 +51,7 @@ class Tabs(unittest.TestCase):
 
     def test_every_setting_is_in_its_groups_panel(self):
         bodies = re.split(r'<div class="panel[ "]', self.dialog)[1:]
-        for g, body in zip(settings.groups([]), bodies):
+        for g, body in zip(settings.groups([], app.translations()), bodies):
             want = list(dict.fromkeys(it["key"] for it in g["items"]))
             got = list(dict.fromkeys(re.findall(r'name="(\w+)"', body)))
             self.assertEqual(got, want, g["key"])

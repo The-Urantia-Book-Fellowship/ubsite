@@ -419,11 +419,11 @@ p.t.head { text-align: center; }
    the text, a line of verse, or a list's item, whose label has a box of its
    own.  The opening then needs no room above it either, where the stack would
    stand.  A leader row's figure takes no part of the indent. */
-:root[data-paranum="off"][data-voice="off"]:not([data-pages="true"])
+:root[data-paranum="off"][data-listen="off"]:not([data-pages="true"])
      .reader p.t:not(.opening, .head, .verse, :has(> .mark)),
 :root[data-paranum="off"]:not([data-pages="true"]) .path p.t:not(.head, .verse, :has(> .mark)) {
      text-indent: 1em; }
-:root[data-paranum="off"][data-voice="off"]:not([data-pages="true"]) .reader p.t.opening { margin-top: 0; }
+:root[data-paranum="off"][data-listen="off"]:not([data-pages="true"]) .reader p.t.opening { margin-top: 0; }
 .leadrow > .fig { text-indent: 0; }
 /* A separator between two paragraphs, its stars as printed: `* * *`, or the five
    of \separatorline set wider, as the press sets them (paragraph.sep_before).  A
@@ -484,7 +484,7 @@ p.t.head { text-align: center; }
 .a .at a { color: var(--faint); text-decoration: none; }
 .a .at a:hover { color: var(--ink); }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
-p.t.hit, p.t.now, .tree li:target { scroll-margin-top: 3rem; }
+p.t.hit, p.t.now, .rt.now, .tree li:target { scroll-margin-top: 3rem; }
 p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 /* The paragraph's full reference, so the reader always knows which one this is;
@@ -530,8 +530,8 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); --lh: calc(var(--line
        height: var(--lh); width: max-content; padding-right: .4rem;
        white-space: nowrap; font-size: .78rem; color: var(--faint); }
 .stk > .pg { float: right; }
-:root:not([data-voice="off"]) .stk > .playp + .pg { clear: none; }
-:root[data-pages="true"]:not([data-voice="off"]) .playp:has(+ .pg) { margin-right: .35rem; }
+:root:not([data-listen="off"]) .stk > .playp + .pg { clear: none; }
+:root[data-pages="true"]:not([data-listen="off"]) .playp:has(+ .pg) { margin-right: .35rem; }
 /* A paper's opening paragraph gives its corner to the dropped letter: the
    stack floated there would take the first two lines' start, and the second
    line would run into the letter.  So its reference, play button and 1955
@@ -547,13 +547,13 @@ p.t.opening .playp { top: -1.45rem; left: calc((var(--refw, 9) + 1) * 1ch); }
        left: calc((var(--refw, 9) + 1) * 1ch + 1.6rem); }
 :root[data-paranum="off"] p.t.opening .playp { left: -.25rem; }
 :root[data-paranum="off"][data-pages="true"] p.t.opening .pg { left: 1.6rem; }
-:root[data-paranum="off"][data-voice="off"][data-pages="true"] p.t.opening .pg { left: 0; }
+:root[data-paranum="off"][data-listen="off"][data-pages="true"] p.t.opening .pg { left: 0; }
 /* Its entries beside it stand level with its text, not with that line
    (Tigran, 2026-10-23): the row begins at the paragraph's margin.  A block of
    verse needs nothing, its margin naming each line's reference in that line. */
 @media (min-width: 62.01rem) {
   p.t.opening + .a { margin-top: 1.5rem; }
-  :root[data-paranum="off"][data-voice="off"]:not([data-pages="true"]) .reader p.t.opening + .a { margin-top: 0; }
+  :root[data-paranum="off"][data-listen="off"]:not([data-pages="true"]) .reader p.t.opening + .a { margin-top: 0; }
 }
 /* The heading in the text is centred on the column, not on what the stack
    floated beside it leaves: an empty float as wide as the stack balances it
@@ -562,7 +562,7 @@ p.t.opening .playp { top: -1.45rem; left: calc((var(--refw, 9) + 1) * 1ch); }
 p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
                    width: calc(var(--refw, 9) * 1ch + .4rem); }
 :root[data-paranum="off"] p.t.head::before { width: 0; }
-:root[data-paranum="off"]:not([data-voice="off"]) p.t.head:has(.playp)::before { width: 1.7rem; }
+:root[data-paranum="off"]:not([data-listen="off"]) p.t.head:has(.playp)::before { width: 1.7rem; }
 
 .jesus { color: var(--jesus); }
 
@@ -896,7 +896,7 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
      entries keep their own places beside them, which their rules give them
      as the paragraph's next sibling, as the cells now are. */
   article.cmp .row:has(> p.t.opening) > :is(.rc, .a) { margin-top: 1.5rem; }
-  :root[data-paranum="off"][data-voice="off"]:not([data-pages="true"]) article.cmp .row:has(> p.t.opening) > :is(.rc, .a) {
+  :root[data-paranum="off"][data-listen="off"]:not([data-pages="true"]) article.cmp .row:has(> p.t.opening) > :is(.rc, .a) {
          margin-top: 0; }
   article.cmp .row:has(> .verse) > :is(.rc, .a) { margin-top: .6rem; }
   :root:not([data-paranum="off"]) article.cmp .row:has(> .verse) > .rc { margin-top: 2.1rem; }
@@ -1051,10 +1051,17 @@ p.t { position: relative; }
 .playp svg { width: .83rem; height: .83rem; }
 :root[data-paranum="off"] .playp { margin-right: .8rem; }
 .playp:focus-visible, p.t.now .playp { opacity: 1; }
-:root[data-voice="off"] :is(.voicecredit, .playp) { display: none; }
+/* A translation's ▶ in Compare (listen.js trPlay), which reads it from there:
+   in the gap before its column, level with the cell's first line; on a phone,
+   in the margin before the rule, level with the translation's name. */
+article.cmp .rc { position: relative; }
+article.cmp .rc > .playp { position: absolute; margin: 0; left: -1.6rem;
+  top: calc((var(--size) * var(--lead) - 1.15rem) / 2); }
+article.cmp .rc:has(.rt.now) > .playp { opacity: 1; }
+:root[data-listen="off"] :is(.voicecredit, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
    playing starts, so only one thing on the page is marked. */
-p.t.now, .papertop :is(h1, h2).now { background: color-mix(in oklch, var(--link) 11%, transparent);
+p.t.now, .papertop :is(h1, h2).now, .rt.now, header.ch.now { background: color-mix(in oklch, var(--link) 11%, transparent);
   border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 11%, transparent);
   transition: background .3s, box-shadow .3s; }
 .player { position: fixed; z-index: 10; left: 50%; transform: translateX(-50%);
@@ -1267,7 +1274,7 @@ dialog.settings .pcm { margin: 0 0 0 .1em; }
 /* Greyed while the setting it needs is off: Speed, with Listening off; and
    which of the browser's voices, unless that voice is chosen. */
 dialog.settings .idle { opacity: .45; cursor: default; }
-/* Which of the browser's voices.  A voice's name can be longer than a phone's
+/* Which of the browser's voices, the English's and each translation's.  A voice's name can be longer than a phone's
    line, as Edge's "Microsoft Ava Online (Natural) - English (United States)"
    is: the menu then has a line of its own, still at the right, and narrower
    still it shrinks to the line, the browser cutting the name it shows.  The
@@ -1617,6 +1624,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
                     font-size: .9rem; }
   article.cmp .rc:empty { display: none; }
   article.cmp .rc .who:first-child { margin-top: .1rem; }
+  article.cmp .rc > .playp { left: calc(-1.05rem - 2px); top: .05rem; width: 1rem; height: 1rem; padding: .1rem; }
 }
 
 /* ---- print ------------------------------------------------------------- */

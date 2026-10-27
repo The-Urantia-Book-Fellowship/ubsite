@@ -109,3 +109,17 @@ CREATE TABLE tr_cite (
     ord          INTEGER NOT NULL,      -- [1], [2] ... in the note, from 0
     PRIMARY KEY (note_id, ord)
 );
+
+-- What the browser's voice reads of a translation (build/speech.py derive_tr),
+-- as `speech` (005_audio.sql) holds the English's: each paragraph it has, as
+-- written but for what a voice would trip on, and a heading per section it
+-- titles (paragraph_id NULL).  Sent by /speech/<key>/<paper>:<section>.
+CREATE TABLE tr_speech (
+    id           INTEGER PRIMARY KEY,
+    translation  TEXT NOT NULL REFERENCES translation(key),
+    section_id   INTEGER NOT NULL REFERENCES section(id),
+    paragraph_id INTEGER REFERENCES paragraph(id),
+    text         TEXT NOT NULL,
+    UNIQUE (translation, paragraph_id)
+);
+CREATE INDEX tr_speech_sec ON tr_speech(translation, section_id);

@@ -493,6 +493,8 @@ def _translations(mtime_ns: int, bilingual: bool) -> list[dict]:
             out.append({"key": r["key"], "lang": r["lang"], "title": r["title"],
                         "by": l10n.L({"en": escape(r["by_en"]), "ru": escape(r["by_ru"])}),
                         "label": escape(r["label"]),
+                        # Its language, as Settings names it: "Russian".
+                        "language": l10n.tr(LANGUAGES[r["lang"]]),
                         # What its owner asks a reader be told, "Copyright © …", or None.
                         "credit": r["credit_en"] and l10n.L({"en": escape(r["credit_en"]),
                                                               "ru": escape(r["credit_ru"])}),
@@ -511,17 +513,20 @@ def translations() -> list[dict]:
 
 T.env.globals["translations"] = translations
 # A translation's language, as Settings names it.
-T.env.globals["LANGUAGES"] = {"ru": "Russian"}
+LANGUAGES = {"ru": "Russian"}
+T.env.globals["LANGUAGES"] = LANGUAGES
 
 
 def translations_json() -> Markup:
     """What a fold needs of each translation (ub.js): its key, title and
-    language, its short name, and who made it in each language, as {en, ru},
-    which l10n.js's T() takes as words made; and the version of its contents,
+    language, its short name, and who made it and its language's name in each
+    language, as {en, ru}, which l10n.js's T() takes as words made (the player
+    names its voices so, listen.js); and the version of its contents,
     which the left rail asks for under it (/rail/<key>).  HTML, escaped.  In
     the dialog, so in the shell."""
     out = [{"key": x["key"], "lang": x["lang"], "title": str(escape(x["title"])),
-            "label": str(x["label"]), "by": dict(x["by"].by), "toc": (toc_of(x["key"]) or {}).get("v")}
+            "label": str(x["label"]), "by": dict(x["by"].by), "language": dict(x["language"].by),
+            "toc": (toc_of(x["key"]) or {}).get("v")}
            for x in translations()]
     return Markup(json.dumps(out, ensure_ascii=False).replace("</", "<\\/"))
 
@@ -764,6 +769,27 @@ def speech(ref: str):
         " WHERE s.paper_n=? AND s.n=? ORDER BY p.para_n IS NOT NULL, p.para_n",
         (int(m[1]), int(m[2]))).fetchall() if m else []
     if not rows:
+        raise HTTPException(status_code=404)
+    return JSONResponse({"segs": [[r["ref"], r["text"]] for r in rows]},
+                        headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/speech/{key}/{ref}", include_in_schema=False)
+def speech_tr(key: str, ref: str):
+    """A section of translation `key` as the browser's voice reads it
+    (build/speech.py derive_tr), in the shape /speech/ sends the English's:
+    its heading first, where it titles the section, then each paragraph it
+    has.  404 for a section it has none of."""
+    m = re.fullmatch(r"(\d+):(\d+)", ref)
+    try:
+        rows = db().execute(
+            "SELECT p.ref, x.text FROM tr_speech x JOIN section s ON s.id=x.section_id"
+            " LEFT JOIN paragraph p ON p.id=x.paragraph_id"
+            " WHERE x.translation=? AND s.paper_n=? AND s.n=? ORDER BY p.para_n IS NOT NULL, p.para_n",
+            (key, int(m[1]), int(m[2]))).fetchall() if m else []
+    except sqlite3.Error:
+        rows = []                                    # a database from before tr_speech
+    if not any(r["ref"] for r in rows):
         raise HTTPException(status_code=404)
     return JSONResponse({"segs": [[r["ref"], r["text"]] for r in rows]},
                         headers={"Cache-Control": "no-cache"})

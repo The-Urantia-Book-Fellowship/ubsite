@@ -190,7 +190,8 @@ def sha(text: str) -> str:
 
 
 def derive(con) -> int:
-    """Fill `speech`: one row per section heading and per paragraph."""
+    """Fill `speech`: one row per section heading and per paragraph.  The
+    translations' spoken text is `derive_tr`'s, below."""
     spans = {}
     for pid, s, e, kind in con.execute(
             "SELECT paragraph_id, start, \"end\", kind FROM span"
@@ -210,3 +211,156 @@ def derive(con) -> int:
     con.executemany("INSERT INTO speech (section_id, paragraph_id, text, sha) VALUES (?,?,?,?)",
                     rows)
     return len(rows)
+
+
+# ---- The translations ------------------------------------------------------------
+#
+# What the browser's voice reads of a translation (Tigran, 2026-10-27): each
+# paragraph as the translator wrote it, with only what a voice would trip on
+# changed.  It is made from the paragraph's HTML (tr_paragraph.html_hy), which
+# keeps what its text has lost: a power's <sup>, a table row's leader, a list's
+# label.  Unlike the English, the numbers stay digits.  A Russian numeral takes
+# its case from the words around it, "в 1934 году", "к 6000 году", which a
+# browser's Russian voice reads better than a table here could, and no
+# recording is made from it yet.  So, for Russian (`speak_ru`):
+#
+#   stress, hyphens   U+0301, the soft hyphen and the word joiner go: a voice
+#                     must not break "бо́льших" at its mark
+#   digit groups      "611 121", "100 000" -> 611121, 100000: one number, not two
+#   list marks        a Latin numeral -> its number: "IV." -> "4."
+#   dot leaders       "Сверхвселенные 7" -> "Сверхвселенные, 7.", as the English
+#   powers            "2 х 10<sup>27</sup>" -> "2 умножить на 10 в 27-й степени";
+#                     "см<sup>3</sup>" -> "кубический сантиметр"; any other fails
+#   fractions         "3⁠1⁄8" -> "3 и 1/8", "2½" -> "2 с половиной"
+#   degrees           "90°F." -> "90 градусов по Фаренгейту."
+#   abbreviations     т.д., т.п., н.э., г. after a year (году after в or к,
+#                     else года), км, км/с, лат.; a stop that also ended the
+#                     sentence is kept
+#   capitals          "Я ЕСТЬ" -> "Я Есть", a heading in capitals in lower
+#                     case: a voice may spell out a word in capitals
+#   brackets          lose their brackets, as the English's do
+#
+# A heading is spoken as the English's is, in the translation's words: "1. Имя
+# Отца.", "Документ 1. Всеобщий Отец." after its part's line where the paper
+# opens a part, and over the Foreword its title alone.  Each language a
+# translation is in needs its function here, or the build fails.
+
+RU_PARTS = {1: "Часть первая", 2: "Часть вторая", 3: "Часть третья", 4: "Часть четвёртая"}
+RE_TAG = re.compile(r"<(/?)([a-z]+)((?: [a-z-]+=\"[^\"]*\")*)>")
+# The markup a translation's HTML may hold (build/tr_html.py, tr_macros.py):
+# anything else fails.  The note markers are empty, so drop with their tags.
+TAGS = {"em": {""}, "sup": {""}, "a": {"fn"},
+        "span": {"mark", "leader", "sc", "frac"}}
+# Every character a translation's spoken text may contain: its own letters, the
+# Latin ones of the words it quotes ("fīat"), digits, and the punctuation a
+# voice pauses on.  Anything else is a gate failure (check_audio).
+ALLOWED_TR = {"ru": re.compile(r"^[А-Яа-яЁёA-Za-zÀ-ÖØ-öø-ÿĀ-ž0-9 .,;:!?'\"\-–—()«»„“”‘’…/%]*$")}
+# A stop after the abbreviation that also ends the sentence is kept for it.
+ENDS = r"(?=\s+[«„“\"(]?[А-ЯЁA-Z]|\s*$)"
+RU_ABBR = [(r"(\b[вкВК]\s+)?(\d+)\s*г\.",
+            lambda m: f"{m[1] or ''}{m[2]} {'году' if m[1] else 'года'}"),
+           (r"\bн\.\s*э\.", "нашей эры"),
+           (r"\bт\.\s*д\.", "так далее"),
+           (r"\bт\.\s*п\.", "тому подобное"),
+           (r"\bкм/с\b", "километров в секунду"),
+           (r"\bкм\b", "километров"),
+           (r"\bлат\.", "латинского")]
+
+
+def _sentence(s: str) -> str:
+    """A heading set in capitals, in lower case after its first letter."""
+    return s[:1] + s[1:].lower() if s == s.upper() else s
+
+
+def speak_ru(html: str, where: str = "") -> str:
+    """A Russian paragraph's HTML -> what a voice is to read."""
+    h = html.replace("\xad", "").replace("́", "")
+    for m in RE_TAG.finditer(h):
+        cls = re.search(r'class="([^"]*)"', m[3])
+        if m[2] not in TAGS or (not m[1] and (cls[1] if cls else "") not in TAGS[m[2]]):
+            raise ValueError(f"{where}: {m[0]!r} is no markup the spoken text knows")
+    leader = '<span class="leader"></span>' in h
+    h = re.sub(r'\s*<span class="leader"></span>\s*', ", ", h)
+    h = re.sub(r'<span class="mark">(«?)([IVX]+)\.</span>',
+               lambda m: f"{m[1]}{ROMAN[m[2]]}.", h)
+    h = re.sub(r'(\d)[⁠ \xa0 ]?<span class="frac">(\d+)⁄(\d+)</span>', r"\1 и \2/\3", h)
+    h = re.sub(r'<span class="frac">(\d+)⁄(\d+)</span>', r"\1/\2", h)
+    h = re.sub(r"(\d)\s*[×х]\s*10<sup>(\d+)</sup>", r"\1 умножить на 10 в \2-й степени", h)
+    h = re.sub(r"\b10<sup>(\d+)</sup>", r"10 в \1-й степени", h)
+    h = h.replace("см<sup>3</sup>", "кубический сантиметр")
+    if "<sup>" in h:
+        raise ValueError(f"{where}: a power the spoken text cannot say: {h[h.index('<sup>') - 12:][:30]!r}")
+    t = re.sub(r"<[^>]+>", "", h).replace("⁠", "")
+    if leader and t.rstrip()[-1:] not in ".!?;:":
+        t = t.rstrip() + "."
+    t = re.sub(r"(?<![\d,])(\d{1,3})((?:[ \xa0 ]\d{3})+)(?!\d)",
+               lambda m: m[1] + re.sub(r"\D", "", m[2]), t)
+    t = t.replace("\xa0", " ").replace(" ", " ").replace("[", "").replace("]", "")
+    t = re.sub(r"(\d)\s+[×х]\s+(\d)", r"\1 умножить на \2", t)
+    t = t.replace("½", " с половиной").replace("¼", " с четвертью")
+    t = re.sub(r"\s*°\s*F(?![A-Za-z])", " градусов по Фаренгейту", t)
+    t = re.sub(r"\s*°", " градусов", t)
+    for pat, words in RU_ABBR:
+        stop = (lambda m, w=words: (w(m) if callable(w) else w) + ".")
+        t = re.sub(pat + ENDS, stop, t)
+        t = re.sub(pat, words, t)
+    # Capitals: a Latin numeral stays, which a Russian voice reads ("XX века").
+    t = re.sub(r"\b[А-ЯЁ][А-ЯЁ]+\b", lambda m: m[0].capitalize(), t)
+    t = re.sub(r"\b(?![IVXLC]+\b)[A-Z][A-Z]+\b", lambda m: m[0].capitalize(), t)
+    return re.sub(r"  +", " ", t).strip()
+
+
+def heading_ru(paper: int, n: int, combined: int | None, title: str | None,
+               word: str, paper_title: str | None, part: str | None) -> str | None:
+    """What is said before a section's first paragraph, in Russian: None
+    where the translation has no title for it."""
+    if n:
+        if not title:
+            return None
+        num = f"{n} и {combined}" if combined else str(n)
+        title = _sentence(re.sub(r"^(?:\d+(?: и \d+)?|[IVX]+)\.\s+", "", title))
+        return speak_ru(f"{num}. {title.rstrip('.')}.")
+    if not paper_title:
+        return None
+    title = _sentence(paper_title).rstrip(".")
+    if paper == 0:
+        return speak_ru(f"{title}.")
+    lead = f"{RU_PARTS[FIRST_OF_PART[paper]]}. {part.rstrip('.')}. " if part else ""
+    return speak_ru(f"{lead}{_sentence(word)} {paper}. {title}.")
+
+
+SPEAK = {"ru": (speak_ru, heading_ru)}
+
+
+def derive_tr(con) -> dict[str, int]:
+    """Fill `tr_speech`, each translation's spoken text: one row per paragraph
+    it has, and a heading per section it has, where it titles it.  {key: rows}."""
+    from .render import strip_tags
+    parts = {(k, n): strip_tags(h) for k, n, h in con.execute(
+        "SELECT translation, n, html FROM tr_toc WHERE kind = 'part'")}
+    heads = {(k, p, s, kind): t for k, p, s, kind, t in con.execute(
+        "SELECT translation, paper_n, section_n, kind, text FROM tr_heading")}
+    out = {}
+    for key, lang, word in con.execute("SELECT key, lang, paper FROM translation ORDER BY ord").fetchall():
+        if lang not in SPEAK:
+            raise ValueError(f"translation {key}: no spoken text for its language, {lang} (build/speech.py SPEAK)")
+        para, head = SPEAK[lang]
+        rows = []
+        for sid, p, n, cw in con.execute(
+                "SELECT DISTINCT s.id, s.paper_n, s.n, s.combined_with FROM tr_paragraph t"
+                " JOIN paragraph g ON g.id = t.paragraph_id JOIN section s ON s.id = g.section_id"
+                " WHERE t.translation = ? ORDER BY s.id", (key,)).fetchall():
+            h = head(p, n, cw, heads.get((key, p, n, "section")), word,
+                     heads.get((key, p, None, "title")),
+                     parts.get((key, FIRST_OF_PART[p])) if p in FIRST_OF_PART else None)
+            if h:
+                rows.append((key, sid, None, h))
+        for pid, sid, ref, html in con.execute(
+                "SELECT t.paragraph_id, g.section_id, g.ref, t.html_hy FROM tr_paragraph t"
+                " JOIN paragraph g ON g.id = t.paragraph_id WHERE t.translation = ? ORDER BY g.ord",
+                (key,)).fetchall():
+            rows.append((key, sid, pid, para(html, f"{key} {ref}")))
+        con.executemany("INSERT INTO tr_speech (translation, section_id, paragraph_id, text)"
+                        " VALUES (?,?,?,?)", rows)
+        out[key] = len(rows)
+    return out

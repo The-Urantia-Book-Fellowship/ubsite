@@ -175,12 +175,14 @@ raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Ru
 # papers each has, which check.py counts from the database, and its database for
 # search, and their size, a band since ud is being written.  Measured 2026-10-26,
 # ud at cc37b29, urantia-ru at a6525fe; their databases for search came in the
-# same day, 1.3 and 5.6 MB of it.
+# same day, 1.3 and 5.6 MB of it.  Since 2026-10-27 each also keeps its spoken
+# text, a chunk to every twenty papers, which the browser's voice reads: ud 0.6
+# MB more, the whole book 2.9 MB more.
 [offline.translations.ud]
-download_mb = [1.0, 8.0]     # 2.01 at measurement, 7.93 unpacked: 45 papers, 4 chunks and search
+download_mb = [1.0, 8.0]     # 2.61 at measurement (2.01 before its spoken text), 10.68 unpacked: 45 papers, 4 chunks, 4 spoken, and search
 [offline.translations.urantia-ru]
-download_mb = [7.0, 11.0]    # 8.85 at measurement, 33.42 unpacked: the whole book, 10 chunks and search
+download_mb = [10.0, 14.0]   # 11.77 at measurement (8.85 before its spoken text), 45.90 unpacked: the whole book, 10 chunks, 10 spoken, and search
 # The Foundation's own, from its zip, which never moves but with a new release:
 # measured 2026-10-27, its 2024 release (sources.toml).
 [offline.translations.uf-ru]
-download_mb = [7.0, 11.0]    # 8.88 at measurement, 33.62 unpacked: the whole book, 10 chunks and search
+download_mb = [10.0, 14.0]   # 11.81 at measurement (8.88 before its spoken text), 46.08 unpacked: the whole book, 10 chunks, 10 spoken, and search

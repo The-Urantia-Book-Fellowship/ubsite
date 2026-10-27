@@ -111,14 +111,17 @@
 "Tooltips" = "Подсказки"
 "a few words on a button or a link, where the pointer rests" = "несколько слов о кнопке или ссылке под указателем мыши"
 
+"English text" = "Английский текст"
 "Merritt Horn" = "Мерритт Хорн"
 "Your browser’s voice" = "Голос вашего браузера"
 "spoken by this browser, which keeps the screen on while it reads" = "читает сам браузер; пока он читает, экран не гаснет"
 "an AI voice" = "голос ИИ"
-"Off" = "Выкл."
-"no listening controls" = "без кнопок прослушивания"
+"Listening controls" = "Кнопки прослушивания"
+"the play buttons beside each paragraph, for the English text and the translations" = "кнопки воспроизведения у каждого абзаца, для английского текста и для переводов"
 "Browser voice" = "Голос браузера"
 "Automatic" = "Автоматически"
+"Browser voices for the translations" = "Голоса браузера для переводов"
+"{a} · {b}" = "{a} · {b}"
 "Speed" = "Скорость"
 "{r}×" = "{r}×"
 "Follow along" = "Следить за чтением"
@@ -361,6 +364,7 @@
 "Listen to this section" = "Слушать этот раздел"
 "Listen to this section, from its heading" = "Слушать этот раздел, начиная с заголовка"
 "Listen from {r}" = "Слушать с {r}"
+"Listen to {l} from {r}" = "Слушать {l} с {r}"
 "Listening" = "Прослушивание"
 "Back to the start of this paragraph (twice: the one before)" = "К началу этого абзаца (дважды — к предыдущему)"
 "Play" = "Играть"
@@ -376,6 +380,8 @@
 "The text could not be loaded." = "Текст не удалось загрузить."
 "{v} needs a connection, and this browser has no voice of its own." = "Голосу {v} нужна сеть, а своего голоса у этого браузера нет."
 "Your browser could not speak ({e})." = "Ваш браузер не смог прочитать ({e})."
+"The next section is not in {l}." = "Следующего раздела нет в переводе {l}."
+"This browser has no voice for {l}." = "В этом браузере нет голоса для перевода {l}."
 
 # --- The offline menu and What's new (offline.js)
 

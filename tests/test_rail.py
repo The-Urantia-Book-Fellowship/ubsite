@@ -14,7 +14,7 @@ import sqlite3
 import unittest
 
 from test_appendix_pages import DB, get
-from ubsite import settings
+from ubsite import l10n, settings
 
 RE_RAIL = re.compile(r'<nav class="rail"[^>]*>.*?</nav>', re.S)
 RE_PAPER = re.compile(r'href="/(\d+)"')
@@ -114,7 +114,9 @@ class Rail(unittest.TestCase):
         # list's (2026-10-27).
         d = settings.defaults()
         self.assertEqual((d["rail"], d["margin"], d["toc"]), ("open", True, ""))
-        shown = [it["key"] for g in settings.groups([]) for it in g["items"]]
+        # A language's browser voice is in it where a translation is in that language.
+        ru = [{"key": "ud", "lang": "ru", "label": "Aivazian", "language": l10n.tr("Russian")}]
+        shown = [it["key"] for g in settings.groups([], ru) for it in g["items"]]
         self.assertEqual(sorted(set(d) - set(shown)), ["lang", "margin", "rail", "toc", "trtab"])
         self.assertEqual(len(shown), len(set(shown)))
 

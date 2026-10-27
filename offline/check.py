@@ -7,7 +7,8 @@ Node runs static/offline-core.js on the copy, as the service worker does
 
   - every stored page, byte for byte: the sha256 the build took of it as the
     server sent it, and what the core joins from the copy's pieces; and the
-    text the browser's voice reads, section by section, as /speech/ sends it;
+    text the browser's voice reads, section by section, as /speech/ sends it,
+    each translation's too, with it kept and not;
   - every section's translations, /tr/, with every translation kept, as the
     server sends them, and with none kept or one alone, the fragment's frame
     around what is kept;
@@ -81,7 +82,8 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               "/index/q", "/index/QQ", "/index/a", "/appendix/a", "/appendix/G", "/appendix/AB",
               "/part/9", "/part/01", "/part/x", "/rail/300", "/rail/007", "/rail/xx", "/rail/UF-RUS", "/nothing", "/i/god/more",
               "/101:4.2:3", "/café", "/speech/01:4", "/speech/999:1", "/speech/1:99", "/speech/x",
-              "/speech/1:4:5", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2",
+              "/speech/1:4:5", "/speech/ud/01:1", "/speech/ud/100:1", "/speech/x/1:1", "/speech/ud/1:99",
+              "/speech/ud/x", "/speech/ud/1:1:2", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2",
               "/1:1/compare", "/1:1.3-4/compare", "/1/compare", "/300/compare", "/1:99/compare",
               "/x/compare", "/1:1/compare/x", "/search/compare", "/i/god/compare"]:
         jobs.append((p, "", True))
@@ -164,8 +166,9 @@ def bands(manifest: dict, con: sqlite3.Connection) -> list[str]:
         if not lo <= val <= hi:
             bad.append(f"{key}: {val:.2f}, expected {lo} to {hi}")
     # Each translation, a download of its own: a chunk to every twenty papers
-    # it has, by the database, as ud's grow as it is written, its database
-    # for search, and its contents for the rail; its size in a band.
+    # it has, by the database, as ud's grow as it is written, and one of its
+    # spoken text to each of those, its database for search, and its contents
+    # for the rail; its size in a band.
     got = {t["key"]: t for t in manifest.get("translations", [])}
     if set(got) != set(exp["translations"]):
         bad.append(f"translations: {sorted(got)}, expected {sorted(exp['translations'])}")
@@ -173,12 +176,14 @@ def bands(manifest: dict, con: sqlite3.Connection) -> list[str]:
         t = got.get(key)
         if t is None:
             continue
-        groups = {f"tr-{key}-{g}" for (g,) in con.execute(
+        twenties = [g for (g,) in con.execute(
             "SELECT DISTINCT p.paper_n / 20 FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id"
-            " WHERE t.translation = ?", (key,))} | {f"tr-{key}.db", f"tr-{key}-toc"}
+            " WHERE t.translation = ?", (key,))]
+        groups = ({f"tr-{key}-{g}" for g in twenties} | {f"tr-{key}-speech-{g}" for g in twenties}
+                  | {f"tr-{key}.db", f"tr-{key}-toc"})
         if {c["name"] for c in t["chunks"]} != groups:
-            bad.append(f"{key}: {len(t['chunks'])} chunks, for {len(groups) - 2} twenties of papers,"
-                       " search and its contents")
+            bad.append(f"{key}: {len(t['chunks'])} chunks, for {len(twenties)} twenties of papers, their"
+                       " spoken text, search and its contents")
         lo, hi = want["download_mb"]
         if not lo <= t["bytes"] / 1e6 <= hi:
             bad.append(f"{key}: {t['bytes'] / 1e6:.2f} MB, expected {lo} to {hi}")

@@ -105,6 +105,19 @@
     } };
     if (sh.miscset[path]) return { chunk: 'misc', make: function (d) { return html(200, stored(sh, d.pages[path])); } };
     if (path === '/search') return { search: true };
+    if ((m = /^\/speech\/([^\/]*[^\/0-9:][^\/]*)\/(.*)$/.exec(path))) {
+      // A translation's, as the browser's voice reads it (app.py speech_tr),
+      // from its own download, twenty papers to a chunk, if the reader keeps
+      // it; if not, the network's failure stands, as for /rail/<key>.  A copy
+      // made before 2026-10-27 has none.
+      var tx = (sh.tr ? sh.tr.order : []).filter(function (x) { return x.key === m[1]; })[0],
+          qm = /^([0-9]+):([0-9]+)$/.exec(m[2]), qp = qm && String(parseInt(qm[1], 10)), qs = qm && parseInt(qm[2], 10);
+      if (sh.tr && (!tx || !qm || (tx.secs[qp] || []).indexOf(qs) < 0)) return { res: missing(sh, T(NOPAGE), path) };
+      if (!tx || !tx.speech || (kept || []).indexOf(tx.key) < 0) return null;
+      return { chunk: 'tr-' + tx.key + '-speech-' + Math.floor(+qp / 20), make: function (d) {
+        return { status: 200, type: 'application/json', body: d[qp + ':' + qs] };
+      } };
+    }
     if ((m = /^\/speech\/(.*)$/.exec(path))) {
       // The text the browser's voice reads (app.py speech()), twenty papers to a
       // chunk (offline/pages.py SPOKEN).
