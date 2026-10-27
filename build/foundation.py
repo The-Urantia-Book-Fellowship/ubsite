@@ -43,28 +43,16 @@ from __future__ import annotations
 
 import collections
 import difflib
-import html
-import io
 import pathlib
-import re
-import zipfile
 
 from .readers import _io
+from .readers import uf_html
+from .readers.uf_html import fmt
 
 ZIP = "misc/uf-eng-001-1955-1.22-html.zip"
-RE_FILE = re.compile(r"Paper(\d{3})\.html$")
-RE_P = re.compile(r'<p id="U(\d+)_(\d+)_(\d+)(F?)"[^>]*>(.*?)</p>', re.S)
-RE_STARS = re.compile(r"\*(?: \*)+")
-RE_SMALL = re.compile(r"\s*<small>([^<]*)</small>\s*")
-RE_PAGE = re.compile(r" \((\d+\.\d+)\)$")
-RE_TAG = re.compile(r"<[^>]+>")
 SIMILAR = 0.9           # a pair matched despite different words must be this alike
 
 Key = tuple[int, int, int]
-
-
-def fmt(k: Key | None) -> str:
-    return "-" if k is None else f"{k[0]}:{k[1]}.{k[2]}"
 
 
 def _norm(t: str) -> str:
@@ -77,53 +65,21 @@ def read(repo, report, pages: dict[Key, str] | None = None,
 
     Each paragraph's 1955 page goes into `pages`, by its key there, and each
     separator into `seps`, as the key of the paragraph after it and its stars.
+    The zip is read by build/readers/uf_html.py, which reads every language's.
     """
-    data = _io.read_bytes_at_rev(repo["path"], ZIP, repo["at"])
+    papers = uf_html.read(_io.read_bytes_at_rev(repo["path"], ZIP, repo["at"]), report)
     out = collections.defaultdict(list)
     found: dict[Key, str] = {}
-    seen: set[Key] = set()
     bare: list[tuple[str, Key]] = []        # numbered, but printed without the number
     stars: list[tuple[Key, str]] = []
-    with zipfile.ZipFile(io.BytesIO(data)) as z:
-        for name in sorted(z.namelist()):
-            if not RE_FILE.search(name):
-                continue
-            star = None                         # a separator awaiting its paragraph
-            for m in RE_P.finditer(z.read(name).decode("utf-8")):
-                k = tuple(map(int, m.group(1, 2, 3)))
-                unlabelled, body = m.group(4), m.group(5)
-                if unlabelled:
-                    text = html.unescape(RE_TAG.sub("", body)).strip()
-                    if RE_STARS.fullmatch(text):
-                        if star:
-                            report.hard("uf-separator-twice", fmt(k), f"{name}: two in a row")
-                        star = text         # a separator: see above
-                        continue
-                else:
-                    small = RE_SMALL.match(body)
-                    if not small or not small.group(1).startswith(fmt(k) + " "):
-                        report.hard("uf-paragraph-unlabelled", fmt(k),
-                                    f"{name}: no <small>{fmt(k)} …</small> before the text")
-                        continue
-                    page = RE_PAGE.search(small.group(1))
-                    if not page:
-                        report.hard("uf-paragraph-no-page", fmt(k),
-                                    f"{name}: no 1955 page in {small.group(1)!r}")
-                    else:
-                        found[k] = page.group(1)
-                    text = html.unescape(RE_TAG.sub("", body[small.end():])).strip()
-                if k in seen:
-                    report.hard("uf-paragraph-duplicate", fmt(k), f"{name}: {fmt(k)} twice")
-                    continue
-                seen.add(k)
-                out[k[0]].append((k, text))
-                if unlabelled:
-                    bare.append((name, k))
-                if star:
-                    stars.append((k, star))
-                    star = None
-            if star:
-                report.hard("uf-separator-at-end", name, "a separator with no paragraph after it")
+    for paper in papers.values():
+        for q in paper.paras:
+            out[q.key[0]].append((q.key, q.text))
+            if q.page:
+                found[q.key] = q.page
+            if q.bare:
+                bare.append((q.name, q.key))
+        stars += [(k, s) for k, s, _ in paper.seps]
     # A paragraph printed without its number has no page beside it either.  It
     # takes the one place its neighbours leave on their page, or none.
     for name, k in bare:
