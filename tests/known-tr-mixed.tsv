@@ -1,0 +1,8 @@
+# A word of both alphabets in a translation (build/translation.py slips()):
+# the translation's key, where it stands (our paragraph, "note" after it for a
+# translator's note), the word as written.  A letter typed in the other
+# keyboard layout looks right on the page and is not what search looks for;
+# these are the translations' own slips, each to be mended in the translation,
+# which then fails the build until its line here goes too.  The nine the check
+# found when it was made (2026-10-27) were mended the same day, ud at 7942f32,
+# urantia-ru at d4d7d2c.

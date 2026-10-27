@@ -58,6 +58,7 @@ KNOWN = ROOT / "tests" / "known-tr-numbering.tsv"
 KNOWN_SEPS = ROOT / "tests" / "known-tr-separators.tsv"
 KNOWN_LABELS = ROOT / "tests" / "known-tr-labels.tsv"
 KNOWN_BIBREFS = ROOT / "tests" / "known-tr-bibrefs.tsv"
+KNOWN_MIXED = ROOT / "tests" / "known-tr-mixed.tsv"
 # Search's own lists, by their `in` (ubsite/app.py search), which no
 # translation's key may be.
 SCOPES = ("index", "text", "notes", "study")
@@ -111,6 +112,10 @@ SUBSTITUTE = {"urantia-ru": {"　": " "}}       # an ideographic space: 44:3.5, 
 # century in Greek capital iotas, which UB Goudy has not, for the Roman II.
 NOTE_SUBSTITUTE = {"ud": {"Галена ΙΙ века": "Галена II века"}}
 RE_CYRILLIC = re.compile(r"[Ѐ-ӿ]")
+# A word of both alphabets, «Cвинец» with a Latin C: a letter typed in the
+# other keyboard layout, which looks right on the page and is not what search
+# looks for (slips()).
+RE_MIXED = re.compile(r"\w*(?:[A-Za-z][Ѐ-ӿ]|[Ѐ-ӿ][A-Za-z])\w*")
 RE_LABEL = re.compile(r"\d+\.")
 # A list's label at the start of a paragraph of the Foundation's, which writes
 # it as words: 1., IV., а. (Cyrillic) where ours is a.
@@ -429,6 +434,43 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
     toc = _toc(key, info, paras, headings, part_titles, contents, report)
     return Built(key, info, repo["commit"], paras, headings, len(theirs_seps), sources,
                  date, tally["normalised"], toc)
+
+
+def slips(b: Built, report) -> None:
+    """What a translation gets wrong where a reader cannot see it (Tigran,
+    2026-10-27, of four titles its contents gave in other words: "those are
+    real errors, you should have told me about them").  A word of both
+    alphabets, in its text, its notes, its titles or its contents, must be
+    exactly tests/known-tr-mixed.tsv, its own slips, each to be mended in the
+    translation, which then fails the build until its line goes too.  And a
+    paper's title in its contents must be the paper's own, but for case: the
+    rail shows the one and Compare the other (urantia-ru 46, 94, 95 and 110
+    differed until its b2caee2)."""
+    found = set()
+
+    def scan(where: str, text: str) -> None:
+        found.update((where, m[0]) for m in RE_MIXED.finditer(text))
+    for p in b.paras:
+        scan(_fmt(p.key), p.text)
+        for nt in p.set_notes:
+            scan(f"{_fmt(p.key)} note", nt["text"])
+    for n, s, kind, text, _ in b.headings:
+        scan(f"{n}:{s if s is not None else '-'} {kind}", text)
+    for kind, n, s, html, _ in b.toc:
+        scan(f"contents {kind} {n}" + (f":{s}" if s is not None else ""), strip_tags(html))
+    known = {tuple(r) for k, *r in _rows(KNOWN_MIXED) if k == b.key}
+    for where, word in sorted(found - known):
+        report.hard("tr-mixed-alphabets", f"{b.key} {where}",
+                    f"{word!r} has letters of both alphabets, not in {KNOWN_MIXED.name}")
+    for where, word in sorted(known - found):
+        report.hard("tr-mixed-gone", f"{b.key} {where}",
+                    f"{KNOWN_MIXED.name} declares {word!r}, and it is no longer so")
+    titles = {n: text for n, s, kind, text, _ in b.headings if kind == "title"}
+    for kind, n, s, html, _ in b.toc:
+        own = strip_tags(html)
+        if kind == "paper" and n in titles and own.casefold() != titles[n].casefold():
+            report.hard("tr-toc-title", f"{b.key} paper {n}",
+                        f"its contents title it {own!r}, its paper {titles[n]!r}")
 
 
 # A part's title that begins with its own word and number, ud's \partimix

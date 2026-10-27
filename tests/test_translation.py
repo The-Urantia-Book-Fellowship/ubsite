@@ -75,6 +75,39 @@ class TeX(unittest.TestCase):
         self.assertIn("unknown-macro", expand("urantia-ru", "\\fnst{x}")[3])
 
 
+class Slips(unittest.TestCase):
+    """A word of both alphabets must be exactly known-tr-mixed.tsv, and a
+    paper's title in the contents the paper's own but for case (slips())."""
+
+    def codes(self, key, text, titles=(), toc=()):
+        b = translation.Built(key, {}, "", [translation.TPara((16, 0, 2), "", text, [], [], [])],
+                              list(titles), 0, [], toc=list(toc))
+        report = Report()
+        translation.slips(b, report)
+        return sorted(p.code for p in report.problems)
+
+    def test_a_word_of_both_alphabets_fails(self):
+        self.assertEqual(self.codes("x", "Cемь Главных Духов"), ["tr-mixed-alphabets"])
+
+    def test_one_declared_passes_and_one_mended_fails(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            known = pathlib.Path(d) / "known.tsv"
+            known.write_text("# a slip\nx\t16:0.2\tCемь\n", encoding="utf-8")
+            was, translation.KNOWN_MIXED = translation.KNOWN_MIXED, known
+            try:
+                self.assertEqual(self.codes("x", "Cемь Главных Духов"), [])
+                self.assertEqual(self.codes("x", "Семь Главных Духов"), ["tr-mixed-gone"])
+            finally:
+                translation.KNOWN_MIXED = was
+
+    def test_the_contents_title_is_the_paper_s_but_for_case(self):
+        heads = [(46, None, "title", "Центр локальной системы", "")]
+        self.assertEqual(self.codes("x", "Семь", heads, [("paper", 46, None, "Столица локальной системы", 0)]),
+                         ["tr-toc-title"])
+        self.assertEqual(self.codes("x", "Семь", heads, [("paper", 46, None, "ЦЕНТР ЛОКАЛЬНОЙ СИСТЕМЫ", 1)]), [])
+
+
 class Notes(unittest.TestCase):
     """A translator's note, set as a study note is, by ud's own table."""
 

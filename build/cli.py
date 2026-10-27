@@ -139,6 +139,7 @@ def main(argv: list[str]) -> int:
                 continue
             print(f"translation {k}, at {at(repos[k])} ...")
             tr_built.append(b := translation.build(k, repos[k], ours, report))
+            translation.slips(b, report)
             print(f"  {len(b.paras):,} paragraphs, {sum(len(p.notes) for p in b.paras)} notes,"
                   f" {len(b.headings)} titles"
                   + (f", {b.normalised} stress marks written as Latin letters read as Cyrillic"

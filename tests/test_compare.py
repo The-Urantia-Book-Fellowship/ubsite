@@ -110,11 +110,8 @@ class Heads(unittest.TestCase):
         self.assertNotIn("section", [k for _, k, _ in self.heads("1:0")])
 
     def test_a_title_its_contents_lack_stays_in_small_capitals(self):
-        # ud's 195 and 196, which its contents do not give; and a title that is
-        # not in capitals stays as its paper writes it, though its contents'
-        # words differ (urantia-ru 46).
+        # ud's 195 and 196, which its contents do not give.
         self.assertIn(("ud", "title", '<span class="caps">ПОСЛЕ ПЯТИДЕСЯТНИЦЫ</span>'), self.heads("195:0"))
-        self.assertIn(("urantia-ru", "title", "Центр локальной системы"), self.heads("46:0"))
 
 
 if __name__ == "__main__":

@@ -69,6 +69,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- In Книга Урантии (USGNY), the titles of Papers 46, 94 and 95 over the text are now those its contents give, Столица локальной системы, Учения Мелхиседека на Востоке and Учения Мелхиседека в Леванте, and in it and Урантийские документы nine words typed with a letter of the other alphabet, which search could not find, are mended.
 - In Compare, the papers' titles of Урантийские документы are in proper case, as its contents give them, rather than in capitals, and its section titles in small capitals, as the contents at the left set them.
 - The book's contents at the left stay in English when the interface is in Russian: they said 0. Введение and Часть I. among the English titles.
 - In Russian, words set in small capitals are small capitals again, not lower case, as they were until October 26.
@@ -83,6 +84,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The build fails a word of both alphabets in a translation, a letter typed in the other keyboard layout, unless `tests/known-tr-mixed.tsv` lists it, and a paper's title in a translation's contents that is not the paper's own but for case.
 - Each translation's spoken text, what the browser's voice reads, is in a new table, `tr_speech`, made by `build/speech.py` (`derive_tr`, `speak_ru`) and gated by `check_audio`; `/speech/<key>/<paper>:<section>` sends it as `/speech/` sends the English's, and each translation's offline download keeps it, `tr-<key>-speech-<n>`. Two new settings: `listen`, the switch for every play button, which a stored `voice` of `off` is read as, and `trvoices`, each translation's browser voice by name, as JSON; visits count a translation heard as the voice `browser:<key>`.
 - Each translation's own contents are in a new table, `tr_toc`, its parts', papers' and sections' titles, from its printed contents (`paper-titles.tex` and its style's part titles, or the Foundation's parts page); `/rail/<key>` sends them as JSON under a version, which `#ub-translations` gives as `toc`, and each translation's offline download has them as a chunk of its own, `tr-<key>-toc`. The rail's head is a `div.railhead` now, the fold button and the list in it, and a new kept setting, `toc`, holds the choice.
 - `sources.toml` takes a release as a source, a zip by its path, SHA-256 and text id, `[uf-ru]`: the Foundation's HTML of its Russian translation, which `build/readers/uf_html.py` reads, as it now reads the English SRT's zip for `build/foundation.py` (`uf_paragraph` and `uf_section` row for row as before), and `build/tr_html.py` turns into text and spans. It is joined to ours by `uf_ref`, so `cli.py` builds the Foundation's numbering before the translations. `translation` has two new columns, `credit_en` and `credit_ru`, which Settings shows; `build_source` gives the zip's digest as its commit and its version stamp's date. EB Garamond's Cyrillic faces no longer keep `smcp` and `c2sc`, and the build fails a subset that does.

@@ -253,8 +253,8 @@ def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     # A paper's title written in capitals, as ud's \upaper sets them, as its
     # printed contents give it, where they do, as the left rail has it (Tigran,
     # 2026-10-27: "Print it in proper case, like all the others"); any other
-    # stays as the paper writes it, since a contents' title may differ in its
-    # words (urantia-ru 46, 94, 95, 110).  A title written only in capitals, a
+    # stays as the paper writes it (the two must agree but for case, which
+    # build/translation.py slips() holds them to).  A title written only in capitals, a
     # paper's or a section's, is set in small capitals, as the rail sets it
     # (tr_toc.caps).
     toc = {(t["k"], t["kind"]): (t["html"], t["caps"]) for t in con.execute(
