@@ -88,9 +88,12 @@ class Heads(unittest.TestCase):
         return re.findall(r'<div data-k="([a-z-]+)" data-head="(\w+)" lang="ru">(.*?)</div>', frag)
 
     def test_a_paper(self):
+        # ud's title, which its \upaper writes in capitals, as its contents
+        # give it (Tigran, 2026-10-27), and its section's, written in capitals
+        # alone, in small capitals.
         self.assertEqual(self.heads("1:1"), [
-            ("ud", "paper", "ДОКУМЕНТ 1"), ("ud", "title", "ВСЕОБЩИЙ ОТЕЦ"),
-            ("ud", "author", "Божественный Советник"), ("ud", "section", "1. ИМЯ ОТЦА"),
+            ("ud", "paper", "ДОКУМЕНТ 1"), ("ud", "title", "Всеобщий Отец"),
+            ("ud", "author", "Божественный Советник"), ("ud", "section", '1. <span class="caps">ИМЯ ОТЦА</span>'),
             ("urantia-ru", "paper", "ТЕКСТ 1"), ("urantia-ru", "title", "Отец Всего Сущего"),
             ("urantia-ru", "author", "Божественный Советник"), ("urantia-ru", "section", "1. Имя Отца"),
             # The Foundation's: its word for a Paper as its p.paper writes it, and
@@ -101,9 +104,17 @@ class Heads(unittest.TestCase):
     def test_the_foreword_and_an_introduction(self):
         heads = self.heads("0:3")
         self.assertNotIn("paper", [k for _, k, _ in heads])
-        self.assertIn(("ud", "section", "3. ПЕРВЫЙ ИСТОЧНИК И ЦЕНТР"), heads)
+        self.assertIn(("ud", "title", "Предисловие"), heads)
+        self.assertIn(("ud", "section", '3. <span class="caps">ПЕРВЫЙ ИСТОЧНИК И ЦЕНТР</span>'), heads)
         self.assertIn(("urantia-ru", "section", "III. Первоисточник и центр"), heads)
         self.assertNotIn("section", [k for _, k, _ in self.heads("1:0")])
+
+    def test_a_title_its_contents_lack_stays_in_small_capitals(self):
+        # ud's 195 and 196, which its contents do not give; and a title that is
+        # not in capitals stays as its paper writes it, though its contents'
+        # words differ (urantia-ru 46).
+        self.assertIn(("ud", "title", '<span class="caps">ПОСЛЕ ПЯТИДЕСЯТНИЦЫ</span>'), self.heads("195:0"))
+        self.assertIn(("urantia-ru", "title", "Центр локальной системы"), self.heads("46:0"))
 
 
 if __name__ == "__main__":

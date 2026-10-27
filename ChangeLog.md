@@ -69,6 +69,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- In Compare, the papers' titles of Урантийские документы are in proper case, as its contents give them, rather than in capitals, and its section titles in small capitals, as the contents at the left set them.
 - The book's contents at the left stay in English when the interface is in Russian: they said 0. Введение and Часть I. among the English titles.
 - In Russian, words set in small capitals are small capitals again, not lower case, as they were until October 26.
 - A translation's short name in parentheses, such as (UF-RUS), is never broken across two lines.

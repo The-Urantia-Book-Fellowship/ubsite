@@ -250,6 +250,23 @@ def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     for r in rows:
         has.setdefault(r["pid"], []).append(r["k"])
     keys = list(dict.fromkeys(r["k"] for r in rows))
+    # A paper's title written in capitals, as ud's \upaper sets them, as its
+    # printed contents give it, where they do, as the left rail has it (Tigran,
+    # 2026-10-27: "Print it in proper case, like all the others"); any other
+    # stays as the paper writes it, since a contents' title may differ in its
+    # words (urantia-ru 46, 94, 95, 110).  A title written only in capitals, a
+    # paper's or a section's, is set in small capitals, as the rail sets it
+    # (tr_toc.caps).
+    toc = {(t["k"], t["kind"]): (t["html"], t["caps"]) for t in con.execute(
+        "SELECT translation AS k, kind, html, caps FROM tr_toc WHERE n = ?"
+        " AND (kind = 'paper' OR kind = 'section' AND section_n = ?)", (paper, sec))}
+
+    def cased(k: str, kind: str, html: str) -> str:
+        own, caps = toc.get((k, kind), (None, 0))
+        text = re.sub(r"<[^>]+>", "", html)
+        if kind == "paper" and own is not None and text == text.upper():
+            html = own
+        return f'<span class="caps">{html}</span>' if caps else html
     heads = []
     for h in con.execute(
             "SELECT h.translation AS k, h.kind, h.html, r.lang, r.paper, r.numbers FROM tr_heading h"
@@ -260,7 +277,13 @@ def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
             continue
         if h["kind"] == "title" and paper:
             heads.append({"k": h["k"], "kind": "paper", "html": f"{escape(h['paper'])} {paper}", "lang": h["lang"]})
-        html = f"{sec}. {h['html']}" if h["kind"] == "section" and h["numbers"] else h["html"]
+        html = h["html"]
+        if h["kind"] == "title":
+            html = cased(h["k"], "paper", html)
+        elif h["kind"] == "section":
+            html = cased(h["k"], "section", html)
+            if h["numbers"]:
+                html = f"{sec}. {html}"
         heads.append({"k": h["k"], "kind": h["kind"], "html": html, "lang": h["lang"]})
     row_of = {(r["k"], r["pid"]): r for r in rows}
     for n in con.execute(

@@ -78,7 +78,7 @@ class Fragment(unittest.TestCase):
         self.assertEqual(sorted(set(k for k, _ in refs)), ["ud", "urantia-ru"])
         self.assertEqual(len(refs), 12)
         self.assertIn('<div data-k="urantia-ru" data-head="section" lang="ru">1. Имя Отца</div>', frag)
-        self.assertIn('<div data-k="ud" data-head="title" lang="ru">ВСЕОБЩИЙ ОТЕЦ</div>', frag)
+        self.assertIn('<div data-k="ud" data-head="title" lang="ru">Всеобщий Отец</div>', frag)
         self.assertIn("Из всех имён", frag)
 
     def test_a_translation_without_the_section_is_not_in_it(self):

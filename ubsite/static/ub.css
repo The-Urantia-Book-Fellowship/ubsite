@@ -268,7 +268,7 @@ footer p { margin: .2rem 0; }
    in capitals, ud's section titles, is set in small capitals, synthesised in
    Cyrillic, which EB Garamond has none of. */
 .rail a.untr { color: var(--faint); }
-.rail .caps { font-variant-caps: all-small-caps; font-synthesis: small-caps; }
+.rail .caps, article.cmp .ch .caps { font-variant-caps: all-small-caps; font-synthesis: small-caps; }
 /* Until the contents chosen are drawn, the tree waits unseen, so that the
    book's English never shows first (base.html sets data-toc; ub.js, or the
    head script after 1.5 s, .tocready). */
