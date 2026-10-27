@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The contents at the left can be read as any translation you have ticked gives them, chosen on the Contents line: its parts, papers and sections in its own words, and in grey what it has not translated.
 - The Urantia Foundation's own Russian translation, Книга Урантии (UF-RUS), its 2024 release, can be shown beside the text, compared and searched as the other two are, by the Foundation's permission: tick it in Settings, in the Translations tab.
 - Compare, at the head of the text, sets the text beside the translations you have ticked, a column each, each under its own paper and section titles, at an address of its own such as /1:1/compare: Back leaves it, and the transport bar and the Contents keep it on. On a phone each paragraph stands with its translations under it.
 - Search finds the study notes too, listed after the text while Settings shows them, each opening its paragraph with the note's card.
@@ -42,6 +43,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The footer says only that the site is not affiliated with Urantia Foundation, whose translations it shows by permission.
 - Settings is in four tabs, Reading, Show, Listening and Offline, so that it no longer runs off the screen, and it keeps one size whichever tab is open.
 - ubsite.sigmaai.au, the main site, now has the blue book as the icon of its tab and of its app, and ubsite.ddns.net the burgundy one; an app installed before keeps its old icon until it is installed again.
 - The index and the appendices set the suffix of an ordinal as a superscript, as the book does, in 1st, 6th and December 25th: on their own pages, beside the text, in the reading paths and in search.
@@ -66,6 +68,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- The book's contents at the left stay in English when the interface is in Russian: they said 0. Введение and Часть I. among the English titles.
 - In Russian, words set in small capitals are small capitals again, not lower case, as they were until October 26.
 - A translation's short name in parentheses, such as (UF-RUS), is never broken across two lines.
 - Each translation's paragraphs are set in a little, as the book's are, on a phone too, in Compare and in the fold under each paragraph alike.
@@ -78,6 +81,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- Each translation's own contents are in a new table, `tr_toc`, its parts', papers' and sections' titles, from its printed contents (`paper-titles.tex` and its style's part titles, or the Foundation's parts page); `/rail/<key>` sends them as JSON under a version, which `#ub-translations` gives as `toc`, and each translation's offline download has them as a chunk of its own, `tr-<key>-toc`. The rail's head is a `div.railhead` now, the fold button and the list in it, and a new kept setting, `toc`, holds the choice.
 - `sources.toml` takes a release as a source, a zip by its path, SHA-256 and text id, `[uf-ru]`: the Foundation's HTML of its Russian translation, which `build/readers/uf_html.py` reads, as it now reads the English SRT's zip for `build/foundation.py` (`uf_paragraph` and `uf_section` row for row as before), and `build/tr_html.py` turns into text and spans. It is joined to ours by `uf_ref`, so `cli.py` builds the Foundation's numbering before the translations. `translation` has two new columns, `credit_en` and `credit_ru`, which Settings shows; `build_source` gives the zip's digest as its commit and its version stamp's date. EB Garamond's Cyrillic faces no longer keep `smcp` and `c2sc`, and the build fails a subset that does.
 - A section's page answers at `/<paper>:<section>/compare` too, byte for byte the same, which `ub.js` draws in columns from `/tr/`; `/<paper>/compare` goes to the paper's first section in Compare. `/tr/` sends each translation's own word for a Paper and the number (`data-head="paper"`, not over the Foreword), and a section's title with its number where the translation's style adds it, from two new columns of `translation`, `paper` (its `\papertxt`) and `numbers`, which the build holds every section title to. Stats count a view in Compare under its section.
 - `requirements.txt` and `requirements-dev.txt` pin brotli 1.2.1, which mends an out-of-bounds write in its decoder (GHSA-9v8h-qqgm-4m35). Nothing here decodes brotli: fontTools uses it to write the WOFF2 fonts, which come out byte for byte as before. The hosts take it at the next deploy.

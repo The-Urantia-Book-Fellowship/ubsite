@@ -222,7 +222,7 @@ class Copy(unittest.TestCase):
             k = re.escape(t["key"])
             for c in t["chunks"]:
                 self.assertEqual(c["tr"], t["key"])
-                self.assertRegex(f"{c['kind']} {c['name']}", rf"^(tr tr-{k}-\d+|db tr-{k}\.db)$")
+                self.assertRegex(f"{c['kind']} {c['name']}", rf"^(tr tr-{k}-(\d+|toc)|db tr-{k}\.db)$")
             self.assertEqual(sum(c["kind"] == "db" for c in t["chunks"]), 1)
         self.assertFalse([c for c in m["chunks"] if "tr" in c])
         self.assertEqual(m["bytes"], sum(c["bytes"] for c in m["chunks"]))

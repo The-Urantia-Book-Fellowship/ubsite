@@ -87,6 +87,9 @@ window.ubTitle = function () {
   }
   window.ubLang(r, 'lang' in s ? s.lang : D.lang);
   window.ubTr('translations' in s ? s.translations : D.translations);
+  // The contents in a translation (ub.js tocApply): the rail's tree waits
+  // unseen until they are drawn, and shows after 1.5 s whatever happens.
+  if (r.dataset.toc) setTimeout(function () { r.classList.add('tocready'); }, 1500);
 })(document.documentElement, window.ubDefaults, window.ubBase);
 </script>
 {% block head %}{% endblock %}
@@ -293,7 +296,7 @@ window.ubTitle = function () {
   {#- And of the Foundation's translations, however many the site shows, one
       clause, in no line of its own: each is credited in Settings (Tigran,
       2026-10-27, "I don't like wasting space in the footer"). #}
-  <p class="disclaim">{{ t('Not affiliated with, or endorsed by, Urantia Foundation, whose translations are its copyright and used by permission.') }}</p>
+  <p class="disclaim">{{ t('Not affiliated with Urantia Foundation, whose translations are its copyright and used by permission.') }}</p>
 </footer>
 <script src="{{ l10n_url() }}" defer></script>
 <script src="{{ asset('ub.js') }}" defer></script>

@@ -243,12 +243,36 @@ footer p { margin: .2rem 0; }
    the left on a wide screen, up to this one line on a phone (below, and the
    phone's block).  Its chevron is drawn as the summaries' are, at their size,
    so on a phone it stands in their column.  It stays at the top of the rail as
-   the rail scrolls, on the paper, and is not drawn without JavaScript, which
-   alone can work it. */
+   the rail scrolls, on the paper, with the list beside it (.railhead), and is
+   not drawn without JavaScript, which alone can work it. */
+.railhead { position: sticky; top: 0; z-index: 1; background: var(--paper); }
 .railfold { display: flex; align-items: baseline; width: 100%; padding: 0 0 .3rem;
-  font: inherit; color: var(--faint); background: var(--paper); border: 0; cursor: pointer;
-  position: sticky; top: 0; z-index: 1; text-align: left;
+  font: inherit; color: var(--faint); background: none; border: 0; cursor: pointer; text-align: left;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+/* The contents in a translation (Tigran, 2026-10-27; ub.js tocApply): a list
+   on the head's line, at its end, before the chevron on a wide screen, in
+   small capitals, closer set than the word "Contents", for room; shown while
+   a translation is ticked.  Its own
+   chevron points down, as a closed list's does. */
+.railtr { position: absolute; top: 0; right: 1.3em; display: flex; align-items: baseline;
+          color: var(--faint); }
+.railtr[hidden], :root:not(.js) .railtr { display: none; }
+.railtr select { appearance: none; -webkit-appearance: none; margin: 0; padding: 0 1.1em 0 0;
+  border: 0; background: none; color: inherit; cursor: pointer; font: inherit; font-size: .9em;
+  font-variant-caps: all-small-caps; letter-spacing: .05em; }
+.railtr::after { content: ""; position: absolute; right: .2em; top: .35em; width: .3em; height: .3em;
+  border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
+  pointer-events: none; }
+@media (hover: hover) { .railtr:hover { color: var(--ink); } }
+/* What the translation chosen has not stays in English, greyed; what it writes
+   in capitals, ud's section titles, is set in small capitals, synthesised in
+   Cyrillic, which EB Garamond has none of. */
+.rail a.untr { color: var(--faint); }
+.rail .caps { font-variant-caps: all-small-caps; font-synthesis: small-caps; }
+/* Until the contents chosen are drawn, the tree waits unseen, so that the
+   book's English never shows first (base.html sets data-toc; ub.js, or the
+   head script after 1.5 s, .tocready). */
+:root[data-toc]:not(.tocready) .rail > ol { visibility: hidden; }
 .railfold span { font-size: .8em; letter-spacing: .12em; text-transform: uppercase; }
 /* The chevron of every fold button (the rail's, the index's, a box's), pointing
    down: the way an open summary's does. */
@@ -641,8 +665,9 @@ x-ru { font-synthesis: small-caps; }
   :root[data-rail="folded"][data-width="full"] .reader { max-width: none; }
   :root[data-rail="folded"] .rail { overflow: visible; }
   :root[data-rail="folded"] .rail > ol, :root[data-rail="folded"] .railfold span { display: none; }
-  :root[data-rail="folded"] .railfold { width: .8rem; margin-left: -.2rem; padding: 0 0 .9rem;
-                                        background: none; }
+  :root[data-rail="folded"] .railfold { width: .8rem; margin-left: -.2rem; padding: 0 0 .9rem; }
+  :root[data-rail="folded"] .railhead { background: none; }
+  :root[data-rail="folded"] .railtr { display: none; }
   :root[data-rail="folded"] .railfold::before { transform: rotate(-45deg); margin: 0 0 .1em; }
 }
 /* The index folded away: the margin and what stands with it are gone, and the
@@ -1528,7 +1553,9 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
           padding-bottom: .8rem; margin-bottom: 1.4rem; }
   /* Folded on every page, to its one line, a tap's height: opened, for that
      page only (ub.js .shown), its chevron points down, as an open summary's. */
-  .railfold { position: static; padding: .35rem 0; }
+  .railhead { position: relative; }      /* in the page's flow, holding the list's place */
+  .railfold { padding: .35rem 0; }
+  .railtr { top: .25rem; right: 0; }
   :root.js .rail:not(.shown) > ol { display: none; }
   :root.js .rail:not(.shown) { padding-bottom: .2rem; }
   .rail:not(.shown) .railfold::before { transform: rotate(-45deg); }

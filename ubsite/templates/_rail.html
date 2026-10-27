@@ -11,12 +11,18 @@
     The button at its head folds it: away to the left on a wide screen, where
     the browser remembers it (settings.py KEPT), and up to that one line on a
     phone, where every page starts folded (ub.js, ub.css .railfold).  With
-    JavaScript off it is not drawn, and the rail is always open. -#}
+    JavaScript off it is not drawn, and the rail is always open.
+
+    Its own words, "0. Introduction", "Part I.", "9 and 10.", are the book's
+    contents', in English, whatever the interface's language (Tigran,
+    2026-10-27).  Beside the button, a list of the translations a reader has
+    ticked, which shows the contents as one of them gives them, ub.js filling
+    it and drawing them (tocApply, from /rail/<key>); hidden until one is. -#}
 
 {% macro sections(paper_n, secs, here_s=None) -%}
 <ol>
 {%- for s in secs %}<li{% if s.n == here_s %} class="here"{% endif %}><a href="/{{ paper_n }}:{{ s.n }}">
-  {%- if s.n %}{% if s.combined_with %}{{ t('{a} and {b}', a=s.n, b=s.combined_with) }}{% else %}{{ s.n }}{% endif %}. {{ s.title_html|safe }}{% else %}{{ t('0. Introduction') }}{% endif %}</a></li>
+  {%- if s.n %}{% if s.combined_with %}{{ s.n }} and {{ s.combined_with }}{% else %}{{ s.n }}{% endif %}. {{ s.title_html|safe }}{% else %}0. Introduction{% endif %}</a></li>
 {%- endfor %}</ol>
 {%- endmacro %}
 
@@ -32,13 +38,14 @@
 {#- here_p is None on a part's own page: the part is open, and is the page. -#}
 {% macro rail(bk, here_p, here_s, here_part) -%}
 <nav class="rail" {{ ta('aria-label', 'The book') }} data-v="{{ book().v }}">
-<button class="railfold" type="button" aria-controls="rail-tree" aria-expanded="true"><span>{{ t('Contents') }}</span></button>
+<div class="railhead"><button class="railfold" type="button" aria-controls="rail-tree" aria-expanded="true"><span>{{ t('Contents') }}</span></button>
+<label class="railtr" hidden><select {{ ta('aria-label', 'Show the contents in a translation') }} {{ ta('title', 'Show the contents in a translation') }}></select></label></div>
 <ol id="rail-tree">
 {%- for p in bk.foreword %}
 {{ paper_row(p, bk, here_p, here_s) }}
 {%- endfor %}
 {%- for part in bk.parts %}
-<li class="part{% if here_p is none and part.n == here_part %} here{% endif %}"><details{% if part.n == here_part %} open{% endif %}><summary><a href="/part/{{ part.n }}">{{ t('Part {r}.', r=part.roman) }} {{ part.title }}</a></summary>
+<li class="part{% if here_p is none and part.n == here_part %} here{% endif %}"><details{% if part.n == here_part %} open{% endif %}><summary><a href="/part/{{ part.n }}">Part {{ part.roman }}. {{ part.title }}</a></summary>
 <ol>
 {%- for p in part.papers %}
 {{ paper_row(p, bk, here_p, here_s) }}

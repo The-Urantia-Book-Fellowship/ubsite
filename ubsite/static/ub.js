@@ -363,6 +363,8 @@
       if (d.querySelector('ol')) return;
       d.insertAdjacentHTML('beforeend', html);
       if (/\/compare$/.test(location.pathname)) cmpLinks(d, true);
+      var k = tocKey();
+      if (k && tocGot[k]) tocDraw(d.querySelector('ol'), tocGot[k]);
     };
     if (railGot[n]) return put(railGot[n]);
     fetch('/rail/' + n + '?v=' + encodeURIComponent(rail.dataset.v || ''))
@@ -405,7 +407,7 @@
   function railSync() {
     var b = document.querySelector('.railfold'), shut;
     if (!b) return;
-    shut = railShut(b.parentNode);
+    shut = railShut(b.closest('.rail'));
     b.setAttribute('aria-expanded', String(!shut));
     var w = shut ? T.k('Show the contents') : T.k('Fold the contents away');
     T.attr(b, 'title', w);
@@ -414,7 +416,7 @@
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('.railfold'), rail, shut;
     if (!b) return;
-    rail = b.parentNode;
+    rail = b.closest('.rail');
     shut = railShut(rail);
     if (phone.matches) rail.classList.toggle('shown', shut);
     else window.ubSettings.set('rail', shut ? 'open' : 'folded');
@@ -464,6 +466,99 @@
   var TRS = [], trBy = {}, trGot = {};
   try { TRS = JSON.parse((document.getElementById('ub-translations') || {}).textContent || '[]'); } catch (e) {}
   TRS.forEach(function (x) { trBy[x.key] = x; });
+
+  // The contents in a translation (Tigran, 2026-10-27).  The list on the
+  // rail's line (templates/_rail.html) offers the book, as Compare names it,
+  // and each translation ticked, by its short name, in Settings' order; the
+  // choice, kept as `toc` (settings.py KEPT), draws the rail as that one gives
+  // its contents, from /rail/<key> (app.py toc_of): its parts', papers' and
+  // sections' titles, and the rail's own words in its language, «0. Введение»,
+  // «Часть I.», «9 и 10.».  What it has not stays in English, greyed (.untr),
+  // and what it writes in capitals is set in small capitals (.caps).  The
+  // English of each link is kept, to be put back.  The head script set
+  // data-toc before first paint, which keeps the tree unseen until it is drawn
+  // (ub.css), and .tocready shows it, drawn or not: offline, a translation not
+  // kept leaves the rail in English.
+  var tocGot = {}, tocEn = new WeakMap(), ROMAN = ['', 'I', 'II', 'III', 'IV'];
+  var RE_RAILA = /^\/(?:part\/([0-9]+)|([0-9]+)(?::([0-9]+))?)(?:\/compare)?$/;
+  function tocTicked() {
+    return String(load().translations || '').split(' ').filter(function (k) { return trBy[k]; });
+  }
+  function tocKey() {
+    var k = load().toc || '';
+    return tocTicked().indexOf(k) >= 0 ? k : '';
+  }
+  function tocSync() {
+    var l = document.querySelector('.railtr'), sel = l && l.querySelector('select'), ks = tocTicked();
+    if (!sel) return;
+    l.hidden = !ks.length;
+    sel.innerHTML = '<option value="">Uversa Press</option>' + ks.map(function (k) {
+      return '<option value="' + k + '">' + trBy[k].label + '</option>';
+    }).join('');
+    sel.value = tocKey();
+  }
+  // Each link of `root` the rail can place by its address, in the contents
+  // `d`, or the book's with none.
+  function tocDraw(root, d) {
+    if (!root) return;
+    Array.prototype.forEach.call(root.querySelectorAll('a[href]'), function (a) {
+      var m = RE_RAILA.exec(a.getAttribute('href'));
+      if (!m) return;
+      if (!tocEn.has(a)) tocEn.set(a, a.innerHTML);
+      var en = tocEn.get(a), h = null, caps, k;
+      a.classList.remove('untr');
+      a.removeAttribute('lang');
+      if (!d) { a.innerHTML = en; return; }
+      var put = function (title, kind) {
+        return d.caps[kind].indexOf(k) >= 0 ? '<span class="caps">' + title + '</span>' : title;
+      };
+      if (m[1]) {                                    // a part
+        k = m[1];
+        if (d.parts[k] != null) h = d.words.part.replace('{r}', ROMAN[+k]) + ' ' + put(d.parts[k], 'parts');
+      } else if (m[3] === undefined) {               // a paper; the Foreword has no number
+        k = m[2];
+        if (d.papers[k] != null) h = (k === '0' ? '' : k + '. ') + put(d.papers[k], 'papers');
+      } else if (m[3] === '0') {                     // a paper's introduction, named by us
+        if (d.papers[m[2]] != null) h = d.words.intro;
+      } else {
+        k = m[2] + ':' + m[3];
+        var two = /^([0-9]+) and ([0-9]+)\./.exec(a.textContent);   // 139's "9 and 10"
+        if (d.sections[k] != null)
+          h = (two ? d.words.and.replace('{a}', two[1]).replace('{b}', two[2]) : m[3]) + '. ' +
+              put(d.sections[k], 'sections');
+      }
+      if (h == null) {
+        a.innerHTML = en;
+        a.classList.add('untr');
+      } else {
+        a.innerHTML = h;
+        a.lang = d.lang;
+      }
+    });
+  }
+  function tocApply() {
+    var r = document.documentElement, rail = document.querySelector('.rail'), k = tocKey();
+    var done = function (d) {
+      if (tocKey() !== k) return;                   // chosen again meanwhile
+      tocDraw(rail, d);
+      r.classList.add('tocready');
+    };
+    tocSync();
+    if (!rail || !k) return done(null);
+    if (tocGot[k]) return done(tocGot[k]);
+    fetch('/rail/' + k + '?v=' + encodeURIComponent(trBy[k].toc || ''))
+      .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+      .then(function (d) { tocGot[k] = d; done(d); })
+      .catch(function () { done(null); });
+  }
+  document.addEventListener('change', function (ev) {
+    if (ev.target.closest && ev.target.closest('.railtr')) window.ubSettings.set('toc', ev.target.value);
+  });
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail.key === 'toc' || ev.detail.key === 'translations') tocApply();
+  });
+  document.addEventListener('ub:swap', tocApply);    // listen.js's <main>, the rail with it
+  tocApply();
   function trKeys(tf) {
     var has = (tf.dataset.has || '').split(' ');
     return String(load().translations || '').split(' ').filter(function (k) {

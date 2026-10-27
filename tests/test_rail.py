@@ -8,6 +8,7 @@ the dialog does not show.  Rendered through the app as ASGI, as test_appendix_pa
 does.  Skipped when var/ub.db has not been built.
 """
 
+import json
 import re
 import sqlite3
 import unittest
@@ -101,23 +102,77 @@ class Rail(unittest.TestCase):
     def test_the_button_at_its_head_folds_it(self):
         for url in ("/133:2", "/part/4"):
             r = rail(url)
-            self.assertRegex(r, r'^<nav class="rail"[^>]*>\n<button class="railfold" type="button"'
+            self.assertRegex(r, r'^<nav class="rail"[^>]*>\n<div class="railhead"><button class="railfold" type="button"'
                                 r' aria-controls="rail-tree" aria-expanded="true"><span>Contents</span>'
-                                r'</button>\n<ol id="rail-tree">', url)
+                                r'</button>\n<label class="railtr" hidden><select [^>]*></select></label></div>'
+                                r'\n<ol id="rail-tree">', url)
 
     def test_folded_is_kept_but_not_in_the_dialog(self):
         # The rail's fold, and the index's: each button is its only control;
         # the language, the flags' (2026-10-25); and a fold's tab of translations,
-        # the fold's (2026-10-26).
+        # the fold's (2026-10-26); and the contents in a translation, the rail's
+        # list's (2026-10-27).
         d = settings.defaults()
-        self.assertEqual((d["rail"], d["margin"]), ("open", True))
+        self.assertEqual((d["rail"], d["margin"], d["toc"]), ("open", True, ""))
         shown = [it["key"] for g in settings.groups([]) for it in g["items"]]
-        self.assertEqual(sorted(set(d) - set(shown)), ["lang", "margin", "rail", "trtab"])
+        self.assertEqual(sorted(set(d) - set(shown)), ["lang", "margin", "rail", "toc", "trtab"])
         self.assertEqual(len(shown), len(set(shown)))
 
     def test_139_names_its_combined_section(self):
         _, _, body = get("/rail/139")
         self.assertIn('<a href="/139:9">9 and 10. ', body)
+
+    def test_its_own_words_are_english_whatever_the_interface_s(self):
+        # Until 2026-10-27 they were the interface's, and a reader of it in
+        # Russian read «0. Введение» and «Часть I.» among the book's titles.
+        for url in ("/139:9", "/rail/139"):
+            body = get(url, raw=True)[2]
+            for w in ("0. Введение", "Часть I.", "9 и 10."):
+                self.assertNotIn(w, body, url)
+        r = get("/1:1", raw=True)[2]
+        self.assertIn('<a href="/1:0">0. Introduction</a>', r)
+        self.assertIn('<a href="/part/1">Part I. The Central and Superuniverses</a>', r)
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class Contents(unittest.TestCase):
+    """A translation's own contents, which the rail shows when a reader
+    chooses it on its line (app.py toc_of, ub.js tocApply)."""
+
+    def toc(self, key):
+        status, headers, body = get(f"/rail/{key}")
+        self.assertEqual(status, 200, key)
+        return headers, json.loads(body)
+
+    def test_the_foundation_s_whole(self):
+        _, d = self.toc("uf-ru")
+        self.assertEqual((len(d["parts"]), len(d["papers"]), len(d["sections"])), (4, 197, 1429))
+        self.assertEqual(d["words"], {"intro": "0. Введение", "part": "Часть {r}.", "and": "{a} и {b}"})
+        self.assertEqual((d["papers"]["1"], d["sections"]["1:1"], d["sections"]["139:9"]),
+                         ("Всеобщий Отец", "Имя Отца", "Иаков и Иуда Алфеевы"))
+        self.assertEqual(d["caps"], {"parts": [], "papers": [], "sections": []})
+
+    def test_ud_s_from_its_printed_contents(self):
+        # Its \upaper is in capitals, its contents are not; its sections'
+        # titles, in capitals, are set in small capitals.
+        _, d = self.toc("ud")
+        self.assertEqual(len(d["papers"]), 45)
+        self.assertEqual((d["papers"]["1"], d["parts"]["1"]),
+                         ("Всеобщий Отец", "Центральная вселенная и сверхвселенные"))
+        self.assertEqual(d["sections"]["1:1"], "ИМЯ ОТЦА")
+        self.assertIn("1:1", d["caps"]["sections"])
+        self.assertNotIn("139", d["papers"])
+
+    def test_kept_for_good_under_its_version(self):
+        from ubsite import app as A
+        v = A.toc_of("uf-ru")["v"]
+        self.assertIn("immutable", get(f"/rail/uf-ru?v={v}")[1].get("cache-control", ""))
+        self.assertEqual(get("/rail/uf-ru")[1].get("cache-control"), "no-cache")
+        self.assertIn(f'"toc": "{v}"', get("/1:1", raw=True)[2])
+
+    def test_a_key_no_translation_has(self):
+        for key in ("nothing", "UF-RUS"):
+            self.assertEqual(get(f"/rail/{key}")[0], 404, key)
 
 
 if __name__ == "__main__":

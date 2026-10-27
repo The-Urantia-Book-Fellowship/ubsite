@@ -240,6 +240,21 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
                 trs[k].setdefault(f"tr-{k}-{p // SPOKEN}", {})[f"{p}:{s}"] = list(piece)
                 tr_secs[k].setdefault(str(p), []).append(s)
 
+    # Each one's own contents, which the left rail shows when a reader chooses
+    # it (app.py toc_of): /rail/<key> as the server sends it, a chunk of its
+    # own in its download, so that a translation not kept leaves the rail in
+    # English offline.
+    tocs = 0
+    for k in order:
+        if not trs[k]:
+            continue
+        got = site.get(f"/rail/{k}")
+        if got.status != 200:
+            raise Shape(f"/rail/{k} answered {got.status}")
+        trs[k][f"tr-{k}-toc"] = {"toc": got.text}
+        expect[f"/rail/{k}"] = sha(got.text)
+        tocs += 1
+
     # The index: a chunk to a letter, its page and its headwords' pages.
     by_letter: dict[str, list[str]] = {}
     for slug, letter in u["slugs"].items():
@@ -336,5 +351,5 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     counts = {"sections": sum(len(s) for s in u["papers"].values()), "papers": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
               "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
-              "pages": len(expect) - spoken - fragments, "spoken": spoken, "fragments": fragments}
+              "pages": len(expect) - spoken - fragments - tocs, "spoken": spoken, "fragments": fragments}
     return chunks, expect, counts, {k: c for k, c in trs.items() if c}

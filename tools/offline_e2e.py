@@ -35,6 +35,8 @@ import urllib.request
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+# The rail's link to Paper 1, as the contents chosen draw it (ub.js tocApply).
+RAIL1 = """document.querySelector('.rail a[href="/1"]').textContent"""
 BASE = "http://localhost:8131"
 SERVER = """
 import os, pathlib, sys, types
@@ -395,6 +397,24 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
            == ["en", "urantia-ru"], "a translation without the section has no column")
 
+        print("The contents in a translation")
+        pg.goto(BASE + "/1:1")
+        opts = pg.evaluate("[...document.querySelectorAll('.railtr option')].map(o => o.textContent)")
+        ok(pg.is_visible(".railtr select") and opts == ["Uversa Press", "USGNY", "Aivazian"],
+           f"the rail's line offers the book and each one ticked, in the reader's order ({opts})")
+        pg.select_option(".railtr select", "ud")
+        pg.wait_for_function("""document.querySelector('.rail a[href="/1"]').textContent.includes('Всеобщий Отец')""")
+        part = pg.inner_text('.rail a[href="/part/1"]')
+        ok(part.startswith("Часть I. Центральная"), f"chosen, the rail is that one's contents ({part!r})")
+        ok(pg.locator(".rail a.untr").count() > 0 and "Introduction" not in pg.inner_text('.rail a[href="/1:0"]'),
+           "what it has not stays in English, greyed, and a paper's introduction is «0. Введение»")
+        pg.goto(BASE + "/1:2")
+        pg.wait_for_selector(":root.tocready")
+        ok("Всеобщий Отец" in pg.evaluate(RAIL1), "and stays chosen from page to page")
+        pg.select_option(".railtr select", "")
+        pg.wait_for_function("""document.querySelector('.rail a[href="/1"]').textContent.includes('The Universal Father')""")
+        ok(pg.locator(".rail a.untr").count() == 0, "Uversa Press puts the book's contents back")
+
         # What the server sends, to hold the worker's answers to.
         want = {}
         urls = ["/101:4", "/101:4.2-3", "/i/god", "/appendix/A", "/lists/1955", "/index/G", "/", "/read",
@@ -457,6 +477,15 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(not pg.is_visible("#offmenu"), "Escape closes the menu")
         ok("offline copy of" in pg.evaluate("getComputedStyle(document.querySelector('footer'), '::before').content"),
            "the footer says the page is from the offline copy")
+        pg.evaluate("ubSettings.set('toc', 'ud')")
+        pg.goto(BASE + "/1:1")
+        pg.wait_for_selector(":root.tocready")
+        ok("Всеобщий Отец" in pg.evaluate(RAIL1), "offline, the contents of the one kept draw the rail")
+        pg.evaluate("ubSettings.set('toc', 'urantia-ru')")
+        pg.goto(BASE + "/1:1")
+        pg.wait_for_selector(":root.tocready")
+        ok("The Universal Father" in pg.evaluate(RAIL1), "and one not kept leaves the rail in English")
+        pg.evaluate("ubSettings.set('toc', '')")
         pg.goto(BASE + "/1:2/compare")
         pg.wait_for_selector("article.cmp .rc[data-k=ud] .rt")
         ok("not in the offline copy" in pg.inner_text("article.cmp .cmphd > .ch[data-k=urantia-ru] .gap")

@@ -39,7 +39,7 @@
 "footer:licence" = { en = 'The Uversa Press edition of <i>The Urantia Book</i>, with the Index and Appendices as revised for the third edition, is licensed as a whole under', ru = 'Издание <i>The Urantia Book</i> от Uversa Press, вместе с Указателем и Приложениями в редакции третьего издания, распространяется целиком по лицензии' }
 "footer:public" = { en = "; its text is in the public domain.", ru = "; его текст является общественным достоянием." }
 "Changelog" = "История изменений"
-"Not affiliated with, or endorsed by, Urantia Foundation, whose translations are its copyright and used by permission." = "Сайт не связан с Фондом Урантия и не одобрен им; переводы Фонда защищены его авторским правом и используются с его разрешения."
+"Not affiliated with Urantia Foundation, whose translations are its copyright and used by permission." = "Сайт не связан с Фондом Урантия; переводы Фонда защищены его авторским правом и используются с его разрешения."
 
 # --- Settings (settings.py): the tabs, then each setting, its choices, its hint
 
@@ -175,6 +175,7 @@
 "Previous section: {s}" = "Предыдущий раздел: {s}"
 "Next section: {s}" = "Следующий раздел: {s}"
 "The book" = "Книга"
+"Show the contents in a translation" = "Показать содержание по переводу"
 "0. Introduction" = "0. Введение"
 "Part {r}." = "Часть {r}."
 "a new group begins here, as in the 1955 printing" = "здесь начинается новая группа, как в издании 1955 года"

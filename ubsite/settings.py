@@ -175,6 +175,10 @@ KEPT = [
     # The tab last chosen in a fold of translations, which the next fold opens
     # at (Tigran, 2026-10-26): a translation's key, "all", or "" for the first.
     ("trtab", "kept", "Translation", "", [], ""),
+    # The contents in the left rail as a translation gives them, chosen on the
+    # rail's line (Tigran, 2026-10-27; ub.js tocApply): a translation's key, or
+    # "" for the book's own.  One no longer ticked reads as "".
+    ("toc", "kept", "Contents", "", [], ""),
 ]
 # Kept through ↺ "Restore the defaults": a reader who chose Russian and resets
 # the settings is not handed an English page (Tigran, 2026-10-25).

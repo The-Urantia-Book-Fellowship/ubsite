@@ -169,6 +169,18 @@
       if (sh.miscset[part]) return { chunk: 'misc', make: function (d) { return html(200, stored(sh, d.pages[part])); } };
       return { res: missing(sh, T('There are four parts, I to IV.'), path) };
     }
+    if ((m = /^\/rail\/([^\/0-9][^\/]*)$/.exec(path))) {
+      // A translation's contents, for the left rail (app.py rail_toc), from its
+      // download, if the reader keeps it; if not, the network's failure stands,
+      // and the rail stays in English (ub.js tocApply).
+      var tk = m[1];
+      if (!sh.tr || !sh.tr.order.some(function (x) { return x.key === tk; }))
+        return { res: text(404, 'No such translation.\n') };
+      if ((kept || []).indexOf(tk) < 0) return null;
+      return { chunk: 'tr-' + tk + '-toc', make: function (d) {
+        return { status: 200, type: 'application/json', body: d.toc };
+      } };
+    }
     if ((m = /^\/rail\/([0-9]+)$/.exec(path))) {
       var pr = String(parseInt(m[1], 10));
       if (!sh.papers[pr]) return { res: text(404, 'No such paper.\n') };

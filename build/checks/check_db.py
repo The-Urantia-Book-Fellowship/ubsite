@@ -145,6 +145,21 @@ INVARIANTS = [
                WHERE t.text IS NULL OR n.at < 0 OR n.at > LENGTH(t.text))
              + (SELECT COUNT(*) FROM (SELECT 1 FROM tr_note n JOIN paragraph p ON p.id = n.paragraph_id
                GROUP BY n.translation, p.paper_n, n.num HAVING COUNT(*) > 1))"""),
+    # Its own contents, which the left rail shows when a reader chooses it: its
+    # four parts, and only papers and sections it has, every paper of them.
+    ("a translation's contents without parts I to IV",
+     """SELECT COUNT(*) FROM translation t WHERE (SELECT COUNT(DISTINCT n) FROM tr_toc
+         WHERE translation = t.key AND kind = 'part' AND n BETWEEN 1 AND 4) <> 4
+         OR EXISTS (SELECT 1 FROM tr_toc WHERE translation = t.key AND kind = 'part' AND n NOT BETWEEN 1 AND 4)"""),
+    ("a paper or section in a translation's contents it has not, or a paper it has not there",
+     """SELECT (SELECT COUNT(*) FROM tr_toc c WHERE c.kind <> 'part' AND NOT EXISTS (
+                 SELECT 1 FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id
+                 WHERE t.translation = c.translation AND p.paper_n = c.n
+                   AND (c.section_n IS NULL OR p.section_n = c.section_n)))
+             + (SELECT COUNT(*) FROM (SELECT DISTINCT t.translation, p.paper_n FROM tr_paragraph t
+                 JOIN paragraph p ON p.id = t.paragraph_id) x WHERE NOT EXISTS (
+                 SELECT 1 FROM tr_toc c WHERE c.translation = x.translation AND c.kind = 'paper'
+                   AND c.n = x.paper_n))"""),
     ("no backslash in a translation's text or titles",
      """SELECT (SELECT COUNT(*) FROM tr_paragraph WHERE text GLOB '*\\*')
              + (SELECT COUNT(*) FROM tr_heading WHERE text GLOB '*\\*')"""),

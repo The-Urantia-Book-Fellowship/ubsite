@@ -517,10 +517,12 @@ T.env.globals["LANGUAGES"] = {"ru": "Russian"}
 def translations_json() -> Markup:
     """What a fold needs of each translation (ub.js): its key, title and
     language, its short name, and who made it in each language, as {en, ru},
-    which l10n.js's T() takes as words made.  HTML, escaped.  In the dialog,
-    so in the shell."""
+    which l10n.js's T() takes as words made; and the version of its contents,
+    which the left rail asks for under it (/rail/<key>).  HTML, escaped.  In
+    the dialog, so in the shell."""
     out = [{"key": x["key"], "lang": x["lang"], "title": str(escape(x["title"])),
-            "label": str(x["label"]), "by": dict(x["by"].by)} for x in translations()]
+            "label": str(x["label"]), "by": dict(x["by"].by), "toc": (toc_of(x["key"]) or {}).get("v")}
+           for x in translations()]
     return Markup(json.dumps(out, ensure_ascii=False).replace("</", "<\\/"))
 
 
@@ -594,8 +596,16 @@ def db_version() -> int:
 
 
 ROMAN = {1: "I", 2: "II", 3: "III", 4: "IV"}
-# What the left rail says itself (templates/_rail.html), which its version holds.
-RAIL_WORDS = ("Contents", "The book", "0. Introduction", "Part {r}.", "{a} and {b}")
+# What the left rail says itself (templates/_rail.html), which its version holds:
+# the interface's words.  Not its contents' own words, "0. Introduction",
+# "Part I.", "9 and 10.", which are in the contents' language, English for the
+# book's and the translation's own in a translation's (/rail/<key>), whatever
+# the interface's (Tigran, 2026-10-27): until then they followed the
+# interface, and a reader of it in Russian read «0. Введение» and «Часть I.»
+# among the book's English titles.
+RAIL_WORDS = ("Contents", "The book", "Show the contents in a translation")
+# The contents' own words, keyed as l10n's catalog keys them.
+TOC_WORDS = {"intro": "0. Introduction", "part": "Part {r}.", "and": "{a} and {b}"}
 
 
 @functools.lru_cache(maxsize=4)
@@ -616,7 +626,7 @@ def _book(mtime_ns: int, bilingual: bool) -> dict:
     # every paper's chunk with each deploy, the book unchanged.  With the words
     # the rail says itself, in each language (ubsite/l10n.py), so that a fragment
     # kept from before they changed is not drawn again.
-    said = [l10n.BILINGUAL] + [l10n.tr(k, r="", a="", b="").by for k in RAIL_WORDS]
+    said = [l10n.BILINGUAL] + [l10n.tr(k).by for k in RAIL_WORDS]
     v = hashlib.sha256(json.dumps([papers, sections, said], sort_keys=True).encode()).hexdigest()[:12]
     return {"foreword": [p for p in papers if p["part_n"] is None],
             "parts": parts, "sections": sections, "v": v}
@@ -1400,6 +1410,54 @@ def rail_sections(request: Request, paper: int, v: str = ""):
     return T.TemplateResponse(request, "rail_sections.html",
                               {"paper_n": paper, "secs": secs},
                               headers={"Cache-Control": cache})
+
+
+@functools.lru_cache(maxsize=16)
+def _toc(mtime_ns: int, bilingual: bool, key: str) -> dict | None:
+    try:
+        con = db()
+        row = con.execute("SELECT lang FROM translation WHERE key = ?", (key,)).fetchone()
+        if row is None:
+            return None
+        rows = con.execute("SELECT kind, n, section_n, html, caps FROM tr_toc WHERE translation = ?"
+                           " ORDER BY kind, n, section_n", (key,)).fetchall()
+    except sqlite3.Error:
+        return None                                # a database from before tr_toc
+    lang = row["lang"]
+    words = {}
+    for w, k in TOC_WORDS.items():
+        by = l10n.tr(k, r="{r}", a="{a}", b="{b}").by
+        words[w] = str(by.get(lang, by["en"]))
+    out = {"lang": lang, "words": words, "parts": {}, "papers": {}, "sections": {},
+           "caps": {"parts": [], "papers": [], "sections": []}}
+    for r in rows:
+        k = str(r["n"]) if r["section_n"] is None else f"{r['n']}:{r['section_n']}"
+        out[r["kind"] + "s"][k] = r["html"]
+        if r["caps"]:
+            out["caps"][r["kind"] + "s"].append(k)
+    body = json.dumps(out, ensure_ascii=False, separators=(",", ":"))
+    return {"body": body, "v": hashlib.sha256(body.encode()).hexdigest()[:12]}
+
+
+def toc_of(key: str) -> dict | None:
+    """A translation's own contents as the left rail shows them when a reader
+    chooses it (ub.js tocApply), JSON: its parts', papers' and sections' titles
+    by our numbers, those written in capitals (`caps`, set in small capitals),
+    and the rail's own words in its language, 0. Введение, Часть I., 9 и 10.;
+    with its version, a hash of it.  None for a key no translation has."""
+    return _toc(db_version(), l10n.BILINGUAL, key)
+
+
+@app.get("/rail/{key}", include_in_schema=False)
+def rail_toc(key: str, v: str = ""):
+    """A translation's contents, for the left rail when a reader chooses it on
+    the rail's line (Tigran, 2026-10-27): asked for under its version
+    (translations_json's `toc`), the answer is kept for good, as /rail/N's is."""
+    got = toc_of(key)
+    if got is None:
+        return Response("No such translation.\n", status_code=404, media_type="text/plain")
+    cache = "public, max-age=31536000, immutable" if v == got["v"] else "no-cache"
+    return Response(got["body"], media_type="application/json", headers={"Cache-Control": cache})
 
 
 @app.get("/part/{n:int}", response_class=HTMLResponse)

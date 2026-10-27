@@ -226,6 +226,16 @@ class FoundationReader(unittest.TestCase):
         self.assertIn("uf-html-unread", self.read(a=PAPER0.replace("<hr />", "<table></table>", 1))[1])
         self.assertIn("uf-html-unread", self.read(a=PAPER0.replace('class="bte"', 'class="xyz"'))[1])
 
+    def test_its_parts_from_the_page_that_lists_them(self):
+        page = "".join(f'<p class="paper"><a href="0{n}.html" title="x">Часть {r}</a></p>\n<h2>Т{r}</h2>\n'
+                       for n, r in enumerate(("I", "II", "III", "IV"), 5))
+        report = Report()
+        self.assertEqual(uf_html.parts(zipped(a=page), report), {1: "ТI", 2: "ТII", 3: "ТIII", 4: "ТIV"})
+        self.assertEqual(report.problems, [])
+        report = Report()
+        uf_html.parts(zipped(a=page.split("<p", 4)[0]), report)
+        self.assertEqual([p.code for p in report.problems], ["uf-parts-unread"])
+
     def test_its_text_id_and_version_stamp(self):
         data = zipped(a="<p>Идентификационный номер текста: UF-RUS-001-1997-1.5<br />"
                         "Штамп версии: UF-202412132348</p>", b=PAPER0)

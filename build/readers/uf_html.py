@@ -116,6 +116,29 @@ def release(data: bytes) -> tuple[set[str], set[str]]:
     return ids, stamps
 
 
+# The parts, on the page that lists them ("01-Parts.html", "01-Части.html"):
+# each its word and number, linking the part's page, then its title.
+RE_PART = re.compile(r'<p class="paper"><a [^>]*>(\S+) (I|II|III|IV)</a></p>\s*<h2>(.*?)</h2>', re.S)
+ROMAN = {"I": 1, "II": 2, "III": 3, "IV": 4}
+
+
+def parts(data: bytes, report) -> dict[int, str]:
+    """{n: its title, HTML as written} for the four parts, from the one page
+    that lists them, in order; anything else fails."""
+    found = []
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        for name in sorted(z.namelist()):
+            if name.endswith(".html"):
+                got = RE_PART.findall(z.read(name).decode("utf-8"))
+                if got:
+                    found.append((name, got))
+    if len(found) != 1 or [ROMAN[r] for _, r, _ in found[0][1]] != [1, 2, 3, 4]:
+        report.hard("uf-parts-unread", ", ".join(n for n, _ in found) or "-",
+                    "not one page listing parts I to IV in order")
+        return {}
+    return {ROMAN[r]: title.strip() for _, r, title in found[0][1]}
+
+
 def read(data: bytes, report) -> dict[int, Paper]:
     """{n: Paper} for each paper in the zip, in order."""
     out: dict[int, Paper] = {}

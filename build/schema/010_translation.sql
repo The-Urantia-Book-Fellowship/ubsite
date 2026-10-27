@@ -58,6 +58,21 @@ CREATE TABLE tr_heading (
     html         TEXT NOT NULL
 );
 
+-- Its own contents, which the left rail shows when a reader chooses it (ub.js
+-- tocApply, app.py /rail/<key>): its four parts' titles, and each paper's and
+-- section's it has, as its printed contents give them, without the number a
+-- title may carry, which the rail adds (build/translation.py _toc).
+CREATE TABLE tr_toc (
+    translation  TEXT NOT NULL REFERENCES translation(key),
+    kind         TEXT NOT NULL CHECK (kind IN ('part', 'paper', 'section')),
+    n            INTEGER NOT NULL,      -- the part's number, or the paper's
+    section_n    INTEGER,               -- a section's; NULL for a part or a paper
+    html         TEXT NOT NULL,
+    caps         INTEGER NOT NULL CHECK (caps IN (0, 1)),   -- written in capitals: set in small capitals
+    UNIQUE (translation, kind, n, section_n),
+    CHECK ((kind = 'section') = (section_n IS NOT NULL))
+);
+
 -- A translator's note (ud's \fnst), at its place in the paragraph's text, set
 -- as build/study.py sets a study note: opened as a card at its number, which its
 -- marker in tr_paragraph.html_hy draws, <a class="fn" data-k="tn" data-n=…>.

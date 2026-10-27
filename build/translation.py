@@ -84,10 +84,16 @@ SCOPES = ("index", "text", "notes", "study")
 # its numbering the Foundation's, joined to ours by uf_ref (build/foundation.py),
 # with no list to keep.  Its Russian writes some stress marks as Latin letters,
 # read as Cyrillic (tr_html.LATIN_STRESS).
+#
+# And where its own contents are, which the left rail shows when a reader
+# chooses it (_toc): its printed contents, \upapertitle{n}{title}..., and the
+# style that titles its parts, \def\partimix{...}.
 STYLE = {
-    "ud": {"hyphenation": "ud.sty", "ackn": "ud.sty", "paper": "ud.sty", "numbers": True},
+    "ud": {"hyphenation": "ud.sty", "ackn": "ud.sty", "paper": "ud.sty", "numbers": True,
+           "contents": "tex/paper-titles.tex"},
     "urantia-ru": {"hyphenation": "tex/urantia-hyphen-ru.tex",
-                   "foreword": ("urantia-ru.sty", "forewordtoc"), "paper": "urantia-ru.sty"},
+                   "foreword": ("urantia-ru.sty", "forewordtoc"), "paper": "urantia-ru.sty",
+                   "contents": "tex/paper-titles.tex"},
     "uf-ru": {"format": "uf-html", "normalise": tr_html.LATIN_STRESS},
 }
 # A section's title that begins with its number: 1., 9 и 10., the Foreword's IX.
@@ -137,6 +143,7 @@ class Built:
     sources: list[dict]          # the works its notes cite: paper_n, key, text, html
     date: str | None = None      # a release's own date, where its source is no repository
     normalised: int = 0          # characters read as others (STYLE normalise)
+    toc: list[tuple] = dataclasses.field(default_factory=list)   # its own contents (_toc)
 
 
 def meta() -> dict[str, dict]:
@@ -278,8 +285,9 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
     date = None
     notes_of: dict[int, list[str]] = {}
     if _uf(key):
-        papers, notes_of, word, date, mapping = _uf_papers(key, repo, info, ours, report)
+        papers, notes_of, word, date, mapping, part_titles = _uf_papers(key, repo, info, ours, report)
         titles: dict[tuple[int, int], Key] = {}
+        contents: dict[int, str] = {}            # its papers' own titles are its contents'
         info = dict(info, paper=word, numbers=False)
     else:
         foreword = None
@@ -295,6 +303,8 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
         info = dict(info, paper=m.group(1) if m else "", numbers=bool(style.get("numbers")))
         papers = reader.read(key, repo["tex"], repo["at"], report, foreword)
         mapping, titles = _mapping(load_known().get(key, []))
+        part_titles = _tex_parts(key, read_at_rev(repo["path"], style["paper"], repo["at"]), report)
+        contents = _tex_contents(key, read_at_rev(repo["path"], style["contents"], repo["at"]), report)
     hyph = Hyphenator(hyphenation(key, repo, report), RUSSIAN)
     used: set[Key] = set()
     used_titles: set[tuple[int, int]] = set()
@@ -416,8 +426,96 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                         f" its number, and its style {'numbers it' if info['numbers'] else 'does not'}")
     paras.sort(key=lambda p: p.key)
     sources = _notes(key, paras, papers, mapping, ours, hyph, report)
+    toc = _toc(key, info, paras, headings, part_titles, contents, report)
     return Built(key, info, repo["commit"], paras, headings, len(theirs_seps), sources,
-                 date, tally["normalised"])
+                 date, tally["normalised"], toc)
+
+
+# A part's title that begins with its own word and number, ud's \partimix
+# «Часть I. Центральная вселенная...»: the rail writes them itself.
+RE_PART_HEAD = re.compile(r"\S+ (?:I|II|III|IV)\.\s+")
+RE_UPAPERTITLE = re.compile(r"\\upapertitle\{(\d+)\}(?=\{)")
+PART_MACRO = {1: "partimix", 2: "partiimix", 3: "partiiimix", 4: "partivmix"}
+
+
+def _tex_parts(key: str, sty: str, report) -> dict[int, str]:
+    """Its four parts' titles, TeX as written: its style's \\partimix ... \\partivmix."""
+    out = {}
+    for n, name in PART_MACRO.items():
+        m = re.search(r"\\def\\" + name + r"(?=\{)", sty)
+        if m:
+            out[n] = reader._brace(sty, m.end())[0].strip()
+    return out
+
+
+def _tex_contents(key: str, src: str, report) -> dict[int, str]:
+    """{paper: its title, TeX as written} from its printed contents,
+    \\upapertitle{n}{title}{author}{page}, lines commented out passed over."""
+    out: dict[int, str] = {}
+    for lineno, raw in enumerate(src.splitlines(), 1):
+        line = re.sub(r"(?<!\\)%.*", "", raw)
+        for m in RE_UPAPERTITLE.finditer(line):
+            n = int(m.group(1))
+            if n in out:
+                report.hard("tr-toc-twice", f"{key}:{STYLE[key]['contents']}:{lineno}",
+                            f"paper {n} twice in its contents")
+            out[n] = reader._brace(line, m.end())[0].strip()
+    return out
+
+
+def _caps(text: str) -> bool:
+    return any(c.isalpha() for c in text) and text == text.upper()
+
+
+def _toc(key: str, info: dict, paras: list[TPara], headings, parts: dict[int, str],
+         contents: dict[int, str], report) -> list[tuple]:
+    """Its own contents, as the left rail shows them when a reader chooses it
+    (ub.js tocApply), each entry (kind, n, section_n, html, caps): its four
+    parts' titles, as its style or its parts page writes them; each paper's it
+    has, as its printed contents give it (ud's \\upaper is in capitals, its
+    contents are not), or failing that its own; and each section's it has,
+    without the number its title may carry, which the rail adds.  What it has
+    not, the rail shows in English.  `caps`: written in capitals, ud's section
+    titles, which the rail sets in small capitals (Tigran, 2026-10-27)."""
+    out: list[tuple] = []
+
+    def entry(kind, n, s, body, where):
+        text, spans, notes = _expand(key, body, report, where)
+        if notes:
+            report.hard("tr-note-in-heading", where, "a note in its contents")
+        html = render(text, spans)
+        if kind == "part" and (m := RE_PART_HEAD.match(text)):
+            if not html.startswith(m.group()):
+                report.hard("tr-toc-part", where, f"its title {text[:40]!r} begins with its number in markup")
+            text, html = text[m.end():], html[m.end():]
+        if not RE_CYRILLIC.search(text):
+            report.hard("tr-not-russian", where, f"its contents' {kind} {text[:40]!r} has no Cyrillic")
+        out.append((kind, n, s, html, int(_caps(text))))
+
+    for n in (1, 2, 3, 4):
+        if n not in parts:
+            report.hard("tr-toc-part", f"{key} part {n}", "no title for it")
+            continue
+        entry("part", n, None, parts[n], f"{key} part {n}")
+    have = sorted({p.key[0] for p in paras})
+    own = {p: (text, html) for p, s, kind, text, html in headings if kind == "title"}
+    for n in have:
+        if n in contents:
+            entry("paper", n, None, contents[n], f"{key} contents, paper {n}")
+        elif n in own:
+            out.append(("paper", n, None, own[n][1], int(_caps(own[n][0]))))
+        else:
+            report.hard("tr-toc-paper", f"{key} paper {n}", "translated, and titled nowhere")
+    for p, s, kind, text, html in headings:
+        if kind != "section":
+            continue
+        m = None if info["numbers"] else RE_NUMBERED.match(text)
+        if m:
+            if not html.startswith(m.group()):
+                report.hard("tr-toc-number", f"{key} {p}:{s}", f"its number in markup: {html[:40]!r}")
+            text, html = text[m.end():], html[m.end():]
+        out.append(("section", p, s, html, int(_caps(text))))
+    return out
 
 
 def _uf_papers(key: str, repo: dict, info: dict, ours: dict[Key, dict], report):
@@ -495,7 +593,7 @@ def _uf_papers(key: str, repo: dict, info: dict, ours: dict[Key, dict], report):
     if not word:
         report.hard("tr-paper-unnamed", key, f"its papers call a Paper {sorted(map(str, words))}, not one word")
     mapping = {u: o for u, o in inv.items() if u != o}
-    return papers, notes_of, word or "", date, mapping
+    return papers, notes_of, word or "", date, mapping, uf_html.parts(data, report)
 
 
 # Each translation with notes: how they are set (build/study.py expand).
@@ -681,6 +779,7 @@ def store(con, built: list[Built], ours_: dict[Key, dict]) -> None:
                                  if (p.key[0], c) in source_id])
         con.executemany("INSERT INTO tr_heading VALUES (?,?,?,?,?,?)",
                         [(b.key, *h) for h in b.headings])
+        con.executemany("INSERT INTO tr_toc VALUES (?,?,?,?,?,?)", [(b.key, *t) for t in b.toc])
 
 
 def roundtrip(con, report) -> None:
