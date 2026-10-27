@@ -121,8 +121,8 @@
     return null;
   }
   // Offline a recording cannot be had: the voice Settings names is not changed
-  // for another (Tigran, 2026-10-13), the bar says why it does not play, and
-  // its voice menu stands beside the message.
+  // for another (Tigran, 2026-10-13), the bar says why it does not play once
+  // it has failed (audio's error), and its voice menu stands beside the message.
   var NEEDS_NET = T.k('The recordings need a connection. Offline, your browser\u2019s voice can read it.');
   // Section d's voice kk; the browser's is made from its paragraphs, d.ids,
   // or a translation's, those it has.
@@ -489,10 +489,9 @@
       said.n = 0;
       return render();
     }
-    if (navigator.onLine === false) {
-      tell(T(NEEDS_NET));
-      return render();
-    }
+    // Tried even where the browser says it is offline, which Chrome can say
+    // with the network working (2026-10-27): offline indeed, the recording
+    // fails at once, and the error below says it needs a connection.
     var s = V.segs[i], t = s[2] / 1000;
     if (file !== s[1]) {
       file = s[1];

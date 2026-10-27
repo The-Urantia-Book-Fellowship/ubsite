@@ -2,8 +2,9 @@
 read and search with the network off, learn of a newer copy and take it, with
 the site's newer worker,
 the page reloading itself after, survive an update that fails, say offline
-while the site is gone though the browser is online, keep it up to date by
-itself, with What's new at the end, and turn it off.
+while the site is gone though the browser is online, and online while the
+browser says offline with the site there, keep it up to date by itself, with
+What's new at the end, and turn it off.
 
     make e2e          (make offline, then .venv/bin/python tools/offline_e2e.py)
 
@@ -159,6 +160,12 @@ HOUR_LATER = """async () => { const c = await caches.open('ub-meta');
   const m = await (await c.match('/offline/meta')).json(); m.checked = 0;
   await c.put('/offline/meta', new Response(JSON.stringify(m), {headers: {'Content-Type': 'application/json'}})); }"""
 
+# The browser saying offline, in the pages of a tab where sessionStorage says
+# so, as Chrome said with the network working until it was restarted
+# (2026-10-27).  The worker's word is its own, and sw.js does not ask it.
+SAYS_OFFLINE = """try { if (sessionStorage.getItem('ubSaysOffline'))
+  Object.defineProperty(Navigator.prototype, 'onLine', { get: () => false }); } catch (e) {}"""
+
 # What the page shows while an update runs, in the menu and on the icon's
 # label, each line once, as it changes; in sessionStorage too, which the
 # reload at its end keeps.
@@ -266,6 +273,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True)
         ctx = b.new_context()
+        ctx.add_init_script(SAYS_OFFLINE)
         pg = ctx.new_page()
         pg.on("dialog", lambda d: d.accept())
         errors = []
@@ -758,6 +766,19 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(i["net"] == "on" and pg.inner_text("#offmenu .net").lower().startswith("online"),
            f"the site back, a page from the copy says online, and Update now is back ({i['title']!r})")
         pg.keyboard.press("Escape")
+
+        print("The browser saying offline, the site there")
+        pg.evaluate("sessionStorage.setItem('ubSaysOffline', '1')")
+        pg.goto(BASE + "/read")
+        ok(pg.evaluate("navigator.onLine") is False, "the browser says offline")
+        ok(not pg.locator("footer[data-copy]").count(), "a page loaded comes from the site all the same")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.net === 'on'", timeout=10000)
+        menu(pg)
+        pg.wait_for_selector("#offmenu .get", timeout=10000)
+        ok(pg.inner_text("#offmenu .net").lower().startswith("online"),
+           f"and without the menu opened the icon says online, and the menu offers Update now ({icon(pg)['title']!r})")
+        pg.keyboard.press("Escape")
+        pg.evaluate("sessionStorage.removeItem('ubSaysOffline')")
 
         print("Kept up to date by itself")
         ctx.set_offline(False)

@@ -69,6 +69,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- The site no longer takes the browser's word that it is offline when it can reach the site: Chrome can say so with the network working, until it is restarted, and the cloud at the top then stayed struck through, every page came from the offline copy, and the recordings would not play. Now the site itself is asked, and the cloud says what it answers.
 - In Книга Урантии (USGNY), the titles of Papers 46, 94 and 95 over the text are now those its contents give, Столица локальной системы, Учения Мелхиседека на Востоке and Учения Мелхиседека в Леванте, and in it and Урантийские документы nine words typed with a letter of the other alphabet, which search could not find, are mended.
 - In Compare, the papers' titles of Урантийские документы are in proper case, as its contents give them, rather than in capitals, and its section titles in small capitals, as the contents at the left set them.
 - The book's contents at the left stay in English when the interface is in Russian: they said 0. Введение and Часть I. among the English titles.

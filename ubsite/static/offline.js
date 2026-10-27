@@ -86,9 +86,14 @@
   // Online is the site reached, not the browser's word alone: ub.js says it
   // from the browser and from where this page came, and the worker's check
   // of the manifest says it again (heard).  A server that is not there is
-  // offline, its buttons would do nothing (Tigran, 2026-10-16).
+  // offline, its buttons would do nothing (Tigran, 2026-10-16).  And a site
+  // that answers is online, whatever the browser says: Chrome can say offline
+  // with the network working, until it is restarted (2026-10-27).
   function online() { return icon.dataset.net === 'on'; }
-  function reach(on) { icon.dataset.net = on ? 'on' : 'off'; }
+  function reach(on) {
+    icon.dataset.net = on ? 'on' : 'off';
+    document.dispatchEvent(new Event('ub:offline'));
+  }
   function heard(s) {
     if (s && 'reached' in s) reach(s.reached);
     show(s);
@@ -189,12 +194,14 @@
     if (s && s.busy) quiet = setTimeout(function () { ask('state').then(show); }, 20000);
   }
   // Before there is a copy: what it would cost, and the button.  A site that
-  // does not answer, or answers 5xx, is offline here too.
+  // does not answer, or answers 5xx, is offline here too, and one that
+  // answers is online.
   function sized() {
     line.textContent = '';
     var gone = function () { reach(false); return Promise.reject(); };
     fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
       if (r.status >= 500) return gone();
+      reach(true);
       if (!r.ok) throw new Error(r.status);
       return r.json();
     }, gone).then(function (m) {
@@ -421,23 +428,25 @@
   document.addEventListener('ub:installable', installed);
   installed();
 
+  // A page load asks at most once an hour, and at once where the page starts
+  // offline, the browser saying so or the page from the copy: a 304 of a few
+  // hundred bytes says whether the site is there.
   sw.getRegistration('/').then(function (reg) {
     if (!reg) return show(null);
     kept = true;
-    return ask('check').then(heard);
+    return ask('check', { force: !online() }).then(heard);
   });
-  // Opening the menu asks the site afresh, and so does coming back online: a
-  // 304 of a few hundred bytes.  Going offline only takes the buttons away.
-  // Asked whenever the browser is online, the site reached or not, so that a
-  // page from the copy learns that the site is back.
-  function fresh() { if (kept && navigator.onLine !== false) ask('check', { force: true }).then(heard); }
+  // Opening the menu asks the site afresh, and so do the browser's online and
+  // offline: whatever it says, so that a page from the copy learns that the
+  // site is back, and the site's answer is the last word.
+  function fresh() { if (kept) ask('check', { force: true }).then(heard); }
   box.addEventListener('toggle', function (ev) { if (ev.newState === 'open') fresh(); });
   window.addEventListener('online', fresh);
   // Coming into view again, as an app brought back to the front, whose page
-  // does not load again: asked as a page load asks, at most once an hour,
-  // so that the copy is kept up to date by itself there too (keepUp).
+  // does not load again: asked as a page load asks, so that the copy is kept
+  // up to date by itself there too (keepUp).
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && kept && navigator.onLine !== false) ask('check').then(heard);
+    if (!document.hidden && kept) ask('check', { force: !online() }).then(heard);
   });
-  window.addEventListener('offline', function () { if (last) show(last); });
+  window.addEventListener('offline', function () { if (last) show(last); fresh(); });
 })();

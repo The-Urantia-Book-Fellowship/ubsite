@@ -243,7 +243,13 @@ self.addEventListener('fetch', function (e) {
     var mine = function () {
       return fromCopy(c, url).then(function (r) { return r || Promise.reject(new Error('not in the copy')); });
     };
-    if (self.navigator.onLine === false) return mine().catch(function () { return fetch(req); });
+    // The network even where the browser says it is offline: Chrome can say so
+    // with the network working, until it is restarted, and until 2026-10-27
+    // every page then came from the copy (a laptop moved from Wi-Fi to a
+    // cable).  Asked past the browser's cache, so that offline indeed the
+    // fetch fails at once and the copy answers, not what the cache happens to
+    // hold: a translation not kept says so, though it was read online.
+    var net = self.navigator.onLine === false ? new Request(req, { cache: 'no-store' }) : req;
     return new Promise(function (resolve, reject) {
       var settled = false, timer = null;
       var fall = function (why) {
@@ -253,7 +259,7 @@ self.addEventListener('fetch', function (e) {
         mine().then(resolve, function () { reject(why); });
       };
       timer = setTimeout(function () { fall(new Error('the network took too long')); }, WAIT);
-      fetch(req).then(function (r) {
+      fetch(net).then(function (r) {
         if (r.status >= 500) return fall(new Error('the server answered ' + r.status));
         if (settled) return;
         settled = true;
