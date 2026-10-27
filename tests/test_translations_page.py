@@ -100,7 +100,7 @@ class Fragment(unittest.TestCase):
                       '<x-ru lang="ru">Примечание 6</x-ru></a> <span lang="ru">', first)
         self.assertIn("Ан­глий­ское сло­во you", first)
         self.assertTrue(first.rstrip().endswith(
-            '<p class="src"><span lang="ru">Урантийские документы</span> (Aivazian)</p>'), first)
+            '<p class="src"><span lang="ru">Урантийские документы</span> <span class="nobreak">(Aivazian)</span></p>'), first)
         # Each after its paragraph, which carries its marker.
         para = frag.index('data-ref="1:1.3"')
         self.assertLess(para, frag.index('id="fnreftn_ud_1_1_3_0"'), frag.index('id="fntn_ud_1_1_3_0"'))
@@ -130,10 +130,20 @@ class Dialog(unittest.TestCase):
     def test_it_lists_each_with_who_made_it_and_what_it_covers(self):
         self.assertIn('<li data-k="ud">', self.panel)
         self.assertIn('<li data-k="urantia-ru">', self.panel)
-        self.assertIn('<span lang="ru">Урантийские документы</span> (Aivazian)', self.panel)
-        self.assertIn('<span lang="ru">Книга Урантии</span> (USGNY)', self.panel)
+        self.assertIn('<li data-k="uf-ru">', self.panel)
+        self.assertIn('<span lang="ru">Урантийские документы</span> <span class="nobreak">(Aivazian)</span>', self.panel)
+        self.assertIn('<span lang="ru">Книга Урантии</span> <span class="nobreak">(USGNY)</span>', self.panel)
+        self.assertIn('<span lang="ru">Книга Урантии</span> <span class="nobreak">(UF-RUS)</span>', self.panel)
         self.assertIn("translated by Tigran Aivazian · Papers 0–40, and 41, 43, 195 and 196 in part", self.panel)
         self.assertIn("the whole book", self.panel)
+
+    def test_the_foundation_s_with_its_credit(self):
+        # Its copyright, as Tigran worded it (2026-10-27), under who made it.
+        li = self.panel[self.panel.index('<li data-k="uf-ru">'):]
+        li = li[:li.index("</li>")]
+        self.assertIn("translated by the Urantia Foundation, 2024 release", li)
+        self.assertIn('<span class="cr">Copyright © Urantia Foundation and used by permission</span>', li)
+        self.assertNotIn('class="cr"', self.panel[:self.panel.index('<li data-k="uf-ru">')])
 
     def test_its_value_is_one_hidden_input(self):
         self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations"])
@@ -141,8 +151,8 @@ class Dialog(unittest.TestCase):
     def test_a_fold_is_handed_their_names(self):
         got = json.loads(re.search(r'<script type="application/json" id="ub-translations">(.*?)</script>',
                                    self.panel, re.S)[1])
-        self.assertEqual([x["key"] for x in got], ["ud", "urantia-ru"])
-        self.assertEqual([x["label"] for x in got], ["Aivazian", "USGNY"])
+        self.assertEqual([x["key"] for x in got], ["ud", "urantia-ru", "uf-ru"])
+        self.assertEqual([x["label"] for x in got], ["Aivazian", "USGNY", "UF-RUS"])
 
 
 if __name__ == "__main__":

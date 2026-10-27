@@ -28,6 +28,7 @@ Paths live in `sources.toml` and **nowhere else**; `build/config.py` is the only
 | `block` | `../block-sources` | Matthew Block's parallel charts of the human sources, one PDF per paper, and `MANIFEST.tsv` naming each chart's address, its version. No git; kept by `../explore-tools/block_fetch.py`. The build reads the manifest and `originals/LIBRARY.tsv`, `tools/study/` the PDFs. Its `originals/`, kept by hand, holds the works themselves where a note was checked against one, each with its official address in `originals/MANIFEST.tsv`, and in `originals/LIBRARY.tsv` the works checked in Tigran's own copies in `/Books`, by path, SHA-256 and their page in his library at ulib.sigmaai.au (sigmaai.au/library until 2026-10-25), with whether a reader who has not logged in can open it (`public`) |
 | `ud` | `../ud` | Tigran's own Russian translation, «Урантийские документы», with notes of his own (`\fnst`): Papers 0–40, and 41, 43, 195 and 196 in part. GPL v3. Read at HEAD |
 | `urantia-ru` | `../urantia-ru` | the late Lila Dogim's Russian translation, with Sergey Prokopov's corrections, as the Urantia Book Society of Greater New York publishes it (urantia.nyc): the whole book, no notes. Read at HEAD |
+| `uf-ru` | `../urantia-rus/misc/uf-rus-001-1997-1.5-html.zip` | the Urantia Foundation's own Russian translation, its 2024 release, as its HTML: the whole book. A zip, fixed by SHA-256 and text id; `../urantia-rus`'s old TeX is never read. Shown by the Foundation's written permission |
 | `audio.mh` | `/Audio/Urantia/Urantia-MH-Audio-DVD` | Merritt Horn's reading, one MP3 per section, 121 h, as on the Uversa Press DVD (2006): 128 kbps stereo, 44.1 kHz. On pi5 too, same path |
 
 All three share one address space: the `\vs` macro addresses `\vs p133 1:3` (a Urantia paragraph) and `\vs Gen 1:1` (a Bible verse) alike.
@@ -36,7 +37,7 @@ The index is read **at HEAD** and the revision recorded in the build, because th
 
 Until 2026-10-06 the first half of that was not true. The readers opened the working tree, while `config` reported HEAD as clean. Now `config` resolves `rev` to one SHA (`at`), `_io.read_tex` reads `tex/` at it, and `build_source` records it. `tests/test_read_tex.py` proves that worktree edits do not get through.
 
-The study edition is read at HEAD too, since 2026-10-18, when its notes began to reach the site (`_io.read_tex_many`, one `git cat-file --batch` for all 197 papers), and so are the translations, since 2026-10-26: a translator's uncommitted paragraph never reaches the site.
+The study edition is read at HEAD too, since 2026-10-18, when its notes began to reach the site (`_io.read_tex_many`, one `git cat-file --batch` for all 197 papers), and so are the translations, since 2026-10-26: a translator's uncommitted paragraph never reaches the site. The Foundation's is a release, read from its zip, whose digest stands where a commit does.
 
 Careful: there are three `urantia-study-edition` trees on this machine. `urantia-study-edition-latest` is the **oldest**. `sources.toml` pins the right one.
 
@@ -107,7 +108,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
 - **Work offline** (2026-10-13): `offline/` keeps the site's own pages in `var/offline/`; `sw.js`, `offline-core.js`, `offline.js`; its gate, `python -m offline check`.
 - **Study notes** (2026-10-18): one reviewed paper at a time, `data/study/NNN.toml`, whose README holds the rules; `build/study.py`, `tools/study/draft.py`.
 - **The interface in Russian** (2026-10-25): `ubsite/ru.toml`, `ubsite/l10n.py`, `/l10n.js`.
-- **Translations beside the text** (2026-10-26): ud and urantia-ru under our numbering (`build/translation.py`, `tests/known-tr-*.tsv`), in a fold under each paragraph, with the translator's notes, offline and in search, and side by side in Compare, `/1:1/compare` (`ub.js cmpDraw`).
+- **Translations beside the text** (2026-10-26): ud and urantia-ru under our numbering (`build/translation.py`, `tests/known-tr-*.tsv`), and the Foundation's from its HTML since 2026-10-27 (`readers/uf_html.py`, `tr_html.py`), in a fold under each paragraph, with the translator's notes, offline and in search, and side by side in Compare, `/1:1/compare` (`ub.js cmpDraw`).
 
 ---
 
@@ -129,8 +130,8 @@ headwords with a reading path 2,058 (3+ paragraphs), 1,820 of them with 2+ chapt
 paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at version 8 (2026-10-13)
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
-translations 2: ud 3,579 paragraphs (45 papers) and 346 notes, citing 11 works, at cc37b29, urantia-ru 14,586 at 04146d5 (2026-10-26); ud numbers 2 of them otherwise, urantia-ru 93
-offline copy 10,285 pages (3,877 reading paths) + 1,626 spoken texts in 417 chunks: 47.6 MB to download and keep, 221 MB unpacked, and each translation a download of its own, chosen by the reader: ud 2.0 MB in 5 chunks, urantia-ru 8.9 MB in 11, each with its database for search (2026-10-26; how it grew: `ARCHITECTURE.md`, Work offline)
+translations 3: ud 3,579 paragraphs (45 papers) and 346 notes, citing 11 works, at cc37b29, urantia-ru 14,586 at 04146d5 (2026-10-26), uf-ru 14,586 and 2 editor's notes, its 2024 release (2026-10-27); ud numbers 2 of them otherwise, urantia-ru 93, uf-ru 106
+offline copy 10,285 pages (3,877 reading paths) + 1,626 spoken texts in 417 chunks: 47.6 MB to download and keep, 221 MB unpacked, and each translation a download of its own, chosen by the reader: ud 2.0 MB in 5 chunks, urantia-ru 8.9 MB in 11, uf-ru 8.9 MB in 11 (2026-10-27), each with its database for search (2026-10-26; how it grew: `ARCHITECTURE.md`, Work offline)
 ```
 
 The index lines move as the index is edited (these are at its `224c84d`, 2026-10-09).
@@ -224,6 +225,8 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 35. **A translation numbers the book as its source did, not as we do.** ud is the study edition's numbering before 2026-09-21: ten separators take a paragraph number (31:10.22 written `\separatorline`, the rest left empty), and everything after one in its section runs one ahead, six in 144:5. urantia-ru numbers 144:5 as the Foundation does, skipping a number at each separator. Neither has a 0:12.10: each sets the Acknowledgment's heading as a `\usection` inside 0:12, which its style's `\ackn` names. So a section's number is taken from the next paragraph's address, never by counting `\usection`.
 36. **A translation's `\pc` comes after the address, and takes no argument.** The press's `\pc` has an optional one and stands before `\vs`; read with the press's spec, urantia-ru's `\vs p031 10:21 \pc [Под объединенным покровительством ...]` lost the whole paragraph as its argument (trap 2 again), and three more. Both styles define `\def\pc{...}`.
 37. **TeX's `\'` stresses the letter after it.** ud's `призна\'ют` is признаю́т, not призна́ют, as ROADMAP's example first had it.
+38. **The Foundation's Russian writes 650 stress marks as Latin letters**, чтó, бóльшую: other letters to search and hyphenation. `tr_html.LATIN_STRESS` reads them as Cyrillic and U+0301. Its two editor's notes stand unclosed at a paper's end, `{{* …`, their marks a bare `*` (62:4.2, 85:2.1).
+39. **A font feature kept for one glyph tells the browser the face has it.** The Cyrillic subset kept `smcp` and `c2sc` for U+0301 alone (2026-10-26), so Chrome stopped synthesising Cyrillic small capitals and set them in lower case. `fonts.py` drops them, and fails a subset that keeps them.
 
 ---
 

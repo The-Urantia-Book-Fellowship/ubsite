@@ -30,7 +30,7 @@
 {% macro tnote(n) %}<aside class="note tn" id="fn{{ n.key }}" data-k="{{ n.k }}" data-of="{{ n.ref }}">
         <p class="lead"><a class="lbl" href="#fnref{{ n.key }}">{{ t('Note {n}', n=n.num) }}</a> <span lang="{{ n.lang }}">{{ n.html_hy|safe }}</span></p>
         {{ sfoot(n) }}
-        <p class="src"><span lang="{{ n.lang }}">{{ n.title }}</span> ({{ n.label }})</p>
+        <p class="src"><span lang="{{ n.lang }}">{{ n.title }}</span> <span class="nobreak">({{ n.label }})</span></p>
       </aside>{% endmacro %}
 {#- A work's page in Tigran's library, where it can be read freely (Tigran,
     2026-10-25): under a work in the Bibliography, and after a source in a

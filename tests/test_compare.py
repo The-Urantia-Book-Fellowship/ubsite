@@ -92,7 +92,11 @@ class Heads(unittest.TestCase):
             ("ud", "paper", "ДОКУМЕНТ 1"), ("ud", "title", "ВСЕОБЩИЙ ОТЕЦ"),
             ("ud", "author", "Божественный Советник"), ("ud", "section", "1. ИМЯ ОТЦА"),
             ("urantia-ru", "paper", "ТЕКСТ 1"), ("urantia-ru", "title", "Отец Всего Сущего"),
-            ("urantia-ru", "author", "Божественный Советник"), ("urantia-ru", "section", "1. Имя Отца")])
+            ("urantia-ru", "author", "Божественный Советник"), ("urantia-ru", "section", "1. Имя Отца"),
+            # The Foundation's: its word for a Paper as its p.paper writes it, and
+            # no author line, which is its last paragraph.
+            ("uf-ru", "paper", "Документ 1"), ("uf-ru", "title", "Всеобщий Отец"),
+            ("uf-ru", "section", "1. Имя Отца")])
 
     def test_the_foreword_and_an_introduction(self):
         heads = self.heads("0:3")

@@ -22,7 +22,13 @@ CREATE TABLE translation (
     -- it, 'ДОКУМЕНТ'; and whether it numbers a section's title itself, so
     -- that the title is written without its number (1) or with it (0).
     paper        TEXT NOT NULL,
-    numbers      INTEGER NOT NULL CHECK (numbers IN (0, 1))
+    numbers      INTEGER NOT NULL CHECK (numbers IN (0, 1)),
+    -- What its owner asks a reader be told with who made it, in each language
+    -- of the interface: "Copyright © Urantia Foundation and used by
+    -- permission".  NULL where nothing is asked.
+    credit_en    TEXT,
+    credit_ru    TEXT,
+    CHECK ((credit_en IS NULL) = (credit_ru IS NULL))
 );
 
 -- A rowid table, not WITHOUT ROWID: its rows are long, and stored by key they

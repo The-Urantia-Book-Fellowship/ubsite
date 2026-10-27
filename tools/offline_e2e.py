@@ -279,8 +279,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(not pg.locator("dialog.settings input[name=offline]").count(), "Settings has no switch for the copy itself")
         ok(not pg.locator("#offmenu input").count(), "and the menu has no switch to turn off")
         offline_tab(pg)
+        n_tr = len(json.loads((copy / "manifest.json").read_text())["translations"])
         ok(pg.evaluate("[...document.querySelectorAll('.offtrs input')].every(i => i.disabled)")
-           and pg.locator(".offtrs li").count() == 2
+           and pg.locator(".offtrs li").count() == n_tr
            and "Download the offline copy first" in pg.inner_text("dialog.settings .offtr .why"),
            "Settings' Offline tab lists the translations, greyed until a copy is kept")
         pg.keyboard.press("Escape")

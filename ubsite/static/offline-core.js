@@ -611,7 +611,7 @@
     // copy does not keep the translation, its heading and a line saying so.
     function trList(e) {
       var x = e.x, h = e.hits,
-          s = '<section data-tr="' + x.key + '"><h2><bdi lang="' + x.lang + '">' + esc(x.title) + '</bdi> (' + x.label + ')';
+          s = '<section data-tr="' + x.key + '"><h2><bdi lang="' + x.lang + '">' + esc(x.title) + '</bdi> <span class="nobreak">(' + x.label + ')</span>';
       if (!h) return s + '</h2>\n<p class="none">' + T('tr:notkept') + '</p></section>';
       s += ' ' + count(h) + '</h2>\n';
       if (h.rows.length)

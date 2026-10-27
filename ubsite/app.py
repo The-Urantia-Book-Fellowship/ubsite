@@ -493,6 +493,9 @@ def _translations(mtime_ns: int, bilingual: bool) -> list[dict]:
             out.append({"key": r["key"], "lang": r["lang"], "title": r["title"],
                         "by": l10n.L({"en": escape(r["by_en"]), "ru": escape(r["by_ru"])}),
                         "label": escape(r["label"]),
+                        # What its owner asks a reader be told, "Copyright © …", or None.
+                        "credit": r["credit_en"] and l10n.L({"en": escape(r["credit_en"]),
+                                                              "ru": escape(r["credit_ru"])}),
                         "cover": _cover(whole, part)})
         return out
     except sqlite3.Error:

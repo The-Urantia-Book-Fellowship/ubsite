@@ -235,8 +235,8 @@ window.ubTitle = function () {
       <ul class="trlist trother" data-lang="{{ lang }}">
         {%- for x in rows %}
         <li data-k="{{ x.key }}"><label><input type="checkbox" value="{{ x.key }}">
-          <span class="w"><span lang="{{ x.lang }}">{{ x.title }}</span> ({{ x.label }}) <span class="lang">{{ t(LANGUAGES[lang]) }}</span></span>
-          <small class="d">{{ t(x.by) }} · {{ t(x.cover) }}</small></label>
+          <span class="w"><span lang="{{ x.lang }}">{{ x.title }}</span> <span class="nobreak">({{ x.label }})</span> <span class="lang">{{ t(LANGUAGES[lang]) }}</span></span>
+          <small class="d">{{ t(x.by) }} · {{ t(x.cover) }}{% if x.credit %}<span class="cr">{{ t(x.credit) }}</span>{% endif %}</small></label>
           <span class="mv"><button type="button" class="up" {{ ta('aria-label', 'Move up') }} {{ ta('title', 'Move up') }}>↑</button><button type="button" class="down" {{ ta('aria-label', 'Move down') }} {{ ta('title', 'Move down') }}>↓</button><button type="button" class="drop" {{ ta('aria-label', 'Hide this translation') }} {{ ta('title', 'Hide this translation') }}>×</button></span></li>
         {%- endfor %}
       </ul>
@@ -262,7 +262,7 @@ window.ubTitle = function () {
       <ul class="offtrs">
         {%- for x in translations() %}
         <li><label><input type="checkbox" value="{{ x.key }}" disabled>
-          <span class="w"><span lang="{{ x.lang }}">{{ x.title }}</span> ({{ x.label }})</span>
+          <span class="w"><span lang="{{ x.lang }}">{{ x.title }}</span> <span class="nobreak">({{ x.label }})</span></span>
           <small class="st"></small></label></li>
         {%- endfor %}
       </ul>
@@ -290,7 +290,10 @@ window.ubTitle = function () {
   <p>{{ t('footer:licence') }}
      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">CC&nbsp;BY-NC-SA&nbsp;4.0</a>{{ t('footer:public') }}
      <a href="/changelog">{{ t('Changelog') }}</a>.</p>
-  <p class="disclaim">{{ t('Not affiliated with, or endorsed by, Urantia Foundation.') }}</p>
+  {#- And of the Foundation's translations, however many the site shows, one
+      clause, in no line of its own: each is credited in Settings (Tigran,
+      2026-10-27, "I don't like wasting space in the footer"). #}
+  <p class="disclaim">{{ t('Not affiliated with, or endorsed by, Urantia Foundation, whose translations are its copyright and used by permission.') }}</p>
 </footer>
 <script src="{{ l10n_url() }}" defer></script>
 <script src="{{ asset('ub.js') }}" defer></script>

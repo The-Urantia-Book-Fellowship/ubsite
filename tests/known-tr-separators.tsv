@@ -10,3 +10,6 @@
 ud	119:8.9	ours
 # urantia-ru sets one after the book's last paragraph, 196:3.35.
 urantia-ru	end	theirs
+# uf-ru, the Foundation's own, has none before 119:8.9 either, as its English has none
+# (tests/known-separator-deltas.tsv).
+uf-ru	119:8.9	ours

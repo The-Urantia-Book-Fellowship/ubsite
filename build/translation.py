@@ -36,16 +36,19 @@ exception list (build/hyphen.py).
 
 from __future__ import annotations
 
+import collections
 import dataclasses
+import hashlib
 import pathlib
 import re
 import tomllib
 
-from . import study
+from . import study, tr_html
 from .expand import Expander, Note, Span, _raw
 from .hyphen import RUSSIAN, Hyphenator
 from .readers import translation as reader
-from .readers._io import read_at_rev
+from .readers import uf_html
+from .readers._io import read_at_rev, read_bytes
 from .render import render, strip_tags
 from .tr_macros import SUBS, TABLES, UD_NOTES, VULGAR
 
@@ -74,10 +77,18 @@ SCOPES = ("index", "text", "notes", "study")
 # \thesecnum.\bibnobreakspace before the title, so ud writes none of its 326
 # with its number; urantia-ru writes every one of its 1,429 with it ("1. Имя
 # Отца", the Foreword's "IX. Бог Предельный"), and its \usection adds none.
+#
+# The Foundation's own is no TeX but its HTML (build/readers/uf_html.py, read
+# by build/tr_html.py): no list of its own, so hyph-ru alone; its titles written
+# with their numbers, as urantia-ru's; its word for a Paper its p.paper's; and
+# its numbering the Foundation's, joined to ours by uf_ref (build/foundation.py),
+# with no list to keep.  Its Russian writes some stress marks as Latin letters,
+# read as Cyrillic (tr_html.LATIN_STRESS).
 STYLE = {
     "ud": {"hyphenation": "ud.sty", "ackn": "ud.sty", "paper": "ud.sty", "numbers": True},
     "urantia-ru": {"hyphenation": "tex/urantia-hyphen-ru.tex",
                    "foreword": ("urantia-ru.sty", "forewordtoc"), "paper": "urantia-ru.sty"},
+    "uf-ru": {"format": "uf-html", "normalise": tr_html.LATIN_STRESS},
 }
 # A section's title that begins with its number: 1., 9 и 10., the Foreword's IX.
 # Its Roman numerals are Latin letters: a Cyrillic Х there (urantia-ru's 0:10
@@ -95,6 +106,9 @@ SUBSTITUTE = {"urantia-ru": {"　": " "}}       # an ideographic space: 44:3.5, 
 NOTE_SUBSTITUTE = {"ud": {"Галена ΙΙ века": "Галена II века"}}
 RE_CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 RE_LABEL = re.compile(r"\d+\.")
+# A list's label at the start of a paragraph of the Foundation's, which writes
+# it as words: 1., IV., а. (Cyrillic) where ours is a.
+RE_UF_LABEL = re.compile(r"(?:\d+|[IVX]+|[а-я])\.(?= )")
 RE_REF = re.compile(r"(\d+):(\d+)\.(\d+)")
 
 Key = tuple[int, int, int]
@@ -121,6 +135,8 @@ class Built:
     headings: list[tuple[int, int | None, str, str, str]]   # paper, section, kind, text, html
     seps: int
     sources: list[dict]          # the works its notes cite: paper_n, key, text, html
+    date: str | None = None      # a release's own date, where its source is no repository
+    normalised: int = 0          # characters read as others (STYLE normalise)
 
 
 def meta() -> dict[str, dict]:
@@ -133,9 +149,10 @@ def meta() -> dict[str, dict]:
         if k in SCOPES:
             raise SystemExit(f"translation: data/translations.toml [{k}] is a list of search's own")
         missing = {"title", "lang", "by", "label"} - set(v)
-        if missing or set(v["by"]) != {"en", "ru"} or not isinstance(v["label"], str):
+        if (missing or set(v["by"]) != {"en", "ru"} or not isinstance(v["label"], str)
+                or ("credit" in v and set(v["credit"]) != {"en", "ru"})):
             raise SystemExit(f"translation: data/translations.toml [{k}] wants title, lang, label,"
-                             f" and by in en and ru")
+                             f" and by in en and ru, and its credit, if any, in both")
     return raw
 
 
@@ -233,7 +250,17 @@ def _expander(key: str, report, where: str) -> Expander:
                     calls={"li": li, "fnst": fnst, "bibfrac": bibfrac}, subs=SUBS, forbid_comments=True)
 
 
-def _expand(key: str, body: str, report, where: str):
+def _uf(key: str) -> bool:
+    return STYLE[key].get("format") == "uf-html"
+
+
+def _expand(key: str, body: str, report, where: str, tally: collections.Counter | None = None):
+    if _uf(key):
+        body, n = tr_html.normalise(body, STYLE[key].get("normalise", {}))
+        if tally is not None:
+            tally["normalised"] += n
+        text, spans, marks = tr_html.expand(body, report, where)
+        return _squeeze(text, spans, [Note(m, "translator", "", "", []) for m in marks])
     ex = _expander(key, report, where).run(body)
     for ch, to in SUBSTITUTE.get(key, {}).items():
         if ch in ex.text:
@@ -247,20 +274,28 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
     {(paper, section, n): {"sep": bool, "label": str | None}} for every paragraph."""
     info = meta()[key]
     style = STYLE[key]
-    foreword = None
-    if "foreword" in style:
-        f, name = style["foreword"]
-        m = re.search(r"\\def\\" + name + r"\{([^{}]*)\}", read_at_rev(repo["path"], f, repo["at"]))
-        if not m:
-            report.hard("tr-foreword-untitled", f"{key}:{f}", f"no \\def\\{name}")
-        foreword = m.group(1) if m else None
-    m = re.search(r"\\def\\papertxt\{([^{}]*)\}", read_at_rev(repo["path"], style["paper"], repo["at"]))
-    if not m or not RE_CYRILLIC.search(m.group(1)):
-        report.hard("tr-paper-unnamed", f"{key}:{style['paper']}", "no \\def\\papertxt in Russian")
-    info = dict(info, paper=m.group(1) if m else "", numbers=bool(style.get("numbers")))
-    papers = reader.read(key, repo["tex"], repo["at"], report, foreword)
+    tally: collections.Counter = collections.Counter()
+    date = None
+    notes_of: dict[int, list[str]] = {}
+    if _uf(key):
+        papers, notes_of, word, date, mapping = _uf_papers(key, repo, info, ours, report)
+        titles: dict[tuple[int, int], Key] = {}
+        info = dict(info, paper=word, numbers=False)
+    else:
+        foreword = None
+        if "foreword" in style:
+            f, name = style["foreword"]
+            m = re.search(r"\\def\\" + name + r"\{([^{}]*)\}", read_at_rev(repo["path"], f, repo["at"]))
+            if not m:
+                report.hard("tr-foreword-untitled", f"{key}:{f}", f"no \\def\\{name}")
+            foreword = m.group(1) if m else None
+        m = re.search(r"\\def\\papertxt\{([^{}]*)\}", read_at_rev(repo["path"], style["paper"], repo["at"]))
+        if not m or not RE_CYRILLIC.search(m.group(1)):
+            report.hard("tr-paper-unnamed", f"{key}:{style['paper']}", "no \\def\\papertxt in Russian")
+        info = dict(info, paper=m.group(1) if m else "", numbers=bool(style.get("numbers")))
+        papers = reader.read(key, repo["tex"], repo["at"], report, foreword)
+        mapping, titles = _mapping(load_known().get(key, []))
     hyph = Hyphenator(hyphenation(key, repo, report), RUSSIAN)
-    mapping, titles = _mapping(load_known().get(key, []))
     used: set[Key] = set()
     used_titles: set[tuple[int, int]] = set()
 
@@ -294,15 +329,19 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                 before_sep = False
             if o not in ours:
                 continue                         # reported below, with the rest
-            text, spans, notes = _expand(key, q.body, report, f"{where}:{q.line}")
+            text, spans, notes = _expand(key, q.body, report, f"{where}:{q.line}", tally)
             if not text or text in PLACEHOLDERS:
                 continue
+            if notes and _uf(key):               # each `*` takes its paper's next note
+                notes = [dataclasses.replace(t, raw=notes_of[n].pop(0)) for t in notes]
             if not RE_CYRILLIC.search(text):
                 report.hard("tr-not-russian", f"{where}:{q.line}", f"{src} has no Cyrillic: {text[:50]!r}")
                 continue
             got_any = True
             if "­" in text:
                 report.hard("soft-hyphen-in-text", f"{where}:{q.line}", "the text itself has a U+00AD")
+            if _uf(key) and ours[o]["label"] and (lm := RE_UF_LABEL.match(text)):
+                spans = [Span(0, lm.end(), "listmark"), *spans]     # its label is words: ours has one
             lead = next((x for x in spans if x.kind == "listmark" and x.start == 0), None)
             theirs_label, our_label = lead and text[:lead.end], ours[o]["label"]
             if (theirs_label and our_label and RE_LABEL.fullmatch(theirs_label)
@@ -325,14 +364,17 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                 report.hard("tr-numbering-extra", where,
                             f"its {_fmt(k)} would be our {_fmt(o)}, which we do not have")
         # Its headings, for a paper it translates.
+        # A section's title is the section of the paragraph after it, ours: the
+        # Foundation's 139:10.1, under "9 и 10", is our 139:9.1.
         by_sec: dict[int, list] = {}
         for h in paper.sections:
             if h.before is not None:
-                by_sec.setdefault(h.before[0], []).append(h)
+                b = (n, *h.before)
+                by_sec.setdefault((mapping.get(b, b) or b)[1], []).append(h)
         if got_any:
             for kind, h in (("title", paper.title), ("author", paper.author)):
                 if h is not None:
-                    headings.append(_heading(key, n, None, kind, h, report, where))
+                    headings.append(_heading(key, n, None, kind, h, report, where, tally))
         done_secs = {p.key[1] for p in paras if p.key[0] == n}
         for s, hs in sorted(by_sec.items()):
             if len(hs) > 1:
@@ -342,7 +384,7 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                     continue
                 used_titles.add((n, s))
                 o = titles[(n, s)]
-                text, spans, notes = _expand(key, hs[1].body, report, f"{where}:{hs[1].line}")
+                text, spans, notes = _expand(key, hs[1].body, report, f"{where}:{hs[1].line}", tally)
                 if notes:
                     report.hard("tr-note-in-heading", f"{where}:{hs[1].line}", "a note in a heading")
                 if "ackn" in STYLE[key]:
@@ -350,7 +392,7 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                 if text and o in ours:
                     paras.append(TPara(o, f"title {n}:{s}", text, spans, [], []))
             if s in done_secs:
-                headings.append(_heading(key, n, s, "section", hs[0], report, where))
+                headings.append(_heading(key, n, s, "section", hs[0], report, where, tally))
     for k in sorted(set(mapping) - used):
         report.hard("tr-numbering-gone", _fmt(k),
                     f"{KNOWN.name} declares {key}'s {_fmt(k)}, which it does not have")
@@ -374,7 +416,86 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                         f" its number, and its style {'numbers it' if info['numbers'] else 'does not'}")
     paras.sort(key=lambda p: p.key)
     sources = _notes(key, paras, papers, mapping, ours, hyph, report)
-    return Built(key, info, repo["commit"], paras, headings, len(theirs_seps), sources)
+    return Built(key, info, repo["commit"], paras, headings, len(theirs_seps), sources,
+                 date, tally["normalised"])
+
+
+def _uf_papers(key: str, repo: dict, info: dict, ours: dict[Key, dict], report):
+    """The Foundation's zip of a translation (build/readers/uf_html.py), as the
+    TeX reader's papers, with its editor's notes apart, its word for a Paper,
+    its release's date, and its numbering against ours.
+
+    It must be the zip build/config.py names, by its digest and the text id its
+    cover page gives, and a Foundation translation's short name is that id's
+    head, UF-RUS: tomorrow's French is UF-FRA.  Each of its paragraphs must be
+    one the Foundation's English numbers, uf_ref, on the same 1955 page
+    (tr-uf-page): independent evidence that the two zips number alike.
+
+    An editor's note stands at its paper's end, after `{{`, and its marker in
+    the text is a bare `*` (build/tr_html.py): each paper's marks and notes
+    agree in number, and are paired in order."""
+    data = read_bytes(repo["path"])
+    digest = hashlib.sha256(data).hexdigest()
+    if digest != repo["sha256"]:
+        raise SystemExit(f"translation: {key}: {repo['path']} is not the zip config names:"
+                         f" its SHA-256 is {digest}")
+    ids, stamps = uf_html.release(data)
+    if ids != {repo["text_id"]}:
+        report.hard("tr-uf-text-id", key, f"its cover page names {sorted(ids)}, config {repo['text_id']}")
+    if len(stamps) != 1:
+        report.hard("tr-uf-stamp", key, f"{len(stamps)} version stamps, not one: {sorted(stamps)}")
+    date = None
+    if stamps:
+        s = min(stamps)
+        date = f"{s[3:7]}-{s[7:9]}-{s[9:11]}"
+    head = "-".join(repo["text_id"].split("-")[:2])
+    if info["label"] != head:
+        report.hard("tr-uf-label", key, f"its short name {info['label']!r} is not its text id's head {head!r}")
+    inv: dict[Key, Key] = {}
+    pages: dict[Key, str | None] = {}
+    for o, v in ours.items():
+        if v["uf"]:
+            u = _ref(v["uf"])
+            inv[u], pages[u] = o, v["uf_page"]
+    papers: dict[int, reader.Paper] = {}
+    notes_of: dict[int, list[str]] = {}
+    words = set()
+    for n, p in uf_html.read(data, report).items():
+        where = f"{key}:{p.name}"
+        paras, notes = [], []
+        for q in p.paras:
+            body = q.body
+            if "{{" in body:
+                body, *cut = body.split("{{")
+                body = body.rstrip()
+                for c in cut:
+                    if not c.startswith("*"):
+                        report.hard("tr-uf-note", f"{where}:{q.line}", f"{{{{ before {c[:20]!r}, which is no note")
+                    notes.append(c.strip())
+            if q.key not in inv:
+                report.hard("tr-uf-unpaired", f"{where}:{q.line}",
+                            f"its {_fmt(q.key)} is none the Foundation's English numbers")
+                continue
+            if q.page and q.page != pages[q.key]:
+                report.hard("tr-uf-page", f"{where}:{q.line}",
+                            f"{_fmt(q.key)} is on page {q.page}, the Foundation's English on {pages[q.key]}")
+            paras.append(reader.Para(q.key[1], q.key[2], q.line, body))
+        marks = sum(len(tr_html.marks(x.body)) for x in paras)
+        if marks != len(notes):
+            report.hard("tr-uf-note", where, f"{marks} marks in the text and {len(notes)} notes")
+            notes = (notes + [""] * marks)[:marks]
+        notes_of[n] = notes
+        if n:
+            words.add(p.word)
+        papers[n] = reader.Paper(
+            n, reader.Heading(p.title.line, p.title.body, None), None,
+            [reader.Heading(h.line, h.body, h.before[1:] if h.before else None) for h in p.sections],
+            paras, [(line, k[1:]) for k, _, line in p.seps], [])
+    word = next(iter(words)) if len(words) == 1 else None
+    if not word:
+        report.hard("tr-paper-unnamed", key, f"its papers call a Paper {sorted(map(str, words))}, not one word")
+    mapping = {u: o for u, o in inv.items() if u != o}
+    return papers, notes_of, word or "", date, mapping
 
 
 # Each translation with notes: how they are set (build/study.py expand).
@@ -392,7 +513,15 @@ def set_note(key: str, tex: str, refs, bib: dict, where: str, report, hyph=None,
              ref_of=None, odd: list | None = None) -> tuple[str, str, list[str]]:
     """A translator's note, or a work it cites, set as build/study.py sets a
     study note: by the translation's own table and quotes, its Hebrew turned,
-    and with no warning of long ties, which are the translator's to set."""
+    and with no warning of long ties, which are the translator's to set.
+
+    The Foundation's editor's notes are its HTML, "* Английское primates …",
+    read as its paragraphs are, and cite nothing."""
+    if _uf(key):
+        text, spans, marks = _expand(key, tex.removeprefix("*").strip(), report, where)
+        if marks:
+            report.hard("tr-uf-note", where, "a `*` in a note")
+        return text, render(text, spans, shy=hyph.points(text, spans) if hyph else ()), []
     return study.expand(tex, refs, bib, where, report, hyph, table=NOTES[key], subs=SUBS,
                         ref_of=ref_of, textheb=True, odd=odd, calls={"textbf": _textbf}, ties=False)
 
@@ -411,7 +540,7 @@ def _notes(key, paras, papers, mapping, ours, hyph, report) -> list[dict]:
     num: dict[int, int] = {}
     for p in paras:
         n = p.key[0]
-        if p.notes and key not in NOTES:
+        if p.notes and key not in NOTES and not _uf(key):
             report.hard("tr-notes-unset", f"{key} {_fmt(p.key)}", "a note, and no table to set it by")
             p.notes = []
         bib = dict(papers[n].sources) if n in papers else {}
@@ -471,13 +600,16 @@ def _ackn(key, repo, body, text, spans, report, where):
 
 
 def hyphenation(key: str, repo: dict, report) -> list[str]:
-    """The translation's own \\hyphenation list, at the commit read."""
+    """The translation's own \\hyphenation list, at the commit read; none
+    where it has none, the Foundation's HTML."""
+    if _uf(key):
+        return []
     f = STYLE[key]["hyphenation"]
     return reader.read_hyphenation(read_at_rev(repo["path"], f, repo["at"]), f"{key}:{f}", report)
 
 
-def _heading(key, paper, section, kind, h, report, where):
-    text, spans, notes = _expand(key, h.body, report, f"{where}:{h.line}")
+def _heading(key, paper, section, kind, h, report, where, tally=None):
+    text, spans, notes = _expand(key, h.body, report, f"{where}:{h.line}", tally)
     if notes:
         report.hard("tr-note-in-heading", f"{where}:{h.line}", "a note in a heading")
     if not RE_CYRILLIC.search(text):
@@ -506,12 +638,15 @@ def _separators(key: str, theirs: set[str], ours: set[str], report) -> None:
 
 
 def ours(con) -> dict[Key, dict]:
-    """Every paragraph of ours, with whether a separator stands before it and its
-    list label, if it opens with one."""
+    """Every paragraph of ours, with whether a separator stands before it, its
+    list label, if it opens with one, and the Foundation's reference to it and
+    its 1955 page, uf_paragraph's, which build/foundation.py fills first."""
     out = {}
-    for pid, p, s, n, sep, text in con.execute(
-            "SELECT id, paper_n, section_n, para_n, sep_before, text FROM paragraph"):
-        out[(p, s, n)] = {"id": pid, "sep": sep is not None, "label": None, "text": text}
+    for pid, p, s, n, sep, text, uf, page in con.execute(
+            "SELECT p.id, paper_n, section_n, para_n, sep_before, text, u.ref, u.page"
+            " FROM paragraph p LEFT JOIN uf_paragraph u ON u.paragraph_id = p.id"):
+        out[(p, s, n)] = {"id": pid, "sep": sep is not None, "label": None, "text": text,
+                          "uf": uf, "uf_page": page}
     by_id = {v["id"]: v for v in out.values()}
     for pid, a, b in con.execute("SELECT paragraph_id, start, end FROM span WHERE kind='listmark' AND start=0"):
         by_id[pid]["label"] = by_id[pid]["text"][a:b]
@@ -521,9 +656,11 @@ def ours(con) -> dict[Key, dict]:
 def store(con, built: list[Built], ours_: dict[Key, dict]) -> None:
     for i, b in enumerate(built):
         m = b.meta
-        con.execute("INSERT INTO translation VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        credit = m.get("credit", {})
+        con.execute("INSERT INTO translation VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (b.key, m["lang"], m["title"], len(b.paras), sum(len(p.notes) for p in b.paras),
-                     b.commit, i, m["by"]["en"], m["by"]["ru"], m["label"], m["paper"], int(m["numbers"])))
+                     b.commit, i, m["by"]["en"], m["by"]["ru"], m["label"], m["paper"], int(m["numbers"]),
+                     credit.get("en"), credit.get("ru")))
         source_id = {}
         for s in b.sources:
             cur = con.execute("INSERT INTO tr_source (translation, paper_n, key, text, html) VALUES (?,?,?,?,?)",

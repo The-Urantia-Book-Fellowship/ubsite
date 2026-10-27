@@ -44,7 +44,7 @@
     translator's notes.  On the overview only those that found something, each
     shown only while Settings shows its translation, in the reader's order
     (base.html ubTr); opened whole, always. #}
-{% macro tr_list(x) %}<section data-tr="{{ x.key }}"><h2><bdi lang="{{ x.lang }}">{{ x.title }}</bdi> ({{ x.label }}) {{ count(x.hits) }}</h2>
+{% macro tr_list(x) %}<section data-tr="{{ x.key }}"><h2><bdi lang="{{ x.lang }}">{{ x.title }}</bdi> <span class="nobreak">({{ x.label }})</span> {{ count(x.hits) }}</h2>
 {% if x.hits.rows %}<ul class="hits">{% for h in x.hits.rows %}<li><a href="/{{ h.ref }}#tr-{{ x.key }}">{{ h.ref }}</a>{% if h.s %} <span lang="{{ x.lang }}">{{ h.s }}</span>{% endif %}{% for n in h.notes %}{{ tr_note_hit(h.ref, n, x.lang) }}{% endfor %}</li>{% endfor %}</ul>
 {{ more(x.hits, x.key, 'Show all {n:,} paragraphs') }}
 {% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endmacro %}

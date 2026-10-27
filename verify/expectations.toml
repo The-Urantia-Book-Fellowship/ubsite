@@ -95,6 +95,15 @@ numbered_otherwise   = 93        # 144:5.11-102, as the Foundation numbers them,
 separators           = 12        # ours, and one after the book's last paragraph
 labels_differ        = 4         # 112:0.12, 112:1.6-8 (tests/known-tr-labels.tsv)
 substituted          = 3         # U+3000 at 44:3.5, 53:4.6, 70:10.12, set as spaces
+[translation.uf-ru]
+source_commit = "fc8ea4e9"    # the zip's SHA-256: its 2024 release, UF-RUS-001-1997-1.5, stamped UF-202412132348
+measured_on   = "2026-10-27"
+paragraphs           = 14586     # the whole book: 14,585 numbered, and 0:12.10, «ПРИМЕЧАНИЕ», printed without
+notes                = 2         # the editor's, 62:4.2 and 85:2.1, at their paper's end in the HTML
+numbered_otherwise   = 106       # as the Foundation's English numbers them (uf_ref)
+separators           = 10        # ours but 119:8.9, as the Foundation's English
+labels_differ        = 0
+normalised           = 651       # stress marks written as Latin letters, read as Cyrillic: 650 in the text, 1 in a note
 
 [index]
 # Read at HEAD; these drift legitimately as the index is edited, so they are
@@ -171,3 +180,7 @@ raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Ru
 download_mb = [1.0, 8.0]     # 2.01 at measurement, 7.93 unpacked: 45 papers, 4 chunks and search
 [offline.translations.urantia-ru]
 download_mb = [7.0, 11.0]    # 8.85 at measurement, 33.42 unpacked: the whole book, 10 chunks and search
+# The Foundation's own, from its zip, which never moves but with a new release:
+# measured 2026-10-27, its 2024 release (sources.toml).
+[offline.translations.uf-ru]
+download_mb = [7.0, 11.0]    # 8.88 at measurement, 33.62 unpacked: the whole book, 10 chunks and search

@@ -39,7 +39,7 @@
 "footer:licence" = { en = 'The Uversa Press edition of <i>The Urantia Book</i>, with the Index and Appendices as revised for the third edition, is licensed as a whole under', ru = 'Издание <i>The Urantia Book</i> от Uversa Press, вместе с Указателем и Приложениями в редакции третьего издания, распространяется целиком по лицензии' }
 "footer:public" = { en = "; its text is in the public domain.", ru = "; его текст является общественным достоянием." }
 "Changelog" = "История изменений"
-"Not affiliated with, or endorsed by, Urantia Foundation." = "Сайт не связан с Фондом Урантия и не одобрен им."
+"Not affiliated with, or endorsed by, Urantia Foundation, whose translations are its copyright and used by permission." = "Сайт не связан с Фондом Урантия и не одобрен им; переводы Фонда защищены его авторским правом и используются с его разрешения."
 
 # --- Settings (settings.py): the tabs, then each setting, its choices, its hint
 

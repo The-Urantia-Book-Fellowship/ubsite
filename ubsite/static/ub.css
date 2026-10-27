@@ -682,6 +682,9 @@ x-ru { font-synthesis: small-caps; }
 sup, sub { line-height: 0; }
 .mark { font-variant-numeric: lining-nums; }
 .sc { font-variant-caps: small-caps; }
+/* In Cyrillic, which EB Garamond has no small capitals of, synthesised, as x-ru's are:
+   Uversa's names in 42:2 of the Foundation's Russian, «абсолюта», in a fold too. */
+.sc:lang(ru) { font-synthesis: small-caps; }
 .supplied { font-style: italic; }
 .nobreak { white-space: nowrap; }
 
@@ -1200,6 +1203,7 @@ dialog.settings ol.trlist li::before { content: counter(tr); color: var(--faint)
 dialog.settings .trlist label { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .1rem 0;
   align-items: baseline; padding: 0; }
 dialog.settings .trlist .d { grid-column: 2; line-height: 1.35; }
+dialog.settings .trlist .cr { display: block; }
 dialog.settings .trlist .lang { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
 dialog.settings .trother :is(.lang, .mv) { display: none; }
 /* Shown, a card is no switch: × hides it.  Its buttons stand beside its

@@ -55,7 +55,8 @@ def main(argv: list[str]) -> int:
         def fingerprint():
             out = {}
             for tree in trees:
-                for f in sorted(tree.rglob("*")):
+                # A source that is one file, the Foundation's zip, is itself.
+                for f in [tree] if tree.is_file() else sorted(tree.rglob("*")):
                     if f.is_file() and ".git" not in f.parts:
                         try:
                             st = f.stat()
@@ -66,7 +67,7 @@ def main(argv: list[str]) -> int:
 
         before = fingerprint()
         print(f"fingerprinted {len(before):,} files in {len(trees)} source trees"
-              " (three repos, the recordings and Block's charts)")
+              " (the repos, the Foundation's zip, the recordings and Block's charts)")
         rc = main(["data"])
         after = fingerprint()
         changed = [k for k in before if k in after and before[k] != after[k]]
@@ -121,7 +122,14 @@ def main(argv: list[str]) -> int:
         print("loading ...")
         para_key = load.load_text(con, papers, parts, repos["press"], hyphenator, report)
         study.store(con, study_built)
-        # The translations, each joined to our numbering (build/translation.py).
+        print("the Foundation's numbering ...")
+        from . import foundation
+        n_uf = foundation.load(con, repos["press"], report,
+                               root / "tests" / "known-uf-refs.tsv",
+                               root / "tests" / "known-separator-deltas.tsv")
+        print(f"  {n_uf} paragraphs it numbers otherwise")
+        # The translations, each joined to our numbering (build/translation.py):
+        # after the Foundation's, by which its own translations are joined.
         from . import translation
         ours = translation.ours(con)
         tr_built = []
@@ -132,15 +140,11 @@ def main(argv: list[str]) -> int:
             print(f"translation {k}, at {at(repos[k])} ...")
             tr_built.append(b := translation.build(k, repos[k], ours, report))
             print(f"  {len(b.paras):,} paragraphs, {sum(len(p.notes) for p in b.paras)} notes,"
-                  f" {len(b.headings)} titles")
+                  f" {len(b.headings)} titles"
+                  + (f", {b.normalised} stress marks written as Latin letters read as Cyrillic"
+                     if b.normalised else ""))
         translation.store(con, tr_built, ours)
         translation.roundtrip(con, report)
-        print("the Foundation's numbering ...")
-        from . import foundation
-        n_uf = foundation.load(con, repos["press"], report,
-                               root / "tests" / "known-uf-refs.tsv",
-                               root / "tests" / "known-separator-deltas.tsv")
-        print(f"  {n_uf} paragraphs it numbers otherwise")
         print("the SRT Committee's reasons ...")
         from . import srt
         srt_src = config.srt()
@@ -210,7 +214,7 @@ def main(argv: list[str]) -> int:
         # And each translation read (build/translation.py).
         con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
                         [(b.key, repos[b.key]["commit"], int(repos[b.key]["dirty"]), repos[b.key]["rev"],
-                          repos[b.key]["date"], repos[b.key]["commit_url"]) for b in tr_built])
+                          b.date or repos[b.key]["date"], repos[b.key]["commit_url"]) for b in tr_built])
         # The study edition, and Block's charts by their manifest's SHA-256, once
         # a paper's notes are on the site: until then the build reads neither.
         if study_built.papers:

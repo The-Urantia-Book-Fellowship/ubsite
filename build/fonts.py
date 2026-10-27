@@ -62,6 +62,8 @@ SBL = {"grc": "SBL_grk.ttf", "he": "SBL_Hbrw.ttf"}
 CYRILLIC = ((0x0301, 0x0301), (0x0400, 0x045F), (0x2116, 0x2116))   # the stress mark; the alphabet, ё and the rest; №
 CYRILLIC_FACES = [(MATH[0].parent / "EBGaramond-Regular.otf", "EBGaramond-Cyrillic.woff2"),
                   (MATH[0].parent / "EBGaramond-Italic.otf", "EBGaramond-Cyrillic-Italic.woff2")]
+# The features a Cyrillic face must not keep (above).
+NO_SMALL_CAPS = frozenset({"smcp", "c2sc"})
 RE_RANGE = re.compile(r"EBGaramond-Cyrillic[^;]*;[^}]*unicode-range:\s*([^;]+);")
 
 
@@ -282,7 +284,14 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
         font = TTFont(src, recalcTimestamp=False)
         opts = subset.Options()
         opts.flavor = "woff2"
-        opts.layout_features = ["*"]
+        # Every feature but the small capitals, which EB Garamond has for no
+        # Cyrillic letter: kept for the stress mark alone, U+0301, they told
+        # the browser this face had them, and it set «абсолюта», and every
+        # small capital of the interface in Russian, in lower case rather than
+        # synthesise them (ub.css .sc:lang(ru), x-ru), from 2026-10-26 to 27.
+        opts.layout_features = sorted({fr.FeatureTag for t in ("GSUB", "GPOS") if t in font
+                                       for fr in font[t].table.FeatureList.FeatureRecord}
+                                      - NO_SMALL_CAPS)
         opts.name_IDs = ["*"]
         opts.notdef_outline = True
         s = subset.Subsetter(options=opts)
@@ -293,6 +302,11 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
         if missing:
             report.hard("font-missing-glyph", dst,
                         " ".join(f"{c} U+{ord(c):04X}" for c in sorted(missing))[:200])
+        kept = {fr.FeatureTag for t in ("GSUB", "GPOS") if t in font
+                for fr in font[t].table.FeatureList.FeatureRecord} & NO_SMALL_CAPS
+        if kept:
+            report.hard("font-cyrillic-small-caps", dst, f"the subset has {sorted(kept)}: the browser"
+                        " would take them for small capitals and synthesise none")
         subsets.append((font, opts, dst, len(have)))
     if report.blocking:
         return stats

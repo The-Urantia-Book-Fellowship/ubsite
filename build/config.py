@@ -59,6 +59,9 @@ def load() -> dict:
     for key, cfg in raw.items():
         if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block"):
             continue                                # not repositories: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block()
+        if "zip" in cfg:
+            repos[key] = _zip(key, cfg)
+            continue
         path = (ROOT / cfg["path"]).resolve()
         if not path.is_dir():
             raise SystemExit(f"config: source {key!r} not found at {path}\n"
@@ -86,6 +89,22 @@ def load() -> dict:
             "date": _git(path, "log", "-1", "--format=%cd", "--date=short", commit or "HEAD"),
         }
     return repos
+
+
+def _zip(key: str, cfg: dict) -> dict:
+    """A source that is a release, not a repository: one zip, by its path, its
+    SHA-256 and the text id its cover page gives (the Foundation's HTML,
+    build/readers/uf_html.py).  In a repository's shape, the digest standing
+    where a commit does, as sqlite_wasm()'s: the reader checks both against
+    the bytes it reads."""
+    path = (ROOT / cfg["zip"]).resolve()
+    if not path.is_file():
+        raise SystemExit(f"config: source {key!r} not found at {path}\n"
+                         f"        fix the path in sources.toml")
+    return {"key": key, "path": path, "tex": None, "rev": "zip", "at": None, "zip": True,
+            "sha256": cfg["sha256"], "text_id": cfg["text_id"],
+            "commit": cfg["sha256"], "dirty": False, "commit_url": None, "pushed": True,
+            "subject": cfg["text_id"], "date": None}
 
 
 def audio() -> dict:

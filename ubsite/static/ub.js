@@ -691,7 +691,7 @@
           heads = '<div class="row cmphd">';
       ks.forEach(function (k, i) {
         var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 2) + '"';
-        names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> (' + x.label + ')</p>';
+        names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> <span class="nobreak">(' + x.label + ')</span></p>';
         heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
                  (g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (g.title ? '<h1>' + g.title + '</h1>' : '') +
                  (g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +

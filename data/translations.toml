@@ -10,7 +10,12 @@
 #           translated: a fold names it so, in its tab and over its text, where
 #           who made it would take two lines on a phone, and Settings puts it
 #           after the title, "Книга Урантии (USGNY)", so that the one can be
-#           known by the other (Tigran, 2026-10-26)
+#           known by the other (Tigran, 2026-10-26).  A Foundation translation's
+#           is the head of its text id, UF-RUS, which the build holds it to: the
+#           year would not tell one language's from another's (Tigran,
+#           2026-10-27)
+#   credit  where its owner asks it, the words a reader is shown with who made
+#           it, in each language of the interface (Settings); none, nothing
 #
 # What it covers ("the whole book", "Papers 0–39 ...") is counted from the
 # data, never written here.  Words from the mockup Tigran settled on 2026-10-26.
@@ -28,3 +33,14 @@ label = "USGNY"         # the Urantia Book Society of Greater New York
 [urantia-ru.by]
 en = "translated by Lila Dogim, corrected by Sergey Prokopov; Urantia Book Society of Greater New York"
 ru = "перевод Лилы Догим, с исправлениями Сергея Прокопова; Общество Книги Урантии Большого Нью-Йорка"
+
+# The Urantia Foundation's own, its 2024 release, from its HTML (sources.toml):
+# the whole book.  Its copyright, shown by its written permission, credited as
+# Tigran worded it (2026-10-27).  Its title is the same as urantia-ru's, as each
+# calls itself, and the short names tell them apart.
+[uf-ru]
+title  = "Книга Урантии"
+lang   = "ru"
+label  = "UF-RUS"
+by     = { en = "translated by the Urantia Foundation, 2024 release", ru = "перевод Фонда Урантия, выпуск 2024 года" }
+credit = { en = "Copyright © Urantia Foundation and used by permission", ru = "© Фонд Урантия; используется с разрешения" }

@@ -260,6 +260,13 @@ class Translations(unittest.TestCase):
     def test_a_stress_mark_is_the_translations(self):
         self.assertIn("<mark>бо\u0301льшим</mark>", section(results("большим"), "ud"))
 
+    def test_a_stress_mark_written_as_a_latin_letter(self):
+        # The Foundation's «видéнием», its é a Latin letter, read as Cyrillic with
+        # the stress mark (build/tr_html.py), and found as any other word is.
+        uf = section(results("видением", "uf-ru"), "uf-ru")
+        self.assertIn("<mark>виде\u0301нием</mark>", uf)
+        self.assertNotIn("é", uf)
+
     def test_in_settings_order_and_only_those_that_found_something(self):
         main = results("греческого")
         self.assertLess(main.index('<div class="trhits"><section data-tr="ud">'),
@@ -281,7 +288,8 @@ class Translations(unittest.TestCase):
     def test_opened_whole(self):
         main = results("бог", "urantia-ru")
         self.assertNotIn("trhits", main)
-        self.assertIn('<section data-tr="urantia-ru"><h2><bdi lang="ru">Книга Урантии</bdi> (USGNY) <span>(1–100 of ', main)
+        self.assertIn('<section data-tr="urantia-ru"><h2><bdi lang="ru">Книга Урантии</bdi>'
+                      ' <span class="nobreak">(USGNY)</span> <span>(1–100 of ', main)
         self.assertIn('<a class="next" href="/search?q=%D0%B1%D0%BE%D0%B3&amp;in=urantia-ru&amp;page=2">', main)
         self.assertIn("(101–200 of ", results("бог", "urantia-ru", "2"))
         self.assertNotIn("data-tr=", results("бог", "text"))
