@@ -55,7 +55,7 @@ window.ubTr = function (v) {
   st.textContent = ks.length ? f + '{display:block}article:has(' + f + ')>.cmphead{display:flex}' +
     '@media (max-width:62rem){' + r +
     '{flex-flow:row wrap;align-items:baseline}' + r + '>:is(.a,.tf){display:contents}' +
-    r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold::after{content:"·";margin:0 .45em}}' +
+    r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold{margin-right:1em}}' +
     '.trhits:has(' + s.join() + '){display:flex}' +
     s.map(function (x, i) { return '.trhits' + x + '{display:block;order:' + i + '}'; }).join('') : '';
 };

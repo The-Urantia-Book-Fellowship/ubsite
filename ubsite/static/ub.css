@@ -1591,8 +1591,9 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
                    padding-left: .7rem; }
   /* The fold stands under the entries, as a box of them does under the text,
      set in as far.  With the index folded, a row's entries and its translations
-     fold to one line, "› 2 index entries · 3 translations", each half opening
-     its own box (Tigran, 2026-10-26): base.html's head script lays the row out
+     fold to one line, "› 2 index entries  › 3 translations", each half opening
+     its own box (Tigran, 2026-10-26), a gap between them and no dot (2026-10-28):
+     base.html's head script lays the row out
      so for the translations a reader has ticked, and here each part takes its
      place on it. */
   .tf { margin: -.6rem 0 .9rem 1rem; border-left: 2px solid var(--rule); padding-left: .7rem;

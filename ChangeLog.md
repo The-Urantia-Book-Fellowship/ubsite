@@ -44,6 +44,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- On a phone, the line that folds a paragraph's index entries and its translations no longer puts a dot between the two.
 - The index is revised from its reading of Papers 29 to 35: entries reworded to say more exactly what the book says, numbers given as the book gives them, citations corrected, the worlds that circle Salvington in ten groups rather than circuits, Part I of the papers, not all of them, mandated by the Ancients of Days, and the trinitized orders third among the orders of the Sons of God, the stationary orders of dual origin being found under dual-origin beings.
 - The footer says only that the site is not affiliated with Urantia Foundation, whose translations it shows by permission.
 - Settings is in four tabs, Reading, Show, Listening and Offline, so that it no longer runs off the screen, and it keeps one size whichever tab is open.
