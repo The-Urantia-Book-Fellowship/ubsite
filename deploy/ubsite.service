@@ -27,9 +27,18 @@ ExecStart=/home/tigran/ubsite/.venv/bin/uvicorn ubsite.app:app \
 Restart=on-failure
 RestartSec=5
 
-# A leak-catcher, not a budget: expect ~120 MB RSS. ub.db is read through the
-# page cache, which is not charged here.
-MemoryMax=1G
+# Two malloc arenas to a process, not glibc's eight to a core. Each request runs
+# in one of a worker's threads, and every thread that allocates under contention
+# gets an arena of its own, which keeps what it freed. Under 32 clients at once
+# for three rounds of 25 s, the two workers grew from 144 MB to 975 MB and were
+# still growing; with two arenas they levelled off at 656 MB, at the same 190
+# pages a second (2026-10-27).
+Environment=MALLOC_ARENA_MAX=2
+
+# A leak-catcher, not a budget: about 200 MB RSS at rest, under 700 MB under a
+# long burst (above), so 2G leaves room for the features to come. ub.db is read
+# through the page cache, which is not charged here.
+MemoryMax=2G
 
 # The service reads a database and writes sockets. It needs nothing else.
 NoNewPrivileges=yes
