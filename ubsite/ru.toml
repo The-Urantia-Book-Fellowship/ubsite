@@ -95,7 +95,9 @@
 "on a phone or a tablet: the lower half of the screen goes on, the upper half back" = "на телефоне или планшете: нижняя половина экрана — вперёд, верхняя — назад"
 
 "Index and appendices" = "Указатель и приложения"
-"beside the text, in search results, and every link to them" = "рядом с текстом, в результатах поиска, и все ссылки на них"
+"beside the text, and every link to them" = "рядом с текстом и все ссылки на них"
+"Index and appendices in search results" = "Указатель и приложения в результатах поиска"
+"headwords, and the entries the words are found in" = "заглавные слова и статьи, в которых найдены слова"
 "Words of Jesus in red" = "Слова Иисуса красным"
 "Paragraph references" = "Номера абзацев"
 "such as 0:1.2, beside each paragraph" = "например 0:1.2, у каждого абзаца"
@@ -105,9 +107,12 @@
 "where the 1955 text leaves a blank line" = "там, где в тексте 1955 года пустая строка"
 "Notes" = "Примечания"
 "from The British Study Edition (ed. Tigran Aivazian)" = "из The British Study Edition (под ред. Тиграна Айвазяна)"
+"Notes in search results" = "Примечания в результатах поиска"
 "1955 readings" = "Разночтения 1955 года"
 "1955 readings in search results" = "Разночтения 1955 года в результатах поиска"
 "their wording, such as Badanon, and the committee’s reasons" = "их слова, например Badanon, и доводы комитета"
+"Translations in search results" = "Переводы в результатах поиска"
+"those ticked under Translations, their words and their translators’ notes" = "отмеченные во вкладке «Переводы»: их слова и примечания переводчиков"
 "Tooltips" = "Подсказки"
 "a few words on a button or a link, where the pointer rests" = "несколько слов о кнопке или ссылке под указателем мыши"
 

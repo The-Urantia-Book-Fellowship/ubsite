@@ -33,7 +33,8 @@
 {% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endif %}
 {#- The study notes (Tigran, 2026-10-26), as the List of study notes has
     them: on the overview only when something matched, and shown only while
-    Settings shows the notes (ub.css .bystudy); opened whole, always. #}
+    Settings shows the notes, and them in search results (ub.css .bystudy);
+    opened whole, always. #}
 {% if stu and stu.rows %}<section{% if not scope %} class="bystudy"{% endif %}><h2>{{ t('In the study notes') }} {{ count(stu) }}</h2>
 <ul class="hits stl">{% for s in stu.rows %}{{ study_hit(s) }}{% endfor %}</ul>
 {{ more(stu, 'study', 'Show all {n:,} notes') }}
@@ -43,7 +44,8 @@
     with what the search found in its words, and under them in its
     translator's notes.  On the overview only those that found something, each
     shown only while Settings shows its translation, in the reader's order
-    (base.html ubTr); opened whole, always. #}
+    (base.html ubTr), and the translations in search results; opened whole,
+    always. #}
 {% macro tr_list(x) %}<section data-tr="{{ x.key }}"><h2><bdi lang="{{ x.lang }}">{{ x.title }}</bdi> <span class="nobreak">({{ x.label }})</span> {{ count(x.hits) }}</h2>
 {% if x.hits.rows %}<ul class="hits">{% for h in x.hits.rows %}<li><a href="/{{ h.ref }}#tr-{{ x.key }}">{{ h.ref }}</a>{% if h.s %} <span lang="{{ x.lang }}">{{ h.s }}</span>{% endif %}{% for n in h.notes %}{{ tr_note_hit(h.ref, n, x.lang) }}{% endfor %}</li>{% endfor %}</ul>
 {{ more(x.hits, x.key, 'Show all {n:,} paragraphs') }}

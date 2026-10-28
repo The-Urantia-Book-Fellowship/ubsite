@@ -1433,13 +1433,19 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
    the search found something in them. */
 .by1955 { display: none; }
 :root[data-notesearch="true"]:not([data-notes="off"]) .by1955 { display: block; }
-/* The study notes among the results, while Settings shows the notes; and each
-   translation's list, while Settings shows the translation, in the reader's
-   order: base.html's head script (ubTr) shows each, and the column around them
-   while it holds one, for a column with nothing in it would still stand
-   between the margins either side of it. */
+/* The study notes among the results, while Settings shows the notes and Notes
+   in search results is on; and each translation's list, while Settings shows
+   the translation, in the reader's order: base.html's head script (ubTr) shows
+   each, and the column around them while it holds one, for a column with
+   nothing in it would still stand between the margins either side of it.
+   Translations in search results off hides the column, over ubTr's rule.  And
+   the index's two lists, Headwords and In the index, go with Index and
+   appendices in search results, as with the index itself (.ix).  A list opened
+   whole, ?in=study, ?in=ud or ?in=index, has none of these classes. */
 .bystudy { display: none; }
-:root[data-studynotes="true"] .bystudy { display: block; }
+:root[data-studynotes="true"]:not([data-studysearch="off"]) .bystudy { display: block; }
+:root[data-indexsearch="off"] .results > .ix { display: none; }
+:root[data-trsearch="off"] .trhits { display: none; }
 .trhits { display: none; flex-direction: column; gap: 1.6rem; margin: 1.6rem 0; }
 .trhits > section { display: none; margin: 0; }
 /* A column's items keep their children's margins, which in the page's flow

@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Settings can leave the index and the appendices, the study notes or the translations out of the search results, each with a switch of its own in the Show tab, as it already could the 1955 readings.
 - In Compare each translation has a play button beside every paragraph, which reads it aloud from there in your browser's voice, on into the next section while it has it, and offline too once the translation is kept in the offline copy; Settings gives each translation a voice of its own, and its Listening controls switch turns every play button on or off at once.
 - The contents at the left can be read as any translation you have ticked gives them, chosen on the Contents line: its parts, papers and sections in its own words, and in grey what it has not translated.
 - The Urantia Foundation's own Russian translation, Книга Урантии (UF-RUS), its 2024 release, can be shown beside the text, compared and searched as the other two are, by the Foundation's permission: tick it in Settings, in the Translations tab.

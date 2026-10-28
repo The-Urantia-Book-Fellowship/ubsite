@@ -1074,7 +1074,8 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
     if fq and scope in ("", "study"):
         # The study notes' words (Tigran, 2026-10-26), each line as the List of
         # study notes has it.  Always looked up, and shown only while Settings
-        # shows the notes (ub.css .bystudy), for settings never reach the server.
+        # shows the notes, and them in search results (ub.css .bystudy), for
+        # settings never reach the server.
         where = (" FROM footnote_fts x JOIN footnote f ON f.id=x.rowid"
                  " JOIN paragraph p ON p.id=f.paragraph_id"
                  " WHERE footnote_fts MATCH ? AND f.kind='study'")
@@ -1090,7 +1091,8 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
                              for h in hits])
     # Each translation beside the text (Tigran, 2026-10-26), its paragraphs and
     # its translator's notes, ё as е.  Always looked up, every one of them, and
-    # each list shown only for a translation Settings shows (base.html ubTr);
+    # each list shown only for a translation Settings shows (base.html ubTr),
+    # and while it shows the translations in search results (ub.css .trhits);
     # on the overview, only where it found something.
     tq = fts_query(fold(q))
     for x in trs:

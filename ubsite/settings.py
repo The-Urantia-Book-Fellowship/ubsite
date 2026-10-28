@@ -88,7 +88,13 @@ SHOW = [
     # they are, for an address asked for.  Promised to the Fellowship on
     # 2026-10-17 (Tigran, 2026-10-18).
     ("index", "switch", "Index and appendices", True, [],
-     "beside the text, in search results, and every link to them"),
+     "beside the text, and every link to them"),
+    # The index among the search results, Headwords and In the index, while
+    # the index is shown: off, a reader who searches finds the book and leaves
+    # the index beside it.  /search?in=index still answers an address asked
+    # for (Tigran, 2026-10-28).
+    ("indexsearch", "switch", "Index and appendices in search results", True, [],
+     "headwords, and the entries the words are found in"),
     ("redletter", "switch", "Words of Jesus in red", True, [], ""),
     ("paranum", "switch", "Paragraph references", True, [], "such as 0:1.2, beside each paragraph"),
     # Where each paragraph begins in the 1955 first printing.  Obsolete as a way
@@ -103,12 +109,21 @@ SHOW = [
     # (Tigran, 2026-10-18).
     ("studynotes", "switch", "Notes", False, [],
      "from The British Study Edition (ed. Tigran Aivazian)"),
+    # The study notes among the search results, while the notes are shown;
+    # /search?in=study still answers (Tigran, 2026-10-28).
+    ("studysearch", "switch", "Notes in search results", True, [], ""),
     ("notes", "switch", "1955 readings", True, [], ""),
     # What the 1955 cards say, listed among the search results: the reading,
     # and the SRT Committee's reasons beneath it.  Off unless a reader asks
     # (Tigran, 2026-10-12).
     ("notesearch", "switch", "1955 readings in search results", False, [],
      "their wording, such as Badanon, and the committee\u2019s reasons"),
+    # The translations ticked under Translations among the search results,
+    # each a list of its own.  Here and not in that tab, since it is about
+    # search, and never greyed: with none ticked it has nothing to hide (Tigran,
+    # 2026-10-28).  /search?in=ud still answers.
+    ("trsearch", "switch", "Translations in search results", True, [],
+     "those ticked under Translations, their words and their translators\u2019 notes"),
     # The browser's own, drawn from a title="", which no stylesheet can hide:
     # ub.js takes every title off the page while this is off, and puts them
     # back (Tigran, 2026-10-14).  The icons keep their aria-labels.
@@ -213,12 +228,14 @@ SITE_DEFAULTS: dict[str, dict] = {}
 # A setting that means nothing while another is off ('off', or a switch turned
 # off): shown, greyed, and not to be changed (ub.js disables it).  With
 # Listening off there is no voice or speed to set (Tigran, 2026-10-08), and with
-# the 1955 readings off no reading to search for.  A pair is a setting that
-# means something only while another has that value: which of the browser's
-# voices, while the browser's voice is chosen.  A setting whose own needs are
-# not met greys those that need it too: the browser's voices with Listening off.
+# the 1955 readings off no reading to search for, nor with the index or the
+# study notes off any of theirs.  A pair is a setting that means something
+# only while another has that value: which of the browser's voices, while the
+# browser's voice is chosen.  A setting whose own needs are not met greys
+# those that need it too: the browser's voices with Listening off.
 NEEDS = {"voice": "listen", "bvoice": ("voice", "browser"), "trvoices": "listen", "rate": "listen",
-         "follow": "listen", "onward": "listen", "notesearch": "notes"}
+         "follow": "listen", "onward": "listen", "notesearch": "notes",
+         "indexsearch": "index", "studysearch": "studynotes"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:
