@@ -88,6 +88,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- `INTEGRATION.md` is the brief for the Fellowship's developers and the agreement with them: who owns what, servers and releases, the site profile, the header and footer, sign-in, what members write, search from their navigation bar, what a server needs, the phases and the open questions. A change to it is a pull request both sides review.
 - The API's page says how to show a paragraph's `html` as it is: a colour for `.jesus` and a dotted line for `.leader`, and nothing for the other markup.
 - `deploy/ubsite.service` sets `MALLOC_ARENA_MAX=2`, and its `MemoryMax` is 2G, from 1G. Under a long burst of 32 clients at once the two workers grew past 975 MB and were still growing, near the old limit, at which systemd kills the service; with two malloc arenas they level off at about 650 MB, serving as fast. `deploy.sh` does not install the unit: on each host, install it again by hand, as root, as in `deploy/README.md` step 1, then `systemctl daemon-reload` and restart the service.
 - The build fails a word of both alphabets in a translation, a letter typed in the other keyboard layout, unless `tests/known-tr-mixed.tsv` lists it, and a paper's title in a translation's contents that is not the paper's own but for case.
