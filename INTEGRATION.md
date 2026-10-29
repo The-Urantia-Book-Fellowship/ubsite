@@ -133,13 +133,14 @@ Every gate runs under each profile.
 
 ## 6. Sign-in
 
-**One account, Laravel's.** Laravel's session cookie is set for `.urantiabook.org` (checked on 15 October 2026), so a browser sends it to read.urantiabook.org as well. On the Fellowship's site the reader keeps no accounts and sets no cookies of its own: identity is the one piece each site's profile plugs in (section 4), and on the maintainer's servers it is the reader's own sign-in, by Google or by email.
+**One account, Laravel's.** Laravel's session cookie, `myapp_live_session`, is set for `.urantiabook.org` (checked on 15 and 29 October 2026: HttpOnly, Secure, SameSite Lax), so a browser sends it to read.urantiabook.org as well. HttpOnly is no obstacle, since no script of the reader's reads it, and Lax allows a request from read.urantiabook.org to urantiabook.org, which is the same site. On the Fellowship's site the reader keeps no accounts and sets no cookies of its own: identity is the one piece each site's profile plugs in (section 4), and on the maintainer's servers it is the reader's own sign-in, by Google or by email.
 
 **What Laravel provides:**
 
 1. **An identity endpoint**, e.g. `GET https://urantiabook.org/api/reader/me`. Given the session cookie, or an app's token as `Authorization: Bearer …`, it answers `200` with the member, `{"id": …, "name": …}`, or `401`. It is the one thing the reader asks Laravel.
 2. **CORS for the reader**: on that endpoint, `Access-Control-Allow-Origin: https://read.urantiabook.org` (and the staging name), with `Access-Control-Allow-Credentials: true`, so that the header's script can ask who is signed in.
 3. **A return address on sign-in and sign-out**: Laravel's sign-in page accepts an address on read.urantiabook.org to come back to, on an allow-list, so that a member who signs in from the reader returns to the paragraph they were reading.
+4. **The endpoint reachable from the reader's server.** urantiabook.org is behind Cloudflare's bot protection (its `cf_clearance` cookie), which answers an unknown client with a challenge page. The reader's server asks the endpoint directly, with no browser to pass a challenge, so a Cloudflare rule must let that path, or the reader's address, through.
 
 **How the reader uses it.** The browser's answer only draws the header. Whenever the reader acts on a member's behalf, storing a note, say, its server asks the endpoint itself, passing on the cookie or token it was sent, and keeps the answer for a few minutes. It never trusts an identity the browser asserts, and never logs the cookie.
 
