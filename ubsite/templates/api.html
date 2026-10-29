@@ -124,7 +124,13 @@ may do with it.</p>
     <code>&lt;span class="mark"&gt;</code> around a list's number, an empty
     <code>&lt;span class="leader"&gt;&lt;/span&gt;</code> where the book prints a dot
     leader, and an empty <code>&lt;span class="v1955"&gt;&lt;/span&gt;</code> where the
-    1955 printing reads otherwise (see <code>readings_1955</code>). For plain text, strip
+    1955 printing reads otherwise (see <code>readings_1955</code>). Shown as it is, the
+    HTML wants two rules of CSS, since a browser draws <code>&lt;em&gt;</code> and
+    <code>&lt;sup&gt;</code> by itself and nothing else: a colour for <code>.jesus</code>,
+    or the words of Jesus are set like the rest, and <code>.leader</code> drawn as a dotted
+    line, as this site draws it (<code>display: inline-block; min-width: 2rem;
+    border-bottom: 1px dotted</code>), or left empty. <code>.mark</code> and
+    <code>.v1955</code> need nothing. For plain text, strip
     the tags: what is left is the text exactly. The only
     entities there can be are <code>&amp;amp;</code>, <code>&amp;lt;</code> and
     <code>&amp;gt;</code>, and the text holds none of those characters today, but
