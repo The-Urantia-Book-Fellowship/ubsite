@@ -124,6 +124,15 @@ SHOW = [
     # 2026-10-28).  /search?in=ud still answers.
     ("trsearch", "switch", "Translations in search results", True, [],
      "those ticked under Translations, their words and their translators\u2019 notes"),
+    # The British Study Edition's quiz (build/quiz.py): the invitation after
+    # the last paragraph of each paper that has questions, and its line on the
+    # home page.  /quiz and /quiz/N answer an address asked for, as the index's
+    # pages do (Tigran, 2026-10-28).
+    ("quiz", "switch", "Quiz", True, [], "questions at the end of a paper, and on the home page"),
+    # Its board (ubsite/board.py): after a quiz, the offer to put a name on it,
+    # and the links to it; off, quiz.js sends nothing at all (Tigran,
+    # 2026-10-28).  A site may turn it off (SITE_DEFAULTS).
+    ("quizboard", "switch", "Quiz board", True, [], "the offer to put your name on it, and the links to it"),
     # The browser's own, drawn from a title="", which no stylesheet can hide:
     # ub.js takes every title off the page while this is off, and puts them
     # back (Tigran, 2026-10-14).  The icons keep their aria-labels.
@@ -235,7 +244,7 @@ SITE_DEFAULTS: dict[str, dict] = {}
 # those that need it too: the browser's voices with Listening off.
 NEEDS = {"voice": "listen", "bvoice": ("voice", "browser"), "trvoices": "listen", "rate": "listen",
          "follow": "listen", "onward": "listen", "notesearch": "notes",
-         "indexsearch": "index", "studysearch": "studynotes"}
+         "indexsearch": "index", "studysearch": "studynotes", "quizboard": "quiz"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:

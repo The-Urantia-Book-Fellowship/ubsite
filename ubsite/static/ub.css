@@ -53,6 +53,10 @@ math { font-family: "Garamond Math", math; }
   /* A card raised over the page: a 1955 reading's (ub.js). */
   --card: oklch(0.995 0.004 85);
   --shade: oklch(0.30 0.02 70 / .16);
+  /* The quiz's marks (quiz.js): right and wrong, each with ✓ or ✗ beside it,
+     so the colour is never all that tells them apart. */
+  --right: oklch(0.47 0.11 150);
+  --wrong: oklch(0.52 0.13 40);
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
      modern face and wanted browser zoom to be comfortable. */
@@ -91,6 +95,7 @@ math { font-family: "Garamond Math", math; }
     --flame: oklch(0.80 0.12 82);
     --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
     --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
+    --right: oklch(0.76 0.11 150);  --wrong: oklch(0.74 0.11 45);
   }
 }
 :root[data-theme="dark"] {
@@ -100,6 +105,7 @@ math { font-family: "Garamond Math", math; }
   --flame: oklch(0.80 0.12 82);
   --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
   --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
+  --right: oklch(0.76 0.11 150);  --wrong: oklch(0.74 0.11 45);
 }
 :root[data-theme="dark"] body, @media (prefers-color-scheme: dark) { }
 
@@ -586,6 +592,12 @@ p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
 .nolists { display: none; }
 :root[data-notes="off"] .nolists.one,
 :root[data-notes="off"]:not([data-studynotes="true"]) .nolists.both { display: block; }
+/* The quiz turned off: the invitation at a paper's end, the home page's line
+   (settings.py `quiz`).  Its pages answer an address asked for. */
+:root[data-quiz="off"] :is(.quizcall, .quizway) { display: none; }
+/* Its board turned off, or the quiz (settings.py NEEDS): the offer after a
+   quiz and the links to the board.  The board's page answers an address. */
+:root:is([data-quiz="off"], [data-quizboard="off"]) .qboard { display: none; }
 /* The index turned off, and the appendices with it (Tigran, 2026-10-18): the
    margin, the box of what a whole section or paper cites, the Index button,
    and whatever else is marked .ix, the header's link, the home page's lines,
@@ -1402,6 +1414,112 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
 .apps b { text-align: left; }
 .toc i { color: var(--faint); font-size: .9rem; }
 .letters { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* ---- the quiz (quiz.html, quiz_paper.html, quiz.js; section.html .quizcall) --
+   The British Study Edition's questions, one at a time, in the book's face;
+   the book's own words, a paragraph that answers one, black as the text is. */
+.pill { display: inline-block; font: inherit; font-size: .95em; line-height: 1.2; text-decoration: none;
+  color: var(--link); background: none; border: 1px solid var(--link); border-radius: 999px;
+  padding: calc(.35em + var(--lift)) 1.1em calc(.35em - var(--lift)); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.pill.solid { color: var(--paper); background: var(--link); }
+.pill:disabled { opacity: .45; cursor: default; }
+/* At a paper's end, under a short rule, as the PDF sets its quiz symbol there. */
+.quizcall { display: grid; justify-items: center; gap: .45rem; text-align: center;
+  max-width: var(--measure); margin: 2.4rem 0 0; }
+.quizcall::before { content: ""; width: 3.5rem; border-top: 1px solid var(--rule); margin-bottom: .5rem; }
+.quizcall p { margin: 0; }
+.quizcall .k, .quiz .qk { font-variant-caps: small-caps; letter-spacing: .07em; color: var(--faint); }
+.quiz .quizof { margin: 0 0 .4rem; color: var(--faint); }
+.quiz .quizof a { color: inherit; }
+.quiz h1 { margin-top: 0; }
+.quiz .lede { color: var(--faint); }
+/* Without scripts, and in print: the questions listed, each answer folded. */
+.quizlist { padding-left: 1.4rem; }
+.quizlist > li { margin-bottom: 1.2rem; }
+.quizlist .qa { list-style: none; padding: 0; margin: .3rem 0; color: var(--faint); }
+.quizlist .qa li::before { content: "· "; }
+.qright { padding-left: 1.2rem; margin: .3rem 0; }
+.js .quizlist, .js .quiz .quiznext, html:not(.js) .quizrnd { display: none; }
+.quizrnd { display: flex; flex-wrap: wrap; gap: .5rem .7rem; align-items: center; margin: 1.2rem 0 1.6rem; }
+.quizrnd select { font: inherit; font-size: .95em; color: var(--ink); background: var(--card);
+  border: 1px solid var(--rule); border-radius: 6px; padding: .15em .3em; }
+.quizhub.running > :is(.quizrnd, .qtoc, h2, .lede) { display: none; }
+.qtoc li { align-items: baseline; }
+.qtoc i { font-style: normal; font-size: .9em; white-space: nowrap; }
+.qtoc i.done { color: var(--right); }
+.qhead { display: flex; justify-content: space-between; align-items: center; gap: .6rem;
+  flex-wrap: wrap; color: var(--faint); font-size: .92em; margin-bottom: .8rem; }
+.qdots { display: flex; flex-wrap: wrap; gap: .3rem; }
+.qdots i { display: block; width: .6rem; height: .6rem; border-radius: 50%; border: 1px solid var(--faint); }
+.qdots i.r { background: var(--right); border-color: var(--right); }
+.qdots i.w { background: var(--wrong); border-color: var(--wrong); }
+.qdots i.c { border: 2px solid var(--ink); }
+.quizrun .qof { margin: 0 0 .3rem; font-size: .92em; }
+.quizrun .qof a { color: var(--faint); }
+.quizrun .qq { font-size: 1.2em; line-height: 1.25; margin: 0 0 .4rem; text-wrap: balance; outline: none; }
+.qhint { color: var(--faint); font-style: italic; font-size: .92em; margin: 0 0 .4rem; }
+.qopts { list-style: none; padding: 0; margin: .7rem 0 0; display: grid; gap: .4rem; }
+.qopt { width: 100%; text-align: left; font: inherit; color: var(--ink); background: var(--card);
+  border: 1px solid var(--rule); border-radius: 10px; padding: .45rem .7rem .4rem; cursor: pointer;
+  display: grid; grid-template-columns: 1.5em 1fr 1.2em; gap: .5rem; align-items: baseline;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.qopt .qn { color: var(--faint); }
+.qopt .mk { text-align: right; font-weight: 700; }
+.qopt[aria-pressed="true"] { border-color: var(--link); box-shadow: inset 0 0 0 1px var(--link); }
+.qopt:disabled { cursor: default; }
+.qopt.ok { border-color: var(--right); }
+.qopt.ok .mk { color: var(--right); }
+.qopt.bad { border-color: var(--wrong); }
+.qopt.bad .mk { color: var(--wrong); }
+.qopt.bad .tx { text-decoration: line-through; text-decoration-thickness: 1px; }
+.qopt.dim { opacity: .55; }
+@media (hover: hover) { .qopt:hover:not(:disabled) { border-color: var(--field-edge); } }
+.qverdict { margin: 1rem 0 0; }
+.qverdict.r { color: var(--right); } .qverdict.w { color: var(--wrong); }
+.qsrc { margin: .5rem 0 0; padding: .1rem 0 .1rem .8rem; border-left: 2px solid var(--rule); }
+.qsrc p { margin: 0; }
+.qbook { color: var(--text); }
+.qref { font-size: .8em; margin-right: .35em; white-space: nowrap; }
+.qacts { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 1.2rem 0 0; }
+.qscore { text-align: center; margin: .6rem 0 1rem; }
+.qscore p { margin: 0; }
+.qbig { font-size: 3.2em; line-height: 1; color: var(--text); outline: none; }
+.qmarks { display: flex; justify-content: center; flex-wrap: wrap; gap: .35rem; margin-top: .6rem !important; }
+.qmarks span { display: grid; place-items: center; width: 1.9em; height: 1.9em; border-radius: 50%;
+  border: 1px solid; font-size: .8em; }
+.qmarks .r { color: var(--right); } .qmarks .w { color: var(--wrong); }
+.qall { text-align: center; }
+.qmissed { list-style: none; padding: 0; display: grid; gap: .35rem; }
+.qend { justify-content: center; }
+.qhome { color: var(--faint); }
+/* The board: the offer after a quiz, the place it gives, the board's page. */
+.qjoinbox { margin-top: 1.6rem; }
+.qjoin { padding: 1rem 1.1rem; background: var(--card); border: 1px solid var(--rule); border-radius: 12px;
+  box-shadow: 0 4px 18px var(--shade); }
+.qjoin h2 { margin: 0 0 .35rem; font-size: 1.1em; }
+.qjoin p { margin: 0 0 .6rem; }
+.namerow { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.namerow label { flex-basis: 100%; color: var(--faint); font-size: .9em; }
+.namerow input { flex: 1 1 10rem; min-width: 0; font: inherit; color: var(--ink); background: var(--paper);
+  border: 1px solid var(--field-edge); border-radius: 8px; padding: .3rem .6rem .2rem; }
+.qsmall { color: var(--faint); font-size: .85em; }
+.qmsg { color: var(--wrong); }
+.qplace { text-align: center; }
+/* The link to the board, on every quiz page under the questions; on the hub,
+   tucked under the form's own margin until a quiz runs and hides the form,
+   or it was drawn over the answer's buttons (Tigran, 2026-10-30). */
+.qtoboard { margin: 1.4rem 0; }
+.quizhub:not(.running) .qtoboard { margin-top: -.6rem; }
+.qtable { overflow-x: auto; }
+.qtable table { border-collapse: collapse; width: 100%; font-variant-numeric: lining-nums tabular-nums; }
+.qtable th { font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em; color: var(--faint);
+  text-align: right; padding: .25rem .5rem; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.qtable td { padding: .3rem .5rem; text-align: right; border-bottom: 1px solid var(--rule); }
+.qtable :is(th, td):nth-child(2) { text-align: left; width: 100%; }
+.qtable td:first-child { color: var(--faint); }
+.qtable tr.you td { background: color-mix(in oklch, var(--flame) 14%, transparent); }
+@media (max-width: 30rem) { .qtable .nar { display: none; } }
 .letters a { border: 1px solid var(--rule); border-radius: 3px; padding: .5rem .7rem;
   text-decoration: none; text-align: center; min-width: 3.2rem; }
 .letters span { display: block; font-size: .82rem; color: var(--faint); }

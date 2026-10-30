@@ -50,7 +50,7 @@ FORMAT = 2
 # copy is one for every host (offline-core.js HOSTED); until 2026-10-15 they
 # were in it.  The tab's icon is chosen in the page from its address, so every
 # site's is kept (build()).
-ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js"]
+ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js", "quiz.js"]
 PLAIN = ["/static/favicon.svg", "/static/fonts/UBGoudy.woff2", "/static/fonts/UBGoudy-Italic.woff2",
          "/static/fonts/OFL.txt", "/static/fonts/GaramondMath.woff2",
          "/static/fonts/OFL-GaramondMath.txt", "/static/fonts/EBGaramond-Cyrillic.woff2",

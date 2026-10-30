@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% set title = 'Cosmic Citizenship Quiz' %}
+{#- The quiz's own page (app.py quiz_page): ten questions at random, drawn by
+    quiz.js from all of them in #ub-quiz, and every paper that has questions,
+    as the contents list papers, each with how many questions it has and, filled
+    in by quiz.js, how many of them this reader has had right. #}
+{% block body %}
+<main class="prose quiz quizhub" data-board="{{ board_url }}">
+  <h1>{{ t('Cosmic Citizenship Quiz') }}</h1>
+  <p class="lede">{{ t('quiz:hub', q=total, p=papers|length) }}</p>
+  <div class="quizrun" aria-live="polite"></div>
+  <form class="quizrnd" id="quizrnd">
+    <label for="quizfrom">{{ t('Ten questions at random from') }}</label>
+    <select id="quizfrom">
+      <option value=""{{ ru('the whole book|from') }}>{{ tt('the whole book|from') }}</option>
+      <option value="0"{{ ru('the Foreword') }}>{{ tt('the Foreword') }}</option>
+      {%- for part in parts %}
+      <option value="{{ part.n }}"{{ ru('Part {r}|from', r=roman[part.n]) }}>{{ tt('Part {r}|from', r=roman[part.n]) }}</option>
+      {%- endfor %}
+    </select>
+    <button class="pill solid" type="submit">{{ t('Start') }}</button>
+  </form>
+  <p class="qboard qtoboard"><a href="/quiz/board">{{ t('The quiz board') }}</a></p>
+  <ol class="toc qtoc">
+  {%- for x in papers if x.n == 0 %}
+    <li data-n="0"><a href="/quiz/0"><b>0</b> {{ x.title }}</a><i>{{ x.count }}</i></li>
+  {%- endfor %}
+  </ol>
+  {%- for part in parts %}
+  <h2>{{ part.title }}</h2>
+  <ol class="toc qtoc">
+    {%- for x in papers if x.part == part.n %}
+    <li data-n="{{ x.n }}"><a href="/quiz/{{ x.n }}"><b>{{ x.n }}</b> {{ x.title }}</a><i>{{ x.count }}</i></li>
+    {%- endfor %}
+  </ol>
+  {%- endfor %}
+</main>
+{% endblock %}
+{% block scripts %}
+<script type="application/json" id="ub-quiz">{{ data|tojson }}</script>
+<script src="{{ asset('quiz.js') }}" defer></script>
+{% endblock %}

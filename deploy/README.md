@@ -160,4 +160,34 @@ The VPS has no `sqlite3` command, so its copy goes through Python. The two hosts
 
 `var/stats.passwd` is the scrypt hash of the `/stats` password, and is remade, not restored (`python -m ubsite.stats passwd`). The DB-IP database in `var/geoip/` is shipped by `deploy.sh`.
 
+**`var/quiz.db`** is the quiz's board (`ubsite/board.py`), on the VPS alone, which keeps it for both sites: the names readers chose and the first answers they gave, no IP address, no cookie. It is the one thing readers gave the site, and no build makes it again, so `deploy.sh` brings a copy of it here before every deploy that includes the VPS, made there by SQLite's own backup, to `var/board/quiz-<date>.db`. To restore one: stop the unit, put the copy at `~/ubsite/var/quiz.db` (and remove any `quiz.db-wal` and `quiz.db-shm` beside it), start the unit. `tests/test_board.py` restores a copy made the same way and reads the same board from it.
+
 When reader annotations arrive they go in a separate `var/user.db`, and that will need a real backup, and a restore tested once, because an untested backup is a rumour.
+
+---
+
+## The quiz's board
+
+Kept by **ubsite.sigmaai.au** (`UB_BOARD`, which defaults to it, so the unit stays the same file on both hosts). pi5's pages send to it and read from it across origins; pi5's app answers the board's routes 404 and never makes a `var/quiz.db`. Its only POSTs, `/quiz/board/join` and `/quiz/board/answers`, have nginx locations of their own, exact matches (trap 19), with a body of up to 16 KB and 10 a minute from one address; everything else keeps the 1 KB limit.
+
+**The nginx files changed with it (2026-10-28), so each host's must be installed again**, as root, which is Tigran's to run (CLAUDE.md, Privilege):
+
+```
+# pi5
+sudo install -m0644 -o root -g root deploy/ubsite.nginx /etc/nginx/sites-available/ubsite.ddns.net
+sudo nginx -t && sudo systemctl reload nginx
+# the VPS
+sudo install -m0644 -o root -g root deploy/ubsite-sigmaai.nginx /etc/nginx/sites-available/ubsite.sigmaai.au
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Then, through nginx itself (trap 19): `curl -sI https://ubsite.sigmaai.au/quiz/board` is a 200, not a 301; an `OPTIONS` to `/quiz/board/join` with `Origin: https://ubsite.ddns.net` is a 204 naming that origin; a POST of 40 KB is a 413; and a POST to ubsite.ddns.net's is the app's 404.
+
+A name that should not be there is taken off on the VPS, its line kept and the name still taken:
+
+```
+cd ~/ubsite && .venv/bin/python -m ubsite.board list
+.venv/bin/python -m ubsite.board hide "NAME"       # and `show` to put it back
+.venv/bin/python -m ubsite.board rename "OLD" "NEW"
+```
+

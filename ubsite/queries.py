@@ -698,3 +698,78 @@ def chronology(con: sqlite3.Connection) -> tuple[list, list]:
                 items.append({"month": r["month_label"], "events": []})
             items[-1]["events"].append(r)
     return years, bands
+
+
+# ---- the quiz -------------------------------------------------------------------
+
+def quiz(con: sqlite3.Connection, paper: int | None = None) -> list[dict]:
+    """The quiz's questions, one paper's or all, in the order of the book
+    (build/quiz.py): what /quiz/N and /quiz send the browser, which asks them.
+
+    Each: its id and the layout of its answers (v), by which the browser keeps
+    an answer; `m`, the right answers as bits, for the browser to mark them,
+    offline too; the question and its answers as HTML; and what answers it,
+    where the review has said (`s`): the passages of the text (`k` "text"),
+    `p`, each a paragraph's words or a run of paragraphs whole, its `ref` then
+    "0:3.2-8", in the order ruled, with `ref` the first's; a study note
+    (`k` "note"); or, for a note whose paper's notes are not yet reviewed, the
+    paragraph itself (`k` "para"), without its rings and markers, since no
+    card of theirs is on the page.  A question kept out (`drop`) is not sent.
+    """
+    where, args = ("WHERE q.paper_n = ?", (paper,)) if paper is not None else ("", ())
+    try:
+        rows = con.execute(
+            "SELECT q.id, q.paper_n, q.ord, q.v, q.mask, q.html, q.state, f.html AS note_html"
+            f" FROM quiz_question q LEFT JOIN footnote f ON f.id = q.footnote_id {where}"
+            " ORDER BY q.paper_n, q.ord", args).fetchall()
+        passages: dict[int, list[dict]] = {}
+        for qid, ref, last, h in con.execute(
+                "SELECT r.question_id, p.ref, l.para_n, r.quote_html FROM quiz_ref r"
+                " JOIN quiz_question q ON q.id = r.question_id"
+                " JOIN paragraph p ON p.id = r.paragraph_id LEFT JOIN paragraph l ON l.id = r.paragraph_last_id"
+                f" {where} ORDER BY r.question_id, r.n", args):
+            passages.setdefault(qid, []).append({"ref": ref + (f"-{last}" if last else ""), "h": h})
+    except sqlite3.Error:
+        return []                  # a database from before the quiz
+    answers: dict[int, list[str]] = {}
+    for qid, html in con.execute("SELECT question_id, html FROM quiz_answer ORDER BY question_id, n"
+                                 if paper is None else
+                                 "SELECT a.question_id, a.html FROM quiz_answer a JOIN quiz_question q"
+                                 " ON q.id = a.question_id WHERE q.paper_n = ? ORDER BY a.question_id, a.n",
+                                 () if paper is None else (paper,)):
+        answers.setdefault(qid, []).append(html)
+    out = []
+    for r in rows:
+        s, ps = None, passages.get(r["id"], [])
+        if r["state"] == "drop":
+            continue
+        if r["state"] == "text" and ps:
+            s = {"k": "text", "ref": ps[0]["ref"], "p": ps}
+        elif r["state"] == "note" and r["note_html"] and ps:
+            s = {"k": "note", "ref": ps[0]["ref"], "h": r["note_html"]}
+        elif r["state"] == "note" and ps:
+            s = {"k": "para", "ref": ps[0]["ref"], "h": ps[0]["h"]}
+        out.append({"id": r["id"], "p": r["paper_n"], "v": r["v"], "m": r["mask"],
+                    "q": r["html"], "a": answers.get(r["id"], []), "s": s})
+    return out
+
+
+def quiz_papers(con: sqlite3.Connection) -> list[dict]:
+    """Every paper that has questions, with its part and how many: /quiz's
+    list, the invitation at a paper's end, the way on from a paper's quiz."""
+    try:
+        return [dict(r) for r in con.execute(
+            "SELECT q.paper_n AS n, q.n AS count, p.title, p.part_n AS part FROM quiz_paper q"
+            " JOIN paper p ON p.n = q.paper_n ORDER BY q.paper_n")]
+    except sqlite3.Error:
+        return []
+
+
+def quiz_count(con: sqlite3.Connection, paper: int) -> int:
+    """How many questions the quiz asks on a paper: 0 for none, or for a
+    database from before the quiz."""
+    try:
+        r = con.execute("SELECT n FROM quiz_paper WHERE paper_n = ?", (paper,)).fetchone()
+    except sqlite3.Error:
+        return 0
+    return r[0] if r else 0

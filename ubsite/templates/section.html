@@ -147,6 +147,15 @@
       {% endfor %}{% endfor %}
     </section>
     {%- endif %}
+    {#- At a paper's end, its quiz, where it has questions (app.py read,
+        quiz_paper.html); Settings' Quiz hides it (ub.css .quizcall). #}
+    {%- if quizcall %}
+    <aside class="quizcall">
+      <p class="k">{{ t('Cosmic Citizenship Quiz') }}</p>
+      <p>{{ t('quiz:call', n=quizcall) }}</p>
+      <a class="pill" href="/quiz/{{ paper.n }}">{{ t('Take the quiz') }}</a>
+    </aside>
+    {%- endif %}
 
     {#- The transport bar: ⏪ ⏮ ⏭ ⏩, across papers in the order of the book
         (app.py transport, templates/_transport.html).  At the book's ends a

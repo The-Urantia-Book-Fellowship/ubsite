@@ -674,7 +674,9 @@
       if (isNew) location.href = url; else location.reload();
     });
   }
-  var SKIP = /^\/(static|audio|speech|healthz|favicon|apple-touch-icon)\b/;
+  // A quiz's page runs quiz.js, which a swapped <main> would leave unrun: it
+  // loads as ever, and the reading stops.
+  var SKIP = /^\/(static|audio|speech|healthz|favicon|apple-touch-icon|quiz)\b/;
   document.addEventListener('click', function (ev) {
     if (!roaming() || ev.defaultPrevented || ev.button || ev.metaKey || ev.ctrlKey ||
         ev.shiftKey || ev.altKey) return;

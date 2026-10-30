@@ -2,7 +2,9 @@
 
 The notes hold 118 `$...$` in 39 notes (study 2474116), all inline, no
 environment, in about thirty commands; ud's, its translator's, 41 more
-(tests/fixtures/tr-math.tsv), in a few more: an integral, a set's braces.  Each is converted here, at build, so a
+(tests/fixtures/tr-math.tsv), in a few more: an integral, a set's braces; and the
+quiz's five (build/quiz.py), in three: \\alpha, \\tau and \\infty.  Each is converted here, at
+build, so a
 page carries MathML the browser lays out itself: no script, the same in the
 offline copy.  A command outside the set fails, as an unknown macro does in the
 text: a converter that guessed would print something else than the editor
@@ -197,6 +199,8 @@ class _Parser:
             return f'<mi mathvariant="normal">{GREEK_UPPER[v]}</mi>', False
         if v == "hbar":
             return "<mi>ℏ</mi>", False
+        if v == "infty":                       # the quiz's answer "$\infty$" (build/quiz.py)
+            return "<mi>∞</mi>", False
         if v in OPERATORS:
             return f"<mo>{OPERATORS[v]}</mo>", False
         if v in SPACES:

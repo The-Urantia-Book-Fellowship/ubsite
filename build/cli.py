@@ -117,6 +117,11 @@ def main(argv: list[str]) -> int:
             print(f"study notes of {len(curated)} paper{'s' * (len(curated) > 1)},"
                   f" the edition at {at(repos['study'])} ...")
         study_built = study.attach(papers, curated, repos["study"], block, report, hyphenator)
+        # The edition's quiz (build/quiz.py), read and set now; stored once the
+        # text, the study notes and the search index are, which it is held to.
+        from . import quiz
+        print(f"the quiz, the edition at {at(repos['study'])} ...")
+        quiz_built = quiz.build(repos["study"], report)
 
         con = db.create(tmp)
         print("loading ...")
@@ -179,6 +184,11 @@ def main(argv: list[str]) -> int:
         print(f"  {n_links:,} entries name a headword, now linked")
         n_pairs = derive.cocitation(con)
         derive.fts(con)
+        if quiz_built:
+            quiz.store(con, quiz_built, report)
+            print(f"  the quiz: {len(quiz_built.questions)} questions,"
+                  f" {sum(q['state'] not in ('-', 'drop') for q in quiz_built.questions)} reviewed,"
+                  f" {len(set(quiz_built.slips))} slips listed in tests/known-quiz-slips.tsv")
         print("speech ...")
         from . import speech
         n_speech = speech.derive(con)
@@ -218,12 +228,14 @@ def main(argv: list[str]) -> int:
         con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
                         [(b.key, repos[b.key]["commit"], int(repos[b.key]["dirty"]), repos[b.key]["rev"],
                           b.date or repos[b.key]["date"], repos[b.key]["commit_url"]) for b in tr_built])
-        # The study edition, and Block's charts by their manifest's SHA-256, once
-        # a paper's notes are on the site: until then the build reads neither.
-        if study_built.papers:
+        # The study edition, which the quiz is read from (build/quiz.py) and a
+        # reviewed paper's notes; and Block's charts by their manifest's SHA-256,
+        # once a paper's notes are on the site: until then the build reads none.
+        if study_built.papers or quiz_built:
             st = repos["study"]
             con.execute("INSERT INTO build_source VALUES ('study',?,?,?,?,?)",
                         (st["commit"], int(st["dirty"]), st["rev"], st["date"], st["commit_url"]))
+        if study_built.papers:
             con.execute("INSERT INTO build_source VALUES ('block', ?, 0, 'manifest', NULL, NULL)",
                         (block["sha256"],))
             # And the library's pages the Bibliography links, by LIBRARY.tsv's SHA-256.
@@ -256,6 +268,14 @@ def main(argv: list[str]) -> int:
                 ("study_notes", "SELECT COUNT(*) FROM footnote WHERE kind='study'"),
                 ("study_papers", "SELECT COUNT(*) FROM study_paper"),
                 ("study_sources", "SELECT COUNT(DISTINCT key) FROM study_source"),
+                # The quiz (build/quiz.py): what the site asks, and how much of it
+                # names what answers it.
+                ("quiz_questions", "SELECT COUNT(*) FROM quiz_question WHERE state != 'drop'"),
+                ("quiz_papers", "SELECT COUNT(*) FROM quiz_paper"),
+                ("quiz_multi", "SELECT COUNT(*) FROM quiz_question WHERE multi AND state != 'drop'"),
+                ("quiz_answers", "SELECT COUNT(*) FROM quiz_answer"),
+                ("quiz_right", "SELECT COUNT(*) FROM quiz_answer WHERE right"),
+                ("quiz_reviewed", "SELECT COUNT(*) FROM quiz_question WHERE state != '-'"),
                 ("srt_items", "SELECT COUNT(*) FROM srt_item"),
                 ("variants_1955_explained", "SELECT COUNT(*) FROM footnote"
                                             " WHERE srt_item_id IS NOT NULL"),
@@ -335,6 +355,9 @@ def main(argv: list[str]) -> int:
         print("\n== study notes ==")
         from .checks.check_study import run as study_run
         rc |= study_run(repos["study"], config.block(), report)
+        print("\n== quiz ==")
+        from .checks.check_quiz import run as quiz_run
+        rc |= quiz_run(config.ROOT / "var" / "ub.db")
         print("\n== italic spans vs press artifacts ==")
         from .checks.check_spans import load_press_italics, run as span_run
         art = ital or (repos["press"]["path"] / "artifacts" / "text-verify" / "tex")

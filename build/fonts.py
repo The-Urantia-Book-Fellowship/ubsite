@@ -151,8 +151,12 @@ def study_codepoints(con) -> tuple[set[str], dict[str, set[str]], list[str]]:
     goudy: set[str] = set()
     other: dict[str, set[str]] = {}
     maths: list[str] = []
+    # And the quiz's questions and answers (build/quiz.py), set as a note is,
+    # their math too: $\alpha$ Centauri, $\infty$.
     for (h,) in con.execute("SELECT html FROM footnote WHERE kind = 'study'"
-                            " UNION ALL SELECT html_hy FROM tr_note"):
+                            " UNION ALL SELECT html_hy FROM tr_note"
+                            " UNION ALL SELECT html FROM quiz_question"
+                            " UNION ALL SELECT html FROM quiz_answer"):
         maths += RE_MATH.findall(h)
         h = RE_MATH.sub(" ", h)
         for lang, inner in RE_LANG.findall(h):

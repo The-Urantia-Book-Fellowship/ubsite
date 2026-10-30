@@ -77,6 +77,7 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
     slugs, paths = shell["slugs"], shell["paths"]
     no_path = next(s for s in slugs if s not in paths)
     one_chapter = next(s for s, (n, _) in paths.items() if n < 2)
+    no_quiz = next(int(p) for p in shell["papers"] if int(p) not in shell["quiz"])
     for p in ["/0:0.0-1", "/86:5.18", "/86:5.15-14", "/39:3.9-8", "/300:1", "/1:99", "/300", "/101",
               "/0", "/007:1", "/i/no-such-headword", f"/i/{no_path}/read", f"/i/{one_chapter}/read/theme",
               "/index/q", "/index/QQ", "/index/a", "/appendix/a", "/appendix/G", "/appendix/AB",
@@ -85,7 +86,11 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               "/speech/1:4:5", "/speech/ud/01:1", "/speech/ud/100:1", "/speech/x/1:1", "/speech/ud/1:99",
               "/speech/ud/x", "/speech/ud/1:1:2", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2",
               "/1:1/compare", "/1:1.3-4/compare", "/1/compare", "/300/compare", "/1:99/compare",
-              "/x/compare", "/1:1/compare/x", "/search/compare", "/i/god/compare"]:
+              "/x/compare", "/1:1/compare/x", "/search/compare", "/i/god/compare",
+              # The quiz: a paper without questions, a paper there is not, a number
+              # written otherwise, a word, Compare's address after it.
+              f"/quiz/{no_quiz}", "/quiz/197", "/quiz/01", "/quiz/x", "/quiz/-1", "/quiz/compare",
+              "/quiz/1/compare", "/quiz/1/x"]:
         jobs.append((p, "", True))
     # Every list a search has, by its `in`: each translation's too, by its key.
     keys = [t["key"] for t in shell["tr"]["order"]]

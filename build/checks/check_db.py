@@ -34,6 +34,16 @@ QUERIES = [
     ("SRT changes considered", "SELECT COUNT(*) FROM srt_item", 319),
     ("  1955 notes with their reason",
      "SELECT COUNT(*) FROM footnote WHERE srt_item_id IS NOT NULL", 167),
+    # The British Study Edition's quiz (build/quiz.py), at study d6c3206: 51 of
+    # its questions have more than one right answer, which a quiz that took one
+    # answer would mark wrong when right.  126 papers have questions; 125 have
+    # one asked, since Paper 138's only question was dropped (Tigran, 2026-10-30).
+    ("quiz questions",      "SELECT COUNT(*) FROM quiz_question", 817),
+    ("  on papers",         "SELECT COUNT(*) FROM quiz_paper", 125),
+    ("  more than one right", "SELECT COUNT(*) FROM quiz_question WHERE multi", 51),
+    ("  answers",           "SELECT COUNT(*) FROM quiz_answer", 3686),
+    ("    right",           "SELECT COUNT(*) FROM quiz_answer WHERE right", 962),
+    ("  reviewed",          "SELECT COUNT(*) FROM quiz_question WHERE state <> '-'", None),
     ("index entries",       "SELECT COUNT(*) FROM index_entry", None),
     ("citations",           "SELECT COUNT(*) FROM citation", None),
     ("citation targets",    "SELECT COUNT(*) FROM citation_target", None),
@@ -123,6 +133,52 @@ INVARIANTS = [
              + (SELECT COUNT(*) FROM paper WHERE title GLOB '*\\*')
              + (SELECT COUNT(*) FROM index_entry WHERE text GLOB '*\\*'
                                                     OR path_plain GLOB '*\\*')"""),
+    # The quiz (build/quiz.py), each question held to its paper and its answers.
+    ("a quiz question's paper is a paper",
+     "SELECT COUNT(*) FROM quiz_question q WHERE NOT EXISTS (SELECT 1 FROM paper WHERE n = q.paper_n)"),
+    ("a question has 2 to 9 answers, numbered from 0 without a gap",
+     """SELECT (SELECT COUNT(*) FROM quiz_question q WHERE NOT EXISTS
+                 (SELECT 1 FROM quiz_answer WHERE question_id = q.id))
+             + (SELECT COUNT(*) FROM (SELECT COUNT(*) c, MAX(n) m FROM quiz_answer
+                 GROUP BY question_id) WHERE c < 2 OR c > 9 OR m <> c - 1)"""),
+    ("a question's mask and multi agree with its answers, at least one right",
+     """SELECT COUNT(*) FROM quiz_question q JOIN (SELECT question_id,
+           SUM(right << n) m, SUM(right) r FROM quiz_answer GROUP BY question_id) a
+           ON a.question_id = q.id WHERE q.mask <> a.m OR q.multi <> (a.r > 1) OR a.r < 1"""),
+    ("a reviewed question has its passages, a note exactly one, the rest none",
+     """SELECT COUNT(*) FROM quiz_question q
+         WHERE (state IN ('text', 'note')) <> EXISTS (SELECT 1 FROM quiz_ref WHERE question_id = q.id)
+            OR (footnote_id IS NOT NULL AND state <> 'note')
+            OR (state = 'note' AND (SELECT COUNT(*) FROM quiz_ref WHERE question_id = q.id) <> 1)"""),
+    ("a question's passages are numbered from 1 without a gap",
+     """SELECT COUNT(*) FROM (SELECT COUNT(*) c, MIN(n) a, MAX(n) b FROM quiz_ref GROUP BY question_id)
+         WHERE a <> 1 OR b <> c"""),
+    ("a quote is its paragraph's own words",
+     """SELECT COUNT(*) FROM quiz_ref r JOIN paragraph p ON p.id = r.paragraph_id
+         WHERE r.paragraph_last_id IS NULL
+           AND SUBSTR(p.text, r.quote_at + 1, LENGTH(r.quote)) <> r.quote"""),
+    ("a run of paragraphs shown whole is one section's, in order, their text one to a line",
+     """SELECT COUNT(*) FROM quiz_ref r JOIN paragraph a ON a.id = r.paragraph_id
+         JOIN paragraph b ON b.id = r.paragraph_last_id
+         WHERE a.section_id <> b.section_id OR b.para_n <= a.para_n
+            OR r.quote_at <> 0 OR r.quote IS NOT (SELECT group_concat(text, char(10)) FROM
+               (SELECT text FROM paragraph WHERE section_id = a.section_id
+                  AND para_n BETWEEN a.para_n AND b.para_n ORDER BY para_n))"""),
+    ("a note that answers a question stands on its paragraph",
+     """SELECT COUNT(*) FROM quiz_question q JOIN footnote f ON f.id = q.footnote_id
+         JOIN quiz_ref r ON r.question_id = q.id AND r.n = 1
+         WHERE f.paragraph_id <> r.paragraph_id OR f.kind <> 'study'"""),
+    ("quiz_paper counts each paper's questions",
+     """SELECT (SELECT COUNT(*) FROM quiz_paper p WHERE n <> (SELECT COUNT(*) FROM quiz_question
+               WHERE paper_n = p.paper_n AND state <> 'drop'))
+             + (SELECT COUNT(DISTINCT paper_n) FROM quiz_question WHERE state <> 'drop')
+             - (SELECT COUNT(*) FROM quiz_paper)"""),
+    ("no backslash in the quiz",
+     """SELECT (SELECT COUNT(*) FROM quiz_question WHERE text GLOB '*\\*')
+             + (SELECT COUNT(*) FROM quiz_answer WHERE text GLOB '*\\*')"""),
+    ("the study edition's commit recorded, where the quiz is read (missing)",
+     """SELECT (SELECT COUNT(*) > 0 FROM quiz_question)
+             - (SELECT COUNT(*) FROM build_source WHERE repo = 'study')"""),
     # The footer and /healthz name these commits; a build that cannot is not shipped.
     ("press and index commits recorded (missing)",
      "SELECT 2 - COUNT(*) FROM build_source WHERE repo IN ('press','index')"),
@@ -305,6 +361,20 @@ def run(con) -> int:
     print(f"            {m - soff}/{m} headwords, chips, targets and events round-trip"
           + ("" if not soff else f"   {soff} FAIL"))
     if soff:
+        bad += 1
+    k = qoff = 0
+    for where, text, h in con.execute(
+            "SELECT 'question ' || id, text, html FROM quiz_question"
+            " UNION ALL SELECT 'answer ' || question_id || '.' || n, text, html FROM quiz_answer"
+            " UNION ALL SELECT 'quote ' || question_id || '.' || n, quote, quote_html FROM quiz_ref"):
+        k += 1
+        if strip_tags(h) != text:
+            qoff += 1
+            if qoff <= 5:
+                print(f"            {where}: {h!r} is not {text!r}")
+    print(f"            {k - qoff}/{k} quiz questions, answers and quotes round-trip"
+          + ("" if not qoff else f"   {qoff} FAIL"))
+    if qoff:
         bad += 1
     k = foff = 0
     for text, h in con.execute("SELECT text, html FROM footnote"):

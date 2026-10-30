@@ -428,7 +428,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         urls = ["/101:4", "/101:4.2-3", "/i/god", "/appendix/A", "/lists/1955", "/index/G", "/", "/read",
                 "/part/2", "/search?q=prayer", "/search?q=self-conscious&in=text", "/search?q=Badanon&in=notes",
                 "/i/jesus/read", "/i/prayer/read/theme",
-                "/rail/120?v=1", "/static/fonts/UBGoudy.woff2", "/speech/101:4", "/speech/0:0", "/changelog"]
+                "/rail/120?v=1", "/static/fonts/UBGoudy.woff2", "/speech/101:4", "/speech/0:0", "/changelog",
+                "/quiz", "/quiz/32"]
         for u in urls:
             with urllib.request.urlopen(BASE + u) as r:
                 want[u] = r.read()
@@ -468,6 +469,17 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_selector(".tf.open .rt")
         ok(pg.url.endswith("#tr-ud") and "объединённым" in words(0),
            "a hit opens its paragraph, with the fold at that translation")
+        # The quiz (2026-10-28): a paper's questions asked and answered offline,
+        # and what the browser keeps of it, which /quiz then shows.
+        pg.goto(BASE + "/quiz/32")
+        pg.wait_for_selector(".qopt")
+        pg.locator(".qopt").nth(1).click()
+        ok(pg.locator(".qopt.ok").count() == 1 and pg.locator(".qverdict.r").count() == 1,
+           "a quiz is asked and answered offline")
+        kept = pg.evaluate("JSON.parse(localStorage.getItem('ub_quiz')).first")
+        ok(kept.get("366.1") == 2, f"its first answer kept, by id and layout ({kept})")
+        pg.goto(BASE + "/quiz/board")
+        ok("read online" in pg.inner_text("main"), "the quiz's board is said to be read online")
         pg.goto(BASE + "/101:4.2-3")
         ok(pg.locator("p.t.hit").count() == 2, "/101:4.2-3 marks two paragraphs")
         i = icon(pg)

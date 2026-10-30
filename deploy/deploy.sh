@@ -114,6 +114,17 @@ if [ -n "$(git status --porcelain -- data/study)" ]; then
     exit 1
 fi
 
+# The quiz's ledger (build/quiz.py): each question's id for ever, and the
+# rulings on what answers it.  An id given and not committed could be given
+# again to another question by the next checkout, and the board keeps answers
+# by id.
+if [ -n "$(git status --porcelain -- data/quiz)" ]; then
+    echo "refusing: data/quiz/ holds the quiz's ledger, not committed." >&2
+    echo "          Commit it, then deploy." >&2
+    git status --short -- data/quiz >&2
+    exit 1
+fi
+
 # One host: everything from here on is done once for each, with what was built above.
 ship() {
     local HOST="$1"
@@ -259,6 +270,20 @@ ship() {
     fi
     echo "==> $HOST done (not restarted)"
 }
+
+# The quiz's board (ubsite/board.py), kept by the main site: the one thing the
+# site holds that readers gave it, and no build can make again.  Before anything
+# is shipped, a copy of it, made by SQLite's own backup on the host, is brought
+# here to var/board/, dated; never shipped back.  None while nobody has joined.
+BOARD_HOST=sigmaai.au
+if [[ " $HOSTS " == *" $BOARD_HOST "* ]] && ssh "$BOARD_HOST" "test -f $DEST/var/quiz.db"; then
+    when="$(date +%F-%H%M%S)"
+    mkdir -p "$HERE/var/board"
+    ssh "$BOARD_HOST" "cd $DEST && .venv/bin/python -c 'import sqlite3; sqlite3.connect(\"var/quiz.db\").backup(sqlite3.connect(\"var/quiz-backup.db\"))'"
+    rsync -a "$BOARD_HOST:$DEST/var/quiz-backup.db" "$HERE/var/board/quiz-$when.db"
+    ssh "$BOARD_HOST" "rm -f $DEST/var/quiz-backup.db"
+    echo "==> the quiz's board, backed up: var/board/quiz-$when.db"
+fi
 
 for HOST in $HOSTS; do
     ship "$HOST"

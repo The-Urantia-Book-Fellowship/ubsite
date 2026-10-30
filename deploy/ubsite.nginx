@@ -15,6 +15,7 @@
 
 limit_req_zone $binary_remote_addr zone=ubsite_search:10m rate=30r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=40r/m;
+limit_req_zone $binary_remote_addr zone=ubsite_board:10m rate=10r/m;
 
 server {
     listen 80;
@@ -32,7 +33,8 @@ server {
     ssl_certificate     /etc/letsencrypt/live/ubsite.ddns.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ubsite.ddns.net/privkey.pem;
 
-    # The site accepts no uploads of any kind.
+    # The site accepts no uploads of any kind; the quiz's board alone takes a
+    # little more, in its own two locations below.
     client_max_body_size 1k;
 
     # Search is the only route that can cost real work; everything else is an
@@ -65,6 +67,28 @@ server {
     # two until the rate limit above refused it with a 429.  An exact match is
     # nginx's own documented way out.
     location = /api {
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+
+    # The quiz's board (ubsite/board.py), which ubsite.sigmaai.au keeps and the
+    # other site's pages send to; here, the app answers 404.  The only POSTs the
+    # site takes: a reader's name and first answers, at most 16 KB (819 answers
+    # come to about 12), 10 a minute, as a reader finishes a quiz.  Exact
+    # matches: a prefix location /quiz/board/ would answer /quiz/board, the
+    # board's page, with a 301 (trap 19).  The addresses stay in memory only,
+    # for the limit, as /search's do.
+    location = /quiz/board/join {
+        client_max_body_size 16k;
+        limit_req zone=ubsite_board burst=5 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+    location = /quiz/board/answers {
+        client_max_body_size 16k;
+        limit_req zone=ubsite_board burst=5 nodelay;
+        limit_req_status 429;
         proxy_pass http://127.0.0.1:8130;
         include /etc/nginx/proxy_params;
     }

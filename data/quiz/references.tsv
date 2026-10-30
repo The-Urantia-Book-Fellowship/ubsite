@@ -1,0 +1,807 @@
+# What answers each question of questions.tsv, in the order ruled: `ref` a
+# paragraph or a run of one section's, `quote` its words, or ¶ for the
+# paragraph(s) whole; for a note, its paragraph and the note's origin.
+id	n	ref	quote
+1	1	0:0.1	In the minds of the mortals of Urantia—that being the name of your world—there exists great confusion respecting the meaning of such terms as God, divinity, and deity.
+2	1	0:0.2	It is exceedingly difficult to present enlarged concepts and advanced truth, in our endeavor to expand cosmic consciousness and enhance spiritual perception, when we are restricted to the use of a circumscribed language of the realm.
+3	1	0:0.1	I have been directed to formulate this introductory statement in explanation of the meanings which should be attached to certain word symbols as they may be hereinafter used in those papers which the Orvonton corps of truth revealers have been authorized to translate into the English language of Urantia.
+4	1	6:7.1	Every personal being derives personality from the Universal Father just as the Original Son eternally derives his personality from the Paradise Father.
+5	1	0:0.5	Your world, Urantia, is one of many similar inhabited planets which comprise the local universe of Nebadon.
+6	1	0:0.5	This universe, together with similar creations, makes up the superuniverse of Orvonton, from whose capital, Uversa, our commission hails.
+7	1	0:0.5	This universe, together with similar creations, makes up the superuniverse of Orvonton, from whose capital, Uversa, our commission hails.
+8	1	0:0.6	The seven evolving superuniverses in association with the central and divine universe, we commonly refer to as the grand universe; these are the now organized and inhabited creations.
+9	1	0:0.5	Orvonton is one of the seven evolutionary superuniverses of time and space which circle the never-beginning, never-ending creation of divine perfection—the central universe of Havona.
+10	1	0:0.6	The seven evolving superuniverses in association with the central and divine universe, we commonly refer to as the grand universe; these are the now organized and inhabited creations.
+11	1	0:0.6	They are all a part of the master universe, which also embraces the uninhabited but mobilizing universes of outer space.
+12	1	0:1.2	Deity is characterized by the quality of unity—actual or potential—on all supermaterial levels of reality; and this unifying quality is best comprehended by creatures as divinity.
+13	1	0:1.17	Divinity is creature comprehensible as truth, beauty, and goodness; correlated in personality as love, mercy, and ministry; disclosed on impersonal levels as justice, power, and sovereignty.
+14	1	0:1.17	Divinity is creature comprehensible as truth, beauty, and goodness; correlated in personality as love, mercy, and ministry; disclosed on impersonal levels as justice, power, and sovereignty.
+15	1	0:1.17	Divinity is creature comprehensible as truth, beauty, and goodness; correlated in personality as love, mercy, and ministry; disclosed on impersonal levels as justice, power, and sovereignty.
+16	1	0:1.8	Evolutional—self-expansive and creature-identified Deity.
+17	1	0:1.5	Potential—self-willed and self-purposive Deity.
+18	1	0:1.9	Supreme—self-experiential and creature-Creator-unifying Deity.
+19	1	0:1.6	Associative—self-personalized and divinely fraternal Deity.
+20	1	0:1.4	Static—self-contained and self-existent Deity.
+21	1	0:1.10	Ultimate—self-projected and time-space-transcending Deity.
+22	1	0:1.7	Creative—self-distributive and divinely revealed Deity.
+23	1	0:1.9	Deity functioning on the first creature-identificational level as time-space overcontrollers of the grand universe, sometimes designated the Supremacy of Deity.
+24	1	0:1.10	As compared with the ministry of the Deities to the grand universe, this absonite function in the master universe is tantamount to universal overcontrol and supersustenance, sometimes called the Ultimacy of Deity.
+25	1	0:1.11	The finite level of reality is characterized by creature life and time-space limitations.
+26	1	0:1.12	The absonite level of reality is characterized by things and beings without beginnings or endings and by the transcendence of time and space.
+27	1	0:1.13	The absolute level is beginningless, endless, timeless, and spaceless.
+28	1	0:1.15	Deity is the source of all that which is divine.
+29	1	0:1.15	Deity is characteristically and invariably divine, but all that which is divine is not necessarily Deity
+30	1	0:1.15	Deity is characteristically and invariably divine, but all that which is divine is not necessarily Deity, though it will be co-ordinated with Deity and will tend towards some phase of unity with Deity—spiritual, mindal, or personal.
+31	1	0:7.3	Existential—beings of eternal existence, past, present, and future.
+32	1	0:7.4	Experiential—beings actualizing in the post-Havona present but of unending existence throughout all future eternity.
+33	1	0:1.13	Whenever, wherever, and however the absolute level of Deity functions, Paradise-absolute values and meanings are manifest.
+34	1	115:1.3	In order to facilitate mortal comprehension of the universe of universes, the diverse levels of cosmic reality have been designated as finite, absonite, and absolute.
+35	1	0:3.2-8	¶
+36	1	104:4.1	The Universal Father is the personal cause of the Absolutes; he is the absolute of Absolutes.
+37	1	0:5.5	The Eternal Son is the absolute personality, the secret of spiritual energy, morontia spirits, and perfected spirits.
+38	1	104:3.13	He is personality unqualified in the Son but personality potentialized in the Deity Absolute.
+39	1	105:3.7	The Unqualified Absolute. Static, reactive, and abeyant; the unrevealed cosmic infinity of the I AM; totality of nondeified reality and finality of all nonpersonal potential.
+47	1	0:2.9	When in doubt as to the exact interpretation of the word God, it would be advisable to refer it to the person of the Universal Father.
+48	1	0:2.3	Prepersonal—as in the ministry of the Father fragments, such as the Thought Adjusters.
+49	1	7:1.8	In accordance with well-known laws, we can and do measure spiritual gravity just as man attempts to compute the workings of finite physical gravity.
+50	1	0:6.1	Any and all things responding to the personality circuit of the Father, we call personal.
+51	1	0:6.1	Any and all things responding to the spirit circuit of the Son, we call spirit.
+52	1	0:6.1	Any and all that responds to the material-gravity circuit centering in nether Paradise, we call matter—energy-matter in all its metamorphic states.
+53	1	7:1.1	The pure and universal spirit gravity of all creation, this exclusively spiritual circuit, leads directly back to the person of the Second Source and Center on Paradise.
+54	1	12:1.10	Havona, the central universe, is not a time creation; it is an eternal existence.
+56	1	133:6.5	But the soul of man is distinct from the divine spirit which dwells within the mind.
+57	1	0:6.8	In personality, mind ever intervenes between spirit and matter; therefore is the universe illuminated by three kinds of light: material light, intellectual insight, and spirit luminosity.
+58	1	1:1.2	The affectionate dedication of the human will to the doing of the Father’s will is man’s choicest gift to God; in fact, such a consecration of creature will constitutes man’s only possible gift of true value to the Paradise Father.
+59	1	2:7.12	Truth is coherent, beauty attractive, goodness stabilizing.
+60	1	4:5.4	It is an affront to God to believe, hold, or teach that innocent blood must be shed in order to win his favor or to divert the fictitious divine wrath.
+61	1	4:5.5	They had not found deliverance from the old and pagan idea that the Gods could not be appeased except by the sight of blood, though Moses did make a distinct advance when he forbade human sacrifices and substituted therefor, in the primitive minds of his childlike Bedouin followers, the ceremonial sacrifice of animals.
+62	1	15:7.7	Salvington, the capital of Nebadon, your local universe, is surrounded by ten university clusters of forty-nine spheres each.
+63	1	6:5.5	The Eternal Son, as an infinite and exclusively personal being, cannot fragmentize his nature, cannot distribute and bestow individualized portions of his selfhood upon other entities or persons as do the Universal Father and the Infinite Spirit.
+64	1	6:5.3	The Eternal Son is thus a cocreator of personalities, but he bestows personality upon no being and of himself, alone, never creates personal beings.
+65	1	6:4.2	The Son is omnipotent only in the spiritual realm.
+66	1	6:4.7	In the realms of knowledge, omniscience, we cannot distinguish between the First and Second Sources; like the Father, the Son knows all
+67	1	6:5.4	Therefore, when the Father and the Son unite to personalize a Creator Son, they achieve their purpose; but the Creator Son thus brought into existence is never able to transmit or delegate the prerogatives of creatorship to the various orders of Sons which he may subsequently create
+68	1	7:5.2	The Eternal Son cannot contact directly with human beings as does the Father through the gift of the prepersonal Thought Adjusters
+69	1	7:5.7	He added to the experience of all Havona then and subsequently, but we do not know whether he added to the supposed experiential capacity of his existential nature. That would fall within the bestowal mystery of the Paradise Sons.
+70	1	7:0.1	We do not fully comprehend this eternal plan, but the Paradise Son undoubtedly does.
+71	1	7:1.2	Spirit gravity never suffers time delays, nor does it undergo space diminution.
+72	1	7:1.2	Spirit gravity never suffers time delays, nor does it undergo space diminution.
+73	1	7:1.2	And this transcendence of time and space by pure spirit energies is inherent in the absoluteness of the Son; it is not due to the interposition of the antigravity forces of the Third Source and Center.
+74	1	8:3.8	At the center of all things the Infinite Spirit is the first of the Paradise Deities to be attained by the ascending pilgrims.
+75	1	8:4.2	God is love, the Son is mercy, the Spirit is ministry—the ministry of divine love and endless mercy to all intelligent creation.
+76	1	9:1.5	The Conjoint Creator manifests certain phases of the omnipotence of the Universal Father but is actually omnipotent only in the domain of mind.
+77	1	9:1.1	As the God of Action, he is the apparent ancestor of motion, change, and relationship.
+78	1	9:3.2	This power is not functionally (observably) present in either the Father or the Son.
+79	1	9:3.3	The gravity-resistant phenomenon of a gyroscope is a fair illustration of the effect of antigravity but of no value to illustrate the cause of antigravity.
+80	1	9:3.3	The gravity-resistant phenomenon of a gyroscope is a fair illustration of the effect of antigravity but of no value to illustrate the cause of antigravity.
+81	1	9:3.6	These unique creatures of physical function all possess varying attributes of power control, such as antigravity, which they utilize in their efforts to establish the physical equilibrium of the matter and energies of the grand universe.
+82	1	9:4.2	Mind is not inherent in energy; energy is receptive and responsive to mind; mind can be superimposed upon energy, but consciousness is not inherent in the purely material level.
+83	1	9:4.2	Spirit is always intelligent, minded in some way.
+84	1	9:4.3	The Conjoint Creator is absolute only in the domain of mind, in the realms of universal intelligence.
+85	1	9:4.3	The mind endowment of the seven superuniverses is derived from the Seven Master Spirits, the primary personalities of the Conjoint Creator.
+86	1	9:4.5	Energy is thing, mind is meaning, spirit is value.
+87	1	10:0.1	The Paradise Trinity of eternal Deities facilitates the Father’s escape from personality absolutism.
+88	1	10:0.3	I deem the Trinity to have been inevitable.
+89	1	10:7.3	The Supreme Being is something less and something other than the Trinity functioning in the finite universes; but within certain limits and during the present era of incomplete power-personalization, this evolutionary Deity does appear to reflect the attitude of the Trinity of Supremacy.
+90	1	10:5.5	Neither the Ultimate nor the Supreme are wholly representative of the Paradise Trinity, but in a qualified sense and to their respective levels, each seems to represent the Trinity during the prepersonal eras of experiential-power development.
+91	1	10:8.8	It may be possible that the finaliters will partially attain the Deity Absolute
+92	1	12:1.16	The central universe is the creation of eternity; the seven superuniverses are the creations of time; the four outer space levels are undoubtedly destined to eventuate-evolve the ultimacy of creation.
+93	1	11:1.1	The personal presence of the Universal Father is resident at the very center of the upper surface of this well-nigh circular, but not spherical, abode of the Deities.
+94	1	11:6.5	It thus requires a little over two billion Urantia years to complete the entire expansion-contraction cycle.
+95	1	11:2.8	We speak of that surface of Paradise which is occupied with personality activities as the upper side, and the opposite surface as the nether side. The periphery of Paradise provides for activities that are not strictly personal or nonpersonal.
+96	1	11:2.8	The Trinity seems to dominate the personal or upper plane, the Unqualified Absolute the nether or impersonal plane.
+97	1	11:3.1	On upper Paradise there are three grand spheres of activity, the Deity presence, the Most Holy Sphere, and the Holy Area.
+98	1	11:2.4	The central Isle is geographically divided into three domains of activity
+99	1	11:3.1	On upper Paradise there are three grand spheres of activity, the Deity presence, the Most Holy Sphere, and the Holy Area.
+100	1	11:3.1	This realm is wholly spiritual, and you are almost wholly material.
+101	1	11:2.3	These differences in dimensions, taken in connection with its stationary status and the greater out-pressure of force-energy at the north end of the Isle, make it possible to establish absolute direction in the master universe.
+102	1	11:2.11	Roughly: space seemingly originates just below nether Paradise; time just above upper Paradise.
+103	1	11:2.11	Motion is not inherent on Paradise; it is volitional.
+104	1	11:2.11	But the concept of distance, even absolute distance, has very much meaning as it may be applied to relative locations on Paradise.
+105	1	11:2.11	Paradise is nonspatial; hence its areas are absolute and therefore serviceable in many ways beyond the concept of mortal mind.
+106	1	11:2.11	Time, as you understand it, is not a feature of Paradise existence, though the citizens of the central Isle are fully conscious of nontime sequence of events.
+107	1	11:5.1	Concerning nether Paradise, we know only that which is revealed; personalities do not sojourn there.
+108	1	11:2.8	The Trinity seems to dominate the personal or upper plane, the Unqualified Absolute the nether or impersonal plane.
+109	1	11:2.10	Paradise exists without time and has no location in space.
+110	1	9:4.5	Cosmic force responds to mind even as cosmic mind responds to spirit.
+112	1	11:2.9	This Paradise source material is neither dead nor alive; it is the original nonspiritual expression of the First Source and Center; it is Paradise, and Paradise is without duplicate.
+113	1	11:8.3	Space is nonresponsive to gravity, but it acts as an equilibrant on gravity.
+114	1	11:8.3	Pervaded space also exerts an antigravity influence upon physical or linear gravity; space can actually neutralize such gravity action even though it cannot delay it.
+115	1	11:8.3	Pervaded space also exerts an antigravity influence upon physical or linear gravity; space can actually neutralize such gravity action even though it cannot delay it.
+116	1	12:5.1	From a practical viewpoint, motion is essential to time, but there is no universal time unit based on motion except in so far as the Paradise-Havona standard day is arbitrarily so recognized. The totality of space respiration destroys its local value as a time source.
+117	1	12:8.5	As the mind of any personality in the universe becomes more spiritual—Godlike—it becomes less responsive to material gravity.
+118	1	12:6.3	Mind alone can interassociate the physical forces and energies of the material level with the spiritual powers and beings of the spirit level.
+119	1	12:5.4	The relatively motionless midspace zones impinging on Paradise and separating pervaded from unpervaded space are the transition zones from time to eternity, hence the necessity of Paradise pilgrims becoming unconscious during this transit when it is to culminate in Paradise citizenship.
+120	1	12:5.5	Relationships to time do not exist without motion in space, but consciousness of time does.
+121	1	12:5.5	But time itself is not genetically a quality of mind.
+122	1	12:5.1	Time comes by virtue of motion and because mind is inherently aware of sequentiality.
+123	1	12:5.6-9	¶
+124	1	15:4.7	There are not many sun-forming nebulae active in Orvonton at the present time, though Andromeda, which is outside the inhabited superuniverse, is very active.
+125	1	12:5.2	We do not know the absolute limits of space, but we do know that the absolute of time is eternity.
+126	1	12:5.3	Time and space are inseparable only in the time-space creations, the seven superuniverses.
+127	1	12:4.10	Primary and secondary motions are absolute, motion in relation to unmoving Paradise.
+128	1	12:3.12	Personality Gravity is noncomputable.
+129	1	12:3.10	These investigators deduce that about eighty-five per cent of the mind-gravity response to the intellectual drawing of the Conjoint Actor takes origin in the existing grand universe.
+130	1	12:3.10	These investigators deduce that about eighty-five per cent of the mind-gravity response to the intellectual drawing of the Conjoint Actor takes origin in the existing grand universe.
+131	1	12:3.8	In other words: At the present moment about ninety-five per cent of the active cosmic-gravity action of the Isle of Paradise, computed on this totality theory, is engaged in controlling material systems beyond the borders of the present organized universes.
+132	1	15:9.1	These presence circuits are: the personality gravity of the Universal Father, the spiritual gravity of the Eternal Son, the mind gravity of the Conjoint Actor, and the material gravity of the eternal Isle.
+133	1	12:3.6	They are absolute presence circuits and like God are independent of time and space.
+134	1	12:3.9	In other words: At the present time practically the entire spirit gravity of the Eternal Son, computed on this theory of totality, is observable as functioning in the grand universe.
+135	1	13:1.1	¶
+135	2	13:2.7-8	¶
+136	1	13:0.1	The innermost circuit consists of the seven secret spheres of the Universal Father; the second group is composed of the seven luminous worlds of the Eternal Son; in the outermost are the seven immense spheres of the Infinite Spirit, the executive-headquarters worlds of the Seven Master Spirits.
+137	1	13:0.2	Even their material or physical construction is of an order unrevealed to you.
+138	1	13:0.2	There exists neither record nor tradition of their origin.
+139	1	13:0.2	Each circuit is diverse in material, and each world of each circuit is different excepting the seven worlds of the Son, which are alike in physical constitution.
+140	1	13:0.4	No personal being may sojourn on any of these seven shining realms.
+141	1	13:2.6	For example: When you mortals attain Havona, you are granted clearance for Ascendington, where you are most welcome, but you are not permitted to visit the other six sacred worlds.
+142	1	13:1.4	Divinington is the Paradise rendezvous of the Thought Adjusters, but it is also the home of numerous other entities, personalities, and other beings taking origin in the Universal Father.
+143	1	13:1.4	Only the Father fragments and those personalities and other beings of direct and exclusive origin in the Universal Father fraternize and function on this abode.
+144	1	13:1.5-6	¶
+145	1	13:0.2	As far as we know they have always been; like Paradise they are eternal.
+151	1	13:1.2	The Paradise worlds of the Father are directed by the highest order of the Stationary Sons of the Trinity, the Trinitized Secrets of Supremacy.
+152	1	13:2.7	Nor will you be permitted to land on the shores of Divinington, the “bosom of the Father,” though you shall surely stand repeatedly at the “right hand of the Father.”
+153	1	13:1.7	SONARINGTON. This sphere is the “bosom of the Son,” the personal receiving world of the Eternal Son.
+154	1	13:1.9	SPIRITINGTON. This world is the “bosom of the Spirit,” the Paradise home of the high beings that exclusively represent the Infinite Spirit.
+155	1	13:1.11	VICEGERINGTON. This planet is the “bosom of the Father and the Son” and is the secret sphere of certain unrevealed beings who take origin by the acts of the Father and the Son.
+156	1	13:1.15	SOLITARINGTON. This world is the “bosom of the Father and the Spirit” and is the rendezvous of a magnificent host of unrevealed beings of origin in the conjoint acts of the Universal Father and the Infinite Spirit
+157	1	13:2.4	They often appear on Ascendington, the “bosom of the Father-Son-Spirit,” where they fraternize with their brethren who have come up from the lowly worlds of space.
+158	1	13:1.19	SERAPHINGTON. This sphere is the “bosom of the Son and the Spirit” and is the home world of the vast hosts of unrevealed beings created by the Son and the Spirit.
+159	1	13:1.8	The secrets of Sonarington include the secret of the incarnation of the divine Sons.
+160	1	13:1.20	The secrets of Seraphington involve a threefold mystery, only one of which I may mention—the mystery of seraphic transport.
+161	1	13:1.8	The incarnation of the divine Sons is a mystery of God the Son; it is a secret locked up in the seventh sector of Sonarington, a realm penetrated by none save those who have personally passed through this unique experience.
+162	1	13:1.10	The secrets of Spiritington involve the impenetrable mysteries of reflectivity.
+163	1	13:1.12	The secrets of Vicegerington include the secrets of trinitization, and trinitization constitutes the secret of authority to represent the Trinity, to act as vicegerents of the Gods.
+164	1	13:1.15	¶
+164	2	13:1.16	This is also the home of the Solitary Messengers and of other personalities of the superangelic orders.
+165	1	13:1.15	¶
+165	2	13:1.16	During the present universe age this is also the status sphere of the Universe Power Directors.
+166	1	13:1.18	Besides certain secrets of trinitization, this world holds the secrets of the personal relation of the Infinite Spirit with certain of the higher offspring of the Third Source and Center.
+167	1	13:1.22	This phenomenon constitutes one of the most perplexing mysteries of the universes—the evolution of an immortal soul within the mind of a mortal and material creature.
+168	1	13:2.3	Ascendington is the only sacred sphere that will be unreservedly open to your inspection as a Paradise arrival.
+169	1	13:2.9	After you attain Paradise, you will know and ardently love the ten Secrets of Supremacy who direct Ascendington.
+170	1	13:2.9	All these secrets are supposedly known to the collective body of the Trinitized Secrets of Supremacy.
+171	1	14:2.3	The morontia senses are seventy, and the higher spiritual orders of reaction response vary in different types of beings from seventy to two hundred and ten.
+172	1	48:1.3	All of these worlds are architectural spheres, and they have just double the number of elements of the evolved planets.
+173	1	14:0.1	It is of enormous dimensions and almost unbelievable mass and consists of one billion spheres of unimagined beauty and superb grandeur, but the true magnitude of this vast creation is really beyond the understanding grasp of the human mind.
+175	1	14:1.9	The billion worlds of Havona are arranged in seven concentric circuits immediately surrounding the three circuits of Paradise satellites.
+176	1	14:1.9	There are upwards of thirty-five million worlds in the innermost Havona circuit and over two hundred and forty-five million in the outermost, with proportionate numbers intervening.
+177	1	14:1.9	There are upwards of thirty-five million worlds in the innermost Havona circuit and over two hundred and forty-five million in the outermost, with proportionate numbers intervening.
+178	1	14:1.10	The Havona planetary circuits are not superimposed; their worlds follow each other in an orderly linear procession.
+179	1	14:1.11	But time is germane to the Havona circuits and to numerous beings of both celestial and terrestrial origin sojourning thereon.
+180	1	14:1.11	All worlds in a given circuit have the same length of year since they uniformly swing around Paradise, and the length of these planetary years decreases from the outermost to the innermost circuit.
+181	1	14:1.11	All worlds in a given circuit have the same length of year since they uniformly swing around Paradise, and the length of these planetary years decreases from the outermost to the innermost circuit.
+182	1	14:1.12	Besides Havona-circuit time, there is the Paradise-Havona standard day and other time designations which are determined on, and are sent out from, the seven Paradise satellites of the Infinite Spirit.
+183	1	14:1.10	The central universe whirls around the stationary Isle of Paradise in one vast plane, consisting of ten concentric stabilized units—the three circuits of Paradise spheres and the seven circuits of Havona worlds.
+184	1	14:1.12	The Paradise-Havona standard day is based on the length of time required for the planetary abodes of the first or inner Havona circuit to complete one revolution around the Isle of Paradise
+185	1	14:1.12	One Paradise-Havona day is just seven minutes, three and one-eighth seconds less than one thousand years of the present Urantia leap-year calendar.
+186	1	14:2.1	Spirit beings do not dwell in nebulous space; they do not inhabit ethereal worlds; they are domiciled on actual spheres of a material nature, worlds just as real as those on which mortals live.
+187	1	14:2.3	The material of Havona consists of the organization of exactly one thousand basic chemical elements and the balanced function of the seven forms of Havona energy.
+188	1	14:2.3	The material of Havona consists of the organization of exactly one thousand basic chemical elements and the balanced function of the seven forms of Havona energy.
+189	1	14:2.3	Each of these basic energies manifests seven phases of excitation, so that the Havona natives respond to forty-nine differing sensation stimuli.
+190	1	14:2.3	Each of these basic energies manifests seven phases of excitation, so that the Havona natives respond to forty-nine differing sensation stimuli.
+191	1	14:2.4	Neither would any of the physical stimuli of those faraway worlds excite a reaction in your gross sense organs.
+192	1	14:2.2	The creation of the central universe is threefold (Trinity); the creation of a local universe (directly) is twofold, by a Creator Son and a Creative Spirit.
+193	1	14:3.1	Concerning the government of the central universe, there is none.
+194	1	14:3.3	It is chiefly planetary and is vested in the resident Eternal of Days, each Havona sphere being directed by one of these Trinity-origin personalities.
+196	1	14:4.9	Decay and death are not a part of the cycle of life on the Havona worlds.
+197	1	14:4.10	They are without creature parents, and they are nonreproducing beings.
+198	1	14:5.4	When intelligent beings first attain the central universe, they are received and domiciled on the pilot world of the seventh Havona circuit.
+199	1	14:5.4	As the new arrivals progress spiritually, attain identity comprehension of their superuniverse Master Spirit, they are transferred to the sixth circle.
+200	1	14:5.4	After ascenders have attained a realization of Supremacy and are thereby prepared for the Deity adventure, they are taken to the fifth circuit; and after attaining the Infinite Spirit, they are transferred to the fourth.
+201	1	14:5.4	After ascenders have attained a realization of Supremacy and are thereby prepared for the Deity adventure, they are taken to the fifth circuit; and after attaining the Infinite Spirit, they are transferred to the fourth.
+202	1	14:5.4	Following the attainment of the Eternal Son, they are removed to the third; and when they have recognized the Universal Father, they go to sojourn on the second circuit of worlds, where they become more familiar with the Paradise hosts.
+203	1	14:5.4	Following the attainment of the Eternal Son, they are removed to the third; and when they have recognized the Universal Father, they go to sojourn on the second circuit of worlds, where they become more familiar with the Paradise hosts.
+204	1	14:5.4	Arrival on the first circuit of Havona signifies the acceptance of the candidates of time into the service of Paradise.
+205	1	14:5.5	you will be allowed to visit freely among the worlds of the circuit of your assignment. You will also be permitted to go back to the planets of those circuits you have previously traversed. And all this is possible to those who sojourn on the circles of Havona without the necessity of being ensupernaphimed.
+206	1	17:3.1	For this reason it is necessary to have seven of these Reflective Spirits on the headquarters of each superuniverse.
+207	1	17:1.10	This eventful occasion takes place in the immediate presence of Majeston, the chief of all reflective spirit groups.
+208	1	15:7.2	The standard day of the superuniverse of Orvonton is equal to almost thirty days of Urantia time
+209	1	15:7.2	This Uversa year is standard in the seventh superuniverse, and it is twenty-two minutes short of three thousand days of Urantia time, about eight and one fifth of your years.
+212	1	15:9.15	The requisites for admission to the councils of the Ancients of Days, membership in the superuniverse confederation, are:
+212	2	15:9.16-17	¶
+213	1	15:9.18	Your local universe is not even reckoned as belonging to the settled physical order of the superuniverse, much less as holding membership in the recognized spiritual family of the supergovernment.
+214	1	15:9.18	Your local universe is not even reckoned as belonging to the settled physical order of the superuniverse, much less as holding membership in the recognized spiritual family of the supergovernment.
+215	1	15:10.11	The three Ancients of Days are immediately assisted by a corps of one billion Perfectors of Wisdom, with whom are associated three billion Divine Counselors.
+216	1	15:10.12	Thus was the executive branch of the superuniverse government enlarged to include the glorified and perfected children of the evolutionary worlds.
+217	1	15:10.23	The superuniverses do not maintain any sort of ambassadorial representation; they are completely isolated from each other.
+218	1	15:14.8	The grand universe number of your world, Urantia, is 5,342,482,337,666. That is the registry number on Uversa and on Paradise, your number in the catalogue of the inhabited worlds.
+221	1	15:0.2	Early in the materialization of the universal creation the sevenfold scheme of the superuniverse organization and government was formulated.
+222	1	15:0.2	The present scheme of administration has existed from near eternity, and the rulers of these seven superuniverses are rightly called Ancients of Days.
+223	1	15:1.2	We have long since discovered that the seven superuniverses traverse a great ellipse, a gigantic and elongated circle.
+224	1	15:2.1	Only the Universal Father knows the location and actual number of inhabited worlds in space; he calls them all by name and number.
+225	1	15:2.3	Each inhabited planet is presided over by a Planetary Prince, and each local system has an architectural sphere as its headquarters and is ruled by a System Sovereign.
+226	1	15:2.3	Each inhabited planet is presided over by a Planetary Prince, and each local system has an architectural sphere as its headquarters and is ruled by a System Sovereign.
+227	1	15:2.4	Each constellation has an architectural headquarters sphere and is presided over by three Vorondadek Sons, the Most Highs.
+228	1	15:2.4	Each constellation also has a Faithful of Days in observation, an ambassador of the Paradise Trinity.
+229	1	15:2.5	Each local universe has a magnificent architectural headquarters world and is ruled by one of the co-ordinate Creator Sons of God of the order of Michael.
+230	1	15:2.5	Each universe is blessed by the presence of a Union of Days, a representative of the Paradise Trinity.
+231	1	15:2.6	One hundred local universes (about 1,000,000,000 inhabitable planets) constitute a minor sector of the superuniverse government; it has a wonderful headquarters world, wherefrom its rulers, the Recents of Days, administer the affairs of the minor sector.
+232	1	15:13.4	Each minor sector embraces as many as one hundred local universes, ten thousand constellations, one million systems, or about one billion inhabitable worlds.
+233	1	15:2.6	There are three Recents of Days, Supreme Trinity Personalities, on each minor sector headquarters.
+234	1	15:2.7	One hundred minor sectors (about 100,000,000,000 inhabitable worlds) make one major sector.
+235	1	15:13.1	A major sector comprises about one tenth of a superuniverse and consists of one hundred minor sectors, ten thousand local universes, about one hundred billion inhabitable worlds.
+236	1	15:2.7	Each major sector is provided with a superb headquarters and is presided over by three Perfections of Days, Supreme Trinity Personalities.
+239	1	15:2.8	Ten major sectors (about 1,000,000,000,000 inhabitable planets) constitute a superuniverse.
+240	1	15:2.8	Each superuniverse is provided with an enormous and glorious headquarters world and is ruled by three Ancients of Days.
+241	1	15:2.8	Ten major sectors (about 1,000,000,000,000 inhabitable planets) constitute a superuniverse.
+242	1	15:3.1	The vast Milky Way starry system represents the central nucleus of Orvonton, being largely beyond the borders of your local universe.
+243	1	15:3.4	Of the ten major divisions of Orvonton, eight have been roughly identified by Urantian astronomers.
+244	1	15:3.5	The rotational center of your minor sector is situated far away in the enormous and dense star cloud of Sagittarius, around which your local universe and its associated creations all move
+246	1	15:3.15	These multiple motions are of several orders: The space paths of your planet and your solar system are genetic, inherent in origin. The absolute counterclockwise motion of Orvonton is also genetic, inherent in the architectural plans of the master universe.
+247	1	15:3.15	But the intervening motions are of composite origin, being derived in part from the constitutive segmentation of matter-energy into the superuniverses and in part produced by the intelligent and purposeful action of the Paradise force organizers.
+248	1	15:7.12	60744f30ed9ba26e
+249	1	15:2.3	The System. The basic unit of the supergovernment consists of about one thousand inhabited or inhabitable worlds.
+250	1	15:2.4	One hundred systems (about 100,000 inhabitable planets) make up a constellation.
+251	1	15:2.4	One hundred systems (about 100,000 inhabitable planets) make up a constellation.
+252	1	15:2.5	One hundred constellations (about 10,000,000 inhabitable planets) constitute a local universe.
+253	1	15:2.5	One hundred constellations (about 10,000,000 inhabitable planets) constitute a local universe.
+254	1	15:6.10	The superuniverse of Orvonton is illuminated and warmed by more than ten trillion blazing suns.
+255	1	15:6.15	In your solar system only three planets are at present suited to harbor life.
+256	1	15:6.15	In your superuniverse not one cool planet in forty is habitable by beings of your order.
+257	1	15:6.7	With the exception of the architectural spheres, all space bodies have had an evolutionary origin
+258	1	15:6.8	You are familiar with suns that emit light accompanied by heat; but there are also suns which shine without heat.
+259	1	15:14.5	Your world is called Urantia, and it is number 606 in the planetary group, or system, of Satania.
+259	2	46:0.1	Jerusem, the headquarters of Satania, is an average capital of a local system
+260	1	15:14.6	Your constellation, Norlatiadek, consists of one hundred local systems and has a headquarters world called Edentia.
+261	1	16:4.16	we are confident there are two realms in the vast range of universe activities with which they have nothing whatever to do: the bestowal and ministry of the Thought Adjusters and the inscrutable functions of the Unqualified Absolute
+262	1	16:9.8	Only a God-knowing individual can love another person as he loves himself.
+263	1	16:9.8	Unselfish social consciousness must be, at bottom, a religious consciousness; that is, if it is objective; otherwise it is a purely subjective philosophic abstraction and therefore devoid of love.
+264	1	16:9.5	Civilizations are unstable because they are not cosmic; they are not innate in the individuals of the races.
+265	1	16:9.5	Civilizations are unstable because they are not cosmic; they are not innate in the individuals of the races. They must be nurtured by the combined contributions of the constitutive factors of man—science, morality, and religion.
+266	1	16:0.1	Had it been possible to produce a larger number of Master Spirits, they would have been created, but there are just seven associative possibilities, and only seven, inherent in three Deities.
+268	1	17:5.2	Their work is wholly confined to Havona.
+269	1	17:3.9	While Thought Adjusters do not participate in the operation of the universal reflectivity system, we have every reason to believe that all Father fragments are fully cognizant of these transactions and are able to avail themselves of their content.
+270	1	17:3.1	These groups of seven dissimilar Reflective Spirits maintain headquarters on the capitals of the superuniverses at the reflective focus of each realm, and this is not identical with the point of spiritual polarity.
+271	1	17:3.9	While Thought Adjusters do not participate in the operation of the universal reflectivity system, we have every reason to believe that all Father fragments are fully cognizant of these transactions and are able to avail themselves of their content.
+272	1	17:3.10	During the present universe age the space range of the extra-Paradise reflectivity service seems to be limited by the periphery of the seven superuniverses.
+273	1	17:3.1	The forty-nine Reflective Spirits are of Trinity origin, but each of the seven creative episodes attendant upon their appearance was productive of a type of being in nature resembling the characteristics of the coancestral Master Spirit.
+274	1	17:4.1	The forty-nine Reflective Image Aids were created by the Reflective Spirits, and there are just seven Aids on the headquarters of each superuniverse.
+275	1	17:4.1	The forty-nine Reflective Image Aids were created by the Reflective Spirits, and there are just seven Aids on the headquarters of each superuniverse.
+276	1	17:3.4	The Reflective Spirits of each superuniverse are the creators of their Reflective Image Aids, their personal voices to the courts of the Ancients of Days.
+277	1	17:4.1	The Image Aids are, in certain attributes and characteristics, perfect reproductions of their Reflective Mother Spirits; they are virtual duplications minus the attribute of reflectivity.
+278	1	17:4.3	The Image Aids do not directly function in connection with the training worlds of ascending mortals.
+279	1	17:4.3	They are closely associated with the intelligence service of the universal scheme of mortal progression, but you will not personally come in contact with them when you sojourn in the Uversa schools because these seemingly personal beings are devoid of will; they do not exercise the power of choice.
+280	1	17:4.3	As a class, ascending mortals do not intimately contact with reflectivity.
+281	1	17:5.4	As you advance from circuit to circuit in Havona, you will learn of the Spirits of the Circuits, but you will not be able to hold personal communion with them, even though you may personally enjoy, and recognize the impersonal presence of, their spiritual influence.
+282	1	17:2.4	Majeston is not included in our catalogue of Paradise personalities because he is the only existing personality of divinity created by the Supreme Being in functional liaison with the Deity Absolute.
+285	1	18:0.9	These beings of administrative perfection are of definite and final numbers.
+286	1	18:1.1	There are seven worlds in the innermost circuit of the Paradise satellites, and each of these exalted worlds is presided over by a corps of ten Trinitized Secrets of Supremacy.
+287	1	18:2.1	These rulers are known as the Eternals of Days, and they number exactly one billion, one for each of the Havona spheres.
+288	1	18:2.1	These rulers are known as the Eternals of Days, and they number exactly one billion, one for each of the Havona spheres.
+289	1	18:1.1	The conduct of the affairs of these seven fraternal spheres is wholly committed to this corps of seventy supreme directors.
+290	1	18:2.1	They are the offspring of the Paradise Trinity, but like the Secrets of Supremacy there are no records of their origin.
+291	1	18:2.1	They are the offspring of the Paradise Trinity, but like the Secrets of Supremacy there are no records of their origin.
+292	1	18:2.2	The Eternals of Days are visible to all will creatures dwelling in their domains.
+293	1	18:2.2	When an Eternal of Days is absent from his sphere, his world is directed by a Trinity Teacher Son.
+294	1	18:2.2	When an Eternal of Days is absent from his sphere, his world is directed by a Trinity Teacher Son.
+295	1	18:3.4	When you reach Paradise and search the written records of the beginning of things, you will find that the first entry appearing in the personality section is the recital of the trinitization of these twenty-one Ancients of Days.
+296	1	18:4.1	There are just two hundred and ten Perfections of Days, and they preside over the governments of the ten major sectors of each superuniverse.
+297	1	18:4.2	Three Perfections of Days are assigned to each major sector capital, but unlike the Ancients of Days, it is not necessary that all three be present at all times. From time to time one of this trio may absent himself to confer in person with the Ancients of Days concerning the welfare of his realm.
+298	1	18:4.7	You will early see the Perfections of Days when you advance to the headquarters of Splandon after your sojourn on the worlds of your minor sector, for these exalted rulers are closely associated with the seventy major sector worlds of higher training for the ascendant creatures of time.
+299	1	18:4.9	Although you are entered only upon the registry of the major sector of Splandon, which embraces the local universe of your origin, you will have to pass through every one of the ten major divisions of our superuniverse.
+300	1	18:4.9	You will see all thirty of the Orvonton Perfections of Days before you reach Uversa.
+301	1	18:5.1	There are just twenty-one thousand of these personally glorious and divinely efficient Trinity personalities.
+302	1	21:1.4	Now, we know that there are exactly seven hundred thousand Unions of Days and no more are being created.
+303	1	18:7.1	There are seventy million Faithfuls of Days, and like the Unions of Days, not all are in service.
+304	1	18:5.4	But at least one of these rulers always remains on duty at the headquarters of a minor sector.
+305	1	18:5.5	You will all sometime know the three Recents of Days in charge of Ensa, your minor sector, since you must pass through their hands on your way inward to the training worlds of the major sectors. In ascending to Uversa, you will pass through only one group of minor sector training spheres.
+306	1	19:5.9	We know that the Trinity Teacher Sons are devoted to the conscious enlightenment of universe creatures.
+307	1	19:5.9	I have arrived at the settled conclusion that the Inspired Trinity Spirits, by superconscious techniques, are also functioning as teachers of the realms.
+308	1	19:4.1	There are exactly eight billion Universal Censors in existence.
+309	1	19:4.3	One billion Censors are assigned to each of the seven superuniverses.
+310	1	19:4.2	One Censor is commissioned on each of the billion worlds of the central universe, being attached to the planetary administration of the resident Eternal of Days.
+311	1	19:2.1	There are exactly seven billion of these beings in existence, and one billion are assigned to each of the seven superuniverses.
+312	1	19:2.1	There are exactly seven billion of these beings in existence, and one billion are assigned to each of the seven superuniverses.
+313	1	19:4.2	Neither Perfectors of Wisdom nor Divine Counselors are thus permanently attached to the Havona administrations, nor do we altogether understand why Universal Censors are stationed in the central universe.
+314	1	19:4.2	One Censor is commissioned on each of the billion worlds of the central universe, being attached to the planetary administration of the resident Eternal of Days.
+315	1	19:3.1	There are twenty-one billion Counselors in service, and three billion are assigned to each superuniverse.
+316	1	19:3.1	There are twenty-one billion Counselors in service, and three billion are assigned to each superuniverse.
+317	1	19:4.8	Perfectors of Wisdom, Divine Counselors, and Universal Censors, together with the seven orders of Supreme Trinity Personalities, constitute those ten groups which have been sometimes designated Stationary Sons of the Trinity.
+317	2	30:1.7-17	¶
+318	1	19:4.8	Their numbers slightly exceed thirty-seven billion.
+319	1	20:6.4	When a bestowal Son has mastered the experience of living the mortal life, when he has achieved perfection of attunement with his indwelling Adjuster, thereupon he begins that part of his planetary mission designed to illuminate the minds and to inspire the souls of his brethren in the flesh.
+320	1	20:9.3	The Teacher Sons usually remain on their visitation planets for one thousand years of planetary time.
+321	1	20:9.3	The Daynals do not incarnate or otherwise so materialize themselves as to be visible to mortal beings; therefore is contact with the world of visitation maintained through the activities of the Brilliant Evening Stars, local universe personalities who are associated with the Trinity Teacher Sons.
+322	1	20:6.2	From a material viewpoint, these human-divine Sons live ordinary lives with just one exception: They do not beget offspring on the worlds of their sojourn; that is a universal restriction imposed on all orders of the Paradise bestowal Sons.
+323	1	20:6.6	When the bestowal Sons, Creator or Magisterial, enter the portals of death, they reappear on the third day.
+324	1	20:2.2	We have reasons for believing that the total number of Magisterial Sons in the grand universe is about one billion.
+325	1	22:5.2	Trinitized Custodians are ascendant seraphim and translated midway creatures who have passed through Havona and have attained Paradise and the Corps of the Finality.
+326	1	22:4.2	There are of record on Uversa over one hundred million of these sons commissioned in Orvonton.
+327	1	22:1.1-8	¶
+328	1	22:2.4	And the last group of this order to qualify on Paradise embraced ascendant pilgrims from the local universe of Nebadon.
+329	1	22:2.5	Almost one trillion Mighty Messengers are commissioned on Uversa, and there is every reason to believe that the number serving in each of the seven superuniverses is exactly the same.
+330	1	22:2.5	Almost one trillion Mighty Messengers are commissioned on Uversa, and there is every reason to believe that the number serving in each of the seven superuniverses is exactly the same.
+331	1	22:6.1	Almost one-half billion are registered on Uversa.
+332	1	22:7.5	if they report that they have singly and jointly elected to make the paradisiacal effort to spiritualize, idealize, and actualize a selected and original concept which has not theretofore been trinitized, then does Master Spirit Number Seven issue orders authorizing such an extraordinary undertaking
+333	1	22:5.5	There are now in the service of Orvonton slightly over ten million of these trusted and high Custodians.
+334	1	22:3.1	Those High in Authority, the second group of the Trinitized Sons of Attainment, are all Adjuster-fused beings of mortal origin.
+335	1	22:3.2	There are now commissioned in Orvonton more than ten billion of these skillful administrators.
+336	1	23:2.22	An enseraphimed being cannot possibly exceed the velocity of 558,840 Urantia miles in one second of your time.
+337	1	24:2.2	But they do not function on Paradise; there is no need for them there. On Paradise knowledge is inherent; the Deities know all things.
+338	1	24:2.3	Seven Census Directors operate in Havona, one being stationed on the pilot world of each Havona circuit.
+339	1	24:2.3	Seven Census Directors operate in Havona, one being stationed on the pilot world of each Havona circuit.
+340	1	24:6.4	The instant he arrived on the pilot world of the outer circuit, he was met with friendly greetings by Malvorian, the first of the Graduate Guides and now the chief of their supreme council and the director of their vast educational organization.
+341	1	24:6.8	The name of this pilgrim discoverer of Havona is Grandfanda, and he hailed from planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one.
+342	1	24:6.8	The name of this pilgrim discoverer of Havona is Grandfanda, and he hailed from planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one.
+343	1	24:6.8	The name of this pilgrim discoverer of Havona is Grandfanda, and he hailed from planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one.
+344	1	24:0.10	Solitary Messengers, Circuit Supervisors, Census Directors, and the Personal Aids are characterized by the possession of tremendous endowments of antigravity.
+344	2	42:4.4	¶
+345	1	9:3.2	And this unique attribute is transmissible to certain of the higher personalities of the Infinite Spirit.
+346	1	24:2.8	Census Directors register the existence of a new will creature when the first act of will is performed; they indicate the death of a will creature when the last act of will takes place.
+347	1	24:2.8	The partial emergence of will observed in the reactions of certain of the higher animals does not belong to the domain of the Census Directors.
+348	1	24:2.5	And this number consists entirely of those assignable to local universes; it does not include the personal staff of Usatia, the superuniverse chief of all Orvonton directors.
+349	1	24:2.5	Usatia, like the other superuniverse chiefs, is not directly attuned to the registration of intelligent will.
+350	1	25:0.1-8	¶
+351	1	25:4.10	At the present time, not counting the mortals and midwayers who are all of transient attachment, the number of Technical Advisers registered on Uversa and operating in Orvonton is slightly in excess of sixty-one trillion.
+352	1	25:8.8	Hence the omniaphim serve not with the ascendant creatures from the seven superuniverses.
+353	1	26:5.2	These pilgrim helpers, functioning on the seventh circle of Havona worlds, conduct their work for the ascending mortals in three major divisions: first, the supreme understanding of the Paradise Trinity; second, the spiritual comprehension of the Father-Son partnership; and third, the intellectual recognition of the Infinite Spirit. Each of these phases of instruction is divided into seven branches of twelve minor divisions of seventy subsidiary groups; and each of these seventy subsidiary groupings of instruction is presented in one thousand classifications.
+354	1	26:6.1	Ascenders of space are designated “spiritual graduates” when translated from the seventh to the sixth circle and are placed under the immediate supervision of the supremacy guides.
+355	1	26:7.1	Trinity guides are the tireless ministers of the fifth circle of the Havona training of the advancing pilgrims of time and space.
+356	1	26:7.6	Seldom does the quest for the Infinite Spirit fail of consummation, and when their subjects have succeeded in this phase of the Deity adventure, the Trinity guides prepare to transfer them to the ministry of the Son finders on the fourth circle of Havona.
+357	1	26:8.5	They never return to the superuniverse of their nativity, always to that supercreation most propitious for their retraining in preparation for the second Deity adventure.
+358	1	26:9.1	When the pilgrim soul attains the third circle of Havona, he comes under the tutelage of the Father guides, the older, highly skilled, and most experienced of the superaphic ministers.
+359	1	29:4.37	The frandalanks are created in thirty divisions, one for each form of basic universe force
+360	1	41:1.3	Architectural spheres, such as Salvington, Edentia, and Jerusem, are lighted, heated, and energized by methods which make them quite independent of the suns of space. These spheres were constructed—made to order—by the power centers and physical controllers
+363	1	17:0.1-4	¶
+364	1	31:9.10	These seven groups of Master Architects total 28,011 universe planners.
+365	1	31:9.10	In other words, at the 28,012th eventuation level the quality of absonity equivalated to the level of the Universal and attained the value of the Absolute.
+366	1	32:2.11	From Jerusem, the headquarters of Satania, it is over two hundred thousand light-years to the physical center of the superuniverse of Orvonton, far, far away in the dense diameter of the Milky Way.
+367	1	32:2.12	The nearest neighboring universes are: Avalon, Henselon, Sanselon, Portalon, Wolvering, Fanoving, and Alvoring.
+368	1	32:5.4	Most human beings die because, having failed to achieve the spirit level of Adjuster fusion, the metamorphosis of death constitutes the only possible procedure whereby they may escape the fetters of time and the bonds of material creation
+369	1	32:2.11	From the outermost system of inhabited worlds to the center of the superuniverse is a trifle less than two hundred and fifty thousand light-years.
+370	1	32:2.12	8fbb4aa5e5c51c7f
+371	1	32:2.9	At the last registry there were 3,840,101 inhabited planets in Nebadon, and Satania, the local system of your world, is fairly typical of other systems.
+372	1	33:5.1	At the head of this Paradise group in Nebadon is the ambassador of the Paradise Trinity—Immanuel of Salvington—the Union of Days assigned to the local universe of Nebadon.
+374	1	34:7.4	But even more disastrous was the Adamic default in that it deprived the races of that superior type of physical nature which would have been more consonant with spiritual aspirations.
+375	1	34:4.11	These are the “seven spirits of God,” “like lamps burning before the throne,” which the prophet saw in the symbols of vision. But he did not see the seats of the four and twenty sentinels about these seven adjutant mind-spirits.
+376	1	36:5.13	This animal relationship makes the adjutants more practically effective as human mind; hence animals are to a certain extent indispensable to man’s intellectual as well as to his physical evolution.
+377	1	34:4.10	The seven adjutants have been given the following names: the spirit of wisdom, the spirit of worship, the spirit of counsel, the spirit of knowledge, the spirit of courage, the spirit of understanding, the spirit of intuition—of quick perception.
+378	1	36:5.2	The seven adjutant mind-spirits are called by names which are the equivalents of the following designations: intuition, understanding, courage, knowledge, counsel, worship, and wisdom.
+379	1	42:10.4	On this level material mind is experiencing: as subhuman (animal) intellect in the first five adjutants; as human (moral) intellect in the seven adjutants; as superhuman (midwayer) intellect in the last two adjutants.
+380	1	34:5.3	Mortal man first experiences the ministry of the Spirit in conjunction with mind when the purely animal mind of evolutionary creatures develops reception capacity for the adjutants of worship and of wisdom.
+381	1	36:5.6	the only one of the adjutants to function so largely in the lower orders of animal life and the only one to make extensive functional contact with the nonteachable levels of mechanical mind.
+382	1	36:5.7	The spirit of understanding—the impulse of co-ordination, the spontaneous and apparently automatic association of ideas.
+383	1	36:5.10	The spirit of counsel—the social urge, the endowment of species co-operation; the ability of will creatures to harmonize with their fellows; the origin of the gregarious instinct among the more lowly creatures.
+384	1	42:10.4	On this level material mind is experiencing: as subhuman (animal) intellect in the first five adjutants; as human (moral) intellect in the seven adjutants; as superhuman (midwayer) intellect in the last two adjutants.
+385	1	38:9.6	and only the sixth and the seventh, the spirit of worship and the spirit of wisdom, are able to minister to the secondary group.
+386	1	36:5.11	Worship is the badge of spiritual-ascension candidacy.
+387	1	35:8.3	The universe of Nebadon began its existence with exactly twelve million Lanonandeks
+388	1	35:8.4	Primary Lanonandeks. Of the highest rank there were 709,841.
+389	1	35:8.5	Secondary Lanonandeks. Of this order emerging from Melchizedek there were 10,234,601.
+390	1	35:8.6	Tertiary Lanonandeks. This group contained 1,055,558.
+391	1	35:0.1	Of the second order of Paradise sonship, the Avonal or Magisterial Sons, Nebadon has its full quota—1,062.
+392	1	35:5.2	The number of Vorondadeks varies in each local universe, just one million being the recorded number in Nebadon.
+393	1	36:1.2	In the universe of Nebadon we have on record the creation of one hundred million Life Carriers.
+394	1	36:4.1	In every local system of inhabited worlds throughout Nebadon there is a single sphere whereon the Melchizedeks have functioned as life carriers.
+395	1	36:4.1	In every local system of inhabited worlds throughout Nebadon there is a single sphere whereon the Melchizedeks have functioned as life carriers.
+396	1	36:4.3	The midsonite creatures live and function as reproducing beings on their magnificent worlds until they are one thousand standard years of age
+397	1	36:4.3	Midsoniters are nonreproducing beings thereafter because the technique of dematerialization which they pass through in preparation for enseraphiming forever deprives them of reproductive prerogatives.
+398	1	36:3.6	The Life Carriers of a planetary corps are given a certain period in which to establish life on a new world, approximately one-half million years of the time of that planet.
+399	1	36:5.13	The adjutant mind-spirits experientially grow, but they never become personal.
+400	1	36:2.11	The number ten—the decimal system—is inherent in the physical universe but not in the spiritual.
+402	1	37:6.3	The methods employed in many of the higher schools are beyond the human concept of the art of teaching truth, but this is the keynote of the whole educational system: character acquired by enlightened experience.
+403	1	37:9.12	These residential citizens on Uversa are at present administering the routine affairs of their world under the immediate supervision of the Uversa corps of the Son-fused mortals.
+404	1	37:1.9	The Bright and Morning Star of our universe is known as Gabriel of Salvington.
+405	1	37:1.9	Of the first order of Universe Aids, the Bright and Morning Stars, there is just one in each local universe, and he is the first-born of all creatures native to a local universe.
+406	1	37:10.1	The various Nebadon types of life are much too numerous to be catalogued in this paper, but there are two unusual orders that function extensively on the 647,591 architectural spheres of the local universe, that may be mentioned.
+407	1	38:2.5	The great seraphim, Loyalatia, when your seer “fell down to worship before the feet of the angel,” said: “See that you do it not; I am a fellow servant with you and with your races, who are all enjoined to worship God.”
+408	1	41:9.5	It will shine on as of present efficiency for more than twenty-five billion years.
+409	1	29:3.5	They are always on duty; there is no provision in the universal scheme for the interruption of the physical lines of energy; never for a fraction of a second can these beings relinquish their direct supervision of the energy circuits of time and space.
+410	1	29:3.5	Having no ascendant past to revert to in memory, power centers and physical controllers never play; they are thoroughly businesslike in all their actions.
+411	1	29:3.9	They could not so function on an ordinary evolutionary sun or planet.
+412	1	41:3.1	There are upward of two thousand brilliant suns pouring forth light and energy in Satania
+413	1	41:3.2	The largest star in the universe, the stellar cloud Antares, is four hundred and fifty times the diameter of your sun and is sixty million times its volume.
+414	1	42:4.8	But no known solar heat or pressure can convert ultimatons back into puissant energy.
+415	1	42:4.10	Throughout all of this never-ending metamorphosis of energy and matter we must reckon with the influence of gravity pressure and with the antigravity behavior of the ultimatonic energies under certain conditions of temperature, velocity, and revolution.
+416	1	42:4.6	The most nearly empty space known in Nebadon would yield about one hundred ultimatons—the equivalent of one electron—in each cubic inch.
+417	1	42:6.5	Mutual attraction holds one hundred ultimatons together in the constitution of the electron; and there are never more nor less than one hundred ultimatons in a typical electron.
+418	1	42:6.5	The loss of one or more ultimatons destroys typical electronic identity, thus bringing into existence one of the ten modified forms of the electron.
+419	1	43:5.17	¶
+420	1	43:9.2	On the Salvington spheres you will be evolving from a morontia being to the status of a true spirit; you will be more spiritual than material.
+421	1	44:4.4	The language of Nebadon is not quite so elaborate, the basic symbols, or alphabet, being forty-eight in number.
+422	1	44:4.4	The concept symbols of Uversa embrace more than a billion characters, although the basic alphabet contains only seventy symbols.
+423	1	45:2.1	The chief executive of a local system of inhabited worlds is a primary Lanonandek Son, the System Sovereign.
+424	1	15:14.5	Your world is called Urantia, and it is number 606 in the planetary group, or system, of Satania.
+425	1	49:0.3	Satania itself is an unfinished system containing only 619 inhabited worlds.
+426	1	45:3.2	The System Sovereign—Lanaforge, number 2,709 of the primary order and successor to the apostate Lucifer.
+427	1	45:4.2	This Urantia advisory council is made up of the following members:
+427	2	45:4.11-12	¶
+428	1	45:4.20-21	¶
+429	1	29:4.37	The frandalanks that register time in addition to quantitative and qualitative energy presence are called chronoldeks.
+430	1	46:7.5	Spornagia are the only creatures in all the universe of Nebadon who experience this or any other sort of reincarnation.
+431	1	47:3.2	The very center of all activities on the first mansion world is the resurrection hall, the enormous temple of personality assembly.
+432	1	48:1.5	Eight of these occur in the system, seventy-one in the constellation, and 491 during the sojourn on the spheres of Salvington.
+433	1	48:1.5	When you traverse the morontia life of Nebadon, these same patient and skillful Morontia Power Supervisors will successively provide you with 570 morontia bodies, each one a phase of your progressive transformation.
+435	1	48:1.2	Only the seven worlds surrounding the finaliters’ sphere of the local systems are called mansion worlds
+436	1	48:1.2	Only the seven worlds surrounding the finaliters’ sphere of the local systems are called mansion worlds, but all fifty-six of the system transition abodes, in common with the higher spheres around the constellations and the universe headquarters, are called morontia worlds.
+437	1	0:5.12	Morontia is a term designating a vast level intervening between the material and the spiritual. It may designate personal or impersonal realities, living or nonliving energies. The warp of morontia is spiritual; its woof is physical.
+438	1	51:4.7	But on all normal spheres this sort of primitive slavery is abolished soon after the arrival of the imported violet or Adamic race.
+439	1	52:5.5	Even Moses was not permitted to go over to the other side until the occasion of a special resurrection, the fallen Planetary Prince, Caligastia, contesting such a deliverance.
+440	1	52:5.5	But ever since the day of Pentecost, Urantia mortals again may proceed directly to the morontia spheres.
+441	1	53:1.1	And Lucifer reigned “upon the holy mountain of God,” the administrative mount of Jerusem, for he was the chief executive of a great system of 607 inhabited worlds.
+442	1	53:1.3	Lucifer is now the fallen and deposed Sovereign of Satania.
+443	1	61:7.8	200,000 years ago, during the advance of the last glacier, there occurred an episode which had much to do with the march of events on Urantia—the Lucifer rebellion.
+444	1	53:0.1	Lucifer was a brilliant primary Lanonandek Son of Nebadon.
+445	1	53:1.4	Satan was a member of the same primary group of Lanonandeks but had never functioned as a System Sovereign
+446	1	53:1.5	Abaddon was the chief of the staff of Caligastia. He followed his master into rebellion and has ever since acted as chief executive of the Urantia rebels.
+447	1	53:1.5	Beelzebub was the leader of the disloyal midway creatures who allied themselves with the forces of the traitorous Caligastia.
+448	1	66:1.1	Caligastia was a Lanonandek Son, number 9,344 of the secondary order.
+449	1	53:1.4-5	¶
+449	2	53:1.6	The dragon eventually became the symbolic representation of all these evil personages.
+450	1	53:8.6	Caligastia, your apostate Planetary Prince, is still free on Urantia to prosecute his nefarious designs
+451	1	53:9.2	Upon Michael’s becoming the settled head of the universe of Nebadon, Lucifer was taken into custody by the agents of the Uversa Ancients of Days and has since been a prisoner on satellite number one of the Father’s group of the transition spheres of Jerusem.
+452	1	53:9.4	Satan is now unqualifiedly detained on the Jerusem prison worlds.
+453	1	56:9.4	On first thought, a concept of the Absolute as ancestor to all things—even the Trinity—seems to afford transitory satisfaction of consistency gratification and philosophic unification, but any such conclusion is invalidated by the actuality of the eternity of the Paradise Trinity.
+454	1	57:8.6	would participate in those experiences which have since caused Urantia to become locally known as the “world of the cross.”
+455	1	57:4.8	6,000,000,000 years ago marks the end of the terminal breakup and the birth of your sun
+456	1	58:5.4	Earthquakes are caused by sliding and shifting of the solid outer crust and not by volcanoes.
+457	1	58:4.2	550,000,000 years ago the Life Carrier corps returned to Urantia. In co-operation with spiritual powers and superphysical forces we organized and initiated the original life patterns of this world and planted them in the hospitable waters of the realm.
+458	1	58:6.1	450,000,000 years ago the transition from vegetable to animal life occurred.
+459	1	58:6.7	The physiologic equipment and the anatomic structure of all new orders of life are in response to the action of physical law, but the subsequent endowment of mind is a bestowal of the adjutant mind-spirits in accordance with innate brain capacity.
+460	1	58:6.3	They do not evolve as the result of the gradual accumulation of small variations; they appear as full-fledged and new orders of life, and they appear suddenly.
+461	1	59:0.1	We reckon the history of Urantia as beginning about one billion years ago and extending through five major eras:
+462	1	59:0.1	We reckon the history of Urantia as beginning about one billion years ago and extending through five major eras
+463	1	59:0.1-2	¶
+463	2	58:4.2	550,000,000 years ago the Life Carrier corps returned to Urantia. In co-operation with spiritual powers and superphysical forces we organized and initiated the original life patterns of this world and planted them in the hospitable waters of the realm.
+464	1	59:0.3	The life-dawn era extends over the next one hundred and fifty million years.
+465	1	59:0.4	The marine-life era covers the next two hundred and fifty million years and is best known to you as the Paleozoic.
+466	1	59:0.5	The early land-life era extends over the next one hundred million years and is known as the Mesozoic.
+467	1	59:0.6	The mammalian era occupies the last fifty million years.
+468	1	59:0.7	The marine-life era thus covers about one quarter of your planetary history. It may be subdivided into six long periods
+469	1	59:1.20	This was the biogeologic picture of Urantia at the end of that long period of the world’s history, embracing fifty million years, designated by your geologists as the Cambrian.
+470	1	59:2.2	350,000,000 years ago saw the beginning of the great flood period of all the continents except central Asia.
+471	1	59:3.12	These developments terminate the third marine-life period, covering twenty-five million years and known to your researchers as the Silurian.
+472	1	59:4.18	This period of the world’s history lasted almost fifty million years; it has become known to your researchers as the Devonian.
+473	1	59:5.20	180,000,000 years ago brought the close of the Carboniferous period
+474	1	59:6.11	The ending of this period of biologic tribulation, known to your students as the Permian, also marks the end of the long Paleozoic era, which covers one quarter of the planetary history, two hundred and fifty million years.
+475	1	60:4.6	This, the Cretaceous age, covers fifty million years and brings to a close the premammalian era of land life, which extends over a period of one hundred million years and is known as the Mesozoic.
+476	1	60:1.14	This period extended over twenty-five million years and is known as the Triassic.
+477	1	60:2.15	This period, embracing the height and the beginning decline of the reptiles, extended nearly twenty-five million years and is known as the Jurassic.
+478	1	60:4.6	This, the Cretaceous age, covers fifty million years and brings to a close the premammalian era of land life, which extends over a period of one hundred million years and is known as the Mesozoic.
+479	1	60:1.11	Several million years later the first mammals appeared.
+480	1	60:3.16	65,000,000 years ago there occurred one of the greatest lava flows of all time.
+480	2	60:3.19	Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.
+481	1	60:3.16	65,000,000 years ago there occurred one of the greatest lava flows of all time.
+481	2	60:3.19	Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.
+482	1	60:3.16	65,000,000 years ago there occurred one of the greatest lava flows of all time.
+482	2	60:3.19	Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.
+483	1	60:3.16	65,000,000 years ago there occurred one of the greatest lava flows of all time.
+483	2	60:3.19	Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.
+484	1	60:3.16	65,000,000 years ago there occurred one of the greatest lava flows of all time.
+484	2	60:3.19	Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.
+485	1	60:3.7	90,000,000 years ago the angiosperms emerged from these early Cretaceous seas and soon overran the continents. These land plants suddenly appeared along with fig trees, magnolias, and tulip trees. Soon after this time fig trees, breadfruit trees, and palms overspread Europe and the western plains of North America.
+486	1	60:3.16	65,000,000 years ago there occurred one of the greatest lava flows of all time.
+486	2	60:3.19	Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.
+487	1	60:3.22	55,000,000 years ago the evolutionary march was marked by the sudden appearance of the first of the true birds, a small pigeonlike creature which was the ancestor of all bird life.
+488	1	61:7.17-19	¶
+489	1	61:3.6	In intelligence and adaptation the elephant is approached only by the horse and is surpassed only by man himself.
+490	1	61:7.18	35,000 years ago marks the termination of the great ice age excepting in the polar regions of the planet.
+491	1	61:4.5	5,000,000 years ago the horse evolved as it now is and from North America migrated to all the world.
+492	1	61:4.5	5,000,000 years ago the horse evolved as it now is and from North America migrated to all the world.
+493	1	63:0.1	Urantia was registered as an inhabited world when the first two human beings—the twins—were eleven years old, and before they had become the parents of the first-born of the second generation of actual human beings.
+494	1	62:5.1	From the year A.D. 1934 back to the birth of the first two human beings is just 993,419 years.
+495	1	62:5.11	so he wandered off into the forest, was set upon by hostile gibbons and beaten to death.
+496	1	62:3.12	And so it may be readily seen that man and the ape are related only in that they sprang from the mid-mammals
+497	1	63:6.9	Although both Andon and Fonta had received Thought Adjusters, as had many of their descendants, it was not until the days of Onagar that the Adjusters and guardian seraphim came in great numbers to Urantia. This was, indeed, the golden age of primitive man.
+498	1	63:0.3	Andon and Fonta never knew these names until they were bestowed upon them at the time of fusion with their Thought Adjusters.
+499	1	62:6.5	when, about a year later, they finally resolved, as a result of meditative thought and purposeful decision, to flee from home and journey north, then did the spirit of wisdom begin to function on Urantia and in these two now recognized human minds.
+500	1	63:3.4	They lived to the age of forty-two, when both were killed at the time of an earthquake by the falling of an overhanging rock.
+501	1	63:3.4	They lived to the age of forty-two, when both were killed at the time of an earthquake by the falling of an overhanging rock.
+502	1	63:4.1	In general appearance and skin color these early Andonites more nearly resembled the present-day Eskimo than any other type of living human beings.
+503	1	62:6.5	Imagine our joy one day—the twins were about ten years old—when the spirit of worship made its first contact with the mind of the female twin and shortly thereafter with the male.
+504	1	63:5.6	The Andonites were fearless and successful hunters and, with the exception of wild berries and certain fruits of the trees, lived exclusively on flesh. As Andon had invented the stone ax, so his descendants early discovered and made effective use of the throwing stick and the harpoon.
+505	1	61:7.4	500,000 years ago, during the fifth advance of the ice, a new development accelerated the course of human evolution. Suddenly and in one generation the six colored races mutated from the aboriginal human stock.
+506	1	64:7.3	The primary Sangik peoples, the superior races, avoided the tropics, the red man going northeast to Asia, closely followed by the yellow man, while the blue race moved northwest into Europe.
+507	1	49:4.2	There are six basic evolutionary races: three primary—red, yellow, and blue; and three secondary—orange, green, and indigo.
+508	1	64:6.17	Before their dispersion these tribes experienced a great revival of culture under the leadership of Fantad, some three hundred and fifty thousand years ago.
+509	1	64:6.21	¶
+510	1	51:4.2	Even mortal stature tends to decrease from the red man down to the indigo race, although on Urantia unexpected strains of giantism appeared among the green and orange peoples.
+511	1	64:7.16	As the Sangik migrations draw to a close, the green and orange races are gone, the red man holds North America, the yellow man eastern Asia, the blue man Europe, and the indigo race has gravitated to Africa.
+512	1	64:6.13	But as a race the orange man ceased to exist about one hundred thousand years ago.
+513	1	64:6.12	But there was a great revival of higher living as a result of the wise leadership of Porshunta, the master mind of this unfortunate race, who ministered to them when their headquarters was at Armageddon some three hundred thousand years ago.
+514	1	64:6.12	But there was a great revival of higher living as a result of the wise leadership of Porshunta, the master mind of this unfortunate race, who ministered to them when their headquarters was at Armageddon some three hundred thousand years ago.
+515	1	45:4.8	Singlangton, the first of the yellow men to teach and lead his people in the worship of “One Truth” instead of many.
+516	1	64:6.15	They traveled far from the influences of the spiritual headquarters of the world and drifted into great darkness following the Caligastia apostasy; but there occurred one brilliant age among this people when Singlangton, about one hundred thousand years ago
+517	1	64:6.7	Because of this great retrogression the red men seemed doomed when, about sixty-five thousand years ago, Onamonalonton appeared as their leader and spiritual deliverer.
+518	1	64:6.7	Because of this great retrogression the red men seemed doomed when, about sixty-five thousand years ago, Onamonalonton appeared as their leader and spiritual deliverer.
+519	1	64:6.7	Onamonalonton lived to be ninety-six years of age and maintained his headquarters among the great redwood trees of California.
+520	1	64:6.7	Onamonalonton lived to be ninety-six years of age and maintained his headquarters among the great redwood trees of California.
+521	1	66:3.3	This world center of culture was named Dalamatia in honor of Daligastia.
+522	1	66:3.1	The headquarters of the Planetary Prince was situated in the Persian Gulf region of those days, in the district corresponding to later Mesopotamia.
+523	1	66:5.6	Bon’s group were successful in training the great fandors as passenger birds, but they became extinct more than thirty thousand years ago.
+524	1	66:5.6	Bon’s group were successful in training the great fandors as passenger birds, but they became extinct more than thirty thousand years ago.
+525	1	66:5.6	Bon’s group were successful in training the great fandors as passenger birds, but they became extinct more than thirty thousand years ago.
+526	1	66:4.1	While it required almost a thousand years for the news to spread abroad, those tribes near the Mesopotamian headquarters were tremendously influenced by the teachings and conduct of the one hundred new sojourners on Urantia.
+527	1	66:4.7	The practice of subsisting on a nonflesh diet dates from the times of the Caligastia one hundred, for this custom spread near and far to affect the eating habits of many surrounding tribes, groups of origin in the once exclusively meat-eating evolutionary races.
+528	1	66:7.5	They were favored with the discipline and training of these superparents; and then, after three years in the schools of the Prince (they entered from thirteen to fifteen), they were eligible for marriage and ready to receive their commissions as emissaries of the Prince to the needy tribes of their respective races.
+529	1	67:4.2	The sixty members of the planetary staff who went into rebellion chose Nod as their leader.
+530	1	67:4.2	knowing full well that the original sixty and their forty-four modified Andonite associates were doomed to suffer extinction by death, sooner or later. After the fall of Dalamatia the disloyal staff migrated to the north and the east. Their descendants were long known as the Nodites
+531	1	68:6.10	In Madagascar some tribes still destroy all children born on certain unlucky days, resulting in the death of about twenty-five per cent of all babies.
+532	1	68:6.8	While these taboos on twins were once well-nigh universal, they were never a part of the Andonite mores; these peoples always regarded twins as omens of good luck.
+533	1	69:8.7	The backward tribes of ancient times, like the native Australians of today, never had slaves.
+534	1	69:8.1	Woman was the first slave, a family slave.
+535	1	73:4.4	In the preparation of the Garden only volunteer laborers were employed; no hirelings were ever used.
+536	1	73:7.1	The peninsula had been overrun by these lower-grade Nodites for almost four thousand years after Adam left the Garden when, in connection with the violent activity of the surrounding volcanoes and the submergence of the Sicilian land bridge to Africa, the eastern floor of the Mediterranean Sea sank
+537	1	73:7.3	The Melchizedeks counseled Adam not to initiate the program of racial uplift and blending until his own family had numbered one-half million.
+538	1	73:6.3	When the Most Highs of Edentia approved the commission of Caligastia as Planetary Prince of Urantia and those of the one hundred Jerusem citizens as his administrative staff, they sent to the planet, by the Melchizedeks, a shrub of Edentia, and this plant grew to be the tree of life on Urantia.
+539	1	73:6.3	When the Most Highs of Edentia approved the commission of Caligastia as Planetary Prince of Urantia and those of the one hundred Jerusem citizens as his administrative staff, they sent to the planet, by the Melchizedeks, a shrub of Edentia, and this plant grew to be the tree of life on Urantia.
+540	1	73:6.3	The “tree of the knowledge of good and evil” may be a figure of speech, a symbolic designation covering a multitude of human experiences, but the “tree of life” was not a myth; it was real and for a long time was present on Urantia.
+541	1	73:6.3	The “tree of the knowledge of good and evil” may be a figure of speech, a symbolic designation covering a multitude of human experiences, but the “tree of life” was not a myth; it was real and for a long time was present on Urantia.
+542	1	73:6.7	Much to their surprise they found it unguarded.
+543	1	73:6.7	They became enraged at their inability to benefit from the tree of life, and in connection with one of their internal wars, the temple and the tree were both destroyed by fire; only the stone wall stood until the Garden was subsequently submerged.
+544	1	73:6.7	They ate freely of the fruit for years, but it did nothing for them; they were all material mortals of the realm; they lacked that endowment which acted as a complement to the fruit of the tree.
+545	1	75:4.4	Every time the Garden pair had partaken of the fruit of the tree of life, they had been warned by the archangel custodian to refrain from yielding to the suggestions of Caligastia to combine good and evil.
+546	1	74:6.6	Adam and Eve could communicate with each other and with their immediate children over a distance of about fifty miles.
+547	1	74:1.1	The Planetary Adam and Eve of Urantia were members of the senior corps of Material Sons on Jerusem, being jointly number 14,311.
+548	1	74:0.1	Adam and Eve arrived on Urantia, from the year A.D. 1934, 37,848 years ago.
+549	1	74:0.1	And from the time of their arrival ten days passed before they were re-created in dual human form for presentation as the world’s new rulers.
+550	1	74:0.1	They regained consciousness simultaneously.
+551	1	74:1.1	They belonged to the third physical series and were a little more than eight feet in height.
+552	1	74:5.7	Adam and Eve had come to institute representative government in the place of monarchial, but they found no government worthy of the name on the face of the whole earth.
+553	1	74:6.2	She bore sixty-three children, thirty-two daughters and thirty-one sons, before the default. When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants. They had forty-two children after leaving the Garden besides the two offspring of joint parentage with the mortal stock of earth.
+554	1	74:6.2	When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants.
+555	1	74:6.2	Adamson was the first-born of the violet race of Urantia, being followed by his sister and Eveson, the second son of Adam and Eve.
+556	1	74:6.2	Adamson was the first-born of the violet race of Urantia, being followed by his sister and Eveson, the second son of Adam and Eve.
+557	1	74:6.3	The Adamic children did not take milk from animals when they ceased to nurse the mother’s breast at one year of age.
+558	1	74:6.4	They ate once a day, shortly after noontime.
+559	1	74:6.3	Eve had access to the milk of a great variety of nuts and to the juices of many fruits, and knowing full well the chemistry and energy of these foods, she suitably combined them for the nourishment of her children until the appearance of teeth.
+560	1	74:6.7	The Adamic children attended their own schools until they were sixteen, the younger being taught by the elder.
+561	1	74:6.8	At twenty they were eligible for marriage; and after marriage they began their lifework or entered upon special preparation therefor.
+562	1	74:6.7	The Adamic children attended their own schools until they were sixteen, the younger being taught by the elder.
+563	1	74:6.2	When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants.
+564	1	74:6.2	When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants.
+565	1	74:8.14	Adam and Eve carried on in the Garden for one hundred and seventeen years when, through the impatience of Eve and the errors of judgment of Adam, they presumed to turn aside from the ordained way, speedily bringing disaster upon themselves and ruinous retardation upon the developmental progression of all Urantia.
+566	1	74:1.5	This Jerusem pair left behind them on the capital of Satania and elsewhere, one hundred offspring—fifty sons and fifty daughters
+567	1	52:3.5	Neither is it the divine plan for the Planetary Adam or Eve to mate, personally, with the evolutionary peoples.
+569	1	75:5.3	When they learned what had happened to Eve, the infuriated inhabitants of the Garden became unmanageable; they declared war on the near-by Nodite settlement.
+570	1	75:8.2	The more superior stocks of Urantia now contain inheritance factors derived from as many as four separate sources: Andonite, Sangik, Nodite, and Adamic.
+571	1	75:1.1	The Adamic mission on experimental, rebellion-seared, and isolated Urantia was a formidable undertaking.
+571	2	75:1.2	¶
+572	1	75:8.5	Never, in all your ascent to Paradise, will you gain anything by impatiently attempting to circumvent the established and divine plan by short cuts, personal inventions, or other devices for improving on the way of perfection, to perfection, and for eternal perfection.
+573	1	75:4.1	And now, for the first time, Adam heard the entire story of the long-nourished plan for accelerating world improvement by operating simultaneously in two directions: the prosecution of the divine plan concomitantly with the execution of the Serapatatia enterprise.
+574	1	75:5.3	And Cano, the father of Cain yet unborn, also perished.
+575	1	75:6.3	While the transports stood by, those children who had arrived at the age of choice (twenty years) were given the option of remaining on Urantia with their parents or of becoming wards of the Most Highs of Norlatiadek.
+576	1	74:6.4	While cooking was universally employed outside of the immediate Adamic sector of Eden, there was no cooking in Adam’s household.
+577	1	75:6.1	When Adam learned that the Nodites were on the march, he sought the counsel of the Melchizedeks, but they refused to advise him, only telling him to do as he thought best and promising their friendly co-operation, as far as possible, in any course he might decide upon.
+578	1	76:5.1	Their transgression had been an error of judgment and not the sin of conscious and deliberate rebellion.
+579	1	76:4.5	They retained the ability to see these celestial beings for over one hundred years after the default.
+580	1	76:5.2	But shortly after their reduction to mortal status they became conscious of a new presence within them and awakened to the realization that human status coupled with sincere repentance had made it possible for Adjusters to indwell them.
+581	1	76:2.1	Less than two years after Cain’s birth, Abel was born, the first child of Adam and Eve to be born in the second garden.
+582	1	76:2.5	The boys were respectively eighteen and twenty years of age when the tension between them was finally resolved, one day, when Abel’s taunts so infuriated his bellicose brother that Cain turned upon him in wrath and slew him.
+583	1	76:2.1	Less than two years after Cain’s birth, Abel was born, the first child of Adam and Eve to be born in the second garden.
+583	2	76:2.5	¶
+584	1	76:2.7	The death of Abel became known to his parents when his dogs brought the flocks home without their master.
+585	1	76:2.9	Cain married Remona, his distant cousin, and their first son, Enoch, became the head of the Elamite Nodites.
+586	1	76:2.8	¶
+587	1	78:5.1	The massive waves of civilization which later spread over Eurasia immediately followed the great renaissance of the Garden consequent upon the extensive union of the Adamites with the surrounding mixed Nodites to form the Andites.
+588	1	76:5.5	Adam lived for 530 years; he died of what might be termed old age.
+589	1	76:5.5	Adam lived for 530 years; he died of what might be termed old age.
+590	1	76:5.5	Adam lived for 530 years; he died of what might be termed old age. His physical mechanism simply wore out; the process of disintegration gradually gained on the process of repair, and the inevitable end came. Eve had died nineteen years previously of a weakened heart.
+591	1	76:5.5	Eve had died nineteen years previously of a weakened heart.
+592	1	75:5.2	It was in the despair of the realization of failure that Adam, the day after Eve’s misstep, sought out Laotta, the brilliant Nodite woman who was head of the western schools of the Garden, and with premeditation committed the folly of Eve.
+593	1	75:5.5	The children of Adam sought to comfort their distracted mother while their father wandered in solitude for thirty days.
+594	1	76:0.2	Laotta, the mother of Sansa, perished at the birth of her daughter; Eve suffered much but survived, owing to superior strength.
+597	1	77:3.9	The mixed races of the Andites (Nodites and Adamites) undertook to raise a new temple on the ruins of the first structure, but there was not sufficient support for the enterprise; it fell of its own pretentious weight.
+598	1	77:4.1	From this time on Nodite culture declined for over one hundred and twenty thousand years until it was upstepped by Adamic infusion.
+600	1	77:3.1	After the submergence of Dalamatia the Nodites moved north and east, presently founding the new city of Dilmun as their racial and cultural headquarters.
+601	1	77:3.4	Three differing views were propounded as to the purpose of building the tower:
+602	1	77:3.8	The religionists, the noncombatants, fled to their homes in the south, while their fellows fought until well-nigh obliterated.
+603	1	77:4.12	Mount Ararat was the sacred mountain of northern Mesopotamia, and since much of your tradition of these ancient times was acquired in connection with the Babylonian story of the flood, it is not surprising that Mount Ararat and its region were woven into the later Jewish story of Noah and the universal flood.
+604	1	77:1.4-5	¶
+605	1	77:1.2	A supermaterial (nonsexual) liaison of a male and a female member of the corporeal staff resulted in the appearance of the first-born of the primary midwayers.
+606	1	77:1.4	This plan was carried out as long as the power to create continued, and the original corps of 50,000 was accordingly brought into being.
+607	1	77:9.5	1-2-3 the first, the eldest of the primary order, was released from immediate planetary duties shortly after Pentecost.
+608	1	77:6.4	There are eight subgroups of secondary midwayers. They are designated as A-B-C the first, second, third, and so on.
+609	1	77:6.4	Each of the eight couples eventually produced 248 midwayers, and thus did the original secondary corps—1,984 in number—come into existence.
+610	1	77:6.2	Among the children of Adamson there were just sixteen of the peculiar progenitors of the secondary midwayers.
+611	1	77:2.10	When archaeologists dig up the clay-tablet records of the later-day Sumerian descendants of the Nodites, they discover lists of Sumerian kings running back for several thousand years
+612	1	77:2.7	It will be recalled that the one hundred Andonite germ plasm contributors were in turn made possessors of the organic complement of the tree of life so that the Satania life currents likewise invested their bodies.
+613	1	78:1.3	The violet race—Adamites and Adamsonites.
+614	1	78:2.5	But the Adamites were a real nation around 19,000 B.C., numbering four and a half million, and already they had poured forth millions of their progeny into the surrounding peoples.
+615	1	78:0.2	This paper depicts the planetary history of the violet race, beginning soon after the default of Adam, about 35,000 B.C., and extending down through its amalgamation with the Nodite and Sangik races, about 15,000 B.C., to form the Andite peoples
+616	1	79:5.3	More than three hundred thousand years ago the main body of the yellow race entered China from the south as coastwise migrants.
+617	1	80:7.3	These progenitors of the Greeks were led westward by Sato, a direct descendant of Adamson and Ratta.
+618	1	80:1.7	Slowly these migrating sons of Eden united with the higher types of the blue race, invigorating their cultural practices while ruthlessly exterminating the lingering strains of Neanderthal stock.
+619	1	81:2.12	By 5000 B.C. the Mesopotamian, Turkestan, and Chinese farmers had begun the raising of sheep, goats, cows, camels, horses, fowls, and elephants.
+620	1	78:0.2	to form the Andite peoples and on to its final disappearance from the Mesopotamian homelands, about 2000 B.C.
+621	1	80:4.5	¶
+622	1	81:3.4	There were no distinct periods, such as the Stone, Bronze, and Iron Ages; all three existed at the same time in different localities.
+623	1	84:7.27	And any attempt to shift parental responsibility to state or church will prove suicidal to the welfare and advancement of civilization.
+624	1	84:7.21-24	¶
+625	1	86:2.1	Anxiety was a natural state of the savage mind.
+626	1	88:1.8	Mankind’s first toy was a preserved umbilical cord.
+627	1	88:1.8	Mankind’s first toy was a preserved umbilical cord. Set with pearls, as was often done, it was man’s first necklace.
+628	1	88:2.6	Moses’ very effort against fetishes became a supreme fetish; his commandment was later used to stultify art and to retard the enjoyment and adoration of the beautiful.
+629	1	89:5.16	The dog was the first domesticated animal and was held in high esteem both as such and as food.
+630	1	91:0.3	As an illustration of this, among certain Australian tribes primitive religious prayers antedated their belief in spirits and superhuman personalities.
+631	1	92:6.13	Sikhism—the most recent.
+632	1	92:6.3	Hinduism—the most ancient.
+633	1	92:5.15	In the Orient the combined teachings of Islam, Hinduism, and Buddhism were synthesized by Nanak and his followers into Sikhism, one of the most advanced religions of Asia.
+634	1	93:5.5	A few weeks after the death of Abraham’s father, Terah, Melchizedek sent one of his students, Jaram the Hittite, to extend this invitation to both Abraham and Nahor: “Come to Salem, where you shall hear our teachings of the truth of the eternal Creator
+635	1	93:4.16	¶
+635	2	96:5.3	Without the teaching of Machiventa to Abraham and his contemporaries, the Hebrews would have come out of Egypt in hopeless darkness.
+636	1	93:3.1	Even the idea of a tithing system, which was introduced by his later convert Abraham, was also derived from the lingering traditions of the methods of the ancient Sethites.
+637	1	93:9.6	The teaching of Melchizedek was full and replete, but the records of these days seemed impossible and fantastic to the later Hebrew priests, although many had some understanding of these transactions, at least up to the times of the en masse editing of the Old Testament records in Babylon.
+638	1	93:9.9-10	¶
+639	1	94:4.6	Many of the ancient gods of the Aryans, such as Agni, Indra, and Soma, have persisted as secondary to the three members of the Trimurti.
+640	1	94:7.2	Gautama formulated those theories which grew into the philosophy of Buddhism after six years of the futile practice of Yoga.
+641	1	94:8.9-14	¶
+642	1	95:3.5	In six thousand years only four great prophets arose among the Egyptians.
+643	1	95:3.5	Amenemope they followed for a season; Okhban they murdered; Ikhnaton they accepted but halfheartedly for one short generation; Moses they rejected.
+644	1	95:6.5	Zoroastrianism is the only Urantian creed that perpetuates the Dalamatian and Edenic teachings about the Seven Master Spirits.
+645	1	95:5.7	Ikhnaton also wrote one hundred and thirty-seven hymns, twelve of which are now preserved in the Old Testament Book of Psalms, credited to Hebrew authorship.
+646	1	95:4.5	In the Book of Hebrew Proverbs, chapters fifteen, seventeen, twenty, and chapter twenty-two, verse seventeen, to chapter twenty-four, verse twenty-two, are taken almost verbatim from Amenemope’s Book of Wisdom.
+647	1	97:9.12	And they did this because eighty per cent of David’s soldiers were Baalites.
+648	1	97:5.5	He taught of a day of freedom from superstition and priestcraft, saying: “But every man shall sit under his own vine, and no one shall make him afraid, for all people will live, each one according to his understanding of God.”
+649	1	97:9.16	Solomon bankrupted the nation by his lavish court and by his elaborate building program: There was the house of Lebanon, the palace of Pharaoh’s daughter, the temple of Yahweh, the king’s palace, and the restoration of the walls of many cities.
+650	1	97:5.6	And but for the stubborn resistance of the priests, these teachers would have overthrown the whole bloody ceremonial of the Hebrew ritual of worship.
+651	1	108:6.2	The indwelling Adjusters are particularly tormented by those thoughts which are purely sordid and selfish; they are distressed by irreverence for that which is beautiful and divine, and they are virtually thwarted in their work by many of man’s foolish animal fears and childish anxieties.
+652	1	100:1.1	While religion produces growth of meanings and enhancement of values, evil always results when purely personal evaluations are elevated to the levels of absolutes.
+653	1	100:5.8	Under no circumstances should the trancelike state of visionary consciousness be cultivated as a religious experience.
+654	1	108:2.1	Adjusters reach their human subjects on Urantia, on the average, just prior to the sixth birthday.
+655	1	108:2.3	Therefore have the divine Adjusters been universally bestowed upon all normal minds of moral status on Urantia ever since the day of Pentecost.
+656	1	109:2.3	Has acquired the balance of spiritual power in a human who has made the third psychic circle and has had assigned to him a personal seraphic guardian.
+657	1	109:6.4	The activities of Adjusters in your local universe are directed by the Personalized Adjuster of Michael of Nebadon, that very Monitor who guided him step by step when he lived his human life in the flesh of Joshua ben Joseph.
+658	1	109:6.4	This Adjuster had previously served with Machiventa Melchizedek in the days of Abraham and had engaged in tremendous exploits both previous to this indwelling and between these bestowal experiences.
+659	1	113:1.5	if such an individual becomes enrolled in any of the several reserve corps of destiny, right then and there, personal seraphim are assigned, and from that time until the earthly career is finished, that mortal will enjoy the continuous ministry and unceasing watchcare of a guardian angel.
+660	1	110:7.2	This fusion during physical life instantly consumes the material body; the human beings who might witness such a spectacle would only observe the translating mortal disappear “in chariots of fire.”
+662	1	112:6.10	When a creature leaves his native planet, he leaves the adjutant ministry behind and becomes solely dependent on morontia intellect.
+664	1	16:9.3	The survival of identity is dependent on the survival of the immortal soul of morontia status and increasingly divine value. Personality identity survives in and by the survival of the soul.
+665	1	112:3.7	Those who go to the mansion worlds are not permitted to send messages back to their loved ones.
+666	1	112:3.2	But this release of the Adjuster in no way affects the duties of the personal or group seraphim concerned with that Adjuster-abandoned individual.
+667	1	113:2.10	For purposes of rest and recharging with the life energy of the universe circuits, the guardian is periodically relieved by her complement, and during her absence the associated cherubim functions as the recorder, as is also the case when the complemental seraphim is similarly absent.
+668	1	113:2.6	All seraphim have individual names, but in the records of assignment to world service they are frequently designated by their planetary numbers.
+669	1	113:1.2	Originally, the seraphim were definitely assigned to the separate Urantia races.
+670	1	113:1.2	But since the bestowal of Michael, they are assigned in accordance with human intelligence, spirituality, and destiny.
+671	1	113:7.3	Therefore will your first assignment of the morontia life be as assistants to the seraphim in the immediate work awaiting at the time you attain personality consciousness subsequent to your liberation from the bonds of the flesh.
+672	1	113:2.1	Seraphim are not known as guardians of destiny until such time as they are assigned to the association of a human soul who has realized one or more of three achievements: has made a supreme decision to become Godlike, has entered the third circle, or has been mustered into one of the reserve corps of destiny.
+673	1	117:6.10	Love is dynamic. It can never be captured; it is alive, free, thrilling, and always moving.
+674	1	119:3.2	Michael proceeded to place universe direction in the hands of Immanuel, while he intrusted command of the celestial forces to Gabriel
+675	1	119:3.8	Each of these missions was followed by an age of increasing service and loyalty among all celestial intelligences of universe origin, while each succeeding bestowal age was characterized by advancement and improvement in all methods of universe administration and in all techniques of government.
+676	1	119:0.7	Michael made ready for his first bestowal adventure about the time Urantia was taking on its present form, one billion years ago.
+677	1	119:0.7	His bestowals have occurred about one hundred and fifty million years apart, the last taking place on Urantia nineteen hundred years ago.
+678	1	119:1.3	At noon today there appeared on the receiving field of this world a strange Melchizedek Son, not of our number but wholly like our order.
+679	1	119:1.5	And at noon on this day, without previous announcement and witnessed by only three of our brotherhood, this visiting Son of our order disappeared from our world as he came
+680	1	119:1.5	And at noon on this day, without previous announcement and witnessed by only three of our brotherhood, this visiting Son of our order disappeared from our world as he came
+681	1	119:2.5	But millions of his misguided and deluded followers accepted the forgiveness of this new ruler, known in that age as the Savior Sovereign of the system of Palonia.
+682	1	119:2.4	directing that this new Son be assigned to system 11 of constellation 37 as the successor of the deposed Lutentia and with full authority as acting System Sovereign pending the appointment of a new sovereign.
+683	1	119:2.2	This rebel System Sovereign, Lutentia, reigned supreme on his headquarters planet for more than twenty years of standard Nebadon time
+684	1	119:2.5	But Lutentia spurned these overtures of mercy, well knowing that this new and strange System Sovereign was none other than Michael, the very universe ruler whom he had so recently defied.
+685	1	119:2.4	This new Son appeared at noon, unannounced and accompanied by a lone tertiaphim who bore credentials from the Uversa Ancients of Days, certified by Immanuel of Salvington
+686	1	119:3.1	The supreme council on Salvington had just finished the consideration of the call of the Life Carriers on planet 217 in system 87 in constellation 61 for the dispatch to their assistance of a Material Son.
+687	1	119:3.4	Thus did this unique Material Son begin his difficult career on a quarantined world of secession and rebellion, located in a beleaguered system without any direct communication with the outside universe, working alone for one whole generation of planetary time.
+688	1	119:3.4	In due time a Material Son and Daughter arrived on this rejuvenated and redeemed world, and when they had been duly installed as visible planetary rulers, the transitory or emergency Planetary Prince took formal leave, disappearing at noon one day.
+689	1	175:3.1	It was just before midnight on this Tuesday, April 4, A.D. 30, that the Sanhedrin, as then constituted, officially and unanimously voted to impose the death sentence upon both Jesus and Lazarus.
+689	2	175:3.2	¶
+689	3	92:3.2	Religion has always been largely a matter of rites, rituals, observances, ceremonies, and dogmas. It has usually become tainted with that persistently mischief-making error, the chosen-people delusion.
+690	1	121:8.7	In the year 71, while living at Pella, Isador wrote the Gospel according to Matthew.
+691	1	121:8.8	The Gospel by Luke. Luke, the physician of Antioch in Pisidia, was a gentile convert of Paul, and he wrote quite a different story of the Master’s life.
+692	1	121:8.8	Luke wrote in the year 82 in Achaia.
+693	1	121:8.8	He planned three books dealing with the history of Christ and Christianity but died in A.D. 90 just before he finished the second of these works, the “Acts of the Apostles.”
+694	1	121:2.5	In Antioch Paul’s disciples were first called “Christians.”
+695	1	122:0.2	as a result of his study of human groups and his survey of the spiritual, intellectual, racial, and geographic features of the world and its peoples, he decided that the Hebrews possessed those relative advantages which warranted their selection as the bestowal race.
+696	1	122:0.3	From the three couples nominated, Gabriel made the personal choice of Joseph and Mary
+697	1	128:0.1	Jesus came into this world just as other children come; he had nothing to do with selecting his parents.
+698	1	122:1.1	David and Solomon were not in the direct line of Joseph’s ancestry, neither did Joseph’s lineage go directly back to Adam.
+699	1	122:1.1	The ancestry of the father of Jesus went back to the days of Abraham and through this venerable patriarch to the earlier lines of inheritance leading to the Sumerians and Nodites and, through the southern tribes of the ancient blue man, to Andon and Fonta.
+700	1	122:2.7	John was born in the City of Judah, March 25, 7 B.C.
+701	1	122:2.7	John was born in the City of Judah, March 25, 7 B.C.
+702	1	122:8.7	These wise men saw no star to guide them to Bethlehem. The beautiful legend of the star of Bethlehem originated in this way: Jesus was born August 21 at noon, 7 B.C. On May 29, 7 B.C., there occurred an extraordinary conjunction of Jupiter and Saturn in the constellation of Pisces. And it is a remarkable astronomic fact that similar conjunctions occurred on September 29 and December 5 of the same year. Upon the basis of these extraordinary but wholly natural events the well-meaning zealots of the succeeding generation constructed the appealing legend of the star of Bethlehem and the adoring Magi led thereby to the manger, where they beheld and worshiped the newborn babe.
+703	1	122:8.1	By the break of day the pangs of childbirth were well in evidence, and at noon, August 21, 7 B.C., with the help and kind ministrations of women fellow travelers, Mary was delivered of a male child.
+704	1	122:8.1	at noon, August 21, 7 B.C., with the help and kind ministrations of women fellow travelers, Mary was delivered of a male child.
+704	2	123:2.1	In something more than a year after the return to Nazareth the boy Jesus arrived at the age of his first personal and wholehearted moral decision; and there came to abide with him a Thought Adjuster, a divine gift of the Paradise Father, which had aforetime served with Machiventa Melchizedek, thus gaining the experience of functioning in connection with the incarnation of a supermortal being living in the likeness of mortal flesh. This event occurred on February 11, 2 B.C.
+705	1	123:2.1	This event occurred on February 11, 2 B.C.
+706	1	123:2.14	She also provided on the roof of the house (the summer bedroom) shallow boxes of sand in which Jesus worked out maps and did much of his early practice at writing Aramaic, Greek, and later on, Hebrew, for in time he learned to read, write, and speak, fluently, all three languages.
+707	1	124:6.16	And so, even ere the heavy responsibilities of the Nazareth family descended upon his youthful shoulders, there now arrived the celestial messenger to remind this lad, not quite thirteen years of age, that the hour had come to begin the resumption of the responsibilities of a universe.
+708	1	125:0.6	Jesus simply would not accept explanations of worship and religious devotion which involved belief in the wrath of God or the anger of the Almighty.
+709	1	127:2.8	He adhered to the terms of his original plea, maintaining that his first duty was to his family, that a widowed mother and eight brothers and sisters needed something more than mere money could buy
+710	1	126:3.6	In the course of this year Jesus found a passage in the so-called Book of Enoch which influenced him in the later adoption of the term “Son of Man” as a designation for his bestowal mission on Urantia.
+711	1	126:2.2	This carpenter lad, now just past fourteen years of age, awakened to the realization that he had not only to fulfill the commission of his heavenly Father to reveal the divine nature on earth and in the flesh, but that his young human nature must also shoulder the responsibility of caring for his widowed mother
+712	1	127:2.4	One of Jesus’ uncles (Mary’s brother Simon) had already joined this group, subsequently becoming an officer in the Galilean division.
+713	1	127:2.1	There was coming into existence a strong nationalist party, presently to be called the Zealots.
+713	2	127:2.2	A group of organizers from Jerusalem arrived in Galilee and were making good headway until they reached Nazareth. When they came to see Jesus, he listened carefully to them and asked many questions but refused to join the party.
+713	3	127:2.4	¶
+714	1	129:1.1	In January of this year, A.D. 21, on a rainy Sunday morning, Jesus took unceremonious leave of his family, only explaining that he was going over to Tiberias and then on a visit to other cities about the Sea of Galilee.
+715	1	129:2.9	These travelers hailed from India, and being on their way to visit Rome and various other points on the Mediterranean, they had arranged to arrive in Jerusalem during the Passover, hoping to find someone whom they could engage as interpreter for both and tutor for the son.
+716	1	129:1.11	Once a week Jesus held a meeting with the entire household, shop, and shore helpers, for Zebedee had many employees. And it was among these workers that Jesus was first called “the Master.”
+718	1	130:8.4	What Jesus meant was that the man was not of normal mind; that he lacked the ability to respond to spirit leading.
+719	1	132:0.4	Before the end of the first week in Rome Jesus had sought out, and had made the acquaintance of, the worth-while leaders of the Cynics, the Stoics, and the mystery cults, in particular the Mithraic group.
+720	1	132:2.1	Among the more important discussions with Mardus was the one designed to answer this sincere Cynic’s question about good and evil. In substance, and in twentieth-century phraseology, Jesus said:
+721	1	132:7.6	And Jesus replied: “Ganid, religions are not made. The religions of men grow up over long periods of time, while the revelations of God flash upon earth in the lives of the men who reveal God to their fellows.”
+722	1	132:2.1	Among the more important discussions with Mardus was the one designed to answer this sincere Cynic’s question about good and evil. In substance, and in twentieth-century phraseology, Jesus said:
+723	1	133:6.5	Self-consciousness, in and of itself, is not the soul.
+724	1	133:5.3	Both the father and the son greatly enjoyed the discussion on science which Jesus had at their inn one evening with a Greek philosopher. After this pedant had talked for almost three hours, and when he had finished his discourse, Jesus, in terms of modern thought, said:
+725	1	133:7.5	The last week of their sojourn in the mountains Jesus and Ganid had a long talk on the functions of the human mind.
+726	1	133:7.12	Unresolved conflicts destroy unity and may terminate in mind disruption.
+727	1	133:7.8	No mere animal could possess a time self-consciousness.
+729	1	134:3.5	In accordance with this arrangement, Jesus stopped off on the return trip and delivered these lectures. This was the most systematic and formal of all the Master’s teaching on Urantia.
+730	1	135:2.4	But he was very fond of Abner, the acknowledged leader and head of the Engedi colony.
+731	1	135:6.4	Only fifteen months intervened between the time John began to preach and baptize and his arrest and imprisonment at the instigation of Herod Antipas, but in this short time he baptized considerably over one hundred thousand penitents.
+732	1	135:6.4	Only fifteen months intervened between the time John began to preach and baptize and his arrest and imprisonment at the instigation of Herod Antipas, but in this short time he baptized considerably over one hundred thousand penitents.
+733	1	120:3.7	Leave no writings behind you on the planet. Refrain from all writing upon permanent materials; enjoin your associates to make no images or other likenesses of yourself in the flesh. See that nothing potentially idolatrous is left on the planet at the time of your departure.
+734	1	136:2.8	(Jesus was almost thirty-one and one-half years old when he was baptized.
+735	1	136:2.3	Thus did Jesus observe his own former divine spirit descending on its return to him in personalized form.
+736	1	136:2.3	This ceremony was the final act of his purely human life on Urantia, and many superhuman observers expected to witness the fusion of the Adjuster with its indwelt mind, but they were all destined to suffer disappointment.
+737	1	136:2.3	As John laid his hands upon Jesus to baptize him, the indwelling Adjuster took final leave of the perfected human soul of Joshua ben Joseph. And in a few moments this divine entity returned from Divinington as a Personalized Adjuster and chief of his kind throughout the entire local universe of Nebadon.
+738	1	136:3.1	And this Prince of Urantia, so soon to be proclaimed supreme Sovereign of Nebadon, now went into forty days of retirement to formulate the plans and determine upon the technique of proclaiming the new kingdom of God in the hearts of men.
+739	1	136:3.5	While he tarried on the mountain, talking with Gabriel, the Constellation Father of Edentia appeared to Jesus and Gabriel in person
+740	1	134:8.4	¶
+740	2	134:8.6	During the last week on Mount Hermon the great temptation, the universe trial, occurred. Satan (representing Lucifer) and the rebellious Planetary Prince, Caligastia, were present with Jesus and were made fully visible to him.
+741	1	134:9.8	But Jesus worked on, making boats, until John had journeyed up the river to a point near Pella in the month of January of the next year, A.D. 26, when he laid down his tools, declaring, “My hour has come,” and presently presented himself to John for baptism.
+742	1	136:1.3	The rabbis had gathered together almost five hundred passages from the Scriptures which, notwithstanding their apparent contradictions, they averred were prophetic of the coming Messiah.
+743	1	136:3.7	Throughout all of these forty days of isolation James and John the sons of Zebedee were engaged in searching for Jesus.
+744	1	135:8.6	Thus did John baptize Jesus and his two brothers James and Jude.
+745	1	136:5.4	And this limitation was dependent on the fact that Adjusters are nontime beings when once they are personalized.
+746	1	137:3.6	On the next day, Tuesday, they all journeyed over to Cana for the wedding of Naomi, which was to take place on the following day.
+747	1	137:4.1	By noon on Wednesday almost a thousand guests had arrived in Cana, more than four times the number bidden to the wedding feast.
+748	1	137:4.1	By noon on Wednesday almost a thousand guests had arrived in Cana, more than four times the number bidden to the wedding feast.
+749	1	137:4.1	It was a Jewish custom to celebrate weddings on Wednesday, and the invitations had been sent abroad for the wedding one month previously.
+750	1	137:4.1	It was a Jewish custom to celebrate weddings on Wednesday, and the invitations had been sent abroad for the wedding one month previously.
+752	1	137:2.8	Jesus had now assembled one half of his future corps of intimate associates, five who had for some time known him and one stranger, Nathaniel.
+753	1	139:12.2	He was probably the best-educated man among the twelve and the only Judean in the Master’s apostolic family.
+754	1	139:8.1	Thomas was the eighth apostle, and he was chosen by Philip.
+756	1	140:2.1	Then the Master placed his hands upon the head of each apostle, beginning with Judas Iscariot and ending with Andrew.
+757	1	141:4.8	But he many times said to them, alluding to these evil spirits: “They shall no more molest men when I shall have ascended to my Father in heaven, and after I shall have poured out my spirit upon all flesh in those times when the kingdom will come in great power and spiritual glory.”
+758	1	142:3.9	But when a later writer narrated these events, subsequent to the enlargement of the Jewish concept of the nature of God, he did not dare attribute evil to Yahweh; therefore he said: ‘And Satan stood up against Israel and provoked David to number Israel.’
+759	1	144:4.10	One of the reasons why Peter, James, and John, who so often accompanied Jesus on his long night vigils, never heard Jesus pray, was because their Master so rarely uttered his prayers as spoken words.
+760	1	77:7.8	Since the day of Pentecost there never again can be such a thing as demoniacal possession.
+761	1	158:1.8	These three conversed in a strange language, but from certain things said, Peter erroneously conjectured that the beings with Jesus were Moses and Elijah; in reality, they were Gabriel and the Father Melchizedek.
+762	1	150:1.1	These women had all listened to the instruction given the young evangelists, but it had never occurred to either themselves or their teachers that Jesus would dare to commission women to teach the gospel of the kingdom and minister to the sick.
+763	1	163:2.11	He required only the twelve and the seventy to dedicate all of their worldly possessions to the common cause.
+764	1	188:1.2	Joseph really believed that Jesus would rise from the dead, but Nicodemus was very doubtful. These former members of the Sanhedrin had kept their faith in Jesus more or less of a secret, although their fellow Sanhedrists had long suspected them, even before they withdrew from the council.
+765	1	166:5.3	Abner became the head of the Philadelphia church, continuing as such until his death.
+766	1	175:3.1	It was just before midnight on this Tuesday, April 4, A.D. 30, that the Sanhedrin, as then constituted, officially and unanimously voted to impose the death sentence upon both Jesus and Lazarus.
+767	1	175:3.1	It was just before midnight on this Tuesday, April 4, A.D. 30, that the Sanhedrin, as then constituted, officially and unanimously voted to impose the death sentence upon both Jesus and Lazarus.
+768	1	176:4.3	He promised, first, to send into the world, and in his stead, another teacher, the Spirit of Truth; and this he did on the day of Pentecost. Second, he most certainly promised his followers that he would sometime personally return to this world.
+769	1	179:5.4	In the establishment of the only ceremony or sacrament associated with his whole life mission, Jesus took great pains to suggest his meanings rather than to commit himself to precise definitions.
+770	1	179:5.2	The old Passover commemorated the emergence of their fathers from a state of racial slavery into individual freedom; now the Master was instituting a new remembrance supper as a symbol of the new dispensation wherein the enslaved individual emerges from the bondage of ceremonialism and selfishness
+771	1	179:1.4	While they hesitated, Judas stepped over to the seat of honor, at the left of the host, and signified that he intended there to recline as the preferred guest.
+772	1	179:1.4	Judas had no sooner seized the seat of honor than John Zebedee laid claim to the next preferred seat, the one on the right of the host.
+773	1	183:4.5	Until the very end of the crucifixion, John Zebedee remained, as Jesus had directed him, always near at hand, and it was he who supplied David’s messengers with information from hour to hour which they carried to David at the garden camp, and which was then relayed to the hiding apostles and to Jesus’ family.
+774	1	182:3.2	And when he had thus prayed, a mighty angel came down by his side and, speaking to him, touched him and strengthened him.
+775	1	182:3.1	After all was still and quiet about the camp, Jesus, taking Peter, James, and John, went a short way up a near-by ravine where he had often before gone to pray and commune.
+776	1	183:1.1	It was, indeed and in truth, the will of the Father that his Son should drink to the full the cup of mortal experience, from birth to death
+778	1	182:3.4	And then, for a third time, the Master withdrew and prayed: “Father, you see my sleeping apostles; have mercy upon them. The spirit is indeed willing, but the flesh is weak.
+779	1	183:5.3	The Roman law allows that any prisoner may have at least one friend to stand with him before the judgment bar, and this man shall not be prevented from standing by the side of his Master, the prisoner.”
+780	1	183:1.1	These inhuman and shocking experiences which Jesus was called upon to endure in the final hours of his mortal life were not in any sense a part of the divine will of the Father
+781	1	182:2.6	The Son of Man will be put to death at the instigation of his enemies, the chief priests and the rulers of the Jews
+782	1	183:3.7	Jesus raised a forbidding hand to Peter and, speaking sternly, said: “Peter, put up your sword. They who take the sword shall perish by the sword.
+783	1	184:3.6	Judas could not be used as a witness against Jesus because the Jewish law specifically forbade the testimony of a traitor.
+784	1	184:2.10	Peter’s entire experience occurred in the courtyard of the palace of Annas on Mount Olivet. He did not follow Jesus to the palace of the high priest, Caiaphas.
+785	1	184:1.3	When Jesus was young, Annas had taken a great interest in him, but now his revenues were threatened by what Jesus had so recently done in driving the money-changers and other commercial traders out of the temple.
+786	1	185:0.1	Shortly after six o’clock on this Friday morning, April 7, A.D. 30, Jesus was brought before Pilate, the Roman procurator who governed Judea, Samaria, and Idumea under the immediate supervision of the legatus of Syria.
+787	1	187:1.5	During the siege of Jerusalem, just forty years after the crucifixion of Jesus, all of Golgotha was covered by thousands upon thousands of crosses upon which, from day to day, there perished the flower of the Jewish race.
+788	1	187:5.1	The people of Jerusalem knew that this meant the coming of one of those hot-wind sandstorms from the Arabian Desert.
+789	1	187:5.2	He did not feel that the Father had forsaken him; he was merely reciting in his vanishing consciousness many Scriptures, among them this twenty-second Psalm, which begins with “My God, my God, why have you forsaken me?”
+791	1	189:1.2	After the resurrected Jesus emerged from his burial tomb, the body of flesh in which he had lived and wrought on earth for almost thirty-six years was still lying there in the sepulchre niche
+792	1	187:2.1	The cross was not high, the Master’s feet being only about three feet from the ground.
+793	1	187:1.11	¶
+793	2	187:5.5	It was just before three o’clock when Jesus, with a loud voice, cried out, “It is finished! Father, into your hands I commend my spirit.” And when he had thus spoken, he bowed his head and gave up the life struggle.
+795	1	187:1.5	Both the Greeks and the Romans learned this method of execution from the Phoenicians.
+796	1	187:1.2	The legend which the centurion carried to put on the cross of Jesus had been written by Pilate himself in Latin, Greek, and Aramaic, and it read: “Jesus of Nazareth—the King of the Jews.”
+797	1	187:5.4	When the Master finally breathed his last, there were present at the foot of his cross John Zebedee, his brother Jude, his sister Ruth, Mary Magdalene, and Rebecca, onetime of Sepphoris.
+798	1	188:1.3	The mortals who bore the material body of Jesus to the tomb were: Joseph, Nicodemus, John, and the Roman centurion.
+799	1	187:5.2	The last conscious thought of the human Jesus was concerned with the repetition in his mind of a portion of the Book of Psalms now known as the twentieth, twenty-first, and twenty-second Psalms.
+800	1	188:1.6	There was considerable hurry and haste about the burial of Jesus because this was preparation day and the Sabbath was drawing on apace.
+801	1	188:2.3	These men rolled yet another stone before the tomb and set the seal of Pilate on and around these stones, lest they be disturbed without their knowledge.
+802	1	188:2.3	They went back to the temple, secured ten of their own guards, and then marched out to Joseph’s tomb with these ten Jewish guards and ten Roman soldiers, even on this Sabbath morning, to set them as watchmen before the tomb.
+803	1	189:2.1	We do not propose to employ our technique of dematerialization; we merely wish to invoke the process of accelerated time.
+804	1	189:4.6	In the recess of stone where they had laid Jesus, Mary saw only the folded napkin where his head had rested and the bandages wherewith he had been wrapped lying intact and as they had rested on the stone before the celestial hosts removed the body. The covering sheet lay at the foot of the burial niche.
+805	1	189:3.3	The first occurred at the time of the arrival of the Planetary Prince, the second during the time of Adam, and this, the third, signalized the morontia resurrection, the mortal transit, of Jesus of Nazareth.
+806	1	189:4.4	The women who went on this mission of anointing Jesus’ body were: Mary Magdalene, Mary the mother of the Alpheus twins, Salome the mother of the Zebedee brothers, Joanna the wife of Chuza, and Susanna the daughter of Ezra of Alexandria.
+807	1	189:2.4	As they made ready to remove the body of Jesus from the tomb preparatory to according it the dignified and reverent disposal of near-instantaneous dissolution, it was assigned the secondary Urantia midwayers to roll away the stones from the entrance of the tomb.
+808	1	189:2.4	When the watching Jewish guards and the Roman soldiers, in the dim light of the morning, saw this huge stone begin to roll away from the entrance of the tomb, apparently of its own accord—without any visible means to account for such motion—they were seized with fear and panic, and they fled in haste from the scene.
+809	1	189:3.2	Then all the survivors of the human races of Urantia who had fallen asleep since the days of Adam, and who had not already gone on to judgment, appeared in the resurrection halls of mansonia in readiness for morontia investiture.
+810	1	190:2.1	From the time of the morontia resurrection until the hour of his spirit ascension on high, Jesus made nineteen separate appearances in visible form to his believers on earth.
+811	1	190:0.3	These bodies do not have circulating blood, and such beings do not partake of ordinary material food; nevertheless, these morontia forms are real.
+812	1	191:4.1	The tenth morontia manifestation of Jesus to mortal recognition occurred a short time after eight o’clock on Tuesday, April 11, at Philadelphia, where he showed himself to Abner and Lazarus and some one hundred and fifty of their associates, including more than fifty of the evangelistic corps of the seventy.
+813	1	183:4.5	Until the very end of the crucifixion, John Zebedee remained, as Jesus had directed him, always near at hand, and it was he who supplied David’s messengers with information from hour to hour which they carried to David at the garden camp, and which was then relayed to the hiding apostles and to Jesus’ family.
+814	1	193:6.1	d4353d82387e8ba0
+816	1	194:3.15	No special gift was bestowed upon the members of Jesus’ earthly family. Pentecost marked the end of special priesthoods and all belief in sacred families.
+817	1	189:1.1	At ten minutes before three, intense vibrations of commingled material and morontia activities began to issue from Joseph’s new tomb, and at two minutes past three o’clock, this Sunday morning, April 9, A.D. 30, the resurrected morontia form and personality of Jesus of Nazareth came forth from the tomb.
+818	1	195:1.11	The Eastern version of the message of Jesus, notwithstanding that it remained more true to his teachings, continued to follow the uncompromising attitude of Abner.
+819	1	195:1.11	¶
+820	1	36:2.11	There are also seven architectural types of life design, fundamental arrangements of the reproducing configurations of living matter.
+821	1	36:2.11	On Urantia there are forty-eight units of pattern control—trait determiners—in the sex cells of human reproduction.
+822	1	46:1.4	The lighting system of Jerusem should not be so difficult for you to comprehend. There are no days and nights, no seasons of heat and cold.

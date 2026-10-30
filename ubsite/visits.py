@@ -305,10 +305,11 @@ class Counter:
             # /speech/<P:S> the English, /speech/<key>/<P:S> a translation's.
             tr, _, ref = path[len("/speech/"):].rpartition("/")
             kind, rest = "listen", ("browser:" + tr if tr else "browser", ref)
-        elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/")):
+        elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/", "/quiz/board/")):
             return                                 # /rail/N: a paper opened in the left rail;
                                                    # /offline/: a copy downloading (sw.js);
-                                                   # /tr/: a section's translations, for a fold
+                                                   # /tr/: a section's translations, for a fold;
+                                                   # /quiz/board/: the board's JSON, for its page
         elif path.startswith("/api/"):
             kind = "api"                           # another site's program, not a reader
         else:

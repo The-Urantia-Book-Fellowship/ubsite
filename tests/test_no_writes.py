@@ -22,6 +22,9 @@ ALLOWED = {
     "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
     "offline/pack.py": "var/offline/",             # the offline copy, by way of a .tmp
     "tools/study/draft.py": "var/study/",          # a paper's notes drafted for review
+    "tools/quiz/draft.py": "var/quiz/",            # a paper's quiz drafted for review
+    "tools/quiz/apply.py": "data/quiz/questions.tsv",  # the quiz's ledger, by ruling
+    "tools/quiz/doubt.py": "var/quiz/",            # the references in doubt, for ruling
 }
 
 WRITE_OPEN = re.compile(r"""\bopen\s*\([^)]*['"][waxr]?\+?[wax]\+?['"]""")
@@ -36,8 +39,9 @@ class NoWrites(unittest.TestCase):
     def _sources(self):
         # build/ reads the masters; offline/ only the database, and is held
         # to the same rule so that it never grows a reason to.
-        # tools/study/ reads the study edition and Block's charts.
-        for d in ("build", "offline", "tools/study"):
+        # tools/study/ reads the study edition and Block's charts, tools/quiz/
+        # the edition's quiz.
+        for d in ("build", "offline", "tools/study", "tools/quiz"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 
@@ -96,6 +100,28 @@ class NoWrites(unittest.TestCase):
         block = (ROOT / "tools/study/block.py").read_text()
         self.assertIn('["pdftotext", *args, str(pdf), "-"]', block)
         self.assertEqual(block.count("subprocess.run("), 1)
+
+    def test_quiz_tools_write_only_their_own(self):
+        """The quiz's draft goes to var/quiz/ and never overwrites a review,
+        which holds Tigran's rulings; the ledger is written by apply.py alone,
+        by way of a .tmp, and nothing in tools/quiz/ deletes."""
+        for rel, src in self._sources():
+            if not rel.startswith("tools/quiz/"):
+                continue
+            self.assertNotRegex(src, r"\.unlink\(|shutil\.|os\.remove", f"{rel} must not delete")
+            if rel == "tools/quiz/draft.py":
+                self.assertIn('OUT = ROOT / "var" / "quiz"', src)
+                self.assertIn("if out.exists():", src)
+                self.assertNotIn('"data"', src)
+            elif rel == "tools/quiz/apply.py":
+                self.assertIn('LEDGER = ROOT / "data" / "quiz" / "questions.tsv"', src)
+                self.assertEqual(len(WRITE_OPEN.findall(src)), 1, "apply.py writes the ledger once")
+            elif rel == "tools/quiz/doubt.py":
+                self.assertIn('OUT = ROOT / "var" / "quiz"', src)
+                self.assertIn("if out.exists():", src)
+                self.assertNotIn('"data"', src)
+            else:
+                self.assertNotRegex(src, WRITE_OPEN, f"{rel} must not write")
 
     def test_no_writer_names_a_sibling(self):
         """No module may name a sibling repo path in a write context."""

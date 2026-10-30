@@ -35,7 +35,7 @@ from fastapi.templating import Jinja2Templates  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import api, l10n, queries, settings, stats, visits  # noqa: E402
+from ubsite import api, board, l10n, queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 STATIC = ROOT / "ubsite" / "static"
@@ -90,7 +90,7 @@ T.env.globals["asset"] = asset
 # place of __CATALOG__.  Made again when any of them changes, as the dev
 # server runs; named by a hash of what it sends, so a build that changes
 # nothing moves nothing (CLAUDE.md trap 29).
-L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js")
+L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js")
 L10N_JS = ROOT / "ubsite" / "l10n.js"
 
 
@@ -1488,6 +1488,118 @@ def rail_toc(key: str, v: str = ""):
     return Response(got["body"], media_type="application/json", headers={"Cache-Control": cache})
 
 
+@app.get("/quiz", response_class=HTMLResponse)
+def quiz_page(request: Request):
+    """The British Study Edition's quiz (build/quiz.py), its own page: ten
+    questions at random, from the whole book or one part, and every paper that
+    has questions, with how many this reader has had right (quiz.js, from what
+    the browser keeps).  All 819 questions are in the page, so that ten can be
+    drawn from them offline too (Tigran, 2026-10-28)."""
+    con = db()
+    papers = queries.quiz_papers(con)
+    if not papers:
+        return missing(request, "There is no page at this address.")
+    parts = con.execute("SELECT n, title FROM part ORDER BY n").fetchall()
+    data = {"papers": [{"n": x["n"], "part": x["part"] or 0, "count": x["count"]} for x in papers],
+            "q": queries.quiz(con)}
+    return page(request, "quiz.html", papers=papers, parts=parts, roman=ROMAN, data=data,
+                total=sum(x["count"] for x in papers), board_url=board.BOARD)
+
+
+# ---- the quiz's board (ubsite/board.py) -----------------------------------------
+# The page is every site's, filled by quiz.js from the board's site; its JSON
+# and its two POSTs are that site's alone, and answer the other sites' pages
+# across origins.  Not for search engines: the names are readers'.
+
+@app.get("/quiz/board", response_class=HTMLResponse)
+def quiz_board_page(request: Request):
+    resp = page(request, "quiz_board.html", board_url=board.BOARD)
+    resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
+
+
+def _board_cors(request: Request) -> dict:
+    origin = request.headers.get("origin")
+    head = {"Vary": "Origin", "Cache-Control": "no-store", "X-Robots-Tag": "noindex"}
+    if origin and origin in board.origins(SITES):
+        head["Access-Control-Allow-Origin"] = origin
+    return head
+
+
+def _board_json(request: Request, body: dict, status: int = 200) -> JSONResponse:
+    return JSONResponse(body, status_code=status, headers=_board_cors(request))
+
+
+def _board_preflight(request: Request):
+    if not board.here(request.headers.get("host")):
+        return Response(status_code=404)
+    return Response(status_code=204, headers={**_board_cors(request),
+                                              "Access-Control-Allow-Methods": "GET, POST",
+                                              "Access-Control-Allow-Headers": "Content-Type",
+                                              "Access-Control-Max-Age": "86400"})
+
+
+@app.get("/quiz/board/lines")
+def quiz_board_lines(request: Request):
+    if not board.here(request.headers.get("host")):
+        return _board_json(request, {"error": "no board here"}, 404)
+    return _board_json(request, board.board().lines())
+
+
+async def _board_post(request: Request, act) -> JSONResponse:
+    if not board.here(request.headers.get("host")):
+        return _board_json(request, {"error": "no board here"}, 404)
+    if int(request.headers.get("content-length") or 0) > board.MAX_BODY:
+        return _board_json(request, {"error": "too large"}, 413)
+    raw = await request.body()
+    if len(raw) > board.MAX_BODY:
+        return _board_json(request, {"error": "too large"}, 413)
+    try:
+        got = json.loads(raw)
+        if not isinstance(got, dict):
+            raise ValueError
+        return _board_json(request, act(got))
+    except ValueError:
+        return _board_json(request, {"error": "json"}, 400)
+    except board.Refused as e:
+        return _board_json(request, {"error": e.why}, e.status)
+
+
+@app.post("/quiz/board/join")
+async def quiz_board_join(request: Request):
+    return await _board_post(request, lambda d: board.board().join(d.get("t"), d.get("n"), d.get("a", [])))
+
+
+@app.post("/quiz/board/answers")
+async def quiz_board_answers(request: Request):
+    return await _board_post(request, lambda d: board.board().add(d.get("t"), d.get("a", [])))
+
+
+for _path in ("/quiz/board/lines", "/quiz/board/join", "/quiz/board/answers"):
+    app.add_api_route(_path, _board_preflight, methods=["OPTIONS"], include_in_schema=False)
+
+
+@app.get("/quiz/{n:int}", response_class=HTMLResponse)
+def quiz_paper_page(request: Request, n: int):
+    """A paper's questions, asked one at a time (quiz.js), and without
+    JavaScript, or in print, listed with each answer under a fold."""
+    con = db()
+    p = con.execute("SELECT * FROM paper WHERE n=?", (n,)).fetchone()
+    if p is None:
+        return missing(request, l10n.tr(NO_PAPER, n=n))
+    papers = queries.quiz_papers(con)
+    here = next((x for x in papers if x["n"] == n), None)
+    if here is None:
+        return missing(request, l10n.tr("Paper {n} has no questions in the quiz: {quiz} lists those that have.",
+                                        n=n, quiz=Markup('<a href="/quiz">/quiz</a>')))
+    questions = queries.quiz(con, n)
+    nxt = next((x for x in papers if x["n"] > n), None)
+    data = {"paper": n, "count": len(questions), "q": questions,
+            "next": nxt and {"n": nxt["n"], "count": nxt["count"]}}
+    return page(request, "quiz_paper.html", paper=p, questions=questions, nxt=nxt, data=data,
+                board_url=board.BOARD)
+
+
 @app.get("/part/{n:int}", response_class=HTMLResponse)
 def part_page(request: Request, n: int):
     """A part's own page: its divider, as the book prints it, and nothing more.
@@ -1595,9 +1707,14 @@ def read(request: Request, ref: str):
             onward["label"] = w.en.unescape()
             if l10n.BILINGUAL:
                 onward["label_ru"] = w["ru"].unescape()
+    # A paper's last section asks, after its notes, whether to take its quiz,
+    # where the paper has questions (Tigran, 2026-10-28).
+    quizcall = None
+    if not go["next"] or go["next"]["paper_n"] != paper:
+        quizcall = queries.quiz_count(con, paper) or None
     tr = translated(paper, sec)
     return page(request, "section.html", paper=p, section=s, **rows,
-                focus=focus, last=last, go=go, onward=onward,
+                focus=focus, last=last, go=go, onward=onward, quizcall=quizcall,
                 audio=section_audio(con, s["id"]), tr_has=tr["has"], trv=tr["v"])
 
 

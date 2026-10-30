@@ -113,6 +113,10 @@
 "their wording, such as Badanon, and the committee’s reasons" = "их слова, например Badanon, и доводы комитета"
 "Translations in search results" = "Переводы в результатах поиска"
 "those ticked under Translations, their words and their translators’ notes" = "отмеченные во вкладке «Переводы»: их слова и примечания переводчиков"
+"Quiz" = "Викторина"
+"questions at the end of a paper, and on the home page" = "вопросы в конце документа и на главной странице"
+"Quiz board" = "Доска викторины"
+"the offer to put your name on it, and the links to it" = "предложение вписать в неё своё имя и ссылки на неё"
 "Tooltips" = "Подсказки"
 "a few words on a button or a link, where the pointer rests" = "несколько слов о кнопке или ссылке под указателем мыши"
 
@@ -277,6 +281,7 @@
 ", and |lists" = { en = ", and ", ru = " и " }
 "home:lists-notes" = { en = "of the <a href=\"/lists/notes\">study notes</a> of The British Study Edition, {n} so far", ru = "<a href=\"/lists/notes\">примечаний</a> из The British Study Edition (пока их {n})" }
 "home:lists-bib" = { en = [", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} work they cite", ", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} works they cite"], ru = [", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})"] }
+"home:quiz" = { en = '<a href="/quiz">The quiz</a> — {q:,} questions on {p} papers, from The British Study Edition of the Urantia Papers: a paper’s questions at its end, or ten at random.', ru = '<a href="/quiz">Викторина</a> — вопросов: {q:,}, документов: {p}; из The British Study Edition of the Urantia Papers: вопросы к документу в его конце или десять наугад.' }
 "home:citation" = { en = '<a href="/search?q=101%3A4.2">A citation</a> — type any reference such as <code>101:4.2</code>, <code>86:5.14-15</code>, <code>Paper 100</code> or <code>76:2sec</code> into the search box and it opens there.', ru = '<a href="/search?q=101%3A4.2">Ссылка</a> — введите в поле поиска любую ссылку, например <code>101:4.2</code>, <code>86:5.14-15</code>, <code>Paper 100</code> или <code>76:2sec</code>, и она откроется.' }
 "home:contents" = { en = '<a href="/read">The contents</a> — all {n} papers with their authors.', ru = '<a href="/read">Содержание</a> — все документы ({n}) и их авторы.' }
 "home:listening" = { en = ["<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hour, timed to the paragraph: start from any paragraph, and the page follows the voice.", "<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hours, timed to the paragraph: start from any paragraph, and the page follows the voice."], ru = ["<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} час, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часа, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часов, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом."] }
@@ -438,3 +443,59 @@
 "css:copy" = { en = 'This page is from the offline copy of {d}.', ru = 'Эта страница — из офлайн-копии от {d}.' }
 "css:show" = { en = "show", ru = "показать" }
 "css:fold" = { en = "fold away", ru = "свернуть" }
+
+# --- The quiz (quiz.html, quiz_paper.html, section.html's invitation, quiz.js).
+# The questions are The British Study Edition's, in English, as the book is;
+# its Russian title is Tigran's, ud's quiz.tex «Космическое гражданство».
+
+"Cosmic Citizenship Quiz" = "Космическое гражданство"
+"The quiz on Paper {n}" = "Викторина: документ {n}"
+"The quiz on the Foreword" = "Викторина: Foreword"
+"quiz:paper" = { en = ["{n} question, from The British Study Edition of the Urantia Papers.", "{n} questions, from The British Study Edition of the Urantia Papers."], ru = ["{n} вопрос из The British Study Edition of the Urantia Papers.", "{n} вопроса из The British Study Edition of the Urantia Papers.", "{n} вопросов из The British Study Edition of the Urantia Papers."] }
+"quiz:hub" = { en = "{q:,} questions on {p} of the 197 papers, from The British Study Edition of the Urantia Papers: a paper’s questions after reading it, or ten at random.", ru = "Вопросов: {q:,}, документов с вопросами: {p} из 197; из The British Study Edition of the Urantia Papers: вопросы к документу после его прочтения или десять наугад." }
+"quiz:call" = { en = ["{n} question on this paper", "{n} questions on this paper"], ru = ["{n} вопрос к этому документу", "{n} вопроса к этому документу", "{n} вопросов к этому документу"] }
+"quiz:next" = { en = ["On to Paper {p}’s quiz: {n} question", "On to Paper {p}’s quiz: {n} questions"], ru = ["Дальше: викторина к документу {p}, {n} вопрос", "Дальше: викторина к документу {p}, {n} вопроса", "Дальше: викторина к документу {p}, {n} вопросов"] }
+"Take the quiz" = "Пройти викторину"
+"The answer" = "Ответ"
+"Study note at {ref}" = "Примечание к {ref}"
+"Paper {n} has no questions in the quiz: {quiz} lists those that have." = "К документу {n} в викторине нет вопросов: те, к которым есть, перечислены на странице {quiz}."
+"Ten questions at random from" = "Десять вопросов наугад из"
+"the whole book|from" = "всей книги"
+"the Foreword" = "Foreword"
+"Part {r}|from" = "части {r}"
+"Start" = "Начать"
+"Question {i} of {n}" = "Вопрос {i} из {n}"
+"Choose every right answer, then Check." = "Выберите все верные ответы и нажмите «Проверить»."
+"Check" = "Проверить"
+"Next question" = "Следующий вопрос"
+"See the score" = "Итог"
+"Right." = "Верно."
+"Not quite: the right answer is marked." = "Не совсем: верный ответ отмечен."
+"Not quite: the right answers are marked." = "Не совсем: верные ответы отмечены."
+"{r} of {n} right" = "Верно: {r} из {n}"
+"Every one right." = "Всё верно."
+"To read again" = "Перечитать"
+"Again" = "Ещё раз"
+"Back to the paper" = "Назад к документу"
+"All the quizzes" = "Все викторины"
+"{r} of {n}" = "{r} из {n}"
+"The quiz board" = "Доска викторины"
+"quiz:board" = { en = "Readers who chose to put a name here, ranked by the questions they had right the first time they met them; beside it, how many they have answered, and on how many papers they have answered every question.", ru = "Читатели, которые решили вписать сюда имя, по числу вопросов, на которые они ответили верно с первого раза; рядом — сколько вопросов отвечено и к скольким документам отвечены все вопросы." }
+"Asking the board…" = "Запрос к доске…"
+"No one is on the board yet." = "На доске пока никого нет."
+"The board could not be reached." = "Доска недоступна."
+"The board could not be reached. Your answers are kept, and go with the next quiz you finish." = "Доска недоступна. Ваши ответы сохранены и будут отправлены после следующей викторины."
+"Name" = "Имя"
+"Right the first time" = "Верно с первого раза"
+"Answered" = "Отвечено"
+"Put your name on the board?" = "Вписать ваше имя на доску?"
+"quiz:offer" = { en = "The board lists everyone who chose to be on it, by the name they typed, with how many of the quiz’s questions they had right the first time they met them.", ru = "На доске — все, кто решил на ней быть, под выбранным ими именем, с числом вопросов викторины, на которые они ответили верно с первого раза." }
+"Your name on the board" = "Ваше имя на доске"
+"Add my name" = "Вписать"
+"quiz:kept" = { en = "Nothing else about you is kept: no account, no e-mail, no address. This browser keeps your line up to date with every quiz you finish.", ru = "Больше о вас ничего не хранится: ни учётной записи, ни почты, ни адреса. Этот браузер обновляет вашу строку после каждой пройденной викторины." }
+"That name is taken: choose another." = "Это имя занято: выберите другое."
+"A name is letters and digits, with spaces, full stops, hyphens or apostrophes between them, 32 at most." = "Имя — это буквы и цифры, между ними пробелы, точки, дефисы или апострофы; не больше 32 знаков."
+"{name} is on the board, in place {p} of {n}." = "{name} на доске: место {p} из {n}."
+"See the board" = "Посмотреть доску"
+"The quiz board is read online." = "Доску викторины можно посмотреть только онлайн."
+

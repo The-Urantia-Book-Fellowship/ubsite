@@ -41,6 +41,9 @@
       {%- if stats.study_notes %}<span class="n1955 nst">{{ t(', and |lists') }}</span><span class="nst">{{ t('home:lists-notes', n=stats.study_notes) }}
       {%- if stats.study_sources %}{{ t('home:lists-bib', n=stats.study_sources) }}{% endif %}</span>
       {%- endif %}.</li>
+    {%- if stats.quiz_questions %}
+    <li class="quizway">{{ t('home:quiz', q=stats.quiz_questions, p=stats.quiz_papers) }}</li>
+    {%- endif %}
     <li>{{ t('home:citation') }}</li>
     <li>{{ t('home:contents', n=stats.papers) }}</li>
     {%- if stats.audio_mh_seconds %}

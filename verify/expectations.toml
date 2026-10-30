@@ -55,13 +55,43 @@ study_footnotes      = 404       # \fnst, in 119 papers; 307 at 8af25c5
 human_sources        = 60        # \bibitem, across 19 papers; 54 at 8af25c5
 bibrefs              = 116       # all inside notes; 86 at 8af25c5
 study_notes_with_math = 39       # inline $...$ only, 118 of them (tests/fixtures/study-math.tsv)
-quiz_questions       = 819
-quiz_correct_flags   = 1002      # 83 questions have more than one correct answer
+quiz_questions       = 819       # on 126 papers, at 2474116; 817 at d6c3206, the [quiz] section below
+quiz_correct_flags   = 966       # 53 questions have more than one; 1002 and 83 were
+                                 # written here until 2026-10-28, never measured at 2474116
 kjv_verses           = 24974
 kjv_marginal_notes   = 5069
 figures              = 84
 figures_private      = 58
 figures_free         = 26
+
+# The quiz (build/quiz.py), the study edition's tex/quiz.tex, read at HEAD.
+# build/checks/check_db.py asserts these; the slips the build finds in it are
+# tests/known-quiz-slips.tsv, exactly, and move as Tigran mends them upstream.
+[quiz]
+# 819 questions at 2474116 (2026-10-28), 3,689 answers, 966 right, 53 with
+# more than one; Tigran mended 30 of them on 2026-10-29 (0992882 to d6c3206),
+# from the checking of every question (var/quiz/flags.md): three deleted, one
+# moved to another paper, two new.
+source_commit = "d6c3206"
+measured_on   = "2026-10-30"
+questions            = 817
+papers               = 126       # of the 197; 29 of them have one question, Paper 0 57; 125 have one
+                                 # asked (quiz_paper), since Paper 138's only question was dropped (2026-10-30)
+multi_answer         = 51        # more than one answer right: a set, not a choice
+answers              = 3686
+right_answers        = 962
+duplicate_questions  = 1         # 137: quiz.tex 5930 and 5940, two ids
+slips                = 63        # 25 words, 23 units, 4 dates, 9 times, the "~", the duplicate
+american_rewrites    = 28        # data/quiz/american.tsv
+allowed_words        = 129       # data/quiz/words.tsv
+reviewed             = 817       # data/quiz/questions.tsv, state other than '-': every question since
+                                 # 2026-10-30.  Paper 32's 6 were ruled 2026-10-28; the Foreword's 57 and
+                                 # Papers 1-12's 77 on 2026-10-29 (3 and 5 have none); the other 114 papers'
+                                 # 677 on 2026-10-30, from var/quiz/doubtful.md (data/quiz/README.md, Many
+                                 # papers at once).  774 by the text, 24 of them by more than one passage
+                                 # and 18 by a run of paragraphs shown whole; 3 by a study note; 40 dropped
+asked                = 777       # not dropped: the Foreword's Q40-Q46, until its figure, its Q55, 11 Q20,
+                                 # and 31 more ruled 2026-10-30, Paper 138's one question among them
 
 # The translations beside the text (build/translation.py), each joined to our
 # numbering.  Reported bands, as the index's are: ud is being written, and its
@@ -157,16 +187,19 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # c0db98c: one headword fewer, two gone and one new.  One more since
 # 2026-10-24: the page about the text API, kept with the address it is read at.
 [offline]
-measured_on = "2026-10-23"
-pages       = 10285      # 1,626 sections, 4,735 headwords, 27 index letters, 20 more, 3,877 reading paths
+measured_on = "2026-10-30"
+pages       = 10411      # 1,626 sections, 4,735 headwords, 27 index letters, 20 more, 3,877 reading paths,
+                         # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
+                         # one fewer since 2026-10-30: Paper 138's one question dropped
 paths       = 3877       # 2,057 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
-chunks      = 417        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
+chunks      = 419        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
                          # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages;
                          # 417 since the interface in Russian too (2026-10-25): the scripts'
                          # words, /l10n.js, EB Garamond's Cyrillic, two faces and their licence,
                          # and 13 more chunks of reading paths, 8% more of them to hold
-                         # (404 with UB_BILINGUAL=0)
+                         # (404 with UB_BILINGUAL=0); 419 since the quiz (2026-10-28): its
+                         # chunk of pages, and quiz.js
 download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement
 raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25)
 

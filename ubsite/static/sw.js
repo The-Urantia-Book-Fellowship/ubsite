@@ -234,7 +234,9 @@ function fromCopy(c, url) {
 self.addEventListener('fetch', function (e) {
   var req = e.request, url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
-  if (/^\/(offline\/|sw\.js$|api\/|audio\/|healthz$)/.test(url.pathname)) return;
+  // Nor the quiz's board's JSON (ubsite/board.py), which is the board's site's
+  // and never kept: on that site a page asks it at its own origin.
+  if (/^\/(offline\/|sw\.js$|api\/|audio\/|healthz$|quiz\/board\/)/.test(url.pathname)) return;
   // Nor what depends on the host: a copy kept before 2026-10-15 holds the
   // manifest and the touch icon as one host sent them.
   if (self.ubOffline.HOSTED.indexOf(url.pathname) >= 0) return;

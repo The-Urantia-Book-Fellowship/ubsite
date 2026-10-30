@@ -1,0 +1,69 @@
+# The quiz's slips: what build/quiz.py finds in what the site shows, and the
+# study edition has not yet mended (quiz.tex at d6c3206; data/quiz/README.md).
+# The build requires exactly these: a new one fails, and so does one mended
+# upstream and still listed here.  `note` gives the quiz.tex line of the
+# question's \qstart, for finding it; the build reads only kind, id and what.
+kind	id	what	note
+word	52	mater	quiz.tex:412; misspelled
+word	136	executuve	quiz.tex:961; misspelled
+word	195	worls	quiz.tex:1432; misspelled
+word	281	evoluionary	quiz.tex:2114; misspelled
+word	305	suoeruniverse	quiz.tex:2291; misspelled
+word	317	perfectiom	quiz.tex:2381; misspelled
+word	351	milliom	quiz.tex:2662; misspelled
+word	467	milion	quiz.tex:3621; misspelled
+word	475	mezozoic	quiz.tex:3678; misspelled
+word	476	mezozoic	quiz.tex:3685; misspelled
+word	477	mezozoic	quiz.tex:3692; misspelled
+word	478	mezozoic	quiz.tex:3699; misspelled
+word	489	tigre	quiz.tex:3808; misspelled
+word	502	aborigenes	quiz.tex:3911; misspelled
+word	531	madascar	quiz.tex:4142; misspelled
+word	586	tatoo	quiz.tex:4585; misspelled
+word	611	heiroglyphic	quiz.tex:4768; misspelled
+word	725	pythagorus	quiz.tex:5738; misspelled
+word	756	nathantiel	quiz.tex:6000; misspelled
+word	762	speciallly	quiz.tex:6090; misspelled
+word	763	wordly	quiz.tex:6096; misspelled
+word	787	crucificion	quiz.tex:6304; misspelled
+word	788	crucificion	quiz.tex:6309; misspelled
+word	799	boom	quiz.tex:6378; misspelled
+word	803	burried	quiz.tex:6414; misspelled
+unit	336	1,000,000 km/s	quiz.tex:2539; metric, where the press gives miles or inches: Tigran to rule
+unit	336	100,000 km/s	quiz.tex:2539; metric, where the press gives miles or inches: Tigran to rule
+unit	336	299,792 km/s	quiz.tex:2539; metric, where the press gives miles or inches: Tigran to rule
+unit	336	36,000 km/s	quiz.tex:2539; metric, where the press gives miles or inches: Tigran to rule
+unit	336	899,366 km/s	quiz.tex:2539; metric, where the press gives miles or inches: Tigran to rule
+unit	366	100,000 ly	quiz.tex:2797; metric, where the press gives miles or inches: Tigran to rule
+unit	366	200,000 ly	quiz.tex:2797; metric, where the press gives miles or inches: Tigran to rule
+unit	369	100,000 ly	quiz.tex:2823; metric, where the press gives miles or inches: Tigran to rule
+unit	369	250,000 ly	quiz.tex:2823; metric, where the press gives miles or inches: Tigran to rule
+unit	369	51,000 ly	quiz.tex:2823; metric, where the press gives miles or inches: Tigran to rule
+unit	416	16.4 cm	quiz.tex:3205; metric, where the press gives miles or inches: Tigran to rule
+unit	546	80 kilometres	quiz.tex:4273; metric, where the press gives miles or inches: Tigran to rule
+unit	551	1.65 m	quiz.tex:4311; metric, where the press gives miles or inches: Tigran to rule
+unit	551	1.8 m	quiz.tex:4311; metric, where the press gives miles or inches: Tigran to rule
+unit	551	2.2 m	quiz.tex:4311; metric, where the press gives miles or inches: Tigran to rule
+unit	551	2.4 m	quiz.tex:4311; metric, where the press gives miles or inches: Tigran to rule
+unit	551	2.8 m	quiz.tex:4311; metric, where the press gives miles or inches: Tigran to rule
+unit	551	3.1 m	quiz.tex:4311; metric, where the press gives miles or inches: Tigran to rule
+unit	551	3.5 m	quiz.tex:4311; metric, where the press gives miles or inches: Tigran to rule
+unit	792	0.56m	quiz.tex:6328; metric, where the press gives miles or inches: Tigran to rule
+unit	792	1m	quiz.tex:6328; metric, where the press gives miles or inches: Tigran to rule
+unit	792	2m	quiz.tex:6328; metric, where the press gives miles or inches: Tigran to rule
+unit	792	3m	quiz.tex:6328; metric, where the press gives miles or inches: Tigran to rule
+date	703	1 January	quiz.tex:5546; the year written "7."
+date	703	18 September	quiz.tex:5546; the year written "7."
+date	703	21 August	quiz.tex:5546; the year written "7."
+date	703	25 December	quiz.tex:5546; the year written "7."
+time	766	15:30	quiz.tex:6143; 24-hour clock; the book: "half past three o'clock"
+time	766	18:00	quiz.tex:6143; 24-hour clock; the book: "half past three o'clock"
+time	793	09:00	quiz.tex:6335; 24-hour clock; the book: "half past three o'clock"
+time	793	10:00	quiz.tex:6335; 24-hour clock; the book: "half past three o'clock"
+time	793	11:00	quiz.tex:6335; 24-hour clock; the book: "half past three o'clock"
+time	793	12:00	quiz.tex:6335; 24-hour clock; the book: "half past three o'clock"
+time	793	15:00	quiz.tex:6335; 24-hour clock; the book: "half past three o'clock"
+time	793	18:00	quiz.tex:6335; 24-hour clock; the book: "half past three o'clock"
+time	793	21:00	quiz.tex:6335; 24-hour clock; the book: "half past three o'clock"
+tilde	479	~	quiz.tex:3708; "~135 million": about? Tigran to rule
+duplicate	750	749	quiz.tex:5940; the same question as id 749

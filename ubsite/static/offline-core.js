@@ -147,10 +147,27 @@
                            ds.map(function (d) { return d[at][1]; }).join('') + f[1]);
         } };
     }
-    if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
+    if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$|quiz\/board\/)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
     // A copy made before 2026-10-24 does not keep it.
     if (path === '/api') return { res: away(sh, T('The page about the text API is read online.')) };
     if (path === '/stats') return { res: away(sh, T('This page is read online.')) };
+    if (path === '/quiz/board') return { res: away(sh, T('The quiz board is read online.')) };
+    if ((m = /^\/quiz(?:\/(.*))?$/.exec(path))) {
+      // The quiz (app.py quiz_page, quiz_paper_page), a chunk of its own: /quiz,
+      // and each paper's questions by its number, as the server reads it, 01
+      // as 1.  A copy made before 2026-10-28 has none.
+      if (!sh.quiz) return null;
+      if (m[1] === undefined) return { chunk: 'quiz', make: function (d) { return html(200, stored(sh, d.pages['/quiz'])); } };
+      if (m[1] === '') return { res: redirect('/quiz', 307) };
+      if (!/^[0-9]+$/.test(m[1])) return { res: missing(sh, T(NOPAGE), path) };
+      var qn = parseInt(m[1], 10);
+      if (!sh.papers[String(qn)])
+        return { res: missing(sh, T('There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196.', { n: qn }), path) };
+      if (sh.quiz.indexOf(qn) < 0)
+        return { res: missing(sh, T('Paper {n} has no questions in the quiz: {quiz} lists those that have.', {
+          n: qn, quiz: T.html('<a href="/quiz">/quiz</a>') }), path) };
+      return { chunk: 'quiz', make: function (d) { return html(200, stored(sh, d.pages['/quiz/' + qn])); } };
+    }
     if ((m = /^\/index\/([^\/]+)$/.exec(path))) {
       var L = m[1].toUpperCase();
       if (sh.letters.indexOf(L) < 0) return { res: missing(sh, T('The index has no section headed “{l}”.', { l: m[1] }), path) };

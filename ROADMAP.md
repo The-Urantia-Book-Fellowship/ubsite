@@ -15,7 +15,7 @@ Three corpora, one address space — `paper:section.paragraph`. The same `\vs` m
 |---|---|
 | text | 14,586 paragraphs · 197 papers · 1,626 sections |
 | index | 32,837 entries · 4,736 headwords · **50,758 references** |
-| apparatus | 307 study footnotes · 54 human-source records · 24,974 KJV verses · 819 quiz questions · 84 figures |
+| apparatus | 307 study footnotes · 54 human-source records · 24,974 KJV verses · 817 quiz questions · 84 figures |
 | appendices | 436 dated events · 1,351 named beings, persons and places |
 
 **The differentiator**: urantia.org has text and paragraph search, the Fellowship has a reader, Urantiapedia has a wiki and the Paramony's Bible cross-references, ubannotated has Katzen's study edition. *Nobody has the index as live data.* Roughly 3.5 curated concept links per paragraph, made by people over decades. Everything below leans on that.
@@ -56,8 +56,9 @@ Still to do: scopes (`index:` `bible:` `jesus:`), filters, `NEAR/n`, and sentenc
 **8. The words of Jesus.**
 **1,267 red-letter spans**, already marked, and `ubdarkred` is defined as `{gray}{0.0}` — *black in print*. This site is the first place they have ever been red. Read end to end, searchable, each one citable.
 
-**9. The quiz.**
-819 questions, already written, already tagged by paper, at zero authoring cost. **83 are multi-answer** (1,002 correct flags) — a single-answer model marks correct responses wrong. Spaced repetition; per-paper self-test.
+**9. The quiz.** `[built]`
+817 questions, already written, already tagged by paper, at zero authoring cost. **51 are multi-answer** (962 right answers at the edition's d6c3206; this said 83 and 1,002 until 2026-10-28, never measured) — a single-answer model marks correct responses wrong. Spaced repetition; per-paper self-test.
+Building (2026-10-28, `ARCHITECTURE.md`, The quiz): the questions are in the database, each with its id for ever, their spelling and dates the book's, every paragraph that answers one drafted for Tigran's review; next its pages, a paper's quiz at its end and `/quiz`, then an opt-in board under a name of the reader's choosing.
 
 **10. The variorum layer.** `[partly built]`
 180 `\fnc` first-edition readings `[imported]` + 84 study-edition variant notes + the index errata. "What the 1955 printing said here", as a toggle.

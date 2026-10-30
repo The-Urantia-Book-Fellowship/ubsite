@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{#- A paper's questions of the British Study Edition's quiz (build/quiz.py,
+    app.py quiz_paper_page).  quiz.js asks them one at a time, from #ub-quiz
+    below, into .quizrun; without it, and in print, they are listed, each
+    question's answer under a fold.  The questions are the edition's, in
+    English, as the book is; the words around them are the interface's. #}
+{% if paper.n %}{% set title = tr('The quiz on Paper {n}', n=paper.n) %}{% else %}{% set title = 'The quiz on the Foreword' %}{% endif %}
+{% block body %}
+<main class="prose quiz" data-paper="{{ paper.n }}" data-board="{{ board_url }}">
+  <p class="quizof"><a href="/{{ paper.n }}">{% if paper.n %}{{ t('Paper {n}', n=paper.n) }}. {% endif %}{{ paper.title }}</a></p>
+  <h1>{{ t('Cosmic Citizenship Quiz') }}</h1>
+  <p class="lede">{{ t('quiz:paper', n=questions|length) }}</p>
+  <div class="quizrun" aria-live="polite"></div>
+  <ol class="quizlist">
+    {%- for q in questions %}
+    <li>
+      <p class="qq">{{ q.q|safe }}</p>
+      <ol class="qa">{% for a in q.a %}<li>{{ a|safe }}</li>{% endfor %}</ol>
+      <details>
+        <summary>{{ t('The answer') }}</summary>
+        <ul class="qright">{% for a in q.a %}{% if q.m // 2 ** loop.index0 % 2 %}<li>{{ a|safe }}</li>{% endif %}{% endfor %}</ul>
+        {%- if q.s %}
+        {%- set ref %}<a class="qref" href="/{{ q.s.ref }}">{{ q.s.ref|replace('-', '–') }}</a>{% endset %}
+        <div class="qsrc">{% if q.s.k == 'note' %}<p class="qk">{{ t('Study note at {ref}', ref=ref) }}</p>
+          <p><span class="qnote">{{ q.s.h|safe }}</span></p>{% elif q.s.k == 'para' %}
+          <p>{{ ref }} <span class="qbook">{{ q.s.h|safe }}</span></p>{% else %}{% for x in q.s.p %}
+          <p><a class="qref" href="/{{ x.ref }}">{{ x.ref|replace('-', '–') }}</a> <span class="qbook">{{ x.h|safe }}</span></p>{% endfor %}{% endif %}</div>
+        {%- endif %}
+      </details>
+    </li>
+    {%- endfor %}
+  </ol>
+  {%- if nxt %}
+  <p class="quiznext"><a href="/quiz/{{ nxt.n }}">{{ t('quiz:next', p=nxt.n, n=nxt.count) }}</a></p>
+  {%- endif %}
+  <p class="qboard qtoboard"><a href="/quiz/board">{{ t('The quiz board') }}</a></p>
+</main>
+{% endblock %}
+{% block scripts %}
+<script type="application/json" id="ub-quiz">{{ data|tojson }}</script>
+<script src="{{ asset('quiz.js') }}" defer></script>
+{% endblock %}

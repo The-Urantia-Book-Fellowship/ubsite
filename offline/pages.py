@@ -143,8 +143,10 @@ def universe(con: sqlite3.Connection) -> dict:
             + [f"/appendix/{r[0]}" for r in con.execute("SELECT letter FROM appendix ORDER BY letter")]
             + ["/lists", "/lists/1955", "/lists/notes", "/lists/bibliography", "/changelog", "/api"]
             + [f"/part/{r[0]}" for r in con.execute("SELECT n FROM part ORDER BY n")])
+    # The papers the quiz has questions on (build/quiz.py), each a page /quiz/N.
+    quiz = [n for (n,) in con.execute("SELECT paper_n FROM quiz_paper ORDER BY paper_n")]
     return {"papers": papers, "letters": letters, "slugs": slugs, "paths": paths,
-            "lasts": lasts, "misc": misc}
+            "lasts": lasts, "misc": misc, "quiz": quiz}
 
 
 def _request(path: str) -> Request:
@@ -312,6 +314,18 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     # Everything else that is a page of its own.
     chunks["misc"] = {"pages": {path: own(path, pg)
                                 for path, pg in zip(u["misc"], site.get_many([(m, "") for m in u["misc"]]))}}
+    # The quiz (app.py quiz_page, quiz_paper_page): /quiz, with all its
+    # questions, and each paper's, a chunk of their own, which moves only when
+    # the quiz does, a reviewed paper's references with it; not misc, which
+    # /changelog moves with every release.
+    # Every quiz page names the board's site, the same on every host and in this
+    # one copy: never a test's (UB_BOARD).
+    from ubsite import board
+    if board.BOARD != board.DEFAULT:
+        raise Shape(f"UB_BOARD is {board.BOARD}: the copy's quiz pages would send to it")
+    qpaths = ["/quiz"] + [f"/quiz/{n}" for n in u["quiz"]]
+    chunks["quiz"] = {"pages": {path: own(path, pg)
+                                for path, pg in zip(qpaths, site.get_many([(m, "") for m in qpaths]))}}
     # /api, asked again at API_HOST: the page at HOST but for its address, or the
     # address is not all of it that depends on the host.  The gate holds what
     # the worker makes of it to the page at HOST.
@@ -353,7 +367,7 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         "search": {"h": srch["h"], "s": srch["s"]},
         "papers": {str(p): secs for p, secs in u["papers"].items()},
         "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
-        "misc": u["misc"],
+        "misc": u["misc"], "quiz": u["quiz"],
         # What /tr/ is made of offline: the fragment's two ends, and each
         # translation in Settings' order with the sections it has, by paper,
         # and its names and language, which its list among a search's results

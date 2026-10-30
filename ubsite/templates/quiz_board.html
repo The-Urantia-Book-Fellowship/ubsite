@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% set title = 'The quiz board' %}
+{#- The quiz's board (ubsite/board.py, app.py quiz_board_page): readers who
+    chose to put a name on it, ranked.  Every site serves this page; quiz.js
+    fills it from the site that keeps the board, `data-board`.  Online only:
+    the offline copy answers it with the page that says so. #}
+{% block body %}
+<main class="prose quiz quizboard" data-board="{{ board_url }}">
+  <p class="quizof"><a href="/quiz">{{ t('Cosmic Citizenship Quiz') }}</a></p>
+  <h1>{{ t('The quiz board') }}</h1>
+  <p class="lede">{{ t('quiz:board') }}</p>
+  <div class="boardrun" aria-live="polite"><p class="qwait">{{ t('Asking the board…') }}</p></div>
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ asset('quiz.js') }}" defer></script>
+{% endblock %}
