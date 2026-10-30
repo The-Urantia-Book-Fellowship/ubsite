@@ -396,6 +396,30 @@ def normal_run(cites):
     return out
 
 
+def book_order(cites):
+    """An entry's citations in book order: by paper, then section.
+
+    Of the A-Z's 5 880 lines whose citations name more than one paper or
+    section, seven did not run so -- `ascension plan > described as > helping
+    those just behind (35:4.1) (37:10.5) (55:2.11) (30:3.9)' -- and the 2010
+    EPUB prints all seven the same, so they are the 1999's slips and not a
+    convention (Tigran, 2026-10-28, from Paper 37's reading).
+
+    A whole-paper citation is not reordered: it leads its run, `(Paper 77)
+    (37:9.11) (38:9.1)', on 73 lines of the A-Z and trails it on two, so the
+    order asked about is the rest's.  Within one section the printed order stands, `(84:2sec)
+    (84:2.3)' among them: that is normal_run's business.  *cites* is parsed
+    citations in printed order; ``None`` (a malformed one) stays where it is.
+    """
+    def where(c):
+        return (c.paper, c.spans[0][0] if c.kind == "sec" else c.sec)
+    slots = [i for i, c in enumerate(cites) if c is not None and c.kind != "paper"]
+    out = list(cites)
+    for i, c in zip(slots, sorted((cites[i] for i in slots), key=where)):
+        out[i] = c
+    return out
+
+
 def main(argv):
     """Parse each argument (or line of stdin) and print what it is."""
     items = argv[1:] or [ln.strip() for ln in sys.stdin if ln.strip()]

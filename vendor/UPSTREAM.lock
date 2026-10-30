@@ -5,7 +5,7 @@
     "dest": "press/latex_tokenizer.py",
     "sha256": "8b620ef668bb1325e9607cb8a27401e20446d251c7422336e2496e0f4f975473",
     "bytes": 12689,
-    "commit": "5f95c312e679c1fc6c4d3d0f7a0b75535b8a641d"
+    "commit": "911b96c98ea3e6b4ed10dbc30142d2bde9e3fbc5"
   },
   {
     "repo": "press",
@@ -13,7 +13,7 @@
     "dest": "press/macros.py",
     "sha256": "4a2e857eeadb3f878e2b91801c30d0055dd673123bb2d7407f30003b9c838d38",
     "bytes": 12019,
-    "commit": "5f95c312e679c1fc6c4d3d0f7a0b75535b8a641d"
+    "commit": "911b96c98ea3e6b4ed10dbc30142d2bde9e3fbc5"
   },
   {
     "repo": "press",
@@ -21,15 +21,15 @@
     "dest": "press/normalize.py",
     "sha256": "f2e93063e5e09effba1ec44e39ff69153d439b4bcfbc67bfffa0534a4a3d60ab",
     "bytes": 5015,
-    "commit": "5f95c312e679c1fc6c4d3d0f7a0b75535b8a641d"
+    "commit": "911b96c98ea3e6b4ed10dbc30142d2bde9e3fbc5"
   },
   {
     "repo": "index",
     "path": "cite.py",
     "dest": "index/cite.py",
-    "sha256": "60a828f149ddf24bd4efd462c8ed9d18a8972023d105a057c951f289cac192d0",
-    "bytes": 17289,
-    "commit": "5e357f62de41d97ba026fb7a52b6f349bdfe1875"
+    "sha256": "ddb440c468af4ea6e6da7e52578c35e2824aa7a0b6b929df2a272ec6a9cbfd0b",
+    "bytes": 18458,
+    "commit": "be07609626fc720e6600f7e3bc41f3d0510bb6ea"
   },
   {
     "repo": "index",
@@ -37,7 +37,7 @@
     "dest": "index/xref.py",
     "sha256": "91643f77ef18114610b4740329d87c0bde139903a3acc7aeaa67f92537313330",
     "bytes": 4686,
-    "commit": "5e357f62de41d97ba026fb7a52b6f349bdfe1875"
+    "commit": "be07609626fc720e6600f7e3bc41f3d0510bb6ea"
   },
   {
     "repo": "texlive",
