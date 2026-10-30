@@ -1,0 +1,181 @@
+# Paper 32, The Evolution of Local Universes: the British Study Edition's four
+# notes at 2474116, and no sources; Block has no chart for it (his site
+# checked 2026-10-30; his chart of Paper 41 sets 15:4.6 beside 32:1.4 in an
+# endnote, the observation of F1, and nothing else of this paper).  First
+# reviewed out of the order of the book (Tigran, 2026-10-28), since the quiz's
+# Excalibur question is answered by the note at 32:2.12; the full pass,
+# Block's charts and the review's own research, 2026-10-30.  Eight notes were
+# found in review, with no credit line: five Bible notes and the Genesis
+# cross-reference, the arithmetic of 32:2.9, and J. G. Holland's "Gradatim"
+# at 32:3.10.  Checked against the press text, the edition's own KJV, the
+# Revised Version where a note gives it, ESA's Gaia pages, Shapley's part of
+# The Scale of the Universe (1921) in NASA's transcript, Baker's The Universe
+# Unfolding (1932) in the Internet Archive's PDF of its lending copy and
+# Holland's Marble Prophecy (1872) in Princeton's scan, both in
+# ../block-sources/originals/ and read in the page images, Geoffrey of
+# Monmouth's Historia and Vita Merlini, and Rhys's Studies in the Arthurian
+# Legend (Oxford, 1891), the Internet Archive's copy, pp. 331-336
+# and 362.  The review, numbered F1-F4 and F1a-F1c, F4a-F4e in the order of
+# the text, is var/study/review-032.md.  All 12 ruled by Tigran on
+# 2026-10-30 and carried as proposed, with no credit line on the eight found
+# in review: F3 with Baker and Shapley (question 1), F1c (question 2) and F4d
+# (question 3).  At his asking the same day, F1a was enlarged with the
+# Armenian reading of Revelation 22:16, "offspring of Adam", from Conybeare's
+# edition in his library (originals/LIBRARY.tsv), F3's Baker given as the
+# view he reports, and Psalms 103:13-14 compared in F4c.
+
+paper = 32
+chart = "none"
+
+# Added: F3 quotes it, pp. 32 and 113 (Block's chart of Paper 15, which
+# identifies it as a source of 15:3, quotes both passages).  The Archive only
+# lends it (universeunfoldin0000robe); checked in the Archive's own PDF of its
+# lending copy, which Tigran put in originals/ (MANIFEST.tsv): the title and
+# copyright pages and pp. 32 and 113, in the page images.
+[[source]]
+key = "Baker1932"
+origin = "none"
+tex = '''Robert H. Baker, \emph{The Universe Unfolding: The Story of Man's Increasing Comprehension of the Universe Around Him} (Baltimore: The Williams \& Wilkins Company, 1932).'''
+
+# Added: F1a quotes it (Tigran, 2026-10-30, asking for the Armenian reading);
+# checked in Tigran's copy, /Books/Religions/Bible/Armenian/Conybeare-Armenian-
+# Apocalypse.djvu (originals/LIBRARY.tsv): the title page, the list of
+# sources pp. 1-2, p. 60 with its note, and the Armenian text pp. 32 and 189,
+# read in the page images (the scan has no text layer).  Not public in his
+# library, so not linked.
+[[source]]
+key = "Conybeare"
+origin = "none"
+tex = '''Fred.~C. Conybeare, \emph{The Armenian Version of Revelation and Cyril of Alexandria's Scholia on the Incarnation and Epistle on Easter, Edited from the Oldest MSS. and Englished} (London: The Text and Translation Society, 1907).'''
+
+# Added: F4b quotes it; Princeton Theological Seminary's copy (originals/
+# marblepr00holl.pdf), title page PDF page 11, the poem pp. 53-55 (PDF 67-69),
+# read in the page images.
+[[source]]
+key = "Holland"
+origin = "none"
+tex = '''J.~G. Holland, \emph{The Marble Prophecy, and Other Poems} (New York: Scribner, Armstrong \& Co., 1872).'''
+
+# F1: kept as the edition has it.  15:4.6 says "exactly one one-hundred-
+# thousandth part of the total energy charge"; here it is "approximately",
+# of the "force endowment".  Block's chart of Paper 41, endnote 1, sets the
+# two side by side too.
+[[note]]
+at = "32:1.4"
+after = "universe is approximately"
+origin = "506837893f7c52bb"
+tex = '''In \bibref[15:4.6]{p015 4:6} we are told this is \bibemph{exactly} so, not \bibemph{approximately}. The only apparent difference is that there it refers to the \bibemph{energy charge}, whereas here to the \bibemph{force endowment} of a superuniverse.'''
+
+# F1a: found in review; checked in the edition's KJV (Rev.tex).  The Armenian
+# reading added at Tigran's asking (2026-10-30), checked in his copy of
+# Conybeare (LIBRARY.tsv), in the page images: p. 60 with its note "Adam]
+# David α 4"; the Armenian text p. 32 (Codex 1, the Bodleian codex, under his
+# verse 17) and p. 189 (Codex 6, the Etchmiadzin codex); the list of sources
+# pp. 1-2 (1 Bodleian, 4 Jerusalem, α the recension of Nerses); the dates in
+# his stemma p. 147 (1: 1324; 4: 1199; 6: 1278; α: 1178-1198); and his own
+# remark p. 134, "Version has Ἀδάμ for Δαβίδ, which α 4 retain".  David in the
+# Zohrab Bible (../zohrab/tex/Rev.tex, "ի Դաւթայ"), in NA27 and the Byzantine
+# text (../na27m, ../byzgnt), the Vulgate (../vul), the Sahidic and the
+# Bohairic (../sahnt, ../bohnt); the Syriac on Tigran's own check.
+[[note]]
+at = "32:2.6"
+after = "Bright and Morning Star,"
+origin = "none"
+tex = '''Revelation~22:16, where Jesus says of himself: ``I am the root and the offspring of David, and the bright and morning star''; and Revelation~2:28: ``And I will give him the morning star.'' Here the title is Gabriel's, the first-born of the Creator Son and the Creative Spirit, ``one like him in all aspects of character''. The oldest Armenian text of the verse makes Jesus the offspring not of David but of Adam: \textarm{Ես եմ արմատն և զաւակն ադամայ, և աստղն առաւաւտուն}, ``I am the root and the offspring of Adam, and the star of dawn'', so in the Bodleian codex of 1324 which Conybeare~\cite{Conybeare} prints (p.~60; the Armenian text p.~32) and in the Etchmiadzin codex of 1278 (p.~189), while the Jerusalem codex of 1199 and the twelfth-century revision of Nerses of Lambron read David (his notes, pp.~60 and 134), as does the Zohrab Bible (Venice, 1805). I have found Adam in no other version: the Greek manuscripts, the Latin, the Syriac and the Coptic all read David. The reading answers to the name Jesus gave himself, the Son of Man, which in Hebrew is \bibemph{ben-adam}, son of Adam.'''
+
+# F1b: found in review; checked in the edition's KJV (Gen.tex), and 6:5.7 and
+# 7:4.4 in the press text.  Tigran's own Russian note here (ud) says the same:
+# "Отца и Сына".
+[[note]]
+at = "32:2.8"
+after = "in their divine image."
+origin = "none"
+tex = '''Genesis~1:26: ``Let us make man in our image, after our likeness''. \bibemph{Their} is the Father's and the Son's: at \bibref[6:5.7]{p006 5:7} the Father's proposal is ``Let us make mortal man in our own image'', and at \bibref[7:4.4]{p007 4:4} ``mortal creatures''.'''
+
+# F1c: found in review; the arithmetic recomputed, 32:0.1, 15:2.5 and 15:14.5
+# in the press text.  3,840,101 / 10,000,000 = 38.4 percent; 619 / 1,000.
+[[note]]
+at = "32:2.9"
+after = "inhabited planets in Nebadon,"
+origin = "none"
+tex = '''A local universe is one hundred constellations of one hundred systems, each eventually of about a thousand inhabited spheres (\bibref[32:0.1]{p032 0:1}): about 10,000,000 in all (\bibref[15:2.5]{p015 2:5}). The 3,840,101 are a little over 38 percent of that, and the universe ``young''. Satania, ``fairly typical'', has 619 of its thousand (\bibref[15:14.5]{p015 14:5}), with more than two hundred more planets evolving towards habitation.'''
+
+# F2: the arithmetic shown, and what it assumes said: the paper does not say
+# that the other four of the five have three worlds each.
+[[note]]
+at = "32:2.10"
+after = "different physical systems"
+origin = "2ef11e68633c66e5"
+tex = '''More precisely, if the other four of the five have three inhabited worlds each: one system with four, four with three and forty-six with two hold $4 + 12 + 92 = 108$ of the 619 worlds, which leaves 511 systems with one, and makes $1 + 4 + 46 + 511 = 562$ systems in all, ``over five hundred.'''''
+
+# F3: the figure dated and named, and the reading said as one: the papers
+# call the Milky Way the "central nucleus" of Orvonton (15:3.1); and the
+# figures of the 1920s and 1930s added (question 1): Baker 1932, pp. 32 and
+# 113, in the page images of the Archive's PDF (p. 100, first given here, is
+# where ch. VI opens, the page Block's chart of Paper 15 puts in the heading
+# it quotes the second passage under), and his figure given as the view he
+# reports (Tigran, 2026-10-30): on p. 32 the sketch that "as recently as
+# 1928, received the approval of many astronomers", on p. 113 the first of
+# three theories he sets side by side; Shapley 1921 in NASA's transcript of the
+# Bulletin of the National Research Council, vol. 2, part 3, no. 11, pp.
+# 171-217; ESA, "Anatomy of the Milky Way", 1 August 2016 (updated 2019).
+[[note]]
+at = "32:2.11"
+after = "fifty thousand light-years"
+origin = "711e4bee2e1ec9f8"
+tex = '''If these distances are taken within the Milky Way, it is at least 500,000 light-years across, five times the 100,000 or so astronomers give for its disc of stars, in which the Sun ``sits about half way between its centre and periphery'' (ESA, ``Anatomy of the Milky Way'', from the Gaia mission, 2016). Nor are they the figures of the 1920s and 1930s: Baker~\cite{Baker1932} reported the view, then approved by many astronomers, of a galactic system 200,000 light-years across, with the sun ``about halfway between the massive center and the edge'' (pp.~32 and 113), and Harlow Shapley's galaxy of 1921, the largest then proposed, was ``at least three hundred thousand light-years'' across, with the sun's star cloud ``at least 50,000 light-years from the galactic center'' (\bibemph{The Scale of the Universe}, Bulletin of the National Research Council, May 1921). But the papers call the Milky Way the ``central nucleus'' of Orvonton (\bibref[15:3.1]{p015 3:1}), so perhaps the distances measure Orvonton rather than the galaxy as astronomers see it.'''
+
+# F4: Morgen and her sisters are the Vita Merlini's, and only the first of
+# them the most skilled in healing; Camlann's meaning hedged and given whole;
+# Rhys's Avallach as he spells and calls him, with his pages; Glastonbury's
+# claim to Avalon the monks' of about 1190, by Gerald of Wales, and Malory's
+# as Rhys read him; the isle of glass tied to Glastonbury's Welsh name.
+[[note]]
+at = "32:2.12"
+after = "universes are: Avalon"
+origin = "8fbb4aa5e5c51c7f"
+tex = '''This word occurs 5 times in the Urantia Papers (\bibref[38:5.1]{p038 5:1}, \bibref[66:2.7]{p066 2:7}, \bibref[67:6.5]{p067 6:5} and \bibref[77:2.6]{p077 2:6}). The word ``Avalon'' first appears in Geoffrey of Monmouth's historical account \bibemph{Historia Regum Britanni\ae} (``The History of the Kings of Britain'', c.~1136) as the place where King Arthur's sword Excalibur (Caliburnus) was forged and later where Arthur was taken to recover from his wounds after the Battle of Camlann --- his final battle (the name ``Camlann'' perhaps meaning ``crooked bank''). In Latin it was called \bibemph{Insula Avallonis} in the \bibemph{Historia}. In the later \bibemph{Vita Merlini} (``The Life of Merlin'', c.~1150) he called it \bibemph{Insula Pomorum}, the ``isle of apples'', ruled by nine sisters, the first of them Morgen, the most skilled in the healing art: the Morgan le Fay of the later romances. The name is generally considered to be of Welsh origin (though an Old Cornish or Old Breton origin is also possible), derived from Old Welsh \bibemph{abal}, ``apple'', or \bibemph{aball}, ``apple tree'' (in later Middle Welsh spelled \bibemph{aval, avall;} now Modern Welsh \bibemph{afal, afall}). Sir John Rhys, however (\bibemph{Studies in the Arthurian Legend}, 1891, pp.~335--336 and 362), linked the name Avalon with that of Avallach, ``a Celtic dark divinity'', and placed Avalon on the west coast of Cornwall. Glastonbury in Somerset had been called the Isle of Avalon since its monks claimed to have found Arthur's grave there, about 1190, under a cross reading \bibemph{in insula Avallonia} (Gerald of Wales, c.~1193); Malory, as Rhys read him, put Avalon there too. Its Welsh name, \bibemph{Ynys Wydrin}, the ``isle of glass'', may be connected with Celtic legends about an island of glass inhabited by deceased heroes.'''
+
+# F4a: found in review; checked in the edition's KJV (Joh.tex), and 6:2.2 and
+# 7:5.11 in the press text.
+[[note]]
+at = "32:3.6"
+after = "has seen the Father."
+origin = "none"
+tex = '''John~14:9: ``he that hath seen me hath seen the Father'', as at \bibref[6:2.2]{p006 2:2} and \bibref[7:5.11]{p007 5:11}; here it is said of every Creator Son. ``The Father and the Sons are one'' is John~10:30, ``I and my Father are one'', in the plural.'''
+
+# F4b: found in review; checked in the book, pp. 53 and 55, in the page
+# images.  The first line ends with a comma on p. 53 and a semicolon on p. 55.
+[[note]]
+at = "32:3.10"
+after = "round by round,"
+origin = "none"
+tex = '''Compare J.~G. Holland's ``Gradatim''~\cite{Holland}, pp.~53--55, whose title is Latin for ``step by step'': ``Heaven is not reached at a single bound, / But we build the ladder by which we rise / From the lowly earth to the vaulted skies, / And we mount to its summit round by round.'' The stanza opens and closes the poem, which was much reprinted. Here the climb from the bottom is made ``joyfully'', and is ``all the more honor'' to those who make it.'''
+
+# F4c: found in review; checked in the edition's KJV (2Ti.tex, Psa.tex).
+# 28:6.2 and Psalms 103:13-14 added at Tigran's asking (2026-10-30), who
+# heard Psalms 103:14 here: the book quotes that verse at 3:3.2, keeping its
+# "frame" and "dust", and Nave lists it under GOD: Knowledge of, p. 466, with
+# 2 Timothy 2:19 on p. 467, so it is compared, not given as the source.
+[[note]]
+at = "32:4.8"
+after = "where we were born.”"
+origin = "none"
+tex = '''2~Timothy~2:19: ``The Lord knoweth them that are his''; and Psalms~87:6: ``The \textsc{Lord} shall count, when he writeth up the people, that this man was born there.'' Both are quoted freely: \bibemph{them that are his} has become \bibemph{his children}, and the Lord's writing up of where each was born, his taking note of it, as at \bibref[28:6.2]{p028 6:2}. Compare Psalms~103:13--14, whose second verse the book quotes at \bibref[3:3.2]{p003 3:2}: ``Like as a father pitieth his children, so the \textsc{Lord} pitieth them that fear him. For he knoweth our frame; he remembereth that we are dust.'''''
+
+# F4d: found in review (question 3); checked in the edition's KJV (Phi.tex,
+# 1Jo.tex), and Philippians 2:7 in the Revised Version (1881), which the
+# American Standard Version (1901) has the same.
+[[note]]
+at = "32:4.12"
+after = "all things else."
+origin = "none"
+tex = '''Compare Philippians~2:7, of the Son: ``made himself of no reputation'', in the Revised Version (1881) ``emptied himself''. Here it is the Father who ``has poured out himself'' and ``divested himself of all things else'', as at \bibref[32:4.10]{p032 4:10} ``of every function which it is possible for another being to perform''. ``That we may be like him'' is 1~John~3:2: ``we know that, when he shall appear, we shall be like him; for we shall see him as he is.'''''
+
+# F4e: found in review; checked in the edition's KJV (Rev.tex, Heb.tex,
+# 1Co.tex, 2Ti.tex, Joe.tex, Act.tex, Neh.tex, Psa.tex).
+[[note]]
+at = "32:5.8"
+after = "upon all flesh."
+origin = "none"
+tex = '''Revelation~22:17: ``whosoever will, let him take the water of life freely''; Hebrews~12:1: ``let us run with patience the race that is set before us'', and 1~Corinthians~9:24--25: ``So run, that ye may obtain'', ``they do it to obtain a corruptible crown; but we an incorruptible''; 2~Timothy~4:7--8: ``I have kept the faith: Henceforth there is laid up for me a crown of righteousness''; Joel~2:28, as Acts~2:17 quotes it: ``I will pour out my spirit upon all flesh''; and the ``good spirit'' is Nehemiah~9:20, ``Thou gavest also thy good spirit to instruct them'', and Psalms~143:10, ``thy spirit is good''.'''

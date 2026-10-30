@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Paper 32, The Evolution of Local Universes, has study notes too, 12 of them, reviewed ahead of the papers before it because the quiz's question on Excalibur is answered by its note on Avalon, and the Bibliography lists the three works they add.
 - The site's address stands under its name at the top of every page, so that which site you are reading, ubsite.sigmaai.au or ubsite.ddns.net, can be seen at once, in the installed app above all, which shows no address bar.
 - After a quiz you may put a name of your choosing on the quiz board, at /quiz/board, which ranks everyone who has by the questions they had right the first time they met them. No account is needed, and nothing about you is kept but that name and your answers; Settings' Quiz board turns the offer off.
 - The Cosmic Citizenship Quiz of The British Study Edition of the Urantia Papers, 777 questions on 125 papers, is asked one question at a time: at the end of each paper that has questions, which offers its quiz, and at /quiz, linked from the home page, which asks ten at random from the whole book or a part. After each answer the right ones are marked, with the passage that answers it, and at the end the score is given with what to read again. It works offline, what you answer stays in this browser, and Settings' Quiz turns it off.

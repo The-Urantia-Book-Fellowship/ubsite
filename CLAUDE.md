@@ -294,7 +294,7 @@ Carried from the plan, none blocking:
 
 ## 11. What comes next
 
-Phase 6, the study-edition apparatus, is under way: its `\fnst` notes reach the site paper by paper, Papers 0–8 so far, and the quiz is live (2026-10-30: its questions, their references all reviewed, its pages and its board). Then the KJV, and the figures behind the rights gate; then Phase 7 (human sources) and 8 (the timeline, the map). The plan has the phases, and `ROADMAP.md` why each is worth doing.
+Phase 6, the study-edition apparatus, is under way: its `\fnst` notes reach the site paper by paper, Papers 0–8 and 32 so far, and the quiz is live (2026-10-30: its questions, their references all reviewed, its pages and its board). Then the KJV, and the figures behind the rights gate; then Phase 7 (human sources) and 8 (the timeline, the map). The plan has the phases, and `ROADMAP.md` why each is worth doing.
 
 What Phase 6 imports: 404 `\fnst` study footnotes (307 on 2026-09-21, when this was first written; the human-source notes of Papers 1–6 came on 2026-10-07 and 09), 60 human-source `\bibitem` records, 116 `\bibref` cross-references, the whole KJV (24,974 verses + 5,069 marginal notes), 817 quiz questions (**51 of them multi-answer**, 962 right answers — a single-answer model marks correct responses wrong; this said 83 and 1,002, never measured, until 2026-10-28, and 819, 53 and 966 at 2474116; the quiz is in the database since then, `ARCHITECTURE.md`, The quiz), and 84 figures of which **58 are rights-restricted** and must be separable at query time.
 
