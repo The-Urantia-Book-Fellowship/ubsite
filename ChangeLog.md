@@ -50,6 +50,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The index is revised once more from its reading of Paper 35: the entry evangels of destiny, which cited 35:3.21, is withdrawn.
 - The example citations in the search box, on the home page and on the not-found page are from Papers 1 and 12 now, which every translation shown has, so that typing one opens a paragraph the translations can be compared on; they named Paper 101 before.
 - A paper's address, such as /15, is the whole paper on one page; unless Settings' Whole paper is on, it opens the paper's first section as before, your browser making the choice.
 - The offline copy is a tick in Settings' Offline tab, Offline copy: ticking it downloads the copy, unticking it lets it go, and the translations in it can be ticked before the copy, which then downloads with them.
