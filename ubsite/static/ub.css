@@ -134,10 +134,21 @@ a:hover { text-decoration-thickness: 2px; }
 /* ---- chrome ------------------------------------------------------------ */
 .top { display: flex; gap: 1rem; align-items: baseline; flex-wrap: wrap;
        padding: .8rem 1rem; border-bottom: 1px solid var(--rule); }
-.brand { font-weight: 400; font-size: 1.2rem; text-decoration: none; letter-spacing: .02em; }
-/* The mark, inline so the name keeps the baseline the header aligns on. */
-.brand .logo { display: inline-block; width: 1.55em; height: 1.55em; margin-right: .4em;
-               vertical-align: -.36em; }
+/* The name, and under it the site's address, beside the mark, which spans
+   both.  Aligned on the baseline, so that the name keeps the baseline the
+   header aligns on (the mark, with none of its own, is centred on the two
+   lines instead). */
+.brand { display: inline-flex; align-items: baseline; gap: .45em; font-weight: 400; font-size: 1.2rem;
+         text-decoration: none; letter-spacing: .02em; line-height: 1.1; }
+.brand .logo { flex: none; align-self: center; width: 1.95em; height: 1.95em; }
+.brand .nm { display: flex; flex-direction: column; }
+/* The site's address, drawn from the page's own (base.html's head script,
+   --host): which site this is, seen at once, in an installed app above all,
+   which shows no address bar (Tigran, 2026-10-30; until then the cloud's
+   menu named it).  The same on both sites, as the mark is. */
+.brand .host { font-size: .66rem; letter-spacing: .07em; color: var(--faint); margin-top: .15em;
+               white-space: nowrap; }
+.brand .host::before { content: var(--host, ""); }
 .top nav { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
 .top nav a { font-size: .92rem; text-decoration: none; color: var(--faint); }
 .top nav a:hover, .top .mode { color: var(--ink); }
@@ -1321,43 +1332,36 @@ dialog.settings .seg label { display: grid; place-items: center; min-width: 2.4r
 /* As tall as a row of words, Theme's: a drawing has no line of its own. */
 dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5 + .24rem); }
 
-/* Work offline's menu, opened by its icon (static/offline.js): online or
-   offline, the switch, what the copy is, and installing the site as an app.
-   A popover, in the top layer, placed by ub.js under the icon in the page's
-   coordinates, so that it scrolls away with the header. */
-.offmenu { position: absolute; inset: auto; margin: 0; width: min(22rem, calc(100vw - 2rem));
-  padding: .7rem 1rem .85rem; color: var(--ink); font-size: 1rem; line-height: 1.4;
-  background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
-  border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
-.offmenu .net { display: flex; flex-wrap: wrap; column-gap: .8rem; margin: 0 0 .45rem;
+/* Work offline's tab in Settings (base.html, static/offline.js), the cloud's
+   menu until 2026-10-30: its first line online or offline, and which site
+   this is at the line's right, as an address is written, or under it at the
+   right when the line is full (the same build is at two addresses; Tigran,
+   2026-10-15); the copy's tick, and under it, indented to its words, what
+   the copy is, or how far its download has gone, with its buttons; the
+   translations (above); and the offer to install the site as an app, under a
+   rule. */
+dialog.settings .net { display: flex; flex-wrap: wrap; column-gap: .8rem; margin: 0 0 .45rem;
   font-size: .82rem; letter-spacing: .06em; font-variant-caps: small-caps; color: var(--faint); }
-/* Which site this is, at the line's right, or under it at the right when the
-   line is full: the same build is at two addresses, and an installed app shows
-   none (Tigran, 2026-10-15).  Written as an address is. */
-.offmenu .net .host { margin-left: auto; font-variant-caps: normal; letter-spacing: 0;
+dialog.settings .net .host { margin-left: auto; font-variant-caps: normal; letter-spacing: 0;
   white-space: nowrap; }
-.offmenu .what { margin: 0; font-size: 1.02rem; }
-.offmenu small { color: var(--faint); font-size: .85rem; }
-.offmenu .state { margin: .45rem 0 0; font-size: .85rem; color: var(--faint); }
-.offmenu .state:empty { display: none; }
-.offmenu .state button { margin-top: .3rem; }
-.offmenu .install { margin: .65rem 0 0; padding-top: .6rem; border-top: 1px solid var(--rule); }
-.offmenu button { padding: .05rem .55rem; font: inherit; font-size: .85rem;
+dialog.settings .offcopy .state { margin: .1rem 0 0 1.35rem; font-size: .85rem; color: var(--faint); }
+dialog.settings .offcopy .state:empty { display: none; }
+dialog.settings .offcopy .state button { margin-top: .3rem; }
+dialog.settings .install { margin: .8rem 0 0; padding-top: .7rem; border-top: 1px solid var(--rule); }
+dialog.settings :is(.offcopy, .install) button { padding: .05rem .55rem; font: inherit; font-size: .85rem;
   color: var(--link); background: none; border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; }
 /* Each label in a span of its own (offline.js), set level with its box as
    the Settings pills are (--lift): Goudy, centred, sits high. */
-.offmenu button > span { position: relative; top: var(--lift); }
-/* Removing the copy is apart from the rest, and quieter. */
-.offmenu .remove { margin: .5rem 0 0; }
-.offmenu button.drop { padding: 0; border: 0; color: var(--faint); text-decoration: underline;
-  text-decoration-thickness: 1px; text-underline-offset: 2px; }
-/* What's new (static/offline.js): a popup over the menu, which stays open
-   beneath it, centred where the browser puts a popover, and scrolling within
-   with its title row in view, as Settings does. */
+dialog.settings :is(.offcopy, .install) button > span { position: relative; top: var(--lift); }
+/* What's new (static/offline.js): a dialog of its own, centred, over
+   Settings where it is opened from there, and scrolling within with its
+   title row in view, as Settings does.  A popover until 2026-10-30, over the
+   cloud's menu; outside Settings' modal dialog a popover is inert. */
 .offnews { width: min(30rem, calc(100vw - 2rem)); max-height: min(38rem, calc(100dvh - 3rem));
   overflow-y: auto; padding: 0 1.2rem 1rem; color: var(--ink); font-size: .95rem; line-height: 1.4;
   background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
   box-shadow: 0 12px 40px rgb(0 0 0 / .28); }
+.offnews::backdrop { background: rgb(0 0 0 / .2); }
 .offnews .bar { position: sticky; top: 0; display: flex; align-items: center; margin: 0 -1.2rem;
   padding: .7rem .6rem .3rem 1.2rem; background: var(--paper); }
 .offnews h2 { margin: 0 auto 0 0; font-size: 1.15rem; }
@@ -1755,7 +1759,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 /* ---- print ------------------------------------------------------------- */
 @media print {
   @page { margin: 22mm 20mm; }
-  .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, dialog, .offmenu { display: none; }
+  .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, dialog { display: none; }
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }

@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The site's address stands under its name at the top of every page, so that which site you are reading, ubsite.sigmaai.au or ubsite.ddns.net, can be seen at once, in the installed app above all, which shows no address bar.
 - After a quiz you may put a name of your choosing on the quiz board, at /quiz/board, which ranks everyone who has by the questions they had right the first time they met them. No account is needed, and nothing about you is kept but that name and your answers; Settings' Quiz board turns the offer off.
 - The Cosmic Citizenship Quiz of The British Study Edition of the Urantia Papers, 777 questions on 125 papers, is asked one question at a time: at the end of each paper that has questions, which offers its quiz, and at /quiz, linked from the home page, which asks ten at random from the whole book or a part. After each answer the right ones are marked, with the passage that answers it, and at the end the score is given with what to read again. It works offline, what you answer stays in this browser, and Settings' Quiz turns it off.
 - Settings can leave the index and the appendices, the study notes or the translations out of the search results, each with a switch of its own in the Show tab, as it already could the 1955 readings.
@@ -47,6 +48,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The offline copy is a tick in Settings' Offline tab, Offline copy: ticking it downloads the copy, unticking it lets it go, and the translations in it can be ticked before the copy, which then downloads with them.
+- The cloud at the top of the page opens Settings at its Offline tab, which has Install as an app too; the cloud's own menu is gone.
 - The index is revised from its reading of Papers 36 to 38: entries reworded to say more exactly what the book says, the angels enjoying our efforts in art and music, the six unrevealed orders of angels never called seraphim, Gavalia the first-born chief of all the Brilliant Evening Stars, and the life plasm formulated by the Life Carriers with its essential factor from the Mother Spirit; citations corrected, Paper 36 written by a Vorondadek Son at its end, the cherubim's borderline tasks at 38:7.7, and the energy transformers who let humans see seraphim at 50:2.7; impetuous said of Simon Peter, not John Zebedee; two entries fewer; and where an entry cites several papers, its citations now stand in the order of the book.
 - Урантийские документы reads район for регион at 11:3.1, at its revision of October 29.
 - On a phone, the line that folds a paragraph's index entries and its translations no longer puts a dot between the two.
@@ -73,6 +76,10 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 - The footer is two lines: the edition and its licence, with a link to this changelog, and that the site is not affiliated with Urantia Foundation.
 - The licence of Goudy, the book's typeface, is linked from Settings, beside the typeface.
 - Update now, in the offline menu, reloads the page once the update is in, and brings with it the part of the site that answers offline, so that nothing needs reloading by hand, even when you go offline straight after.
+
+### Removed
+
+- Settings' Keep the offline copy up to date: a kept copy always does, and Update now is offered only when it cannot, with the browser's data saver on or after an update that stopped.
 
 ### Fixed
 

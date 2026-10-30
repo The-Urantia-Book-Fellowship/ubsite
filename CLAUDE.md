@@ -105,7 +105,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
 - **The 1955 readings and their reasons** (2026-10-12): rings and cards, the SRT Committee's reasons from `data/srt/` (`build/srt.py`), `queries.notes()`, `/lists/1955`, and in search.
 - **Justified, hyphenated where the book hyphenates** (2026-10-12): `build/hyphen.py`, `paragraph.html_hy`, `check_hyphen`.
 - **Reading paths** (2026-10-13): `/i/<slug>/read` and `/read/theme`; `derive.reading_path`, `queries.reading_path()`.
-- **Work offline** (2026-10-13): `offline/` keeps the site's own pages in `var/offline/`; `sw.js`, `offline-core.js`, `offline.js`; its gate, `python -m offline check`.
+- **Work offline** (2026-10-13): `offline/` keeps the site's own pages in `var/offline/`; `sw.js`, `offline-core.js`, `offline.js` (Settings' Offline tab, since 2026-10-30; the cloud's menu before); its gate, `python -m offline check`.
 - **Study notes** (2026-10-18): one reviewed paper at a time, `data/study/NNN.toml`, whose README holds the rules; `build/study.py`, `tools/study/draft.py`.
 - **The interface in Russian** (2026-10-25): `ubsite/ru.toml`, `ubsite/l10n.py`, `/l10n.js`.
 - **Translations beside the text** (2026-10-26): ud and urantia-ru under our numbering (`build/translation.py`, `tests/known-tr-*.tsv`), and the Foundation's from its HTML since 2026-10-27 (`readers/uf_html.py`, `tr_html.py`), in a fold under each paragraph, with the translator's notes, offline and in search, side by side in Compare, `/1:1/compare` (`ub.js cmpDraw`), and in the rail (`/rail/<key>`, 2026-10-27).
@@ -260,10 +260,10 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 - **Search**: an exact headword wins; Ctrl+X.
 - **Settings**: one mode; the dialog, its tabs and every setting; a site's own defaults.
 - **Listening**: no Listen button; the end of a section; Follow along; ⏮; the browser's voice; the AI voice, made here; Bark, rejected.
-- **The sites, their apps and their visitors**: the mark; each site's app and icons; the footer; visits counted with no IP address or cookie kept; robots.txt.
+- **The sites, their apps and their visitors**: the mark; the site's address under the name; each site's app and icons; the footer; visits counted with no IP address or cookie kept; robots.txt.
 - **The text API and the licence**: `ref` and `uf_ref`; the text public domain, the edition CC BY-NC-SA 4.0; passages and papers by reference; HTML alone; text versions; what a paragraph record says.
 - **The 1955 readings**: a ring and a card with the committee's reasons; the 1955 page references.
-- **Work offline**: updating, by the reader or by itself; everything but the recordings; the API's page.
+- **Work offline**: the copy a tick in Settings' Offline tab, the cloud a sign that opens it; updating by itself; everything but the recordings; the API's page.
 - **The changelog and What's new**: `ChangeLog.md` is both; American dates.
 - **Russian, and the translations**: the interface in both languages; the translations in a fold, chosen in Settings, offline, with their notes, and in search.
 - **The quiz**: two ways in; one question at a time, a set for more than one right answer; references reviewed per paper, a study note among them; the book's spelling and dates; English only; on by default; kept in the browser; a board, opt-in, ranked by questions right the first time, on the main site.

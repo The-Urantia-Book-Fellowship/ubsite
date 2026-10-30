@@ -1,51 +1,56 @@
-// Work offline, the page's side: the menu that the icon at the header's corner
-// opens (#offmenu in base.html), with the switch, what it says about the copy,
-// and the offer to install the site as an app; and what the icon shows of the
+// Work offline, the page's side: Settings' Offline tab (base.html, the panel
+// .offline), which does what the cloud's menu did until 2026-10-30 (Tigran:
+// the translations' ticks, greyed until a copy had been got from the menu,
+// were counter-intuitive, so the tab does the whole of it, and the menu is
+// gone): online or offline, and which site this is; the copy, a tick that
+// downloads it and lets it go, with what it is, or how far its download has
+// gone, under it; the translations kept in it; and the offer to install the
+// site as an app.  And what the cloud at the header's corner shows of the
 // copy, data-have: none, kept, stale (an update is waiting: the flame's dot)
-// or busy.  ub.js shows the icon, says online or offline, and loads this when
-// the menu opens, or at once on a page the worker controls.  The worker
-// (static/sw.js) does the work, and answers {cmd} on a message port with its
-// state:
+// or busy.  ub.js shows the cloud, says online or offline, opens the tab from
+// it, and loads this when the tab opens, or at once on a page the worker
+// controls.  The worker (static/sw.js) does the work, and answers {cmd} on a
+// message port with its state:
 //
-//   have    the copy kept: {build, made, text, index, bytes, raw}, or null
+//   have    the copy kept: {build, made, text, index, bytes, raw, tr, trs}, or null
 //   latest  the site's, when it is another: {made, fetch, full, ...}, or null
-//   busy    {done, total} in bytes while downloading
+//   busy    {done, total, adding, copy} in bytes while downloading
 //   error   why the last download stopped
 //
-// Downloading registers the worker, which fetches the copy; updating asks for
-// the site's worker first, and reloads the page once the copy is in; removing
-// it removes the copy and unregisters the worker.  Nothing else does: the copy
-// stays through going offline and online again, and the worker answers from
-// it whenever the network does not.  An out-of-date copy is said, with what
-// the update costs, whenever the menu shows it, and the icon has the flame's
-// dot.  Until 2026-10-14 all this was in Settings, a switch turned on or off,
-// and a reader who turned it off to be "online" again lost the copy; a stale
-// copy was announced by a line under the header too (Tigran).
+// Ticking the copy registers the worker, which fetches the copy; unticking it
+// removes the copy and unregisters the worker, at once, as a translation is
+// let go.  Nothing else does: the copy stays through going offline and online
+// again, and the worker answers from it whenever the network does not.  Until
+// 2026-10-14 all this was in Settings, a switch turned on or off, and a reader
+// who turned it off to be "online" again lost the copy (Tigran); the tick is
+// named for the copy now, not for a mode.
 //
-// Unless Settings' "Keep the offline copy up to date" is off (settings.py
-// OFFLINE), an out-of-date copy is updated by itself, as if Update now had
-// been tapped, whenever a check finds it so with the site reached and this
-// page in view: as a page loads, as the browser comes online, and as the page
-// comes into view again (keepUp).  Only from a page the reader has open, never
-// in the background.  At its end What's new opens, saying what changed since
-// the copy before, and the page reloads once it is closed (told).  Update now
-// is for a reader who keeps the copy as it was until they choose; most would
-// forget it, and find the copy "broken" (Tigran, 2026-10-25).
+// A kept copy is updated by itself whenever a check finds it out of date with
+// the site reached and this page in view: as a page loads, as the browser
+// comes online, and as the page comes into view again (keepUp).  Only from a
+// page the reader has open, never in the background.  At its end What's new
+// opens, saying what changed since the copy before, and the page reloads once
+// it is closed (told).  Update now stays only where the copy will not update
+// itself: the browser saving data, or the same update having stopped within
+// the hour, when it is Try again.  Until 2026-10-30 Settings' "Keep the
+// offline copy up to date" could turn this off, leaving Update now to a reader
+// who kept the copy as it was until they chose; most would forget it, and
+// find the copy "broken" (Tigran, 2026-10-25).
 //
-// The translations beside the text are each a download of their own, chosen
-// in Settings' Offline tab (base.html .offtr; Tigran, 2026-10-26): a tick
-// downloads one at once, with an update of the copy if it is out of date, and
-// an untick lets it go, online or not.  What the copy keeps is the worker's
+// The translations beside the text are each a download of their own (Tigran,
+// 2026-10-26): a tick downloads one at once, with the copy where none is kept
+// yet (2026-10-30), or with an update of the copy if it is out of date, and an
+// untick lets it go, online or not.  What the copy keeps is the worker's
 // (sw.js meta.tr), not a setting, so ↺ never removes one; and it is kept up to
 // date with the copy.  `ub:trkept` tells ub.js's folds when it changes.
 (function () {
-  var box = document.getElementById('offmenu'), icon = document.querySelector('.top .offline');
-  if (!box || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
+  var panel = document.querySelector('dialog.settings .panel.offline'), icon = document.querySelector('.top .offline');
+  if (!panel || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
   window.ubOfflineUI = true;
-  var sw = navigator.serviceWorker, line = box.querySelector('.state'), drop = box.querySelector('p.remove'),
-      inst = box.querySelector('.install'), kept = false;
-  // The interface's words (ubsite/l10n.js): what the menu says is HTML in
-  // both languages, which CSS chooses between (T()).
+  var sw = navigator.serviceWorker, line = panel.querySelector('.offcopy .state'),
+      copyBox = panel.querySelector('.offcopy input'), inst = panel.querySelector('.install'), kept = false;
+  // The interface's words (ubsite/l10n.js): what the tab says is HTML in both
+  // languages, which CSS chooses between (T()).
   var T = window.ubT;
 
   // A size, "44.8 MB", and a day, "October 18": the American order, as the
@@ -54,11 +59,12 @@
   function mb(n) { return T.tr('{x} MB', { x: T.dec(Math.max(0.1, n / 1e6).toFixed(1)) }); }
   function day(iso) { return T.date(iso, false); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
-  // The index turned off in Settings: what the menu says of the copy leaves it
+  // The index turned off in Settings: what the tab says of the copy leaves it
   // out, as the page does (settings.py `index`).
   function noIndex() { return !!window.ubSettings && window.ubSettings.get().index === false; }
-  // Kept up to date by itself (settings.py `autoupdate`), on unless turned off.
-  function byItself() { return !window.ubSettings || window.ubSettings.get().autoupdate !== false; }
+  // The browser saving data: the copy is not updated by itself (keepUp), and
+  // Update now is offered instead.
+  function saving() { return !!(navigator.connection && navigator.connection.saveData); }
   // Listening: closing What's new then reloads nothing, which would stop it.
   function listening() { return !!document.querySelector('.player'); }
   function ask(cmd, more) {
@@ -82,7 +88,7 @@
     document.dispatchEvent(new Event('ub:offline'));
   }
 
-  // An update can be had only online; offline, the menu says so instead.
+  // An update can be had only online; offline, the tab says so instead.
   // Online is the site reached, not the browser's word alone: ub.js says it
   // from the browser and from where this page came, and the worker's check
   // of the manifest says it again (heard).  A server that is not there is
@@ -105,8 +111,11 @@
     watch(s);
     trs(s);
     kept = !!s && !s.removed;
-    // Not while it downloads, nor offline, when it is all the site there is.
-    drop.hidden = !kept || !!(s && s.busy) || !online();
+    // The copy's tick: ticked while a copy is kept or fetched, and not to be
+    // changed while a download runs, nor offline: none can be fetched then,
+    // and a copy kept is all the site there is.
+    copyBox.checked = kept;
+    copyBox.disabled = !!(s && s.busy) || !online();
     if (!kept) {
       mark('none');
       return sized();
@@ -125,11 +134,15 @@
                        (online() ? ' <button type="button" class="get"><span>' + T('Try again') + '</span></button>' : '');
       mark('none', T.tr('Online; the offline copy did not finish downloading'));
     } else if (up) {
+      // Out of date.  Online it is updated by itself at once (keepUp), unless
+      // the browser is saving data or this update stopped within the hour:
+      // then Update now and What's new.  Offline, once online.
+      var held = online() && (saving() || triedLately(up.build));
       line.innerHTML = T('Out of date: kept as the site was on {d}, which has changed since.', { d: day(have.made) }) + ' ' +
-                       (online() ? '<br><button type="button" class="get"><span>' + T('Update now ({s})', { s: mb(up.fetch) }) +
-                                   '</span></button> <button type="button" class="newsbtn" popovertarget="offnews"><span>' +
-                                   T('What’s new') + '</span></button>'
-                                 : byItself() ? T('It updates by itself once online.') : T('It can be updated once online.')) +
+                       (held ? '<br><button type="button" class="get"><span>' + T('Update now ({s})', { s: mb(up.fetch) }) +
+                               '</span></button> <button type="button" class="newsbtn"><span>' +
+                               T('What’s new') + '</span></button>'
+                             : online() ? '' : T('It updates by itself once online.')) +
                        (err ? '<br>' + T('The last update stopped: {e}.', { e: err }) : '');
       mark('stale', T.tr('An update to the offline copy is waiting ({s})', { s: mb(up.fetch) }));
     } else {
@@ -140,40 +153,49 @@
       mark('kept');
     }
   }
-  // Settings' Offline tab: each translation, its tick what the copy keeps or is
-  // fetching, and its size, or how far its download has gone.  Greyed without
-  // a copy, while any download runs, and offline for those not kept; its last
-  // line says why, or that a download would update the copy too.
-  var trBox = document.querySelector('dialog.settings .offtr'), trSig = null;
+  // The translations: each one's tick what the copy keeps or is fetching, and
+  // its size, or how far its download has gone.  With no copy kept, its size
+  // is the site's manifest's (sized), and a tick downloads the copy with it.
+  // Greyed while any download runs, offline for those not kept, and until the
+  // sizes are known; the last line says why, or that a tick would update the
+  // copy too.
+  var trBox = panel.querySelector('.offtr'), trSig = null, offer = null;
   function trs(s) {
-    if (!trBox) return;
     var have = s && !s.removed && s.have, busy = s && s.busy, on = online(), by = {};
     var mine = (have && have.tr) || [], err = s && s.error ? s.words || T.same(s.error) : null;
-    ((have && have.trs) || []).forEach(function (t) { by[t.key] = t; });
+    ((have && have.trs) || offer || []).forEach(function (t) { by[t.key] = t; });
     var of = busy && busy.total && { a: mb(busy.done), b: mb(busy.total) };
     Array.prototype.forEach.call(trBox.querySelectorAll('.offtrs li'), function (li) {
       var box = li.querySelector('input'), k = box.value, t = by[k], kept = mine.indexOf(k) >= 0,
           adding = !!busy && (busy.adding || []).indexOf(k) >= 0;
       box.checked = kept || adding;
-      box.disabled = !have || !!busy || (!kept && !on);
+      box.disabled = !!busy || (!kept && !on) || !t;
       li.querySelector('.st').innerHTML = adding ? (of ? T('Downloading: {a} of {b}', of) : T('Downloading…'))
         : kept && t ? T('kept, {s}', { s: mb(t.bytes) }) : t ? T(mb(t.bytes)) : '';
     });
     var why = trBox.querySelector('.why');
-    why.innerHTML = !have ? T('offline:trfirst') : busy ? '' : err ? T('The download stopped: {e}.', { e: err })
+    why.innerHTML = busy ? '' : !have ? (on && offer ? T('offline:trwith') : '')
+                  : err ? T('The download stopped: {e}.', { e: err })
                   : !on ? T('offline:troffline') : s.latest ? T('offline:trstale') : '';
     why.hidden = !why.innerHTML;
     var sig = mine.join(' ');
     if (trSig !== null && sig !== trSig) document.dispatchEvent(new Event('ub:trkept'));
     trSig = sig;
   }
-  // A tick: the copy's translations and this one, fetched now, the site's
-  // worker asked for first, as an update asks; an update of the copy with it
-  // ends as one made by itself does (told).  An untick: let go at once.
-  if (trBox) trBox.addEventListener('change', function (ev) {
-    var box = ev.target, have = last && !last.removed && last.have;
-    if (box.type !== 'checkbox' || !have) return;
+  // The copy's tick: ticked, the worker is registered and fetches the copy
+  // (on); unticked, the copy is removed and the worker unregistered (off).  A
+  // translation's tick: the copy's translations and this one, fetched now,
+  // the site's worker asked for first, as an update asks, or with no copy
+  // kept, the copy with it; an update of the copy with it ends as one made by
+  // itself does (told).  An untick: let go at once.
+  panel.addEventListener('change', function (ev) {
+    var box = ev.target;
+    if (box.type !== 'checkbox') return;
+    if (box === copyBox) return box.checked ? on() : off();
+    if (!box.closest('.offtrs')) return;
+    var have = last && !last.removed && last.have;
     if (!box.checked) return ask('drop', { tr: box.value }).then(function (s) { show(s); fresh(); });
+    if (!have) return on([box.value]);
     var was = last.latest ? have.made : null;
     going = true;
     show(Object.assign({}, last, { busy: { done: 0, total: 0, adding: [box.value], copy: !!was } }));
@@ -193,11 +215,14 @@
     clearTimeout(quiet);
     if (s && s.busy) quiet = setTimeout(function () { ask('state').then(show); }, 20000);
   }
-  // Before there is a copy: what it would cost, and the button.  A site that
-  // does not answer, or answers 5xx, is offline here too, and one that
-  // answers is online.
+  // Before there is a copy: what it would cost, in the tick's hint (base.html,
+  // offline:copyhint), and each translation's size, from the site's manifest;
+  // the tick itself is greyed until that has come.  A site that does not
+  // answer, or answers 5xx, is offline here too, and one that answers is
+  // online.
   function sized() {
     line.textContent = '';
+    copyBox.disabled = true;
     var gone = function () { reach(false); return Promise.reject(); };
     fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
       if (r.status >= 500) return gone();
@@ -205,8 +230,13 @@
       if (!r.ok) throw new Error(r.status);
       return r.json();
     }, gone).then(function (m) {
-      if (!kept) line.innerHTML = T('About {s} to download and keep in this browser.', { s: mb(m.bytes) }) +
-                                  '<br><button type="button" class="keep"><span>' + T('Download it') + '</span></button>';
+      if (kept) return;
+      Array.prototype.forEach.call(panel.querySelectorAll('.offcopy .size'), function (el) {
+        el.innerHTML = T('offline:about', { s: mb(m.bytes) });
+      });
+      offer = m.translations || [];
+      copyBox.disabled = false;
+      trs(last);
     }, function () {
       if (kept) return;
       line.innerHTML = !online() ? T('It can be downloaded only online.') : T('This site has no offline copy yet.');
@@ -219,21 +249,29 @@
   // Until 2026-10-23 it added a line of its own where the text or the index
   // was newer than the copy's, "The index as of October 23"; a new revision of
   // either has a line in the changelog now, which that only repeated (Tigran).
-  // A popup over the menu, which stays open
-  // beneath it with its Update button: a popover inside the menu's, so the
-  // browser counts it the menu's own.  At its foot, the whole changelog, the
-  // page /changelog (2026-10-18).  After an update made by itself, it says so,
-  // and lists what changed since the copy before, whose date is `since` until
-  // it closes (told).
-  var news = document.createElement('div'), since = null;
+  // A modal dialog of its own, over Settings where it is opened from there:
+  // a popover outside a modal dialog is inert while that is open, and
+  // cannot be closed (until 2026-10-30 it was a popover inside the cloud's
+  // menu's).  Escape, its ×, and a tap outside it close it.  At its foot, the
+  // whole changelog, the page /changelog (2026-10-18).  After an update made
+  // by itself, it says so, and lists what changed since the copy before,
+  // whose date is `since` until it closes (told).
+  var news = document.createElement('dialog'), since = null;
   news.id = 'offnews';
   news.className = 'offnews';
-  news.setAttribute('popover', '');
-  news.setAttribute('role', 'dialog');
   news.setAttribute('aria-labelledby', 'offnews-title');
-  box.appendChild(news);
-  news.addEventListener('beforetoggle', function (ev) { if (ev.newState === 'open') whatsNew(); });
-  news.addEventListener('toggle', function (ev) { if (ev.newState === 'closed') since = null; });
+  document.body.appendChild(news);
+  news.addEventListener('close', function () { since = null; });
+  news.addEventListener('click', function (ev) {
+    var r = news.getBoundingClientRect();
+    if (ev.target.closest('.x') || (ev.target === news && (ev.clientX < r.left || ev.clientX > r.right ||
+                                                           ev.clientY < r.top || ev.clientY > r.bottom)))
+      news.close();
+  });
+  function openNews() {
+    whatsNew();
+    if (!news.open) news.showModal();
+  }
   function manifest() {
     return fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
@@ -258,7 +296,7 @@
   function whatsNew() {
     var made = since || (last && last.have && last.have.made);
     news.innerHTML = '<div class="bar"><h2 id="offnews-title">' + T('What’s new') + '</h2>' +
-      '<button type="button" class="x" popovertarget="offnews" popovertargetaction="hide" ' + T.a('aria-label', 'Close') + ' ' +
+      '<button type="button" class="x" ' + T.a('aria-label', 'Close') + ' ' +
       T.a('title', 'Close') + '><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>' +
       '</svg></button></div><p class="since">' +
       (since ? T('The offline copy has just been updated. New since its last update, on {d}:', { d: day(since) })
@@ -283,8 +321,10 @@
   // or not (Tigran, 2026-10-18); while What's new is open, once it closes.
   // One made by itself (`was`, the date of the copy before) says so first
   // (told).  One that stops is not made by itself again for an hour (failed).
-  function get(update, was) {
-    return ask('get').then(function (s) {
+  // `trs` names the translations to fetch with the copy (a first copy got by a
+  // translation's tick).
+  function get(update, was, trs) {
+    return ask('get', trs ? { tr: trs } : {}).then(function (s) {
       show(s);
       if (s && s.error) {
         failed(s.latest && s.latest.build);
@@ -294,8 +334,7 @@
     });
   }
   function reload() {
-    if (news.matches(':popover-open'))
-      return news.addEventListener('toggle', function (ev) { if (ev.newState === 'closed') reload(); });
+    if (news.open) return news.addEventListener('close', function () { reload(); }, { once: true });
     history.scrollRestoration = 'auto';   // listen.js may have set it to manual
     location.reload();
   }
@@ -316,17 +355,26 @@
       });
     }).catch(function () {});
   }
-  function on() {
-    line.innerHTML = T('Starting…');
+  // The copy, ticked: the worker registered, and the copy fetched, with the
+  // translations `trs` where a translation's tick asked for it.  Said at once,
+  // as an update is, so that the tick does not look as if it did nothing.  A
+  // first copy reloads nothing.
+  function on(trs) {
+    going = true;
+    show({ have: null, latest: null, busy: { done: 0, total: 0, adding: trs || [], copy: true }, error: null, removed: false });
     sw.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then(function () {
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
-      return get();
+      return get(false, null, trs);
     }).catch(function (e) {
+      show(null);
       line.innerHTML = T('This browser would not keep it: {e}', { e: e && e.message || e });
-    });
+    }).then(function () { going = false; });
   }
+  // Unticked: the copy removed and the worker unregistered, at once.  The
+  // menu's Remove asked first; a tick named for the copy is not mistaken for
+  // going online, which was the bug of 2026-10-14.
   function off() {
-    if (!window.confirm(T.text('Remove the offline copy from this browser? It can be downloaded again at any time.'))) return;
+    copyBox.disabled = true;
     ask('remove').then(function () {
       return sw.getRegistration('/');
     }).then(function (reg) { return reg && reg.unregister(); }).then(function () { show(null); });
@@ -343,13 +391,13 @@
       .then(function () { going = false; }, function () { going = false; });
   }
 
-  // An update made by itself, where Settings has not turned that off: when a
-  // check finds the copy out of date, with the site reached and this page in
-  // view, unless the browser is saving data, or this browser tried the same
-  // update by itself within the hour and it stopped (Update now still offers
-  // it).  A download already under way, from the page before a link was
-  // followed, or from Update now there, is this page's to finish: asking the
-  // worker for it again waits for the one running.
+  // An update made by itself: when a check finds the copy out of date, with
+  // the site reached and this page in view, unless the browser is saving
+  // data, or this browser tried the same update by itself within the hour and
+  // it stopped (Update now offers it then).  A download already under way,
+  // from the page before a link was followed, or from a tick there, is this
+  // page's to finish: asking the worker for it again waits for the one
+  // running.
   var TRIED = 'ub_offline_auto', HOUR = 3600 * 1000, tried = null;
   function failed(build) {
     if (!build) return;
@@ -362,22 +410,20 @@
     return !!t && t.build === build && Date.now() - t.at < HOUR;
   }
   function keepUp(s) {
-    if (going || !byItself() || !s || !s.have || document.hidden || !online()) return;
+    if (going || !s || !s.have || document.hidden || !online()) return;
     if (s.busy) {
       going = true;
       return get(true, s.have.made).then(function () { going = false; }, function () { going = false; });
     }
-    if (!s.latest || triedLately(s.latest.build)) return;
-    if (navigator.connection && navigator.connection.saveData) return;
+    if (!s.latest || triedLately(s.latest.build) || saving()) return;
     update(true);
   }
-  // Its end: What's new, opened over the menu, says that the copy has just
-  // been updated and lists what changed since the copy before (`was`), and the
-  // page reloads once it is closed, as after Update now; while listening, it
-  // does not, which would stop the reading.  With nothing listed, no reader
-  // would see a difference: nothing is said and nothing reloaded, and the
-  // next page is the new one.  It waits for the page to be in view, and for
-  // Settings to close.
+  // Its end: What's new says that the copy has just been updated and lists
+  // what changed since the copy before (`was`), and the page reloads once it
+  // is closed, as after Update now; while listening, it does not, which would
+  // stop the reading.  With nothing listed, no reader would see a difference:
+  // nothing is said and nothing reloaded, and the next page is the new one.
+  // It waits for the page to be in view, and for Settings to close.
   function told(was) {
     var dlg = document.querySelector('dialog[open]');
     if (dlg) return dlg.addEventListener('close', function () { told(was); }, { once: true });
@@ -392,18 +438,16 @@
     manifest().then(function (m) {
       if (!listed(m, was)) return;
       since = was;
-      if (!box.matches(':popover-open')) box.showPopover();
-      if (news.matches(':popover-open')) whatsNew(); else news.showPopover();
+      openNews();
       if (!listening()) reload();
     }, function () {});
   }
 
-  box.addEventListener('click', function (ev) {
+  panel.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('button');
     if (!b) return;
-    if (b.classList.contains('keep')) on();
-    else if (b.classList.contains('drop')) off();
-    else if (b.classList.contains('get')) update(false);
+    if (b.classList.contains('get')) update(false);
+    else if (b.classList.contains('newsbtn')) openNews();
     else if (b.classList.contains('app') && window.ubInstall) {
       window.ubInstall.prompt();
       window.ubInstall.userChoice.then(function () { window.ubInstall = null; installed(); });
@@ -413,7 +457,7 @@
   sw.addEventListener('message', function (e) { if (e.data && e.data.ubOffline) show(e.data.ubOffline); });
 
   // Install as an app: where the browser offers it (Chrome, Edge), a button;
-  // on an iPhone or iPad, how, and why it matters there.
+  // on an iPhone or iPad, how, and why it matters there.  Not in an app.
   function installed() {
     var app = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
     var ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -436,11 +480,15 @@
     kept = true;
     return ask('check', { force: !online() }).then(heard);
   });
-  // Opening the menu asks the site afresh, and so do the browser's online and
+  // Opening the tab asks the site afresh, and so do the browser's online and
   // offline: whatever it says, so that a page from the copy learns that the
-  // site is back, and the site's answer is the last word.
-  function fresh() { if (kept) ask('check', { force: true }).then(heard); }
-  box.addEventListener('toggle', function (ev) { if (ev.newState === 'open') fresh(); });
+  // site is back, and the site's answer is the last word.  With no copy, the
+  // manifest is asked for again, for the tick and the sizes.
+  function fresh() {
+    if (kept) ask('check', { force: true }).then(heard);
+    else show(null);
+  }
+  document.addEventListener('ub:offtab', fresh);
   window.addEventListener('online', fresh);
   // Coming into view again, as an app brought back to the front, whose page
   // does not load again: asked as a page load asks, so that the copy is kept

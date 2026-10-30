@@ -490,7 +490,8 @@ function drop(k) {
   }).then(tell);
 }
 
-// Everything this worker keeps, for a reader who turns Work offline off.
+// Everything this worker keeps, for a reader who unticks the offline copy in
+// Settings (offline.js off).
 function remove() {
   held = null;
   return caches.keys().then(function (ks) {

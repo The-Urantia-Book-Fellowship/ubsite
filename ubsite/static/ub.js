@@ -1343,18 +1343,19 @@
 
   // Work offline, at the header's corner where a service worker can run: an
   // icon that says whether this page is online or offline, and whether a copy
-  // is kept (ub.css .top .offline), and opens its menu (#offmenu, a popover).
-  // static/offline.js runs the menu, and says what the copy is on the icon,
-  // then 'ub:offline'.  It is loaded when the menu opens, or at once on a page
+  // is kept (ub.css .top .offline), and opens Settings at its Offline tab,
+  // which keeps the copy (base.html; until 2026-10-30 a menu of its own,
+  // #offmenu, under the icon, and until 2026-10-14 a switch in Settings).
+  // static/offline.js runs the tab, and says what the copy is on the icon,
+  // then 'ub:offline'.  It is loaded when the tab opens, or at once on a page
   // the worker answers for, to say whether its copy is still the site's.  The
-  // browser's own offer to install the site waits in the menu too, rather than
-  // in a banner of its own.  Until 2026-10-14 all this was in Settings.
-  var cloud = document.querySelector('.top .offline'), menu = document.getElementById('offmenu');
-  if (cloud && menu && 'serviceWorker' in navigator && window.isSecureContext &&
-      'popover' in HTMLElement.prototype) {
-    cloud.hidden = menu.hidden = false;
-    // And Settings' tab for it, keeping the copy up to date by itself
-    // (settings.py OFFLINE): the tab and its panel.
+  // browser's own offer to install the site waits in the tab too, rather than
+  // in a banner of its own.
+  var cloud = document.querySelector('.top .offline'), offpanel = document.querySelector('dialog.settings .panel.offline');
+  if (cloud && offpanel && 'serviceWorker' in navigator && window.isSecureContext &&
+      window.HTMLDialogElement && 'showModal' in HTMLDialogElement.prototype) {
+    cloud.hidden = false;
+    // And Settings' tab for it: the tab and its panel.
     document.querySelectorAll('dialog.settings .offline').forEach(function (el) { el.hidden = false; });
     // Offline (data-net) is the site out of reach: the browser says so, or the
     // worker answered for this page from its copy, which sw.js writes on the
@@ -1364,9 +1365,10 @@
     // where the page starts offline: the site's answer is the last word, as
     // Chrome can say offline with the network working (2026-10-27).
     var fromCopy = document.querySelector('footer[data-copy]'), loaded = false;
-    // Which site this is: the same build is at ubsite.ddns.net and
-    // ubsite.sigmaai.au, and an app installed from either shows no address.
-    menu.querySelector('.net .host').textContent = location.host;
+    // Which site this is, on the tab's first line: the same build is at
+    // ubsite.ddns.net and ubsite.sigmaai.au (and under the name in the header,
+    // which base.html's head script writes).
+    offpanel.querySelector('.net .host').textContent = location.host;
     // What offline.js says of the copy is cloud.ubSay, its words in each
     // language; the date sw.js writes on the footer is in each too.
     var label = function () {
@@ -1375,7 +1377,7 @@
             : cloud.ubSay || (none ? T.k('Online') : T.k('Online, with a copy kept for working offline'));
       T.attr(cloud, 'title', t);
       T.attr(cloud, 'aria-label', t);
-      menu.querySelector('.net .conn').innerHTML = on ? T('Online') : !fromCopy ? T('Offline')
+      offpanel.querySelector('.net .conn').innerHTML = on ? T('Online') : !fromCopy ? T('Offline')
         : T('Offline · the copy of {d}', { d: { en: T.esc(fromCopy.dataset.copy),
                                                 ru: T.esc(fromCopy.dataset.copyRu || fromCopy.dataset.copy) } });
     };
@@ -1393,16 +1395,12 @@
     window.addEventListener('offline', function () { net(false); });
     document.addEventListener('ub:offline', label);
     if (navigator.serviceWorker.controller) script();
-    // And by Settings' Offline tab, which lists the translations the copy keeps.
+    // And by Settings' Offline tab, whose words are its to say.
     document.addEventListener('ub:offtab', script);
-    // Under the icon, its right edge a little past the icon's, in the page's
-    // coordinates: a popover is in the top layer, absolute to the document.
-    menu.addEventListener('beforetoggle', function (ev) {
-      if (ev.newState !== 'open') return;
-      script();
-      var r = cloud.getBoundingClientRect();
-      menu.style.top = (r.bottom + window.scrollY + 8) + 'px';
-      menu.style.right = Math.max(8, document.documentElement.clientWidth - r.right - 8) + 'px';
+    // A tap on the icon opens Settings at that tab, as the gear opens Settings.
+    cloud.addEventListener('click', function () {
+      var gearBtn = document.querySelector('.gear'), tab = document.getElementById('set-t-offline');
+      if (gearBtn && tab) { gearBtn.click(); tab.click(); }
     });
   }
   window.addEventListener('beforeinstallprompt', function (ev) {

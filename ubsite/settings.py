@@ -177,16 +177,17 @@ LISTEN = [
     # carries on, across papers, through the whole book (2026-10-08).
     ("onward", "switch", "Carry on into the next section", False, [], "and so on through the book"),
 ]
-# Work offline's copy, updated by itself whenever the site is open and online
-# (static/offline.js auto()), then What's new, and the page reloaded once that
-# is closed.  Update now suits a reader who keeps a copy as it was until they
-# choose; most would forget it, and find the copy "broken" (Tigran,
-# 2026-10-25).  So on, unless a reader turns it off.  Shown only where Work
-# offline can run: ub.js unhides its tab with the cloud.
-OFFLINE = [
-    ("autoupdate", "switch", "Keep the offline copy up to date", True, [],
-     "by itself, whenever the site is open and online, then shows what is new"),
-]
+# Work offline has a tab, Offline, and no setting in it: what it holds is the
+# worker's, not a reader's choice to store (base.html, the panel's own markup;
+# static/offline.js).  The copy's tick downloads it and lets it go, and a kept
+# copy is updated by itself whenever the site is open and online, then What's
+# new, and the page reloaded once that is closed.  Until 2026-10-30 a switch
+# here, "Keep the offline copy up to date" (`autoupdate`, on by default), could
+# turn that off, leaving Update now in the cloud's menu to the reader; Tigran
+# had the menu's work moved into this tab, and the tick do both.  A stored
+# `autoupdate` is ignored.  Shown only where Work offline can run: ub.js
+# unhides the tab with the cloud.
+OFFLINE: list[tuple] = []
 
 
 # Remembered like the rest, but set where it is used, not in the dialog.  The

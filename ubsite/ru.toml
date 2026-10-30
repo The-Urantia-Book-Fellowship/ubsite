@@ -18,7 +18,7 @@
 #   study note            примечание
 #   offline copy          офлайн-копия
 
-# --- Every page: the header, the offline menu, Settings, the footer (base.html)
+# --- Every page: the header, Settings, the footer (base.html)
 
 "The Urantia Book" = "Книга Урантии"
 "Search" = "Поиск"
@@ -30,9 +30,6 @@
 "Settings" = "Настройки"
 "Settings (Ctrl+,)" = "Настройки (Ctrl+,)"
 "Online" = "В сети"
-"Work offline:" = "Работа без сети:"
-"full functionality except Merritt Horn audio recordings" = "всё работает, кроме записей чтения Мерритта Хорна"
-"Remove the offline copy" = "Удалить офлайн-копию"
 "Restore the defaults" = "Восстановить настройки по умолчанию"
 "Close" = "Закрыть"
 "Kept in this browser only." = "Хранятся только в этом браузере."
@@ -138,13 +135,15 @@
 "Carry on into the next section" = "Продолжать со следующего раздела"
 "and so on through the book" = "и так далее, по всей книге"
 
-"Keep the offline copy up to date" = "Обновлять офлайн-копию"
-"by itself, whenever the site is open and online, then shows what is new" = "само, когда сайт открыт и есть сеть, а затем показывать, что нового"
-# The translations kept in the copy (base.html, offline.js), each a download of
-# its own (2026-10-26).
+# The Offline tab (base.html, offline.js), the cloud's menu until 2026-10-30:
+# the copy, a tick, its size filled in by offline.js (the span); then the
+# translations kept in the copy, each a download of its own (2026-10-26).
+"Offline copy" = "Офлайн-копия"
+"offline:copyhint" = { en = 'the whole site but the recordings<span class="size"></span>, kept in this browser and updated by itself whenever the site is open and online', ru = 'весь сайт, кроме записей чтения<span class="size"></span>; хранится в этом браузере и обновляется сама, когда сайт открыт и есть сеть' }
+"offline:about" = { en = ", about {s}", ru = ", около {s}" }
 "Translations in the offline copy" = "Переводы в офлайн-копии"
 "offline:tr" = { en = "Each is a download of its own, kept with the copy and updated with it.", ru = "Каждый загружается отдельно, хранится вместе с копией и обновляется вместе с ней." }
-"offline:trfirst" = { en = "Download the offline copy first: the cloud at the top of the page.", ru = "Сначала загрузите офлайн-копию: облачко вверху страницы." }
+"offline:trwith" = { en = "Ticking one downloads the offline copy with it.", ru = "Если отметить перевод, вместе с ним загрузится и офлайн-копия." }
 "offline:trstale" = { en = "The offline copy is out of date: downloading a translation updates it too.", ru = "Офлайн-копия устарела: загрузка перевода обновит и её." }
 "offline:troffline" = { en = "Offline, a translation can be let go, and downloaded once online.", ru = "Без сети перевод можно удалить, а загрузить — когда сеть появится." }
 "kept, {s}" = "сохранён, {s}"
@@ -393,7 +392,7 @@
 "The next section is not in {l}." = "Следующего раздела нет в переводе {l}."
 "This browser has no voice for {l}." = "В этом браузере нет голоса для перевода {l}."
 
-# --- The offline menu and What's new (offline.js)
+# --- The Offline tab and What's new (offline.js)
 
 "{x} MB" = "{x} МБ"
 "Updating: {a} of {b}" = "Обновляется: {a} из {b}"
@@ -412,14 +411,11 @@
 "Update now ({s})" = "Обновить ({s})"
 "What’s new" = "Что нового"
 "It updates by itself once online." = "Она обновится сама, когда появится сеть."
-"It can be updated once online." = "Её можно будет обновить, когда появится сеть."
 "The last update stopped: {e}." = "Последнее обновление остановилось: {e}."
 "An update to the offline copy is waiting ({s})" = "Офлайн-копию можно обновить ({s})"
 "Up to date: kept as the site was on {d}, with the text of {t}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t}; в этом браузере занимает {s}."
 "Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t} и указателем от {i}; в этом браузере занимает {s}."
 "Without a connection, the site reads from it by itself." = "Без сети сайт сам читается из неё."
-"About {s} to download and keep in this browser." = "Около {s} — загрузить и хранить в этом браузере."
-"Download it" = "Загрузить"
 "It can be downloaded only online." = "Загрузить её можно только в сети."
 "This site has no offline copy yet." = "У этого сайта пока нет офлайн-копии."
 "And earlier changes." = "И более ранние изменения."
@@ -430,9 +426,7 @@
 "The whole changelog" = "Вся история изменений"
 "Nothing is listed for this update." = "Для этого обновления ничего не указано."
 "The list could not be fetched just now." = "Список сейчас не удалось загрузить."
-"Starting…" = "Начинаем…"
 "This browser would not keep it: {e}" = "Этот браузер не сохранил её: {e}"
-"Remove the offline copy from this browser? It can be downloaded again at any time." = "Удалить офлайн-копию из этого браузера? Её можно снова загрузить в любое время."
 "Install as an app" = "Установить как приложение"
 "it opens on its own, from the home screen or the dock" = "оно открывается отдельно — с главного экрана или из панели"
 "offline:ios" = { en = "On an iPhone or iPad, add it to the Home Screen too (Share, then Add to Home Screen): Safari deletes what a site keeps after seven days without a visit, but not for an app on the Home Screen.", ru = "На iPhone или iPad добавьте его ещё и на экран «Домой» («Поделиться», затем «На экран «Домой»»): Safari удаляет то, что хранит сайт, если его не открывали семь дней, но не для приложения на экране «Домой»." }

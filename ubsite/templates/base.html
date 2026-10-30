@@ -77,6 +77,12 @@ window.ubTitle = function () {
   if (v) document.querySelectorAll('link[rel=icon]').forEach(function (l) {
     l.href = '/static/favicon' + v + (l.type === 'image/svg+xml' ? '.svg' : '.ico');
   });
+  // And the site's address under its name in the header (ub.css .brand .host),
+  // drawn by CSS from this, before first paint: never written by the server,
+  // since the offline copy's pages are made once for both hosts (Tigran,
+  // 2026-10-30, so that which site this is can be seen at once, in an
+  // installed app above all, which shows no address).
+  r.style.setProperty('--host', JSON.stringify(location.host));
   try {
     var s = JSON.parse(localStorage.getItem('ub_settings') || '{}') || {};
     if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
@@ -98,7 +104,9 @@ window.ubTitle = function () {
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="/">{{ mark }}{{ t('The Urantia Book') }}</a>
+  {#- The name, and under it the site's address, which the head script hands
+      CSS (--host); with scripts off, the name alone. #}
+  <a class="brand" href="/">{{ mark }}<span class="nm">{{ t('The Urantia Book') }}<span class="host"></span></span></a>
   <form class="find" action="/search" role="search">
     <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>
     <input name="q" value="{{ q|default('') }}" {{ ta('aria-label', 'Search') }}
@@ -115,9 +123,10 @@ window.ubTitle = function () {
         <circle cx="8" cy="8" r="2.2"/></svg></button>
     {#- Work offline: whether this page is online or offline, and whether a copy
         is kept, drawn as one cloud whose parts ub.css shows by data-net and
-        data-have; it opens #offmenu.  Shown by ub.js only where a service
-        worker can run. #}
-    <button class="offline" type="button" popovertarget="offmenu" {{ ta('aria-label', 'Online') }} {{ ta('title', 'Online') }}
+        data-have.  A sign, which opens Settings at its Offline tab, where the
+        copy is kept and let go (until 2026-10-30 it opened a menu of its own,
+        #offmenu).  Shown by ub.js only where a service worker can run. #}
+    <button class="offline" type="button" {{ ta('aria-label', 'Online') }} {{ ta('title', 'Online') }}
       hidden data-net="on" data-have="none" data-src="{{ asset('offline.js') }}">
       <svg viewBox="0 0 20 16" aria-hidden="true" focusable="false">
         <path class="cloud" d="M5.6 13.4h9a3.4 3.4 0 0 0 .5-6.75A4.9 4.9 0 0 0 5.8 5.3a4.05 4.05 0 0 0-.2 8.1z"/>
@@ -147,24 +156,6 @@ window.ubTitle = function () {
         <path d="M0 20h45v10H0z" fill="#d52b1e"/></svg></button>
   </span>
 </header>
-{#- The offline icon's menu: Work offline, the copy, and installing the site as
-    an app (static/offline.js).  A popover, so the browser closes it on Escape
-    or a tap elsewhere; ub.js places it under the icon.  Hidden as well, so that
-    a browser with no popovers never shows it; ub.js unhides it with the icon.
-    No switch: going offline and online again is the browser's, and the copy
-    stays through both.  Its buttons download it, update it, or remove it, and
-    removing it is apart, since a switch turned off to be "online" removed it
-    (Tigran, 2026-10-14).  Its first line names the site at its right, which
-    ub.js reads from the page's own address: never written here, since the
-    offline copy's pages are made under one name for both hosts. #}
-<div id="offmenu" class="offmenu" popover hidden>
-  <p class="net"><span class="conn">{{ t('Online') }}</span> <span class="host"></span></p>
-  <p class="what">{{ t('Work offline:') }}
-    <small>{{ t('full functionality except Merritt Horn audio recordings') }}</small></p>
-  <p class="state" aria-live="polite"></p>
-  <p class="remove" hidden><button type="button" class="drop">{{ t('Remove the offline copy') }}</button></p>
-  <p class="install" hidden></p>
-</div>
 <dialog class="settings" aria-labelledby="settings-title">
   {#- Rendered from ubsite/settings.py; ub.js fills in the values and keeps them.
       × closes it (method="dialog" needs no script), and ↺ restores the
@@ -267,12 +258,27 @@ window.ubTitle = function () {
       {%- endif %}
       {%- endfor %}
       {%- if g.key == 'offline' %}
-      {#- The translations kept in the offline copy, each a download of its own
-          (ROADMAP item 15): what the copy holds, which the worker keeps with it
-          (sw.js meta.tr), not a setting, so that ↺ never removes one.  A tick
-          downloads one at once, and an untick lets it go (Tigran, 2026-10-26).
-          Greyed, its last line saying why, until offline.js says what the copy
-          has.  Not .trlist, which is the Translations tab's own (ub.js). #}
+      {#- Work offline (static/offline.js), the cloud's menu until 2026-10-30
+          (Tigran): online or offline, and which site this is, which ub.js
+          reads from the page's own address, never written here, since the
+          offline copy's pages are made under one name for both hosts; the copy,
+          a tick: ticked, it is downloaded and kept up to date by itself,
+          unticked, let go, as a translation is.  Not a setting, as what the
+          copy holds is the worker's (sw.js), so ↺ never removes it and nothing
+          is stored; disabled until offline.js runs.  Under it what the copy is,
+          or how far its download has gone.  Then the translations kept in the
+          copy, each a download of its own (ROADMAP item 15), the worker keeping
+          them with it (meta.tr): a tick downloads one at once, with the copy
+          where none is kept yet, and an untick lets it go (Tigran, 2026-10-26
+          and 30); its last line says why one cannot be changed.  Not .trlist,
+          which is the Translations tab's own (ub.js).  Last, the offer to
+          install the site as an app, where the browser makes one. #}
+      <p class="net"><span class="conn">{{ t('Online') }}</span> <span class="host"></span></p>
+      <div class="offcopy">
+      <label><input type="checkbox" class="copy" disabled> {{ t('Offline copy') }}
+        <small>{{ t('offline:copyhint') }}</small></label>
+      <p class="state" aria-live="polite"></p>
+      </div>
       <div class="offtr">
       <p class="sub">{{ t('Translations in the offline copy') }}</p>
       <p class="trintro">{{ t('offline:tr') }}</p>
@@ -283,8 +289,9 @@ window.ubTitle = function () {
           <small class="st"></small></label></li>
         {%- endfor %}
       </ul>
-      <p class="why">{{ t('offline:trfirst') }}</p>
+      <p class="why" hidden></p>
       </div>
+      <p class="install" hidden></p>
       {%- endif %}
     </div>
     {%- endfor %}

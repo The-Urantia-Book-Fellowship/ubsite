@@ -142,23 +142,34 @@ class Pages(unittest.TestCase):
             h = hashlib.sha256((STATIC / name).read_bytes()).hexdigest()[:10]
             self.assertIn(f"/static/{name}?v={h}", body)
         self.assertIn('<link rel="manifest" href="/manifest.webmanifest">', body)
-        # Work offline's icon, at the header's corner, which ub.js shows, and
-        # its menu (Settings until 2026-10-14).
-        self.assertRegex(body, r'<button class="offline" type="button" popovertarget="offmenu"[^>]*\n?[^>]*'
+        # Work offline's icon, at the header's corner, which ub.js shows: a
+        # sign, opening Settings' Offline tab, since 2026-10-30 (its own menu,
+        # #offmenu, until then; Settings until 2026-10-14).
+        self.assertRegex(body, r'<button class="offline" type="button" aria-label="Online"[^>]*\n?[^>]*'
                                r'data-src="/static/offline\.js\?v=')
-        self.assertIn('<div id="offmenu" class="offmenu" popover hidden>', body)
-        # Settings has no switch for the copy itself, only whether it keeps
-        # itself up to date, on unless turned off (2026-10-25), in a tab of its
-        # own: tab and panel hidden until ub.js finds that Work offline can run
-        # here.
+        self.assertNotIn("offmenu", body)
+        # The site's address under the name, drawn by CSS from the page's own
+        # (base.html's head script, --host): never written by the server, since
+        # the offline copy's shell is one for both hosts.
+        self.assertIn('<a class="brand" href="/">', body)
+        self.assertIn('<span class="host"></span></span></a>', body)
+        self.assertIn("r.style.setProperty('--host', JSON.stringify(location.host))", body)
+        # The Offline tab holds no setting: the copy's tick and the
+        # translations' are what the worker keeps, not a reader's choice to
+        # store (2026-10-30; until then one switch, `autoupdate`).  Tab and
+        # panel hidden until ub.js finds that Work offline can run here.
         from ubsite import settings
         self.assertRegex(body, r'<button type="button" role="tab" id="set-t-offline"[^>]*'
                                r' class="offline" hidden>Offline</button>')
         fs = re.search(r'<div class="panel offline" role="tabpanel"\s+id="set-p-offline"'
-                       r' aria-labelledby="set-t-offline" hidden>(.*?)</div>', body, re.S)
+                       r' aria-labelledby="set-t-offline" hidden>(.*?)<p class="install" hidden></p>', body, re.S)
         self.assertTrue(fs)
-        self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), ["autoupdate"])
-        self.assertIs(settings.defaults()["autoupdate"], True)
+        self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), [])
+        self.assertNotIn("autoupdate", settings.defaults())
+        self.assertIn('<p class="net"><span class="conn">', fs.group(1))
+        self.assertIn('<input type="checkbox" class="copy" disabled> Offline copy', fs.group(1))
+        self.assertIn('<p class="state" aria-live="polite"></p>', fs.group(1))
+        self.assertEqual(fs.group(1).count('<li><label><input type="checkbox" value="'), 3)
 
     def test_every_kind_of_page_cuts_and_joins_again(self):
         from offline import pages, site
