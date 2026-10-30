@@ -109,6 +109,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
 - **Study notes** (2026-10-18): one reviewed paper at a time, `data/study/NNN.toml`, whose README holds the rules; `build/study.py`, `tools/study/draft.py`.
 - **The interface in Russian** (2026-10-25): `ubsite/ru.toml`, `ubsite/l10n.py`, `/l10n.js`.
 - **Translations beside the text** (2026-10-26): ud and urantia-ru under our numbering (`build/translation.py`, `tests/known-tr-*.tsv`), and the Foundation's from its HTML since 2026-10-27 (`readers/uf_html.py`, `tr_html.py`), in a fold under each paragraph, with the translator's notes, offline and in search, side by side in Compare, `/1:1/compare` (`ub.js cmpDraw`), and in the rail (`/rail/<key>`, 2026-10-27).
+- **Whole paper** (2026-10-30): a paper on one page at `/N`, chosen in Settings, the choice made in the browser before paint (`base.html` `ubUnit`); its text from the same macros as a section's page (`templates/_text.html`, `paper.html`, `app.py paper_page`), listened to as one unit (`whole_audio`), and joined offline from the sections' pieces (`offline/pages.py holes`). `ARCHITECTURE.md`, The whole paper.
 - **The quiz** (2026-10-28, live since 2026-10-30): the British Study Edition's `tex/quiz.tex` in the database, each question with its id for ever in `data/quiz/questions.tsv` and its paragraph reviewed paper by paper (`build/quiz.py`, `readers/quiz.py`, `tools/quiz/`, `data/quiz/README.md`); asked at `/quiz` and `/quiz/N`, invited at each paper's end, offline too (`queries.quiz`, `static/quiz.js`, Settings' `quiz`); and its board, opt-in, the site's first POSTs, kept by ubsite.sigmaai.au for both sites in `var/quiz.db` (`ubsite/board.py`, Settings' `quizboard`, `deploy/README.md`).
 
 ---
@@ -132,7 +133,7 @@ paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at v
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
 soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
 translations 3: ud 3,579 paragraphs (45 papers) and 346 notes, citing 11 works, at cc37b29, urantia-ru 14,586 at 04146d5 (2026-10-26), uf-ru 14,586 and 2 editor's notes, its 2024 release (2026-10-27); ud numbers 2 of them otherwise, urantia-ru 93, uf-ru 106
-offline copy 10,411 pages (3,877 reading paths, 126 of the quiz since 2026-10-30, 127 before) + 1,626 spoken texts in 419 chunks: 47.8 MB to download and keep, 223 MB unpacked (2026-10-28), and each translation a download of its own, chosen by the reader: ud 2.6 MB in 10 chunks, urantia-ru 11.8 MB in 22, uf-ru 11.8 MB in 22, each with its database for search (2026-10-26) and its spoken text (2026-10-27; how it grew: `ARCHITECTURE.md`, Work offline)
+offline copy 10,608 pages (3,877 reading paths, 126 of the quiz since 2026-10-30, 127 before, and the 197 whole papers since 2026-10-30, joined from the sections' pieces) + 1,626 spoken texts in 419 chunks: 48.3 MB to download and keep, 225 MB unpacked (2026-10-30), and each translation a download of its own, chosen by the reader: ud 2.6 MB in 10 chunks, urantia-ru 11.8 MB in 22, uf-ru 11.8 MB in 22, each with its database for search (2026-10-26) and its spoken text (2026-10-27; how it grew: `ARCHITECTURE.md`, Work offline)
 translations spoken (tr_speech): ud 3,579 paragraphs and 371 headings, urantia-ru and uf-ru 14,586 and 1,626 each (2026-10-27)
 quiz 817 questions on 126 papers, 51 with more than one right answer, 3,686 answers (962 right), 63 slips open in tests/known-quiz-slips.tsv, all 817 reviewed: 774 by the text (24 by more than one passage, 18 by a run of paragraphs shown whole), 3 by a study note, 40 dropped (the Foreword's 8, 11 Q20, and 31 ruled on 2026-10-30, Paper 138's only question among them), so 777 asked on 125 papers (study d6c3206, 2026-10-30; 819 at 2474116, until Tigran mended 30 on 2026-10-29)
 ```
@@ -255,15 +256,15 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 **The groups**, and what each decides:
 
 - **The text on the page**: justified, with the book's hyphenation; dot-leader rows; a paper's head; the dropped capital; verse; separators; pilcrows; each paragraph's reference, ▶ and 1955 page; the small indent; a list's label; UB Goudy; the colours of the text and its links.
-- **Moving about the book**: `/101` → `/101:0`; paragraph addresses and ranges; the left rail and its fold; the transport bar; turning the page by keys and taps; `/lists`; `/appendix/A` … `/F`; slugs.
+- **Moving about the book**: `/101` the whole paper, or its first section, by Settings' Whole paper, decided in the browser; paragraph addresses and ranges; the left rail and its fold; the transport bar; turning the page by keys and taps; `/lists`; `/appendix/A` … `/F`; slugs.
 - **The index beside the text**: chips; ordinals' superscripts; what a whole paper or section cites, once; a range at its first paragraph; *See* links; appendix chips; the Chronology and its windows; entries of one headword run on; reading paths in two orders; the index's fold, and the switch that turns it off.
 - **Search**: an exact headword wins; Ctrl+X.
-- **Settings**: one mode; the dialog, its tabs and every setting; a site's own defaults.
-- **Listening**: no Listen button; the end of a section; Follow along; ⏮; the browser's voice; the AI voice, made here; Bark, rejected.
+- **Settings**: one mode; the dialog, its tabs and every setting; Whole paper, a rule for addresses, not a CSS rule; a site's own defaults.
+- **Listening**: no Listen button; the end of a section; a whole paper one unit; Follow along; ⏮; the browser's voice; the AI voice, made here; Bark, rejected.
 - **The sites, their apps and their visitors**: the mark; the site's address under the name; each site's app and icons; the footer; visits counted with no IP address or cookie kept; robots.txt.
 - **The text API and the licence**: `ref` and `uf_ref`; the text public domain, the edition CC BY-NC-SA 4.0; passages and papers by reference; HTML alone; text versions; what a paragraph record says.
 - **The 1955 readings**: a ring and a card with the committee's reasons; the 1955 page references.
-- **Work offline**: the copy a tick in Settings' Offline tab, the cloud a sign that opens it; updating by itself; everything but the recordings; the API's page.
+- **Work offline**: the copy a tick in Settings' Offline tab, the cloud a sign that opens it; updating by itself; everything but the recordings; the API's page; the whole paper joined from its sections' pieces.
 - **The changelog and What's new**: `ChangeLog.md` is both; American dates.
 - **Russian, and the translations**: the interface in both languages; the translations in a fold, chosen in Settings, offline, with their notes, and in search.
 - **The quiz**: two ways in; one question at a time, a set for more than one right answer; references reviewed per paper, a study note among them; the book's spelling and dates; English only; on by default; kept in the browser; a board, opt-in, ranked by questions right the first time, on the main site.

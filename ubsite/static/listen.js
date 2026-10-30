@@ -33,6 +33,14 @@
 // while the bar is open the site's own links are followed in this page too
 // (`visit`), so the page changes and the reading does not.  This page's section
 // (`P`) and the section being heard (`D`) are then two different things.
+//
+// The whole paper's page (paper.html, Settings' Whole paper) is one unit here
+// as a section is: its #ub-audio has the paper's every voice in a section's
+// shape (app.py whole_audio), `section` null and `whole` true, each spoken
+// heading's ref the section's own address, "15:3", which no paragraph's is
+// (`isHead`), so that the heading marked is that section's (`heads`), and the
+// spoken text is asked for section by section (`secOf`).  "Next" is the next
+// paper, whole.
 (function () {
   var data = document.getElementById('ub-audio');
   var S = window.ubSettings, T = window.ubT;   // T: the interface's words (ubsite/l10n.js)
@@ -78,7 +86,10 @@
   var PV = null, pkey = null;        // the voice the page's own controls start
   var k = -1, file = -1;             // the segment being heard, and its file
   var marked = null, bar = null, controls = [], shuts = [];
-  var head, paras;
+  var head, paras, heads;
+  // A ref that names a section, "15:3", or null: a spoken heading's, never a
+  // paragraph's, which has its number after a dot.
+  function isHead(ref) { return !ref || ref.indexOf('.') < 0; }
   // The ids of the paragraphs in root, in reading order.
   function ids(root) {
     return Array.prototype.map.call(root.querySelectorAll('p.t[id]'), function (p) { return p.id; });
@@ -103,13 +114,21 @@
   function scan() {
     // The section's title, or over an introduction, which has none, the
     // paper's: what its spoken heading reads.
-    head = document.querySelector('.papertop h2') || document.querySelector('.papertop h1');
+    head = document.querySelector('article > .papertop h2') || document.querySelector('.papertop h1');
     paras = {};
     Array.prototype.forEach.call(document.querySelectorAll('p.t[id]'),
                                  function (p) { paras[p.id] = p; });
+    // On the whole paper's page, each section's own title, by the section's
+    // address; the introduction's is the paper's.
+    heads = {};
+    Array.prototype.forEach.call(document.querySelectorAll('article.whole > section[id]'), function (sec) {
+      heads[sec.id] = sec.querySelector('.papertop h2') || head;
+    });
     if (P) { P.ids = ids(document); P.tr = trIds(document); }
   }
   scan();
+  // The heading a spoken heading's ref names, if this page has it.
+  function headOf(ref) { return (ref && heads[ref]) || (same(P, D) ? head : null); }
 
   // The voice Settings asks for, else the first section d has.
   function choose(d) {
@@ -128,10 +147,15 @@
   // or a translation's, those it has.
   function voiceOf(d, kk) {
     var t = trOf(kk);
-    return kk === 'browser' ? spoken(d.ids, href(d)) : t ? spoken(d.tr[t] || [], href(d), t)
+    return kk === 'browser' ? spoken(d, d.ids) : t ? spoken(d, d.tr[t] || [], t)
                             : kk ? d.voices[kk] : null;
   }
-  function href(d) { return '/' + d.paper + ':' + d.section; }
+  // The page's address: a section's, or the whole paper's.
+  function href(d) { return '/' + d.paper + (d.whole ? '' : ':' + d.section); }
+  // The section a segment's ref belongs to, whose spoken text it is in
+  // (/speech/<section>): a paragraph's by its address, a heading's its own,
+  // and the one section's where its ref is null.
+  function secOf(ref) { return ref ? '/' + ref.split('.')[0] : href(D); }
   function same(a, b) { return !!(a && b && a.paper === b.paper && a.section === b.section); }
   function rate() { var r = S.get().rate; return RATES.indexOf(r) < 0 ? 1 : r; }
   // What the bar and the lock screen call the voice, in each language: for
@@ -187,13 +211,13 @@
       if (p0) place(p0, 0, T.k('Listen to this section'));
       return;
     }
-    var first = true;
+    // The first paragraph after a section's spoken heading starts from the
+    // heading: on the whole paper's page, each section's.
     PV.segs.forEach(function (s, i) {
       var p = s[0] && paras[s[0]];
       if (!p) return;
-      if (first && PV.segs[0][0] === null) place(p, 0, T.k('Listen to this section, from its heading'));
+      if (i > 0 && isHead(PV.segs[i - 1][0])) place(p, i - 1, T.k('Listen to this section, from its heading'));
       else place(p, i, T.tr('Listen from {r}', { r: s[0] }));
-      first = false;
     });
   }
   // A press on the page's own controls: what is heard becomes what the page
@@ -429,7 +453,7 @@
   // unique in the book, so on another page paras[ref] is simply not there.
   function reading() {
     var s = k >= 0 ? V.segs[k] : null;
-    return !s ? null : s[0] ? paras[s[0]] || null : same(P, D) ? head : null;
+    return !s ? null : isHead(s[0]) ? headOf(s[0]) : paras[s[0]] || null;
   }
   // A message in the bar in place of what is being read, until something is
   // played again, as HTML (T()).  Kept, not only written: a recording that cannot be loaded
@@ -451,7 +475,7 @@
     var s = k >= 0 ? V.segs[k] : null, at = bar.querySelector('.at');
     at.hidden = !s;
     if (s) at.textContent = s[0] || D.paper + ':' + D.section;
-    bar.querySelector('.who').innerHTML = s ? '' : T('End of the section');
+    bar.querySelector('.who').innerHTML = s ? '' : D.whole ? T('End of the paper') : T('End of the section');
     bar.querySelector('.voice span').innerHTML = T(vname());
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
@@ -650,7 +674,12 @@
   // Show url in this page: pushed as a new address, or (from Back) restored to y.
   // `then` runs once it is in.
   function visit(url, isNew, y, then) {
-    var n = ++visiting, hash = new URL(url, location.href).hash;
+    // In the reader's unit (base.html ubUnit): the rail's /101 is its first
+    // section's page to one reader and the whole paper's to another.
+    var u = new URL(url, location.href);
+    if (window.ubUnit) u = new URL(window.ubUnit(u.pathname + u.hash), location.href);
+    url = u.href;
+    var n = ++visiting, hash = u.hash;
     fetch(url, { credentials: 'same-origin', headers: { 'X-UB-Fetch': 'swap' } }).then(function (r) {
       if (!/text\/html/.test(r.headers.get('content-type') || '')) throw new Error('not a page');
       return r.text().then(function (html) { return { url: r.url || url, html: html }; });
@@ -658,7 +687,7 @@
       if (n !== visiting) return;      // overtaken by a later one
       var doc = new DOMParser().parseFromString(got.html, 'text/html');
       if (!doc.querySelector('main')) throw new Error('not a page');
-      // A redirect (/101 to /101:0, a citation searched for) lands at its real address.
+      // A redirect (a citation searched for) lands at its real address.
       if (isNew) push(got.url.split('#')[0] + hash);
       else shown = bare(location.pathname, location.search);
       swap(doc);
@@ -823,13 +852,20 @@
     t.wait.then(function (m) { t.map = m; }, function () { if (texts[at] === t) delete texts[at]; });
     return t;
   }
-  // The heading, then every paragraph of section h, ids, in the English or
-  // translation tr.  Its text is fetched now, so that a tap starts it at once:
-  // iOS speaks only in answer to one.  A paragraph or heading it has no words
-  // for is passed over.
-  function spoken(ids, h, tr) {
-    var segs = [[null]].concat(ids.map(function (id) { return [id]; }));
-    words(h, tr);
+  // The heading, then every paragraph of section d, ids, in the English or
+  // translation tr; on the whole paper's page each section's heading, by its
+  // address, then its paragraphs.  The first section's text is fetched now,
+  // so that a tap starts it at once: iOS speaks only in answer to one.  A
+  // paragraph or heading it has no words for is passed over.
+  function spoken(d, ids, tr) {
+    var segs = [], sec = null;
+    ids.forEach(function (id) {
+      var at = id.split('.')[0];
+      if (at !== sec) { sec = at; segs.push([d.whole ? at : null]); }
+      segs.push([id]);
+    });
+    if (!segs.length) segs.push([null]);
+    words(ids.length ? '/' + ids[0].split('.')[0] : href(d), tr);
     return { label: 'Your browser\u2019s voice', kind: 'browser', by: 'paragraph', segs: segs,
              tr: tr || null, lang: tr ? TRS[tr].lang : 'en' };
   }
@@ -868,7 +904,7 @@
     said.n = n;
     hold(true);
     render();
-    var t = words(href(D), V.tr);
+    var t = words(secOf(V.segs[k][0]), V.tr);
     if (t.map) return begin(gen, t.map);
     t.wait.then(function (m) { if (gen === said.gen) begin(gen, m); }, function () {
       if (gen !== said.gen) return;
@@ -879,7 +915,7 @@
     });
   }
   function begin(gen, m) {
-    said.parts = pieces(m[V.segs[k][0] || ''] || '');
+    said.parts = pieces(m[isHead(V.segs[k][0]) ? '' : V.segs[k][0]] || '');
     if (synth.speaking || synth.pending) {
       // Safari can drop an utterance spoken straight after a cancel.
       synth.cancel();

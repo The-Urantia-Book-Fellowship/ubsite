@@ -65,6 +65,41 @@ window.ubTitle = function () {
   if (!t.dataset.en) t.dataset.en = t.textContent;
   document.title = document.documentElement.dataset.lang === 'ru' ? t.dataset.ru : t.dataset.en;
 };
+// Whole paper (settings.py `whole`; Tigran, 2026-10-30).  A paper's address,
+// /15, is the whole paper on one page (paper.html), and a section's, /15:3,
+// that section alone (section.html).  Which a reader sees is this setting,
+// decided here, before first paint, since no setting reaches the server:
+// ubUnit gives any address of the book (its path and hash, no origin) in the
+// reader's unit.  On, a section's or a paragraph's becomes the paper's with
+// its place after #: /15:3 -> /15#15:3, /15:3.4-6 -> /15#15:3.4-6, /15:0 ->
+// /15; a hash that names its paragraph itself, a card's (#note15_3_4_0,
+// #fnref…), stands alone, /15#note15_3_4_0, and any other after the place,
+// /15#15:3.4#tr-ud (ub.js arrive).  Off, a paper's becomes its first
+// section's, /15 -> /15:0, every paper opening with one, and a place after #
+// its own address again.  Compare's suffix stays where it is, before the
+// hash: /15:3/compare -> /15/compare#15:3 (ub.js cmpDraw draws the whole
+// paper's sections each).  Idempotent: what it gives it leaves alone, which
+// is what makes going there safe.  ub.js puts links right as they are clicked, and
+// listen.js what it fetches, so the hop below is for an address typed, kept
+// or followed from elsewhere.
+window.ubUnit = function (where) {
+  var whole = document.documentElement.dataset.whole === 'true',
+      m = /^\/(\d+)(?::(\d+)(?:\.(\d+(?:-\d+)?))?)?(\/compare)?(#.*)?$/.exec(where);
+  if (!m) return where;
+  var p = m[1], s = m[2], n = m[3], cmp = m[4] || '', h = m[5] || '', c;
+  if (whole) {
+    if (s === undefined) return where;
+    if (/^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?\d+_\d+_\d+_\d+$/.test(h)) return '/' + p + cmp + h;
+    if (s === '0' && !n && !h) return '/' + p + cmp;
+    return '/' + p + cmp + '#' + p + ':' + s + (n ? '.' + n : '') + h;
+  }
+  if (s !== undefined) return where;
+  c = /^#(\d+):(\d+)(?:\.(\d+(?:-\d+)?))?(#.*)?$/.exec(h);
+  if (c && c[1] === p) return '/' + p + ':' + c[2] + (c[3] ? '.' + c[3] : '') + cmp + (c[4] || '');
+  c = /^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?(\d+)_(\d+)_(\d+)_\d+$/.exec(h);
+  if (c && c[1] === p) return '/' + p + ':' + c[2] + '.' + c[3] + cmp + h;
+  return '/' + p + ':0' + cmp + h;
+};
 (function (r, D, B) {
   r.classList.add('js');
   // Compare's address, /1:1/compare (app.py read_compare): the same page, which
@@ -95,6 +130,22 @@ window.ubTitle = function () {
   }
   window.ubLang(r, 'lang' in s ? s.lang : D.lang);
   window.ubTr('translations' in s ? s.translations : D.translations);
+  // This address in the reader's unit (ubUnit, above), or the page is left
+  // for it before it is drawn, with no entry in the history, as the server's
+  // redirect left none.  Not the same step twice in three seconds: a worker
+  // from before Whole paper (sw.js, offline-core.js) still answers /15 with
+  // its first section, and would send a reader who has it on back and forth
+  // until the copy is updated; the page stays as it is instead.
+  var here = location.pathname + location.hash, to = window.ubUnit(here), last = null;
+  if (to !== here) {
+    try { last = (sessionStorage.getItem('ub_unit') || '').split('\n'); } catch (e) {}
+    if (last && last[0] === here && last[1] === to && Date.now() - last[2] < 3000) {
+      try { sessionStorage.removeItem('ub_unit'); } catch (e) {}
+    } else {
+      try { sessionStorage.setItem('ub_unit', here + '\n' + to + '\n' + Date.now()); } catch (e) {}
+      location.replace(to.replace(/#.*$/, '') + location.search + to.replace(/^[^#]*/, ''));
+    }
+  }
   // The contents in a translation (ub.js tocApply): the rail's tree waits
   // unseen until they are drawn, and shows after 1.5 s whatever happens.
   if (r.dataset.toc) setTimeout(function () { r.classList.add('tocready'); }, 1500);
@@ -111,7 +162,7 @@ window.ubTitle = function () {
     <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>
     <input name="q" value="{{ q|default('') }}" {{ ta('aria-label', 'Search') }}
     {{ ta('title', 'Search (Ctrl+X, with any words selected)') }} aria-keyshortcuts="Control+X"
-    {{ ta('placeholder', 'a word, or a citation like 101:4.2') }} autocomplete="off"></form>
+    {{ ta('placeholder', 'a word, or a citation like 1:4.2') }} autocomplete="off"></form>
   <nav>
     <a href="/read">{{ t('Contents') }}</a>
     <a class="ix" href="/index">{{ t('Index') }}</a>

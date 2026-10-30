@@ -450,7 +450,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                 "/part/2", "/search?q=prayer", "/search?q=self-conscious&in=text", "/search?q=Badanon&in=notes",
                 "/i/jesus/read", "/i/prayer/read/theme",
                 "/rail/120?v=1", "/static/fonts/UBGoudy.woff2", "/speech/101:4", "/speech/0:0", "/changelog",
-                "/quiz", "/quiz/32"]
+                "/quiz", "/quiz/32", "/101"]
         for u in urls:
             with urllib.request.urlopen(BASE + u) as r:
                 want[u] = r.read()
@@ -565,10 +565,44 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_selector(".tf.open .gap")
         ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "as does a fold opened after")
         pg.evaluate("ubSettings.set('translations', '')")
-        pg.goto(BASE + "/search?q=101:4.2")
-        ok(pg.url.endswith("/101:4.2"), f"a citation typed into the box opens it ({pg.url})")
+        pg.goto(BASE + "/search?q=1:4.2")                # the search box's own example
+        ok(pg.url.endswith("/1:4.2"), f"a citation typed into the box opens it ({pg.url})")
         pg.goto(BASE + "/101")
         ok(pg.url.endswith("/101:0"), "/101 opens 101:0")
+        # Whole paper (2026-10-30): the setting on, a section's address opens
+        # the whole paper at that section, joined offline from the sections'
+        # pieces (offline/pages.py holes), its rail's section links scroll,
+        # and off again, the paper's address opens the section being read.
+        pg.evaluate("ubSettings.set('whole', true)")
+        pg.goto(BASE + "/101:4")
+        ok(pg.url.endswith("/101#101:4"), f"with Whole paper on, /101:4 opens the whole paper at its section ({pg.url})")
+        ok(pg.locator("article.whole > section[id]").count() == 11 and pg.locator("main p.t").count() == 115,
+           "the whole of Paper 101 is on the page, from the copy")
+        ok(pg.evaluate("document.querySelector('.transport').children.length") == 2, "with the two paper buttons alone")
+        ok(pg.evaluate("Math.abs(document.getElementById('101:4').getBoundingClientRect().top) < 80"),
+           "scrolled to section 4")
+        pg.evaluate("window.ubStay = 1")
+        pg.click('.rail a[href="/101:6"]')
+        pg.wait_for_function("location.hash === '#101:6'")
+        # The link clicked is in the reader's unit now, /101#101:6 (ub.js).
+        ok(pg.evaluate("window.ubStay") == 1 and pg.evaluate("document.querySelector('.rail li.here > details li.here a').getAttribute('href')") == "/101#101:6",
+           "a section's link in the rail scrolls the page, and the rail marks the section")
+        pg.goto(BASE + "/101:4.2-3")
+        ok(pg.url.endswith("/101#101:4.2-3") and pg.locator("p.t.hit").count() == 2, "/101:4.2-3 marks its two paragraphs on the whole paper's page")
+        # Compare on the whole paper, every section in columns, a translation
+        # ticked and not kept saying so in each section's head: Paper 1, which
+        # Aivazian's has (it ends at Paper 43), let go above.
+        pg.evaluate("ubSettings.set('translations', 'ud')")
+        pg.goto(BASE + "/1/compare")
+        pg.wait_for_selector("article.cmp .cmphd")
+        ok(pg.locator("article.cmp .cmphd").count() == 8 and pg.locator("article.cmp .cmpnames").count() == 8,
+           "Compare sets every section of the whole of Paper 1 in columns")
+        ok(pg.locator("article.cmp .cmphd .gap").count() == 8, "each section's head says the translation is not kept")
+        pg.evaluate("ubSettings.set('translations', '')")
+        pg.evaluate("ubSettings.set('whole', false)")
+        pg.goto(BASE + "/read")                  # from another page: the same page's hash alone loads nothing
+        pg.goto(BASE + "/101#101:5")
+        ok(pg.url.endswith("/101:5"), f"off again, the whole paper's address opens the section it names ({pg.url})")
         pg.goto(BASE + "/i/humor/read")
         ok(pg.title().startswith("humor") and pg.locator("main p.t").count() > 3, "a reading path reads offline")
         pg.goto(BASE + "/i/humor/read/theme")

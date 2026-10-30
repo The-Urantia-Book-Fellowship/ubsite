@@ -1622,24 +1622,95 @@ def part_page(request: Request, n: int):
 NO_PAPER = "There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196."
 
 
+def section_text(con, p, s) -> dict:
+    """One section's text and everything that stands beside it, as
+    templates/_text.html textof() draws it: queries.section()'s keys, the
+    section's row, the translations that have each paragraph and the version
+    they are asked for under (translated()), and every voice's segments
+    (section_audio())."""
+    tr = translated(p["n"], s["n"])
+    return {**queries.section(con, p["n"], s["n"]), "section": s,
+            "tr_has": tr["has"], "trv": tr["v"], "audio": section_audio(con, s["id"])}
+
+
+def refw(paras) -> int:
+    """The longest reference among `paras`, in characters: how far the text
+    stands in from them (ub.css .num, --refw)."""
+    return max((len(q["ref"]) for q in paras), default=0)
+
+
 @app.get("/{paper:int}")
 def paper_page(request: Request, paper: int):
-    """A paper number opens the paper, not a table of its sections.
+    """A paper's address is the paper, whole: every section's text on one
+    page (templates/paper.html), with the two paper buttons alone at its end,
+    for reading the book straight through (Tigran, 2026-10-30).
 
-    Every paper begins with an unnumbered introduction, so /101 lands on
-    101:0 -- the first words of the text.  The section list is always in the
-    left rail, so a separate page for it was a click that bought nothing.
+    Whether a reader sees it or the paper's first section is Settings' Whole
+    paper, decided in the browser before first paint, since no setting
+    reaches the server (base.html ubUnit): with it off, /101 goes on to
+    /101:0, the first words of the text, as the server itself sent it until
+    2026-10-30; with it on, /101:4 comes here, to #101:4.  Every paper opens
+    with an unnumbered introduction, section 0, so the rule needs no table.
+    The section list is always in the left rail, so a table of a paper's
+    sections was never a page (Tigran, 2026-10-09).
     """
-    return _first_section(request, paper, "")
-
-
-def _first_section(request: Request, paper: int, then: str):
     con = db()
-    first = con.execute(
-        "SELECT MIN(n) FROM section WHERE paper_n=?", (paper,)).fetchone()[0]
-    if first is None:
+    p = con.execute("SELECT * FROM paper WHERE n=?", (paper,)).fetchone()
+    if p is None:
         return missing(request, l10n.tr(NO_PAPER, n=paper))
-    return RedirectResponse(f"/{paper}:{first}{then}", status_code=307)
+    secs = con.execute("SELECT * FROM section WHERE paper_n=? ORDER BY n", (paper,)).fetchall()
+    texts = [section_text(con, p, s) for s in secs]
+    go = paper_transport(con, paper)
+    # Where listening goes on to: the next paper, whole, as ⏩ does.
+    onward = None
+    if go["ff"]:
+        w = l10n.tr("Paper {n}. {title}", n=go["ff"]["n"], title=go["ff"]["title"])
+        onward = {"href": go["ff"]["href"], "label": w.en.unescape()}
+        if l10n.BILINGUAL:
+            onward["label_ru"] = w["ru"].unescape()
+    return page(request, "paper.html", paper=p, texts=texts,
+                paras=[q for d in texts for q in d["paras"]],
+                notes={k: v for d in texts for k, v in d["notes"].items()},
+                study={k: v for d in texts for k, v in d["study"].items()},
+                refw=refw(q for d in texts for q in d["paras"]), go=go, onward=onward,
+                quizcall_n=queries.quiz_count(con, paper) or None, audio=whole_audio(texts))
+
+
+def paper_transport(con, paper: int) -> dict:
+    """The whole paper's transport bar (paper.html): ⏪ the paper before, ⏩
+    the paper after, each by its own address, /100 and /102, since a reader
+    who sees that page reads whole papers and the next is one too.  None at
+    the book's ends.  The labels are transport()'s."""
+    def at(row, foreword, numbered):
+        return row and {**dict(row), "href": f"/{row['n']}",
+                        "label": l10n.tr(foreword) if row["n"] == 0 else l10n.tr(numbered, p=row["n"])}
+    fb = con.execute("SELECT n, title FROM paper WHERE n < ? ORDER BY n DESC LIMIT 1", (paper,)).fetchone()
+    ff = con.execute("SELECT n, title FROM paper WHERE n > ? ORDER BY n LIMIT 1", (paper,)).fetchone()
+    return {"fb": at(fb, "Previous paper: the Foreword", "Previous paper: {p}"),
+            "ff": at(ff, "Next paper: the Foreword", "Next paper: {p}")}
+
+
+def whole_audio(texts: list[dict]) -> dict:
+    """Every voice's segments for a whole paper, in the shape section_audio()
+    gives a section's, so that listen.js plays a paper as it plays a section:
+    each voice's files in the order of the book, each section's segments
+    after the last section's, their file numbers moved up, and a spoken
+    heading's ref, null in a section's, the section's own address, "15:3",
+    which no paragraph's is (listen.js headOf)."""
+    out: dict = {}
+    for d in texts:
+        here = f"{d['section']['paper_n']}:{d['section']['n']}"
+        for key, v in d["audio"].items():
+            w = out.setdefault(key, {**{k: x for k, x in v.items() if k not in ("files", "segs")},
+                                     "files": [], "segs": []})
+            at = []
+            for f in v["files"]:
+                if f not in w["files"]:
+                    w["files"].append(f)
+                at.append(w["files"].index(f))
+            for ref, fi, a, b in v["segs"]:
+                w["segs"].append([here if ref is None else ref, at[fi], a, b])
+    return out
 
 
 # Compare, the text and the translations a reader has ticked side by side
@@ -1647,11 +1718,11 @@ def _first_section(request: Request, paper: int, then: str):
 # Back leaves it and a reload or a link keeps it.  It is the same page as
 # /1:1, byte for byte: ub.js draws the columns from /tr/, as a fold draws its
 # translations, so no setting reaches the server and the offline copy holds
-# no page more (offline-core.js resolve).  The rail's papers link /N, which
-# goes to the paper's first section, and in Compare /N/compare.
+# no page more (offline-core.js resolve).  The whole paper's too, /1/compare,
+# the same page as /1, every section in columns (Tigran, 2026-10-30).
 @app.get("/{paper:int}/compare")
 def paper_compare(request: Request, paper: int):
-    return _first_section(request, paper, "/compare")
+    return paper_page(request, paper)
 
 
 @app.get("/{ref}/compare", response_class=HTMLResponse)
@@ -1693,7 +1764,7 @@ def read(request: Request, ref: str):
         if last < focus:
             return missing(request, l10n.tr("A range runs forwards, in the order of the book: {a}, not {b}.",
                                             a=go(f"{here}.{last}-{focus}"), b=f"{here}.{focus}-{last}"))
-    rows = queries.section(con, paper, sec)
+    d = section_text(con, p, s)
     go = transport(con, paper, sec)
     # Where listening goes on to: the next section, or from a paper's last
     # section the next paper's first, as the transport bar's ⏭ does.
@@ -1712,10 +1783,8 @@ def read(request: Request, ref: str):
     quizcall = None
     if not go["next"] or go["next"]["paper_n"] != paper:
         quizcall = queries.quiz_count(con, paper) or None
-    tr = translated(paper, sec)
-    return page(request, "section.html", paper=p, section=s, **rows,
-                focus=focus, last=last, go=go, onward=onward, quizcall=quizcall,
-                audio=section_audio(con, s["id"]), tr_has=tr["has"], trv=tr["v"])
+    return page(request, "section.html", paper=p, section=s, text=d, refw=refw(d["paras"]),
+                focus=focus, last=last, go=go, onward=onward, quizcall_n=quizcall)
 
 
 def transport(con, paper: int, sec: int) -> dict:
@@ -1723,9 +1792,11 @@ def transport(con, paper: int, sec: int) -> dict:
     (prev), a section on (next), a paper on (ff), in the order of the book.
 
     A section steps across a paper's edge, 101:0 back to 100's last section;
-    a paper goes to its first section, never the /N redirect.  Part pages are
-    not stops.  None at the book's ends.  The label is the tooltip and the
-    accessible name alike (Tigran, 2026-10-14).
+    a paper goes to its first section, /100:0, not /100: a section's page is
+    shown only to a reader whose unit is the section (base.html ubUnit), and
+    the whole paper's page has a bar of its own (paper_transport).  Part
+    pages are not stops.  None at the book's ends.  The label is the tooltip
+    and the accessible name alike (Tigran, 2026-10-14).
     """
 
     def at(row, label):

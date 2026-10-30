@@ -23,7 +23,7 @@
 "The Urantia Book" = "Книга Урантии"
 "Search" = "Поиск"
 "Search (Ctrl+X, with any words selected)" = "Поиск (Ctrl+X, когда выделены слова)"
-"a word, or a citation like 101:4.2" = "слово или ссылка, например 101:4.2"
+"a word, or a citation like 1:4.2" = "слово или ссылка, например 1:4.2"
 "Contents" = "Содержание"
 "Index" = "Указатель"
 "Theme" = "Тема"
@@ -90,6 +90,8 @@
 "even spaces, no hyphens" = "ровные пробелы, без переносов"
 "Tap to turn the page" = "Листать касанием"
 "on a phone or a tablet: the lower half of the screen goes on, the upper half back" = "на телефоне или планшете: нижняя половина экрана — вперёд, верхняя — назад"
+"Whole paper" = "Документ целиком"
+"the paper on one page, section after section, with only the paper buttons at its end" = "документ на одной странице, раздел за разделом; внизу только кнопки документов"
 
 "Index and appendices" = "Указатель и приложения"
 "beside the text, and every link to them" = "рядом с текстом и все ссылки на них"
@@ -159,7 +161,6 @@
 "Part {r} — {title}" = "Часть {r} — {title}"
 "Not found" = "Не найдено"
 "Lists" = "Списки"
-"Paper {n} — {title}" = "Документ {n} — {title}"
 "{h} — read through" = "{h} — читать подряд"
 "{h} — read through, by theme" = "{h} — читать подряд, по темам"
 "Not in the offline copy" = "Нет в офлайн-копии"
@@ -281,7 +282,7 @@
 "home:lists-notes" = { en = "of the <a href=\"/lists/notes\">study notes</a> of The British Study Edition, {n} so far", ru = "<a href=\"/lists/notes\">примечаний</a> из The British Study Edition (пока их {n})" }
 "home:lists-bib" = { en = [", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} work they cite", ", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} works they cite"], ru = [", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})"] }
 "home:quiz" = { en = '<a href="/quiz">The quiz</a> — {q:,} questions on {p} papers, from The British Study Edition of the Urantia Papers: a paper’s questions at its end, or ten at random.', ru = '<a href="/quiz">Викторина</a> — вопросов: {q:,}, документов: {p}; из The British Study Edition of the Urantia Papers: вопросы к документу в его конце или десять наугад.' }
-"home:citation" = { en = '<a href="/search?q=101%3A4.2">A citation</a> — type any reference such as <code>101:4.2</code>, <code>86:5.14-15</code>, <code>Paper 100</code> or <code>76:2sec</code> into the search box and it opens there.', ru = '<a href="/search?q=101%3A4.2">Ссылка</a> — введите в поле поиска любую ссылку, например <code>101:4.2</code>, <code>86:5.14-15</code>, <code>Paper 100</code> или <code>76:2sec</code>, и она откроется.' }
+"home:citation" = { en = '<a href="/search?q=1%3A4.2">A citation</a> — type any reference such as <code>1:4.2</code>, <code>12:4.2-3</code>, <code>Paper 12</code> or <code>12:4sec</code> into the search box and it opens there.', ru = '<a href="/search?q=1%3A4.2">Ссылка</a> — введите в поле поиска любую ссылку, например <code>1:4.2</code>, <code>12:4.2-3</code>, <code>Paper 12</code> или <code>12:4sec</code>, и она откроется.' }
 "home:contents" = { en = '<a href="/read">The contents</a> — all {n} papers with their authors.', ru = '<a href="/read">Содержание</a> — все документы ({n}) и их авторы.' }
 "home:listening" = { en = ["<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hour, timed to the paragraph: start from any paragraph, and the page follows the voice.", "<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hours, timed to the paragraph: start from any paragraph, and the page follows the voice."], ru = ["<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} час, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часа, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часов, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом."] }
 "home:api" = { en = '<a href="/api">The text API</a> — for other sites and AI: keep your own copy of the text in step with the most up to date SRT text, used for the Uversa Press edition.', ru = '<a href="/api">API текста</a> — для других сайтов и ИИ: держите свою копию текста в соответствии с самым свежим текстом SRT, по которому сделано издание Uversa Press.' }
@@ -326,7 +327,7 @@
 
 "notfound:two" = { en = "The <a href=\"/read\">contents</a> and the <a href=\"/index\">index</a> are the two ways in.", ru = "<a href=\"/read\">Содержание</a> и <a href=\"/index\">указатель</a> — два пути в книгу." }
 "notfound:one" = { en = "The <a href=\"/read\">contents</a> are the way in.", ru = "<a href=\"/read\">Содержание</a> — путь в книгу." }
-"notfound:box" = { en = "The search box above also opens a citation directly: type one such as <i>101:4.2</i> or <i>Paper 100</i>.", ru = "Поле поиска вверху тоже сразу открывает ссылку: введите, например, <i>101:4.2</i> или <i>Paper 100</i>." }
+"notfound:box" = { en = "The search box above also opens a citation directly: type one such as <i>1:4.2</i> or <i>Paper 12</i>.", ru = "Поле поиска вверху тоже сразу открывает ссылку: введите, например, <i>1:4.2</i> или <i>Paper 12</i>." }
 "There is no page at this address." = "По этому адресу страницы нет."
 "The index has no section headed “{l}”." = "В указателе нет раздела «{l}»."
 "No headword in the index has this address." = "Ни у одного заглавного слова указателя нет такого адреса."
@@ -383,6 +384,7 @@
 "Stop and close" = "Остановить и закрыть"
 "Voice" = "Голос"
 "End of the section" = "Конец раздела"
+"End of the paper" = "Конец документа"
 "Next: {l} ›" = "Далее: {l} ›"
 "The recording could not be loaded. Your browser’s voice can read without it." = "Запись не удалось загрузить. Голос вашего браузера может читать без неё."
 "Offline, this needs Work offline: the cloud at the top of the page." = "Без сети для этого нужна работа без сети: облачко вверху страницы."

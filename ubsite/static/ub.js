@@ -328,6 +328,20 @@
     dlg.addEventListener('close', function () {
       if (dlg.contains(document.activeElement)) document.activeElement.blur();
     });
+    // Settings' Whole paper changed (settings.py `whole`, base.html ubUnit):
+    // the page is shown again in the other unit once the dialog is closed,
+    // so that other settings can be changed first -- a section's page as the
+    // whole paper's, at its section, and the whole paper's as the page of the
+    // section being read.
+    var unitChanged = false;
+    document.addEventListener('ub:settings', function (ev) { if (ev.detail.key === 'whole') unitChanged = true; });
+    dlg.addEventListener('close', function () {
+      if (!unitChanged || !window.ubUnit) return;
+      unitChanged = false;
+      var s = sectionInView(), here = location.pathname + (s ? '#' + s.id : location.hash),
+          to = window.ubUnit(here);
+      if (to !== location.pathname + location.hash) location.replace(to);
+    });
     // A tab to each group (Tigran, 2026-10-25), opened by a click, or by ←, →,
     // Home and End among those shown.  From anywhere in the dialog, not only
     // from the tabs, as a tablist would have it: the dialog opens with × in
@@ -364,6 +378,19 @@
     });
   }
 
+  // Whole paper (base.html ubUnit): a link to the book is put in the reader's
+  // unit as it is clicked -- the rail's /15 to /15:0 with the setting off,
+  // the rail's and a paragraph's /15:3 to /15#15:3 with it on, which on the
+  // paper's own page is a place on it, and scrolls -- before listen.js or the
+  // browser follows it, so that no page is asked for twice.  In the capture
+  // phase, so first.
+  if (window.ubUnit) document.addEventListener('click', function (ev) {
+    var a = ev.target.closest && ev.target.closest('a[href]');
+    if (!a || a.origin !== location.origin) return;
+    var at = a.pathname + a.hash, to = window.ubUnit(at);
+    if (to !== at) a.href = to;
+  }, true);
+
   // Bring the page's focus into view.  /61:7.18 renders the whole of 61:7 with
   // paragraph 18 marked .hit, and nothing in the address says where to scroll
   // -- a #fragment would, but then the permalink would stop being the
@@ -371,24 +398,79 @@
   // itself.  Either way, scroll once more when the fonts are in: UB Goudy
   // loads with font-display: swap, the text reflows, and the first scroll
   // drifts.  Not if the reader has scrolled meanwhile.  Again whenever
-  // listen.js brings a page in while it plays ('ub:page').  A fragment that
+  // listen.js brings a page in while it plays ('ub:page'), and whenever the
+  // hash changes, a section's link on the whole paper's page.  A fragment that
   // names no element -- #note…, a 1955 reading found by search -- leaves the
-  // paragraph marked .hit as the focus.
+  // paragraph marked .hit as the focus.  On the whole paper's page
+  // (paper.html) the place after # is a section's or a paragraph's address,
+  // as ubUnit makes it, a range marked as the section's page marks it
+  // (/15:3.4-6 as /15#15:3.4-6), or a card's, which names its paragraph
+  // (#note15_3_4_0); what follows a second # is arriveTr's.
   function arrive() {
-    var focus = null;
+    var focus = null, m, el, i, whole = document.querySelector('article.whole');
     try {
-      focus = (location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)))) ||
+      m = whole && (/^#(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?(?:#.*)?$/.exec(location.hash) ||
+                    /^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?(\d+)_(\d+)_(\d+)_\d+$/.exec(location.hash));
+      if (m) {
+        Array.prototype.forEach.call(document.querySelectorAll('p.t.hit'), function (p) { p.classList.remove('hit'); });
+        for (i = +m[3]; m[3] && i <= +(m[4] || m[3]); i++) {
+          el = document.getElementById(m[1] + ':' + m[2] + '.' + i);
+          if (el) el.classList.add('hit');
+        }
+        focus = document.getElementById(m[1] + ':' + m[2] + (m[3] ? '.' + m[3] : ''));
+      }
+      focus = focus || (location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)))) ||
               document.querySelector('.hit');
     } catch (e) {}
     if (!focus) return;
-    focus.scrollIntoView({ block: 'start' });
-    var y = window.scrollY;
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
-      if (window.scrollY === y) focus.scrollIntoView({ block: 'start' });
-    });
+    // Placed now, again a frame on, and once the fonts are in, unless the
+    // reader has scrolled meanwhile: by hand, since the browser itself moves
+    // the page as what is above the focus changes height (scroll anchoring),
+    // so the scroll position says nothing.
+    var t = Date.now(), put = function () { if (arriveTouched <= t) focus.scrollIntoView({ block: 'start' }); };
+    put();
+    requestAnimationFrame(put);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(put);
   }
+  var arriveTouched = 0;
+  ['wheel', 'touchmove', 'keydown'].forEach(function (e) {
+    addEventListener(e, function () { arriveTouched = Date.now(); }, { passive: true });
+  });
   arrive();
   document.addEventListener('ub:page', arrive);
+  addEventListener('hashchange', arrive);
+
+  // The whole paper's page (paper.html): the section being read, the last
+  // whose top is above the window's top, less a line -- where Settings' Whole
+  // paper turned off lands, and what the rail marks, as a section's page has
+  // its own marked, following the page as it scrolls.
+  function sectionInView() {
+    var secs = document.querySelectorAll('article.whole > section[id]'), at = secs[0] || null;
+    for (var i = 1; i < secs.length; i++)
+      if (secs[i].getBoundingClientRect().top <= 60) at = secs[i]; else break;
+    return at;
+  }
+  var railMarkAt = null, railMarkWait = false;
+  function railMark() {
+    railMarkWait = false;
+    var s = sectionInView(), rail = document.querySelector('.rail');
+    if (!s || !rail || s === railMarkAt) return;
+    railMarkAt = s;
+    // A link once clicked is in the reader's unit already (above): both are
+    // compared in it.
+    var want = window.ubUnit ? window.ubUnit('/' + s.id) : '/' + s.id;
+    Array.prototype.forEach.call(rail.querySelectorAll('li.here > details > ol > li'), function (li) {
+      var a = li.querySelector('a');
+      li.classList.toggle('here', !!a && (window.ubUnit ? window.ubUnit(a.pathname + a.hash) : a.getAttribute('href')) === want);
+    });
+  }
+  railMark();
+  addEventListener('scroll', function () {
+    if (railMarkWait) return;
+    railMarkWait = true;
+    requestAnimationFrame(railMark);
+  }, { passive: true });
+  document.addEventListener('ub:swap', function () { railMarkAt = null; railMark(); });
 
   // The left rail is the whole book (templates/_rail.html), and only the paper
   // being read comes with its sections.  Another opened there fetches its own
@@ -610,8 +692,10 @@
       return trBy[k] && has.indexOf(k) >= 0;
     });
   }
-  function trFetch(art, sec) {
-    var v = (art && art.dataset.trv) || '', key = sec + '?' + v;
+  // `sec` is the section's address, `el` its element, section[data-trv],
+  // which carries the version (templates/_text.html textof).
+  function trFetch(el, sec) {
+    var v = (el && el.dataset.trv) || '', key = sec + '?' + v;
     if (!trGot[key]) {
       trGot[key] = fetch('/tr/' + sec + '?v=' + encodeURIComponent(v))
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
@@ -670,7 +754,7 @@
     var lines = tf.parentNode.querySelectorAll('p.t[id]'),
         refs = Array.prototype.map.call(lines, function (q) { return q.id; });
     if (!refs.length) return Promise.resolve();
-    return trFetch(tf.closest('article'), refs[0].split('.')[0]).then(function (got) {
+    return trFetch(tf.closest('section[data-trv]'), refs[0].split('.')[0]).then(function (got) {
       if (!tf.classList.contains('open')) return;
       var want = tab || load().trtab, h = '', notes = '',
           cur = want === 'all' && ks.length > 1 ? 'all' : ks.indexOf(want) >= 0 ? want : ks[0];
@@ -708,7 +792,7 @@
   // places a study note's.
   function arriveTr() {
     if (/\/compare$/.test(location.pathname)) return;      // in their columns (cmpArrive)
-    var m = /^#(?:tr-([a-z0-9-]+)|note(tn_([a-z0-9-]+)_\d+_\d+_\d+_\d+))$/.exec(location.hash),
+    var m = /^#(?:\d+:\d+(?:\.\d+(?:-\d+)?)?#)?(?:tr-([a-z0-9-]+)|note(tn_([a-z0-9-]+)_\d+_\d+_\d+_\d+))$/.exec(location.hash),
         hit = m && document.querySelector('p.t.hit'), row = hit && hit.closest('.row'),
         tf = row && row.querySelector('.tf'), k = m && (m[1] || m[3]), b = tf && tf.querySelector('.trfold');
     if (!b || trKeys(tf).indexOf(k) < 0) return;
@@ -773,8 +857,13 @@
       shutMine();
       return Promise.resolve(null);
     }
-    if (art && art.classList.contains('cmp'))
-      return Promise.resolve(ref ? pick(row) : art.querySelector('header.ch[data-k="' + k + '"]'));
+    if (art && art.classList.contains('cmp')) {
+      // A heading: the page's one section's (ref null), or on the whole paper's
+      // page the section the ref names (listen.js isHead).
+      var sec = ref && ref.indexOf('.') < 0 ? q : null;
+      if (!ref || sec) return Promise.resolve((sec || art).querySelector('header.ch[data-k="' + k + '"]'));
+      return Promise.resolve(pick(row));
+    }
     if (!tf) return Promise.resolve(null);
     if (tf.classList.contains('open')) {
       shutMine();
@@ -832,8 +921,8 @@
   // /compare after them while it is on (a paper's goes to its first section).
   function cmpLinks(root, on) {
     Array.prototype.forEach.call(root.querySelectorAll('.transport a[href], .rail a[href]'), function (a) {
-      var m = /^(\/\d+(?::\d+)?)(?:\/compare)?$/.exec(a.getAttribute('href'));
-      if (m) a.setAttribute('href', m[1] + (on ? '/compare' : ''));
+      var m = /^(\/\d+(?::\d+)?)(?:\/compare)?(#.*)?$/.exec(a.getAttribute('href'));
+      if (m) a.setAttribute('href', m[1] + (on ? '/compare' : '') + (m[2] || ''));
     });
   }
   function cmpUndraw(art) {
@@ -852,59 +941,70 @@
     cmpLinks(document, on);
     if (!art) return Promise.resolve();
     var b = art.querySelector('.cmphead .cmpbtn'), ks = on ? cmpKeys(art) : [],
-        first = art.querySelector('.grid p.t[id]');
+        secs = art.querySelectorAll('section[data-trv]');
     if (b) b.setAttribute('aria-pressed', String(on));
-    if (!ks.length || !first) { cmpUndraw(art); return Promise.resolve(); }
-    var draw = function (got, failed) {
+    if (!ks.length || !secs.length) { cmpUndraw(art); return Promise.resolve(); }
+    // Each section of the page in columns: the one of a section's page, or
+    // every one of the whole paper's (paper.html), each with the names of
+    // the columns over it, which stay at the window's top while it is in
+    // view, and its own heads: the paper's over the first, and each
+    // section's title over its own.  `got` is a section's /tr/ fragment, or
+    // null where it could not be had.
+    var draw = function (gots) {
       if (n !== cmpN || !art.isConnected) return;
       cmpUndraw(art);
       // The folds' words go, so that no note's number stands twice.
       Array.prototype.forEach.call(art.querySelectorAll('.tf.open'), trShut);
       Array.prototype.forEach.call(art.querySelectorAll('.tf .tr'), function (el) { el.remove(); });
-      var grid = art.querySelector('.grid'), top = art.querySelector('.papertop');
       art.classList.add('cmp');
       art.style.setProperty('--cols', ks.length + 1);
-      // A column's name, as Settings names a translation, and over the English
-      // the book's own title, which no language translates.
-      var names = '<div class="row cmpnames"><p class="cn" style="--c:1" lang="en"><b>The Urantia Book</b> (Uversa Press)</p>',
-          heads = '<div class="row cmphd">';
-      ks.forEach(function (k, i) {
-        var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 2) + '"';
-        names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> <span class="nobreak">(' + x.label + ')</span></p>';
-        heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
-                 (g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (g.title ? '<h1>' + g.title + '</h1>' : '') +
-                 (g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +
-                 // Every one counted is in the fragment the server sends, so one
-                 // missing is offline, and not kept in the copy.
-                 (got.t[k] ? '' : '<p class="gap">' + T(failed ? 'tr:unreachable' : 'tr:notkept') + '</p>') + '</header>';
-      });
-      grid.insertAdjacentHTML('afterbegin', names + '</div>' + heads + '</div>');
-      var en = top.cloneNode(true);
-      en.classList.add('ch');
-      en.style.setProperty('--c', 1);
-      grid.querySelector('.cmphd').prepend(en);
-      Array.prototype.forEach.call(grid.children, function (row) {
-        if (row.classList.contains('stars')) {
-          row.insertAdjacentHTML('beforeend', ks.map(function (k, i) {
-            return '<i class="rs" style="--c:' + (i + 2) + '" data-stars="' + row.dataset.stars + '" aria-hidden="true"></i>';
+      Array.prototype.forEach.call(secs, function (sec, j) {
+        var failed = !gots[j], got = gots[j] || { t: {}, n: {}, h: {} }, grid = sec.querySelector('.grid'),
+            top = sec.querySelector(':scope > .papertop') || art.querySelector(':scope > .papertop');
+        if (!grid || !top) return;
+        // A column's name, as Settings names a translation, and over the English
+        // the book's own title, which no language translates.
+        var names = '<div class="row cmpnames"><p class="cn" style="--c:1" lang="en"><b>The Urantia Book</b> (Uversa Press)</p>',
+            heads = '<div class="row cmphd">';
+        ks.forEach(function (k, i) {
+          var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 2) + '"', paper = j === 0;
+          names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> <span class="nobreak">(' + x.label + ')</span></p>';
+          heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
+                   (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
+                   (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +
+                   // Every one counted is in the fragment the server sends, so one
+                   // missing is offline, and not kept in the copy.
+                   (got.t[k] ? '' : '<p class="gap">' + T(failed ? 'tr:unreachable' : 'tr:notkept') + '</p>') + '</header>';
+        });
+        grid.insertAdjacentHTML('afterbegin', names + '</div>' + heads + '</div>');
+        var en = top.cloneNode(true);
+        en.classList.add('ch');
+        en.style.setProperty('--c', 1);
+        grid.querySelector('.cmphd').prepend(en);
+        Array.prototype.forEach.call(grid.children, function (row) {
+          if (row.classList.contains('stars')) {
+            row.insertAdjacentHTML('beforeend', ks.map(function (k, i) {
+              return '<i class="rs" style="--c:' + (i + 2) + '" data-stars="' + row.dataset.stars + '" aria-hidden="true"></i>';
+            }).join(''));
+            return;
+          }
+          var text = row.querySelector(':scope > p.t, :scope > .verse');
+          if (!text) return;
+          var lines = row.querySelectorAll('p.t[id]');
+          text.insertAdjacentHTML('afterend', ks.map(function (k, i) {
+            var x = trBy[k], w = trLines(got, k, lines);
+            return '<div class="rc" style="--c:' + (i + 2) + '" data-k="' + k + '" lang="' + x.lang + '">' +
+                   (w.h && '<p class="who">' + x.label + '</p>' + w.h) +
+                   (w.notes && '<div class="tnotes" hidden>' + w.notes + '</div>') + '</div>';
           }).join(''));
-          return;
-        }
-        var text = row.querySelector(':scope > p.t, :scope > .verse');
-        if (!text) return;
-        var lines = row.querySelectorAll('p.t[id]');
-        text.insertAdjacentHTML('afterend', ks.map(function (k, i) {
-          var x = trBy[k], w = trLines(got, k, lines);
-          return '<div class="rc" style="--c:' + (i + 2) + '" data-k="' + k + '" lang="' + x.lang + '">' +
-                 (w.h && '<p class="who">' + x.label + '</p>' + w.h) +
-                 (w.notes && '<div class="tnotes" hidden>' + w.notes + '</div>') + '</div>';
-        }).join(''));
+        });
       });
       // listen.js puts each translation's ▶ in its cells.
       document.dispatchEvent(new CustomEvent('ub:cmp', { detail: art }));
     };
-    return trFetch(art, first.id.split('.')[0]).then(function (got) { draw(got, false); },
-                                                      function () { draw({ t: {}, n: {}, h: {} }, true); });
+    return Promise.all(Array.prototype.map.call(secs, function (sec) {
+      return trFetch(sec, sec.id).then(function (got) { return got; }, function () { return null; });
+    })).then(draw);
   }
   // The paragraph at the window's top, kept there as the page is drawn again,
   // from its start, below the columns' names; at the page's head, the head.  A
@@ -942,12 +1042,14 @@
   });
   // Opened at Compare's address: drawn, then the paragraph cited brought into
   // view again, as the rows have changed height, unless the reader has
-  // scrolled meanwhile; and a translator's note's card opened from its column.
+  // scrolled meanwhile (by hand: the fonts coming in move the page too, and
+  // the whole paper's columns take a while); and a translator's note's card
+  // opened from its column.
   function cmpArrive() {
     if (!cmpOn()) return;
-    var y = scrollY;
+    var t = Date.now();
     cmpDraw().then(function () {
-      if (scrollY === y) arrive();
+      if (arriveTouched <= t) arrive();
       var m = /^#note(tn_[a-z0-9-]+_\d+_\d+_\d+_\d+)$/.exec(location.hash),
           mark = m && document.getElementById('fnref' + m[1]);
       if (!mark || !mark.closest('.rc')) return;

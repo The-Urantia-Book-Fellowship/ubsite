@@ -3,8 +3,8 @@
 ROADMAP item 15, step 2 (Tigran, 2026-10-26).  Its address is a section's with
 /compare after it, the same page byte for byte, which ub.js draws in columns
 from /tr/: so a reload or a link keeps it, and no setting reaches the server.
-A paper's number goes to its first section in Compare, as /N goes to it
-without.  The toggle is in every page whose section has a translation, after
+A paper's number is the whole paper, in Compare too, every section in columns
+(test_whole).  The toggle is in every page whose section has a translation, after
 the Index's head and before the paper's, shown by the head script only where
 one the reader has ticked has it.  Rendered through the app as ASGI, as
 test_appendix_pages does; skipped when var/ub.db has not been built.
@@ -27,12 +27,13 @@ class Address(unittest.TestCase):
             self.assertEqual(cmp[0], 200, ref)
             self.assertEqual(plain[2], cmp[2], ref)
 
-    def test_a_paper_goes_to_its_first_section_in_compare(self):
-        status, headers, _ = get("/1/compare")
-        self.assertEqual((status, headers["location"]), (307, "/1:0/compare"))
-        self.assertEqual(get("/1")[1]["location"], "/1:0")
+    def test_a_whole_paper_in_compare_is_the_same_page(self):
+        plain, cmp = get("/1", raw=True), get("/1/compare", raw=True)
+        self.assertEqual((plain[0], cmp[0]), (200, 200))
+        self.assertEqual(plain[2], cmp[2])
+        self.assertIn('class="cmphead"', plain[2])
         # Not a query of /N: nothing but the address says Compare.
-        self.assertEqual(get("/1?compare=true")[1]["location"], "/1:0")
+        self.assertEqual(get("/1?compare=true")[2], get("/1")[2])
 
     def test_what_is_not_there_is_said_as_without_it(self):
         for ref, words in (("1:99", "Paper 1 has no section 99."), ("300", "There is no Paper 300."),

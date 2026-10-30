@@ -188,9 +188,11 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # 2026-10-24: the page about the text API, kept with the address it is read at.
 [offline]
 measured_on = "2026-10-30"
-pages       = 10411      # 1,626 sections, 4,735 headwords, 27 index letters, 20 more, 3,877 reading paths,
+pages       = 10608      # 1,626 sections, 4,735 headwords, 27 index letters, 20 more, 3,877 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
-                         # one fewer since 2026-10-30: Paper 138's one question dropped
+                         # one fewer since 2026-10-30: Paper 138's one question dropped;
+                         # 197 more the same day: the whole paper's page, /N, joined from its
+                         # sections' pieces, 0.3 MB in all (Settings' Whole paper)
 paths       = 3877       # 2,057 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
 chunks      = 419        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
@@ -200,8 +202,8 @@ chunks      = 419        # 396 with the SBL fonts (2026-10-19); 400 since every 
                          # and 13 more chunks of reading paths, 8% more of them to hold
                          # (404 with UB_BILINGUAL=0); 419 since the quiz (2026-10-28): its
                          # chunk of pages, and quiz.js
-download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement
-raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25)
+download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement; 48.3 on 2026-10-30
+raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25); 224.9 on 2026-10-30
 
 # The translations, each a download of its own that a reader chooses in Settings'
 # Offline tab, and none of the above (offline/pack.py): a chunk to every twenty

@@ -1,7 +1,64 @@
-{% extends "base.html" %}{% set title = tr('Paper {n} — {title}', n=paper.n, title=paper.title) %}
-{% block body %}<main class="prose">
-<p class="papernum">Paper {{ paper.n }}</p><h1>{{ paper.title }}</h1>
-{% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
-<ol class="toc">
-{% for s in sections %}<li><a href="/{{ paper.n }}:{{ s.n }}">{% if s.n %}<b>{{ s.n }}{% if s.combined_with %} and {{ s.combined_with }}{% endif %}.</b> {{ s.title }}{% else %}<b></b> Introduction{% endif %}</a></li>{% endfor %}
-</ol></main>{% endblock %}
+{% extends "base.html" %}{% from "_text.html" import textof, endnotes, quizcall %}
+{% from "_rail.html" import rail %}
+{% from "_fold.html" import indexfold, compare %}
+{% from "_transport.html" import step %}
+{#- The whole paper on one page, /15 (app.py paper_page): Settings' Whole
+    paper (settings.py `whole`, Tigran, 2026-10-30), for reading the book
+    straight through with every distraction off.  Chosen in the browser,
+    which sends a reader who has it on from a section's address to this one,
+    at that section, and one who has not from this to the first section's
+    (base.html ubUnit): no setting reaches the server.  Every section's text
+    as section.html sets it (_text.html textof), each under its own title,
+    the paper's notes at its end, its quiz, and a transport bar of the two
+    paper buttons alone, to the papers before and after by their own
+    addresses: the section buttons are what the mode leaves out.  The rail
+    marks no section; ub.js marks the one being read as the page scrolls.
+    Compare, /15/compare, sets every section beside the translations ticked
+    (ub.js cmpDraw).  Offline the copy joins this page from its sections'
+    pieces (offline/pages.py holes). #}
+{% set title = same(paper.n ~ ' — ' ~ paper.title) %}
+{% block body %}
+<main class="reader">
+  {{ rail(book(), paper.n, none, paper.part_n) }}
+
+  {#- The paper's longest reference, in characters, so that the text stands at
+      one indent down the whole paper (ub.css .num, section.html). #}
+  <article class="whole" style="--refw: {{ refw }}">
+    {{ indexfold() }}
+    {%- if texts|selectattr('trv')|list %}
+    {{ compare() }}
+    {%- endif %}
+    <header class="papertop">
+      {%- if paper.n %}
+      <p class="papernum">{{ t('Paper {n}', n=paper.n) }}</p>
+      {%- endif %}
+      <h1>{{ paper.title }}</h1>
+      {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
+    </header>
+    {%- for d in texts %}
+    {{ textof(paper.n, d.section, d, titled=True) }}
+    {%- endfor %}
+    {{ endnotes(paras, notes, study) }}
+    {{ quizcall(quizcall_n, paper.n) }}
+
+    {#- ⏪ the paper before, ⏩ the paper after (app.py paper_transport); at
+        the book's ends a greyed icon in its place. #}
+    <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>
+      {%- for k in ('fb', 'ff') %}
+      {{ step(k, go[k]) }}
+      {%- endfor %}
+    </nav>
+  </article>
+</main>
+{% endblock %}
+{% block scripts %}
+{#- Every voice's segments for the whole paper, in a section's shape (app.py
+    whole_audio): listen.js plays the paper as it plays a section, a spoken
+    heading's ref the section's own address, and goes on to the next paper. #}
+<script type="application/json" id="ub-audio">{{ {
+  "paper": paper.n, "section": none, "whole": true,
+  "title": paper.n ~ " " ~ paper.title,
+  "next": onward,
+  "voices": audio}|tojson }}</script>
+<script src="{{ asset('listen.js') }}" defer></script>
+{% endblock %}

@@ -61,7 +61,9 @@ class Page(unittest.TestCase):
 
     def test_the_page_names_its_translations_version(self):
         body = get("/1:1")[2]
-        v = re.search(r'<article data-trv="([0-9a-f]{12})">', body)
+        # On the section's own element, which the whole paper's page has one of
+        # for each section (templates/_text.html textof).
+        v = re.search(r'<section id="1:1" data-trv="([0-9a-f]{12})">', body)
         self.assertTrue(v)
         status, headers, frag = get("/tr/1:1?v=" + v[1])
         self.assertEqual(status, 200)

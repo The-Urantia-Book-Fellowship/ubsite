@@ -84,6 +84,18 @@
       }
     return html(200, stored(sh, rec, b));
   }
+  // The whole paper's page (templates/paper.html) from its paper's chunk: its
+  // own text, with each section's, which the section's own page holds, put
+  // in its hole (offline/pages.py holes), and the rail, which marks no
+  // section.
+  function whole(sh, d, paper) {
+    var w = d.whole, b = w.b.map(function (x) {
+      if (typeof x === 'string') return x;
+      var r = d.sections[String(x[0])];
+      return r.b.slice(r.sec[0], r.sec[1]);
+    }).join('');
+    return html(200, compose(sh, w.t, w.h, '', put(b, '\u0000', d.rail), w.s));
+  }
   function go(ref) { return '<a href="/' + esc(ref) + '">' + esc(ref) + '</a>'; }
 
   var RE_REF = /^(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?$/;
@@ -216,14 +228,16 @@
       if (!sh.papers[pr]) return { res: text(404, 'No such paper.\n') };
       return { chunk: 'paper-' + pr, make: function (d) { return { status: 200, type: HTML, body: d.railsecs }; } };
     }
-    // Compare's address (app.py read_compare) is the page's with /compare
-    // after it, the same page; a paper's number goes to its first section in
-    // Compare.
-    var cm = /^(\/[^\/]+)\/compare$/.exec(path), at = cm ? cm[1] : path, then = cm ? '/compare' : '';
+    // Compare's address (app.py read_compare, paper_compare) is the page's
+    // with /compare after it, the same page.  A paper's number is the whole
+    // paper (app.py paper_page, since 2026-10-30); a copy from before it
+    // sends on to the paper's first section, as the server did.
+    var cm = /^(\/[^\/]+)\/compare$/.exec(path), at = cm ? cm[1] : path;
     if ((m = /^\/([0-9]+)$/.exec(at))) {
       var pn = parseInt(m[1], 10), secs = sh.papers[String(pn)];
       if (!secs) return { res: missing(sh, T('There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196.', { n: pn }), path) };
-      return { res: redirect('/' + pn + ':' + Math.min.apply(null, secs) + then, 307) };
+      var first = redirect('/' + pn + ':' + Math.min.apply(null, secs) + (cm ? '/compare' : ''), 307);
+      return { chunk: 'paper-' + pn, make: function (d) { return d.whole ? whole(sh, d, pn) : first; } };
     }
     if ((m = /^\/([^\/]+)$/.exec(at))) {
       var r = RE_REF.exec(m[1]);

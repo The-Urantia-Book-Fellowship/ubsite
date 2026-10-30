@@ -119,15 +119,21 @@ def classify(ua: str) -> dict:
 
 
 # ---- pages -------------------------------------------------------------------------
-# A section read in Compare, /1:1/compare, is a view of the section.
+# A section read in Compare, /1:1/compare, is a view of the section.  A paper's
+# address, /15, is the whole paper on one page since 2026-10-30 (Settings' Whole
+# paper); until then a redirect, and never a view.
 RE_SECTION = re.compile(r"^/(\d+):(\d+)(?:\.\d+(?:-\d+)?)?(?:/compare)?$")
+RE_PAPER = re.compile(r"^/(\d+)$")
 
 
 def page_kind(path: str) -> tuple[str, str]:
-    """(kind, key): ('section', '102:3'), ('concept', 'adoption'), ..."""
+    """(kind, key): ('section', '102:3'), ('paper', '15'), ('concept', 'adoption'), ..."""
     m = RE_SECTION.match(path)
     if m:
         return "section", f"{int(m[1])}:{int(m[2])}"
+    m = RE_PAPER.match(path)
+    if m:
+        return "paper", str(int(m[1]))
     if path == "/":
         return "home", ""
     if path == "/read":
@@ -148,7 +154,7 @@ def page_kind(path: str) -> tuple[str, str]:
     return "other", path
 
 
-KIND_LABEL = {"section": "Sections of the text", "concept": "Concept pages",
+KIND_LABEL = {"section": "Sections of the text", "paper": "Whole papers", "concept": "Concept pages",
               "path": "Reading paths",
               "index": "The index, by letter", "appendix": "Appendices",
               "search": "Search", "home": "Home page", "contents": "Contents", "lists": "Lists",
@@ -286,7 +292,7 @@ def report(ub: sqlite3.Connection, days: int, recent: int = 50) -> dict:
                          for h, c in links.items()), key=lambda x: -x["n"])[:25]
 
     # -- what is read
-    kinds, sections, concepts, other = Counter(), Counter(), Counter(), Counter()
+    kinds, sections, whole, concepts, other = Counter(), Counter(), Counter(), Counter(), Counter()
     sec_vis, con_vis = Counter(), Counter()
     for row in q(f"SELECT path, COUNT(*) views, {VIS} n FROM hv WHERE status = 200 GROUP BY path"):
         kind, key = page_kind(row["path"])
@@ -294,6 +300,8 @@ def report(ub: sqlite3.Connection, days: int, recent: int = 50) -> dict:
         if kind == "section":
             sections[key] += row["views"]
             sec_vis[key] += row["n"]
+        elif kind == "paper":
+            whole[key] += row["views"]
         elif kind == "concept":
             concepts[key] += row["views"]
             con_vis[key] += row["n"]
@@ -303,9 +311,12 @@ def report(ub: sqlite3.Connection, days: int, recent: int = 50) -> dict:
     titles = section_titles(ub)
     r["sections"] = [{"ref": k, "title": titles.get(k, ""), "views": n, "n": sec_vis[k]}
                      for k, n in sections.most_common(30)]
+    # A paper's readers: its sections' views, and the whole paper's.
     papers = Counter()
     for k, n in sections.items():
         papers[int(k.split(":")[0])] += n
+    for k, n in whole.items():
+        papers[int(k)] += n
     ptitles = dict(ub.execute("SELECT n, title FROM paper").fetchall())
     r["papers"] = [{"n": p, "title": ptitles.get(p, ""), "views": n} for p, n in papers.most_common(20)]
     heads = headwords(ub, list(concepts))

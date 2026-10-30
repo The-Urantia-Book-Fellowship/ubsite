@@ -13,7 +13,9 @@ Node runs static/offline-core.js on the copy, as the service worker does
     server sends them, and with none kept or one alone, the fragment's frame
     around what is kept;
   - every section with all its paragraphs marked (/101:4.1-N), and a sample of
-    one paragraph each, which puts back each section's rail and marks;
+    one paragraph each, which puts back each section's rail and marks; and
+    every whole paper, /101, joined from its sections' pieces, among the
+    stored pages;
   - addresses the server explains or redirects: a paragraph that is not there,
     a range that runs backwards, a paper or section there is none of, a
     reading path a headword does not have, or not by theme, and Compare's
@@ -78,8 +80,8 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
     no_path = next(s for s in slugs if s not in paths)
     one_chapter = next(s for s, (n, _) in paths.items() if n < 2)
     no_quiz = next(int(p) for p in shell["papers"] if int(p) not in shell["quiz"])
-    for p in ["/0:0.0-1", "/86:5.18", "/86:5.15-14", "/39:3.9-8", "/300:1", "/1:99", "/300", "/101",
-              "/0", "/007:1", "/i/no-such-headword", f"/i/{no_path}/read", f"/i/{one_chapter}/read/theme",
+    for p in ["/0:0.0-1", "/86:5.18", "/86:5.15-14", "/39:3.9-8", "/300:1", "/1:99", "/300",
+              "/007:1", "/i/no-such-headword", f"/i/{no_path}/read", f"/i/{one_chapter}/read/theme",
               "/index/q", "/index/QQ", "/index/a", "/appendix/a", "/appendix/G", "/appendix/AB",
               "/part/9", "/part/01", "/part/x", "/rail/300", "/rail/007", "/rail/xx", "/rail/UF-RUS", "/nothing", "/i/god/more",
               "/101:4.2:3", "/café", "/speech/01:4", "/speech/999:1", "/speech/1:99", "/speech/x",

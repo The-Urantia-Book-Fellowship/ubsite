@@ -1,37 +1,24 @@
-{% extends "base.html" %}{% from "_note.html" import note, snote %}
-{% from "_para.html" import para %}
+{% extends "base.html" %}{% from "_text.html" import textof, sectitle, endnotes, quizcall %}
 {% from "_rail.html" import rail %}
-{% from "_fold.html" import indexfold, afold, trfold, compare %}
+{% from "_fold.html" import indexfold, compare %}
 {% from "_transport.html" import step %}
-{# An index entry beside the text.  A headword or subentry links to its line on
-   the concept page; an appendix entry to its line on the appendix page, named
-   with its appendix.  A Chronology event stands in its window onto Appendix A
-   (queries.windows), a slice of the timeline: the event printed before it,
-   with its citations, the event itself, with its date, linking to its line
-   there, and the event after, under no heading: its dashed rule marks it.
-   Entries of one headword stand together, run on (queries.groups): the part
-   they share once, linking to its line, then each entry's own words, linking
-   to theirs, separated by semicolons. #}
-{% macro chip(c) -%}
-{% if c.window %}<div class="win">
-  {%- if c.before %}<span class="nb">{{ c.before.line_html|safe }}</span>{% endif %}
-  {%- for e in c.events %}<a class="here" href="{{ appendix_href(e.scope, e.anchor) }}">{{ e.event|safe }}</a>{% endfor %}
-  {%- if c.after %}<span class="nb">{{ c.after.line_html|safe }}</span>{% endif %}</div>
-{%- elif c.group %}<span class="grp"><a href="{{ entry_href(c.rslug, c.head.level, c.head.anchor) }}">{{ c.head.label|safe }}</a> ›
-  {%- for t in c.tails %}{% if not loop.first %};{% endif %} <a href="{{ entry_href(c.rslug, t.level, t.anchor) }}">{{ t.label|safe }}</a>{% endfor %}</span>
-{%- elif c.rslug %}<a href="{{ entry_href(c.rslug, c.level, c.anchor) }}">{{ c.path|safe }}</a>
-{%- else %}<a class="app" href="{{ appendix_href(c.scope, c.anchor) }}"><span class="lbl">{{ c.appendix }}</span> {{ (c.event or c.path)|safe }}</a>{% endif %}
-{%- endmacro %}
+{#- One section of the text, with everything that stands beside it: the
+    page a reader sees unless Settings' Whole paper puts the paper on one
+    page (paper.html), the browser choosing between the two addresses
+    (base.html ubUnit).  The text itself is _text.html's, which both pages
+    draw. #}
 {% set title = same(paper.n ~ ':' ~ section.n ~ ' — ' ~ (section.title or paper.title)) %}
 {% block body %}
 <main class="reader">
   {{ rail(book(), paper.n, section.n, paper.part_n) }}
 
-  {#- The version its translations are asked for under (/tr/, app.py), where
-      it has any. #}
-  <article{% if trv %} data-trv="{{ trv }}"{% endif %}>
+  {#- The longest reference here, in characters: on a phone the reference stands
+      at the start of each paragraph, and the text beside it is set that far in
+      (ub.css .num).  On the article, so that the text's piece is the same on
+      the whole paper's page, which takes the paper's longest. #}
+  <article style="--refw: {{ refw }}">
     {{ indexfold() }}
-    {%- if trv %}
+    {%- if text.trv %}
     {{ compare() }}
     {%- endif %}
     <header class="papertop">
@@ -42,120 +29,13 @@
       {%- endif %}
       <h1>{{ paper.title }}</h1>
       {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}
-      {#- An introduction has no title of its own: the paper's stands over it, and
-          "0. Introduction" is the rail's name for it, not the book's. #}
       {%- if section.n %}
-      <h2>{% if section.combined_with %}{{ t('{a} and {b}', a=section.n, b=section.combined_with) }}{% else %}{{ section.n }}{% endif %}. {{ section.title_html|safe }}</h2>
+      {{ sectitle(section) }}
       {%- endif %}
     </header>
-
-    {% if paperwide or blanket %}
-    <aside class="blanket">
-      {{ afold(nwhole, 'paper+section' if paperwide and blanket else 'paper' if paperwide else 'section') }}
-      {# read_pack's rule: a blanket citation is listed ONCE here, never repeated
-         under every paragraph -- otherwise Paper 15's 470 citations print some
-         entries forty times over and the eye stops reading.  An entry citing the
-         whole paper is listed once, above section 0, under a heading of its own
-         (Tigran, 2026-10-17). #}
-      {%- if paperwide %}
-      <h3>{{ t('Cited across this whole paper') }}</h3>
-      <ul>{% for b in paperwide %}<li>{{ chip(b) }}</li>{% endfor %}</ul>
-      {%- endif %}
-      {%- if blanket %}
-      <h3>{{ t('Cited across this whole section') }}</h3>
-      <ul>{% for b in blanket %}<li>{{ chip(b) }}</li>{% endfor %}</ul>
-      {%- endif %}
-    </aside>
-    {% endif %}
-
-    {#- The longest reference here, in characters: on a phone the reference stands
-        at the start of each paragraph, and the text beside it is set that far in.
-        Each paragraph, or block of verse, is a row with what stands beside it
-        and its translations' fold under it (ub.css .row). #}
-    <div class="grid" style="--refw: {{ paras|map(attribute='ref')|map('length')|max }}">
-    {% for r in rows %}
-      {%- set first = r.p if 'p' in r else r.lines[0] %}
-      {#- A separator before the paragraph, its stars as printed: a row of its own
-          across both columns, drawn in CSS (ub.css .stars). #}
-      {%- if first.sep_before %}
-      <div class="stars" role="separator" data-stars="{{ first.sep_before }}"></div>
-      {%- endif %}
-      {%- if 'p' in r %}
-      <div class="row">
-      {{ para(r.p, focus and r.p.para_n >= focus and r.p.para_n <= last) }}
-      {#- Nothing at all inside when nothing stands beside the paragraph, so
-          that .a:empty holds and a phone draws no box for it. #}
-      {%- set cs = citers.get(r.p.id, []) %}
-      <div class="a">
-        {%- if cs %}
-          {{ afold(nciters[r.p.id]) }}
-          <ul class="chips">
-          {% for c in cs %}<li>{{ chip(c) }}</li>{% endfor %}
-          </ul>
-        {%- endif -%}
-      </div>
-      {{ trfold(tr_has.get(r.p.id)) }}
-      </div>
-      {%- else %}
-      {#- A block of verse, as the book sets it: indented as one, its lines close,
-          a wrapped line hanging (ub.css .verse).  The entries citing its lines
-          stand beside the block, each line's under its reference, so that a
-          line cited many times opens no gap in the verse. #}
-      <div class="row">
-      <div class="verse">
-      {%- for q in r.lines %}
-      {{ para(q, focus and q.para_n >= focus and q.para_n <= last) }}
-      {%- endfor %}
-      </div>
-      {%- set nv = namespace(n=0) %}{% for q in r.lines %}{% set nv.n = nv.n + nciters.get(q.id, 0) %}{% endfor %}
-      <div class="a">
-      {%- if nv.n %}{{ afold(nv.n) }}{% endif %}
-      {%- for q in r.lines if citers.get(q.id) %}
-        <p class="at"><a href="/{{ q.ref }}">{{ q.ref }}</a></p>
-        <ul class="chips">
-        {% for c in citers[q.id] %}<li>{{ chip(c) }}</li>{% endfor %}
-        </ul>
-      {%- endfor -%}
-      </div>
-      {%- set ks = [] %}{% for q in r.lines %}{% for k in tr_has.get(q.id, '').split() %}{% if k not in ks %}{% set _ = ks.append(k) %}{% endif %}{% endfor %}{% endfor %}
-      {{ trfold(ks|join(' ')) }}
-      </div>
-      {%- endif %}
-    {% endfor %}
-    </div>
-
-    {#- The 1955 readings: each where the text departs from the first printing,
-        as the press gives it, with the SRT Committee's reason for the change
-        where it gives one.  With
-        JavaScript each opens as a card at its ring (ub.js) and this block is
-        hidden; without it, and in print, they are the section's endnotes. #}
-    {% if notes %}
-    <section class="notes" {{ ta('aria-label', 'The 1955 readings') }}>
-      <h3><a href="/lists/1955">{{ t('The 1955 readings') }}</a></h3>
-      {% for p in paras %}{% for n in notes.get(p.id, []) %}
-      {{ note(n) }}
-      {% endfor %}{% endfor %}
-    </section>
-    {% endif %}
-    {#- The study notes, as reviewed (build/study.py): numbered through the
-        paper, each opened as a card at its number. #}
-    {%- if study %}
-    <section class="notes st" {{ ta('aria-label', 'Study notes') }}>
-      <h3>{{ t('Study notes') }}</h3>
-      {% for p in paras %}{% for n in study.get(p.id, []) %}
-      {{ snote(n) }}
-      {% endfor %}{% endfor %}
-    </section>
-    {%- endif %}
-    {#- At a paper's end, its quiz, where it has questions (app.py read,
-        quiz_paper.html); Settings' Quiz hides it (ub.css .quizcall). #}
-    {%- if quizcall %}
-    <aside class="quizcall">
-      <p class="k">{{ t('Cosmic Citizenship Quiz') }}</p>
-      <p>{{ t('quiz:call', n=quizcall) }}</p>
-      <a class="pill" href="/quiz/{{ paper.n }}">{{ t('Take the quiz') }}</a>
-    </aside>
-    {%- endif %}
+    {{ textof(paper.n, section, text, focus, last) }}
+    {{ endnotes(text.paras, text.notes, text.study) }}
+    {{ quizcall(quizcall_n, paper.n) }}
 
     {#- The transport bar: ⏪ ⏮ ⏭ ⏩, across papers in the order of the book
         (app.py transport, templates/_transport.html).  At the book's ends a
@@ -177,6 +57,6 @@
   "paper": paper.n, "section": section.n,
   "title": paper.n ~ ":" ~ section.n ~ " " ~ (section.title or paper.title),
   "next": onward,
-  "voices": audio}|tojson }}</script>
+  "voices": text.audio}|tojson }}</script>
 <script src="{{ asset('listen.js') }}" defer></script>
 {% endblock %}

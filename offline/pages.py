@@ -19,6 +19,14 @@ the same for every section of a paper but for that mark, so it is lifted out
 of the body, where a NUL stands in for it, and kept once for the paper with
 no section marked.  The worker marks the section again.
 
+The whole paper's page, /15 (templates/paper.html, Settings' Whole paper), is
+its sections' text once more, under one head: each section's piece of it, the
+inner of its <section id="15:3"> (templates/_text.html textof), is byte for
+byte the piece in the section's own page, so the whole page is kept as its
+own text with a hole where each section's text goes, and the worker fills
+the holes from the section pages it holds (holes(), offline-core.js whole()).
+Stored whole, the 197 pages would have added a tenth to the copy.
+
 A headword's reading path (/i/<slug>/read, and /read/theme) is a page like any
 other, and the largest part of the copy: 132 MB of the 191 unpacked, though
 it is made of paragraphs the copy has already, because each paragraph comes
@@ -117,6 +125,59 @@ def lift_rail(body: str, paper: int, sec: int) -> tuple[str, str]:
             m.group(0).replace(here, f'<li><a href="/{paper}:{sec}">'))
 
 
+def lift_rail_whole(body: str, paper: int, rail: str) -> str:
+    """The whole paper's body (paper.html) with a NUL where its rail was: the
+    rail is its sections' with no section marked, which the paper's chunk
+    keeps."""
+    found = list(RE_RAIL.finditer(body))
+    if len(found) != 1:
+        raise Shape(f"/{paper} has {len(found)} rails")
+    m = found[0]
+    if m.group(0) != rail:
+        raise Shape(f"/{paper}'s rail is not its sections' with no section marked")
+    return body[:m.start()] + RAIL + body[m.end():]
+
+
+def inner(body: str, paper: int, sec: int) -> tuple[int, int]:
+    """Where section paper:sec's text stands in a body (templates/_text.html
+    textof): the inner of its <section id>, from the end of the open tag to
+    the first </section> after it (the grid holds no section; the notes'
+    come later), as offsets."""
+    tag = f'<section id="{paper}:{sec}"'
+    if body.count(tag) != 1:
+        raise Shape(f"{paper}:{sec}'s text stands {body.count(tag)} times in its page")
+    i = body.index(">", body.index(tag)) + 1
+    return i, body.index("</section>", i)
+
+
+def holes(whole: str, sections: dict[str, dict], paper: int, secs: list[int]) -> list:
+    """The whole paper's body as its own text and holes: each section's text,
+    which the copy holds in the section's own page, replaced by [s], and each
+    section's record given `sec`, where that text stands in its body, so that
+    the worker can fill the hole (offline-core.js whole()).  The sections in
+    the order of the book, each found once."""
+    parts: list = []
+    rest = whole
+    for s in secs:
+        rec = sections[str(s)]
+        i, j = inner(rec["b"], paper, s)
+        rec["sec"] = [i, j]
+        piece = rec["b"][i:j]
+        if rest.count(piece) != 1:
+            raise Shape(f"{paper}:{s}'s text stands {rest.count(piece)} times in /{paper}")
+        at = rest.index(piece)
+        parts += [rest[:at], [s]]
+        rest = rest[at + len(piece):]
+    parts.append(rest)
+    return parts
+
+
+def join_whole(parts: list, sections: dict[str, dict]) -> str:
+    """The whole paper's body again, as offline-core.js whole() makes it."""
+    return "".join(x if isinstance(x, str) else sections[str(x[0])]["b"][slice(*sections[str(x[0])]["sec"])]
+                   for x in parts)
+
+
 def sha(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -196,7 +257,14 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         sections = site.get(f"/rail/{p}")
         if sections.status != 200:
             raise Shape(f"/rail/{p} answered {sections.status}")
-        chunks[f"paper-{p}"] = {"rail": rail, "railsecs": sections.text, "sections": out}
+        # The whole paper's page, its own text with a hole for each section's,
+        # and held to the page the server sends once joined again.
+        wpage = site.get(f"/{p}")
+        wrec = own(f"/{p}", wpage)
+        wrec["b"] = holes(lift_rail_whole(wrec["b"], p, rail), out, p, secs)
+        if compose(shell, {**wrec, "b": join_whole(wrec["b"], out).replace(RAIL, rail, 1)}) != wpage.text:
+            raise Shape(f"/{p} is not its own text with its sections' pieces in their holes")
+        chunks[f"paper-{p}"] = {"rail": rail, "railsecs": sections.text, "sections": out, "whole": wrec}
 
     # What the browser's voice reads (app.py speech(), build/speech.py), as the
     # server sends it, so that it reads offline too.  Apart from the pages,
@@ -378,6 +446,7 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
                          for k in order if trs[k]]},
     }
     counts = {"sections": sum(len(s) for s in u["papers"].values()), "papers": len(u["papers"]),
+              "whole": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
               "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
               "pages": len(expect) - spoken - fragments - tocs - tr_spoken, "spoken": spoken,

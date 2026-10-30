@@ -56,6 +56,16 @@ class Rail(unittest.TestCase):
         self.assertEqual(r.count("<details open>"), 2)          # Part IV and Paper 133
         self.assertEqual(re.findall(r'<li class="here"><a href="/([\d:]+)"', r), ["133:2"])
 
+    def test_the_whole_papers_page_marks_no_section(self):
+        # Its rail is its sections' but for their mark (offline/pages.py keeps
+        # one for the paper); ub.js marks the section being read as the page
+        # scrolls.
+        r = rail("/133")
+        self.assertIn('<li class="here"><details open><summary><a href="/133">', r)
+        self.assertEqual(re.findall(r'<li class="here"><a href="/([\d:]+)"', r), [])
+        secs = [(int(p), int(s)) for p, s in RE_SECTION.findall(r)]
+        self.assertEqual(secs, [(133, s) for s in self.sections[133]])
+
     def test_the_foreword_is_in_no_part(self):
         r = rail("/0:3")
         self.assertEqual(RE_OPEN_PART.findall(r), [])

@@ -174,7 +174,7 @@ class Pages(unittest.TestCase):
     def test_every_kind_of_page_cuts_and_joins_again(self):
         from offline import pages, site
         shell = None
-        for path in ("/", "/101:4", "/i/god", "/appendix/A", "/lists/1955", "/part/2", "/search"):
+        for path in ("/", "/101:4", "/101", "/i/god", "/appendix/A", "/lists/1955", "/part/2", "/search"):
             text = site.get(path).text
             sh, rec = pages.cut(text)
             shell = shell or sh
@@ -191,6 +191,33 @@ class Pages(unittest.TestCase):
             self.assertNotIn('<li class="here"><a href="/101:', rail)
             rails.add(rail)
         self.assertEqual(len(rails), 1)
+
+    def test_a_whole_paper_is_its_sections_pieces_in_their_holes(self):
+        # The whole paper's page is kept as its own text with a hole for each
+        # section's, filled from the section's own page (pages.holes,
+        # offline-core.js whole()); joined, it is the server's page again.
+        import sqlite3
+        from offline import pages, site
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        secs = [s for (s,) in con.execute("SELECT n FROM section WHERE paper_n=101 ORDER BY n")]
+        self.assertEqual(len(secs), 11)
+        out, rail = {}, None
+        for s in secs:
+            sh, rec = pages.cut(site.get(f"/101:{s}").text)
+            rec["b"], rail = pages.lift_rail(rec["b"], 101, s)
+            out[str(s)] = rec
+        whole = site.get("/101").text
+        sh, wrec = pages.cut(whole)
+        wrec.pop("q")
+        wrec["b"] = pages.holes(pages.lift_rail_whole(wrec["b"], 101, rail), out, 101, secs)
+        self.assertEqual([x[0] for x in wrec["b"] if not isinstance(x, str)], secs)
+        for s in secs:
+            self.assertEqual(len(out[str(s)]["sec"]), 2)
+        joined = pages.join_whole(wrec["b"], out).replace(pages.RAIL, rail, 1)
+        self.assertEqual(pages.compose(sh, {**wrec, "b": joined}), whole)
+        # Its own text is a small part of the page: the sections' pieces are the rest.
+        own = sum(len(x) for x in wrec["b"] if isinstance(x, str))
+        self.assertLess(own, len(joined) / 4)
 
     def test_a_page_that_is_not_a_page_will_not_cut(self):
         from offline import pages

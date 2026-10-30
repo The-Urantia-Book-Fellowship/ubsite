@@ -350,6 +350,13 @@ h1 { font-size: 2.1rem; font-weight: 400; line-height: 1.15; margin: .2rem 0 .3r
 h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
      font-variant-caps: small-caps; letter-spacing: .03em; }
 .author { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
+/* The whole paper on one page (paper.html, Settings' Whole paper): each
+   section under its own title, in a head of its own set as the paper's is,
+   and a section's address, #15:3, lands a little below the window's top, as
+   a paragraph does (p.t.hit, below). */
+article.whole > section[id] { scroll-margin-top: 3rem; }
+article.whole > section > .papertop { margin: 2.6rem 0 1.2rem; }
+article.whole > section > .papertop h2 { margin-top: 0; }
 
 /* Each paragraph emits TWO grid cells -- text and apparatus.  The browser
    aligns them for free, a paragraph with nine chips simply makes its row
@@ -875,7 +882,7 @@ article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark
 /* In Compare the folds give way to the columns, from first paint (the head
    script marks <html> from the address), and the paper's head to the heads of
    the columns. */
-:root.compare .grid > .row > .tf, article.cmp > .papertop { display: none; }
+:root.compare .grid > .row > .tf, article.cmp > .papertop, article.cmp > section > .papertop { display: none; }
 /* Over the columns, a line naming each, which stays at the window's top, level
    with the Contents' and the Index's buttons, while the columns are in view,
    on the paper, which hides the text passing under it.  Under it each column's

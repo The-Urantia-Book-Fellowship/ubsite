@@ -79,6 +79,17 @@ READING = [
     # Space and Page Down among them, turn it always (ub.js turn()).
     ("tappage", "switch", "Tap to turn the page", False, [],
      "on a phone or a tablet: the lower half of the screen goes on, the upper half back"),
+    # The whole paper on one page, /15 (templates/paper.html), with the two
+    # paper buttons alone at its end, for reading the book straight through
+    # with every distraction off (Tigran, 2026-10-30).  The one setting with
+    # no CSS rule: its effect is where an address of the book goes, decided
+    # before first paint by base.html's ubUnit, since no setting reaches the
+    # server -- on, a section's address opens the whole paper at that section;
+    # off, a paper's opens its first section, as the server itself sent it
+    # until then.  ub.js puts links right as they are clicked, and shows the
+    # page again in the other unit when the dialog closes after a change.
+    ("whole", "switch", "Whole paper", False, [],
+     "the paper on one page, section after section, with only the paper buttons at its end"),
 ]
 SHOW = [
     # Off, the site is the book alone, with its 1955 readings if they are on:
