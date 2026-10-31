@@ -24,10 +24,12 @@ QUERIES = [
     ("red-letter spans",    "SELECT COUNT(*) FROM span WHERE kind='redletter'", 1267),
     ("em spans",            "SELECT COUNT(*) FROM span WHERE kind='em'", 2295),
     # Where a word may break at a line's end, as the book lets it (build/hyphen.py):
-    # the source's own \- and, in paragraph.html_hy, every soft hyphen.
+    # the source's own \- and, in paragraph.html_hy, every soft hyphen.  Since
+    # 2026-10-31 a paragraph's last word carries none but its \- (DECISIONS.md,
+    # The text on the page): 515,975, from 530,865.
     ("discretionary hyphens (\\-)", "SELECT COUNT(*) FROM span WHERE kind='shy'", 1392),
     ("soft hyphens",        "SELECT SUM(LENGTH(html_hy) - LENGTH(REPLACE(html_hy, char(173), '')))"
-                            " FROM paragraph", 530865),
+                            " FROM paragraph", 515975),
     ("1955 variant notes",  "SELECT COUNT(*) FROM footnote WHERE kind='variant-1955'", 180),
     # The SRT Committee's page (build/srt.py): every change it considered, and the
     # notes it gives a reason; the 13 without are in tests/known-srt-deltas.tsv.

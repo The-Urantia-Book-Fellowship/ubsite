@@ -31,6 +31,9 @@ sys.path.insert(0, str(ROOT))
 
 from build import config, db                          # noqa: E402
 from build.checks.check_hyphen import _offsets        # noqa: E402
+from build.hyphen import Hyphenator                   # noqa: E402
+from build.problems import Report                     # noqa: E402
+from build.readers.press import read_hyphenation      # noqa: E402
 
 _WORD = re.compile(r"[A-Za-z]+")
 _COMPOUND = re.compile(r"[A-Za-z]+(?:-[A-Za-z]+)+")
@@ -46,15 +49,24 @@ def printed_breaks(pdf: pathlib.Path):
             yield m.group(1), mb.group(1)
 
 
-def offered(con):
-    """{word: the points it breaks at somewhere}, {joined compound: its hyphens}."""
+def offered(con, hyphenator=None):
+    """{word: the points it breaks at somewhere}, {joined compound: its hyphens}.
+
+    A paragraph's last word carries no soft hyphen (build/hyphen.py, since
+    2026-10-31), while the print breaks it as any other; with a `hyphenator`
+    each takes the model's own points, so that what is compared with the
+    print is still the model."""
     words: dict[str, set[int]] = collections.defaultdict(set)
     joined: dict[str, set[int]] = collections.defaultdict(set)
     for text, hy in con.execute("SELECT text, html_hy FROM paragraph"):
         at = set(_offsets(hy))
-        for m in _WORD.finditer(text):
+        ms = list(_WORD.finditer(text))
+        for m in ms:
             a, b = m.span()
             words[m.group().lower()] |= {p - a for p in at if a < p < b}
+        if hyphenator and ms:
+            lw = ms[-1].group().lower()
+            words[lw] |= set(hyphenator.word(lw))
         for m in _COMPOUND.finditer(text):
             parts = m.group().lower().split("-")
             joined["".join(parts)] |= {len("".join(parts[:k])) for k in range(1, len(parts))}
@@ -62,12 +74,13 @@ def offered(con):
 
 
 def main(argv: list[str]) -> int:
-    pdf = pathlib.Path(argv[0]) if argv else (
-        config.load()["press"]["path"] / "urantia-uversa-press.pdf")
+    repos = config.load()
+    pdf = pathlib.Path(argv[0]) if argv else repos["press"]["path"] / "urantia-uversa-press.pdf"
     if not pdf.exists():
         print(f"hyphen_print: no PDF at {pdf}; build the book there, or name one", file=sys.stderr)
         return 2
-    words, joined = offered(db.connect(ROOT / "var" / "ub.db"))
+    hyphenator = Hyphenator(read_hyphenation(repos["press"]["tex"], Report()))
+    words, joined = offered(db.connect(ROOT / "var" / "ub.db"), hyphenator)
     n = 0
     missed = collections.Counter()
     for h, t in printed_breaks(pdf):

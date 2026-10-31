@@ -131,7 +131,7 @@ paragraphs continuing a range 8,822 of 47,958 paragraph targets (index at 2026-1
 headwords with a reading path 2,058 (3+ paragraphs), 1,820 of them with 2+ chapters (index at 2026-10-13)
 paragraphs the Foundation numbers otherwise 106 · text API records 16,413, at version 8 (2026-10-13)
 SRT changes considered 319 (303 entries) · 1955 notes with the committee's reason 167 of 180 (2026-10-12)
-soft hyphens 530,865, of them the source's \- 1,392 (press 806c7ac, 2026-10-12)
+soft hyphens 515,975, of them the source's \- 1,392; a paragraph's last word carries none but its \- since 2026-10-31 (530,865 before; press 806c7ac, 2026-10-12)
 translations 3: ud 3,579 paragraphs (45 papers) and 346 notes, citing 11 works, at cc37b29, urantia-ru 14,586 at 04146d5 (2026-10-26), uf-ru 14,586 and 2 editor's notes, its 2024 release (2026-10-27); ud numbers 2 of them otherwise, urantia-ru 93, uf-ru 106
 offline copy 10,608 pages (3,877 reading paths, 126 of the quiz since 2026-10-30, 127 before, and the 197 whole papers since 2026-10-30, joined from the sections' pieces) + 1,626 spoken texts in 417 chunks: 47.9 MB to download and keep, 223 MB unpacked (2026-10-31, two chunks fewer since the paragraph's reference is text, not a link; 419 on 2026-10-30), and each translation a download of its own, chosen by the reader: ud 2.6 MB in 10 chunks, urantia-ru 11.8 MB in 22, uf-ru 11.8 MB in 22, each with its database for search (2026-10-26) and its spoken text (2026-10-27; how it grew: `ARCHITECTURE.md`, Work offline)
 translations spoken (tr_speech): ud 3,579 paragraphs and 371 headings, urantia-ru and uf-ru 14,586 and 1,626 each (2026-10-27)

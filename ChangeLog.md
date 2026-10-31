@@ -51,6 +51,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- A paragraph's last word is no longer broken across its last two lines, as "Abso-" over "lute." was: the whole word drops to the last line, and the line before it is set a little looser where it must be; the browser still fills a narrow screen's lines one at a time, so some stay loose, and Ragged right in Settings gives even spaces.
 - A paragraph's reference beside it is plain text, no longer a link: tapping it did nothing but open the paragraph's own page and leave it greyed.
 - Unticking Offline copy in Settings' Offline tab now asks first, saying that it deletes the copy and every translation kept in it from this browser, which would then have to be ticked and downloaded again.
 - The index is revised once more from its reading of Paper 35: the entry evangels of destiny, which cited 35:3.21, is withdrawn.
@@ -91,6 +92,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- On a narrow screen, a word that would have fitted on its line is no longer carried down to the paragraph's last line to keep the last word from standing alone there, which left the line above stretched across the width, as in "7. The Unquali-" over "fied Absolute." on a phone.
 - On a phone, with the index and the appendices turned off in Settings, a paragraph's index entries no longer show on the translations' line under it, as they did once a translation was ticked with the index folded; nor are they printed with the index folded.
 - The site no longer takes the browser's word that it is offline when it can reach the site: Chrome can say so with the network working, until it is restarted, and the cloud at the top then stayed struck through, every page came from the offline copy, and the recordings would not play. Now the site itself is asked, and the cloud says what it answers.
 - In Книга Урантии (USGNY), the titles of Papers 46, 94 and 95 over the text are now those its contents give, Столица локальной системы, Учения Мелхиседека на Востоке and Учения Мелхиседека в Леванте, and in it and Урантийские документы nine words typed with a letter of the other alphabet, which search could not find, are mended.

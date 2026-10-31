@@ -8,6 +8,8 @@ break (build/hyphen.py).  This holds it to that, from the outside:
   * a soft hyphen stands only inside a run of ASCII letters;
   * every \\- in the source is one, and a word carrying a \\- breaks nowhere
     else;
+  * the text's last word, the paragraph's, carries none but its \\- (hyphen.py:
+    the whole word drops to the last line, never its stub);
   * every other break leaves at least 2 letters before it and 3 after;
   * every word the press's list names breaks exactly where the entry says,
     less the minimums -- read here from the list itself, not the model.
@@ -19,7 +21,8 @@ A translation's paragraphs (tr_paragraph.html_hy) are held the same way to
 their own model, its TeX's (build/hyphen.py RUSSIAN): its text the HTML less
 its soft hyphens and tags, which build/translation.py gates; a soft hyphen
 only inside a word, and never in one with a stress mark; 2 letters before it
-and 2 after; and every word of the translation's own list broken as listed.
+and 2 after; every word of the translation's own list broken as listed; and
+the paragraph's last word whole.
 """
 
 from __future__ import annotations
@@ -59,6 +62,7 @@ def run(con, entries) -> int:
         "a soft hyphen outside a word",
         "a \\- with no soft hyphen",
         "a word with a \\- breaks elsewhere too",
+        "a paragraph's last word broken",
         "a break under the minimums",
         "a listed word not broken as listed")}
     n = total = words_listed = 0
@@ -75,12 +79,18 @@ def run(con, entries) -> int:
         for p in sorted(own - got):
             fails["a \\- with no soft hyphen"].append(f"{ref} @{p}")
         inside = set()
-        for m in _WORD.finditer(text):
+        words = list(_WORD.finditer(text))
+        last = words[-1].span() if words else None
+        for m in words:
             a, b = m.span()
             here = {p - a for p in got if a < p < b}
             inside |= {a + p for p in here}
             mine = {p - a for p in own if a < p < b}
             w = m.group().lower()
+            if (a, b) == last:
+                if here - mine:
+                    fails["a paragraph's last word broken"].append(f"{ref} {m.group()}")
+                continue
             if mine:
                 if here != mine:
                     fails["a word with a \\- breaks elsewhere too"].append(f"{ref} {m.group()}")
@@ -118,6 +128,7 @@ def run_translations(con, lists: dict[str, list[str]]) -> int:
         fails: dict[str, list[str]] = {k: [] for k in (
             "a soft hyphen outside a word",
             "a soft hyphen in a word with a stress mark",
+            "a paragraph's last word broken",
             "a break under the minimums",
             "a listed word not broken as listed")}
         n = notes = total = words_listed = 0
@@ -129,11 +140,17 @@ def run_translations(con, lists: dict[str, list[str]]) -> int:
             at = _offsets(hy)
             total += len(at)
             got, inside = set(at), set()
-            for m in _RU_WORD.finditer(text):
+            words = list(_RU_WORD.finditer(text))
+            last = words[-1].span() if words else None
+            for m in words:
                 a, b = m.span()
                 here = {p - a for p in got if a < p < b}
                 inside |= {a + p for p in here}
                 w = m.group().lower()
+                if (a, b) == last:
+                    if here:
+                        fails["a paragraph's last word broken"].append(f"{pid} {m.group()}")
+                    continue
                 if STRESS in w:
                     if here:
                         fails["a soft hyphen in a word with a stress mark"].append(f"{pid} {m.group()}")

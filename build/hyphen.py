@@ -21,7 +21,12 @@ The rules, all TeX's:
     (Mi-chael's prints from Mi-cha-el) and `twenty-five' is two words;
   * a \\- in the source overrides all of that for its one occurrence: the
     word breaks there and nowhere else, minimums or not.  That is how the press
-    divides `to pre-sent' from `the pres-ent age' (tools/verb_breaks.py).
+    divides `to pre-sent' from `the pres-ent age' (tools/verb_breaks.py);
+  * the text's last word is left whole, but for a \\- in it.  That rule is
+    ours, not TeX's (DECISIONS.md, The text on the page, 2026-10-31): a
+    browser fills its lines one at a time and has no \\finalhyphendemerits, so
+    wherever `Abso-' fitted the line before it left `lute.' as a paragraph's
+    last line.  The book itself does so in some 1,200 paragraphs.
 
 pyphen and the browsers' dictionaries do something else: pyphen's en_US,
 which is LibreOffice's and Firefox's, disagrees with 387 of the list's 523
@@ -136,11 +141,15 @@ class Hyphenator:
         `spans` are the paragraph's; its `shy` spans are the source's \\-.
         A letter run that is not all ASCII is left whole: TeX would read the
         accented letter into the word, and these patterns know no such word
-        (two in the book, `attachés' and `365¼').
+        (two in the book, `attachés' and `365¼').  So is the text's last run
+        of letters, the paragraph's last word, but for a \\- in it (the module's
+        head): the whole word drops to the last line, never its stub.
         """
         shy = sorted(s.start for s in spans if s.kind == "shy")
+        words = list((_WORD if self.lang.ascii_only else _RU_WORD).finditer(text))
+        last = words[-1].span() if words else None
         out = []
-        for m in (_WORD if self.lang.ascii_only else _RU_WORD).finditer(text):
+        for m in words:
             if self.lang.ascii_only and not _ASCII.fullmatch(m.group()):
                 continue
             if STRESS in m.group():
@@ -149,6 +158,6 @@ class Hyphenator:
             own = [p for p in shy if a < p < b]
             if own:
                 out.extend(own)
-            else:
+            elif (a, b) != last:
                 out.extend(a + p for p in sorted(self.word(m.group())))
         return out

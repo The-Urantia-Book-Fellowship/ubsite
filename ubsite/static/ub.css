@@ -376,13 +376,23 @@ article.whole > section > .papertop h2 { margin-top: 0; }
 .grid > .row > :is(p.t, .verse, .tf) { grid-column: 1; }
 .grid > .row > .a { grid-column: 2; grid-row: 1 / span 2; }
 .grid > .row > .tf { grid-row: 2; }
-p.t { margin: 0 0 .85rem; text-wrap: pretty; max-width: var(--measure); color: var(--text);
+p.t { margin: 0 0 .85rem; max-width: var(--measure); color: var(--text);
       --line: var(--lead); line-height: var(--line); }
 /* Justified, as the book is set, and hyphenated where the book hyphenates: the
    paragraph carries a soft hyphen (U+00AD) at every break the press allows
    (build/hyphen.py), and `manual` breaks there and nowhere else.  The hyphen
    drawn is the hyphen-minus, as TeX's.  A browser fills each line greedily and
-   has no penalty for two hyphens running; Safari alone can be told so. */
+   has no penalty for two hyphens running; Safari alone can be told so.  Not
+   text-wrap: pretty, which set the text from the first day to 2026-10-31:
+   Chrome's keeps a single word off the last line by carrying a word, or a
+   hyphenated piece of one, down to it, and on a phone's 30-character line
+   left the line above stretched to the width, "7. The    Unquali-" over
+   "fied Absolute." (0:3.8; Tigran's screenshots, reproduced in headless
+   Chrome, where it moved a word that fitted in 1 to 8 lines of each
+   section).  Under Ragged right, below, it stays: there a line made short is
+   just short, and no word is hyphenated.  The build's half of the same
+   trouble, the stub of a paragraph's last word as its last line, "lute.", is
+   build/hyphen.py's: that word carries no soft hyphen. */
 p.t { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
       hyphenate-character: "-"; -webkit-hyphenate-character: "-";
       -webkit-hyphenate-limit-lines: 1; }
@@ -403,7 +413,8 @@ p.t.verse { text-align: start; }
 /* Ragged right.  The soft hyphens are in the page either way: `none` is what
    silences them, and `manual`, the initial value, would break at them still.
    Not the heading, which this would outrank and un-centre. */
-:root[data-align="ragged"] p.t:not(.head) { text-align: start; hyphens: none; -webkit-hyphens: none; }
+:root[data-align="ragged"] p.t:not(.head) { text-align: start; hyphens: none; -webkit-hyphens: none;
+                                             text-wrap: pretty; }
 /* A heading within the text, 0:12.10 ACKNOWLEDGMENT, centred as a section's
    title is (paragraph.heading). */
 p.t.head { text-align: center; }
@@ -837,14 +848,15 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
   margin: .5rem 0 .15rem; }
 .tf .who:first-child { margin-top: .1rem; }
 :is(.tf, .rc) .rt { margin: 0 0 .5rem; font-size: var(--size); line-height: var(--lead); color: var(--text);
-  text-wrap: pretty; text-align: justify; hyphens: manual; -webkit-hyphens: manual;
+  text-align: justify; hyphens: manual; -webkit-hyphens: manual;
   hyphenate-character: "-"; -webkit-hyphenate-character: "-"; -webkit-hyphenate-limit-lines: 1; }
 :is(.tf, .rc) .rt.head { text-align: center; }
 :is(.tf, .rc) .rt .leadrow { display: flex; align-items: baseline; }
 :is(.tf, .rc) .rt .leadrow .fig { margin-left: auto; white-space: nowrap; }
 :is(.tf, .cmp) .gap { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
 .frac { font-variant-numeric: diagonal-fractions; }
-:root[data-align="ragged"] :is(.tf, .rc) .rt { text-align: start; hyphens: none; -webkit-hyphens: none; }
+:root[data-align="ragged"] :is(.tf, .rc) .rt { text-align: start; hyphens: none; -webkit-hyphens: none;
+                                                text-wrap: pretty; }
 /* A translation's paragraphs are set in a little, as the book's are, as the
    English's are where nothing stands at their start: in a fold and in
    Compare nothing ever does, on a phone as on a wide screen (Tigran,
