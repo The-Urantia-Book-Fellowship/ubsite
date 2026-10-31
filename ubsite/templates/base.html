@@ -40,7 +40,11 @@ window.ubLang = function (r, v) {
 // The translations a reader has ticked (settings.py `translations`, a list of
 // keys): the fold under every row of the text one of them has, its place there
 // before first paint (ub.css .tf), and on a phone with the index folded, a row's
-// entries and its translations on one line (Tigran, 2026-10-26).  Among the
+// entries and its translations on one line (Tigran, 2026-10-26): folded, not
+// turned off, which leaves `margin` as it was (settings.py `index`), and on the
+// screen, since a printed page is narrower than 62rem too (ub.css, print).
+// Until 2026-10-31 the rule, which outranks ub.css's, showed the entries' fold
+// on that line with the index off, and printed it.  Among the
 // search results, each one's list, in the reader's order (ub.css .trhits).  And
 // Compare's toggle, where one of them has the section (ub.css .cmphead); in
 // Compare the row's entries keep their own line.  One rule, since the keys are
@@ -50,10 +54,10 @@ window.ubTr = function (v) {
   if (!st) { st = document.createElement('style'); st.id = 'ub-tr'; document.head.appendChild(st); }
   var ks = String(v || '').split(' ').filter(function (k) { return /^[a-z0-9-]+$/.test(k); });
   var f = ks.map(function (k) { return '.tf[data-has~="' + k + '"]'; }).join(),
-      r = ':root[data-margin="off"]:not(.compare) .grid>.row:has(>:is(' + f + '))',
+      r = ':root[data-margin="off"]:not(.compare, [data-index="off"]) .grid>.row:has(>:is(' + f + '))',
       s = ks.map(function (k) { return '>[data-tr="' + k + '"]'; });
   st.textContent = ks.length ? f + '{display:block}article:has(' + f + ')>.cmphead{display:flex}' +
-    '@media (max-width:62rem){' + r +
+    '@media screen and (max-width:62rem){' + r +
     '{flex-flow:row wrap;align-items:baseline}' + r + '>:is(.a,.tf){display:contents}' +
     r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold{margin-right:1em}}' +
     '.trhits:has(' + s.join() + '){display:flex}' +

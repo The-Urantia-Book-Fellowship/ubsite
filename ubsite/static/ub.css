@@ -1730,10 +1730,12 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
      its own box (Tigran, 2026-10-26), a gap between them and no dot (2026-10-28):
      base.html's head script lays the row out
      so for the translations a reader has ticked, and here each part takes its
-     place on it. */
+     place on it.  With the index turned off (data-index, above) the entries'
+     box is hidden but still beside the fold in the page, so the fold stands
+     under the text as under a row with no entries. */
   .tf { margin: -.6rem 0 .9rem 1rem; border-left: 2px solid var(--rule); padding-left: .7rem;
         font-size: .9rem; }
-  .a:not(:empty) + .tf { margin-top: -.9rem; }
+  :root:not([data-index="off"]) .a:not(:empty) + .tf { margin-top: -.9rem; }
   .tf .tr { border-left: 0; padding-left: 0; }
   .grid > .row > p.t, .grid > .row .chips, .grid > .row .tr { width: 100%; }
   .grid > .row .afold { order: 1; }

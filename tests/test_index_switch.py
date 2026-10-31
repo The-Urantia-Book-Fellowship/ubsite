@@ -66,6 +66,20 @@ class Switch(unittest.TestCase):
         self.assertIn(':root[data-index="off"] :is(.ix, .a, .blanket, .reader .marginhead) { display: none; }', css)
         self.assertIn(':root:not([data-index="off"]) .noix { display: none; }', css)
 
+    def test_the_phone_s_one_line_row_is_for_the_index_folded_not_off(self):
+        # On a phone with the index folded (settings.py KEPT `margin`, which the
+        # switch leaves as it was), base.html's ubTr lays a row's entries and
+        # translations on one line, by a rule that outranks the one above: so it
+        # must leave the index turned off alone, and the screen is its medium,
+        # since a printed page is narrower than 62rem too.  Until 2026-10-31 the
+        # entries' fold showed on that line with the index off, and printed.
+        tpl = (ROOT / "ubsite" / "templates" / "base.html").read_text()
+        self.assertIn(''':root[data-margin="off"]:not(.compare, [data-index="off"]) .grid>.row:has(>:is(''', tpl)
+        self.assertIn("'@media screen and (max-width:62rem){'", tpl)
+        # And the fold's place under a row whose hidden entries are still beside it.
+        css = (ROOT / "ubsite" / "static" / "ub.css").read_text()
+        self.assertIn(':root:not([data-index="off"]) .a:not(:empty) + .tf { margin-top: -.9rem; }', css)
+
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
 class Pages(unittest.TestCase):
