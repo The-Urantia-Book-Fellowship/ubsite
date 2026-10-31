@@ -147,6 +147,8 @@
 "offline:tr" = { en = "Each is a download of its own, kept with the copy and updated with it.", ru = "Каждый загружается отдельно, хранится вместе с копией и обновляется вместе с ней." }
 "offline:trwith" = { en = "Ticking one downloads the offline copy with it.", ru = "Если отметить перевод, вместе с ним загрузится и офлайн-копия." }
 "offline:trstale" = { en = "The offline copy is out of date: downloading a translation updates it too.", ru = "Офлайн-копия устарела: загрузка перевода обновит и её." }
+"offline:dropall" = { en = "This deletes the offline copy from this browser, and with it every translation kept in it. To have them again, you would tick Offline copy and each translation again, and download it all anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера, а с ней и все сохранённые в ней переводы. Чтобы вернуть их, придётся снова отметить «Офлайн-копия» и каждый перевод и заново загрузить всё — около {s}." }
+"offline:drop" = { en = "This deletes the offline copy from this browser. To have it again, you would tick Offline copy again, and download it anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера. Чтобы вернуть её, придётся снова отметить «Офлайн-копия» и заново загрузить её — около {s}." }
 "offline:troffline" = { en = "Offline, a translation can be let go, and downloaded once online.", ru = "Без сети перевод можно удалить, а загрузить — когда сеть появится." }
 "kept, {s}" = "сохранён, {s}"
 

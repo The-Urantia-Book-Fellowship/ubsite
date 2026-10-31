@@ -18,12 +18,12 @@
 //   error   why the last download stopped
 //
 // Ticking the copy registers the worker, which fetches the copy; unticking it
-// removes the copy and unregisters the worker, at once, as a translation is
-// let go.  Nothing else does: the copy stays through going offline and online
-// again, and the worker answers from it whenever the network does not.  Until
-// 2026-10-14 all this was in Settings, a switch turned on or off, and a reader
-// who turned it off to be "online" again lost the copy (Tigran); the tick is
-// named for the copy now, not for a mode.
+// removes the copy and unregisters the worker, once the reader has said yes
+// to what that deletes (drop).  Nothing else does: the copy stays through
+// going offline and online again, and the worker answers from it whenever
+// the network does not.  Until 2026-10-14 all this was in Settings, a switch
+// turned on or off, and a reader who turned it off to be "online" again lost
+// the copy (Tigran); the tick is named for the copy now, not for a mode.
 //
 // A kept copy is updated by itself whenever a check finds it out of date with
 // the site reached and this page in view: as a page loads, as the browser
@@ -191,7 +191,7 @@
   panel.addEventListener('change', function (ev) {
     var box = ev.target;
     if (box.type !== 'checkbox') return;
-    if (box === copyBox) return box.checked ? on() : off();
+    if (box === copyBox) return box.checked ? on() : drop();
     if (!box.closest('.offtrs')) return;
     var have = last && !last.removed && last.have;
     if (!box.checked) return ask('drop', { tr: box.value }).then(function (s) { show(s); fresh(); });
@@ -370,9 +370,23 @@
       line.innerHTML = T('This browser would not keep it: {e}', { e: e && e.message || e });
     }).then(function () { going = false; });
   }
-  // Unticked: the copy removed and the worker unregistered, at once.  The
-  // menu's Remove asked first; a tick named for the copy is not mistaken for
-  // going online, which was the bug of 2026-10-14.
+  // Unticked: the copy removed and the worker unregistered.  A tick named for
+  // the copy is not mistaken for going online, which was the bug of
+  // 2026-10-14; but it deletes every translation kept in the copy with it,
+  // and having them again means ticking each and downloading it all anew, so
+  // it asks first, saying so and how much that is (Tigran, 2026-10-31; from
+  // 2026-10-30 it let go at once).  `have.bytes` is the copy with the
+  // translations kept (sw.js state()).  Cancelled, the tick comes back and
+  // nothing is done.  A first download that stopped keeps nothing whole, and
+  // is let go without asking.
+  function drop() {
+    var have = last && !last.removed && last.have, p = have && { s: mb(have.bytes) };
+    if (have && !window.confirm(have.tr && have.tr.length ? T.text('offline:dropall', p) : T.text('offline:drop', p))) {
+      copyBox.checked = true;
+      return;
+    }
+    off();
+  }
   function off() {
     copyBox.disabled = true;
     ask('remove').then(function () {

@@ -50,6 +50,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Unticking Offline copy in Settings' Offline tab now asks first, saying that it deletes the copy and every translation kept in it from this browser, which would then have to be ticked and downloaded again.
 - The index is revised once more from its reading of Paper 35: the entry evangels of destiny, which cited 35:3.21, is withdrawn.
 - The example citations in the search box, on the home page and on the not-found page are from Papers 1 and 12 now, which every translation shown has, so that typing one opens a paragraph the translations can be compared on; they named Paper 101 before.
 - A paper's address, such as /15, is the whole paper on one page; unless Settings' Whole paper is on, it opens the paper's first section as before, your browser making the choice.

@@ -279,7 +279,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ctx.add_init_script(SAYS_OFFLINE)
         ctx.add_init_script(SAVES_DATA)
         pg = ctx.new_page()
-        pg.on("dialog", lambda d: d.accept())
+        accept = lambda d: d.accept()
+        pg.on("dialog", accept)
         errors = []
         pg.on("pageerror", lambda e: errors.append(str(e)))
 
@@ -333,6 +334,20 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         used = pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
         print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
         ok(used < (m["bytes"] + ud["bytes"]) * 1.25, "it keeps the copy gzipped, as it came")
+        # Unticking the copy deletes the translations kept in it too, so it
+        # asks first (Tigran, 2026-10-31); cancelled, nothing is let go.
+        asked = []
+        pg.remove_listener("dialog", accept)
+        pg.once("dialog", lambda d: (asked.append(d.message), d.dismiss()))
+        pg.click("dialog.settings .offcopy input")
+        pg.on("dialog", accept)
+        print(f"  asked: {asked[0] if asked else None!r}")
+        ok(asked and "every translation kept in it" in asked[0]
+           and f"about {(m['bytes'] + ud['bytes']) / 1e6:.1f} MB" in asked[0],
+           "unticking the copy asks first, naming the translations and what it would take to have them again")
+        ok(pg.is_checked("dialog.settings .offcopy input") and tr_row(pg, "ud").startswith("kept")
+           and pg.evaluate(KEPT) == kept and icon(pg)["have"] == "kept",
+           "and cancelled, the tick comes back and the copy and the translation stay")
         pg.keyboard.press("Escape")
         ok(not pg.is_visible("dialog.settings"), "Escape closes Settings")
         # Updated by hand, with Update now, until "Kept up to date by itself":
