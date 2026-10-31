@@ -74,9 +74,11 @@ READING = [
       ("ragged", "Ragged right", "even spaces, no hyphens", "")], ""),
     # A tap on the text turns the page, on a phone or a tablet, as the volume
     # keys would in a reading app: Chrome never lets a web page have them
-    # (Tigran, 2026-10-20).  Off unless a reader asks, since a tap on the text
-    # otherwise does nothing, and may be made without meaning it.  The keys,
-    # Space and Page Down among them, turn it always (ub.js turn()).
+    # (Tigran, 2026-10-20).  Off unless a reader asks, since a tap made without
+    # meaning it would lose the reader's place; with it off a tap on the text
+    # shows the running head instead, and with it on the band at the window's
+    # top does (ub.js tapHead, 2026-10-31).  The keys, Space and Page Down
+    # among them, turn it always (ub.js turn()).
     ("tappage", "switch", "Tap to turn the page", False, [],
      "on a phone or a tablet: the lower half of the screen goes on, the upper half back"),
     # The whole paper on one page, /15 (templates/paper.html), with the two

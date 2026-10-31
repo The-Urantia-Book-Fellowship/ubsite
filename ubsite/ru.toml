@@ -365,6 +365,7 @@
 "Fold the contents away" = "Свернуть содержание"
 "Fold the index away" = "Свернуть указатель"
 "Show the index" = "Показать указатель"
+"Running head" = "Колонтитул"
 "{n} translations" = { en = ["{n} translation", "{n} translations"], ru = ["{n} перевод", "{n} перевода", "{n} переводов"] }
 "All|translations" = "Все"
 "tr:unreachable" = { en = "The translations could not be fetched: they need a connection, or to be kept in the offline copy (Settings, in its Offline tab).", ru = "Переводы не удалось загрузить: для них нужно подключение к сети или офлайн-копия с ними (настройки, вкладка „Офлайн“)." }

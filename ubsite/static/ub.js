@@ -1239,16 +1239,18 @@
     var t = ev.target, mark = t.closest && t.closest('a.fn');
     if (mark) {
       var again = card && card.mark === mark;
+      hideHead();
       shut(false);
       if (again || open(mark) !== false) ev.preventDefault();
       return;
     }
-    if (!card) { tapTurn(ev); return; }
+    if (!card) { if (!tapHead(ev)) tapTurn(ev); return; }
     if (card.el.contains(t)) { if (t.closest('.x')) shut(true); return; }
     shut(false);
   });
   document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && card) shut(true);
+    if (ev.key !== 'Escape') return;
+    if (card) shut(true); else hideHead();
   });
   window.addEventListener('resize', place);
   document.addEventListener('ub:swap', function () { card = null; });
@@ -1260,10 +1262,11 @@
   // Page Up and ← back: from a keyboard, a page turner, or volume keys an
   // Android app sends as Page Down.  With Settings' "Tap to turn the page", a
   // tap on the text goes on in the lower half of the screen and back in the
-  // upper.  A screen is what the window shows, less a line: the last whole line
+  // upper, less the band at the top, which the running head takes (tapHead,
+  // below).  A screen is what the window shows, less a line: the last whole line
   // comes to the top, and going back, the first whole line to the bottom, so
   // that no line the reader picks up at is cut.
-  var EDGE = 6, touch = false;
+  var EDGE = 6, touch = false, selDown = false;
   // The line of text crossing y, as the box of one of its letters, or null.
   function lineAt(x, y) {
     var c = document.caretPositionFromPoint ? document.caretPositionFromPoint(x, y) : null,
@@ -1318,9 +1321,13 @@
     if (!dir || (t.closest && t.closest('input, textarea, select, button, summary, [contenteditable], dialog, [popover], .pop, .player'))) return;
     if (turn(dir)) ev.preventDefault();
   });
-  // Only a finger's tap, or a pen's: a mouse's click selects words.
-  document.addEventListener('pointerdown', function (ev) { touch = ev.pointerType !== 'mouse'; },
-                            { passive: true });
+  // Only a finger's tap, or a pen's: a mouse's click selects words.  And the
+  // selection as it stood before the tap, which the browser clears before the
+  // tap's click (tapHead, below).
+  document.addEventListener('pointerdown', function (ev) {
+    touch = ev.pointerType !== 'mouse';
+    selDown = !getSelection().isCollapsed;
+  }, { passive: true });
   function tapTurn(ev) {
     var t = ev.target;
     if (document.documentElement.dataset.tappage !== 'true' || !touch || ev.button ||
@@ -1328,6 +1335,137 @@
         t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .blanket, .marginhead, .player')) return;
     if (turn(ev.clientY < innerHeight / 2 ? -1 : 1)) ev.preventDefault();
   }
+
+  // The running head on demand (Tigran, 2026-10-31).  Reading on a phone, the
+  // whole paper on one page and the paragraph references off, the header a
+  // paper up the page, a reader had no way to Settings, to the reference of
+  // the paragraph in hand, or to the paper's name.  The book gives all three
+  // in its running heads: the first paragraph on the page at the outer corner,
+  // the author centred on a verso, PAPER 101 – THE REAL NATURE OF RELIGION on
+  // a recto.  So a tap on the text brings the running head down over the top
+  // of the window (ub.css .runhead): the tapped paragraph's reference, the
+  // paper's number and title, and its author, and the gear.  The reference is
+  // text, not a link, as the one beside the paragraph is: a tap on a link to
+  // the paragraph would only mark it as the page's opening place (Tigran).  The paragraph is tinted as a
+  // search hit is (p.t.named) rather than given its reference in its place, a
+  // float that would re-set its first two lines under the finger.  The next
+  // tap takes it away, as do Escape, a card opening, Settings opening, a new
+  // page, a turn of the window, and two lines of scrolling, so that it never
+  // covers the text while reading.  With Tap to turn the page on, a tap turns,
+  // and only the band at the window's top summons the head, naming the first
+  // paragraph on the screen, as a verso's head does.  Never a tap while words
+  // are selected: the long press is the system's, with its Copy and Web
+  // search, and since the browser clears the selection before the tap's
+  // click, it is read at pointerdown (selDown, above).  Built here from what
+  // the page carries, on <body>, which listen.js never swaps.
+  var head = null, headP = null, headAt = 0, headSlack = 56, BAND = 3.2;
+  function clampY() {
+    return Math.max(0, Math.min(scrollY, document.documentElement.scrollHeight - innerHeight));
+  }
+  // The paragraph tapped, or the English one of the row a translation's cell is in.
+  function paraOf(t) {
+    var row;
+    return (t.closest && t.closest('p.t[id]')) ||
+           ((row = t.closest && t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || null;
+  }
+  // The first paragraph on the screen: a verso's running head.
+  function firstOnScreen() {
+    var ps = document.querySelectorAll('main p.t[id]'), r;
+    for (var i = 0; i < ps.length; i++) {
+      r = ps[i].getBoundingClientRect();
+      if (r.height && r.bottom > 0) return ps[i];
+    }
+    return ps[0] || null;
+  }
+  // The paper's head for a paragraph: the article's own, with the title (the
+  // whole paper's sections have heads of their own, each the section's title
+  // alone), or on a reading path the running head before the paragraph, which
+  // names the paper and its title and no author.
+  function headOf(p) {
+    var top = document.querySelector('main article > header.papertop'), rhs, rh = null, i;
+    if (top && top.querySelector('h1')) {
+      return { num: top.querySelector('.papernum') ? top.querySelector('.papernum').innerHTML : '',
+               title: top.querySelector('h1').textContent,
+               author: top.querySelector('.author') ? top.querySelector('.author').textContent : '' };
+    }
+    rhs = document.querySelectorAll('main .rh-paper');
+    for (i = 0; i < rhs.length; i++)
+      if (rhs[i].compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING) rh = rhs[i];
+    return { num: rh ? rh.innerHTML : '', title: '', author: '' };
+  }
+  function buildHead() {
+    var btn;
+    head = document.createElement('div');
+    head.className = 'runhead';
+    head.hidden = true;
+    head.setAttribute('role', 'region');
+    T.attr(head, 'aria-label', 'Running head');
+    head.innerHTML = '<span class="ref"></span><div class="mid"><p class="pn"></p><p class="au"></p></div>';
+    btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'set';
+    T.attr(btn, 'aria-label', 'Settings');
+    T.attr(btn, 'title', 'Settings');
+    if (gear && gear.querySelector('svg')) btn.appendChild(gear.querySelector('svg').cloneNode(true));
+    head.appendChild(btn);
+    // The header's gear opens the dialog, and its click hides the head (below);
+    // never focused first, or the dialog would give the focus back to the
+    // header on closing and scroll a long page to its top.
+    btn.addEventListener('click', function () { if (gear) gear.click(); else hideHead(); });
+    head.addEventListener('click', function (ev) { if (!ev.target.closest('a, button')) hideHead(); });
+    document.body.appendChild(head);
+  }
+  function showHead(p) {
+    var h;
+    if (!p) return;
+    if (!head) buildHead();
+    h = headOf(p);
+    if (headP) headP.classList.remove('named');
+    headP = p;
+    p.classList.add('named');
+    head.querySelector('.ref').textContent = p.id;
+    head.querySelector('.pn').innerHTML = h.num + '<span class="tt"></span>';
+    head.querySelector('.tt').textContent = h.title;
+    head.querySelector('.au').textContent = h.author;
+    head.hidden = false;
+    headAt = clampY();
+    headSlack = 2 * (parseFloat(getComputedStyle(p).lineHeight) || 28);
+    // A tap is a touch of the page: arrive()'s late scroll must not undo it.
+    arriveTouched = Date.now();
+  }
+  function hideHead() {
+    if (headP) headP.classList.remove('named');
+    headP = null;
+    if (head) head.hidden = true;
+  }
+  // True when the tap was the head's: to show it, or to hide it.  Not a
+  // mouse's second click, a double-click, which would show and hide it in a
+  // blink; a finger's quick second tap, which Chrome counts the same, is
+  // the tap that hides it.
+  function tapHead(ev) {
+    var t = ev.target, tap, band;
+    if (ev.button || (ev.detail > 1 && !touch) || selDown || !t.closest || !t.closest('main') || !getSelection().isCollapsed ||
+        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .cites, .blanket, .marginhead, .cmphead, .player, .pop, dialog') ||
+        !document.querySelector('main p.t[id]')) return false;
+    // A tap on the text also lets go of the paragraph the page opened at
+    // (p.t.hit: the server's mark on a section's page, arrive()'s on the whole
+    // paper's), which stayed tinted beside the one named and had no other way
+    // to be let go of (Tigran, 2026-10-31), as listen.js lets go of it when
+    // playing starts: one thing on the page is marked.
+    Array.prototype.forEach.call(document.querySelectorAll('main p.t.hit'), function (p) { p.classList.remove('hit'); });
+    tap = document.documentElement.dataset.tappage === 'true' && touch;
+    band = ev.clientY < BAND * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    if (head && !head.hidden) { hideHead(); return !tap || band; }
+    if (tap && !band) return false;
+    showHead(tap ? firstOnScreen() : paraOf(t) || firstOnScreen());
+    return true;
+  }
+  addEventListener('scroll', function () {
+    if (headP && Math.abs(clampY() - headAt) > headSlack) hideHead();
+  }, { passive: true });
+  addEventListener('resize', hideHead);
+  document.addEventListener('ub:swap', hideHead);
+  if (gear) gear.addEventListener('click', hideHead);
 
   // A search hit among the 1955 readings opens /93:5.8#note93_5_8_0, and
   // arrive() brings its paragraph into view: its card opens too -- if the ring

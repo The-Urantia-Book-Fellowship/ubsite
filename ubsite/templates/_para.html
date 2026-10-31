@@ -15,7 +15,7 @@
 {%- set row = p.html_hy.split('<span class="leader"></span>') %}
 {%- set pcm %}{% if p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}{% endset %}
 <p class="t{% if opening and p.section_n == 0 and p.para_n == 1 %} opening{% endif %}{% if p.gap_before %} pc{% endif %}{% if p.heading %} head{% endif %}{% if p.src != 'vs' %} verse{% endif %}{% if p.setoff %} setoff{% endif %}{% if hit %} hit{% endif %}"{% if anchor %}
-         id="{{ p.ref }}"{% endif %}><span class="stk"><a class="num" href="/{{ p.ref }}">{{ p.ref }}</a>
+         id="{{ p.ref }}"{% endif %}><span class="stk"><span class="num">{{ p.ref }}</span>
          {%- if p.page_1955 %}<span class="pg" data-pg="{{ p.page_1955 }}"></span>{% endif %}</span>
          {%- if row|length == 2 %}<span class="leadrow"><span class="lab">{{ pcm }}{{ row[0]|safe }}</span><span class="fig"><span class="leader"></span>{{ row[1]|safe }}</span></span>
          {%- else %}{{ pcm }}{{ p.html_hy|safe }}{% endif %}</p>

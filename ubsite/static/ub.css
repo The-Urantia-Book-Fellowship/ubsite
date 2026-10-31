@@ -173,11 +173,12 @@ a:hover { text-decoration-thickness: 2px; }
   font-family: system-ui, sans-serif; }
 /* Settings: a gear, drawn, not a glyph -- U+2699 turns into an emoji on some
    systems.  It was a row of three sliders until Tigran asked for the usual
-   gear (2026-10-14). */
-.gear { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer;
+   gear (2026-10-14).  The running head's gear (.runhead .set, below) is the
+   same drawing. */
+.gear, .runhead .set { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer;
         align-self: center; }
-.gear svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
-.gear path, .gear circle { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
+:is(.gear, .runhead .set) svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
+:is(.gear, .runhead .set) :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
 .gear:hover, .theme:hover, .top .offline:hover { color: var(--ink); }
 /* The flags beside it (base.html .langs): the interface in English or in
    Russian, the one chosen full, the other faded, each in its own proportions,
@@ -509,10 +510,12 @@ p.t.head { text-align: center; }
 .a .at a:hover { color: var(--ink); }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
 p.t.hit, p.t.now, .rt.now, .tree li:target { scroll-margin-top: 3rem; }
-p.t.hit { background: color-mix(in oklch, var(--link) 12%, transparent);
+p.t.hit, p.t.named { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 /* The paragraph's full reference, so the reader always knows which one this is;
-   Settings can turn it off.  It stands at the start of the paragraph, the play
+   Settings can turn it off.  Text, not a link, since 2026-10-31 (Tigran): a
+   tap on it opened the paragraph's own page and left it marked as the place
+   the page opened at, for nothing.  It stands at the start of the paragraph, the play
    button under it and the 1955 page under that, as a drop capital stands: the
    text runs beside them for two lines, and then the full width.  One float,
    .stk (_para.html; listen.js puts the button in it), so that a list's label
@@ -538,9 +541,8 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); --lh: calc(var(--line
 .stk > * { clear: left; }
 .num { width: 100%; min-width: calc(var(--refw, 9) * 1ch + .4rem); padding-right: .4rem;
        height: var(--lh); text-align: right; white-space: nowrap;
-       font-size: .78rem; color: var(--faint); text-decoration: none;
+       font-size: .78rem; color: var(--faint);
        position: relative; top: calc(.2rem + var(--ref)); }
-.num:hover { color: var(--ink); }
 /* The 1955 page, only if a reader asks (Settings): where the paragraph begins
    in the first printing.  Drawn from data-pg, as the pilcrow is drawn, so
    copying a paragraph never takes it along.  It stands beside the play button,
@@ -1094,6 +1096,36 @@ article.cmp .rc:has(.rt.now) > .playp { opacity: 1; }
 p.t.now, .papertop :is(h1, h2).now, .rt.now, header.ch.now { background: color-mix(in oklch, var(--link) 11%, transparent);
   border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 11%, transparent);
   transition: background .3s, box-shadow .3s; }
+/* The running head on demand (ub.js tapHead; Tigran, 2026-10-31): over the
+   top of the window on a tap, as the book's running heads stand, the
+   paragraph's reference at the corner, the paper and its author in the
+   middle, and the gear, with a rule under it as the book draws one.  Over
+   the sticky heads (z 1-3), under a card (5), which hides it as it opens.
+   Not the stack's reference in its place, a float that would re-set the
+   paragraph's first lines under the finger: the paragraph is tinted as a hit
+   is (p.t.named, above).  The dash between the paper's number and its title
+   is generated content, so that build/fonts.py, which reads content: and
+   never a script, keeps the glyph in the face; a reading path's head has no
+   title apart (.tt empty), and the Foreword no number before it. */
+.runhead { position: fixed; top: 0; left: 0; right: 0; z-index: 4; display: grid;
+  grid-template-columns: minmax(3.5rem, auto) 1fr minmax(3.5rem, auto); align-items: start; gap: .5rem;
+  padding: max(.5rem, env(safe-area-inset-top)) .7rem .45rem; background: var(--paper); color: var(--ink);
+  border-bottom: 1px solid var(--rule); box-shadow: 0 6px 18px rgb(0 0 0 / .10); line-height: 1.35; }
+.runhead .ref { font-size: .82rem; color: var(--faint); white-space: nowrap; padding-top: .15rem; }
+.runhead .mid { min-width: 0; text-align: center; }
+.runhead .mid p { margin: 0; }
+.runhead .pn { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); text-wrap: balance; }
+.runhead .tt:not(:first-child)::before { content: " – "; }
+.runhead .tt:empty { display: none; }
+.runhead .au { font-size: .86rem; font-style: italic; color: var(--faint); margin-top: .05rem; }
+.runhead .au:empty { display: none; }
+.runhead .set { justify-self: end; align-self: start; margin: -.3rem -.3rem 0 0; padding: .3rem; }
+.runhead .set svg { width: 1.2rem; height: 1.2rem; }
+@media (hover: hover) { .runhead .set:hover { color: var(--ink); } }
+@media (max-width: 40rem) { .runhead { font-size: .9rem; } .runhead .pn { font-size: .7rem; } }
+/* A tap on the text means the head: no double-tap zoom on it, or the tap
+   that hides the head would zoom on iOS; pinching and the long press stay. */
+main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .player { position: fixed; z-index: 10; left: 50%; transform: translateX(-50%);
   bottom: max(1rem, env(safe-area-inset-bottom)); max-width: calc(100vw - 2rem);
   display: flex; align-items: center; gap: .15rem; padding: .3rem .45rem;
@@ -1768,7 +1800,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 /* ---- print ------------------------------------------------------------- */
 @media print {
   @page { margin: 22mm 20mm; }
-  .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, dialog { display: none; }
+  .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, .runhead, dialog { display: none; }
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }

@@ -195,15 +195,17 @@ pages       = 10608      # 1,626 sections, 4,735 headwords, 27 index letters, 20
                          # sections' pieces, 0.3 MB in all (Settings' Whole paper)
 paths       = 3877       # 2,057 headwords in book order, 1,820 of them by theme too
 spoken      = 1626       # one to a section
-chunks      = 419        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
+chunks      = 417        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
                          # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages;
                          # 417 since the interface in Russian too (2026-10-25): the scripts'
                          # words, /l10n.js, EB Garamond's Cyrillic, two faces and their licence,
                          # and 13 more chunks of reading paths, 8% more of them to hold
                          # (404 with UB_BILINGUAL=0); 419 since the quiz (2026-10-28): its
-                         # chunk of pages, and quiz.js
-download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement; 48.3 on 2026-10-30
-raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25); 224.9 on 2026-10-30
+                         # chunk of pages, and quiz.js; 417 since the paragraph's reference
+                         # is text, not a link (2026-10-31): 30 bytes fewer in each of 14,586
+                         # paragraphs, two chunks fewer of pages
+download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement; 48.3 on 2026-10-30; 47.9 on 2026-10-31
+raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25); 224.9 on 2026-10-30; 223.4 on 2026-10-31
 
 # The translations, each a download of its own that a reader chooses in Settings'
 # Offline tab, and none of the above (offline/pack.py): a chunk to every twenty

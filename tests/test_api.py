@@ -189,7 +189,7 @@ class Whole(Quiet):
     def test_a_section_page_carries_the_1955_pages(self):
         status, _, body = call("/101:4")
         self.assertEqual(status, 200)
-        self.assertIn('id="101:4.2"><span class="stk"><a class="num" href="/101:4.2">101:4.2</a>'
+        self.assertIn('id="101:4.2"><span class="stk"><span class="num">101:4.2</span>'
                       '<span class="pg" data-pg="1109.3"></span></span>', body.decode())
 
     def test_the_two_numberings(self):

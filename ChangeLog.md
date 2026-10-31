@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- A tap on the text shows the book's running head over the top of the screen: the paragraph's reference, the paper's number, title and author, and the Settings gear, so that a reader deep in a paper with the paragraph references off can see where they are and reach Settings without scrolling back to the top; the paragraph named is tinted, and a second tap, or reading on, hides it; a tap also lets go of the grey a paragraph keeps from the page having opened at it. With Tap to turn the page on, the thin band at the very top of the screen shows it instead.
 - Settings' Whole paper, in the Reading tab, shows each paper on one page, section after section, with only the previous and next paper buttons at its end, for reading the book straight through: a paper's address, such as /15, is then the whole paper, and a section's or a paragraph's address opens the whole paper at that place. The contents at the left mark the section you are reading as the page scrolls, listening plays on through the paper and into the next, and Compare sets the whole paper beside the translations you have ticked, a column each.
 - Paper 32, The Evolution of Local Universes, has study notes too, 12 of them, reviewed ahead of the papers before it because the quiz's question on Excalibur is answered by its note on Avalon, and the Bibliography lists the three works they add.
 - The site's address stands under its name at the top of every page, so that which site you are reading, ubsite.sigmaai.au or ubsite.ddns.net, can be seen at once, in the installed app above all, which shows no address bar.
@@ -50,6 +51,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- A paragraph's reference beside it is plain text, no longer a link: tapping it did nothing but open the paragraph's own page and leave it greyed.
 - Unticking Offline copy in Settings' Offline tab now asks first, saying that it deletes the copy and every translation kept in it from this browser, which would then have to be ticked and downloaded again.
 - The index is revised once more from its reading of Paper 35: the entry evangels of destiny, which cited 35:3.21, is withdrawn.
 - The example citations in the search box, on the home page and on the not-found page are from Papers 1 and 12 now, which every translation shown has, so that typing one opens a paragraph the translations can be compared on; they named Paper 101 before.
