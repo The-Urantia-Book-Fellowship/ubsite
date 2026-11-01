@@ -1120,10 +1120,17 @@ p.t.now, .papertop :is(h1, h2).now, .rt.now, header.ch.now { background: color-m
    never a script, keeps the glyph in the face; a reading path's head has no
    title apart (.tt empty), and the Foreword no number before it. */
 .runhead { position: fixed; top: 0; left: 0; right: 0; z-index: 4; display: grid;
-  grid-template-columns: minmax(3.5rem, auto) 1fr minmax(3.5rem, auto); align-items: start; gap: .5rem;
+  grid-template-columns: minmax(4rem, auto) 1fr minmax(4rem, auto); align-items: start; gap: .5rem;
   padding: max(.5rem, env(safe-area-inset-top)) .7rem .45rem; background: var(--paper); color: var(--ink);
   border-bottom: 1px solid var(--rule); box-shadow: 0 6px 18px rgb(0 0 0 / .10); line-height: 1.35; }
-.runhead .ref { font-size: .82rem; color: var(--faint); white-space: nowrap; padding-top: .15rem; }
+/* The reference is a button to the Contents (ub.js toContents; Tigran,
+   2026-11-01), set as the text was, with the Contents' chevron after it,
+   drawn as the fold buttons' is and pointing down, the way an open one's
+   does. */
+.runhead .ref { font: inherit; font-size: .82rem; color: var(--faint); white-space: nowrap; padding: .15rem 0 0;
+  background: none; border: 0; cursor: pointer; justify-self: start; -webkit-tap-highlight-color: transparent; }
+.runhead .ref::after { content: ""; display: inline-block; width: .34em; height: .34em; margin: 0 0 .1em .45em;
+  border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
 .runhead .mid { min-width: 0; text-align: center; }
 .runhead .mid p { margin: 0; }
 .runhead .pn { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); text-wrap: balance; }
@@ -1131,9 +1138,16 @@ p.t.now, .papertop :is(h1, h2).now, .rt.now, header.ch.now { background: color-m
 .runhead .tt:empty { display: none; }
 .runhead .au { font-size: .86rem; font-style: italic; color: var(--faint); margin-top: .05rem; }
 .runhead .au:empty { display: none; }
-.runhead .set { justify-self: end; align-self: start; margin: -.3rem -.3rem 0 0; padding: .3rem; }
+/* Home and the gear together at the right (Tigran, 2026-11-01): the site's
+   mark, the header's own drawing (app.py _mark, .logo) in its own colours
+   (grey at first, until Tigran saw it), a link to the home page; the
+   reference stands alone at its corner, as the book sets it. */
+.runhead .ctl { display: flex; align-items: start; gap: .15rem; justify-self: end; margin: -.3rem -.3rem 0 0; }
+.runhead .set { padding: .3rem; }
 .runhead .set svg { width: 1.2rem; height: 1.2rem; }
-@media (hover: hover) { .runhead .set:hover { color: var(--ink); } }
+.runhead .home { display: block; padding: .3rem; line-height: 0; }
+.runhead .home .logo { width: 1.2rem; height: 1.2rem; display: block; }
+@media (hover: hover) { .runhead :is(.ref, .set):hover { color: var(--ink); } }
 @media (max-width: 40rem) { .runhead { font-size: .9rem; } .runhead .pn { font-size: .7rem; } }
 /* A tap on the text means the head: no double-tap zoom on it, or the tap
    that hides the head would zoom on iOS; pinching and the long press stay. */

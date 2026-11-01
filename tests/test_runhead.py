@@ -1,13 +1,14 @@
 """The running head on demand (ub.js tapHead, 2026-10-31): a tap on the text
 shows the book's running head over the top of the window, the paragraph's
 reference, the paper's number, title and author, and the gear, and a tap or
-two lines of reading hides it.  It is built by ub.js from what the page
-carries and kept on <body>, so that no template names it and no stored page
-of the offline copy moves with it (CLAUDE.md trap 29).  These hold the static
-facts: the stylesheet hides it in print and tints the paragraph it names as a
-search hit; the script names its one interface word as a literal, in the
-form test_l10n and app.py read, and appends the head to the body; and no
-template knows of it.  Chrome is driven through the gesture itself by
+two lines of reading hides it; since 2026-11-01 the reference is a button to
+the Contents (toContents) and the site's mark beside the gear a link home.
+It is built by ub.js from what the page carries and kept on <body>, so that
+no template names it and no stored page of the offline copy moves with it
+(CLAUDE.md trap 29).  These hold the static facts: the stylesheet hides it in
+print and tints the paragraph it names as a search hit; the script names its
+interface words as literals, in the form test_l10n and app.py read, and
+appends the head to the body; and no template knows of it.  Chrome is driven through the gesture itself by
 tools/runhead_e2e.py, which is not a gate.
 """
 
@@ -38,6 +39,33 @@ class RunningHead(unittest.TestCase):
     def test_script_names_its_words_as_literals(self):
         self.assertIn("T.attr(head, 'aria-label', 'Running head')", JS)
         self.assertIn("T.attr(btn, 'aria-label', 'Settings')", JS)
+        self.assertIn("T.attr(ref, 'title', 'Show in the contents')", JS)
+        self.assertIn("T.attr(home, 'aria-label', 'Home')", JS)
+
+    def test_reference_is_a_button_to_the_contents(self):
+        # With the Contents' chevron after it, drawn and not a glyph.
+        self.assertIn("ref = document.createElement('button')", JS)
+        self.assertIn("ref.addEventListener('click', function () { var p = headP; hideHead(); toContents(p); })", JS)
+        self.assertIn('.runhead .ref::after { content: "";', CSS)
+
+    def test_home_is_the_mark_and_a_link(self):
+        self.assertIn("home.href = '/'", JS)
+        self.assertIn("logo = document.querySelector('.brand .logo')", JS)
+        # In its own colours, the header's .logo rules (Tigran, 2026-11-01).
+        self.assertNotIn(".runhead .home .logo .book", CSS)
+        self.assertNotIn("currentColor; }\n.runhead .home", CSS)
+
+    def test_the_jump_is_a_history_step(self):
+        # On a phone; Back puts the paragraph back, arrive() leaves the entry's place alone.
+        self.assertIn("state = { ub: 'contents', p: p.id, top: p.getBoundingClientRect().top, shown: !shut, href: location.href };", JS)
+        self.assertIn("if (location.href !== was.href) return;", JS)
+        self.assertIn("if (contentsAt) history.replaceState(state, ''); else history.pushState(state, '');", JS)
+        self.assertIn("if (contentsAt && history.state && history.state.ub === 'contents') return;", JS)
+        self.assertIn("if (history.state && history.state.ub === 'contents') { contentsAt = history.state; toContents(null); }", JS)
+
+    def test_rail_keeps_its_mark_above_the_text(self):
+        # Scrolled up to the Contents, the rail still names the section left.
+        self.assertIn("if (railMarkAt && s.getBoundingClientRect().top > 60) return;", JS)
 
     def test_head_lives_on_body(self):
         self.assertIn("document.body.appendChild(head)", JS)

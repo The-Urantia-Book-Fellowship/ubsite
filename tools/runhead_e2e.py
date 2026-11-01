@@ -1,8 +1,9 @@
 """The running head on demand, end to end, in Chrome with a touch screen
 (ub.js tapHead, 2026-10-31): a tap on a paragraph shows it with that
 paragraph's reference and the paper's head, a tap or two lines of scrolling
-hides it, its gear opens Settings, a tap while words are selected does
-nothing, with Tap to turn the page on the top band shows it and the rest
+hides it, its gear opens Settings, its reference opens the Contents with the
+paper being read in view and its mark is a link home, a tap while words are
+selected does nothing, with Tap to turn the page on the top band shows it and the rest
 turns, the whole paper's page names the paper and not the section, a reading
 path names the paper of the paragraph, and a 1955 card and the head are never
 up together.
@@ -79,8 +80,8 @@ def run() -> int:
         pg.tap("[id='101:4.3']")
         settle(pg)
         ok(shown(pg), "a tap on a paragraph shows the head")
-        ok(pg.inner_text(".runhead .ref") == "101:4.3" and pg.evaluate("document.querySelector('.runhead .ref').tagName") == "SPAN",
-           "with the paragraph's reference, as text")
+        ok(pg.inner_text(".runhead .ref") == "101:4.3" and pg.evaluate("document.querySelector('.runhead .ref').tagName") == "BUTTON",
+           "with the paragraph's reference, a button")
         ok(pg.evaluate(EN + "(document.querySelector('.runhead .pn'))") == "Paper 101The Real Nature of Religion",
            "and the paper's number and title")
         ok(pg.evaluate("getComputedStyle(document.querySelector('.runhead .tt'), '::before').content") == '" – "',
@@ -117,6 +118,47 @@ def run() -> int:
         settle(pg)
         ok(not pg.evaluate("document.querySelector('dialog.settings').open") and pg.evaluate("scrollY") == y,
            "Settings closes and the page has not moved")
+
+        print("Home and the Contents from the head")
+        SHOWN = "document.querySelector('.rail').classList.contains('shown')"
+        pg.tap("[id='101:4.4']")
+        settle(pg)
+        top0 = pg.evaluate("document.getElementById('101:4.4').getBoundingClientRect().top")
+        ok(pg.evaluate("document.querySelector('.runhead .home').getAttribute('href')") == "/"
+           and pg.evaluate("!!document.querySelector('.runhead .home svg.logo')"), "the home link is the site's mark, to /")
+        ok(not pg.evaluate(SHOWN), "the Contents folded, as a phone's page starts")
+        pg.tap(".runhead .ref")
+        settle(pg)
+        ok(not shown(pg) and named(pg) == [], "a tap on the reference hides the head")
+        ok(pg.evaluate(SHOWN) and pg.evaluate("document.querySelector('.railfold').getAttribute('aria-expanded')") == "true",
+           "and opens the Contents")
+        top = pg.evaluate("document.querySelector('.rail li.here').getBoundingClientRect().top")
+        ok(abs(top - 844 / 6) < 40, "with the paper being read a sixth of the way down the screen: %.0f px" % top)
+        ok(pg.evaluate(EN + "(document.querySelector('.rail li.here > details > summary'))").strip().startswith("101.")
+           and pg.evaluate("document.querySelector('.rail li.here li.here a').getAttribute('href')") == "/101:4",
+           "its sections under it, section 4 marked")
+        ok(pg.evaluate("getComputedStyle(document.querySelector('.runhead .home .logo .flame')).fill") !=
+           pg.evaluate("getComputedStyle(document.querySelector('.runhead .home .logo .book')).fill"),
+           "the mark in its own colours, the flame not the book's")
+        pg.go_back()
+        settle(pg)
+        ok("/101:4" in pg.url and not pg.evaluate(SHOWN), "Back stays on the page and folds the Contents again")
+        top1 = pg.evaluate("document.getElementById('101:4.4').getBoundingClientRect().top")
+        ok(abs(top1 - top0) < 3, "and puts the paragraph back where it stood: %.0f px for %.0f" % (top1, top0))
+        pg.go_forward()
+        settle(pg)
+        ok(pg.evaluate(SHOWN) and abs(pg.evaluate("document.querySelector('.rail li.here').getBoundingClientRect().top") - 844 / 6) < 40,
+           "Forward opens them again at the paper")
+        pg.click(".rail li.here li a[href='/101:5']")
+        pg.wait_for_selector("[id='101:5.1']")
+        settle(pg)
+        pg.go_back()
+        pg.wait_for_selector("[id='101:4.4']")
+        settle(pg)
+        ok(pg.evaluate(SHOWN), "Back from a section opened from the Contents finds them open")
+        pg.go_back()
+        settle(pg)
+        ok("/101:4" in pg.url and not pg.evaluate(SHOWN), "and Back again folds them")
 
         pg.evaluate("getSelection().selectAllChildren(document.getElementById('101:4.5'))")
         pg.tap("[id='101:4.4']")
@@ -176,6 +218,31 @@ def run() -> int:
         settle(pg)
         ok(shown(pg) and pg.evaluate(EN + "(document.querySelector('.runhead .pn'))") == "Paper 101The Real Nature of Religion"
            and pg.inner_text(".runhead .ref") == "101:4.2", "names the paper, not the section")
+        top0 = pg.evaluate("document.getElementById('101:4.2').getBoundingClientRect().top")
+        pg.tap(".runhead .ref")
+        settle(pg)
+        ok(not shown(pg) and pg.evaluate(SHOWN), "the reference opens the Contents on the whole paper's page")
+        ok(pg.evaluate("[...document.querySelectorAll('.rail li.here li.here a')].map(a => a.getAttribute('href'))") == ["/101:4"],
+           "which still mark section 4, the one left, not the introduction")
+        pg.go_back()
+        settle(pg)
+        top1 = pg.evaluate("document.getElementById('101:4.2').getBoundingClientRect().top")
+        ok(not pg.evaluate(SHOWN) and abs(top1 - top0) < 3,
+           "Back folds the Contents and puts the paragraph back where it stood: %.0f px for %.0f" % (top1, top0))
+        pg.go_forward()
+        settle(pg)
+        pg.evaluate("document.querySelector(\".rail li.here li a[href='/101:7']\").click()")
+        settle(pg)
+        ok(pg.evaluate("location.hash") == "#101:7" and pg.evaluate("document.getElementById('101:7').getBoundingClientRect().top") < 80,
+           "a section tapped in the Contents is a place on the whole paper's page, scrolled to")
+        pg.go_back()
+        settle(pg)
+        ok(pg.evaluate(SHOWN) and abs(pg.evaluate("document.querySelector('.rail li.here').getBoundingClientRect().top") - 844 / 6) < 40,
+           "Back from it is the Contents again, at the paper, not section 4's top")
+        pg.go_back()
+        settle(pg)
+        ok(not pg.evaluate(SHOWN) and abs(pg.evaluate("document.getElementById('101:4.2').getBoundingClientRect().top") - top0) < 3,
+           "and Back again the paragraph where it stood")
         pg.evaluate("ubSettings.set('whole', false)")
 
         print("A reading path")
@@ -186,6 +253,9 @@ def run() -> int:
         pn = pg.evaluate(EN + "(document.querySelector('.runhead .pn'))")
         ok(shown(pg) and pn.startswith("Paper ") and " · " in pn, "names the paragraph's paper from the running head before it: " + pn)
         ok(pg.evaluate("getComputedStyle(document.querySelector('.runhead .au')).display") == "none", "with no author")
+        pg.tap(".runhead .ref")
+        settle(pg)
+        ok(not shown(pg) and not errors, "with no Contents on the page, the reference only hides the head")
 
         print("A 1955 card")
         RING = "a.fn:not([data-k='st']):not([data-k='tn'])"
@@ -204,6 +274,25 @@ def run() -> int:
         settle(pg)
         ok(not pg.evaluate("!!document.querySelector('.pop')") and not shown(pg),
            "the tap that closes the card does not bring the head")
+
+        print("A wide screen, the Contents folded away")
+        ctx2 = b.new_context(viewport={"width": 1280, "height": 900})
+        pg2 = ctx2.new_page()
+        pg2.on("pageerror", lambda e: errors.append(str(e)))
+        pg2.goto(BASE + "/101:4")
+        pg2.evaluate("ubSettings.set('rail', 'folded')")
+        settle(pg2)
+        ok(pg2.evaluate("document.documentElement.dataset.rail") == "folded", "folded by its setting")
+        pg2.click("[id='101:4.3']")
+        settle(pg2)
+        ok(shown(pg2), "a click on a paragraph shows the head")
+        pg2.click(".runhead .ref")
+        settle(pg2)
+        ok(not shown(pg2) and pg2.evaluate("document.documentElement.dataset.rail") != "folded",
+           "the reference unfolds the Contents and hides the head")
+        ok(pg2.evaluate("document.querySelector('.railfold').getAttribute('aria-expanded')") == "true", "the fold button says so")
+        pg2.evaluate("ubSettings.set('rail', 'open')")
+        ctx2.close()
 
         ok(not errors, "no script error: " + "; ".join(errors))
         b.close()

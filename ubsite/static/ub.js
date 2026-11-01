@@ -408,6 +408,10 @@
   // (#note15_3_4_0); what follows a second # is arriveTr's.
   function arrive() {
     var focus = null, m, el, i, whole = document.querySelector('article.whole');
+    // At the Contents' entry again, by Back or Forward (toContents, below),
+    // the place is theirs; left by a section's link, it is forgotten.
+    if (contentsAt && history.state && history.state.ub === 'contents') return;
+    contentsAt = null;
     try {
       m = whole && (/^#(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?(?:#.*)?$/.exec(location.hash) ||
                     /^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?(\d+)_(\d+)_(\d+)_\d+$/.exec(location.hash));
@@ -455,6 +459,10 @@
     railMarkWait = false;
     var s = sectionInView(), rail = document.querySelector('.rail');
     if (!s || !rail || s === railMarkAt) return;
+    // Above the text, at the Contents (toContents, below, or scrolled up by
+    // hand), the mark stays on the section the reader left; only a page with
+    // none marked yet takes the first.
+    if (railMarkAt && s.getBoundingClientRect().top > 60) return;
     railMarkAt = s;
     // A link once clicked is in the reader's unit already (above): both are
     // compared in it.
@@ -523,6 +531,64 @@
   railView();
   document.addEventListener('ub:swap', railView);
 
+  // The Contents from the running head (Tigran, 2026-11-01; tapHead, below):
+  // shut, opened as their own button opens them (above), and the paper being
+  // read brought into view.  On a wide screen the rail scrolls to it
+  // (railView); on a phone, where the rail is a block at the top of the page,
+  // the page scrolls so that the paper stands a sixth of the way down the
+  // window, as railView places it in the rail, its sections under it and the
+  // one being read marked.  Nothing on a page with no Contents, a reading path.
+  // On a phone the jump is a step in the history, at the same address, so
+  // that Back undoes it (Tigran, the same day, finding Back at the home page,
+  // the page before): the paragraph `p` left goes back to where it stood, the
+  // Contents folded again if they were, and Forward opens them again.  While
+  // the entry is the current one `contentsAt` is its state; a section's link
+  // followed from the Contents leaves it for a new address (popstate, below,
+  // and arrive() by history.state).  A fresh load of the entry, Back from
+  // another page without the page cache, opens them again from history.state.
+  var contentsAt = null;
+  function toContents(p) {
+    var b = document.querySelector('.railfold'), rail = b && b.closest('.rail'), here, shut, state;
+    if (!rail) return false;
+    shut = railShut(rail);
+    if (phone.matches && p) {
+      // Measured before the Contents open above it, as it will stand after
+      // they fold again.
+      state = { ub: 'contents', p: p.id, top: p.getBoundingClientRect().top, shown: !shut, href: location.href };
+      if (contentsAt) history.replaceState(state, ''); else history.pushState(state, '');
+      contentsAt = state;
+    }
+    if (shut) b.click(); else railView();
+    if (phone.matches && (here = rail.querySelector('li.here'))) {
+      scrollTo({ top: scrollY + here.getBoundingClientRect().top - innerHeight / 6, behavior: 'instant' });
+      arriveTouched = Date.now();
+    }
+    return true;
+  }
+  addEventListener('popstate', function (ev) {
+    var s = ev.state, was = contentsAt, rail = document.querySelector('.rail'), p;
+    if (s && s.ub === 'contents') { contentsAt = s; toContents(null); return; }
+    if (!was) return;
+    contentsAt = null;
+    // A section's link followed from the Contents fires popstate too, in
+    // Chrome, for its fragment: a new address, and the place is the link's.
+    // Back to the entry before is the entry's own address, which the jump
+    // kept.
+    if (location.href !== was.href) return;
+    if (rail && !was.shown && rail.classList.contains('shown')) { rail.classList.remove('shown'); railSync(); }
+    p = document.getElementById(was.p);
+    if (!p) return;
+    // Now, and again over the next frames: the browser puts back the offset
+    // it kept, before popstate, and as the Contents fold above the paragraph
+    // its scroll anchoring moves the page once more, a frame on.
+    var place = function () { scrollTo({ top: scrollY + p.getBoundingClientRect().top - was.top, behavior: 'instant' }); };
+    place();
+    requestAnimationFrame(function () { place(); requestAnimationFrame(place); });
+    setTimeout(place, 120);
+    arriveTouched = Date.now();
+  });
+  document.addEventListener('ub:swap', function () { contentsAt = null; });
+
   // The button at the rail's head folds it (ub.css .railfold).  On a wide
   // screen away to the left, kept as the setting 'rail' (settings.py KEPT); on
   // a phone up to its one line, which every page starts as, so a class on the
@@ -552,6 +618,9 @@
   });
   railSync();
   if (phone.addEventListener) phone.addEventListener('change', railSync);
+  // A fresh load of the Contents' entry (toContents, above): here, once
+  // `phone` is, which toContents asks.
+  if (history.state && history.state.ub === 'contents') { contentsAt = history.state; toContents(null); }
 
   // The index folds (templates/_fold.html, ub.css .indexfold): its button,
   // kept as the setting 'margin' (settings.py KEPT), folds the margin to the
@@ -1344,9 +1413,11 @@
   // the author centred on a verso, PAPER 101 – THE REAL NATURE OF RELIGION on
   // a recto.  So a tap on the text brings the running head down over the top
   // of the window (ub.css .runhead): the tapped paragraph's reference, the
-  // paper's number and title, and its author, and the gear.  The reference is
-  // text, not a link, as the one beside the paragraph is: a tap on a link to
-  // the paragraph would only mark it as the page's opening place (Tigran).  The paragraph is tinted as a
+  // paper's number and title, and its author, and the gear; since 2026-11-01
+  // Home beside the gear, and the reference a button to the Contents
+  // (toContents, above).  Not a link to the paragraph, as the one beside it
+  // once was: a tap on that would only mark it as the page's opening place
+  // (Tigran, 2026-10-31).  The paragraph is tinted as a
   // search hit is (p.t.named) rather than given its reference in its place, a
   // float that would re-set its first two lines under the finger.  The next
   // tap takes it away, as do Escape, a card opening, Settings opening, a new
@@ -1394,20 +1465,41 @@
     return { num: rh ? rh.innerHTML : '', title: '', author: '' };
   }
   function buildHead() {
-    var btn;
+    var ref, ctl, home, btn, logo = document.querySelector('.brand .logo');
     head = document.createElement('div');
     head.className = 'runhead';
     head.hidden = true;
     head.setAttribute('role', 'region');
     T.attr(head, 'aria-label', 'Running head');
-    head.innerHTML = '<span class="ref"></span><div class="mid"><p class="pn"></p><p class="au"></p></div>';
+    head.innerHTML = '<div class="mid"><p class="pn"></p><p class="au"></p></div>';
+    // The reference, a button to the Contents (toContents, above; Tigran,
+    // 2026-11-01), with the Contents' chevron after it (ub.css); its name is
+    // the reference itself.
+    ref = document.createElement('button');
+    ref.type = 'button';
+    ref.className = 'ref';
+    T.attr(ref, 'title', 'Show in the contents');
+    ref.addEventListener('click', function () { var p = headP; hideHead(); toContents(p); });
+    head.insertBefore(ref, head.firstChild);
+    // Home and the gear together at the right: the site's mark, the header's
+    // own drawing, as a link to the home page; and the gear.
+    ctl = document.createElement('span');
+    ctl.className = 'ctl';
+    home = document.createElement('a');
+    home.className = 'home';
+    home.href = '/';
+    T.attr(home, 'title', 'Home');
+    T.attr(home, 'aria-label', 'Home');
+    if (logo) home.appendChild(logo.cloneNode(true));
+    ctl.appendChild(home);
     btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'set';
     T.attr(btn, 'aria-label', 'Settings');
     T.attr(btn, 'title', 'Settings');
     if (gear && gear.querySelector('svg')) btn.appendChild(gear.querySelector('svg').cloneNode(true));
-    head.appendChild(btn);
+    ctl.appendChild(btn);
+    head.appendChild(ctl);
     // The header's gear opens the dialog, and its click hides the head (below);
     // never focused first, or the dialog would give the focus back to the
     // header on closing and scroll a long page to its top.
