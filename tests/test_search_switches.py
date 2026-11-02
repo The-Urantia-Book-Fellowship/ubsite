@@ -36,7 +36,7 @@ class Declared(unittest.TestCase):
 
     def test_css_hides_what_it_says(self):
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
-        self.assertIn(':root[data-studynotes="true"]:not([data-studysearch="off"]) .bystudy { display: block; }', css)
+        self.assertIn(':root:not([data-studynotes="off"]):not([data-studysearch="off"]) .bystudy { display: block; }', css)
         self.assertIn(':root[data-indexsearch="off"] .results > .ix { display: none; }', css)
         self.assertIn(':root[data-trsearch="off"] .trhits { display: none; }', css)
 
