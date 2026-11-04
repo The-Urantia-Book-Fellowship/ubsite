@@ -52,9 +52,11 @@ tex  = "tex"
 rev  = "HEAD"
 url  = "https://github.com/tigran123/ud"
 
-# Lila Dogim's, with Sergey Prokopov's corrections, as the Urantia Book Society of
-# Greater New York publishes it (urantia.nyc): the whole book, no notes.  The
-# site is the Fellowship's, and may show it (Tigran, 2026-10-26).
+# Lila Dogim's, with Sergey Prokopov's corrections, made and published by the
+# Urantia Book Society of Greater New York (urantia.nyc), whose name its short
+# name keeps, USGNY, and owned since 2026 by The Urantia Book Fellowship (Geoff
+# to Tigran, 2026-11-04; its title page says so), which is credited for it
+# (data/translations.toml): the whole book, no notes.
 [urantia-ru]
 path = "../urantia-ru"
 tex  = "tex"

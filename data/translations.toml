@@ -26,13 +26,21 @@ lang  = "ru"
 by    = { en = "translated by Tigran Aivazian", ru = "перевод Тиграна Айвазяна" }
 label = "Aivazian"
 
+# Made and published by the Urantia Book Society of Greater New York, whose
+# name the short name keeps, as readers know it; owned since 2026 by The
+# Urantia Book Fellowship, as its title page says, and credited so (Geoff to
+# Tigran, 2026-11-04).  The Fellowship's name stays in Latin letters in
+# Russian, as the interface writes it (ubsite/ru.toml).
 [urantia-ru]
 title = "Книга Урантии"
 lang  = "ru"
-label = "USGNY"         # the Urantia Book Society of Greater New York
+label = "USGNY"         # the Urantia Book Society of Greater New York, which made it
 [urantia-ru.by]
-en = "translated by Lila Dogim, corrected by Sergey Prokopov; Urantia Book Society of Greater New York"
-ru = "перевод Лилы Догим, с исправлениями Сергея Прокопова; Общество Книги Урантии Большого Нью-Йорка"
+en = "translated by Lila Dogim, corrected by Sergey Prokopov; The Urantia Book Fellowship"
+ru = "перевод Лилы Догим, с исправлениями Сергея Прокопова; The Urantia Book Fellowship"
+[urantia-ru.credit]
+en = "Copyright © The Urantia Book Fellowship"
+ru = "© The Urantia Book Fellowship"
 
 # The Urantia Foundation's own, its 2024 release, from its HTML (sources.toml):
 # the whole book.  Its copyright, shown by its written permission, credited as

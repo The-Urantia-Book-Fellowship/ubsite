@@ -139,13 +139,24 @@ class Dialog(unittest.TestCase):
         self.assertIn("translated by Tigran Aivazian · Papers 0–40, and 41, 43, 195 and 196 in part", self.panel)
         self.assertIn("the whole book", self.panel)
 
+    def _li(self, key):
+        li = self.panel[self.panel.index(f'<li data-k="{key}">'):]
+        return li[:li.index("</li>")]
+
     def test_the_foundation_s_with_its_credit(self):
         # Its copyright, as Tigran worded it (2026-10-27), under who made it.
-        li = self.panel[self.panel.index('<li data-k="uf-ru">'):]
-        li = li[:li.index("</li>")]
+        li = self._li("uf-ru")
         self.assertIn("translated by the Urantia Foundation, 2024 release", li)
         self.assertIn('<span class="cr">Copyright © Urantia Foundation and used by permission</span>', li)
-        self.assertNotIn('class="cr"', self.panel[:self.panel.index('<li data-k="uf-ru">')])
+
+    def test_usgny_s_with_the_fellowship_s_credit(self):
+        # Owned by the Fellowship since 2026 (Geoff, 2026-11-04), the short name
+        # the Society's still; Tigran's own has no credit line.
+        li = self._li("urantia-ru")
+        self.assertIn("translated by Lila Dogim, corrected by Sergey Prokopov; The Urantia Book Fellowship", li)
+        self.assertIn('<span class="cr">Copyright © The Urantia Book Fellowship</span>', li)
+        self.assertNotIn("Greater New York", li)
+        self.assertNotIn('class="cr"', self._li("ud"))
 
     def test_its_value_is_one_hidden_input(self):
         self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations"])
