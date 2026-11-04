@@ -143,6 +143,7 @@
   // for another (Tigran, 2026-10-13), the bar says why it does not play once
   // it has failed (audio's error), and its voice menu stands beside the message.
   var NEEDS_NET = T.k('The recordings need a connection. Offline, your browser\u2019s voice can read it.');
+  var NOT_KEPT = T.k('This paper\u2019s recording is not kept offline: Settings, in its Offline tab, keeps it. Your browser\u2019s voice can read it.');
   // Section d's voice kk; the browser's is made from its paragraphs, d.ids,
   // or a translation's, those it has.
   function voiceOf(d, kk) {
@@ -305,9 +306,68 @@
     nxt.addEventListener('click', forward);
     tog.addEventListener('click', toggle);
     x.addEventListener('click', close);
-    [prev, tog, nxt, mid, spd, on, x].forEach(function (e) { bar.appendChild(e); });
+    [prev, tog, nxt, mid, keepButton(), spd, on, x].forEach(function (e) { bar.appendChild(e); });
     document.body.appendChild(bar);
     document.body.classList.add('listening');
+    drawKeep();
+  }
+  // ---- keeping the paper's recording offline ----------------------------------
+  // A ↓ after the voice, for a recording only, never the browser's voice: the
+  // paper being heard, to keep, downloading or kept, as its row in Settings'
+  // Offline tab shows it, with the same four states and the same tap
+  // (offline.js, window.ubOfflineUI.rec; Tigran, 2026-11-04).  Where Work
+  // offline can run at all; its state is the worker's word, which offline.js
+  // hands on (ub:audio).  With no copy kept yet, the copy comes first, and
+  // offline.js with it, loaded as the Offline tab loads it (ub.js, ub:offtab).
+  var KEEP_ICONS = {
+    none: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v7.5M4.5 7.5L8 11l3.5-3.5M3.5 13.5h9"/></svg>',
+    busy: '<svg viewBox="0 0 16 16" aria-hidden="true"><path class="f" d="M5 5h6v6H5z"/></svg>',
+    kept: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-6.5"/></svg>'
+  };
+  KEEP_ICONS.some = KEEP_ICONS.none;
+  var recState = null;
+  document.addEventListener('ub:audio', function (ev) { recState = ev.detail; drawKeep(); });
+  function keepButton() {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'keep';
+    b.dataset.st = 'none';
+    b.hidden = true;
+    b.addEventListener('click', keepTap);
+    return b;
+  }
+  function drawKeep() {
+    var b = bar && bar.querySelector('.keep');
+    if (!b) return;
+    var can = !!(V && D && V.kind !== 'browser' && 'serviceWorker' in navigator && window.isSecureContext);
+    b.hidden = !can;
+    if (!can) return;
+    var n = D.paper, v = (recState && recState.voices && recState.voices[key]) || { kept: [], partial: {}, bytes: 0 };
+    var queued = ((recState && recState.queue) || []).some(function (q) { return q.v === key && q.n === n; });
+    var busy = recState && recState.busy && recState.busy.v === key && recState.busy.n === n ? recState.busy : null;
+    var st = v.kept.indexOf(n) >= 0 ? 'kept' : queued ? 'busy' : v.partial[n] ? 'some' : 'none';
+    b.dataset.st = st;
+    if (b.dataset.icon !== st) { b.dataset.icon = st; b.innerHTML = KEEP_ICONS[st]; }
+    b.style.setProperty('--p', busy && busy.total ? (busy.done / busy.total).toFixed(3) : '0');
+    var words = st === 'busy' ? T.k('Downloading: {a} of {b}; tap to stop')
+              : st === 'kept' ? T.k('This paper\u2019s recording is kept offline; tap to let go')
+              : st === 'some' ? T.k('This paper\u2019s recording is kept in part; tap to keep the rest')
+              : T.k('Keep this paper\u2019s recording offline');
+    var p = busy ? { a: T.tr('{x} MB', { x: Math.round(busy.done / 1e6) }), b: T.tr('{x} MB', { x: Math.round(busy.total / 1e6) }) } : {};
+    T.attr(b, 'title', words, p);
+    T.attr(b, 'aria-label', words, p);
+  }
+  function keepTap(ev) {
+    ev.preventDefault();
+    var b = ev.currentTarget, st = b.dataset.st, paper = D && D.paper, kk = key, tries = 0;
+    if (paper === undefined || paper === null) return;
+    var go = function () { window.ubOfflineUI.rec(st, kk, paper); };
+    if (window.ubOfflineUI && window.ubOfflineUI.rec) return go();
+    document.dispatchEvent(new Event('ub:offtab'));
+    var wait = setInterval(function () {
+      if (window.ubOfflineUI && window.ubOfflineUI.rec) { clearInterval(wait); go(); }
+      else if (++tries > 50) clearInterval(wait);
+    }, 100);
   }
   // A button in the bar and the list a tap on it opens above the bar: the
   // speed, the voice.  entries() is asked each time it opens, so that what it
@@ -488,6 +548,7 @@
       at.hidden = true;
       bar.querySelector('.who').innerHTML = trouble;
     }
+    drawKeep();
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
   }
 
@@ -813,9 +874,11 @@
   });
   audio.addEventListener('play', render);
   audio.addEventListener('pause', render);
+  // Offline with a worker, the recording is one not kept (sw.js answers a kept
+  // one, online or not): the bar says where it is kept (2026-11-04).
   audio.addEventListener('error', function () {
     if (audio.getAttribute('src'))
-      tell(navigator.onLine === false ? T(NEEDS_NET)
+      tell(navigator.onLine === false ? (navigator.serviceWorker && navigator.serviceWorker.controller ? T(NOT_KEPT) : T(NEEDS_NET))
                                       : T('The recording could not be loaded. Your browser\u2019s voice can read without it.'));
   });
 

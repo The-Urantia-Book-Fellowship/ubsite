@@ -7,8 +7,10 @@
 // not here, so a reader sees the live site and the visit counter counts them.
 // The copy answers when the network fails, takes longer than WAIT, or the
 // server is down (a 5xx): a page, a search, a stylesheet, as the server would.
-// What the copy does not hold -- the recordings, the API -- is left to fail;
-// the text the browser's voice reads is in it, so that voice reads offline.
+// What the copy does not hold -- the API, a recording not kept -- is left to
+// fail; the text the browser's voice reads is in it, so that voice reads
+// offline, and a recording a reader keeps, a paper, a part or a voice at a
+// time, answers from a cache of its own (The recordings kept, below).
 //
 // The copy is kept in the Cache API, one cache per build, each chunk under
 // its hash, so an update fetches only the chunks that changed, carries the
@@ -36,6 +38,7 @@ var T = self.ubT;               // the interface's words (ubsite/l10n.js)
 var WAIT = 4000;                 // ms the network has before the copy answers
 var CHECK = 3600 * 1000;         // how often to ask whether the copy is current
 var META = 'ub-meta', ENGINE = 'ub-engine', COPY = 'ub-copy-', FORMAT = 2;   // offline/pack.py FORMAT
+var AUDIO = 'ub-audio-';           // + a voice's key: the recording a reader keeps, by paper
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(ENGINE).then(function (c) { return c.add(V.wasm); })
@@ -52,9 +55,11 @@ self.addEventListener('activate', function (e) {
 
 // ---- What is kept --------------------------------------------------------
 // meta: {current: build, checked: ms, latest: {build, made, text, index,
-// bytes, raw, fetch, full} or null, error, tr: {key: build}}.  `fetch` is what
-// an update to `latest` would download; `tr`, the translations kept, each at
-// the build of its own it was fetched at.
+// bytes, raw, fetch, full} or null, error, tr: {key: build}, audio: {queue:
+// [{v, n}], error, words}}.  `fetch` is what an update to `latest` would
+// download; `tr`, the translations kept, each at the build of its own it was
+// fetched at; `audio`, the papers of each voice asked for and not yet whole
+// (The recordings kept, below), never what is kept, which the caches say.
 function readMeta() {
   return caches.open(META).then(function (c) { return c.match('/offline/meta'); })
     .then(function (r) { return r ? r.json() : {}; });
@@ -198,6 +203,252 @@ function database(c) {
   return c.db;
 }
 
+// ---- The recordings kept ---------------------------------------------------
+// A reader keeps a recording a paper, a part or a voice at a time (Settings'
+// Offline tab, offline.js; the player's ↓, listen.js): each voice's files in
+// a cache of its own, AUDIO + key, under their paths, whole, as the server
+// sends them, each held to the voice's list (/offline/audio/<key>.json, the
+// copy's chunk audio-<key>) by size and digest before it is kept.  Never
+// versioned: a recording does not change, and an update of the copy must
+// never cost a reader 7 GB.  What is kept is the caches' own word; meta.audio
+// holds only the queue of papers asked for, {v: key, n: paper}, as asked.
+//
+// A page pumps the download, one file a message (`keep`, offline.js): a
+// message's work runs inside its waitUntil, which Chrome ends after five
+// minutes, and the worker's own fetches do not keep it alive, so a keep
+// fetches at most one file, 27 MB at most, and answers, and the page asks
+// again while the queue is not empty.  A worker stopped mid-file loses
+// nothing: a file is in its cache only once it is whole and checked.
+var lists = {};                      // key -> promise of the voice's list, indexed
+function audioList(key) {
+  if (lists[key]) return lists[key];
+  var p = lists[key] = copy().then(function (c) {
+    if (c && c.byName['audio-' + key]) return chunk(c, 'audio-' + key).then(function (d) { return JSON.parse(d.json); });
+    return fetch('/offline/audio/' + key + '.json', { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error('no list of ' + key);
+      return r.json();
+    });
+  }).then(function (d) {
+    d.byPaper = {};
+    d.papers.forEach(function (x) { d.byPaper[x.n] = x; });
+    return d;
+  });
+  p.catch(function () { delete lists[key]; });
+  return p;
+}
+function audioPath(key, name) { return '/audio/' + key + '/' + name; }
+// The paths a voice's cache holds.
+function audioHave(key) {
+  return caches.has(AUDIO + key).then(function (has) {
+    if (!has) return {};
+    return caches.open(AUDIO + key).then(function (c) { return c.keys(); }).then(function (ks) {
+      var have = {};
+      ks.forEach(function (k) { have[new URL(k.url).pathname] = true; });
+      return have;
+    });
+  });
+}
+function hashOf(data) {
+  return crypto.subtle.digest('SHA-256', data).then(function (d) {
+    return Array.prototype.map.call(new Uint8Array(d), function (b) {
+      return (b < 16 ? '0' : '') + b.toString(16);
+    }).join('').slice(0, 16);
+  });
+}
+// What is kept, for the tab and the bar: for each voice with a cache or in
+// the queue, the papers kept whole, those kept in part with the bytes held,
+// and the bytes in all; the queue; the file under way (`busy`, plain data);
+// why the last one stopped.  A voice whose list cannot be had, offline with a
+// copy from before the lists, says so (`nolist`).
+var audioBusy = null, audioRunning = null, audioAbort = null;
+function audioState() {
+  return Promise.all([readMeta(), caches.keys()]).then(function (got) {
+    var a = got[0].audio || {}, queue = a.queue || [], keys = {};
+    queue.forEach(function (q) { keys[q.v] = true; });
+    got[1].forEach(function (n) { if (n.indexOf(AUDIO) === 0) keys[n.slice(AUDIO.length)] = true; });
+    return Promise.all(Object.keys(keys).map(function (key) {
+      return Promise.all([audioList(key).catch(function () { return null; }), audioHave(key)]).then(function (x) {
+        var list = x[0], have = x[1], v = { kept: [], partial: {}, bytes: 0 };
+        if (!list) { v.nolist = true; return [key, v]; }
+        list.papers.forEach(function (p) {
+          var n = 0, b = 0;
+          p.files.forEach(function (f) { if (have[audioPath(key, f[0])]) { n++; b += f[1]; } });
+          if (n && n === p.files.length) v.kept.push(p.n);
+          else if (n) v.partial[p.n] = b;
+          v.bytes += b;
+        });
+        return [key, v];
+      });
+    })).then(function (pairs) {
+      var voices = {};
+      pairs.forEach(function (kv) { voices[kv[0]] = kv[1]; });
+      return { voices: voices, queue: queue, busy: audioBusy, error: a.error || null, words: a.words || null };
+    });
+  });
+}
+// A response read whole into a buffer of the size the list gives; `told` how
+// far, every half second, for the ring in the tab.
+function readAll(r, name, size, told) {
+  var buf = new Uint8Array(size), at = 0, reader = r.body.getReader(), last = 0;
+  var step = function () {
+    return reader.read().then(function (x) {
+      if (x.done) return buf.buffer;
+      if (at + x.value.length > size) throw stopped(T.k('{x} arrived damaged'), { x: name });
+      buf.set(x.value, at);
+      at += x.value.length;
+      var now = Date.now();
+      if (now - last > 500) { last = now; told(at); }
+      return step();
+    });
+  };
+  return step();
+}
+function dequeue(q) {
+  return updateMeta(function (meta) {
+    var a = meta.audio || (meta.audio = { queue: [] });
+    a.queue = (a.queue || []).filter(function (x) { return !(x.v === q.v && x.n === q.n); });
+    a.error = a.words = null;
+  });
+}
+// One file of the queue's first paper, fetched, checked and kept; the paper
+// out of the queue once it is whole.  Not while the copy downloads: the page
+// asks again after.  Two pages asking at once share the one file.
+function keepOne() {
+  if (audioRunning) return audioRunning;
+  if (running) return tell();
+  var ctl = audioAbort = new AbortController(), q, paper, file, url, missing;
+  audioRunning = readMeta().then(function (meta) {
+    var queue = (meta.audio || {}).queue || [];
+    if (!queue.length) return null;
+    q = queue[0];
+    return Promise.all([audioList(q.v), audioHave(q.v)]).then(function (got) {
+      paper = got[0].byPaper[q.n];
+      if (!paper) return dequeue(q).then(function () { return 'again'; });
+      missing = paper.files.filter(function (f) { return !got[1][audioPath(q.v, f[0])]; });
+      if (!missing.length) return dequeue(q).then(function () { return 'again'; });
+      file = missing[0];
+      url = audioPath(q.v, file[0]);
+      var held = paper.bytes - missing.reduce(function (s, f) { return s + f[1]; }, 0);
+      audioBusy = { v: q.v, n: q.n, done: held, total: paper.bytes, left: missing.length, of: paper.files.length };
+      tell();
+      // Past the browser's cache, which must not keep a second copy of the
+      // file, nor answer with a part of it kept from playing (a 206).
+      return fetch(url, { cache: 'no-store', headers: { 'X-UB-Fetch': 'keep' }, signal: ctl.signal }).then(function (r) {
+        if (r.status !== 200) throw stopped(T.k('{x} could not be fetched ({s})'), { x: file[0], s: r.status });
+        return readAll(r, file[0], file[1], function (n) { audioBusy.done = held + n; tell(); });
+      }).then(function (buf) {
+        return hashOf(buf).then(function (h) {
+          if (buf.byteLength !== file[1] || h !== file[2]) throw stopped(T.k('{x} arrived damaged'), { x: file[0] });
+          return caches.open(AUDIO + q.v).then(function (c) {
+            return c.put(url, new Response(buf, { headers: {
+              'Content-Type': 'audio/mpeg', 'Content-Length': String(buf.byteLength), 'Accept-Ranges': 'bytes' } }));
+          }).catch(function (e) {
+            throw stopped(T.k('this browser has no room for it ({e})'), { e: String(e && e.name || e) });
+          });
+        });
+      }).then(function () {
+        return missing.length === 1 ? dequeue(q)
+          : updateMeta(function (meta) { if (meta.audio) meta.audio.error = meta.audio.words = null; });
+      });
+    });
+  }).then(function (r) {
+    audioBusy = audioRunning = audioAbort = null;
+    return r === 'again' ? keepOne() : tell();
+  }, function (err) {
+    audioBusy = audioRunning = audioAbort = null;
+    if (err && err.name === 'AbortError') return tell();
+    return updateMeta(function (meta) {
+      var a = meta.audio || (meta.audio = { queue: [] });
+      a.error = String(err && err.message || err);
+      a.words = err && err.words || null;
+    }).then(tell);
+  });
+  return audioRunning;
+}
+// Papers of a voice asked for: those not whole go on the queue, as asked, and
+// the first file is fetched.
+function keep(v, ns) {
+  return Promise.all([audioList(v), audioHave(v)]).then(function (got) {
+    var want = ns.filter(function (n) {
+      var p = got[0].byPaper[n];
+      return p && p.files.some(function (f) { return !got[1][audioPath(v, f[0])]; });
+    });
+    return updateMeta(function (meta) {
+      var a = meta.audio || (meta.audio = { queue: [] }), q = a.queue || (a.queue = []);
+      want.forEach(function (n) {
+        if (!q.some(function (x) { return x.v === v && x.n === n; })) q.push({ v: v, n: n });
+      });
+      a.error = a.words = null;
+    });
+  }).then(keepOne);
+}
+// Papers let go: out of the queue, the one under way stopped, their files out
+// of the cache, and the cache itself once it is empty.
+function unkeep(v, ns) {
+  if (audioAbort && audioBusy && audioBusy.v === v && ns.indexOf(audioBusy.n) >= 0) audioAbort.abort();
+  return updateMeta(function (meta) {
+    var a = meta.audio || (meta.audio = { queue: [] });
+    a.queue = (a.queue || []).filter(function (x) { return !(x.v === v && ns.indexOf(x.n) >= 0); });
+    a.error = a.words = null;
+  }).then(function () { return audioRunning; }).then(function () {
+    return Promise.all([audioList(v), caches.has(AUDIO + v)]);
+  }).then(function (got) {
+    if (!got[1]) return;
+    return caches.open(AUDIO + v).then(function (c) {
+      return Promise.all(ns.map(function (n) {
+        var p = got[0].byPaper[n];
+        return p && Promise.all(p.files.map(function (f) { return c.delete(audioPath(v, f[0])); }));
+      })).then(function () { return c.keys(); }).then(function (ks) {
+        if (!ks.length) return caches.delete(AUDIO + v);
+      });
+    });
+  }).then(tell);
+}
+// Papers of a voice out of the queue, or the whole queue emptied, the file
+// under way stopped if it is theirs; what is whole stays.
+function stopAudio(v, ns) {
+  var mine = function (x) { return !v || (x.v === v && ns.indexOf(x.n) >= 0); };
+  if (audioAbort && audioBusy && mine(audioBusy)) audioAbort.abort();
+  return updateMeta(function (meta) {
+    var a = meta.audio || (meta.audio = { queue: [] });
+    a.queue = (a.queue || []).filter(function (x) { return !mine(x); });
+    a.error = a.words = null;
+  }).then(function () { return audioRunning; }).then(tell);
+}
+
+// ---- Answering a recording ---------------------------------------------------
+// A kept file answers from its cache, online too: the recording never changes,
+// and a paper kept is not fetched twice.  The player seeks with Range
+// requests, and Safari will not seek without a 206 (app.py audio_file); the
+// Cache API matches by URL alone, cannot hold a 206, and gives the whole file,
+// so the slice is cut here from the file's Blob, which reads only what the
+// player takes, the last file's Blob kept so that a seek does not read it
+// again.  Anything not kept goes to the network as it did, with its own
+// Range, and is never kept on the way.
+var blobMemo = null;
+function audioAnswer(req, path, key) {
+  return caches.has(AUDIO + key).then(function (has) {
+    if (!has) return fetch(req);
+    return caches.open(AUDIO + key).then(function (c) { return c.match(path); }).then(function (hit) {
+      if (!hit) return fetch(req);
+      var range = req.headers.get('range');
+      if (!range) return hit;
+      var blob = blobMemo && blobMemo.path === path ? Promise.resolve(blobMemo.blob)
+               : hit.blob().then(function (bl) { blobMemo = { path: path, blob: bl }; return bl; });
+      return blob.then(function (bl) {
+        var total = bl.size, m = /^bytes=(\d*)-(\d*)$/.exec(range.trim()), a, b;
+        if (m && m[1] !== '') { a = +m[1]; b = m[2] === '' ? total - 1 : Math.min(+m[2], total - 1); }
+        else if (m && m[2] !== '') { a = Math.max(0, total - +m[2]); b = total - 1; }
+        if (!m || a > b || a >= total)
+          return new Response(null, { status: 416, headers: { 'Content-Range': 'bytes */' + total } });
+        return new Response(bl.slice(a, b + 1), { status: 206, headers: {
+          'Content-Type': 'audio/mpeg', 'Content-Length': String(b - a + 1),
+          'Content-Range': 'bytes ' + a + '-' + b + '/' + total, 'Accept-Ranges': 'bytes' } });
+      });
+    });
+  });
+}
+
 // ---- Answering -----------------------------------------------------------
 function respond(c, r) {
   if (r.location) return Response.redirect(new URL(r.location, location).href, r.status);
@@ -236,7 +487,11 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET' || url.origin !== location.origin) return;
   // Nor the quiz's board's JSON (ubsite/board.py), which is the board's site's
   // and never kept: on that site a page asks it at its own origin.
-  if (/^\/(offline\/|sw\.js$|api\/|audio\/|healthz$|quiz\/board\/)/.test(url.pathname)) return;
+  var am = /^\/audio\/([a-z0-9-]+)\//.exec(url.pathname);
+  if (am) { e.respondWith(audioAnswer(req, url.pathname, am[1])); return; }
+  // A recording's list, /offline/audio/<key>.json, is a page to the copy
+  // (offline-core.js), not the worker's own.
+  if (/^\/(offline\/(?!audio\/)|sw\.js$|api\/|audio\/|healthz$|quiz\/board\/)/.test(url.pathname)) return;
   // Nor what depends on the host: a copy kept before 2026-10-15 holds the
   // manifest and the touch icon as one host sent them.
   if (self.ubOffline.HOSTED.indexOf(url.pathname) >= 0) return;
@@ -282,7 +537,7 @@ var busy = null, running = null;
 // size with the translations kept (`tr`), and every translation its manifest
 // lists, with its size (`trs`), for Settings' Offline tab.
 function state() {
-  return Promise.all([readMeta(), copy()]).then(function (got) {
+  return Promise.all([readMeta(), copy(), audioState()]).then(function (got) {
     var meta = got[0], c = got[1], m = c && c.manifest;
     var mine = m ? (m.translations || []).filter(function (t) { return c.kept.indexOf(t.key) >= 0; }) : [];
     var sum = function (k) { return mine.reduce(function (n, t) { return n + t[k]; }, m[k]); };
@@ -292,7 +547,7 @@ function state() {
                     return { key: t.key, bytes: t.bytes, raw: t.raw };
                   }) } : null,
       latest: meta.latest || null, checked: meta.checked || 0, busy: busy, error: meta.error || null,
-      words: meta.error && meta.words || null
+      words: meta.error && meta.words || null, audio: got[2]
     };
   });
 }
@@ -412,10 +667,7 @@ function download(want) {
             gz = got;
             return unpack(new Response(gz)).arrayBuffer();
           }).then(function (data) {
-            return crypto.subtle.digest('SHA-256', data).then(function (d) {
-              var h = Array.prototype.map.call(new Uint8Array(d), function (b) {
-                return (b < 16 ? '0' : '') + b.toString(16);
-              }).join('').slice(0, 16);
+            return hashOf(data).then(function (h) {
               if (h !== x.hash) throw stopped(T.k('{x} arrived damaged'), { x: x.name });
               return target.put(key(x.hash), new Response(gz));
             });
@@ -448,6 +700,7 @@ function download(want) {
       }).then(function () {
         var was = held;
         held = null;
+        lists = {};
         if (was) was.then(function (c) { if (c && c.db) c.db.then(function (d) { d.db.close(); }, function () {}); });
         return caches.keys().then(function (ks) {
           return Promise.all(ks.filter(function (k) { return k.indexOf(COPY) === 0 && k !== COPY + m.build; })
@@ -479,6 +732,7 @@ function drop(k) {
       meta.checked = 0;                // the next check asks again, without it
     }).then(function () {
       held = null;
+      lists = {};
       var t = c && (c.manifest.translations || []).filter(function (x) { return x.key === k; })[0];
       if (!t) return;
       var keep = {};
@@ -495,22 +749,30 @@ function drop(k) {
 function remove() {
   held = null;
   return caches.keys().then(function (ks) {
-    return Promise.all(ks.filter(function (k) { return k === META || k === ENGINE || k.indexOf(COPY) === 0; })
+    return Promise.all(ks.filter(function (k) {
+      return k === META || k === ENGINE || k.indexOf(COPY) === 0 || k.indexOf(AUDIO) === 0;
+    })
                          .map(function (k) { return caches.delete(k); }));
   });
 }
 
-// offline.js asks: {cmd: 'state' | 'check' | 'get' | 'drop' | 'remove', force,
-// tr}, and the answer, the state, comes back on the message's port.  `get`
-// may name the translations to keep, `tr`, a list of their keys, and `drop`
-// names the one to let go.  A check's says too
-// whether it reached the site: `reached` true or false, or none where it did
-// not ask, or failed otherwise (a 404: the site is there, with no copy).
+// offline.js asks: {cmd: 'state' | 'check' | 'get' | 'drop' | 'remove' |
+// 'keep' | 'unkeep' | 'stop', force, tr, voice, papers}, and the answer, the
+// state, comes back on the message's port.  `get` may name the translations
+// to keep, `tr`, a list of their keys, and `drop` names the one to let go.
+// `keep` names a voice and its papers to keep, or nothing, to fetch the next
+// file of the queue; `unkeep` a voice and papers to let go.  A check's says
+// too whether it reached the site: `reached` true or false, or none where it
+// did not ask, or failed otherwise (a 404: the site is there, with no copy).
 self.addEventListener('message', function (e) {
   var cmd = e.data && e.data.cmd, port = e.ports && e.ports[0];
-  var tr = e.data && e.data.tr;
+  var tr = e.data && e.data.tr, voice = e.data && e.data.voice, ns = e.data && e.data.papers;
+  ns = Array.isArray(ns) ? ns.map(Number).filter(function (n) { return Number.isInteger(n) && n >= 0; }) : [];
   var p = cmd === 'get' ? download(Array.isArray(tr) ? tr.filter(function (k) { return typeof k === 'string'; }) : undefined)
         : cmd === 'drop' ? drop(String(tr))
+        : cmd === 'keep' ? (voice ? keep(String(voice), ns) : keepOne()).then(state)
+        : cmd === 'unkeep' ? unkeep(String(voice), ns).then(state)
+        : cmd === 'stop' ? stopAudio(voice ? String(voice) : null, ns).then(state)
         : cmd === 'check' ? check(!!e.data.force).then(function (asked) {
             return state().then(function (s) { if (asked) s.reached = true; return s; });
           }, function (err) {

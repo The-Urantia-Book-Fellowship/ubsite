@@ -297,6 +297,11 @@ class Counter:
         elif path.startswith("/audio/"):
             if status not in (200, 206):
                 return
+            # A file fetched to keep the recording offline (sw.js, X-UB-Fetch:
+            # keep) is not a listen; played from the device after, it never
+            # reaches here (2026-11-04).
+            if dict(scope["headers"]).get(b"x-ub-fetch", b"") == b"keep":
+                return
             _, _, voice, name = path.split("/", 3)
             kind, rest = "listen", (voice, name)
         elif path.startswith("/speech/"):

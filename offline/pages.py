@@ -280,6 +280,20 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
             chunks.setdefault(f"speech-{p // SPOKEN}", {})[f"{p}:{s}"] = got.text
             spoken += 1
 
+    # The recordings a reader may keep, a paper, a part or a voice at a time
+    # (sw.js, offline.js): each voice's files by paper, as the server sends it
+    # (app.py offline_audio_list), one chunk to a voice, so that the tab draws
+    # its tree offline and the worker keeps papers by it with no network.  The
+    # files themselves are never in the copy.
+    from ubsite import app as A
+    voices = [v["key"] for v in A.voices()]
+    for key in voices:
+        got = site.get(f"/offline/audio/{key}.json")
+        if got.status != 200 or not got.headers.get("content-type", "").startswith("application/json"):
+            raise Shape(f"/offline/audio/{key}.json answered {got.status}")
+        expect[f"/offline/audio/{key}.json"] = sha(got.text)
+        chunks[f"audio-{key}"] = {"json": got.text}
+
     # The translations, each apart: a section's fragment as the server sends it
     # is the frame around every translation's headings, then every one's
     # paragraphs, in Settings' order, and each translation keeps its two
@@ -436,6 +450,8 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         "papers": {str(p): secs for p, secs in u["papers"].items()},
         "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
         "misc": u["misc"], "quiz": u["quiz"],
+        # The voices whose lists the copy holds (audio-<key>), in Settings' order.
+        "audio": voices,
         # What /tr/ is made of offline: the fragment's two ends, and each
         # translation in Settings' order with the sections it has, by paper,
         # and its names and language, which its list among a search's results
@@ -449,6 +465,6 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
               "whole": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
               "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
-              "pages": len(expect) - spoken - fragments - tocs - tr_spoken, "spoken": spoken,
-              "fragments": fragments, "tr_spoken": tr_spoken}
+              "pages": len(expect) - spoken - fragments - tocs - tr_spoken - len(voices), "spoken": spoken,
+              "fragments": fragments, "tr_spoken": tr_spoken, "recordings": len(voices)}
     return chunks, expect, counts, {k: c for k, c in trs.items() if c}

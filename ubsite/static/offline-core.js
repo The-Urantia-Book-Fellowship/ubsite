@@ -159,6 +159,15 @@
                            ds.map(function (d) { return d[at][1]; }).join('') + f[1]);
         } };
     }
+    if ((m = /^\/offline\/audio\/([a-z0-9-]+)\.json$/.exec(path))) {
+      // A recording's files by paper (app.py offline_audio_list), which the
+      // Offline tab draws its tree from and the worker keeps papers by
+      // (sw.js): one chunk to a voice.  A copy made before 2026-11-04 has
+      // none, and leaves the network's failure standing.
+      if (!sh.audio) return null;
+      if (sh.audio.indexOf(m[1]) < 0) return { res: text(404, 'No such recording.\n') };
+      return { chunk: 'audio-' + m[1], make: function (d) { return { status: 200, type: 'application/json', body: d.json }; } };
+    }
     if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$|quiz\/board\/)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
     // A copy made before 2026-10-24 does not keep it.
     if (path === '/api') return { res: away(sh, T('The page about the text API is read online.')) };

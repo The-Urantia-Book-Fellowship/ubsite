@@ -816,14 +816,22 @@ def engine(name: str) -> tuple[bytes, str]:
     return _engine(name, (ROOT / "vendor" / "sqlite-wasm" / name).stat().st_mtime_ns)
 
 
-def _etagged(request: Request, body: bytes, media_type: str, salt: str = "", **headers) -> Response:
+def _etagged(request: Request, body: bytes, media_type: str, salt: str = "", gz: bool = False,
+             **headers) -> Response:
     """`body`, or a bodiless 304 when the browser holds it already.  A browser
     with Work offline on asks again for the worker and the scripts it imports
-    after every page it loads, to see whether the worker has changed."""
+    after every page it loads, to see whether the worker has changed.  With
+    `gz`, gzipped where the browser takes it, the tag the body's own: nginx
+    compresses only under /static/ (deploy/ubsite.nginx)."""
     tag = '"' + hashlib.sha256(body).hexdigest()[:16] + salt + '"'
     headers = {"ETag": tag, "Cache-Control": "no-cache", **headers}
+    if gz:
+        headers["Vary"] = "Accept-Encoding"
     if tag in request.headers.get("if-none-match", ""):
         return Response(status_code=304, headers=headers)
+    if gz and "gzip" in request.headers.get("accept-encoding", ""):
+        return Response(gzip.compress(body, 6, mtime=0), media_type=media_type,
+                        headers={**headers, "Content-Encoding": "gzip"})
     return Response(body, media_type=media_type, headers=headers)
 
 
@@ -864,6 +872,59 @@ def offline_manifest(request: Request):
     except OSError:
         return Response("No offline copy has been built.\n", status_code=404, media_type="text/plain")
     return _etagged(request, body, "application/json")
+
+
+@functools.lru_cache(maxsize=8)
+def _audio_list(key: str, mtime_ns: int) -> bytes | None:
+    """A recording's files by paper, for keeping it offline (sw.js, offline.js):
+    each file's name under /audio/<key>/, its size and the head of its
+    SHA-256, as the copy's chunks are hashed, so that the worker can hold each
+    to the list; each paper's and part's size and length, and the voice's own.
+    A file is heard in one paper: a recording of part of the book lists the
+    papers it has, and the parts that have any.  Made once per database, and
+    the same bytes from the same rows (CLAUDE.md trap 29)."""
+    con = db()
+    src = con.execute("SELECT id, key, label, kind, credit, credit_url FROM audio_source WHERE key = ?",
+                      (key,)).fetchone()
+    if src is None:
+        return None
+    by_paper: dict[int, list] = {}
+    for r in con.execute(
+            "SELECT f.name, f.bytes, f.duration_ms, f.sha256, MIN(sec.paper_n) AS paper,"
+            " COUNT(DISTINCT sec.paper_n) AS papers"
+            " FROM audio_file f JOIN audio_segment g ON g.file_id = f.id JOIN section sec ON sec.id = g.section_id"
+            " WHERE f.source_id = ? GROUP BY f.id ORDER BY paper, f.name", (src["id"],)):
+        if r["papers"] != 1:
+            raise RuntimeError(f"audio {key}: {r['name']} is heard in {r['papers']} papers")
+        by_paper.setdefault(r["paper"], []).append(r)
+    titles = {r["n"]: (r["title"], r["part_n"] or 1) for r in con.execute("SELECT n, title, part_n FROM paper")}
+    papers = [{"n": n, "title": titles[n][0], "part": titles[n][1],
+               "bytes": sum(f["bytes"] for f in fs), "seconds": round(sum(f["duration_ms"] for f in fs) / 1000),
+               "files": [[f["name"], f["bytes"], f["sha256"][:16]] for f in fs]}
+              for n, fs in sorted(by_paper.items())]
+    parts = []
+    for p in con.execute("SELECT n, title, first_paper, last_paper FROM part ORDER BY n"):
+        first = 0 if p["n"] == 1 else p["first_paper"]       # the Foreword with Part I
+        mine = [x for x in papers if first <= x["n"] <= p["last_paper"]]
+        if mine:
+            parts.append({"n": p["n"], "title": p["title"], "first": first, "last": p["last_paper"],
+                          "papers": len(mine), "of": p["last_paper"] - first + 1,
+                          "bytes": sum(x["bytes"] for x in mine), "seconds": sum(x["seconds"] for x in mine)})
+    data = {"key": key, "label": src["label"], "kind": src["kind"], "credit": src["credit"],
+            "credit_url": src["credit_url"], "bytes": sum(x["bytes"] for x in papers),
+            "seconds": sum(x["seconds"] for x in papers), "parts": parts, "papers": papers}
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()
+
+
+@app.get("/offline/audio/{key}.json", include_in_schema=False)
+def offline_audio_list(request: Request, key: str):
+    """A recording's files by paper (_audio_list), which Settings' Offline tab
+    draws its tree from and the worker keeps papers by; the copy holds it as
+    the chunk audio-<key> (offline/pages.py), so the tab draws offline too."""
+    body = _audio_list(key, DB.stat().st_mtime_ns) if re.fullmatch(r"[a-z0-9-]+", key) else None
+    if body is None:
+        return Response("No such recording.\n", status_code=404, media_type="text/plain")
+    return _etagged(request, body, "application/json", gz=True)
 
 
 @app.get("/offline/c/{name}", include_in_schema=False)

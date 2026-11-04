@@ -199,7 +199,7 @@ pages       = 10609      # 1,626 sections, 4,735 headwords, 27 index letters, 20
 paths       = 3878       # 2,057 headwords in book order, 1,821 of them by theme too (1,820 until
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40)
 spoken      = 1626       # one to a section
-chunks      = 418        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
+chunks      = 419        # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
                          # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages;
                          # 417 since the interface in Russian too (2026-10-25): the scripts'
                          # words, /l10n.js, EB Garamond's Cyrillic, two faces and their licence,
@@ -208,7 +208,9 @@ chunks      = 418        # 396 with the SBL fonts (2026-10-19); 400 since every 
                          # chunk of pages, and quiz.js; 417 since the paragraph's reference
                          # is text, not a link (2026-10-31): 30 bytes fewer in each of 14,586
                          # paragraphs, two chunks fewer of pages; 418 since 2026-11-01: the
-                         # reading paths under V take a chunk more (read-V-1)
+                         # reading paths under V take a chunk more (read-V-1); 419 since
+                         # 2026-11-04: each recording's list of files by paper, audio-mh, for
+                         # keeping it offline (one chunk to a voice)
 download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement; 48.3 on 2026-10-30; 47.9 on 2026-10-31 and 2026-11-01
 raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25); 224.9 on 2026-10-30; 223.4 on 2026-10-31; 223.1 on 2026-11-01
 

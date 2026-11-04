@@ -46,7 +46,7 @@
 (function () {
   var panel = document.querySelector('dialog.settings .panel.offline'), icon = document.querySelector('.top .offline');
   if (!panel || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
-  window.ubOfflineUI = true;
+  window.ubOfflineUI = {};
   var sw = navigator.serviceWorker, line = panel.querySelector('.offcopy .state'),
       copyBox = panel.querySelector('.offcopy input'), inst = panel.querySelector('.install'), kept = false;
   // The interface's words (ubsite/l10n.js): what the tab says is HTML in both
@@ -57,6 +57,12 @@
   // site writes every date in words (Tigran, 2026-10-18); in Russian «44,8 МБ»
   // and «18 октября».  Each in both languages, for T().
   function mb(n) { return T.tr('{x} MB', { x: T.dec(Math.max(0.1, n / 1e6).toFixed(1)) }); }
+  // A recording's sizes: a paper's in whole megabytes, a part's or a voice's in
+  // gigabytes to two places, as a phone's own settings count them (decimal).
+  function mbw(n) { return T.tr('{x} MB', { x: Math.round(n / 1e6) }); }
+  function gb(n) { return T.tr('{x} GB', { x: T.dec((n / 1e9).toFixed(2)) }); }
+  function size(n) { return n >= 1e9 ? gb(n) : n >= 1e7 ? mbw(n) : mb(n); }
+  function hours(sec) { return T.tr('{h} h', { h: Math.round(sec / 3600) }); }
   function day(iso) { return T.date(iso, false); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
   // The index turned off in Settings: what the tab says of the copy leaves it
@@ -110,6 +116,7 @@
     last = s;
     watch(s);
     trs(s);
+    recShow(s);
     kept = !!s && !s.removed;
     // The copy's tick: ticked while a copy is kept or fetched, and not to be
     // changed while a download runs, nor offline: none can be fetched then,
@@ -149,8 +156,11 @@
       var at = { d: day(have.made), t: day(have.text.date), i: day(have.index.date), s: mb(have.bytes) };
       line.innerHTML = (noIndex() ? T('Up to date: kept as the site was on {d}, with the text of {t}, {s} in this browser.', at)
                                   : T('Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser.', at)) +
-                       ' ' + T('Without a connection, the site reads from it by itself.');
-      mark('kept');
+                       ' ' + T('Whenever the server cannot be reached, online or not, the site reads from it by itself.');
+      // A recording downloading shows on the cloud as the copy's download does.
+      var rb = s.audio && s.audio.busy;
+      mark(rb ? 'busy' : 'kept', rb ? T.tr('Downloading {v}: Paper {n}, {a} of {b}',
+        { v: recName(rb.v), n: rb.n, a: mbw(rb.done), b: mbw(rb.total) }) : null);
     }
   }
   // The translations: each one's tick what the copy keeps or is fetching, and
@@ -181,7 +191,28 @@
     var sig = mine.join(' ');
     if (trSig !== null && sig !== trSig) document.dispatchEvent(new Event('ub:trkept'));
     trSig = sig;
+    trFold();
   }
+  // Those the reader shows beside the text (Settings' Translations tab) stand
+  // first; the rest fold away under a line that counts them, so that the tab
+  // stays short as the Foundation's languages come (Tigran, 2026-11-04).  A
+  // reader may still keep one it does not show.
+  var trMain = trBox.querySelector('ul.offtrs'), trMore = trBox.querySelector('.offmore'),
+      trOrder = Array.prototype.slice.call(trBox.querySelectorAll('.offtrs li'));
+  function trFold() {
+    var shown = window.ubSettings ? String(window.ubSettings.get().translations || '').split(' ') : [];
+    var others = trOrder.filter(function (li) { return shown.indexOf(li.querySelector('input').value) < 0; });
+    trOrder.forEach(function (li) {
+      var into = others.indexOf(li) >= 0 ? trMore.querySelector('ul') : trMain;
+      if (li.parentNode !== into) into.appendChild(li);
+    });
+    trMore.hidden = !others.length;
+    trMore.querySelector('summary .w').innerHTML = others.length === trOrder.length
+      ? T('All translations · {n}', { n: others.length }) : T('Other translations · {n}', { n: others.length });
+  }
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail && ev.detail.key === 'translations') trFold();
+  });
   // The copy's tick: ticked, the worker is registered and fetches the copy
   // (on); unticked, the copy is removed and the worker unregistered (off).  A
   // translation's tick: the copy's translations and this one, fetched now,
@@ -213,7 +244,8 @@
   var quiet = null;
   function watch(s) {
     clearTimeout(quiet);
-    if (s && s.busy) quiet = setTimeout(function () { ask('state').then(show); }, 20000);
+    if (s && (s.busy || (s.audio && s.audio.queue.length)))
+      quiet = setTimeout(function () { pumping = false; ask('state').then(show); }, 20000);
   }
   // Before there is a copy: what it would cost, in the tick's hint (base.html,
   // offline:copyhint), and each translation's size, from the site's manifest;
@@ -359,12 +391,16 @@
   // translations `trs` where a translation's tick asked for it.  Said at once,
   // as an update is, so that the tick does not look as if it did nothing.  A
   // first copy reloads nothing.
-  function on(trs) {
+  // `rec`, a recording's papers asked for before any copy was kept, {voice,
+  // papers}, go on its queue once the copy is in (2026-11-04).
+  function on(trs, rec) {
     going = true;
     show({ have: null, latest: null, busy: { done: 0, total: 0, adding: trs || [], copy: true }, error: null, removed: false });
     sw.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then(function () {
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
       return get(false, null, trs);
+    }).then(function () {
+      if (rec && last && last.have) return ask('keep', rec).then(show);
     }).catch(function (e) {
       show(null);
       line.innerHTML = T('This browser would not keep it: {e}', { e: e && e.message || e });
@@ -380,8 +416,10 @@
   // nothing is done.  A first download that stopped keeps nothing whole, and
   // is let go without asking.
   function drop() {
-    var have = last && !last.removed && last.have, p = have && { s: mb(have.bytes) };
-    if (have && !window.confirm(have.tr && have.tr.length ? T.text('offline:dropall', p) : T.text('offline:drop', p))) {
+    var have = last && !last.removed && last.have, rec = recBytes(last && last.audio),
+        p = have && { s: rec ? size(have.bytes + rec) : mb(have.bytes) };
+    if (have && !window.confirm(rec ? T.text('offline:droprec', p)
+                                    : have.tr && have.tr.length ? T.text('offline:dropall', p) : T.text('offline:drop', p))) {
       copyBox.checked = true;
       return;
     }
@@ -467,6 +505,233 @@
       window.ubInstall.userChoice.then(function () { window.ubInstall = null; installed(); });
     }
   });
+  // ---- The recordings kept (sw.js, The recordings kept; Tigran, 2026-11-04) --
+  // A fold to each voice the database carries (base.html .offrec), which is its
+  // whole-book row; opened, its parts, each folded to its papers, drawn from
+  // the voice's list, /offline/audio/<key>.json, when it first opens.  One
+  // control to a row, of four states: ↓ to keep, a ring while it downloads
+  // (its progress --p; tap to stop), ✓ kept (tap to let go, a paper at once,
+  // a part or a voice after asking), ↓ over the ring of a part kept.  What is
+  // kept is the worker's word (state.audio): the papers whole, those in part,
+  // the queue, the file under way.  The page pumps the download, one file a
+  // message, while the queue is not empty and the page is online (pump), and
+  // keeps the screen on meanwhile (hold).
+  var recBox = panel.querySelector('.offrec'), recLists = {}, recIdx = {}, room = null, pumping = false;
+  var ROMAN = ['', 'I', 'II', 'III', 'IV'];
+  var ICONS = {
+    none: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v7.5M4.5 7.5L8 11l3.5-3.5M3.5 13.5h9"/></svg>',
+    busy: '<svg viewBox="0 0 16 16" aria-hidden="true"><path class="f" d="M5 5h6v6H5z"/></svg>',
+    kept: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-6.5"/></svg>'
+  };
+  ICONS.some = ICONS.none;
+  function recList(key) {
+    if (recLists[key]) return recLists[key];
+    var p = recLists[key] = fetch('/offline/audio/' + key + '.json', { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function (list) {
+      list.byN = {};
+      list.papers.forEach(function (x) { list.byN[x.n] = x; });
+      recIdx[key] = list;
+      return list;
+    });
+    p.catch(function () { delete recLists[key]; });
+    return p;
+  }
+  function recVoice(key) { return recBox.querySelector('.recvoice[data-key="' + key + '"]'); }
+  // A voice's name, in each language where ru.toml has it (app.py puts the
+  // voices' names in l10n.js), from its row until its list has come.
+  function recName(key) {
+    var list = recIdx[key], el = recVoice(key), en = el && el.querySelector('.rname x-en');
+    var s = list ? list.label : en ? en.textContent : key;
+    return T.has(s) ? T.tr(s) : T.same(s);
+  }
+  function recBytes(a) {
+    var n = 0;
+    if (a && a.voices) Object.keys(a.voices).forEach(function (k) { n += a.voices[k].bytes || 0; });
+    return n;
+  }
+  // The voice's list fetched and its parts drawn, once.
+  function ensure(key) {
+    return recList(key).then(function (list) {
+      var det = recVoice(key);
+      if (det && !det.dataset.drawn) {
+        det.dataset.drawn = '1';
+        det.querySelector(':scope > summary .rmeta').innerHTML = T(hours(list.seconds)) + ' · ' + T(size(list.bytes));
+        det.querySelector('.parts').innerHTML = list.parts.map(function (pt) {
+          var papers = list.papers.filter(function (x) { return pt.first <= x.n && x.n <= pt.last; });
+          return '<details class="recpart" data-first="' + pt.first + '" data-last="' + pt.last + '"><summary>' +
+            '<span class="rfold"></span><span class="w"><span class="rname">' + T('Part {r}', { r: ROMAN[pt.n] || pt.n }) +
+            '<span class="rpt"> · ' + esc(pt.title) + '</span></span><small class="rst"></small></span>' +
+            '<span class="rmeta">' + T(hours(pt.seconds)) + ' · ' + T(size(pt.bytes)) + '</span>' +
+            '<button type="button" class="keep" data-st="none"></button></summary>' +
+            papers.map(function (x) {
+              return '<div class="recrow" data-n="' + x.n + '"><span class="rpn">' + x.n + '</span>' +
+                '<span class="rname" title="' + esc(x.title) + '">' + esc(x.title) + '</span>' +
+                '<span class="rmeta"></span><button type="button" class="keep" data-st="none"></button></div>';
+            }).join('') + '</details>';
+        }).join('');
+        recShow(last);
+      }
+      return list;
+    });
+  }
+  // What a row's papers are, against the state: all kept, any on the queue,
+  // some kept, none; and the bytes held of them.
+  function stateOf(ns, v, queued) {
+    var kept = 0, some = 0, q = 0;
+    ns.forEach(function (n) {
+      if (v.kept.indexOf(n) >= 0) kept++;
+      else { if (v.partial[n]) some++; if (queued[n]) q++; }
+    });
+    return q ? 'busy' : ns.length && kept === ns.length ? 'kept' : kept || some ? 'some' : 'none';
+  }
+  function heldOf(ns, v, busy, key, byN) {
+    var b = 0;
+    ns.forEach(function (n) {
+      if (busy && busy.v === key && busy.n === n) b += busy.done;
+      else if (v.kept.indexOf(n) >= 0) b += byN[n].bytes;
+      else if (v.partial[n]) b += v.partial[n];
+    });
+    return b;
+  }
+  // A control's state, its ring's progress, and its words.
+  function setKeep(btn, st, held, total, what) {
+    btn.dataset.st = st;
+    if (btn.dataset.icon !== st) { btn.dataset.icon = st; btn.innerHTML = ICONS[st]; }
+    btn.style.setProperty('--p', total ? Math.max(0, Math.min(1, held / total)).toFixed(3) : '0');
+    btn.dataset.room = room !== null && st === 'none' && total > room ? 'no' : '';
+    var p = { s: size(total), a: mbw(held), b: mbw(total), n: what.n, r: what.r, v: what.v };
+    var key = st === 'busy' ? T.k('Downloading: {a} of {b}; tap to stop')
+            : st === 'kept' ? T.k('Kept, {s}; tap to let go')
+            : st === 'some' ? T.k('Kept in part, {s}; tap to keep the rest')
+            : what.n !== undefined ? T.k('Keep Paper {n} offline ({s})')
+            : what.r !== undefined ? T.k('Keep Part {r} offline ({s})') : T.k('Keep the whole of {v} offline ({s})');
+    if (st === 'some') p.s = size(held);
+    T.attr(btn, 'title', key, p);
+    T.attr(btn, 'aria-label', key, p);
+  }
+  function recShow(s) {
+    var a = s && !s.removed && s.audio || null, have = s && !s.removed && s.have, on = online();
+    var queue = (a && a.queue) || [], busy = a && a.busy, total = recBytes(a), nolist = false;
+    Array.prototype.forEach.call(recBox.querySelectorAll('.recvoice'), function (det) {
+      var key = det.dataset.key, v = (a && a.voices && a.voices[key]) || { kept: [], partial: {}, bytes: 0 },
+          list = recIdx[key], queued = {};
+      if (v.nolist) nolist = true;
+      queue.forEach(function (q) { if (q.v === key) queued[q.n] = true; });
+      var st = det.querySelector(':scope > summary .rst'), btn = det.querySelector(':scope > summary .keep');
+      if (list) {
+        var all = list.papers.map(function (x) { return x.n; }), vs = stateOf(all, v, queued);
+        st.innerHTML = v.kept.length || Object.keys(v.partial).length
+          ? T('offline:reckept', { n: v.kept.length, t: all.length, s: size(v.bytes) }) : '';
+        setKeep(btn, vs, heldOf(all, v, busy, key, list.byN), list.bytes, { v: recName(key) });
+        Array.prototype.forEach.call(det.querySelectorAll('.recpart'), function (pd) {
+          var ns = all.filter(function (n) { return +pd.dataset.first <= n && n <= +pd.dataset.last; }),
+              pb = ns.reduce(function (t, n) { return t + list.byN[n].bytes; }, 0), ps = stateOf(ns, v, queued),
+              kept = ns.filter(function (n) { return v.kept.indexOf(n) >= 0; }).length,
+              pt = list.parts.filter(function (x) { return x.first === +pd.dataset.first; })[0];
+          pd.querySelector(':scope > summary .rst').innerHTML = ps === 'none' ? ''
+            : T('{a} of {b} papers', { a: kept, b: ns.length });
+          setKeep(pd.querySelector(':scope > summary .keep'), ps, heldOf(ns, v, busy, key, list.byN), pb,
+                  { r: ROMAN[pt ? pt.n : 0] || '' });
+        });
+        Array.prototype.forEach.call(det.querySelectorAll('.recrow'), function (row) {
+          var n = +row.dataset.n, x = list.byN[n], rs = stateOf([n], v, queued), hb = heldOf([n], v, busy, key, list.byN);
+          row.querySelector('.rmeta').innerHTML = rs === 'busy' || rs === 'some'
+            ? T('{a} of {b}', { a: Math.round(hb / 1e6), b: mbw(x.bytes) }) : T(mbw(x.bytes));
+          setKeep(row.querySelector('.keep'), rs, hb, x.bytes, { n: n });
+        });
+      } else {
+        st.innerHTML = v.bytes ? T('kept, {s}', { s: size(v.bytes) }) : '';
+        setKeep(btn, Object.keys(queued).length ? 'busy' : v.kept.length || v.bytes ? 'some' : 'none', v.bytes, 0, { v: recName(key) });
+      }
+      // Greyed where nothing can be done: no worker's word yet, offline for
+      // what is not kept, a list the copy lacks (nolist).
+      Array.prototype.forEach.call(det.querySelectorAll('.keep'), function (b) {
+        b.disabled = !s || v.nolist || (!on && (b.dataset.st === 'none' || b.dataset.st === 'some'));
+      });
+    });
+    recBox.querySelector('.recstate').innerHTML = total && room !== null ? T('offline:rechead', { s: size(total), r: size(room) })
+      : total ? T('kept, {s}', { s: size(total) }) : room !== null ? T('Room for about {s} in this browser.', { s: size(room) }) : '';
+    recBox.querySelector('.going').hidden = !queue.length;
+    hold(!!queue.length);
+    var why = recBox.querySelector('.why');
+    why.innerHTML = a && a.error ? T('The download stopped: {e}.', { e: a.words || T.same(a.error) }) +
+                      (on ? ' <button type="button" class="recagain"><span>' + T('Try again') + '</span></button>' : '')
+                  : !on ? T('offline:recoffline') : nolist ? T('offline:nolist') : !have ? T('offline:recwith') : '';
+    why.hidden = !why.innerHTML;
+    document.dispatchEvent(new CustomEvent('ub:audio', { detail: a }));
+    pump(s);
+  }
+  // The next file asked for while the queue is not empty, nothing runs, and
+  // the page is online; the reply, shown, asks for the next.
+  function pump(s) {
+    var a = s && !s.removed && s.audio;
+    if (!a || !a.queue.length || a.busy || s.busy || !online() || pumping) return;
+    pumping = true;
+    ask('keep').then(function (r) { pumping = false; show(r); }, function () { pumping = false; });
+  }
+  // A recording asked for, stopped or let go: a voice and its papers.  With no
+  // copy kept, the copy comes first, as a translation's tick brings it.
+  function recAct(st, key, ns) {
+    var have = last && !last.removed && last.have;
+    if (st === 'busy') return ask('stop', { voice: key, papers: ns }).then(show);
+    if (st === 'kept') {
+      var list = recIdx[key], b = ns.reduce(function (t, n) { return t + (list && list.byN[n] ? list.byN[n].bytes : 0); }, 0);
+      if (ns.length > 1 && !window.confirm(T.text('offline:recdrop', { n: ns.length, v: recName(key), s: size(b) }))) return Promise.resolve();
+      return ask('unkeep', { voice: key, papers: ns }).then(show);
+    }
+    if (!have) return Promise.resolve(on(null, { voice: key, papers: ns }));
+    return ask('keep', { voice: key, papers: ns }).then(function (r) { show(r); estimate(); });
+  }
+  window.ubOfflineUI.rec = function (st, key, n) { return ensure(key).then(function () { return recAct(st, key, [n]); }); };
+  recBox.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('button');
+    if (!b) return;
+    if (b.classList.contains('recagain')) { pumping = false; pump(last); return; }
+    if (!b.classList.contains('keep')) return;
+    ev.preventDefault();
+    ev.stopPropagation();                        // not the fold's
+    if (b.disabled) return;
+    var det = b.closest('.recvoice'), key = det.dataset.key, row = b.closest('.recrow'), part = b.closest('.recpart');
+    ensure(key).then(function (list) {
+      var ns = row ? [+row.dataset.n]
+             : list.papers.map(function (x) { return x.n; }).filter(function (n) {
+                 return !part || (+part.dataset.first <= n && n <= +part.dataset.last); });
+      return recAct(b.dataset.st, key, ns);
+    });
+  });
+  // A voice opened draws its parts.
+  recBox.addEventListener('toggle', function (ev) {
+    var det = ev.target;
+    if (det.classList && det.classList.contains('recvoice') && det.open) ensure(det.dataset.key).catch(function () {});
+  }, true);
+  // How much room this browser has, by its own estimate, advisory: Safari's
+  // grows as it is asked.  A row larger than it is drawn faint, not disabled;
+  // the worker's refused put is the word that counts.
+  function estimate() {
+    if (!navigator.storage || !navigator.storage.estimate) return;
+    navigator.storage.estimate().then(function (e) {
+      room = Math.max(0, (e.quota || 0) - (e.usage || 0));
+      if (last) recShow(last);
+    }, function () {});
+  }
+  estimate();
+  // The screen stays on while the recordings download: a phone that locks it
+  // stops the page, and with it the pump (as listen.js holds one for speech).
+  var lock = null;
+  function hold(on) {
+    if (on && !lock && navigator.wakeLock && document.visibilityState === 'visible') {
+      var p = lock = navigator.wakeLock.request('screen');
+      p.then(function (l) { l.addEventListener('release', function () { if (lock === p) lock = null; }); },
+             function () { if (lock === p) lock = null; });
+    } else if (!on && lock) {
+      var q = lock;
+      lock = null;
+      q.then(function (l) { l.release(); }, function () {});
+    }
+  }
+
   // The worker's word, as a download goes on.
   sw.addEventListener('message', function (e) { if (e.data && e.data.ubOffline) show(e.data.ubOffline); });
 

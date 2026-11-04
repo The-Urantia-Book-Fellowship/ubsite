@@ -140,16 +140,46 @@
 # The Offline tab (base.html, offline.js), the cloud's menu until 2026-10-30:
 # the copy, a tick, its size filled in by offline.js (the span); then the
 # translations kept in the copy, each a download of its own (2026-10-26).
-"Offline copy" = "Офлайн-копия"
-"offline:copyhint" = { en = 'the whole site but the recordings<span class="size"></span>, kept in this browser and updated by itself whenever the site is open and online', ru = 'весь сайт, кроме записей чтения<span class="size"></span>; хранится в этом браузере и обновляется сама, когда сайт открыт и есть сеть' }
+"Base" = "База"
+"offline:copyhint" = { en = 'the whole site<span class="size"></span>, kept in this browser and updated by itself whenever the site is open and online', ru = 'весь сайт<span class="size"></span>; хранится в этом браузере и обновляется сама, когда сайт открыт и есть сеть' }
 "offline:about" = { en = ", about {s}", ru = ", около {s}" }
-"Translations in the offline copy" = "Переводы в офлайн-копии"
-"offline:tr" = { en = "Each is a download of its own, kept with the copy and updated with it.", ru = "Каждый загружается отдельно, хранится вместе с копией и обновляется вместе с ней." }
+"Translations" = "Переводы"
 "offline:trwith" = { en = "Ticking one downloads the offline copy with it.", ru = "Если отметить перевод, вместе с ним загрузится и офлайн-копия." }
 "offline:trstale" = { en = "The offline copy is out of date: downloading a translation updates it too.", ru = "Офлайн-копия устарела: загрузка перевода обновит и её." }
-"offline:dropall" = { en = "This deletes the offline copy from this browser, and with it every translation kept in it. To have them again, you would tick Offline copy and each translation again, and download it all anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера, а с ней и все сохранённые в ней переводы. Чтобы вернуть их, придётся снова отметить «Офлайн-копия» и каждый перевод и заново загрузить всё — около {s}." }
-"offline:drop" = { en = "This deletes the offline copy from this browser. To have it again, you would tick Offline copy again, and download it anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера. Чтобы вернуть её, придётся снова отметить «Офлайн-копия» и заново загрузить её — около {s}." }
+"offline:dropall" = { en = "This deletes the offline copy from this browser, and with it every translation kept in it. To have them again, you would tick Base and each translation again, and download it all anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера, а с ней и все сохранённые в ней переводы. Чтобы вернуть их, придётся снова отметить «База» и каждый перевод и заново загрузить всё — около {s}." }
+"offline:drop" = { en = "This deletes the offline copy from this browser. To have it again, you would tick Base again, and download it anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера. Чтобы вернуть её, придётся снова отметить «База» и заново загрузить её — около {s}." }
+"offline:droprec" = { en = "This deletes the offline copy from this browser, and with it every translation and recording kept in it, {s} in all. To have them again, you would tick Base and each of them again, and download it all anew.", ru = "Офлайн-копия будет удалена из этого браузера, а с ней все сохранённые переводы и записи чтения — всего {s}. Чтобы вернуть их, придётся снова отметить «База» и каждый из них и заново загрузить всё." }
 "offline:troffline" = { en = "Offline, a translation can be let go, and downloaded once online.", ru = "Без сети перевод можно удалить, а загрузить — когда сеть появится." }
+"Other translations · {n}" = "Другие переводы · {n}"
+"All translations · {n}" = "Все переводы · {n}"
+# The recordings kept for listening offline (2026-11-04; base.html .offrec,
+# offline.js, sw.js The recordings kept, the player's ↓ in listen.js).
+"Recordings" = "Записи чтения"
+"offline:going" = { en = "Keep the site open while it downloads; the screen stays on.", ru = "Не закрывайте сайт, пока идёт загрузка; экран не погаснет." }
+"offline:rechead" = { en = "{s} kept in this browser; room for about {r} more.", ru = "Сохранено {s}; места ещё примерно на {r}." }
+"Room for about {s} in this browser." = "В этом браузере есть место примерно на {s}."
+"offline:reckept" = { en = "{n} of {t} papers kept, {s}", ru = "сохранено документов: {n} из {t}, {s}" }
+"{a} of {b} papers" = "{a} из {b} документов"
+"{a} of {b}" = "{a} из {b}"
+"{h} h" = "{h} ч"
+"{x} GB" = "{x} ГБ"
+"Part {r}" = "Часть {r}"
+"Keep Paper {n} offline ({s})" = "Сохранить Документ {n} ({s})"
+"Keep Part {r} offline ({s})" = "Сохранить часть {r} ({s})"
+"Keep the whole of {v} offline ({s})" = "Сохранить {v} целиком ({s})"
+"Downloading: {a} of {b}; tap to stop" = "Загружается: {a} из {b}; нажмите, чтобы остановить"
+"Kept, {s}; tap to let go" = "Сохранено, {s}; нажмите, чтобы удалить"
+"Kept in part, {s}; tap to keep the rest" = "Сохранено частично, {s}; нажмите, чтобы сохранить остальное"
+"offline:recdrop" = { en = ["This deletes {n} paper of {v} from this browser, {s}. To have it again, you would download it anew.", "This deletes {n} papers of {v} from this browser, {s}. To have them again, you would download them anew."], ru = ["Из этого браузера будет удалён {n} документ ({v}), {s}. Чтобы вернуть его, придётся загрузить его заново.", "Из этого браузера будут удалены {n} документа ({v}), {s}. Чтобы вернуть их, придётся загрузить их заново.", "Из этого браузера будет удалено {n} документов ({v}), {s}. Чтобы вернуть их, придётся загрузить их заново."] }
+"offline:recwith" = { en = "Keeping a recording downloads the offline copy with it.", ru = "Вместе с записью чтения загрузится и офлайн-копия." }
+"offline:recoffline" = { en = "Offline, a recording can be let go, and downloaded once online.", ru = "Без сети запись чтения можно удалить, а загрузить — когда сеть появится." }
+"offline:nolist" = { en = "The offline copy must update before a recording can be kept.", ru = "Чтобы сохранять записи чтения, сначала должна обновиться офлайн-копия." }
+"Downloading {v}: Paper {n}, {a} of {b}" = "Загружается {v}: Документ {n}, {a} из {b}"
+# The player's ↓ (listen.js drawKeep), for the paper being heard.
+"Keep this paper’s recording offline" = "Сохранить запись чтения этого документа"
+"This paper’s recording is kept offline; tap to let go" = "Запись чтения этого документа сохранена; нажмите, чтобы удалить"
+"This paper’s recording is kept in part; tap to keep the rest" = "Запись чтения этого документа сохранена частично; нажмите, чтобы сохранить остальное"
+"This paper’s recording is not kept offline: Settings, in its Offline tab, keeps it. Your browser’s voice can read it." = "Запись чтения этого документа не сохранена: её можно сохранить в Настройках, на вкладке «Офлайн». Голос браузера может его прочитать."
 "kept, {s}" = "сохранён, {s}"
 
 # --- Titles of pages
@@ -352,6 +382,7 @@
 "this browser has an older worker; reload the page and try again" = "в этом браузере старый обработчик; перезагрузите страницу и попробуйте снова"
 "{x} could not be fetched ({s})" = "{x} не удалось загрузить ({s})"
 "{x} arrived damaged" = "{x} пришёл повреждённым"
+"this browser has no room for it ({e})" = "в этом браузере нет для неё места ({e})"
 "Offline" = "Не в сети"
 "Offline: reading the copy kept in this browser" = "Не в сети: читается копия, сохранённая в этом браузере"
 "Online, with a copy kept for working offline" = "В сети; копия для работы без сети сохранена"
@@ -422,7 +453,7 @@
 "An update to the offline copy is waiting ({s})" = "Офлайн-копию можно обновить ({s})"
 "Up to date: kept as the site was on {d}, with the text of {t}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t}; в этом браузере занимает {s}."
 "Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t} и указателем от {i}; в этом браузере занимает {s}."
-"Without a connection, the site reads from it by itself." = "Без сети сайт сам читается из неё."
+"Whenever the server cannot be reached, online or not, the site reads from it by itself." = "Когда сервер недоступен — в сети вы или нет, — сайт сам читает из неё."
 "It can be downloaded only online." = "Загрузить её можно только в сети."
 "This site has no offline copy yet." = "У этого сайта пока нет офлайн-копии."
 "And earlier changes." = "И более ранние изменения."

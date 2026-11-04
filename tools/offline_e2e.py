@@ -178,6 +178,11 @@ SAVES_DATA = """try { if (sessionStorage.getItem('ubSavesData'))
 # An element's words as a reader of English has them: the interface is in the
 # page in Russian too (ubsite/l10n.py), which CSS hides; its textContent has both.
 EN = "(el => { const c = el.cloneNode(true); c.querySelectorAll('x-ru').forEach(x => x.remove()); return c.textContent; })"
+
+
+def en(pg, sel: str) -> str:
+    """The English of an element's words, the Russian stripped (EN)."""
+    return pg.eval_on_selector(sel, EN).strip()
 WATCH = """() => { window.shown = []; sessionStorage.shown = '[]';
   const keep = () => { for (const t of [""" + EN + """(document.querySelector('dialog.settings .offcopy .state')),
                                         document.querySelector('.top .offline').title])
@@ -205,6 +210,14 @@ def update(pg, pressed=None, timeout: int = 60000) -> None:
     wait_state(pg, "t.startsWith('Up to date')")
 
 
+def unfold(pg) -> None:
+    """The translations not shown beside the text fold away (base.html
+    .offmore, 2026-11-04): opened, so that their ticks can be read and tapped."""
+    if pg.locator("dialog.settings .offmore:not([hidden])").count() and \
+            not pg.evaluate("document.querySelector('dialog.settings .offmore').open"):
+        pg.click("dialog.settings .offmore > summary")
+
+
 def offline_tab(pg) -> None:
     """Open Settings at its Offline tab, which keeps the copy and the
     translations in it (base.html .offcopy, .offtr), unless it is open."""
@@ -212,6 +225,7 @@ def offline_tab(pg) -> None:
         pg.click(".gear")
     pg.click("#set-t-offline")
     pg.wait_for_selector("dialog.settings .offcopy", state="visible")
+    unfold(pg)
 
 
 # The copy's tick: unticked and to be ticked, as with none kept.
@@ -274,13 +288,16 @@ def main() -> int:
 
 def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
     with sync_playwright() as p:
-        b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True)
+        b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True,
+                              args=["--autoplay-policy=no-user-gesture-required"])
         ctx = b.new_context()
         ctx.add_init_script(SAYS_OFFLINE)
         ctx.add_init_script(SAVES_DATA)
         pg = ctx.new_page()
         accept = lambda d: d.accept()
         pg.on("dialog", accept)
+        asked = []
+        pg.on("dialog", lambda d: asked.append(d.message))
         errors = []
         pg.on("pageerror", lambda e: errors.append(str(e)))
 
@@ -297,6 +314,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(not pg.locator("#offmenu").count(), "the icon has no menu")
         pg.click(ICON)
         pg.wait_for_selector("dialog.settings .offcopy", state="visible")
+        unfold(pg)
         ok(pg.get_attribute("#set-t-offline", "aria-selected") == "true", "a tap on it opens Settings at the Offline tab")
         ok(pg.inner_text("dialog.settings .net .host") == "localhost:8131"
            and pg.inner_text("dialog.settings .net").lower().startswith("online"),
@@ -470,10 +488,64 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
             with urllib.request.urlopen(BASE + u) as r:
                 want[u] = r.read()
 
+        print("Keeping a recording")
+        # Paper 161, the smallest: four files, 16.6 MB, from this machine's
+        # copy of the DVD (sources.toml audio.mh), kept in a cache of its own,
+        # one file a message (sw.js, The recordings kept).
+        pg.goto(BASE + "/101:4")
+        offline_tab(pg)
+        pg.click("dialog.settings .recvoice[data-key='mh'] > summary .rname")
+        pg.wait_for_selector("dialog.settings .recvoice[data-key='mh'] .recpart", timeout=15000)
+        ok(pg.locator("dialog.settings .recpart").count() == 4 and pg.locator("dialog.settings .recrow").count() == 197,
+           "Merritt Horn's reading opens to its four parts and 197 papers")
+        ok(en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rmeta") == "121 h · 6.98 GB",
+           "its row says its hours and size")
+        pg.click("dialog.settings .recpart[data-first='120'] > summary .rname")
+        row = "dialog.settings .recrow[data-n='161'] .keep"
+        ok(pg.get_attribute(row, "data-st") == "none" and pg.get_attribute(row, "title") == "Keep Paper 161 offline (17 MB)",
+           f"Paper 161's row offers to keep it ({pg.get_attribute(row, 'title')!r})")
+        pg.click(row)
+        pg.wait_for_function(f"document.querySelector(\"{row}\").dataset.st === 'kept'", timeout=120000)
+        kept = pg.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.map(k => new URL(k.url).pathname).sort())")
+        ok(kept == [f"/audio/mh/paper161/P161_0{i}.mp3" for i in range(4)], f"its four files are in the cache ({kept})")
+        ok(pg.get_attribute(row, "title") == "Kept, 17 MB; tap to let go"
+           and en(pg, "dialog.settings .recpart[data-first='120'] > summary .rst") == "1 of 77 papers"
+           and en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rst") == "1 of 197 papers kept, 17 MB",
+           "the row, its part and the voice say so")
+        ok(en(pg, "dialog.settings .recstate").startswith("17 MB kept in this browser; room for about"),
+           f"and the block counts it against the browser's room ({en(pg, 'dialog.settings .recstate')!r})")
+        ok(not pg.evaluate("[...document.querySelectorAll('dialog.settings .offtrs li')].length") == 0
+           and pg.get_attribute("dialog.settings .offmore", "hidden") is None,
+           "the translations not shown beside the text fold away under a line")
+        pg.keyboard.press("Escape")
+
         print("Offline")
         pg.reload()
         ok(pg.evaluate("!!navigator.serviceWorker.controller"), "the page is the worker's")
         ctx.set_offline(True)
+        probe = ("async (a) => { try { const r = await fetch(a[0], a[1] ? {headers: {Range: a[1]}} : {});"
+                 " const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-range'), b.byteLength]; }"
+                 " catch (e) { return ['rejected']; } }")
+        f = "/audio/mh/paper161/P161_00.mp3"
+        ok(pg.evaluate(probe, [f, None]) == [200, None, 1163180], "offline, a kept file answers whole")
+        ok(pg.evaluate(probe, [f, "bytes=100-199"]) == [206, "bytes 100-199/1163180", 100]
+           and pg.evaluate(probe, [f, "bytes=0-"]) == [206, "bytes 0-1163179/1163180", 1163180],
+           "a range of it is cut from the cache, 206 with its Content-Range, as a seek asks")
+        ok(pg.evaluate(probe, [f, "bytes=5000000-"]) == [416, "bytes */1163180", 0], "a range past its end is 416")
+        ok(pg.evaluate(probe, ["/audio/mh/paper101/P101_04.mp3", None]) == ["rejected"], "a file not kept fails, as before")
+        pg.goto(BASE + "/161:1")
+        pg.locator("p.t .playp").first.click()
+        pg.wait_for_timeout(4000)
+        ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and not pg.inner_text(".player .who"),
+           f"offline, the kept paper plays ({pg.get_attribute('.player .toggle', 'aria-label')}, {pg.inner_text('.player .who')!r})")
+        ok(pg.get_attribute(".player .keep", "data-st") == "kept", "and the bar's ↓ shows it kept")
+        pg.click(".player .next")
+        pg.wait_for_timeout(4000)
+        ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and pg.inner_text(".player .at") == "161:1.1"
+           and not pg.inner_text(".player .who"),
+           f"the next paragraph plays on, its seek answered from the cache ({pg.get_attribute('.player .toggle', 'aria-label')},"
+           f" {pg.inner_text('.player .at')!r}, {pg.inner_text('.player .who')!r})")
+        pg.click(".player button.close")
         for u in urls:
             got = pg.evaluate("u => fetch(u).then(r => r.arrayBuffer()).then(b => Array.from(new Uint8Array(b)))", u)
             # The one thing the worker adds: the footer's note of the copy's date,
@@ -522,6 +594,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(i["net"] == "off" and i["have"] == "kept", f"the icon says offline ({i['title']!r})")
         pg.click(ICON)
         pg.wait_for_selector("dialog.settings .offcopy", state="visible")
+        unfold(pg)
         print("  " + pg.inner_text("dialog.settings .net"))
         ok(pg.inner_text("dialog.settings .net").lower().startswith("offline"), "and so does the tab's first line")
         ok(pg.inner_text("dialog.settings .net .host") == "localhost:8131", "and names the site from the copy too")
@@ -630,11 +703,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/101:4")
         pg.locator("p.t .playp").first.click()
         pg.wait_for_function("(document.querySelector('.player .who') || {}).textContent"
-                             " && document.querySelector('.player .who').textContent.includes('connection')",
+                             " && document.querySelector('.player .who').textContent.includes('not kept')",
                              timeout=10000)
         pg.wait_for_timeout(1500)
-        ok("connection" in pg.inner_text(".player .who") and pg.evaluate("!speechSynthesis.speaking"),
-           f"offline, a recording refuses to play, saying why, and the message stays ({pg.inner_text('.player .who')!r})")
+        ok("not kept offline" in pg.inner_text(".player .who") and pg.evaluate("!speechSynthesis.speaking")
+           and pg.get_attribute(".player .keep", "data-st") == "none",
+           f"offline, a recording not kept refuses to play, saying where it is kept, and the message stays ({pg.inner_text('.player .who')!r})")
         ok(pg.inner_text(".player .voice") == "Merritt Horn", "and the bar still names the voice Settings chose")
         pg.click(".player .voice")
         pg.locator(".player .voices [role=group] button,"
@@ -648,6 +722,19 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.evaluate("document.querySelectorAll('nav.rail li.lazy details')[40].open = true")
         pg.wait_for_selector("nav.rail li.lazy details[open] ol a", state="attached", timeout=5000)
         ok(True, "the rail opens another paper from the copy")
+        offline_tab(pg)
+        pg.click("dialog.settings .recvoice[data-key='mh'] > summary .rname")
+        pg.wait_for_selector("dialog.settings .recvoice[data-key='mh'] .recpart", timeout=15000)
+        pg.click("dialog.settings .recpart[data-first='120'] > summary .rname")
+        pg.wait_for_selector("dialog.settings .recrow[data-n='161']", timeout=15000)
+        ok(pg.get_attribute("dialog.settings .recrow[data-n='160'] .keep", "disabled") is not None
+           and pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "disabled") is None,
+           "offline, a paper not kept cannot be asked for, and one kept can be let go")
+        pg.click("dialog.settings .recrow[data-n='161'] .keep")
+        pg.wait_for_function("caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", timeout=10000)
+        ok(pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "data-st") == "none",
+           "let go at once, without asking, its cache goes with its last file")
+        pg.keyboard.press("Escape")
         ok(not errors, f"no script errors ({errors[:2]})")
 
         print("A copy kept unpacked, as before 2026-10-14")
@@ -955,12 +1042,22 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
 
         print("Turning it off")
         ctx.set_offline(False)
+        pg.goto(BASE + "/161:1")
+        pg.locator("p.t .playp").first.click()
+        pg.wait_for_selector(".player .keep[data-st='none']", timeout=10000)
+        pg.click(".player .keep")
+        pg.wait_for_function("document.querySelector('.player .keep').dataset.st === 'kept'", timeout=120000)
+        ok(pg.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.length)") == 4,
+           "the bar's ↓ keeps the paper being heard")
+        pg.click(".player button.close")
         pg.goto(BASE + "/read")
         offline_tab(pg)
         pg.uncheck("dialog.settings .offcopy input")
         pg.wait_for_function(COPY_CLEAR, timeout=10000)
+        ok(asked and "recording" in asked[-1] and "Base" in asked[-1],
+           f"unticking Base asks first, naming the recordings kept too ({(asked or [''])[-1][:70]!r})")
         ok(pg.evaluate("caches.keys().then(k => k.length)") == 0,
-           "unticked, with no question asked, nothing is kept, the translation kept with it")
+           "accepted, nothing is kept: the translation and the recording kept with it")
         ok(icon(pg)["have"] == "none", "and the icon says so")
         ok(pg.evaluate("[...document.querySelectorAll('.offtrs input')].every(i => !i.checked && !i.disabled)"),
            "and the translations are offered again, with the copy")

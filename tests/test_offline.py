@@ -167,9 +167,55 @@ class Pages(unittest.TestCase):
         self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), [])
         self.assertNotIn("autoupdate", settings.defaults())
         self.assertIn('<p class="net"><span class="conn">', fs.group(1))
-        self.assertIn('<input type="checkbox" class="copy" disabled> Offline copy', fs.group(1))
+        self.assertIn('<input type="checkbox" class="copy" disabled> Base', fs.group(1))
+        # The recordings' block: a fold to each voice, its control a button
+        # drawn by offline.js, never a checkbox or a setting (2026-11-04).
+        self.assertIn('<details class="recvoice" data-key="mh"><summary>', fs.group(1))
+        self.assertIn('<button type="button" class="keep" data-st="none" disabled></button>', fs.group(1))
         self.assertIn('<p class="state" aria-live="polite"></p>', fs.group(1))
         self.assertEqual(fs.group(1).count('<li><label><input type="checkbox" value="'), 3)
+
+    def test_a_recordings_list_of_files_by_paper(self):
+        # What Settings' Offline tab draws its tree from and the worker keeps
+        # papers by (app.py offline_audio_list, 2026-11-04): every file of the
+        # voice, by paper, with its size and the head of its digest, and each
+        # paper's and part's totals; the Foreword with Part I.
+        import sqlite3
+        status, h, body = call("/offline/audio/mh.json")
+        self.assertEqual((status, h["cache-control"], h["vary"]), (200, "no-cache", "Accept-Encoding"))
+        self.assertEqual(call("/offline/audio/mh.json", headers={"if-none-match": h["etag"]})[0], 304)
+        self.assertEqual(call("/offline/audio/nobody.json")[0], 404)
+        self.assertEqual(call("/offline/audio/MH.json")[0], 404)
+        d = json.loads(body)
+        self.assertEqual(set(d), {"key", "label", "kind", "credit", "credit_url", "bytes", "seconds", "parts", "papers"})
+        self.assertEqual((d["key"], d["label"], d["kind"]), ("mh", "Merritt Horn", "human"))
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        files = {n: (b, sha) for n, b, sha in con.execute(
+            "SELECT f.name, f.bytes, f.sha256 FROM audio_file f JOIN audio_source s ON s.id = f.source_id"
+            " WHERE s.key = 'mh'")}
+        self.assertEqual([p["n"] for p in d["papers"]], list(range(197)))
+        self.assertEqual(sum(len(p["files"]) for p in d["papers"]), len(files))
+        for p in d["papers"]:
+            self.assertEqual(set(p), {"n", "title", "part", "bytes", "seconds", "files"})
+            for name, b, h16 in p["files"]:
+                self.assertEqual((b, h16), (files[name][0], files[name][1][:16]))
+                self.assertTrue(name.startswith(f"paper{p['n']:03d}/"), name)
+            self.assertEqual(p["bytes"], sum(f[1] for f in p["files"]))
+        self.assertEqual(d["bytes"], sum(b for b, _ in files.values()))
+        self.assertEqual(d["papers"][0], {**d["papers"][0], "title": "Foreword", "part": 1})
+        self.assertEqual([(x["n"], x["first"], x["last"], x["papers"], x["of"]) for x in d["parts"]],
+                         [(1, 0, 31, 32, 32), (2, 32, 56, 25, 25), (3, 57, 119, 63, 63), (4, 120, 196, 77, 77)])
+        for part in d["parts"]:
+            mine = [p for p in d["papers"] if part["first"] <= p["n"] <= part["last"]]
+            self.assertEqual((part["bytes"], part["seconds"]),
+                             (sum(p["bytes"] for p in mine), sum(p["seconds"] for p in mine)))
+        self.assertEqual(d["seconds"], sum(p["seconds"] for p in d["parts"]))
+        # Gzipped where the browser takes it, as /l10n.js is: nginx compresses
+        # only under /static/.  And the same bytes twice (CLAUDE.md trap 29).
+        status, h, gz = call("/offline/audio/mh.json", headers={"accept-encoding": "gzip"})
+        self.assertEqual((status, h.get("content-encoding")), (200, "gzip"))
+        self.assertEqual(gzip.decompress(gz), body)
+        self.assertEqual(call("/offline/audio/mh.json")[2], body)
 
     def test_every_kind_of_page_cuts_and_joins_again(self):
         from offline import pages, site
@@ -265,6 +311,25 @@ class Copy(unittest.TestCase):
             self.assertEqual(sum(c["kind"] == "db" for c in t["chunks"]), 1)
         self.assertFalse([c for c in m["chunks"] if "tr" in c])
         self.assertEqual(m["bytes"], sum(c["bytes"] for c in m["chunks"]))
+
+    def test_each_recordings_list_is_a_chunk_of_the_copy(self):
+        # One chunk to a voice, audio-<key>, the route's bytes as a string
+        # (offline/pages.py), which offline-core.js answers /offline/audio/<key>.json
+        # from; the shell names the voices it holds.
+        from ubsite import app as A
+        m = json.loads((COPY / "manifest.json").read_text())
+        keys = [v["key"] for v in A.voices()]
+        self.assertTrue(keys)
+        for key in keys:
+            c = next(c for c in m["chunks"] if c["name"] == f"audio-{key}")
+            self.assertEqual(c["kind"], "pages")
+            data = json.loads(gzip.decompress((COPY / c["file"]).read_bytes()))
+            self.assertEqual(list(data), ["json"])
+            self.assertEqual(data["json"].encode(), call(f"/offline/audio/{key}.json")[2])
+        shell = json.loads(gzip.decompress((COPY / next(c["file"] for c in m["chunks"]
+                                                         if c["name"] == "shell")).read_bytes()))
+        self.assertEqual(shell["audio"], keys)
+        self.assertEqual(m["counts"]["recordings"], len(keys))
 
     def test_deploy_keeps_every_chunk_the_manifest_names(self):
         # deploy.sh prunes on the hosts what neither manifest names: the

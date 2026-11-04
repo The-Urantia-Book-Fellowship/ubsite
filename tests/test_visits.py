@@ -183,6 +183,15 @@ class Pages(Counted):
         call("/speech/102:3")
         self.assertEqual(self.rows("SELECT voice, item FROM listen"), [("browser", "102:3")])
 
+    @unittest.skipUnless(pathlib.Path("/Audio/Urantia/Urantia-MH-Audio-DVD/paper161").is_dir(), "no recordings here")
+    def test_a_file_kept_for_offline_is_not_a_listen(self):
+        # The worker fetches a recording's file to keep it (sw.js keepOne,
+        # X-UB-Fetch: keep); played from the device after, it never comes back.
+        status, _, _ = call("/audio/mh/paper161/P161_00.mp3", headers={"x-ub-fetch": "keep"})
+        self.assertEqual(status, 200)
+        call("/audio/mh/paper161/P161_00.mp3", headers={"range": "bytes=0-99"})
+        self.assertEqual(self.rows("SELECT voice, item FROM listen"), [("mh", "paper161/P161_00.mp3")])
+
     def test_the_owner_is_not_counted(self):
         call("/102:3", headers={"cookie": "a=b; ub_me=1"})
         call("/102:3", headers={"cookie": "ub_me=0"})

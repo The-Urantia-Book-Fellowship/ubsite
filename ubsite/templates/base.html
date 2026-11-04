@@ -330,13 +330,12 @@ window.ubUnit = function (where) {
           install the site as an app, where the browser makes one. #}
       <p class="net"><span class="conn">{{ t('Online') }}</span> <span class="host"></span></p>
       <div class="offcopy">
-      <label><input type="checkbox" class="copy" disabled> {{ t('Offline copy') }}
+      <label><input type="checkbox" class="copy" disabled> {{ t('Base') }}
         <small>{{ t('offline:copyhint') }}</small></label>
       <p class="state" aria-live="polite"></p>
       </div>
       <div class="offtr">
-      <p class="sub">{{ t('Translations in the offline copy') }}</p>
-      <p class="trintro">{{ t('offline:tr') }}</p>
+      <p class="sub">{{ t('Translations') }}</p>
       <ul class="offtrs">
         {%- for x in translations() %}
         <li><label><input type="checkbox" value="{{ x.key }}" disabled>
@@ -344,6 +343,35 @@ window.ubUnit = function (where) {
           <small class="st"></small></label></li>
         {%- endfor %}
       </ul>
+      {#- Those not shown beside the text (the Translations tab) fold away under
+          a line that counts them, so that the tab stays short as the
+          Foundation's languages come (Tigran, 2026-11-04): offline.js moves
+          them, and a reader may still keep one it does not show. #}
+      <details class="offmore" hidden><summary><span class="rfold"></span><span class="w"></span></summary>
+      <ul class="offtrs"></ul></details>
+      <p class="why" hidden></p>
+      </div>
+      {#- The recordings a reader keeps for listening offline, a paper, a part or
+          a voice at a time (Tigran, 2026-11-04; sw.js, The recordings kept): a
+          fold to each voice the database carries, which is its whole-book row,
+          with one control of four states, ↓ to keep, a ring while it
+          downloads, ✓ kept, ↓ over the ring of a part kept; opened, its parts,
+          each folded to its papers, which offline.js draws from
+          /offline/audio/<key>.json when it opens.  Boson's credit for the AI
+          voice stands with its name, as its licence asks wherever it is
+          offered (sources.toml). #}
+      <div class="offrec">
+      <p class="sub">{{ t('Recordings') }}</p>
+      <p class="recstate"></p>
+      <p class="going" hidden>{{ t('offline:going') }}</p>
+      <div class="recs">
+        {%- for v in voices() %}
+        <details class="recvoice" data-key="{{ v.key }}"><summary><span class="rfold"></span>
+          <span class="w"><span class="rname">{{ t(v.label) }}</span>{% if v.credit %} <span class="rpt">· <a href="{{ v.credit_url }}">{{ t(v.credit) }}</a></span>{% endif %}<small class="rst"></small></span>
+          <span class="rmeta"></span><button type="button" class="keep" data-st="none" disabled></button></summary>
+        <div class="parts"></div></details>
+        {%- endfor %}
+      </div>
       <p class="why" hidden></p>
       </div>
       <p class="install" hidden></p>

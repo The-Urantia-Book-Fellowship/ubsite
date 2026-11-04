@@ -5,7 +5,9 @@ A reader who turns on "Work offline" in Settings registers a service worker
 site's addresses from it when the network does not.  It holds the book with
 its margin index and 1955 readings, the index's concept pages, every
 headword's reading path, the appendices and the lists, and a database to
-search them by; not the recordings.
+search them by; and each recording's list of files by paper (audio-<key>),
+by which the worker keeps the recordings a reader chooses, apart from the
+copy, in caches of their own (sw.js, The recordings kept; 2026-11-04).
 
 **The copy is the site's own pages.**  `python -m offline build` asks the app
 for every page it will hold (offline/site.py), as a browser would, and cuts

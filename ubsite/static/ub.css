@@ -1347,6 +1347,66 @@ dialog.settings .offtrs .st:empty { display: none; }
 dialog.settings .offtrs label:has(input:disabled) { cursor: default; }
 dialog.settings .offtrs label:has(input:disabled) .w { color: var(--faint); }
 dialog.settings .offtr .why { color: var(--faint); font-size: .9rem; margin: 0; }
+/* The translations not shown beside the text, folded (base.html .offmore):
+   a line that counts them, which opens to their ticks. */
+dialog.settings .offmore { margin: .1rem 0 .4rem; }
+dialog.settings .offmore > summary { display: grid; grid-template-columns: 1.1em minmax(0, 1fr); gap: 0 .5rem; align-items: center;
+  list-style: none; cursor: pointer; font-size: 1.02rem; padding: .16rem 0; }
+dialog.settings .offmore > summary::-webkit-details-marker { display: none; }
+dialog.settings .offmore .offtrs { margin-left: 1.6em; }
+dialog.settings .rfold { justify-self: center; width: .42em; height: .42em; border: solid var(--faint); border-width: 0 1.4px 1.4px 0;
+  transform: rotate(-45deg) translate(-.05em, 0); transition: transform .15s; }
+dialog.settings details[open] > summary > .rfold { transform: rotate(45deg) translate(0, -.12em); }
+/* The recordings kept for listening offline (base.html .offrec, offline.js;
+   2026-11-04): a fold to each voice, its row the whole-book row, folded open
+   to its parts, each folded to its papers.  One control to a row, .keep, of
+   four states: ↓ to keep; a ring while it downloads, its progress --p, a
+   square to stop; ✓ kept; ↓ over the ring of what a part has.  A row larger
+   than the browser's room is faint, not disabled: the estimate is advisory. */
+dialog.settings .offrec { margin-top: .9rem; }
+dialog.settings .recstate { margin: .1rem 0 .15rem; font-size: .95rem; }
+dialog.settings .going { color: var(--faint); font-size: .9rem; margin: 0 0 .35rem; }
+dialog.settings .recs { display: grid; gap: .1rem; margin: .35rem 0 .7rem; font-size: 1.02rem; }
+dialog.settings .recs .recrow, dialog.settings .recs summary { display: grid; grid-template-columns: 1.1em minmax(0, 1fr) auto 1.65rem;
+  gap: 0 .5rem; align-items: center; padding: .14rem 0; }
+dialog.settings .recs summary { list-style: none; cursor: pointer; }
+dialog.settings .recs summary::-webkit-details-marker { display: none; }
+dialog.settings .recs .recvoice > summary { padding: .2rem 0; }
+dialog.settings .recs .recvoice > .parts { margin-left: 1.3em; }
+dialog.settings .recs .recrow { padding-left: 1.6em; }
+dialog.settings .recs .w { min-width: 0; }
+dialog.settings .recs .rpn { color: var(--faint); font-size: .82rem; text-align: right; font-variant-numeric: tabular-nums; }
+dialog.settings .recs .recrow .rname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+dialog.settings .recs .rpt { color: var(--faint); }
+dialog.settings .recs .rpt a { color: inherit; }
+dialog.settings .recs .rst { display: block; line-height: 1.3; }
+dialog.settings .recs .rst:empty { display: none; }
+dialog.settings .recs .rmeta { color: var(--faint); font-size: .85rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 30rem) {
+  dialog.settings .recs .recpart .rpt { display: none; }
+  dialog.settings .recs .recrow { padding-left: .5em; }
+}
+.keep { position: relative; display: grid; place-items: center; width: 1.65rem; height: 1.65rem; padding: 0; box-sizing: border-box;
+  border: 1.4px solid var(--rule); border-radius: 50%; background: none; color: var(--link); cursor: pointer; }
+.keep svg { position: relative; width: .95rem; height: .95rem; overflow: visible; }
+.keep path { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.keep path.f { fill: currentColor; stroke: none; }
+.keep[data-st="kept"] { color: var(--paper); background: var(--link); border-color: var(--link); }
+.keep[data-st="busy"], .keep[data-st="some"] { border-color: transparent;
+  background: conic-gradient(var(--link) calc(var(--p, 0) * 360deg), var(--rule) 0); }
+.keep[data-st="busy"]::before, .keep[data-st="some"]::before { content: ""; position: absolute; inset: 1.4px; border-radius: 50%; background: var(--paper); }
+.keep[data-st="busy"] { color: var(--ink); }
+.keep[data-room="no"] { opacity: .45; }
+/* In the player's bar (listen.js keepButton), after the voice. */
+.player .keep { width: 1.65rem; height: 1.65rem; padding: 0; margin: 0 .15rem; border: 1.4px solid var(--rule); border-radius: 50%; }
+.player .keep[data-st="kept"] { border-color: var(--link); }
+.player .keep[data-st="busy"], .player .keep[data-st="some"] { border-color: transparent; }
+.player .keep[hidden] { display: none; }
+.keep:disabled { opacity: .35; cursor: default; }
+@media (hover: hover) {
+  .keep:not(:disabled):hover { border-color: var(--link); }
+  .keep[data-st="kept"]:not(:disabled):hover { background: color-mix(in oklch, var(--link) 80%, var(--ink)); }
+}
 dialog.settings .mv { display: flex; gap: .2rem; }
 dialog.settings .mv button { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0;
   font: 1rem system-ui, sans-serif; color: var(--ink); background: var(--card, var(--paper));
