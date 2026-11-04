@@ -53,6 +53,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Letting a kept recording go, in Settings' Offline tab, always asks first, a single paper's included; the check mark in the player's bar only shows that the paper is kept.
 - In Settings' Offline tab the copy's tick is now called Base, the translations you show beside the text stand first with the rest folded under a line that counts them, and the copy's line says that the site reads from it whenever the server cannot be reached, online or not.
 - Книга Урантии (USGNY) is credited to The Urantia Book Fellowship, which now owns it, in Settings under who made it; its short name USGNY stays.
 - The study notes are shown unless you turn them off: Notes, in Settings' Show tab, is now on by default.

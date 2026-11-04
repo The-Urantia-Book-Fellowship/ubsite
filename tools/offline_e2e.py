@@ -538,7 +538,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_timeout(4000)
         ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and not pg.inner_text(".player .who"),
            f"offline, the kept paper plays ({pg.get_attribute('.player .toggle', 'aria-label')}, {pg.inner_text('.player .who')!r})")
-        ok(pg.get_attribute(".player .keep", "data-st") == "kept", "and the bar's ↓ shows it kept")
+        ok(pg.get_attribute(".player .keep", "data-st") == "kept" and pg.is_disabled(".player .keep"),
+           "and the bar's ↓ shows it kept, a sign and no more")
         pg.click(".player .next")
         pg.wait_for_timeout(4000)
         ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and pg.inner_text(".player .at") == "161:1.1"
@@ -732,8 +733,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            "offline, a paper not kept cannot be asked for, and one kept can be let go")
         pg.click("dialog.settings .recrow[data-n='161'] .keep")
         pg.wait_for_function("caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", timeout=10000)
-        ok(pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "data-st") == "none",
-           "let go at once, without asking, its cache goes with its last file")
+        ok(asked and asked[-1].startswith("This deletes 1 paper of Merritt Horn from this browser, 17 MB.")
+           and pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "data-st") == "none",
+           f"asked first, and let go, its cache goes with its last file ({(asked or [''])[-1][:60]!r})")
         pg.keyboard.press("Escape")
         ok(not errors, f"no script errors ({errors[:2]})")
 

@@ -177,7 +177,7 @@
 "Downloading {v}: Paper {n}, {a} of {b}" = "Загружается {v}: Документ {n}, {a} из {b}"
 # The player's ↓ (listen.js drawKeep), for the paper being heard.
 "Keep this paper’s recording offline" = "Сохранить запись чтения этого документа"
-"This paper’s recording is kept offline; tap to let go" = "Запись чтения этого документа сохранена; нажмите, чтобы удалить"
+"This paper’s recording is kept offline" = "Запись чтения этого документа сохранена"
 "This paper’s recording is kept in part; tap to keep the rest" = "Запись чтения этого документа сохранена частично; нажмите, чтобы сохранить остальное"
 "This paper’s recording is not kept offline: Settings, in its Offline tab, keeps it. Your browser’s voice can read it." = "Запись чтения этого документа не сохранена: её можно сохранить в Настройках, на вкладке «Офлайн». Голос браузера может его прочитать."
 "kept, {s}" = "сохранён, {s}"

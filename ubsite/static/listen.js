@@ -349,8 +349,11 @@
     b.dataset.st = st;
     if (b.dataset.icon !== st) { b.dataset.icon = st; b.innerHTML = KEEP_ICONS[st]; }
     b.style.setProperty('--p', busy && busy.total ? (busy.done / busy.total).toFixed(3) : '0');
+    // Kept, the ✓ is a sign and no more: letting go is Settings' alone, which
+    // asks first (Tigran, 2026-11-04, after a tap here deleted a paper).
+    b.disabled = st === 'kept';
     var words = st === 'busy' ? T.k('Downloading: {a} of {b}; tap to stop')
-              : st === 'kept' ? T.k('This paper\u2019s recording is kept offline; tap to let go')
+              : st === 'kept' ? T.k('This paper\u2019s recording is kept offline')
               : st === 'some' ? T.k('This paper\u2019s recording is kept in part; tap to keep the rest')
               : T.k('Keep this paper\u2019s recording offline');
     var p = busy ? { a: T.tr('{x} MB', { x: Math.round(busy.done / 1e6) }), b: T.tr('{x} MB', { x: Math.round(busy.total / 1e6) }) } : {};
@@ -360,7 +363,7 @@
   function keepTap(ev) {
     ev.preventDefault();
     var b = ev.currentTarget, st = b.dataset.st, paper = D && D.paper, kk = key, tries = 0;
-    if (paper === undefined || paper === null) return;
+    if (paper === undefined || paper === null || st === 'kept') return;
     var go = function () { window.ubOfflineUI.rec(st, kk, paper); };
     if (window.ubOfflineUI && window.ubOfflineUI.rec) return go();
     document.dispatchEvent(new Event('ub:offtab'));

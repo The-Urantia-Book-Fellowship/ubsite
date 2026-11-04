@@ -672,13 +672,15 @@
     ask('keep').then(function (r) { pumping = false; show(r); }, function () { pumping = false; });
   }
   // A recording asked for, stopped or let go: a voice and its papers.  With no
-  // copy kept, the copy comes first, as a translation's tick brings it.
+  // copy kept, the copy comes first, as a translation's tick brings it.  A
+  // let-go always asks first, a paper's too: a tap deleted a paper unwarned on
+  // the first evening (Tigran, 2026-11-04).
   function recAct(st, key, ns) {
     var have = last && !last.removed && last.have;
     if (st === 'busy') return ask('stop', { voice: key, papers: ns }).then(show);
     if (st === 'kept') {
       var list = recIdx[key], b = ns.reduce(function (t, n) { return t + (list && list.byN[n] ? list.byN[n].bytes : 0); }, 0);
-      if (ns.length > 1 && !window.confirm(T.text('offline:recdrop', { n: ns.length, v: recName(key), s: size(b) }))) return Promise.resolve();
+      if (!window.confirm(T.text('offline:recdrop', { n: ns.length, v: recName(key), s: size(b) }))) return Promise.resolve();
       return ask('unkeep', { voice: key, papers: ns }).then(show);
     }
     if (!have) return Promise.resolve(on(null, { voice: key, papers: ns }));
