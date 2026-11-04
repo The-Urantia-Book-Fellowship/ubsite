@@ -119,7 +119,9 @@ def lift_rail(body: str, paper: int, sec: int) -> tuple[str, str]:
         raise Shape(f"{paper}:{sec} has {len(found)} rails")
     m = found[0]
     here = f'<li class="here"><a href="/{paper}:{sec}">'
-    if m.group(0).count(here) != 1:
+    # The Foreword's row stands twice, on its own and in Part I, for Settings'
+    # Foreword in Part I (templates/_rail.html), its sections under each.
+    if m.group(0).count(here) != (2 if paper == 0 else 1):
         raise Shape(f"{paper}:{sec}'s rail marks it {m.group(0).count(here)} times")
     return (body[:m.start()] + RAIL + body[m.end():],
             m.group(0).replace(here, f'<li><a href="/{paper}:{sec}">'))

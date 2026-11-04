@@ -20,7 +20,12 @@
     <button class="pill solid" type="submit">{{ t('Start') }}</button>
   </form>
   <p class="qboard qtoboard"><a href="/quiz/board">{{ t('The quiz board') }}</a></p>
-  <ol class="toc qtoc">
+  {#- The Foreword twice, as /read lists it (contents.html): under Part I as its
+      first paper, and on its own before the parts for Settings' Foreword in
+      Part I off; the CSS shows one (ub.css .fwin, .fwout), and quiz.js counts
+      its best score into both.  Its option in the list above goes with the
+      switch too (quiz.js fwSync). #}
+  <ol class="toc qtoc fwout">
   {%- for x in papers if x.n == 0 %}
     <li data-n="0"><a href="/quiz/0"><b>0</b> {{ x.title }}</a><i>{{ x.count }}</i></li>
   {%- endfor %}
@@ -28,6 +33,9 @@
   {%- for part in parts %}
   <h2>{{ part.title }}</h2>
   <ol class="toc qtoc">
+    {%- if loop.first %}{% for x in papers if x.n == 0 %}
+    <li class="fwin" data-n="0"><a href="/quiz/0"><b>0</b> {{ x.title }}</a><i>{{ x.count }}</i></li>
+    {%- endfor %}{% endif %}
     {%- for x in papers if x.part == part.n %}
     <li data-n="{{ x.n }}"><a href="/quiz/{{ x.n }}"><b>{{ x.n }}</b> {{ x.title }}</a><i>{{ x.count }}</i></li>
     {%- endfor %}

@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The Foreword is listed in Part I, as its first paper, wherever the parts are listed: on the home page, whose Part I now opens on it, in the contents, in the Contents at the left, in the quiz and among the recordings kept offline. Settings' Foreword in Part I, in the Reading tab, puts it back on its own before the parts, as the printed book has it.
 - Merritt Horn's reading can be kept in the browser for listening offline, a paper, a part or the whole book at a time, under Recordings in Settings' Offline tab or from the ↓ in the player's bar; a kept paper plays from the device online too, and seeking works offline.
 - The running head has two more ways out: a tap on the paragraph's reference opens the contents with the paper being read in view, its sections under it, and Back returns to the paragraph you left; and the site's mark beside the gear goes to the home page.
 - A tap on the text shows the book's running head over the top of the screen: the paragraph's reference, the paper's number, title and author, and the Settings gear, so that a reader deep in a paper with the paragraph references off can see where they are and reach Settings without scrolling back to the top; the paragraph named is tinted, and a second tap, or reading on, hides it; a tap also lets go of the grey a paragraph keeps from the page having opened at it. With Tap to turn the page on, the thin band at the very top of the screen shows it instead.
@@ -99,6 +100,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- Under Recordings in Settings' Offline tab, a voice's row showed its download control before its list of files had come, and its tooltip promised the whole reading for 0.1 MB; the list now comes as the tab opens, with the reading's hours and size, and until it has the control is greyed. The line under the voices that says why nothing can be kept yet was set at the text's size; it is small and grey, as the tab's other notes are.
 - On a narrow screen, a word that would have fitted on its line is no longer carried down to the paragraph's last line to keep the last word from standing alone there, which left the line above stretched across the width, as in "7. The Unquali-" over "fied Absolute." on a phone.
 - On a phone, with the index and the appendices turned off in Settings, a paragraph's index entries no longer show on the translations' line under it, as they did once a translation was ticked with the index folded; nor are they printed with the index folded.
 - The site no longer takes the browser's word that it is offline when it can reach the site: Chrome can say so with the network working, until it is restarted, and the cloud at the top then stayed struck through, every page came from the offline copy, and the recordings would not play. Now the site itself is asked, and the cloud says what it answers.

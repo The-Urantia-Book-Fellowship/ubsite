@@ -12,16 +12,27 @@
   </header>
 
   {# Reading begins here.  The parts ARE the entry points -- a separate "start
-     reading" button sat apart from them and made the page read as two halves. #}
+     reading" button sat apart from them and made the page read as two halves.
+     The Foreword is Part I's first paper (settings.py `foreword`, on by
+     default), so Part I opens on it and its range names it; with the switch
+     off it is a row of its own before the parts.  Both are sent, and the CSS
+     shows one (ub.css .fwin, .fwout). #}
   <ol class="front-toc">
     {% for p in papers if p.n == 0 %}
-    <li class="foreword">
+    <li class="foreword fwout">
       <a href="/0"><span class="lbl">Foreword</span>
         <span class="range">{{ t('Definitions and terminology') }}</span></a>
     </li>
     {% endfor %}
     {% for part in parts %}
-    <li>
+    {%- if loop.first %}
+    <li class="fwin">
+      <a href="/0">
+        <span class="lbl">{{ part.title }}</span>
+        <span class="range">{{ t('Foreword and Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span></a>
+    </li>
+    {%- endif %}
+    <li{% if loop.first %} class="fwout"{% endif %}>
       <a href="/{{ part.first_paper }}">
         <span class="lbl">{{ part.title }}</span>
         <span class="range">{{ t('Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span></a>

@@ -26,27 +26,42 @@
 {%- endfor %}</ol>
 {%- endmacro %}
 
-{% macro paper_row(p, bk, here_p, here_s) -%}
+{#- cls: " fwin" or " fwout" on the Foreword's row, which stands twice (below). -#}
+{% macro paper_row(p, bk, here_p, here_s, cls='') -%}
 {%- if p.n == here_p -%}
-<li class="here"><details open><summary><a href="/{{ p.n }}">{% if p.n %}{{ p.n }}. {% endif %}{{ p.title }}</a></summary>
+<li class="here{{ cls }}"><details open><summary><a href="/{{ p.n }}">{% if p.n %}{{ p.n }}. {% endif %}{{ p.title }}</a></summary>
   {{- sections(p.n, bk.sections[p.n], here_s) }}</details></li>
 {%- else -%}
-<li class="lazy"><details><summary><a href="/{{ p.n }}">{% if p.n %}{{ p.n }}. {% endif %}{{ p.title }}</a></summary></details></li>
+<li class="lazy{{ cls }}"><details><summary><a href="/{{ p.n }}">{% if p.n %}{{ p.n }}. {% endif %}{{ p.title }}</a></summary></details></li>
 {%- endif %}
 {%- endmacro %}
 
-{#- here_p is None on a part's own page: the part is open, and is the page. -#}
+{#- here_p is None on a part's own page: the part is open, and is the page.
+
+    The Foreword stands twice: at the head of the tree, on its own, and in
+    Part I as its first paper, which is where Settings' Foreword in Part I (on
+    by default) shows it; the CSS shows one (ub.css .fwin, .fwout), so a page
+    is the same whichever a reader chose, and the offline copy holds one page
+    (offline/pages.py lift_rail counts its sections' marks twice).  Reading
+    the Foreword, Part I is open for it, and the line of script after the
+    tree shuts it where the switch is off, before anything after the rail is
+    drawn: CSS can hide what a <details> holds, but not shut it, and a reader
+    who then opened it would find it empty. -#}
 {% macro rail(bk, here_p, here_s, here_part) -%}
 <nav class="rail" {{ ta('aria-label', 'The book') }} data-v="{{ book().v }}">
 <div class="railhead"><button class="railfold" type="button" aria-controls="rail-tree" aria-expanded="true"><span>{{ t('Contents') }}</span></button>
 <label class="railtr" hidden><select {{ ta('aria-label', 'Show the contents in a translation') }} {{ ta('title', 'Show the contents in a translation') }}></select></label></div>
 <ol id="rail-tree">
 {%- for p in bk.foreword %}
-{{ paper_row(p, bk, here_p, here_s) }}
+{{ paper_row(p, bk, here_p, here_s, ' fwout') }}
 {%- endfor %}
 {%- for part in bk.parts %}
-<li class="part{% if here_p is none and part.n == here_part %} here{% endif %}"><details{% if part.n == here_part %} open{% endif %}><summary><a href="/part/{{ part.n }}">Part {{ part.roman }}. {{ part.title }}</a></summary>
+{%- set fw_open = loop.first and here_p == 0 %}
+<li class="part{% if here_p is none and part.n == here_part %} here{% endif %}{% if fw_open %} fwhere{% endif %}"><details{% if part.n == here_part or fw_open %} open{% endif %}><summary><a href="/part/{{ part.n }}">Part {{ part.roman }}. {{ part.title }}</a></summary>
 <ol>
+{%- if loop.first %}{% for p in bk.foreword %}
+{{ paper_row(p, bk, here_p, here_s, ' fwin') }}
+{%- endfor %}{% endif %}
 {%- for p in part.papers %}
 {{ paper_row(p, bk, here_p, here_s) }}
 {%- endfor %}
@@ -54,4 +69,7 @@
 {%- endfor %}
 </ol>
 </nav>
+{%- if here_p == 0 %}
+<script>if(document.documentElement.dataset.foreword==='off'){var d=document.querySelector('.rail li.fwhere>details');if(d)d.removeAttribute('open');}</script>
+{%- endif %}
 {%- endmacro %}

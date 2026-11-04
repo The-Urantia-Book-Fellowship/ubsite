@@ -514,8 +514,16 @@
   // By the rail's scrollTop, never scrollIntoView, which would move the page
   // as well.  Again when the fonts are in, as arrive() does, unless the reader
   // has scrolled the rail meanwhile; and whenever listen.js swaps <main>.
+  // The paper being read in the rail: the Foreword stands there twice, on its
+  // own and in Part I (templates/_rail.html), and the one shown is the one to
+  // scroll to.
+  function railHere(rail) {
+    var all = rail.querySelectorAll('li.here');
+    for (var i = 0; i < all.length; i++) if (all[i].offsetParent !== null) return all[i];
+    return all[0] || null;
+  }
   function railView() {
-    var rail = document.querySelector('.rail'), here = rail && rail.querySelector('li.here');
+    var rail = document.querySelector('.rail'), here = rail && railHere(rail);
     if (!here) return;
     var place = function () {
       if (rail.scrollHeight <= rail.clientHeight) return;
@@ -559,7 +567,7 @@
       contentsAt = state;
     }
     if (shut) b.click(); else railView();
-    if (phone.matches && (here = rail.querySelector('li.here'))) {
+    if (phone.matches && (here = railHere(rail))) {
       scrollTo({ top: scrollY + here.getBoundingClientRect().top - innerHeight / 6, behavior: 'instant' });
       arriveTouched = Date.now();
     }
@@ -1134,7 +1142,14 @@
   document.addEventListener('ub:settings', function (ev) {
     if (ev.detail.key === 'translations') cmpGo();
   });
-  function swapped() { railSync(); indexSync(); }
+  // Part I is open in the Foreword's rail for the Foreword's sake (templates/
+  // _rail.html), and its line of script shuts it where Settings puts the
+  // Foreword before the parts; a rail swapped in runs no script.
+  function railForeword() {
+    var d = document.querySelector('.rail li.fwhere > details');
+    if (d && document.documentElement.dataset.foreword === 'off') d.removeAttribute('open');
+  }
+  function swapped() { railSync(); indexSync(); railForeword(); }
   document.addEventListener('ub:swap', swapped);
   document.addEventListener('ub:settings', function (ev) {
     if (ev.detail.key === 'margin')

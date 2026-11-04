@@ -92,6 +92,8 @@
 "on a phone or a tablet: the lower half of the screen goes on, the upper half back" = "на телефоне или планшете: нижняя половина экрана — вперёд, верхняя — назад"
 "Whole paper" = "Документ целиком"
 "the paper on one page, section after section, with only the paper buttons at its end" = "документ на одной странице, раздел за разделом; внизу только кнопки документов"
+"Foreword in Part I" = "Foreword в части I"
+"wherever the parts are listed; off, it stands on its own before them" = "везде, где перечислены части; выключено — стоит отдельно перед ними"
 
 "Index and appendices" = "Указатель и приложения"
 "beside the text, and every link to them" = "рядом с текстом и все ссылки на них"
@@ -305,6 +307,7 @@
 "home:lead" = { en = "The Uversa Press text, read together with the Uversa Press index. Every paragraph carries in its margin the index entries that cite it, so the index works in both directions at once: from a concept into the text, and from any passage back to everything the index has to say about it.", ru = "Текст Uversa Press, который читается вместе с указателем Uversa Press. На полях каждого абзаца стоят рубрики указателя, которые на него ссылаются, так что указатель работает сразу в обе стороны: от понятия к тексту и от любого места текста ко всему, что говорит о нём указатель." }
 "Definitions and terminology" = "Определения и терминология"
 "Papers {a}&ndash;{b}" = "Документы {a}&ndash;{b}"
+"Foreword and Papers {a}&ndash;{b}" = "Foreword и документы {a}&ndash;{b}"
 "Other ways in" = "Другие пути в книгу"
 "home:index" = { en = '<a href="/index">The index</a> — {e:,} entries under {h:,} headwords, each opening onto the passages it cites.', ru = '<a href="/index">Указатель</a> — рубрик: {e:,}, заглавных слов: {h:,}; каждая рубрика открывает места текста, на которые ссылается.' }
 "home:appendices" = { en = '<a href="/appendix">The appendices</a> — a chronology of {e:,} dated events, and the {m:,} beings, persons and places the book names.', ru = '<a href="/appendix">Приложения</a> — хронология датированных событий ({e:,}) и названные в книге существа, лица и места ({m:,}).' }

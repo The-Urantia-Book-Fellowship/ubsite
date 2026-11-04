@@ -353,6 +353,13 @@ class Pages(unittest.TestCase):
         d = self.data(body)
         self.assertEqual((len(d["q"]), len(d["papers"])), (777, 125))     # 40 dropped: Paper 0's 8, 11 Q20, and 31 ruled 2026-10-30,
         self.assertEqual(body.count('<li data-n="'), 125)                   # Paper 138's one question among them
+        # The Foreword's row twice, on its own and in Part I, for Settings'
+        # Foreword in Part I (quiz.html; 2026-11-04); its choice in the list
+        # is sent, and quiz.js takes it out while the switch is on.
+        self.assertEqual(body.count('data-n="0"'), 2)
+        self.assertIn('<ol class="toc qtoc fwout">\n    <li data-n="0"><a href="/quiz/0"><b>0</b> Foreword</a>', body)
+        self.assertIn('<li class="fwin" data-n="0"><a href="/quiz/0"><b>0</b> Foreword</a>', body)
+        self.assertIn('<option value="0"', body)
 
     def test_a_run_of_paragraphs_answers(self):
         st, _, body = self.get("/quiz/0")

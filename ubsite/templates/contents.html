@@ -1,10 +1,12 @@
 {% extends "base.html" %}{% set title = 'Contents' %}
 {% block body %}<main class="prose"><h1>{{ t('Contents') }}</h1>
 
-{# The Foreword belongs at the head of the book, where it is printed. It carries
-   no part number -- the four parts begin at Paper 1 -- so it is listed on its
-   own rather than falling out of the loop below. #}
-<ol class="toc">
+{# The Foreword carries no part number -- the four parts begin at Paper 1 --
+   and is listed twice: under Part I as its first paper (settings.py
+   `foreword`, on by default), and on its own at the head of the book, where
+   the press prints it, for the switch off.  The CSS shows one (ub.css .fwin,
+   .fwout). #}
+<ol class="toc fwout">
 {% for p in papers if p.n == 0 %}
   <li><a href="/0"><b>0</b> {{ p.title }}</a><i>{{ p.author or '' }}</i></li>
 {% endfor %}
@@ -13,6 +15,9 @@
 {% for part in parts %}
   <h2>{{ part.title }}</h2>
   <ol class="toc">
+  {%- if loop.first %}{% for p in papers if p.n == 0 %}
+    <li class="fwin"><a href="/0"><b>0</b> {{ p.title }}</a><i>{{ p.author or '' }}</i></li>
+  {%- endfor %}{% endif %}
   {% for p in papers if p.part_n == part.n %}
     <li><a href="/{{ p.n }}"><b>{{ p.n }}</b> {{ p.title }}</a><i>{{ p.author or '' }}</i></li>
   {% endfor %}

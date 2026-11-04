@@ -104,6 +104,7 @@ Every site that runs the reader has a profile, chosen by its host name, saying:
 | its look | the Fellowship's header and footer, colours and logo | to build |
 | its features | Work offline, listening, the text API, the index and appendices, the study notes, each translation, the interface in Russian, each on or off for the site | to build; the interface in Russian can already be switched off for a whole server, `UB_BILINGUAL=0` |
 | its settings' defaults | the 1955 readings hidden until a reader shows them | built: `SITE_DEFAULTS` in `ubsite/settings.py`, empty until the Fellowship's site exists |
+| a setting fixed, its control out of the dialog | the Foreword on its own before Part I, with no switch for a reader to move it | to build; the setting itself is built (`foreword` in `ubsite/settings.py`, on by default, 2026-11-04), and `SITE_DEFAULTS` can set a site's default meanwhile |
 | its sign-in | Laravel's (section 6) on the Fellowship's site; the reader's own, by Google or by email, on the maintainer's | to build |
 | its app's name and icon | the name and colour an installed app shows | built: `SITES` in `ubsite/app.py` |
 

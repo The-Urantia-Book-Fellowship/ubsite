@@ -625,6 +625,12 @@ p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
 /* The quiz turned off: the invitation at a paper's end, the home page's line
    (settings.py `quiz`).  Its pages answer an address asked for. */
 :root[data-quiz="off"] :is(.quizcall, .quizway) { display: none; }
+/* The Foreword in Part I (settings.py `foreword`, on by default; Tigran,
+   2026-11-04): each list of the parts carries it both ways, .fwin where Part I
+   has it as its first paper and .fwout on its own before the parts, and the
+   switch shows one (home.html, contents.html, _rail.html, quiz.html; the
+   recordings' tree is drawn by offline.js for the switch as it stands). */
+:root:not([data-foreword="off"]) .fwout, :root[data-foreword="off"] .fwin { display: none; }
 /* Its board turned off, or the quiz (settings.py NEEDS): the offer after a
    quiz and the links to the board.  The board's page answers an address. */
 :root:is([data-quiz="off"], [data-quizboard="off"]) .qboard { display: none; }
@@ -1346,7 +1352,7 @@ dialog.settings .offtrs .st { grid-column: 2; }
 dialog.settings .offtrs .st:empty { display: none; }
 dialog.settings .offtrs label:has(input:disabled) { cursor: default; }
 dialog.settings .offtrs label:has(input:disabled) .w { color: var(--faint); }
-dialog.settings .offtr .why { color: var(--faint); font-size: .9rem; margin: 0; }
+dialog.settings :is(.offtr, .offrec) .why { color: var(--faint); font-size: .9rem; margin: 0; }
 /* The translations not shown beside the text, folded (base.html .offmore):
    a line that counts them, which opens to their ticks. */
 dialog.settings .offmore { margin: .1rem 0 .4rem; }
@@ -1374,6 +1380,8 @@ dialog.settings .recs summary::-webkit-details-marker { display: none; }
 dialog.settings .recs .recvoice > summary { padding: .2rem 0; }
 dialog.settings .recs .recvoice > .parts { margin-left: 1.3em; }
 dialog.settings .recs .recrow { padding-left: 1.6em; }
+/* The Foreword's row at the parts' level, with the switch above off. */
+dialog.settings .recs .parts > .recrow { padding-left: 0; }
 dialog.settings .recs .w { min-width: 0; }
 dialog.settings .recs .rpn { color: var(--faint); font-size: .82rem; text-align: right; font-variant-numeric: tabular-nums; }
 dialog.settings .recs .recrow .rname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

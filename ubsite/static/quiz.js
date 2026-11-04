@@ -366,19 +366,40 @@
     }
     return a;
   }
+  // Settings' Foreword in Part I (settings.py `foreword`, on by default): on,
+  // the Foreword's questions are Part I's and its own choice in the list goes;
+  // off, it is a choice of its own, as its row among the papers is (quiz.html,
+  // where it stands both ways and the CSS shows one).  Taken out and put back,
+  // never hidden: Safari shows a hidden option.
+  function fwIn() { return document.documentElement.dataset.foreword !== 'off'; }
+  var fwSel = main.querySelector('#quizfrom'), fwOpt = fwSel && fwSel.querySelector('option[value="0"]'),
+      fwBefore = fwOpt && fwOpt.previousElementSibling;
+  function fwSync() {
+    if (!fwOpt) return;
+    if (fwIn() && fwOpt.parentNode) {
+      if (fwSel.value === '0') fwSel.value = '';
+      fwSel.removeChild(fwOpt);
+    } else if (!fwIn() && !fwOpt.parentNode) {
+      fwSel.insertBefore(fwOpt, fwBefore ? fwBefore.nextSibling : fwSel.firstChild);
+    }
+  }
+  fwSync();
+  document.addEventListener('ub:settings', function (ev) { if (ev.detail.key === 'foreword') fwSync(); });
   function draw() {
     var from = main.querySelector('#quizfrom').value, part = {};
-    D.papers.forEach(function (p) { part[p.n] = p.part; });
+    D.papers.forEach(function (p) { part[p.n] = p.part || (fwIn() ? 1 : 0); });
     var pool = D.q.filter(function (q) { return from === '' || String(part[q.p]) === from; });
     return shuffle(pool.slice()).slice(0, 10);
   }
   function progress() {
     var s = load();
     D.papers.forEach(function (p) {
-      var i = main.querySelector('.qtoc li[data-n="' + p.n + '"] i');
-      if (!i || !(p.n in s.best)) return;
-      i.innerHTML = T('{r} of {n}', { r: s.best[p.n], n: p.count });
-      i.classList.toggle('done', s.best[p.n] === p.count);
+      if (!(p.n in s.best)) return;
+      // The Foreword's row stands twice (quiz.html).
+      Array.prototype.forEach.call(main.querySelectorAll('.qtoc li[data-n="' + p.n + '"] i'), function (i) {
+        i.innerHTML = T('{r} of {n}', { r: s.best[p.n], n: p.count });
+        i.classList.toggle('done', s.best[p.n] === p.count);
+      });
     });
   }
 

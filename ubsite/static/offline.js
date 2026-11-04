@@ -551,31 +551,70 @@
     if (a && a.voices) Object.keys(a.voices).forEach(function (k) { n += a.voices[k].bytes || 0; });
     return n;
   }
-  // The voice's list fetched and its parts drawn, once.
+  // The voice's list fetched and its parts drawn, once; its row's hours and
+  // size with them, so the whole-book control is never offered unsized (on
+  // the first evening it was, "0.1 MB": Tigran, 2026-11-04).  Drawn again
+  // when Settings moves the Foreword (below).
   function ensure(key) {
     return recList(key).then(function (list) {
       var det = recVoice(key);
       if (det && !det.dataset.drawn) {
         det.dataset.drawn = '1';
         det.querySelector(':scope > summary .rmeta').innerHTML = T(hours(list.seconds)) + ' · ' + T(size(list.bytes));
-        det.querySelector('.parts').innerHTML = list.parts.map(function (pt) {
-          var papers = list.papers.filter(function (x) { return pt.first <= x.n && x.n <= pt.last; });
-          return '<details class="recpart" data-first="' + pt.first + '" data-last="' + pt.last + '"><summary>' +
-            '<span class="rfold"></span><span class="w"><span class="rname">' + T('Part {r}', { r: ROMAN[pt.n] || pt.n }) +
-            '<span class="rpt"> · ' + esc(pt.title) + '</span></span><small class="rst"></small></span>' +
-            '<span class="rmeta">' + T(hours(pt.seconds)) + ' · ' + T(size(pt.bytes)) + '</span>' +
-            '<button type="button" class="keep" data-st="none"></button></summary>' +
-            papers.map(function (x) {
-              return '<div class="recrow" data-n="' + x.n + '"><span class="rpn">' + x.n + '</span>' +
-                '<span class="rname" title="' + esc(x.title) + '">' + esc(x.title) + '</span>' +
-                '<span class="rmeta"></span><button type="button" class="keep" data-st="none"></button></div>';
-            }).join('') + '</details>';
-        }).join('');
+        det.querySelector('.parts').innerHTML = recTree(list);
         recShow(last);
       }
       return list;
     });
   }
+  // Every voice's, as the tab opens and whenever the page comes online again
+  // after that: the lists are the copy's where one is kept, and ~30 KB each
+  // from the site where none is.
+  var recWanted = false;
+  function ensureAll() {
+    Array.prototype.forEach.call(recBox.querySelectorAll('.recvoice'), function (det) {
+      ensure(det.dataset.key).catch(function () {});
+    });
+  }
+  document.addEventListener('ub:offtab', function () { recWanted = true; ensureAll(); });
+  window.addEventListener('online', function () { if (recWanted) ensureAll(); });
+  // Loaded by the tab's own opening (ub.js), the event is past: the panel
+  // shown says so.
+  if (panel.classList.contains('on')) { recWanted = true; ensureAll(); }
+  // The parts, each folded to its papers.  The list counts the Foreword in
+  // Part I (app.py _audio_list), as the left rail lists it; with Settings'
+  // Foreword in Part I off it is a row of its own before the parts, at their
+  // level (ub.css .parts > .recrow), and Part I begins at Paper 1.
+  function fwIn() { return document.documentElement.dataset.foreword !== 'off'; }
+  function sum(xs, k) { return xs.reduce(function (t, x) { return t + x[k]; }, 0); }
+  function recRow(x) {
+    return '<div class="recrow" data-n="' + x.n + '"><span class="rpn">' + x.n + '</span>' +
+      '<span class="rname" title="' + esc(x.title) + '">' + esc(x.title) + '</span>' +
+      '<span class="rmeta"></span><button type="button" class="keep" data-st="none"></button></div>';
+  }
+  function recTree(list) {
+    var out = [];
+    if (!fwIn() && list.byN[0]) out.push(recRow(list.byN[0]));
+    list.parts.forEach(function (pt) {
+      var first = !fwIn() && pt.first === 0 ? 1 : pt.first,
+          papers = list.papers.filter(function (x) { return first <= x.n && x.n <= pt.last; });
+      if (!papers.length) return;
+      out.push('<details class="recpart" data-part="' + pt.n + '" data-first="' + first + '" data-last="' + pt.last + '"><summary>' +
+        '<span class="rfold"></span><span class="w"><span class="rname">' + T('Part {r}', { r: ROMAN[pt.n] || pt.n }) +
+        '<span class="rpt"> · ' + esc(pt.title) + '</span></span><small class="rst"></small></span>' +
+        '<span class="rmeta">' + T(hours(sum(papers, 'seconds'))) + ' · ' + T(size(sum(papers, 'bytes'))) + '</span>' +
+        '<button type="button" class="keep" data-st="none"></button></summary>' +
+        papers.map(recRow).join('') + '</details>');
+    });
+    return out.join('');
+  }
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail.key !== 'foreword') return;
+    Array.prototype.forEach.call(recBox.querySelectorAll('.recvoice[data-drawn]'), function (det) {
+      delete det.dataset.drawn;
+      ensure(det.dataset.key).catch(function () {});
+    });
+  });
   // What a row's papers are, against the state: all kept, any on the queue,
   // some kept, none; and the bytes held of them.
   function stateOf(ns, v, queued) {
@@ -628,12 +667,11 @@
         Array.prototype.forEach.call(det.querySelectorAll('.recpart'), function (pd) {
           var ns = all.filter(function (n) { return +pd.dataset.first <= n && n <= +pd.dataset.last; }),
               pb = ns.reduce(function (t, n) { return t + list.byN[n].bytes; }, 0), ps = stateOf(ns, v, queued),
-              kept = ns.filter(function (n) { return v.kept.indexOf(n) >= 0; }).length,
-              pt = list.parts.filter(function (x) { return x.first === +pd.dataset.first; })[0];
+              kept = ns.filter(function (n) { return v.kept.indexOf(n) >= 0; }).length;
           pd.querySelector(':scope > summary .rst').innerHTML = ps === 'none' ? ''
             : T('{a} of {b} papers', { a: kept, b: ns.length });
           setKeep(pd.querySelector(':scope > summary .keep'), ps, heldOf(ns, v, busy, key, list.byN), pb,
-                  { r: ROMAN[pt ? pt.n : 0] || '' });
+                  { r: ROMAN[+pd.dataset.part] || '' });
         });
         Array.prototype.forEach.call(det.querySelectorAll('.recrow'), function (row) {
           var n = +row.dataset.n, x = list.byN[n], rs = stateOf([n], v, queued), hb = heldOf([n], v, busy, key, list.byN);
@@ -642,13 +680,18 @@
           setKeep(row.querySelector('.keep'), rs, hb, x.bytes, { n: n });
         });
       } else {
+        // Its list not come: its state alone, with no size to promise, and
+        // the control greyed below.
         st.innerHTML = v.bytes ? T('kept, {s}', { s: size(v.bytes) }) : '';
-        setKeep(btn, Object.keys(queued).length ? 'busy' : v.kept.length || v.bytes ? 'some' : 'none', v.bytes, 0, { v: recName(key) });
+        btn.dataset.st = Object.keys(queued).length ? 'busy' : v.kept.length || v.bytes ? 'some' : 'none';
+        if (btn.dataset.icon !== btn.dataset.st) { btn.dataset.icon = btn.dataset.st; btn.innerHTML = ICONS[btn.dataset.st]; }
+        btn.style.setProperty('--p', '0');
+        ['title', 'data-ru-title', 'aria-label', 'data-ru-aria-label'].forEach(function (a) { btn.removeAttribute(a); });
       }
-      // Greyed where nothing can be done: no worker's word yet, offline for
-      // what is not kept, a list the copy lacks (nolist).
+      // Greyed where nothing can be done: no worker's word yet, no list yet,
+      // offline for what is not kept, a list the copy lacks (nolist).
       Array.prototype.forEach.call(det.querySelectorAll('.keep'), function (b) {
-        b.disabled = !s || v.nolist || (!on && (b.dataset.st === 'none' || b.dataset.st === 'some'));
+        b.disabled = !s || !list || v.nolist || (!on && (b.dataset.st === 'none' || b.dataset.st === 'some'));
       });
     });
     recBox.querySelector('.recstate').innerHTML = total && room !== null ? T('offline:rechead', { s: size(total), r: size(room) })

@@ -75,7 +75,9 @@
   // them (templates/_para.html: " hit" ends the class, and the id follows).
   function section(sh, d, paper, sec, focus, last) {
     var rec = d.sections[sec], here = paper + ':' + sec;
-    var rail = put(d.rail, '<li><a href="/' + here + '">', '<li class="here"><a href="/' + here + '">');
+    // Wherever the rail has it: the Foreword's sections stand twice, under its
+    // row on its own and under its row in Part I (templates/_rail.html).
+    var rail = d.rail.split('<li><a href="/' + here + '">').join('<li class="here"><a href="/' + here + '">');
     var b = put(rec.b, '\u0000', rail);
     if (focus !== null)
       for (var k = focus; k <= last; k++) {

@@ -45,7 +45,8 @@ class Rail(unittest.TestCase):
 
     def test_every_paper_once_and_only_its_own_sections(self):
         r = rail("/133:2")
-        self.assertEqual([int(n) for n in RE_PAPER.findall(r)], self.papers)
+        # But the Foreword, which stands twice (below).
+        self.assertEqual([int(n) for n in RE_PAPER.findall(r)], [0] + self.papers)
         secs = [(int(p), int(s)) for p, s in RE_SECTION.findall(r)]
         self.assertEqual(secs, [(133, s) for s in self.sections[133]])
 
@@ -66,11 +67,33 @@ class Rail(unittest.TestCase):
         secs = [(int(p), int(s)) for p, s in RE_SECTION.findall(r)]
         self.assertEqual(secs, [(133, s) for s in self.sections[133]])
 
-    def test_the_foreword_is_in_no_part(self):
-        r = rail("/0:3")
-        self.assertEqual(RE_OPEN_PART.findall(r), [])
-        self.assertIn('<li class="here"><details open><summary><a href="/0">Foreword</a>', r)
-        self.assertEqual(re.findall(r'<li class="here"><a href="/([\d:]+)"', r), ["0:3"])
+    def test_the_foreword_stands_twice_in_part_one_and_before_it(self):
+        # Settings' Foreword in Part I (settings.py `foreword`, on by default;
+        # Tigran, 2026-11-04): its row in Part I, .fwin, is the one shown, and
+        # its row on its own before the parts, .fwout, with the switch off;
+        # the CSS shows one, so the page is one page.  Reading it, Part I is
+        # open for it, and a line of script after the tree shuts Part I where
+        # the switch is off.  Until then the Foreword was in no part here.
+        status, _, body = get("/0:3")
+        r = RE_RAIL.search(body).group(0)
+        self.assertEqual(RE_OPEN_PART.findall(r), ["I"])
+        self.assertIn('<li class="part fwhere"><details open>', r)
+        self.assertEqual(r.count('<li class="here fwout"><details open><summary><a href="/0">Foreword</a>'), 1)
+        self.assertEqual(r.count('<li class="here fwin"><details open><summary><a href="/0">Foreword</a>'), 1)
+        self.assertEqual(re.findall(r'<li class="here"><a href="/([\d:]+)"', r), ["0:3", "0:3"])
+        self.assertEqual(r.count("<details open>"), 3)
+        self.assertIn("</nav>\n<script>if(document.documentElement.dataset.foreword==='off')"
+                      "{var d=document.querySelector('.rail li.fwhere>details');if(d)d.removeAttribute('open');}</script>",
+                      body)
+        self.assertIn('<li class="part fwhere"><details open>', rail("/0"))     # the whole paper's page too
+        # Elsewhere both rows are shut, and nothing shuts Part I.
+        status, _, body = get("/133:2")
+        r = RE_RAIL.search(body).group(0)
+        self.assertIn('<li class="lazy fwout"><details><summary><a href="/0">Foreword</a>', r)
+        self.assertIn('<ol>\n<li class="lazy fwin"><details><summary><a href="/0">Foreword</a>', r)
+        self.assertNotIn("fwhere", r)
+        self.assertNotIn("dataset.foreword", body)
+        self.assertEqual(RE_OPEN_PART.findall(rail("/1:0")), ["I"])
 
     def test_a_papers_sections_on_demand(self):
         status, headers, body = get(f"/rail/101?v={self.version}")

@@ -92,6 +92,18 @@ READING = [
     # page again in the other unit when the dialog closes after a change.
     ("whole", "switch", "Whole paper", False, [],
      "the paper on one page, section after section, with only the paper buttons at its end"),
+    # The Foreword listed in Part I, as the first of its papers, wherever the
+    # parts are listed: the home page, /read, the left rail, the quiz's page and
+    # the recordings' tree in the Offline tab (Tigran, 2026-11-04: "by default
+    # make Part I include Foreword").  Off, it stands on its own before the
+    # parts, as the press prints it.  Each list carries it both ways and the
+    # CSS shows one (ub.css .fwin, .fwout), so no page changes with it; the
+    # left rail's Part I, open for the Foreword, is shut by a line of script
+    # where the switch is off (templates/_rail.html).  A site's profile is to
+    # be able to fix it and take the switch out of the dialog (INTEGRATION.md,
+    # section 4); SITE_DEFAULTS sets a site's default meanwhile.
+    ("foreword", "switch", "Foreword in Part I", True, [],
+     "wherever the parts are listed; off, it stands on its own before them"),
 ]
 SHOW = [
     # Off, the site is the book alone, with its 1955 readings if they are on:
