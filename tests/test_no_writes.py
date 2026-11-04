@@ -71,6 +71,18 @@ class NoWrites(unittest.TestCase):
             self.assertTrue(str(here).startswith(str(ROOT.resolve()) + "/"),
                             f"{rel} writes outside the project: {here}")
 
+    def test_no_writer_targets_the_foundation_s_releases(self):
+        """data/uf/ holds the Foundation's zips, a master like the repos though
+        it lies inside the project (sources.toml): no allowlisted writer may
+        target it, nor data/ whole."""
+        for rel, target in ALLOWED.items():
+            if target is None:
+                continue
+            here = (ROOT / target).resolve()
+            self.assertNotEqual(here, (ROOT / "data").resolve(), f"{rel} writes into data/ whole")
+            self.assertFalse(str(here).startswith(str((ROOT / "data" / "uf").resolve())),
+                             f"{rel} writes into data/uf/: {target}")
+
     def test_offline_writes_only_var(self):
         """The offline copy is written by pack.py alone, into var/offline/, which
         it builds as var/offline.tmp/ and swaps in."""
@@ -127,10 +139,11 @@ class NoWrites(unittest.TestCase):
         """No module may name a sibling repo path in a write context."""
         for rel, src in self._sources():
             # The recordings are a master too: Merritt Horn's reading.
-            # And the translations: ud's name is too short to search for alone.
+            # And the translations: ud's name is too short to search for alone;
+            # the Foundation's zips are inside the project, in data/uf/.
             for bad in ("urantia-uversa-press-claude", "../index",
                         "urantia-study-edition", "Urantia-MH-Audio", "block-sources",
-                        "../ud", "urantia-ru"):
+                        "../ud", "urantia-ru", "data/uf"):
                 for m in WRITE_OPEN.finditer(src):
                     seg = src[max(0, m.start() - 200):m.end() + 200]
                     self.assertNotIn(bad, seg,

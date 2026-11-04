@@ -63,16 +63,21 @@ url  = "https://github.com/tigran123/urantia-ru"
 
 # The Urantia Foundation's own Russian translation, «Книга Урантии»: the whole
 # book, its 2024 release, as the Foundation publishes it in HTML.  Not a
-# repository: the zip Tigran downloaded on 2026-10-27, kept where he put it,
-# beside the old TeX of this translation in ../urantia-rus, which is never
-# read (DECISIONS.md).  A MASTER like the rest, fixed by its digest: the build
-# fails on any other bytes, and on a cover page that names another text, so a
-# new release is a new zip, its path, digest and text id here, and a reviewed
-# build.  build/readers/uf_html.py reads it, as it reads the English SRT's.
-# The Foundation's copyright, shown by its written permission (Mo Siegel, its
-# President, to Tigran, 2026).
+# repository: the zip Tigran downloaded on 2026-10-27, kept in data/uf/, the one
+# place for every Foundation release to come (Tigran, 2026-11-04; until then it
+# stood beside the old TeX of this translation in ../urantia-rus, which is never
+# read, DECISIONS.md).  Never committed: this repository is public, and the
+# Foundation's permission is to show the text, not to hand out its file, so
+# .gitignore leaves the zips out, deploy.sh does not ship them, and
+# data/uf/MANIFEST.tsv records each by its address, digest and text id, for a
+# fresh clone.  A MASTER like the rest, fixed by its digest: the build fails on
+# any other bytes, and on a cover page that names another text, so a new
+# release is a new zip, its path, digest and text id here and in the manifest,
+# and a reviewed build.  build/readers/uf_html.py reads it, as it reads the
+# English SRT's.  The Foundation's copyright, shown by its written permission
+# (Mo Siegel, its President, to Tigran, 2026).
 [uf-ru]
-zip     = "../urantia-rus/misc/uf-rus-001-1997-1.5-html.zip"
+zip     = "data/uf/uf-rus-001-1997-1.5-html.zip"
 sha256  = "fc8ea4e99ea6d241ef9c2ca72195750587fd63ac04514e6c1357e9b9ea492671"
 text_id = "UF-RUS-001-1997-1.5"     # as its cover page names it
 

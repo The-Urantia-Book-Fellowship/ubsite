@@ -4,3 +4,8 @@ __pycache__/
 *.pyc
 .venv/
 .obsidian/
+
+# The Urantia Foundation's releases, one zip per translation (sources.toml,
+# data/uf/README.md): its copyright, shown on the site by its written permission,
+# never handed out from this public repository.  data/uf/MANIFEST.tsv names each.
+data/uf/*.zip

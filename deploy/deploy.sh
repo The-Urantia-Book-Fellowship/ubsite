@@ -137,7 +137,9 @@ ship() {
     # Excluded: .venv (per-architecture, the target builds its own), var/ except the
     # database, and everything only the build needs.  So is a file git neither
     # tracks nor ignores, being in no commit: a draft beside the code, an editor's
-    # swap file (INTEGRATION.md, 2026-10-19).  What the build makes is ignored, and goes.
+    # swap file (INTEGRATION.md, 2026-10-19).  What the build makes is ignored, and goes;
+    # the Foundation's zips in data/uf/, ignored too, do not: a host serves the
+    # database and never holds a source (2026-11-04).
     local -a untracked=()
     while IFS= read -r f; do untracked+=(--exclude "/$f"); done \
         < <(git -C "$HERE" ls-files --others --exclude-standard)
@@ -147,6 +149,7 @@ ship() {
         --exclude '__pycache__/' \
         --exclude 'var/' \
         --exclude 'export/' \
+        --exclude 'data/uf/*.zip' \
         "${untracked[@]}" \
         "$HERE"/ "$HOST:$DEST"/
 
