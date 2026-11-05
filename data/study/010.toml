@@ -1,0 +1,215 @@
+# Paper 10, The Paradise Trinity: the British Study Edition has one note on it
+# at d6c3206 (10:5.7, carried), and Block has no chart for it.  Every other
+# note was found in review, with no credit line, checked against the press
+# text, the edition's own KJV, the SBL Greek New Testament, and the originals:
+# Matthews's God in Christian Thought and Experience, ch. VIII, The Holy
+# Trinity, pp. 180-201 (../block-sources/originals/, the page images for every
+# page quoted); Knudson's The Doctrine of God, ch. X, The Trinity, in Tigran's
+# copy (originals/LIBRARY.tsv, the DjVu pages quoted); Aquinas's Summa, I,
+# q. 32, a. 1 (originals/, p. 61); Sadler's Analytic Study of Part I,
+# pp. 251-269 (originals/); and Georg Simmel's The Number of Members as
+# Determining the Sociological Form of the Group, in The American Journal of
+# Sociology, 1902, JSTOR's free text from the Archive (originals/
+# jstor-2762037.pdf and jstor-2761932.pdf).  The review, numbered F1-F21 in
+# the order of the text, is var/study/review-010.md.  All 21 ruled Yes by
+# Tigran on 2026-11-05 ("All 21 notes are accepted"), with Simmel as a
+# source (question 1), the Nicene anathema's Greek kept in F12 (question 2),
+# and F13's reading kept (question 3).
+
+paper = 10
+chart = "none"
+
+# The works the notes quote, each under the key and words earlier papers gave
+# it where it has one.  Added: F2 and F4 quote it (q. 32, a. 1, p. 61 = PDF
+# page 75), under Paper 6's key and words.
+[[source]]
+key = "Aquinas"
+origin = "none"
+tex = '''Thomas Aquinas, \emph{The ``Summa Theologica'' of St.~Thomas Aquinas}, Part~I, QQ.~XXVII--XLIX, literally translated by Fathers of the English Dominican Province, second and revised edition (London: Burns Oates \& Washbourne, 1921).'''
+
+# Added: F4 and F13 quote it, pp. 412-413 and 416 (djvu pages 414-415, 418),
+# under Paper 1's key and words; public in Tigran's library.
+[[source]]
+key = "Knudson"
+origin = "none"
+tex = '''Albert C. Knudson, \emph{The Doctrine of God} (New York: The Abingdon Press, 1930).'''
+
+# Added: F2, F7, F8, F9, F12 and F14 quote it, pp. 190, 192, 194-195, 196 and
+# 198 (PDF pages 214, 216, 218-219, 220, 222), under Paper 5's key and words.
+[[source]]
+key = "Matthews"
+origin = "none"
+tex = '''W.~R. Matthews, \emph{God in Christian Thought and Experience} (London: Nisbet \& Co. Ltd., 1930).'''
+
+# Added: F1 and F10 quote it, pp. 256, 267 and 269 (PDF pages 274, 285 and
+# 287), under Paper 3's key and words.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# Added: F8 and F14 quote it, pp. 40 and 45 of the first part (PDF pages 41
+# and 46); the article's head and its last page name the author and the
+# translator (p. 1, note 1: "Translated by A. W. Small").
+[[source]]
+key = "Simmel"
+origin = "none"
+tex = '''Georg Simmel, ``The Number of Members as Determining the Sociological Form of the Group'', translated by A.~W. Small, \emph{The American Journal of Sociology}, vol.~VIII, no.~1 (July 1902), pp.~1--46, and no.~2 (September 1902), pp.~158--196.'''
+
+# F1: checked in the republication, pp. 267 and 269 (PDF pages 285 and 287);
+# 93:2.5 in the press text.
+[[note]]
+at = "10:0.2"
+after = "God the Father, God the Son, and God the Spirit."
+origin = "none"
+tex = '''The word is no Scripture's. Dr~Sadler, closing his study of this paper \cite{Sadler2003}, p.~267: ``The word `Trinity' is not found in the Bible''; and p.~269: ``The word `Trinity' first appears in Greek in A.D. 181, used by Theophilus of Antioch. The Latin word from which we derive our English was first used by Tertullian in A.D. 200.'' Theophilus says \textgreek{τριάς} of God, his Word and his Wisdom (\emph{To Autolycus}, II, 15); Tertullian's \emph{trinitas} is in his \emph{Against Praxeas}. The book's own sign for it is Melchizedek's, the three concentric circles (\bibref[93:2.5]{p093 2:5}).'''
+
+# F2: checked in the Aquinas scan, p. 61, and Matthews, p. 195, in the page
+# images; 0:12.1, 16:1.1 and 3:6.2 in the press text.
+[[note]]
+at = "10:0.3"
+after = "deem the Trinity to have been inevitable."
+origin = "none"
+tex = '''The Censor's word has a history. Richard of St~Victor held that ``probable and even necessary arguments can be found'' for the Trinity, as Aquinas reports him, with those ``moved by the consideration that no good thing can be joyfully possessed without partnership'', before ruling that ``It is impossible to attain to the knowledge of the Trinity by natural reason'' \cite{Aquinas}, q.~32, a.~1, p.~61. Matthews~\cite{Matthews}, p.~195: ``Many philosophical interpretations of the doctrine of the Trinity have professed, at any rate, to show the inevitability of the number three, though it may be, as Dr.~Gore and Dr.~Kirk allege, their confidence is misplaced.'' The book takes Richard's side, by revelation: the Trinity ``was inevitable'' (\bibref[0:12.1]{p000 12:1}), ``the absolute inevitability'' (\bibref[16:1.1]{p016 1:1}), while ``The universe was not inevitable'' (\bibref[3:6.2]{p003 6:2}).'''
+
+# F3: checked in the edition's KJV, the SBL Greek, and the Revised Version
+# (its 1895 printing); 32:4.12's note in data/study/032.toml.
+[[note]]
+at = "10:1.2"
+after = "except that of his central indwelling."
+origin = "none"
+tex = '''A kenosis before the Son's. Philippians~2:7, of Christ: ``But made himself of no reputation, and took upon him the form of a servant'', \textgreek{ἑαυτὸν ἐκένωσεν}, ``emptied himself'' in the Revised Version (1881). Said there of the incarnation; here of the Father in eternity, as at \bibref[32:4.12]{p032 4:12}, whose note gives the verse.'''
+
+# F4: checked in Tigran's copy of Knudson, pp. 412-413 (djvu pages 414-415),
+# and the Aquinas scan, p. 61; 1:7.6 in the press text.
+[[note]]
+at = "10:1.3"
+after = "the Eternal Son and the Conjoint Actor."
+origin = "none"
+tex = '''Knudson~\cite{Knudson}, p.~413: ``It is at present, for instance, urged that personality is in its very nature social. It implies fellowship. There can, therefore, be no proper personality of God except on something like the Trinitarian basis.'' On p.~412 he gives the argument's roots: ``\,`Thou dost see the Trinity,' said Augustine, `if thou seest love' \ldots{} This idea of a trinity of love was elaborated at length during the medieval period by Richard St.~Victor in his six books de Trinitate''. Richard's own reason, as Aquinas gives it \cite{Aquinas}, p.~61: ``no good thing can be joyfully possessed without partnership''. The book has the fellowship at \bibref[1:7.6]{p001 7:6}: personality implies ``fellowship with other and equal personalities, such as exists in the personality associations of the Paradise Deities''.'''
+
+# F5: checked in the edition's KJV; 6:1.1's note in data/study/006.toml links
+# here.
+[[note]]
+at = "10:1.4"
+after = "his only-begotten Son,"
+origin = "none"
+tex = '''John~1:18: ``the only begotten Son, which is in the bosom of the Father''. The note at \bibref[6:1.1]{p006 1:1} follows the title through the book, to the Creator Sons.'''
+
+# F6: checked in the edition's KJV; 8:4.5's note in data/study/008.toml.
+[[note]]
+at = "10:1.6"
+after = "likeness of mortal flesh,"
+origin = "none"
+tex = '''Romans~8:3: ``in the likeness of sinful flesh''; \textit{sinful} has become \textit{mortal}, as at \bibref[8:4.5]{p008 4:5}.'''
+
+# F7: checked in the Matthews scan, pp. 196 and 198, in the page images;
+# 10:2.4 in the press text.
+[[note]]
+at = "10:2.2"
+after = "completes the existential personalization of Deity."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, pp.~196--198, reaching for the Spirit by ``the analogy of society'': ``If then there is, in the very imperfect societies which are known to us, something which, transcending all individuals taken singly, can be called even metaphorically a social mind, we might expect that this characteristic would be perfectly developed in a perfect Society. Perhaps that would mean that, in this instance alone, the `social mind' would have passed beyond all metaphor and be `real mind'---fully personal will and intelligence. \ldots{} the relation between the First and Second Persons may itself be Personal.'' Here the Spirit is ``the unique personal consequence of the everlasting Father-Son union'' (\bibref[10:2.4]{p010 2:4}).'''
+
+# F8: checked in the Matthews scan, p. 192, and in Simmel's first part,
+# pp. 40 and 45, in the page images.
+[[note]]
+at = "10:2.3"
+after = "Three persons are a minimum social group,"
+origin = "none"
+tex = '''The social analogy of the Trinity is the Cappadocian Fathers'. Matthews~\cite{Matthews}, p.~192: theology has used ``two classes of analogy \ldots{} that of the individual person and that of a society. The first of these has been the most common in the West and is employed by Augustine \ldots{} the second was used by the Cappadocian Fathers and has been revived by Dr.~Tennant and others in modern times.'' That three is the least number of a society is sociology's finding too. Simmel~\cite{Simmel}, p.~40, of a group of two: ``The departure of each single individual would destroy the whole, so that it does not come to such a superpersonal life of the whole that the individual feels himself independent; whereas, even in the case of an association of only three, if one individual departs, a group may still continue to exist''; and p.~45: ``Where three elements, A, B, C, constitute a community, there is added to the immediate relationship which exists, for example, between A and B, the immediate relationship which they gain by their common relation to C.'''''
+
+# F9: checked in the Matthews scan, pp. 194-195, in the page images.
+[[note]]
+at = "10:2.3"
+after = "inevitability of the Conjoint Actor."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, pp.~194--195: ``It has been said that no philosophical or theological argument has ever succeeded in showing why there should be three Persons in one God. The reality of distinctions within the Divine Experience may be shown to be a tenable proposition, but no ground can be discovered for the conclusion that these distinctions are not two or more than three. \ldots{} so far we have not, in our present discussion, gone beyond the `Binitarian' idea---the real being of Father and Son.'' The paper answers with the inevitability he doubted (the note at \bibref[10:0.3]{p010 0:3}), and counts the arithmetic of a social group ``least of all'' its reasons.'''
+
+# F10: checked in the edition's KJV and the republication, p. 256 (PDF
+# page 274).
+[[note]]
+at = "10:3.1"
+after = "in our own image.”"
+origin = "none"
+tex = '''Genesis~1:26: ``And God said, Let us make man in our image, after our likeness''. \textit{Mortal} is added, \textit{after our likeness} left out. Dr~Sadler, on this paragraph \cite{Sadler2003}, p.~256: ``Plural Deity. The Creator addresses an equal---`us.' Thus, the first chapter of our Bible recognizes the Trinity.'' The paper reads it so too, of the Adjusters' bestowal.'''
+
+# F11: checked in the edition's KJV; 8:2.2 in the press text.
+[[note]]
+at = "10:3.3"
+after = "the “Word of God,”"
+origin = "none"
+tex = '''John~1:1 and 14; and Revelation~19:13: ``his name is called The Word of God''. ``The Act of God'' is the book's own, as ``the Divine Action'' is a title of the Spirit's (\bibref[8:2.2]{p008 2:2}).'''
+
+# F12: checked in the Matthews scan, pp. 190 and 194, in the page images.
+# The Nicene anathema is the creed's own text.
+[[note]]
+at = "10:3.5"
+after = "are both coeternal with the Father."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, p.~190: ``It is assumed that the full knowledge of God would be that of God apart from creation, absolutely unrevealed, the solitary Absolute \ldots{} But the conception of God in Himself in this sense is probably unmeaning. At least we shall argue later that creation and revelation---the going forth into `otherness'---is no accidental or arbitrary characteristic of Deity, but, of the essence of the Divine Being''; and p.~194: ``the bare and solitary Absolute cannot be love''. The Council of Nicaea (325) put the same under anathema in Arius's words, \textgreek{ἦν ποτε ὅτε οὐκ ἦν}, ``there was when he was not''.'''
+
+# F13: checked in Tigran's copy of Knudson, p. 416 (djvu page 418); 10:3.5,
+# 0:12.1 and 10:3.7 in the press text.
+[[note]]
+at = "10:3.17"
+after = "wholly voluntary and self-imposed."
+origin = "none"
+tex = '''Here the tradition is reversed. Knudson~\cite{Knudson}, p.~416, on the orthodox answer to the charge of tritheism: ``\,`Generation' and `procession,' we are told, are necessary processes; they are due to the divine nature rather than the divine will. There is, therefore, no possibility of one Person detaching himself from the others.'' In the paper the Son and the Spirit are the Father's ``self-willed divestment'' (\bibref[10:3.5]{p010 3:5}), the Trinity is ``inherent in the fact of the differentiation of the personal and the nonpersonal by the Father's unfettered will'' (\bibref[0:12.1]{p000 12:1}), and its interdependence is the price he chose (\bibref[10:3.7]{p010 3:7}).'''
+
+# F14: checked in the Matthews scan, p. 198, and Simmel's first part, p. 45,
+# in the page images.
+[[note]]
+at = "10:5.2"
+after = "of the component individuals."
+origin = "none"
+tex = '''Matthews~\cite{Matthews}, p.~198: ``The association of human beings in any kind of group, whether family, club, or state, or even crowd, engenders some impulse to common action and hence some common thought and feeling. Nor can the common action, thought, or feeling be identified with that of any single person or class of persons within the group.'' And Simmel~\cite{Simmel}, p.~45, of two against three: when one of two fails, ``only the other remains, without any superindividual energy such as, even in the case of a combination of only three, is in some measure present''.'''
+
+# F15: the edition's one note on this paper, carried as it is.
+[[note]]
+at = "10:5.7"
+after = "the seven triunities"
+origin = "f6d3ca1772416164"
+tex = '''Defined at \bibref[104:4.1]{p104 4:1}.'''
+
+# F16: checked in the edition's KJV.
+[[note]]
+at = "10:6.1"
+after = "he is law."
+origin = "none"
+tex = '''Compare Isaiah~33:22: ``For the \textsc{Lord} \bibemph{is} our judge, the \textsc{Lord} \bibemph{is} our lawgiver, the \textsc{Lord} \bibemph{is} our king''; and James~4:12: ``There is one lawgiver''. Here the one law is shared out: its source the Father, its administration the Son's, its revelation the Spirit's, and its application, justice, the Trinity's.'''
+
+# F17: checked in the edition's KJV; 10:6.4 and 10:6.16 in the press text.
+[[note]]
+at = "10:6.2"
+after = "it is always a plural function."
+origin = "none"
+tex = '''Compare John~5:22: ``For the Father judgeth no man, but hath committed all judgment unto the Son''. Here neither judges: ``No one of the Paradise Deities fosters the administration of justice''; judgment is the work of the Stationary Sons of the Trinity (\bibref[10:6.4]{p010 6:4}), and the Censor who writes this is one of them (\bibref[10:6.16]{p010 6:16}).'''
+
+# F18: 2:4.1 and 2:3.2 in the press text; checked in the edition's KJV.
+[[note]]
+at = "10:6.18"
+after = "mercy is its personal expression."
+origin = "none"
+tex = '''\bibref[2:4.1]{p002 4:1}: ``Mercy is simply justice tempered by that wisdom which grows out of perfection of knowledge and the full recognition of the natural weaknesses and environmental handicaps of finite creatures''; and \bibref[2:3.2]{p002 3:2}: ``this divine justice is always tempered with mercy''. Compare Psalms~89:14: ``Justice and judgment \bibemph{are} the habitation of thy throne: mercy and truth shall go before thy face.'''''
+
+# F19: checked in the edition's KJV; 1:7.6's note in data/study/001.toml.
+[[note]]
+at = "10:7.1"
+after = "“The Lord our God is one God.”"
+origin = "none"
+tex = '''Deuteronomy~6:4: ``Hear, O Israel: The \textsc{Lord} our God \bibemph{is} one \textsc{Lord}'', the Shema, whose Hebrew and Greek the note at \bibref[1:7.6]{p001 7:6} gives; and Mark~12:29, where Jesus puts it first of all the commandments. \textit{One Lord} has become \textit{one God}.'''
+
+# F20: checked in the edition's KJV.
+[[note]]
+at = "10:7.1"
+after = "beside me there is no God.”"
+origin = "none"
+tex = '''Isaiah~44:6: ``I \bibemph{am} the first, and I \bibemph{am} the last; and beside me \bibemph{there is} no God.'' Also 48:12; and of Christ, Revelation~1:17: ``I am the first and the last''.'''
+
+# F21: checked in the edition's KJV; 3:5.5 in the press text.
+[[note]]
+at = "10:7.5"
+after = "the welfare and progress of the universes."
+origin = "none"
+tex = '''Romans~8:28: ``And we know that all things work together for good to them that love God''. \textit{All things} are here the ``catastrophic physical events, appalling accidents, horrific disasters, painful illnesses, and world-wide scourges''; \textit{for good} has become ``for the welfare and progress of the universes''; and the Supreme is named as the hand in it, as \bibref[3:5.5]{p003 5:5} names ``the universal sovereignty of God'' over ``the vicissitudes of existence''.'''
