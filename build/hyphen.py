@@ -38,6 +38,19 @@ hyph-ru with hyphenmins 2/2 (gloss-russian.ldf), plus each translation's own
 \\hyphenation list (build/translation.py reads it).  `RUSSIAN` is that model.
 A word written with a stress mark, U+0301, is left whole: TeX's lccode for the
 mark is 0, and how it would cut the word around it is not worth the copy.
+
+A study note's Greek, its `\\textgreek` spans, breaks as polyglossia's `greek`
+with variant=ancient would break it (Tigran, 2026-11-05, so that a long word
+such as κεκαυστηριασμένων no longer spreads the line before it): hyph-grc,
+Dimitrios Filippou's patterns for ancient Greek, with polyglossia's
+hyphenmins where a gloss sets none of its own, 2/3 (polyglossia.sty, not the
+pattern file's 1/1).  `GREEK` is that model, and tests/test_hyphen.py holds it
+to what xelatex printed for a list of the notes' words.  The patterns list
+each accented vowel in both its forms, with tonos and with oxia, so a word is
+looked up as written; one written with a combining mark is left whole, as a
+Russian one with a stress mark is.  The study edition itself sets
+`\\textgreek` as a font switch alone, under English, so this is the site's
+choice, not the edition's.
 """
 
 from __future__ import annotations
@@ -50,12 +63,14 @@ import re
 LEFT, RIGHT = 2, 3                 # \lefthyphenmin, \righthyphenmin for english
 PATTERNS = pathlib.Path(__file__).resolve().parent.parent / "vendor" / "tex" / "hyphen.tex"
 RU_PATTERNS = PATTERNS.with_name("hyph-ru.tex")
+GRC_PATTERNS = PATTERNS.with_name("hyph-grc.tex")
 
 _WORD = re.compile(r"[^\W\d_]+")   # a run of letters, any script
 _ASCII = re.compile(r"[A-Za-z]+")
 # A Russian word, with any stress mark written in it (U+0301 is no letter to \w).
 _RU_WORD = re.compile(r"[^\W\d_](?:[^\W\d_]|\u0301)*")
 STRESS = "\u0301"
+_COMBINING = re.compile(r"[\u0300-\u036f]")
 
 
 @dataclasses.dataclass(frozen=True, slots=True)
@@ -70,6 +85,7 @@ class Language:
 
 ENGLISH = Language(PATTERNS, "latin-1", LEFT, RIGHT, True)
 RUSSIAN = Language(RU_PATTERNS, "utf-8", 2, 2, False)
+GREEK = Language(GRC_PATTERNS, "utf-8", 2, 3, False)   # polyglossia's default minimums
 
 
 def points_of(entry: str) -> frozenset[int]:
@@ -93,8 +109,10 @@ def _load_knuth(path: pathlib.Path = PATTERNS, encoding: str = "latin-1"):
             else:
                 i += 1
         pats[letters] = nums
-    exc = {e.replace("-", "").lower(): points_of(e)
-           for e in re.sub(r"%.*", "", src.split("\\hyphenation{")[1].split("}")[0]).split()}
+    exc = {}
+    if "\\hyphenation{" in src:                   # hyph-grc.tex has none
+        exc = {e.replace("-", "").lower(): points_of(e)
+               for e in re.sub(r"%.*", "", src.split("\\hyphenation{")[1].split("}")[0]).split()}
     return pats, exc
 
 
@@ -146,18 +164,31 @@ class Hyphenator:
         head): the whole word drops to the last line, never its stub.
         """
         shy = sorted(s.start for s in spans if s.kind == "shy")
+        # A note's Greek, \textgreek, is its own language (the module's head).
+        greek = [(s.start, s.end) for s in spans
+                 if s.kind == "lang" and (s.attr or {}).get("lang") == "grc"]
         words = list((_WORD if self.lang.ascii_only else _RU_WORD).finditer(text))
         last = words[-1].span() if words else None
         out = []
         for m in words:
+            a, b = m.span()
+            if any(x <= a and b <= y for x, y in greek):
+                if (a, b) != last and not _COMBINING.search(m.group()):
+                    out.extend(a + p for p in sorted(_greek().word(m.group())))
+                continue
             if self.lang.ascii_only and not _ASCII.fullmatch(m.group()):
                 continue
             if STRESS in m.group():
                 continue
-            a, b = m.span()
             own = [p for p in shy if a < p < b]
             if own:
                 out.extend(own)
             elif (a, b) != last:
                 out.extend(a + p for p in sorted(self.word(m.group())))
         return out
+
+
+@functools.lru_cache(maxsize=None)
+def _greek() -> "Hyphenator":
+    """The Greek model, with no list of its own, made once."""
+    return Hyphenator((), GREEK)

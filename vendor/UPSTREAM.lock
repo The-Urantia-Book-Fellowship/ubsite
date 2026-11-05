@@ -29,7 +29,7 @@
     "dest": "index/cite.py",
     "sha256": "ddb440c468af4ea6e6da7e52578c35e2824aa7a0b6b929df2a272ec6a9cbfd0b",
     "bytes": 18458,
-    "commit": "be07609626fc720e6600f7e3bc41f3d0510bb6ea"
+    "commit": "7c282f2c409f20da4349747b93f1fbeec2e34882"
   },
   {
     "repo": "index",
@@ -37,7 +37,7 @@
     "dest": "index/xref.py",
     "sha256": "91643f77ef18114610b4740329d87c0bde139903a3acc7aeaa67f92537313330",
     "bytes": 4686,
-    "commit": "be07609626fc720e6600f7e3bc41f3d0510bb6ea"
+    "commit": "7c282f2c409f20da4349747b93f1fbeec2e34882"
   },
   {
     "repo": "texlive",
@@ -53,6 +53,14 @@
     "dest": "tex/hyph-ru.tex",
     "sha256": "ce988fcc66e5e29d7474df5ab5b489d3f52a50ebccf570997f992d84221b922a",
     "bytes": 68421,
+    "commit": null
+  },
+  {
+    "repo": "texlive",
+    "path": "tex/generic/hyph-utf8/patterns/tex/hyph-grc.tex",
+    "dest": "tex/hyph-grc.tex",
+    "sha256": "38870c0292b1937517dd1709c5af5b1200f7a15a25469f5389a1783579abaf6a",
+    "bytes": 82245,
     "commit": null
   },
   {

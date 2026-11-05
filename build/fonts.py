@@ -161,7 +161,11 @@ def study_codepoints(con) -> tuple[set[str], dict[str, set[str]], list[str]]:
         h = RE_MATH.sub(" ", h)
         for lang, inner in RE_LANG.findall(h):
             for c in html.unescape(RE_TAG.sub("", inner)):
-                if c.isspace() or (c.isascii() and not c.isalnum()):
+                if c == "\u00ad":
+                    # A soft hyphen (build/hyphen.py GREEK) is never drawn; the
+                    # hyphen the break shows is, from the span's font.
+                    other.setdefault(lang, set()).add("-")
+                elif c.isspace() or (c.isascii() and not c.isalnum()):
                     goudy.add(c)
                 else:
                     other.setdefault(lang, set()).add(c)
@@ -230,7 +234,9 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
     _, other, maths = study_codepoints(con)
     for lang, chars in sorted(other.items()):
         spans = SCRIPTS.get(lang, ())
-        stray = sorted(c for c in chars if not any(a <= ord(c) <= b for a, b in spans))
+        # The hyphen a Greek break shows is drawn from the span's font, which
+        # the missing-glyph gate below holds it to; it is no stray.
+        stray = sorted(c for c in chars if c != "-" and not any(a <= ord(c) <= b for a, b in spans))
         if stray:
             report.hard("study-lang-script", f"lang={lang}",
                         " ".join(f"{c} U+{ord(c):04X}" for c in stray)[:200])

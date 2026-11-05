@@ -396,7 +396,8 @@ def run(con) -> int:
             " UNION ALL SELECT 'SRT ' || name || ' ' || n, why_html, why_html_hy FROM srt_item"):
         k += 1
         plain = strip_tags(hy)
-        if hy.replace("\u00ad", "") != h or re.search(r"(?<![A-Za-z])\u00ad|\u00ad(?![A-Za-z])", plain):
+        # ... of any script: a note's Greek breaks too (build/hyphen.py GREEK).
+        if hy.replace("\u00ad", "") != h or re.search(r"(?<![^\W\d_])\u00ad|\u00ad(?![^\W\d_])", plain):
             hoff += 1
             if hoff <= 5:
                 print(f"            {where}: its soft hyphens are not only the book's")

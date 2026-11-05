@@ -44,6 +44,10 @@ MANIFEST = [
     # And the patterns the Russian translations are set with: polyglossia's
     # `russian` loads hyph-ru, as both translations' TeX does (build/hyphen.py).
     ("texlive", "tex/generic/hyph-utf8/patterns/tex/hyph-ru.tex", "tex/hyph-ru.tex"),
+    # And the patterns a study note's Greek breaks by: Dimitrios Filippou's for
+    # ancient Greek, which polyglossia's `greek` with variant=ancient loads, the
+    # TeX of a polytonic New Testament word (build/hyphen.py; Tigran, 2026-11-05).
+    ("texlive", "tex/generic/hyph-utf8/patterns/tex/hyph-grc.tex", "tex/hyph-grc.tex"),
     # The face a study note's math is set in, subset by build/fonts.py: OFL 1.1,
     # drawn to match EB Garamond, the nearest of TeX Live's math fonts to Goudy.
     ("texlive", "fonts/opentype/public/garamond-math/Garamond-Math.otf", "fonts/Garamond-Math.otf"),

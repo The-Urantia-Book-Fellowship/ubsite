@@ -12,6 +12,7 @@ import tempfile
 import textwrap
 import tomllib
 import unittest
+from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -423,6 +424,28 @@ class Study(unittest.TestCase):
         self.assertIn('<span class="lang" lang="he" dir="rtl">שְׁמַע</span>', html)
         self.assertIn('<span class="lang" lang="grc">οὐρανός</span>', html)
         self.assertEqual(text, "so 23−1=7 and שְׁמַע and οὐρανός")
+
+    def test_a_figure_is_drawn_inline_with_its_labels_as_math(self):
+        # Tigran, 2026-11-05: the gyroscope at 9:3.3, data/study/figures/.
+        with mock.patch.object(study, "FIGURES", pathlib.Path(self.data) / "figures"):
+            (pathlib.Path(self.data) / "figures").mkdir()
+            (pathlib.Path(self.data) / "figures" / "wheel.svg").write_text(
+                '<svg class="sfig" viewBox="0 0 10 10"><path d="M0 0H9"/>'
+                '<foreignObject x="1" y="1" width="8" height="8"><div class="lab">$\\omega$</div>'
+                '</foreignObject></svg>\n', encoding="utf-8")
+            (text, html, _), bad = self.expand(r"turns at $\Omega$. \figure{wheel} Its weight")
+            self.assertEqual(bad, [])
+            self.assertIn('<math xmlns="http://www.w3.org/1998/Math/MathML">'
+                          '<mi mathvariant="normal">Ω</mi></math>. <svg class="sfig"', html)
+            self.assertIn('<div class="lab"><math xmlns="http://www.w3.org/1998/Math/MathML">'
+                          '<mi>ω</mi></math></div></foreignObject></svg> Its weight', html)
+            self.assertEqual(text, "turns at Ω. ω Its weight")
+            _, bad = self.expand(r"\figure{nowhere}")
+            self.assertEqual(bad, ["study-figure"])
+            (pathlib.Path(self.data) / "figures" / "bad.svg").write_text(
+                '<svg><foreignObject>$\\frac{a}{b}$</foreignObject></svg>', encoding="utf-8")
+            _, bad = self.expand(r"\figure{bad}")
+            self.assertEqual(bad, ["study-math"])
 
 
 if __name__ == "__main__":

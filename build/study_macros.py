@@ -48,6 +48,9 @@ TABLE: dict[str, Spec] = {
     "bibref": Spec(CALL, opt=1, args=1, note="\\bibref[1:2.9]{p001 2:9}: a link to the paragraph"),
     "myurl": Spec(CALL, args=1, note="an address, linked"),
     "bibfrac": Spec(CALL, args=2, note="\\bibfrac{3}{4}: 3/4"),
+    # Not the edition's: a figure of the review's own, data/study/figures/<name>.svg,
+    # drawn inline, its labels $...$ set as the note's math is (Tigran, 2026-11-05).
+    "figure": Spec(CALL, args=1, note="\\figure{gyroscope}: data/study/figures/gyroscope.svg, inline"),
 }
 
 # {\em ...} in a bibliography entry: italic to the end of its group.

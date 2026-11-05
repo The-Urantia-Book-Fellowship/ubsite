@@ -1,0 +1,24 @@
+<svg class="sfig" viewBox="0 0 296 222" role="img" aria-label="A gyroscope: a wheel spinning on an axle that rests on a support at one end, with its weight pulling down at the wheel and the axle swinging round the vertical" xmlns="http://www.w3.org/2000/svg">
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<path d="M30 212H90M60 212V116" stroke-width="2"/>
+<path d="M60 108V34" stroke-width="1.2" stroke-dasharray="4 3"/>
+<path d="M-1 0A1 1 0 0 1 1 0" transform="matrix(24 0 10.8 -6.72 60 44)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+<path d="M1 0A1 1 0 0 1 -1 0" transform="matrix(24 0 10.8 -6.72 60 44)" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>
+<path d="M60 112H258" stroke-width="2.2"/>
+<circle r="1" transform="matrix(19.8 -12.32 0 -44 205 112)" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0.574 0.819A1 1 0 0 1 -0.866 0.5" transform="matrix(24.3 -15.12 0 -54 205 112)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+<path d="M205 118V176" stroke-width="1.6"/>
+<path d="M60 190H205M60 185V195M205 185V195" stroke-width="1"/>
+</g>
+<g fill="currentColor" stroke="none">
+<circle cx="60" cy="112" r="3.2"/>
+<circle cx="205" cy="112" r="4"/>
+<polygon points="89.9,40.3 85.7,46.7 82.3,41.3"/>
+<polygon points="182.4,104.9 180.8,97.4 187.1,98.8"/>
+<polygon points="205.0,183.0 201.8,176.0 208.2,176.0"/>
+</g>
+<foreignObject x="94" y="28" width="32" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$\Omega$</div></foreignObject>
+<foreignObject x="226" y="46" width="32" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$\omega$</div></foreignObject>
+<foreignObject x="214" y="163" width="40" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$mg$</div></foreignObject>
+<foreignObject x="126" y="195" width="24" height="26"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$r$</div></foreignObject>
+</svg>

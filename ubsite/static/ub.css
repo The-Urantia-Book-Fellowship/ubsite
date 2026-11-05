@@ -1027,6 +1027,15 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
    it can be read freely, grey as the card's other link, Block's chart. */
 :is(.note, .pop) .cite { font-size: .88em; }
 .cite a.lib { color: var(--faint); }
+/* A figure in a study note (\figure{name}, data/study/figures/name.svg, drawn
+   inline by build/study.py; Tigran, 2026-11-05, the gyroscope at 9:3.3): a
+   block of its own in the words, in the text's colour, as wide as the card
+   allows.  Its labels are math in foreignObjects, sized in the figure's own
+   units so that they scale with it. */
+:is(.note, .pop) svg.sfig { display: block; width: min(100%, 19em); height: auto;
+                            margin: .7em auto .35em; color: var(--text); overflow: visible; }
+:is(.note, .pop) svg.sfig foreignObject { overflow: visible; }
+:is(.note, .pop) svg.sfig .lab { font-size: 15px; line-height: 1; white-space: nowrap; text-align: start; }
 .pop .at { display: none; }                     /* the card stands at its paragraph */
 .pop .lbl { pointer-events: none; }
 /* A note's first paragraph is a .lead, which the prose pages set at 1.05rem

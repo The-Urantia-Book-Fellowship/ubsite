@@ -73,6 +73,10 @@ RE_TARGET = re.compile(r"p(\d+) (\d+):(\d+)")
 RE_MONTH = re.compile(r"/uploads/(\d{4})/(\d{2})/")
 RE_HEB = re.compile(r"\\textheb\s*\{([^{}]*)\}")
 SENTINEL = 0xE000                    # a private-use character stands for each $...$
+FIG_SENTINEL = SENTINEL + 0x800      # and one for each \figure, put back after render()
+FIGURES = DATA / "figures"           # \figure{name}: data/study/figures/name.svg
+RE_FIGURE = re.compile(r"[a-z][a-z0-9-]*")
+RE_DOLLAR = re.compile(r"\$([^$]*)\$")
 # A hyphen that begins a word, a suffix's or an ending's ("the Latin suffix
 # -tia", "-el/-al"): a browser may break a line after any hyphen, and left
 # "-" alone at a line's end (Tigran, 2026-10-18).  Held to its letters.
@@ -499,9 +503,37 @@ def expand(tex: str, paras, sources: dict, where: str, report,
     def bibfrac(exp, opts, args, tok):
         exp._emit(f"{_raw(args[0]).strip()}/{_raw(args[1]).strip()}")
 
+    figs: list[str] = []
+
+    def figure(exp, opts, args, tok):
+        # A figure of the review's own (Tigran, 2026-11-05: the gyroscope at
+        # 9:3.3): data/study/figures/<name>.svg, an <svg> alone, drawn inline
+        # in the note, so that the offline copy and the card carry it with the
+        # words.  Its labels are $...$, set by texmath as the note's math is,
+        # so they are held to the same set and drawn from the same font; what
+        # they say is in `text`, as everything the HTML says is.
+        name = _raw(args[0]).strip() if args else ""
+        path = FIGURES / f"{name}.svg"
+        if not RE_FIGURE.fullmatch(name) or not path.is_file():
+            report.hard("study-figure", where, f"\\figure{{{name}}}: no {FIGURES.name}/{name}.svg")
+            return
+        svg = path.read_text(encoding="utf-8").strip()
+        if not (svg.startswith("<svg") and svg.endswith("</svg>")) or "<script" in svg:
+            report.hard("study-figure", where, f"{path.name}: not one <svg> element")
+            return
+        try:
+            svg = RE_DOLLAR.sub(lambda m: texmath.convert(m[1]), svg)
+        except texmath.MathError as e:
+            report.hard("study-math", where, f"{path.name}: {e}")
+            return
+        # One space where the file breaks a line between elements, so that
+        # `text` reads "Ω ω mg r" where the labels stand, not a run of lines.
+        figs.append(re.sub(r">\s+<", "> <", svg))
+        exp._emit(chr(FIG_SENTINEL + len(figs) - 1))
+
     exp = Expander(table, set(), report, where, italic_openers=ITALIC_OPENERS,
                    calls={"cite": cite, "bibref": bibref, "myurl": myurl, "bibfrac": bibfrac,
-                          **(calls or {})},
+                          "figure": figure, **(calls or {})},
                    subs=subs, forbid_comments=True)
     ex = exp.run(src)
     ex.spans += [Span(m.start(), m.end(), "nobreak") for m in RE_LEADING_HYPHEN.finditer(ex.text)]
@@ -520,6 +552,10 @@ def expand(tex: str, paras, sources: dict, where: str, report,
             html = html.replace(chr(SENTINEL + i), texmath.convert(m))
         except texmath.MathError as e:
             report.hard("study-math", where, f"${m}$: {e}")
+    for i, svg in enumerate(figs):
+        if html.count(chr(FIG_SENTINEL + i)) != 1:
+            report.hard("study-figure", where, "a \\figure did not survive its macro")
+        html = html.replace(chr(FIG_SENTINEL + i), svg)
     return strip_tags(html).replace("\u00ad", ""), html, cites
 
 

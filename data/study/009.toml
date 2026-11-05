@@ -1,0 +1,241 @@
+# Paper 9, Relation of the Infinite Spirit to the Universe: the British Study
+# Edition has no notes on it at d6c3206, and Block has no chart for it.  Every
+# note here was found in review, with no credit line, checked against the
+# press text, the edition's own KJV, the Revised Version (1881) and the
+# Revised Standard Version (1946) where a note names them, the SBL Greek New
+# Testament, and the originals: Smyth's Loeb Aeschylus, vol. II (1926), the
+# University of Toronto's copy (../block-sources/originals/), Heath's Works of
+# Archimedes (1897) in Tigran's own library (originals/LIBRARY.tsv), and
+# Sadler's Analytic Study of Part I (originals/).  The review, numbered F1-F19
+# in the order of the text, is var/study/review-009.md.  All 19 ruled Yes by
+# Tigran on 2026-11-05 ("I have approved all 19 of your notes"), the three
+# questions as recommended: the classical notes F5 and F11, the cross-reference
+# notes F7, F12-F14 and F18, and the echoes F4, F16 and F17 all stay; F9 with
+# the rate of precession and its schematic, which he asked for the same day.
+
+paper = 9
+chart = "none"
+
+# The works the notes quote, none of which the edition lists for this paper,
+# each under the key and words earlier papers gave it where it has one.
+# Added: F5 quotes it; the title page (originals/aeschyluswitheng02aescuoft.pdf,
+# PDF page 7), the Greek p. 222 and the English p. 223 (PDF pages 236-237) in
+# the page images.
+[[source]]
+key = "Aeschylus"
+origin = "none"
+tex = '''Aeschylus, \emph{Aeschylus, with an English Translation by Herbert Weir Smyth}, vol.~II, \emph{Agamemnon, Libation-Bearers, Eumenides, Fragments} (London: William Heinemann; New York: G.~P. Putnam's Sons, 1926).'''
+
+# Added: F11 quotes it; checked in Tigran's copy, the title page and p. xix
+# (djvu page 18).
+[[source]]
+key = "Heath"
+origin = "none"
+tex = '''T.~L. Heath, \emph{The Works of Archimedes, Edited in Modern Notation with Introductory Chapters} (Cambridge: at the University Press, 1897).'''
+
+# Added for section 7 (Tigran, 2026-11-05, asking what the literature has on
+# reflectivity): F17a quotes it; checked in the scan, the title page and
+# p. 248 (originals/themonadology00leibuoft.pdf, PDF page 264).
+[[source]]
+key = "Leibniz"
+origin = "none"
+tex = '''Gottfried Wilhelm Leibniz, \emph{The Monadology and Other Philosophical Writings}, translated with introduction and notes by Robert Latta (Oxford: at the Clarendon Press, 1898).'''
+
+# Added for section 7: F17d quotes it; checked in Tigran's copy, the title
+# page and p. 2 (PDF page 26), recorded in originals/LIBRARY.tsv.
+[[source]]
+key = "Bucke"
+origin = "none"
+tex = '''Richard Maurice Bucke, \emph{Cosmic Consciousness: A Study in the Evolution of the Human Mind} (Philadelphia: Innes \& Sons, 1905; copyright 1901).'''
+
+# Added for section 7: F17d cites it; checked in Tigran's copy, Project
+# Gutenberg's text of the 1917 impression with the printed pages marked,
+# p. 398, recorded in originals/LIBRARY.tsv.
+[[source]]
+key = "James"
+origin = "none"
+tex = '''William James, \emph{The Varieties of Religious Experience: A Study in Human Nature, Being the Gifford Lectures on Natural Religion Delivered at Edinburgh in 1901--1902} (New York, London, Bombay, Calcutta and Madras: Longmans, Green, and Co., 1917).'''
+
+# Added: F8 quotes it, under Paper 3's key and words; checked in the
+# republication, p. 240.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# F1: checked in the edition's KJV and the SBL Greek.
+[[note]]
+at = "9:0.1"
+after = "ministering spirits"
+origin = "none"
+tex = '''Hebrews~1:14: ``Are they not all ministering spirits, sent forth to minister for them who shall be heirs of salvation?'' (\textgreek{λειτουργικὰ πνεύματα}). The title is the Spirit's whole family here, ``a vast array of ministering spirits'' at \bibref[9:8.6]{p009 8:6}, and its third group, the Ministering Spirits of Time, at \bibref[9:8.23]{p009 8:23}.'''
+
+# F2: checked in the edition's KJV, the SBL Greek, and the Revised Version
+# (its 1895 printing with the Apocrypha).
+[[note]]
+at = "9:0.4"
+after = "all things consist"
+origin = "none"
+tex = '''Colossians~1:17, of Christ: ``And he is before all things, and by him all things consist.'' The Greek is \textgreek{τὰ πάντα ἐν αὐτῷ συνέστηκεν}, \textit{in him} all things hold together, as the Revised Version (1881) has it, ``in him all things consist'', and as the paper has it, \textit{in whom}. What Paul says of the Son is said here of the Conjoint Actor, ``the revelation of the unity of God''.'''
+
+# F3: checked in the edition's KJV, and 8:2.2 and 7:1.1 in the press text.
+[[note]]
+at = "9:1.5"
+after = "called the Omnipresent Spirit."
+origin = "none"
+tex = '''Psalms~139:7--8: ``Whither shall I go from thy spirit? or whither shall I flee from thy presence? If I ascend up into heaven, thou \bibemph{art} there: if I make my bed in hell, behold, thou \bibemph{art there}.'' The title is among the Spirit's at \bibref[8:2.2]{p008 2:2}, and \bibref[7:1.1]{p007 1:1} says the same three, omnipresence, omnipotence and omniscience, of the Son.'''
+
+# F4: checked in the edition's KJV and the SBL Greek.
+[[note]]
+at = "9:1.8"
+after = "overshadow justice with mercy."
+origin = "none"
+tex = '''James~2:13: ``and mercy rejoiceth against judgment'' (\textgreek{κατακαυχᾶται ἔλεος κρίσεως}, mercy triumphs over judgment).'''
+
+# F5: checked in the Loeb, the Greek p. 222 and the English p. 223, in the
+# page images; Sidgwick's rendering in his edition of 1884 (the Archive's
+# text); 23:2.12 and 66:5.13 in the press text.
+[[note]]
+at = "9:1.8"
+after = "offspring of the Infinite Spirit."
+origin = "none"
+tex = '''The anvil of Justice is Aeschylus's. In the \emph{Choephori}, as the son comes home to avenge his father, the chorus sings (646--647) \textgreek{Δίκας δ᾽ ἐρείδεται πυθμήν· προχαλκεύει δ᾽ Αἶσα φασγανουργός}, in Smyth's rendering~\cite{Aeschylus}, p.~223: ``The anvil of Justice is planted firm. Destiny fashioneth her arms and forgeth her sword betimes'' (\textgreek{πυθμήν} is properly a base or a stock; Sidgwick in 1884 and Smyth both make it her anvil). There Fate forges a sword on it; here suffering's hammer forges a universe, and those who swing it are the children of mercy. The figure returns at \bibref[23:2.12]{p023 2:12}, where characters are forged ``between the anvils of necessity and the hammers of anguish'', and at \bibref[66:5.13]{p066 5:13}, where Urantia's civilization ``was literally forged out between the anvil of necessity and the hammers of fear''.'''
+
+# F6: checked in the edition's KJV, the SBL Greek, and the RSV (John 4:24,
+# "God is spirit").
+[[note]]
+at = "9:2.1"
+after = "in a threefold sense:"
+origin = "none"
+tex = '''John~4:24: ``God \bibemph{is} a Spirit''. The predicate has no article in the Greek, \textgreek{πνεῦμα ὁ θεός}, and the Revised Standard Version (1946) and the versions after it read ``God is spirit'', as the paper does here and at \bibref[1:3.1]{p001 3:1}.'''
+
+# F7: 8:5.3 in the press text.
+[[note]]
+at = "9:2.5"
+after = "bestowal upon the races of mankind."
+origin = "none"
+tex = '''\bibref[8:5.3]{p008 5:3}: ``The Holy Spirit is the spiritual circuit of this Creative Daughter of the Paradise Infinite Spirit. The Holy Spirit is a circuit indigenous to each local universe and is confined to the spiritual realm of that creation; but the Infinite Spirit is omnipresent.'''''
+
+# F8: checked in the republication, p. 240 = PDF page 258.
+[[note]]
+at = "9:3.2"
+after = "in either the Father or the Son."
+origin = "none"
+tex = '''Dr~Sadler, on this paragraph \cite{Sadler2003}, p.~240: ``Heredity can produce qualities in the offspring which are not discernible in the parents.'''''
+
+# F9: the physics of the gyroscope, in words, with the rate of precession and
+# a schematic, data/study/figures/gyroscope.svg (Tigran asked for both,
+# 2026-11-05); no source.
+[[note]]
+at = "9:3.3"
+after = "the cause of antigravity."
+origin = "none"
+tex = '''A gyroscope does not resist gravity. A wheel spinning fast on an axle held up at one end only does not fall as a still wheel would: its axle swings slowly around the vertical axis instead, which is called precession, and the faster the spin, the slower the swing: with the wheel's weight $mg$ at a distance $r$ from the support, its moment of inertia $I$ and its spin $\omega$, the axle turns at $\Omega = {mgr \over I\omega}$. \figure{gyroscope} Its weight is undiminished, and a scale under the support reads all of it; what the pull of gravity does is turn the direction of the spin, not lower the wheel. So it shows a body held up against gravity, the effect, and nothing of how, since it is held up as any body is, by what it rests on.'''
+
+# F10: 42:4.9 in the press text; Blackett and Occhialini, Proc. R. Soc. A 139
+# (1933), 699-726.
+[[note]]
+at = "9:3.4"
+after = "techniques unknown to you."
+origin = "none"
+tex = '''\bibref[42:4.9]{p042 4:9}: ``the dark worlds and all outer space can slow down electronic and ultimatonic activity to the point of converting these energies into the matter of the realms''. \textit{Materialization} is the physicists' own word, since the 1930s, for energy becoming matter: in 1933 Patrick Blackett and Giuseppe Occhialini photographed in a cloud chamber the tracks of an electron and a positron created together out of a gamma ray (\emph{Proceedings of the Royal Society}~A, 139, pp.~699--726), and the reverse, their annihilation into radiation, was observed the same year.'''
+
+# F11: checked in Tigran's copy of Heath, p. xix (djvu page 18); Pappus,
+# Collection VIII, Hultsch's edition p. 1060, in the Archive's text.
+[[note]]
+at = "9:3.8"
+after = "of the physical creation."
+origin = "none"
+tex = '''The fulcrum and the lever are Archimedes's. ``Give me a place to stand on, and I can move the earth'' (\textgreek{δός μοι ποῦ στῶ καὶ κινῶ τὴν γῆν}), as Pappus of Alexandria reports him in the eighth book of his \emph{Collection}, and as Heath~\cite{Heath}, p.~xix, renders it. Here Paradise is the place to stand, and the Spirit's agencies are the lever.'''
+
+# F12: 0:0.3, 9:0.4 and 16:6.10 in the press text.
+[[note]]
+at = "9:4.5"
+after = "mind is meaning, spirit is value."
+origin = "none"
+tex = '''The three run through the book from its first paragraph, \bibref[0:0.3]{p000 0:3}, ``the things, meanings, and values of universal reality'', and \bibref[9:0.4]{p009 0:4}, ``things, meanings, and values; energies, minds, and spirits''. At \bibref[16:6.10]{p016 6:10} the three cosmic intuitions answer to them, ``Matter-energy is recognized by the mathematical logic of the senses; mind-reason intuitively knows its moral duty; spirit-faith (worship) is the religion of the reality of spiritual experience'': science, philosophy and religion.'''
+
+# F13: 108:2.2 and 34:5.4 in the press text.
+[[note]]
+at = "9:5.2"
+after = "function of the Infinite Spirit."
+origin = "none"
+tex = '''\bibref[108:2.2]{p108 2:2}: ``The Adjusters cannot invade the mortal mind until it has been duly prepared by the indwelling ministry of the adjutant mind-spirits and encircuited in the Holy Spirit.'' And \bibref[34:5.4]{p034 5:4}: once a bestowal Son has poured out the Spirit of Truth, ``all normal minds are automatically prepared for the reception of the Thought Adjusters''.'''
+
+# F14: 4:2.3 in the press text.
+[[note]]
+at = "9:5.5"
+after = "but nature is not perfect."
+origin = "none"
+tex = '''\bibref[4:2.3]{p004 2:3}: nature ``carries a uniform, unchanging, majestic, and marvelous thread of perfection from the circle of eternity; but in each universe, on each planet, and in each individual life, this nature is modified, qualified, and perchance marred by the acts, the mistakes, and the disloyalties of the creatures''.'''
+
+# F15: checked in the edition's KJV and the SBL Greek; 1:4.3 in the press
+# text.  Tigran's own Russian note at 1:4.3 (ud) gives the Tabernacle of
+# Exodus 25:9 behind the word.
+[[note]]
+at = "9:5.6"
+after = "tabernacles of the flesh."
+origin = "none"
+tex = '''Tabernacle is the Bible's figure for the body, a tent soon struck. 2~Corinthians~5:1: ``For we know that if our earthly house of \bibemph{this} tabernacle were dissolved, we have a building of God, an house not made with hands, eternal in the heavens'' (\textgreek{σκῆνος}, a tent); and 2~Peter~1:13--14: ``as long as I am in this tabernacle \ldots{} shortly I must put off \bibemph{this} my tabernacle'' (\textgreek{σκήνωμα}). The book has ``the mortal tabernacle'' at \bibref[1:4.3]{p001 4:3}.'''
+
+# F16: checked in the edition's KJV and the SBL Greek.
+[[note]]
+at = "9:5.7"
+after = "sear them with unrighteousness;"
+origin = "none"
+tex = '''Compare 1~Timothy~4:2: ``having their conscience seared with a hot iron'' (\textgreek{κεκαυστηριασμένων}, branded).'''
+
+# F17: checked in the edition's KJV and the SBL Greek; 7:1.1 and 9:6.1 in
+# the press text.
+[[note]]
+at = "9:6.2"
+after = "draws all personality to himself,"
+origin = "none"
+tex = '''Compare John~12:32: ``And I, if I be lifted up from the earth, will draw all \bibemph{men} unto me'' (\textgreek{πάντας ἑλκύσω πρὸς ἐμαυτόν}, I will draw all to myself); and John~6:44: ``No man can come to me, except the Father which hath sent me draw him''. The verb is John's; the three drawings, of personality, of spirit and of mind, are the book's three gravities (\bibref[7:1.1]{p007 1:1}, \bibref[9:6.1]{p009 6:1}).'''
+
+# F17a (section 7, proposed 2026-11-05 at Tigran's asking, ruled Yes the same
+# day, "All your notes on §7 are approved"):
+# checked in the scan, p. 248; 17:3.1 in the press text.
+[[note]]
+at = "9:7.1"
+after = "focalizes on Paradise."
+origin = "none"
+tex = '''The nearest thought in philosophy is Leibniz's. \emph{Monadology}, §~56, in Latta's rendering~\cite{Leibniz}, p.~248: ``this connexion or adaptation of all created things to each and of each to all, means that each simple substance has relations which express all the others, and, consequently, that it is a perpetual living mirror of the universe''. There every monad mirrors the whole, each confusedly and from its own point of view; here the mirroring is the service of distinct personalities, the Reflective Spirits (\bibref[17:3.1]{p017 3:1}), which sees ``all things as they transpire throughout a superuniverse'' and focuses them where they are wanted.'''
+
+# F17b (section 7, ruled Yes 2026-11-05): 25:2.2, 28:4.9, 17:4.1 and 28:5.20 in the
+# press text.
+[[note]]
+at = "9:7.2"
+after = "with their occurrence."
+origin = "none"
+tex = '''The name is a mirror's, and the book keeps it so. The Reflective Spirits are ``the seven reflections of the Seven Master Spirits'' (\bibref[25:2.2]{p025 2:2}), by whom the Ancients of Days ``enjoy the reflective presence of all those exalted beings whose personal presence is denied them'' (\bibref[28:4.9]{p028 4:9}); their Image Aids are ``true images'' (\bibref[17:4.1]{p017 4:1}); and the Discerners of Spirits show the Censors ``the naked soul of the reflected individual'' (\bibref[28:5.20]{p028 5:20}). What a mirror shows is not itself but what stands before it, and here what stands before it may be a superuniverse away. In physics reflectivity is the share of the light falling on a surface that the surface throws back.'''
+
+# F17c (section 7, ruled Yes 2026-11-05): 17:3.7 and 28:4.12 in the press text.
+[[note]]
+at = "9:7.3"
+after = "the universal space reports,"
+origin = "none"
+tex = '''\bibref[17:3.7]{p017 3:7}: ``The reflectivity organization is also the news-gathering and the decree-disseminating mechanism of all creation. It is in constant operation in contrast with the periodic functioning of the various broadcast services.'' The Broadcast Receivers among the seconaphim synchronize ``the reflective vision of the Ancients of Days'' with the messages of the circuits (\bibref[28:4.12]{p028 4:12}).'''
+
+# F17d (section 7, ruled Yes 2026-11-05): checked in Tigran's copy of Bucke, p. 2;
+# James's Varieties, lecture XVI, quotes the sentence; 8:2.2 and 9:7.5 in the
+# press text.
+[[note]]
+at = "9:7.4"
+after = "this consciousness of the cosmos."
+origin = "none"
+tex = '''\textit{Cosmic consciousness} is Richard Maurice Bucke's term, and these are his words for it~\cite{Bucke}, p.~2: ``The prime characteristic of cosmic consciousness is, as its name implies, a consciousness of the cosmos, that is, of the life and order of the universe.'' William James quoted them in \emph{The Varieties of Religious Experience} (1902)~\cite{James}, p.~398, and the term was current when these papers were written: \bibref[8:2.2]{p008 2:2} says the Infinite Spirit ``is sometimes confused with the cosmic mind''. Bucke's is a faculty appearing in the human race; here the consciousness of the cosmos is reflectivity's, and may be ``the emergence of the presence-consciousness of the Supreme Being'' (\bibref[9:7.5]{p009 7:5}).'''
+
+# F18: 16:8.5, 112:0.8 and 0:5.11 in the press text.
+[[note]]
+at = "9:8.8"
+after = "the Father’s personality circuit."
+origin = "none"
+tex = '''The book's other marks of creature personality: \bibref[16:8.5]{p016 8:5}, ``self-consciousness and associated relative free will''; \bibref[112:0.8]{p112 0:8}, personality ``discloses only qualitative response to the personality circuit in contradistinction to the three energies which show both qualitative and quantitative response to gravity''; and \bibref[0:5.11]{p000 5:11}, where it ``unifies all other associated factors of individuality''.'''
+
+# F19: checked in the edition's KJV; 26:10.2 in the press text.
+[[note]]
+at = "9:8.25"
+after = "from chaos to glory."
+origin = "none"
+tex = '''The ladder is Jacob's. Genesis~28:12: ``And he dreamed, and behold a ladder set up on the earth, and the top of it reached to heaven: and behold the angels of God ascending and descending on it''; and John~1:51, where Jesus makes it himself: ``ye shall see heaven open, and the angels of God ascending and descending upon the Son of man.'' The same words, ``from chaos to glory'', are the pilgrims' at \bibref[26:10.2]{p026 10:2}, who ``climbed, as on a ladder''.'''
