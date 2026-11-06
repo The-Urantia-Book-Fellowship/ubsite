@@ -1597,6 +1597,23 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
 .changelog li { margin: .3rem 0; }
 .changelog .day { color: var(--faint); font-size: .8em; white-space: nowrap; }
 .changelog code { font-size: .88em; }
+/* A release's headings as tabs, built by ub.js (Tigran, 2026-11-06): a row
+   under the release's heading, the one chosen underlined in the link's blue,
+   each with how many entries it holds, For developers' too; one part shown
+   at a time, its own heading hidden, the tab being it, and For developers'
+   fold opened under its tab.  Without scripts, and in print, every heading
+   and list as written, For developers folded. */
+.changelog .ctabs { display: flex; flex-wrap: wrap; gap: 0 .2rem; margin: 1.2rem 0 .8rem;
+  border-bottom: 1px solid var(--rule); }
+.changelog .ctabs button { font: inherit; font-size: .95rem; padding: .35rem .7rem .3rem; margin-bottom: -1px;
+  border: 0; border-bottom: 2px solid transparent; background: none; color: var(--faint); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; }
+.changelog .ctabs button small { font-size: .78em; color: var(--faint); margin-left: .15em; }
+.changelog .ctabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--link); }
+@media (hover: hover) { .changelog .ctabs button:hover { color: var(--ink); } }
+.changelog .parts.tabbed .part:not(.on), .changelog .parts.tabbed .part > h3,
+.changelog .parts.tabbed .part > details > summary { display: none; }
+.changelog .parts.tabbed .part > :first-of-type { margin-top: 0; }
 .cta { display: inline-block; margin: .4rem 1rem .4rem 0; }
 .counts { display: flex; gap: 2rem; flex-wrap: wrap; margin: 1.6rem 0; }
 .counts dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); }
@@ -1958,6 +1975,8 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   @page { margin: 22mm 20mm; }
   .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, .runhead, dialog { display: none; }
   .tour-shield, .tour-ring, .tour-card { display: none; }
+  .changelog .ctabs { display: none; }
+  .changelog .parts.tabbed .part, .changelog .parts.tabbed .part > h3 { display: block; }
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }

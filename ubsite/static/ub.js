@@ -1802,6 +1802,63 @@
     hs.src = helpLink.dataset.src;
     document.head.appendChild(hs);
   }
+  // The changelog's tabs (templates/changelog.html; Tigran, 2026-11-06: the
+  // lists under Added, Changed, Removed and Fixed had grown long).  Each
+  // release's headings become a row of tabs, For developers' among them,
+  // built here from the headings themselves with how many entries each
+  // holds, and one part is shown at a time, the first first; so the page carries the file's words and nothing
+  // more, and without scripts it is the file as written.  ←, →, Home and End
+  // move among a row's tabs, as Settings' do.
+  var tabRows = [];
+  Array.prototype.forEach.call(document.querySelectorAll('.changelog .parts'), function (parts) {
+    var secs = Array.prototype.filter.call(parts.children, function (s) { return s.matches('section.part') && s.querySelector('h3, summary'); });
+    if (secs.length < 2) return;
+    var bar = document.createElement('div'), tabs = [];
+    bar.className = 'ctabs';
+    bar.setAttribute('role', 'tablist');
+    secs.forEach(function (s, i) {
+      var b = document.createElement('button'), n = s.querySelectorAll('li').length;
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.id = 'cl-t-' + tabRows.length + '-' + i;
+      s.id = s.id || ('cl-p-' + tabRows.length + '-' + i);
+      s.setAttribute('role', 'tabpanel');
+      s.setAttribute('aria-labelledby', b.id);
+      b.setAttribute('aria-controls', s.id);
+      b.innerHTML = s.querySelector('h3, summary').innerHTML + (n ? ' <small>' + n + '</small>' : '');
+      // For developers keeps its fold for the page without scripts: open here, its tab the heading.
+      var fold = s.querySelector('details.dev');
+      if (fold) fold.open = true;
+      bar.appendChild(b);
+      tabs.push(b);
+    });
+    function show(t) {
+      tabs.forEach(function (b, i) {
+        var on = b === t;
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        b.tabIndex = on ? 0 : -1;
+        secs[i].classList.toggle('on', on);
+      });
+    }
+    bar.addEventListener('click', function (ev) {
+      var t = ev.target.closest('[role="tab"]');
+      if (t) show(t);
+    });
+    bar.addEventListener('keydown', function (ev) {
+      if (ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey) return;
+      var i = tabs.indexOf(bar.querySelector('[aria-selected="true"]')), n = tabs.length;
+      var to = { ArrowRight: i + 1, ArrowLeft: i - 1 + n, Home: 0, End: n - 1 }[ev.key];
+      if (i < 0 || to === undefined) return;
+      ev.preventDefault();
+      show(tabs[to % n]);
+      tabs[to % n].focus();
+    });
+    parts.classList.add('tabbed');
+    parts.insertBefore(bar, parts.firstChild);
+    tabRows.push(bar);
+    show(tabs[0]);
+  });
+
   window.addEventListener('beforeinstallprompt', function (ev) {
     ev.preventDefault();
     window.ubInstall = ev;

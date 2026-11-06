@@ -1452,10 +1452,39 @@ def _blocks(rows) -> list[dict]:
     return out
 
 
+def _releases(blocks: list[dict]) -> list[dict]:
+    """The blocks with each release (a ##) gathered: its heading, what stands
+    under it before any ### (`lead`), and each ### with its blocks as a part,
+    For developers among them, marked `dev`.  The page shows a release's parts
+    as tabs (templates/changelog.html, ub.js; Tigran, 2026-11-06, For
+    developers a tab too the same day).  What stands before the first ## is
+    left as it is."""
+    out: list[dict] = []
+    rel = part = None
+    for b in blocks:
+        if b["kind"] == "h2":
+            rel = {"kind": "release", "html": b["html"], "lead": [], "parts": []}
+            part = None
+            out.append(rel)
+        elif rel is None:
+            out.append(b)
+        elif b["kind"] == "h3":
+            part = {"html": b["html"], "blocks": [], "dev": False}
+            rel["parts"].append(part)
+        elif b["kind"] == "dev":
+            part = {"html": b["summary"], "blocks": b["blocks"], "dev": True}
+            rel["parts"].append(part)
+        elif part is None:
+            rel["lead"].append(b)
+        else:
+            part["blocks"].append(b)
+    return out
+
+
 @app.get("/changelog", response_class=HTMLResponse)
 def changelog(request: Request):
     rows = db().execute("SELECT * FROM changelog ORDER BY line").fetchall()
-    return page(request, "changelog.html", blocks=_blocks(rows))
+    return page(request, "changelog.html", blocks=_releases(_blocks(rows)))
 
 
 # Help's examples are drawn from one section: 11:7, the one early section

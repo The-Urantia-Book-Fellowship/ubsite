@@ -59,6 +59,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- On the changelog's page each release's headings, Added, Changed, Removed, Fixed and For developers, are tabs, one list shown at a time with how many entries it holds; without scripts, and in print, the page is the file as before.
 - Compare translations now stays on as you move about: a search result, a reference in a study note or a translator's note, a citation in the index, a paper opened from the home page or the contents, a citation typed into the search box and an address typed into the browser all open in Compare while it is on, in the same tab, until you turn it off or go Back past where you turned it on; until now only the previous and next buttons and the contents kept it.
 - Greek words in the study notes now break at the syllable, as the English does, by TeX's patterns for ancient Greek, so that a long Greek word no longer spreads the line before it across a card.
 - Letting a kept recording go, in Settings' Offline tab, always asks first, a single paper's included; the check mark in the player's bar only shows that the paper is kept.

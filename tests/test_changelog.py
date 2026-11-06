@@ -158,6 +158,18 @@ class Page(unittest.TestCase):
         self.assertEqual(words[at:].strip(), "")
 
     @unittest.skipUnless(DB.exists(), "var/ub.db not built")
+    def test_each_release_wraps_its_headings_for_the_tabs(self):
+        # The tabs are ub.js's, built from the headings (2026-11-06): the page
+        # only wraps each ### with its blocks in a section.part, and names no tab.
+        body = get("/changelog")[2]
+        main = body[body.index("<main"):body.index("</main>")]
+        self.assertEqual(main.count('<div class="parts">'), main.count("<h2>"))
+        self.assertEqual(main.count('<section class="part">'), main.count("<h3>"))
+        self.assertEqual(main.count('<section class="part dev">'), main.count("<summary>"))
+        self.assertNotIn("ctabs", main)
+        js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
+        self.assertIn("querySelectorAll('.changelog .parts')", js)
+
     def test_every_page_links_it(self):
         for url in ("/", "/101:4", "/changelog"):
             _, _, body = get(url)
