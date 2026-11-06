@@ -1,0 +1,30 @@
+<svg class="sfig" viewBox="0 0 320 262" role="img" aria-label="A flattened body seen edge on, with its axis and its equatorial plane; three points at one distance r from its center, on the axis, in the plane and at an angle θ between them, each with its pull drawn as an arrow: longest in the plane, shortest on the axis, and the one between tilted toward the plane" xmlns="http://www.w3.org/2000/svg">
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="150" cy="140" r="95" stroke-width="1" stroke-dasharray="5 4" stroke-opacity=".5"/>
+<path d="M150 22V248" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M34 140H262" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M150 140L211.1 67.2" stroke-width=".9"/>
+<path d="M150 112A28 28 0 0 1 168 118.5" stroke-width=".9"/>
+<path d="M150 160H192M150 156V164M192 156V164" stroke-width="1"/>
+<path d="M245 140H206" stroke-width="1.8"/>
+<path d="M150 45V68" stroke-width="1.8"/>
+<path d="M211.1 67.2L195.6 96.1" stroke-width="1.8"/>
+</g>
+<g fill="currentColor" stroke="none">
+<ellipse cx="150" cy="140" rx="42" ry="9"/>
+<circle cx="245" cy="140" r="3"/>
+<circle cx="150" cy="45" r="3"/>
+<circle cx="211.1" cy="67.2" r="3"/>
+<polygon points="199,140 206,143.5 206,136.5"/>
+<polygon points="150,75 146.5,68 153.5,68"/>
+<polygon points="192.8,101.4 199.2,96.9 193.0,93.6"/>
+</g>
+<foreignObject x="156" y="14" width="84" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">axis, $\theta=0$</div></foreignObject>
+<foreignObject x="64" y="147" width="50" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">plane,<br/>$\theta=\pi/2$</div></foreignObject>
+<foreignObject x="157" y="92" width="18" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$\theta$</div></foreignObject>
+<foreignObject x="176" y="110" width="18" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$r$</div></foreignObject>
+<foreignObject x="164" y="163" width="20" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$R$</div></foreignObject>
+<foreignObject x="218" y="118" width="20" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$g$</div></foreignObject>
+<foreignObject x="158" y="50" width="20" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$g$</div></foreignObject>
+<foreignObject x="208" y="84" width="20" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$g$</div></foreignObject>
+</svg>

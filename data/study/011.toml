@@ -1,0 +1,277 @@
+# Paper 11, The Eternal Isle of Paradise: the British Study Edition has five
+# notes on it at d6c3206: one carried (11:3.1), the two at 11:8.9 superseded
+# by one note at the first's place, and two 1955 readings dropped without a
+# ruling, the press's apparatus being complete (11:7.3 Maltese, 11:7.7 zone);
+# Block has no chart for it.  Every other note
+# was found in review, with no credit line, checked against the press text,
+# the edition's own KJV, the SBL Greek New Testament, and the originals:
+# Arnold's Song Celestial, the 1885 Trübner printing (../block-sources/
+# originals/, pp. 61 and 71 in the page images); Eddington's The Expanding
+# Universe, 1933, in Tigran's copy (originals/LIBRARY.tsv, p. 20 in the djvu
+# page image); Masson's Milton, vol. II, 1896 (originals/, p. 88 in the page
+# image and the text layer); White's Great Controversy, 1911 (originals/,
+# pp. 412-415, p. 414 in the page image); Sadler's Analytic Study of Part I,
+# pp. 278-294 (originals/, pp. 279 and 290 in the page images; its page
+# numbers are footers); and Baker's Universe Unfolding, p. 139 (originals/,
+# PDF page 163, the page Block's chart of Paper 12 gives for 12:4.14).  The
+# review, numbered F1-F26 in the order of the text, is var/study/review-011.md.
+# All 26 ruled Yes by Tigran on 2026-11-06, F3 kept (question 1), F6 kept
+# whole (question 2) and F16 kept (question 4); and F24 and F25, his own notes
+# in the edition, superseded at his asking (question 3) by one note at F24's
+# place, written from the physics of a flattened body: the pull to quadrupole
+# order, with its formula and a schematic (figures/oblate.svg), the two-body
+# problem having no preferred plane, the direction a transport seraphim
+# leaves in, and Kepler's ellipses against Hooke's, the book's concentric
+# ones with Paradise at their center being Hooke's case.  F25's origin is
+# dropped as folded into that note.
+
+paper = 11
+chart = "none"
+
+# The works the notes quote, each under the key and words earlier papers gave
+# it where it has one.  Added: F14 and F21 quote it (pp. 71 and 61, PDF pages
+# 91 and 81), the first printing, University of Michigan's copy on the
+# Archive.
+[[source]]
+key = "Arnold"
+origin = "none"
+tex = '''\emph{The Song Celestial, or Bhagavad-Gîtâ (from the Mahâbhârata)}, translated from the Sanskrit text by Edwin Arnold (London: Trübner \& Co., 1885).'''
+
+# Added: F16 quotes it (p. 139, PDF page 163), under Paper 32's key and words.
+[[source]]
+key = "Baker1932"
+origin = "none"
+tex = '''Robert H. Baker, \emph{The Universe Unfolding: The Story of Man's Increasing Comprehension of the Universe Around Him} (Baltimore: The Williams \& Wilkins Company, 1932).'''
+
+# Added: F16 quotes it (p. 20, djvu page 30), Tigran's copy of the American
+# issue, published February 1933; public in his library.
+[[source]]
+key = "Eddington"
+origin = "none"
+tex = '''Arthur Eddington, \emph{The Expanding Universe} (New York: The Macmillan Company; Cambridge: at the University Press, 1933).'''
+
+# Added: F3 quotes it (p. 88, PDF page 100), Masson's Globe edition, the 1896
+# reprint, Trent University's copy on the Archive.
+[[source]]
+key = "Milton"
+origin = "none"
+tex = '''John Milton, \emph{The Poetical Works of John Milton}, edited by David Masson, vol.~II (London: Macmillan and Co., 1896).'''
+
+# Added: F1, F12 and F22 cite it (pp. 279, 284 and 290, PDF pages 297, 302
+# and 308), under Paper 3's key and words.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# Added: F6 quotes it (pp. 412-415, PDF pages 416-419), under Paper 1's key
+# and words.
+[[source]]
+key = "White1911"
+origin = "none"
+tex = '''Ellen G. White, \emph{The Great Controversy Between Christ and Satan: The Conflict of the Ages in the Christian Dispensation} (Mountain View, California: Pacific Press Publishing Association, 1911; first published 1888).'''
+
+# F1, proposed: the word Paradise, its Greek and its three New Testament
+# places, which Sadler's workbook lists, and the book's own reading of the
+# first of them
+[[note]]
+at = "11:0.1"
+after = "the universe of universes"
+origin = "none"
+tex = '''The word is Greek, \textgreek{παράδεισος}, borrowed from the Persian for a walled park; it is the Septuagint's name for the garden of Eden (Genesis~2:8), and in the New Testament the abode of the blessed, three times: Luke~23:43, 2~Corinthians~12:4, Revelation~2:7 (Sadler lists the three in his study of this paper, \cite{Sadler2003}, p.~279). The book keeps the New Testament sense, and at \bibref[187:4.1]{p187 4:1} reads the first of the three with its comma moved, the Greek having had none: ``Verily, verily, I say to you today, you shall sometime be with me in Paradise.'''''
+
+# F2, proposed: John 8:12, and the phrase's other uses in the book
+[[note]]
+at = "11:0.2"
+after = "the light of life"
+origin = "none"
+tex = '''John~8:12: ``he that followeth me shall not walk in darkness, but shall have the light of life.'' The book uses the phrase of the Adjuster's luminosity, called on Uversa ``the light of life'' (\bibref[107:4.5]{p107 4:5}), and of Jesus (\bibref[122:8.6]{p122 8:6}, \bibref[125:5.7]{p125 5:7}); here it is the glory of Paradise itself.'''
+
+# F3, proposed: Milton's word
+[[note]]
+at = "11:1.4"
+after = "universal pandemonium"
+origin = "none"
+tex = '''\bibemph{Pandemonium} is Milton's word, the capital of Hell: ``A solemn council forthwith to be held / At Pandemonium, the high capital / Of Satan and his peers'' (\emph{Paradise Lost}, I, 755--757, \cite{Milton}, p.~88), coined from the Greek for ``all the demons''; the everyday sense, an uproar, came later. A paper on Paradise borrows the name of its opposite.'''
+
+# F4, proposed: the proportions in numbers, and the eccentricity
+[[note]]
+at = "11:2.2"
+after = "one tenth that of the east-west diameter"
+origin = "none"
+tex = '''In numbers: if the east-west diameter is six, the north-south is seven and the thickness six tenths, a plate seven by six and a tenth as thick as it is wide. Its outline, an ellipse with axes as 7 to 6, has eccentricity $\sqrt{1-(6/7)^2}\approx0.52$ and is visibly oval, so that ``well-nigh circular'' at \bibref[11:1.1]{p011 1:1} is said broadly; the same ellipse recurs in the zones of nether Paradise (\bibref[11:5.4]{p011 5:4}) and in ``the swing of the great ellipse'' of the space levels (\bibref[11:8.2]{p011 8:2}, \bibref[12:1.3]{p012 1:3}).'''
+
+# F5, proposed: the Latin, and the word's one other place in the book
+[[note]]
+at = "11:2.9"
+after = "named it absolutum"
+origin = "none"
+tex = '''\bibemph{Absolutum}, Latin, ``the absolute (thing)'', the neuter singular, is the only name the book gives to the substance of Paradise; it recurs once, at \bibref[104:4.28]{p104 4:28}, where ``the absolutum of the Isle of Paradise'' is the center around which the possibilities of the Unqualified Absolute turn. It is not the \bibemph{absoluta} of \bibref[42:2.6]{p042 2:6}, Uversa's name for space potency; the other Uversa names of that passage are gathered in the note at \bibref[11:8.5]{p011 8:5}.'''
+
+# F6, proposed: the sanctuary's two apartments, the pattern shown in the
+# mount, and the Adventist doctrine of the heavenly sanctuary, White pp. 412-415
+[[note]]
+at = "11:3.1"
+after = "and the Holy Area"
+origin = "none"
+tex = '''Most Holy and Holy are the two apartments of the tabernacle and the temple, ``the holy place and the most holy'' (Exodus~26:33; Hebrews~9:2--3), and the Holy Land of \bibref[11:3.2]{p011 3:2} and \bibref[11:3.4]{p011 3:4} is Zechariah's name for Judah (2:12). Moses was to make the tabernacle ``according to the pattern shewed to thee in the mount'' (Exodus~25:40, Hebrews~8:5), its holy places being ``the figures of the true'' (Hebrews~9:24), as God's residence here is ``the beauteous pattern for all universe headquarters worlds'' (\bibref[11:9.6]{p011 9:6}). The Seventh-day Adventists, Sadler's church in his youth, hold the heavenly sanctuary to be a literal place of two apartments, ``the great original, of which the sanctuary built by Moses was a copy'' (White~\cite{White1911}, pp.~412--415, the words p.~414). Whether or not the names were chosen with the sanctuary in mind, the gradation is the same, and innermost is the presence.'''
+
+# F7, carried: the edition's note
+[[note]]
+at = "11:3.1"
+after = "of the Deities"
+origin = "b157d8cdb3650f8e"
+tex = '''The ``Deity presence'' indicates the presence of the \bibemph{one} undivided Paradise Trinity, whereas the ``presence of the Deities'' points to the dwelling places of the \bibemph{three} individual existential Deities: Universal Father, Eternal Son and Infinite Spirit. In effect, this simply means that the \bibemph{home} of each existential Deity and the \bibemph{office} of their corporate organisation as Trinity is the same place.'''
+
+# F8, proposed: John 14:2, and the book's three applications of it
+[[note]]
+at = "11:3.3"
+after = "the Father’s Paradise mansions"
+origin = "none"
+tex = '''John~14:2: ``In my Father's house are many mansions.'' \bibemph{Mansions} is the King James word for the Greek \textgreek{μοναί}, abiding-places (so the Revised Version). The book applies the saying to the mansion worlds of the local system (\bibref[47:0.1]{p047 0:1}), to every training world of mortal residence (\bibref[30:4.17]{p030 4:17}: ``it was to such spheres that Jesus alluded''), and here to the seven zones of the Holy Area, ``the Father's House'' being Paradise itself.'''
+
+# F9, proposed: the arithmetic of the residential units
+[[note]]
+at = "11:3.4"
+after = "to the supreme units"
+origin = "none"
+tex = '''In numbers: a unit houses $10^9$ working groups; $10^3\times10^5\times10^7\times10^9=10^{24}$ units make a grand unit, $10^{33}$ working groups; seven grand units make a master unit, and so by sevens, six steps up, to the supreme unit of $7^6\times10^{33}\approx1.2\times10^{38}$ working groups. That is for one of the seven sectors, and ``considerably less than one per cent'' of the Holy Land; the seven superuniverses, for comparison, have some $7\times10^{12}$ inhabitable worlds (\bibref[15:2.9]{p015 2:9}).'''
+
+# F10, proposed: the three circuits of sacred spheres, and the power
+# directors' description at 29:1.3 in the same words
+[[note]]
+at = "11:4.2"
+after = "on the Paradise periphery"
+origin = "none"
+tex = '''The seven spheres of the Spirit are the outermost of the three circuits of sacred spheres between Paradise and Havona: the Father's seven secret spheres, the Son's seven ``luminous worlds'', the Spirit's seven (\bibref[13:0.1]{p013 0:1}, \bibref[13:4.1]{p013 4:1}). The Seven Supreme Power Directors are described in the same words at \bibref[29:1.3]{p029 1:3}: ``their slowly circulating presences indicate the whereabouts of the force-focal headquarters of the Master Spirits.'''''
+
+# F11, proposed: seven trillion is the count of inhabitable worlds; the
+# English counterpart of Tigran's Russian note here
+[[note]]
+at = "11:4.3"
+after = "historic reservations now set up or in reserve"
+origin = "none"
+tex = '''Seven trillion is also the number of inhabitable worlds in the seven superuniverses, ``approximately seven trillion'' (\bibref[15:2.9]{p015 2:9}; \bibref[12:1.13]{p012 1:13}): a thousand to a system and a hundred thousand local universes to a superuniverse (\bibref[15:2.3--8]{p015 2:3}). One reservation for each world, as it were, though the reservations are said to be dedicated to the local universes, of which there are seven hundred thousand, and to be mostly for creations beyond the present seven superuniverses.'''
+
+# F12, proposed: 1 Corinthians 2:9, and what the paper changed in it;
+# Sadler's workbook gives the verse
+[[note]]
+at = "11:4.5"
+after = "worlds of time and space.”"
+origin = "none"
+tex = '''1~Corinthians~2:9: ``Eye hath not seen, nor ear heard, neither have entered into the heart of man, the things which God hath prepared for them that love him,'' which echoes Isaiah~64:4. The paper's changes are its own: the mind of mortal man for the heart of man (the Greek has \textgreek{καρδίαν}, heart), the Universal Father for God, and those who survive the life in the flesh for them that love him. Sadler gives the verse in his study of this paper (\cite{Sadler2003}, p.~284).'''
+
+# F13, proposed: the heart at 104:4.28, and the north-south flow of 11:2.3
+[[note]]
+at = "11:5.5"
+after = "a gigantic heart"
+origin = "none"
+tex = '''The image returns at \bibref[104:4.28]{p104 4:28}: ``the endless throbbing of the material Paradise heart of the infinite cosmos beats in harmony with the unfathomable pattern and the unsearchable plan of the Infinite Energizer.'' The inflow at the south and outflow at the north answer to the ``greater out-pressure of force-energy at the north end'' by which absolute direction is fixed (\bibref[11:2.3]{p011 2:3}).'''
+
+# F14, proposed: the day and night of Brahma, Gita VIII in Arnold, p. 71
+[[note]]
+at = "11:6.1"
+after = "alternately contracts and expands"
+origin = "none"
+tex = '''The picture of a universe that goes forth and withdraws in vast alternate ages is ancient. The Bhagavad-Gîtâ, VIII: ``When that vast Dawn doth break, th' Invisible / Is brought anew into the Visible; / When that deep Night doth darken, all which is / Fades back again to Him Who sent it forth'' (Arnold~\cite{Arnold}, p.~71), the day and the night of Brahma each a thousand ages long. On the paper's two billion years, see the note at \bibref[11:6.4]{p011 6:4}.'''
+
+# F15, proposed: the hourglass is the figure's vertical arms
+[[note]]
+at = "11:6.1"
+after = "an hourglass"
+origin = "none"
+tex = '''The hourglass is the vertical pair of arms in the figure at \bibref[11:7.3]{p011 7:3}: the two reservoirs widen away from Paradise, which is the waist.'''
+
+# F16, proposed: two billion years was the expansion's time scale in the
+# astronomy of the 1930s, Eddington p. 20 and the book's own rate at 12:4.14
+# (Baker p. 139); what the paper does with the figure
+[[note]]
+at = "11:6.4"
+after = "a little more than one billion Urantia years"
+origin = "none"
+tex = '''Two billion years for the whole cycle was the time scale of the astronomy of the day. Eddington in 1933: ``The galaxies separate to double their original distances in 1300 million years'' (\cite{Eddington}, p.~20); a recession at that steady rate, run backwards, brings the galaxies together about 1.9 billion years ago (the doubling time divided by the natural logarithm of two), and the rate the book itself repeats at \bibref[12:4.14]{p012 4:14}, ``more than one hundred miles a second for every million light-years'' (Baker~\cite{Baker1932}, p.~139), gives the same, a million light-years at a hundred miles a second being 1.9 billion years. The paper takes the figure for the period of a respiration rather than the age of an expansion from a point: an expansion of a little over a billion years, now near its midpoint and so begun some five hundred million years ago, with a contraction to follow, as in the periodic worlds among Friedmann's solutions of 1922.'''
+
+# F17, proposed: 12:5.4 on the midspace zones as the passage from time to
+# eternity
+[[note]]
+at = "11:7.1"
+after = "contact with the central Isle"
+origin = "none"
+tex = '''The midspace zones that touch Paradise are, at \bibref[12:5.4]{p012 5:4}, ``the transition zones from time to eternity, hence the necessity of Paradise pilgrims becoming unconscious during this transit when it is to culminate in Paradise citizenship.'''''
+
+# F18, proposed: the figure, and why a Maltese cross
+[[note]]
+at = "11:7.3"
+after = "a Maltese cross"
+origin = "none"
+tex = '''The arms of a Maltese cross widen from its center, which is what the simile wants: pervaded space ``thickens'' with distance from Paradise (\bibref[11:7.6]{p011 7:6}), so the horizontal arms are the V-shaped plane of \bibref[11:7.5]{p011 7:5} seen edge on, and the vertical arms are the hourglass of \bibref[11:6.1]{p011 6:1}. The regions between the arms are the quiescent midspace zones, which grow with distance until they enclose all space (the dashed line). The thin lines across the horizontal arms stand for the space levels, Havona, the superuniverses and the four outer levels, with the relatively quiet zones between them (\bibref[11:7.7]{p011 7:7}, \bibref[12:1.3]{p012 1:3}); Paradise at the center is drawn far too large, and nothing is to scale. \figure{space-cross}'''
+
+# F19, proposed: the V is the figure's horizontal arm in profile
+[[note]]
+at = "11:7.5"
+after = "the volume of pervaded space"
+origin = "none"
+tex = '''The V is the profile of a horizontal arm of the figure at \bibref[11:7.3]{p011 7:3}: its point near the periphery of Paradise, its opening outward, and its revolution in an ellipse about Paradise sweeping out the flattened, thickening disk of pervaded space.'''
+
+# F20, proposed: the alternate directions at 12:4.15 and 14:1.15
+[[note]]
+at = "11:7.9"
+after = "counterclockwise flow of the galaxies"
+origin = "none"
+tex = '''At \bibref[12:4.15]{p012 4:15} the seven superuniverses revolve counterclockwise about Paradise, the first outer space level clockwise, the second counterclockwise, and a third shows the beginnings of a clockwise motion; and the two belts of dark gravity bodies about Havona run in opposite directions, which ``so effectively equalize the lines of Havona gravity as to render the central universe a physically balanced and perfectly stabilized creation'' (\bibref[14:1.15]{p014 1:15}). The alternation is a brake at every scale.'''
+
+# F21, proposed: the Gita's pearls on a string, VII, 7, in Arnold, p. 61
+[[note]]
+at = "11:8.1"
+after = "whirling spheres"
+origin = "none"
+tex = '''The image is the Bhagavad-Gîtâ's (VII, 7), in Arnold's English: ``All these hang on me / As hangs a row of pearls upon its string'' (\cite{Arnold}, p.~61), the worlds strung on God as pearls on a thread. Whether read there or arrived at anew, the strand on which the stars are strung is the same figure.'''
+
+# F22, proposed: three of Paul's phrases; Sadler's workbook names two
+[[note]]
+at = "11:8.1"
+after = "in whom all things consist"
+origin = "none"
+tex = '''Three of Paul's phrases in one: ``that God may be all in all'' (1~Corinthians~15:28), ``that he might fill all things'' (Ephesians~4:10; ``the fulness of him that filleth all in all'', 1:23), and ``by him all things consist'' (Colossians~1:17), the last the book's constant text for the Father and the Son (\bibref[3:5.4]{p003 5:4}, \bibref[42:1.2]{p042 1:2}, \bibref[56:1.5]{p056 1:5}), read ``in him'' as the Revised Version has it. Sadler names Ephesians~1:23 and Colossians~1:17 (\cite{Sadler2003}, p.~290).'''
+
+# F23, proposed: Uversa's Latin names, gathered from 42:2
+[[note]]
+at = "11:8.5"
+after = "pure energy or segregata"
+origin = "none"
+tex = '''These Latin names are Uversa's, given in order at \bibref[42:2.3--18]{p042 2:3}: \bibemph{absoluta}, space potency (\bibref[42:2.6]{p042 2:6}); \bibemph{segregata}, primordial force (\bibref[42:2.9]{p042 2:9}); \bibemph{ultimata}, the puissant and gravity energies together (\bibref[42:2.13]{p042 2:13}); \bibemph{gravita}, universe power (\bibref[42:2.15]{p042 2:15}); \bibemph{triata}, the threefold energy of Havona (\bibref[42:2.17]{p042 2:17}); and \bibemph{tranosta}, transcendental energy (\bibref[42:2.18]{p042 2:18}). The forms are Latin neuter plurals, things set apart, last things, things in threes, and gravita and tranosta are coined on the pattern. The three stages of this passage carry four of the six names, in the order of their response to gravity.'''
+
+# F24, the edition's note at this place, superseded by one note at Tigran's
+# asking (2026-11-06, review question 3), F25 folded in: the physics of a
+# flattened body's pull, with its formula to quadrupole order and a schematic
+[[note]]
+at = "11:8.9"
+after = "to the mass"
+origin = "5f037c71961e305b"
+tex = '''A mass has no plane, but a mass with a shape has an axis, and the book gives Paradise one: an upper and a nether surface, a tenth of the east-west diameter apart (\bibref[11:2.2]{p011 2:2}). The plane perpendicular to that axis is the Isle's own, in which the six concentric ellipses of the space levels lie (\bibref[12:1.3]{p012 1:3}), and the sentence reads naturally as a statement about it. So read, it is what the physics of a flattened body says. At a distance $r$ from a body of mass $M$ and equatorial radius $R$, with $\theta$ measured from its axis, the pull is, to the first correction for its shape, $g(r,\theta) = {GM \over r^2}\,[1 - 3J_2(R/r)^2 P_2(\cos\theta)]$, where $P_2(\cos\theta) = {3\cos^2\theta - 1 \over 2}$ and $J_2$, positive for a flattened body, measures the flattening. In the plane $P_2 = -{1 \over 2}$ and on the axis $P_2 = 1$: at one distance the pull is strongest in the plane and weakest along the axis, and between them the same term tilts it toward the plane. \figure{oblate} That is why a planet's rings lie in its equatorial plane and a satellite's orbit precesses about its axis. The departure of the field from the same pull in every direction is a direct reading of the body's shape, which is what ``indicative of the differential dimensions of Paradise'' says; and the elastic tension the sentence builds on is planar itself, a stretched membrane pulling in its own plane. The two-body problem is the opposite case. Two point masses pull the same in every direction, and the plane of their orbit is fixed by their angular momentum, not by either mass; so it shows each orbit to be planar, which the text does not dispute, and nothing of a plane that gravity prefers. The planets share one, within a few degrees, because they condensed from one disc; the Sun's own field, its $J_2$ some $2\times10^{-7}$, prefers none. A transport seraphim leaves a planet perpendicular to the plane of its system, in my own experience: that is the direction in which a flattened system's pull is least, and in which there is least to pass through, the planets and the dust lying near the plane. It is not the direction a rocket would take, which does best in the plane, where the planet's own orbital motion counts, and Ulysses needed Jupiter to leave the ecliptic; but the energy of escape from a still field is the same every way, and at three times the speed of light (\bibref[23:3.2]{p023 3:2}) an orbital motion counts for nothing. Lastly the ellipses. Kepler's, with the attractor at a focus, follow from the inverse-square law alone: a perfectly round Sun gives them exactly, and a flattened one gives orbits that do not close but precess, which is how the Earth's own flattening is measured from its satellites; they tell nothing of the shape of their source. The book's ellipses are concentric, with Paradise at their center, and this paragraph calls Paradise gravity an elastic tension. Bertrand's theorem allows only two central forces whose bound orbits all close, the inverse square and Hooke's, a pull proportional to distance, which is what elastic means; and Hooke's orbits are ellipses centered on the attractor. The book's picture is consistent with itself, elastic tension and concentric ellipses, and it is Hooke's case, not Kepler's.'''
+
+# F26, proposed: the Foreword's definitions of pattern
+[[note]]
+at = "11:9.5"
+after = "the absolute of patterns"
+origin = "none"
+tex = '''The definitions are the Foreword's: ``Pattern is a master design from which copies are made. Eternal Paradise is the absolute of patterns; the Eternal Son is the pattern personality'' (\bibref[0:6.13]{p000 6:13}), and ``pattern is pattern and remains pattern; only copies are multiplied'' (\bibref[0:6.10]{p000 6:10}). Copies, not reflections: Havona is ``an exhibit of these potentials in actuality.'''''
+
+# F25, the edition's second note at 11:8.9, Kepler's ellipses and the shape of
+# Paradise: folded into the note above (Tigran, 2026-11-06).
+[[dropped]]
+at = "11:8.9"
+origin = "bec762085d15a62c"
+why = "folded into the note at 11:8.9, after `to the mass', which gives Kepler's ellipses against Hooke's (Tigran, 2026-11-06)"
+
+# The two 1955 readings, dropped without a ruling, the press's apparatus
+# being complete.
+[[dropped]]
+at = "11:7.3"
+origin = "6def8961787ca3b7"
+why = "a 1955 reading (maltese): the press's apparatus gives it"
+
+[[dropped]]
+at = "11:7.7"
+origin = "28d44c9ef2074ff4"
+why = "a 1955 reading (zone): the press's apparatus gives it"

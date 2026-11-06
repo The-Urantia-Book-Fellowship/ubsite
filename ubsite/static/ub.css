@@ -1032,10 +1032,10 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
    block of its own in the words, in the text's colour, as wide as the card
    allows.  Its labels are math in foreignObjects, sized in the figure's own
    units so that they scale with it. */
-:is(.note, .pop) svg.sfig { display: block; width: min(100%, 19em); height: auto;
+:is(.note, .pop, .snote) svg.sfig { display: block; width: min(100%, 19em); height: auto;
                             margin: .7em auto .35em; color: var(--text); overflow: visible; }
-:is(.note, .pop) svg.sfig foreignObject { overflow: visible; }
-:is(.note, .pop) svg.sfig .lab { font-size: 15px; line-height: 1; white-space: nowrap; text-align: start; }
+:is(.note, .pop, .snote) svg.sfig foreignObject { overflow: visible; }
+:is(.note, .pop, .snote) svg.sfig .lab { font-size: 15px; line-height: 1; white-space: nowrap; text-align: start; }
 .pop .at { display: none; }                     /* the card stands at its paragraph */
 .pop .lbl { pointer-events: none; }
 /* A note's first paragraph is a .lead, which the prose pages set at 1.05rem

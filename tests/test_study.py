@@ -366,6 +366,15 @@ class Study(unittest.TestCase):
                   sources=[])
         self.assertIn("study-order", codes(self.attach()[2]))
 
+    def test_a_paragraph_reference_is_never_bare(self):
+        # 187:4.1 as text is no link: Paper 11's review wrote 49 so (2026-11-05).
+        o = self.orig.notes[0].origin
+        self.toml(notes=[("0:0.1", "Urantia", o, r"see 0:0.2 and \cite{Hart}.", None)])
+        self.assertEqual(codes(self.attach()[2]), ["study-bare-ref"])
+        self.toml(notes=[("0:0.1", "Urantia", o,
+                          r"see \bibref[0:0.2]{p000 0:2}, Luke~23:43 and \cite{Hart}, p.~8.", None)])
+        self.assertEqual(self.attach()[2].problems, [])
+
     # -- how a note is set ------------------------------------------------
     def expand(self, tex, sources=None):
         report = Report()

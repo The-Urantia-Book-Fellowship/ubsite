@@ -90,6 +90,26 @@ class Forms(unittest.TestCase):
     def test_markup_characters_are_escaped(self):
         self.assertEqual(body("n<1"), "<mi>n</mi><mo>&lt;</mo><mn>1</mn>")
 
+    def test_a_function_name_is_upright_with_a_thin_space_after_it(self):
+        # 11:8.9's $P_2(\cos\theta)$ (2026-11-06): the name is one <mi>, so the
+        # browser sets it upright, and TeX's thin space stands before a letter or
+        # a number, not before a bracket, as its spacing table has it.
+        self.assertEqual(body("\\cos\\theta"), '<mi>cos</mi><mspace width="0.1667em"/><mi>θ</mi>')
+        self.assertEqual(body("\\cos(x)"), "<mi>cos</mi><mo>(</mo><mi>x</mi><mo>)</mo>")
+        self.assertEqual(body("\\cos^2\\theta"),
+                         '<msup><mi>cos</mi><mn>2</mn></msup><mspace width="0.1667em"/><mi>θ</mi>')
+        self.assertEqual(body("{3\\cos^2\\theta - 1 \\over 2}"),
+                         '<mfrac><mrow><mn>3</mn><msup><mi>cos</mi><mn>2</mn></msup>'
+                         '<mspace width="0.1667em"/><mi>θ</mi><mo>−</mo><mn>1</mn></mrow><mn>2</mn></mfrac>')
+        self.assertEqual(body("\\sin\\theta"), '<mi>sin</mi><mspace width="0.1667em"/><mi>θ</mi>')
+        self.assertEqual(texmath.drawn(texmath.convert("\\cos\\theta")), {"c", "o", "s", "𝜃"})
+
+    def test_a_root_draws_the_radical_sign(self):
+        # No token carries it: the browser draws √ for <msqrt> from the font,
+        # so the subset is told to keep it (11:2.2's eccentricity lost it).
+        self.assertIn("√", texmath.drawn(texmath.convert("\\sqrt{1-(6/7)^2}")))
+        self.assertNotIn("√", texmath.drawn(texmath.convert("(6/7)^2")))
+
 
 class Refused(unittest.TestCase):
     def test_outside_the_set(self):

@@ -34,6 +34,10 @@ OPERATORS = {"times": "×", "approx": "≈", "pm": "±", "neq": "≠", "subset":
              # ud's notes (build/translation.py), with the braces of a set
              "in": "∈", "Rightarrow": "⇒", "ldots": "…", "{": "{", "}": "}"}
 CHARS = {"-": "−", "*": "∗"}
+# A function's name is set upright, and TeX's thin space follows it before a
+# letter or a number (\cos\theta), none before a bracket (\cos(x)): the pull
+# of a flattened body at 11:8.9, $P_2(\cos\theta)$ (2026-11-06).
+FUNCTIONS = {"cos", "sin"}
 OPCHARS = set("+-=<>()[]/,;:!|*.×")
 SPACES = {",": "0.1667em", " ": "0.25em"}
 
@@ -118,6 +122,7 @@ class _Parser:
     def __init__(self, src: str):
         self.toks = list(_tokens(src))
         self.i = 0
+        self.fn = False                 # the atom just taken was a function's name
 
     def peek(self):
         return self.toks[self.i] if self.i < len(self.toks) else None
@@ -157,6 +162,7 @@ class _Parser:
 
     def scripted(self) -> str:
         base, limits = self.atom()
+        fn, self.fn = self.fn, False
         sub = sup = None
         while self.peek() and self.peek()[0] in "^_":
             k = self.take()[0]
@@ -169,13 +175,16 @@ class _Parser:
                 if sub is not None:
                     raise MathError("two subscripts")
                 sub = arg
-        if sub is None and sup is None:
-            return base
-        if limits:
-            tag = "munderover" if sub and sup else "munder" if sub else "mover"
-        else:
-            tag = "msubsup" if sub and sup else "msub" if sub else "msup"
-        return f"<{tag}>{base}{sub or ''}{sup or ''}</{tag}>"
+        if sub is not None or sup is not None:
+            if limits:
+                tag = "munderover" if sub and sup else "munder" if sub else "mover"
+            else:
+                tag = "msubsup" if sub and sup else "msub" if sub else "msup"
+            base = f"<{tag}>{base}{sub or ''}{sup or ''}</{tag}>"
+        nxt = self.peek()
+        if fn and nxt is not None and nxt[0] != "}" and nxt not in (("op", "("), ("op", "[")):
+            base += f'<mspace width="{SPACES[","]}"/>'
+        return base
 
     def atom(self) -> tuple[str, bool]:
         """One node, and whether its scripts go under and over it (\\limits)."""
@@ -199,6 +208,9 @@ class _Parser:
             return f'<mi mathvariant="normal">{GREEK_UPPER[v]}</mi>', False
         if v == "hbar":
             return "<mi>ℏ</mi>", False
+        if v in FUNCTIONS:
+            self.fn = True
+            return f"<mi>{v}</mi>", False
         if v == "infty":                       # the quiz's answer "$\infty$" (build/quiz.py)
             return "<mi>∞</mi>", False
         if v in OPERATORS:
@@ -305,6 +317,12 @@ def drawn(mathml: str) -> set[str]:
         if tag == "mi" and len(text) == 1 and "mathvariant" not in (attrs or ""):
             text = italic(text)
         out.update(text)
+    # A root's radical sign is no token: the browser draws it for <msqrt> and
+    # <mroot> from the font's own glyph (U+221A, stretched by the MATH table),
+    # so the subset must keep it.  Without this, 11:2.2's eccentricity lost its
+    # radical and was set as 1 − (6/7)² (2026-11-05).
+    if "<msqrt" in mathml or "<mroot" in mathml:
+        out.add("√")
     return out
 
 

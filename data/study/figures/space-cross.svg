@@ -1,0 +1,18 @@
+<svg class="sfig" viewBox="0 0 320 300" role="img" aria-label="A vertical cross section of total space: Paradise at the center; pervaded space as the two horizontal arms of a Maltese cross, widening outward and crossed by the space levels; the two reservoirs of unpervaded space as its vertical arms; and the quiescent midspace zones between the arms, enclosing everything" xmlns="http://www.w3.org/2000/svg">
+<g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round">
+<ellipse cx="160" cy="150" rx="152" ry="142" fill="none" stroke-width="1" stroke-dasharray="5 4" stroke-opacity=".55"/>
+<path d="M160 140L110 18H210ZM160 160L110 282H210Z" fill="currentColor" fill-opacity=".06" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M183 150L300 101V199ZM137 150L20 101V199Z" fill="currentColor" fill-opacity=".16" stroke="none"/>
+<path d="M300 101L183 150L300 199M20 101L137 150L20 199" stroke-width="1.2"/>
+<path d="M300 101V199M20 101V199" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M200 142.9V157.1M222 133.7V166.3M244 124.5V175.5M264 116.1V183.9M284 107.7V192.3M120 142.9V157.1M98 133.7V166.3M76 124.5V175.5M56 116.1V183.9M36 107.7V192.3" stroke-width=".8" stroke-opacity=".5"/>
+<path d="M152 154L108 206" stroke-width=".9"/>
+</g>
+<ellipse cx="160" cy="150" rx="17" ry="4.5" fill="currentColor"/>
+<foreignObject x="46" y="198" width="62" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:right">Paradise</div></foreignObject>
+<foreignObject x="232" y="134" width="66" height="34"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">pervaded<br/>space</div></foreignObject>
+<foreignObject x="118" y="24" width="84" height="34"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">unpervaded<br/>space</div></foreignObject>
+<foreignObject x="118" y="242" width="84" height="34"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">unpervaded<br/>space</div></foreignObject>
+<foreignObject x="226" y="40" width="72" height="34"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">midspace<br/>zones</div></foreignObject>
+<foreignObject x="22" y="226" width="72" height="34"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">midspace<br/>zones</div></foreignObject>
+</svg>

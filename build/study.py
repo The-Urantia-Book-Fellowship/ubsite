@@ -88,6 +88,11 @@ RE_LEADING_HYPHEN = re.compile(r"(?:^|(?<=[\s(\[/“‘]))-[^\W\d_]+")
 # Measured between the places a line may break anyway: a space, a dash, a slash.
 RE_TIED = re.compile(r"[^\s\u00a0\u202f—–/-]+(?:[\u00a0\u202f][^\s\u00a0\u202f—–/-]+)+")
 TIED_MAX = 24
+# A paragraph's reference is a link only as \bibref sets it; written bare,
+# 187:4.1, it is text, and nothing said so: Paper 11's review wrote all 49 of
+# its references so, and Tigran asked why none was a link (2026-11-05).
+RE_BIBREF = re.compile(r"\\bibref\s*(?:\[[^\]]*\])?\s*\{[^}]*\}")
+RE_BARE_REF = re.compile(r"(?<![\w\[.])\d{1,3}:\d{1,2}\.\d{1,3}(?![\w])")
 
 KEYS = {"paper", "chart", "chart_date", "study", "reviewed", "source", "note", "dropped"}
 SOURCE_KEYS = {"key", "origin", "tex"}
@@ -343,6 +348,10 @@ def _notes(cur: Curated, paras, order, sources, orig, where, report,
         at = f"{where} note {i} ({nt['at']})"
         # Set first, so that what it cites is counted even if it cannot be placed.
         text, html, cites = expand(nt["tex"], paras, sources, at, report)
+        bare = RE_BARE_REF.search(RE_BIBREF.sub("", nt["tex"] + " " + nt.get("corrects", "")))
+        if bare:
+            report.hard("study-bare-ref", at, f"{bare[0]} is written bare, and links only as "
+                        f"\\bibref[{bare[0]}]{{p… …}}")
         html_hy = expand(nt["tex"], paras, sources, at, Report(), hyphenator)[1] if hyphenator else html
         for c in cites:
             if c in sources:
