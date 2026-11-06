@@ -240,11 +240,12 @@ class Pages(unittest.TestCase):
         said.append(re.sub(r"<[^>]+>", " ", shell))
         words = set(re.findall(r"[A-Za-z]{2,}", html.unescape(" ".join(said))))
         # The Fellowship's name stays in Latin letters in Russian, as the home
-        # page writes it (ru.toml home:edition) and a translation's credit does;
-        # and the book's own titles stay as printed, "Foreword" among them
-        # (DECISIONS.md, Russian), which Settings' "Foreword in Part I" names.
+        # page writes it (ru.toml home:edition) and a translation's credit does.
+        # Not "Foreword": Settings' "Foreword in Part I" is «Предисловие в части I»,
+        # the interface's words, not the book's title as listed (DECISIONS.md,
+        # Russian, 2026-11-06).
         names = {"Ctrl", "OFL", "CC", "BY", "NC", "SA", "Goudy", "Uversa", "Press", "The", "Urantia", "Book",
-                 "British", "Study", "Edition", "Badanon", "English", "localhost", "Fellowship", "Foreword"}
+                 "British", "Study", "Edition", "Badanon", "English", "localhost", "Fellowship"}
         # And the translations' short names, which no language translates (data/translations.toml).
         with open(ROOT / "data" / "translations.toml", "rb") as fh:
             names |= {w for x in tomllib.load(fh).values() for w in re.findall(r"[A-Za-z]{2,}", x["label"])}

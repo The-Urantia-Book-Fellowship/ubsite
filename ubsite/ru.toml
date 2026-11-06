@@ -12,7 +12,8 @@
 #                         «Предисловие» is the Russian translation's, Tigran,
 #                         2026-10-25; but where the interface describes, not
 #                         lists, it is «Предисловие»: the home page's
-#                         «Предисловие и документы 1–31», Tigran, 2026-11-06)
+#                         «Предисловие и документы 1–31», Settings, the
+#                         tooltips, the quiz, Tigran, 2026-11-06)
 #   Paper / section       документ / раздел;  paragraph  абзац
 #   index entry           рубрика указателя;  subentry  подрубрика;
 #                         headword  заглавное слово
@@ -94,7 +95,7 @@
 "on a phone or a tablet: the lower half of the screen goes on, the upper half back" = "на телефоне или планшете: нижняя половина экрана — вперёд, верхняя — назад"
 "Whole paper" = "Документ целиком"
 "the paper on one page, section after section, with only the paper buttons at its end" = "документ на одной странице, раздел за разделом; внизу только кнопки документов"
-"Foreword in Part I" = "Foreword в части I"
+"Foreword in Part I" = "Предисловие в части I"
 "wherever the parts are listed; off, it stands on its own before them" = "везде, где перечислены части; выключено — стоит отдельно перед ними"
 
 "Index and appendices" = "Указатель и приложения"
@@ -216,8 +217,8 @@
 "The 1955 readings" = "Разночтения 1955 года"
 "Study notes" = "Примечания"
 "Papers and sections" = "Документы и разделы"
-"Previous paper: the Foreword" = "Предыдущий документ: Foreword"
-"Next paper: the Foreword" = "Следующий документ: Foreword"
+"Previous paper: the Foreword" = "Предыдущий документ: Предисловие"
+"Next paper: the Foreword" = "Следующий документ: Предисловие"
 "Previous paper: {p}" = "Предыдущий документ: {p}"
 "Next paper: {p}" = "Следующий документ: {p}"
 "Previous section: {s}" = "Предыдущий раздел: {s}"
@@ -370,7 +371,7 @@
 "No headword in the index has this address." = "Ни у одного заглавного слова указателя нет такого адреса."
 "The appendices are lettered A to F." = "Приложения обозначены буквами от A до F."
 "There are four parts, I to IV." = "Частей четыре, от I до IV."
-"There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196." = "Документа {n} нет. Foreword — это документ 0, а документы идут до 196-го."
+"There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196." = "Документа {n} нет. Предисловие — это документ 0, а документы идут до 196-го."
 "Paper {n} has no section {s}." = "В документе {n} нет раздела {s}."
 "There is no paragraph {p}: {s} runs from {a} to {b}." = "Абзаца {p} нет: в {s} абзацы с {a} по {b}."
 "A range runs forwards, in the order of the book: {a}, not {b}." = "Диапазон идёт вперёд, в порядке книги: {a}, а не {b}."
@@ -487,7 +488,7 @@
 
 "Cosmic Citizenship Quiz" = "Космическое гражданство"
 "The quiz on Paper {n}" = "Викторина: документ {n}"
-"The quiz on the Foreword" = "Викторина: Foreword"
+"The quiz on the Foreword" = "Викторина: Предисловие"
 "quiz:paper" = { en = ["{n} question, from The British Study Edition of the Urantia Papers.", "{n} questions, from The British Study Edition of the Urantia Papers."], ru = ["{n} вопрос из The British Study Edition of the Urantia Papers.", "{n} вопроса из The British Study Edition of the Urantia Papers.", "{n} вопросов из The British Study Edition of the Urantia Papers."] }
 "quiz:hub" = { en = "{q:,} questions on {p} of the 197 papers, from The British Study Edition of the Urantia Papers: a paper’s questions after reading it, or ten at random.", ru = "Вопросов: {q:,}, документов с вопросами: {p} из 197; из The British Study Edition of the Urantia Papers: вопросы к документу после его прочтения или десять наугад." }
 "quiz:call" = { en = ["{n} question on this paper", "{n} questions on this paper"], ru = ["{n} вопрос к этому документу", "{n} вопроса к этому документу", "{n} вопросов к этому документу"] }
@@ -498,7 +499,7 @@
 "Paper {n} has no questions in the quiz: {quiz} lists those that have." = "К документу {n} в викторине нет вопросов: те, к которым есть, перечислены на странице {quiz}."
 "Ten questions at random from" = "Десять вопросов наугад из"
 "the whole book|from" = "всей книги"
-"the Foreword" = "Foreword"
+"the Foreword" = "Предисловия"
 "Part {r}|from" = "части {r}"
 "Start" = "Начать"
 "Question {i} of {n}" = "Вопрос {i} из {n}"
