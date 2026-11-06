@@ -105,6 +105,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- With the interface in Russian, the home page's Part I reads «Предисловие и документы 1–31», where it read «Foreword и документы 1–31».
 - On a whole paper's page, Back after following a reference to a place on the same page, a study note's for example, returns to where the page stood; it stayed at the paragraph cited.
 - A search typed into the box while listening with Follow along off, when pages are shown without stopping the reading, now shows its results instead of an empty search page.
 - On the List of study notes a figure in a note is drawn at the size, and with the labels, its card gives it; the gyroscope's labels were set in the page's own size there, and ran over the drawing.
