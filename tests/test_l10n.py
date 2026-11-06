@@ -180,7 +180,7 @@ class Settings(unittest.TestCase):
 
 
 PAGES = ["/", "/101:4", "/101:10", "/144:3", "/i/humor", "/i/humor/read", "/search?q=jesus", "/lists",
-         "/lists/1955", "/appendix/A", "/part/1", "/0:0.0-1", "/nothing"]
+         "/lists/1955", "/appendix/A", "/part/1", "/0:0.0-1", "/nothing", "/help"]
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")

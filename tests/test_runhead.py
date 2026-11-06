@@ -72,8 +72,11 @@ class RunningHead(unittest.TestCase):
         self.assertNotRegex(JS, r"main[^\n]*appendChild\(head\)")
 
     def test_no_template_names_it(self):
+        # But Help's, which draws one still as an example (2026-11-06): a page
+        # of its own, not a page of the text.
         for path in (ROOT / "ubsite" / "templates").glob("*.html"):
-            self.assertNotIn("runhead", path.read_text(), path.name)
+            if path.name != "help.html":
+                self.assertNotIn("runhead", path.read_text(), path.name)
 
     def test_tap_comes_before_the_turn(self):
         # The one click handler decides: a card, else the head, else the turn.

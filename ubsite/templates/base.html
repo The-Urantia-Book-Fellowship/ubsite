@@ -1,3 +1,4 @@
+{% import "_chrome.html" as chrome -%}
 <!doctype html>
 <html lang="en" data-mode="{{ mode }}">
 <head>
@@ -210,8 +211,7 @@ window.ubCompare = function (where) {
     {#- Hidden until ub.js runs: with JavaScript off there is nothing to set. #}
     <button class="gear" type="button" {{ ta('aria-label', 'Settings') }} {{ ta('title', 'Settings (Ctrl+,)') }}
             aria-keyshortcuts="Control+Comma" aria-haspopup="dialog" hidden>
-      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6.67 3.03L6.97 1.08A7 7 0 0 1 9.03 1.08L9.33 3.03A5.15 5.15 0 0 1 10.58 3.54L12.16 2.37A7 7 0 0 1 13.63 3.84L12.46 5.43A5.15 5.15 0 0 1 12.97 6.67L14.92 6.97A7 7 0 0 1 14.92 9.03L12.97 9.33A5.15 5.15 0 0 1 12.46 10.57L13.63 12.16A7 7 0 0 1 12.16 13.63L10.58 12.46A5.15 5.15 0 0 1 9.33 12.97L9.03 14.92A7 7 0 0 1 6.97 14.92L6.67 12.97A5.15 5.15 0 0 1 5.43 12.46L3.84 13.63A7 7 0 0 1 2.37 12.16L3.54 10.57A5.15 5.15 0 0 1 3.03 9.33L1.08 9.03A7 7 0 0 1 1.08 6.97L3.03 6.67A5.15 5.15 0 0 1 3.54 5.42L2.37 3.84A7 7 0 0 1 3.84 2.37L5.42 3.54A5.15 5.15 0 0 1 6.67 3.03Z"/>
-        <circle cx="8" cy="8" r="2.2"/></svg></button>
+      {{ chrome.gear_svg() }}</button>
     {#- Work offline: whether this page is online or offline, and whether a copy
         is kept, drawn as one cloud whose parts ub.css shows by data-net and
         data-have.  A sign, which opens Settings at its Offline tab, where the
@@ -219,12 +219,7 @@ window.ubCompare = function (where) {
         #offmenu).  Shown by ub.js only where a service worker can run. #}
     <button class="offline" type="button" {{ ta('aria-label', 'Online') }} {{ ta('title', 'Online') }}
       hidden data-net="on" data-have="none" data-src="{{ asset('offline.js') }}">
-      <svg viewBox="0 0 20 16" aria-hidden="true" focusable="false">
-        <path class="cloud" d="M5.6 13.4h9a3.4 3.4 0 0 0 .5-6.75A4.9 4.9 0 0 0 5.8 5.3a4.05 4.05 0 0 0-.2 8.1z"/>
-        <path class="tick" d="M7.6 9.4l1.8 1.8 3.4-3.6"/>
-        <path class="down" d="M10.2 6.6v4.6M8.2 9.3l2 2 2-2"/>
-        <path class="slash" d="M3.2 1.8l13.6 13"/>
-        <circle class="dot" cx="16.6" cy="3.4" r="2.4"/></svg></button>
+      {{ chrome.cloud_svg() }}</button>
   </nav>
   {#- The interface's language, at the corner, after the nav: the Union Jack and the Russian
       tricolour, each named in its own language, the one chosen full and the
@@ -246,6 +241,12 @@ window.ubCompare = function (where) {
         <path d="M0 0h45v10H0z" fill="#fff"/><path d="M0 10h45v10H0z" fill="#0039a6"/>
         <path d="M0 20h45v10H0z" fill="#d52b1e"/></svg></button>
   </span>
+  {#- Help, and the tour (Tigran, 2026-11-06): a link to the page /help, so it
+      works with JavaScript off and offline, the last thing in the header: the
+      corner on a wide screen and on a phone alike (ub.css a.help).  Its
+      data-src is the tour's script, which ub.js loads when the tour is due:
+      on a first visit, or a step kept for the tab (static/help.js). #}
+  <a class="help" href="/help" {{ ta('aria-label', 'Help') }} {{ ta('title', 'Help and tour') }} data-src="{{ asset('help.js') }}">{{ chrome.help_svg() }}</a>
 </header>
 <dialog class="settings" aria-labelledby="settings-title">
   {#- Rendered from ubsite/settings.py; ub.js fills in the values and keeps them.

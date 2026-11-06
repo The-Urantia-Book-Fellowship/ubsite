@@ -126,7 +126,7 @@ Every gate runs under each profile.
 
 - Its links name urantiabook.org in full: the reader is another site.
 - Its CSS is scoped to the header and footer, under a class of their own, so that it restyles nothing of the reader's.
-- The reader's own controls stay: its search box, Contents, Index, the theme, Settings, Work offline and the two flags that switch its interface between English and Russian, as a bar of the reader's under the Fellowship's header.
+- The reader's own controls stay: its search box, Contents, Index, the theme, Settings, Work offline, Help (the ? and the tour) and the two flags that switch its interface between English and Russian, as a bar of the reader's under the Fellowship's header.
 - The footer keeps the reader's own two lines, in English or Russian with the rest of its interface. The first says that the text of *The Urantia Book* is in the public domain, and the edition as a whole, with its index, is licensed CC BY-NC-SA 4.0. This is a condition of the index's use (`CLAUDE.md` §10.5), and the offline copy carries it too. The second says that the site is not affiliated with Urantia Foundation, whose translations are its copyright and used by permission.
 - Its words are in English unless the Fellowship provides them in Russian too (section 11).
 

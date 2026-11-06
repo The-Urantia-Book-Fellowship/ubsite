@@ -179,6 +179,7 @@ a:hover { text-decoration-thickness: 2px; }
         align-self: center; }
 :is(.gear, .runhead .set) svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
 :is(.gear, .runhead .set) :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
+.eg .gear { cursor: default; }
 .gear:hover, .theme:hover, .top .offline:hover { color: var(--ink); }
 /* The flags beside it (base.html .langs): the interface in English or in
    Russian, the one chosen full, the other faded, each in its own proportions,
@@ -190,11 +191,20 @@ a:hover { text-decoration-thickness: 2px; }
 .top .flag[data-to="ru"] svg { width: 1.23rem; }
 .top .flag[aria-pressed="true"] { opacity: 1; }
 @media (hover: hover) { .top .flag:hover { opacity: .8; } }
+/* Help (base.html, templates/help.html; Tigran, 2026-11-06): a question mark
+   in a ring, drawn as the gear is, the last thing in the header, after the
+   flags: the corner.  A link to the page, shown with JavaScript off too. */
+a.help { display: block; color: var(--faint); align-self: center; line-height: 0; text-decoration: none; }
+a.help svg { width: 1.15rem; height: 1.15rem; display: block; overflow: visible; }
+a.help :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+a.help .dot { fill: currentColor; stroke: none; }
+a.help:hover { color: var(--ink); }
 /* On a phone the corner is the end of the name's line, which has room: the
    nav under the search box has none, the more in Russian.  So the flags come
-   second, the search box after them on a line of its own. */
+   second, the ? with them, the search box after them on a line of its own. */
 @media (max-width: 40rem) {
   .top .langs { order: 1; margin-left: auto; }
+  .top a.help { order: 1; }
   .top .find { order: 2; flex-basis: 100%; }
   .top nav { order: 3; }
 }
@@ -204,17 +214,19 @@ a:hover { text-decoration-thickness: 2px; }
    by data-net and data-have (ub.js, static/offline.js). */
 .top .offline { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer;
                 align-self: center; }
-.top .offline svg { width: 1.3rem; height: 1.04rem; display: block; overflow: visible; }
-.top .offline path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round;
+/* The same drawing in the Help page's examples (.eg), in each of its states. */
+:is(.top, .eg) .offline svg { width: 1.3rem; height: 1.04rem; display: block; overflow: visible; }
+:is(.top, .eg) .offline path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round;
                      stroke-linejoin: round; }
-.top .offline .cloud { fill: var(--paper); }
-.top .offline :is(.tick, .down, .slash, .dot) { display: none; }
-.top .offline[data-net="on"]:is([data-have="kept"], [data-have="stale"]) .tick,
-.top .offline[data-net="on"][data-have="busy"] .down,
-.top .offline[data-net="off"] .slash { display: inline; }
+:is(.top, .eg) .offline .cloud { fill: var(--paper); }
+:is(.top, .eg) .offline :is(.tick, .down, .slash, .dot) { display: none; }
+:is(.top, .eg) .offline[data-net="on"]:is([data-have="kept"], [data-have="stale"]) .tick,
+:is(.top, .eg) .offline[data-net="on"][data-have="busy"] .down,
+:is(.top, .eg) .offline[data-net="off"] .slash { display: inline; }
 /* The dot offline too: the copy being read is out of date (Tigran, 2026-10-14). */
-.top .offline[data-have="stale"] .dot { display: inline; fill: var(--flame);
+:is(.top, .eg) .offline[data-have="stale"] .dot { display: inline; fill: var(--flame);
                                         stroke: var(--paper); stroke-width: 1.2; }
+.eg .offline { display: block; color: var(--faint); }
 
 footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1rem;
   font-size: .88rem; color: var(--faint); }
@@ -1166,6 +1178,47 @@ p.t.now, .papertop :is(h1, h2).now, .rt.now, header.ch.now { background: color-m
 /* A tap on the text means the head: no double-tap zoom on it, or the tap
    that hides the head would zoom on iOS; pinching and the long press stay. */
 main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* The tour (static/help.js; Tigran, 2026-11-06): four shields dim the page
+   around the lit control and take every tap outside it, a ring stands on the
+   control, and the card beside it, set as a note's card is (.pop): below,
+   above or beside the control, centred for the welcome, a sheet at the foot
+   of a phone's screen.  Under the player (10) and under the top layer, so
+   that Settings opened from the lit gear, and the player from the lit ▶,
+   stand over the dim. */
+.tour-shield { position: fixed; z-index: 8; background: rgb(0 0 0 / .42); }
+.tour-ring { position: fixed; z-index: 8; pointer-events: none; border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--link), 0 0 0 6px color-mix(in oklch, var(--link) 25%, transparent); }
+.tour-card { position: fixed; z-index: 9; width: min(23.8em, calc(100vw - 1.5rem)); padding: .9rem 1.1rem 1rem;
+  font-size: max(1.05rem, calc(var(--size) * .77)); line-height: 1.4; color: var(--ink);
+  background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+  border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
+.tour-card.sheet { left: .75rem !important; right: .75rem; width: auto; top: auto !important;
+  bottom: max(.75rem, env(safe-area-inset-bottom)); }
+.tour-card.centre { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); }
+.tour-card .k { margin: 0 0 .25rem; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.tour-card h2 { margin: 0 0 .4rem; font-size: 1.2em; font-weight: 400; line-height: 1.2; }
+.tour-card.welcome h2 { font-size: 1.45em; }
+.tour-card p { margin: 0 0 .5rem; }
+.tour-card .more { font-size: .88em; margin: 0 0 .7rem; }
+.tour-card .more a { color: var(--link); }
+.tour-card .btns { display: flex; align-items: center; gap: .5rem; margin: .4rem 0 0; }
+.tour-card .btns .skip { margin-left: auto; padding: .3em 0; border: 0; background: none; font: inherit;
+  font-size: .9em; color: var(--faint); cursor: pointer; }
+.tour-card .btns .skip:hover { color: var(--ink); text-decoration: underline; }
+.tour-card .x { position: absolute; top: .3rem; right: .4rem; display: grid; place-items: center;
+  width: 1.8rem; height: 1.8rem; padding: 0; border: 0; border-radius: 50%; background: transparent;
+  color: var(--faint); cursor: pointer; }
+.tour-card .x svg { width: 1rem; height: 1rem; }
+.tour-card .x path { fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.tour-card .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
+.tour-card .mark { display: block; width: 2.4rem; height: 2.4rem; margin: 0 0 .5rem; }
+.tour-card .tip { font-size: .85em; color: var(--faint); margin: .4rem 0 0; }
+/* The ? named in the welcome, drawn as the header draws it; and the keys. */
+.tour-card .qi svg { width: .95em; height: .95em; vertical-align: -.12em; }
+.tour-card .qi :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; }
+.tour-card .qi .dot { fill: currentColor; stroke: none; }
+.tour-card kbd { font: .85em/1 var(--sans); color: var(--ink); border: 1px solid var(--rule); border-bottom-width: 2px;
+  border-radius: 4px; padding: .1em .4em; background: var(--paper); white-space: nowrap; }
 .player { position: fixed; z-index: 10; left: 50%; transform: translateX(-50%);
   bottom: max(1rem, env(safe-area-inset-bottom)); max-width: calc(100vw - 2rem);
   display: flex; align-items: center; gap: .15rem; padding: .3rem .45rem;
@@ -1904,6 +1957,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 @media print {
   @page { margin: 22mm 20mm; }
   .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, .runhead, dialog { display: none; }
+  .tour-shield, .tour-ring, .tour-card { display: none; }
   :root.js .marginhead, :root[data-margin="off"] .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }

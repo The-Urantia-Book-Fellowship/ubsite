@@ -112,6 +112,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
 - **Whole paper** (2026-10-30): a paper on one page at `/N`, chosen in Settings, the choice made in the browser before paint (`base.html` `ubUnit`); its text from the same macros as a section's page (`templates/_text.html`, `paper.html`, `app.py paper_page`), listened to as one unit (`whole_audio`), and joined offline from the sections' pieces (`offline/pages.py holes`). `ARCHITECTURE.md`, The whole paper.
 - **The Foreword in Part I** (2026-11-04): Settings' `foreword`, in Reading, on by default, lists the Foreword as Part I's first paper wherever the parts are listed, off on its own before them; every list carries it both ways and the CSS shows one (`.fwin`, `.fwout`: `home.html`, `contents.html`, `_rail.html`, `quiz.html`, `offline.js recTree`, `quiz.js fwSync`). `ARCHITECTURE.md`, The Foreword in Part I.
 - **The quiz** (2026-10-28, live since 2026-10-30): the British Study Edition's `tex/quiz.tex` in the database, each question with its id for ever in `data/quiz/questions.tsv` and its paragraph reviewed paper by paper (`build/quiz.py`, `readers/quiz.py`, `tools/quiz/`, `data/quiz/README.md`); asked at `/quiz` and `/quiz/N`, invited at each paper's end, offline too (`queries.quiz`, `static/quiz.js`, Settings' `quiz`); and its board, opt-in, the site's first POSTs, kept by ubsite.sigmaai.au for both sites in `var/quiz.db` (`ubsite/board.py`, Settings' `quizboard`, `deploy/README.md`).
+- **Help and the tour** (2026-11-06): the ? at the header's corner, a link to `/help` (`templates/help.html`, `app.py help_page`), the page that says what each part of the page does, its examples the site's own markup on 11:7, in both languages and in the offline copy; and the tour (`static/help.js`), which starts by itself on a first visit, lights one control at a time over the real page and is started again from Help. The header's drawings are `templates/_chrome.html`'s macros. `ARCHITECTURE.md`, Help and the tour.
 
 ---
 
@@ -269,6 +270,7 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 - **The changelog and What's new**: `ChangeLog.md` is both; American dates.
 - **Russian, and the translations**: the interface in both languages; the translations in a fold, chosen in Settings, offline, with their notes, and in search; Compare at an address of its own, kept for the tab as one moves about.
 - **The quiz**: two ways in; one question at a time, a set for more than one right answer; references reviewed per paper, a study note among them; the book's spelling and dates; English only; on by default; kept in the browser; a board, opt-in, ranked by questions right the first time, on the main site.
+- **Help and the tour**: the ? a link at the corner, after the flags; Help a page, in both languages, its examples the site's own markup, never screenshots; the tour on the first visit wherever the reader lands, narrated over the real page with the controls live, what a control opens kept clear; seen for good its own key, not a setting; built by script on `<body>`.
 
 ---
 

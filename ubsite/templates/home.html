@@ -60,6 +60,7 @@
     {%- if stats.audio_mh_seconds %}
     <li>{{ t('home:listening', n=(stats.audio_mh_seconds / 3600)|round|int) }}</li>
     {%- endif %}
+    <li>{{ t('home:help') }}</li>
     <li>{{ t('home:api') }}</li>
   </ul>
 

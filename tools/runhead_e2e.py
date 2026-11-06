@@ -69,6 +69,8 @@ def run() -> int:
         b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True)
         ctx = b.new_context(has_touch=True, is_mobile=True, viewport={"width": 390, "height": 844},
                             device_scale_factor=2)
+        # A fresh context is a first visit, which the tour would meet (help.js).
+        ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
         pg = ctx.new_page()
         errors: list[str] = []
         pg.on("pageerror", lambda e: errors.append(str(e)))

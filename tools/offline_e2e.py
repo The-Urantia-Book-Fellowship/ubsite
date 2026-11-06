@@ -293,6 +293,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ctx = b.new_context()
         ctx.add_init_script(SAYS_OFFLINE)
         ctx.add_init_script(SAVES_DATA)
+        # A fresh context is a first visit, which the tour would meet (help.js).
+        ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
         pg = ctx.new_page()
         accept = lambda d: d.accept()
         pg.on("dialog", accept)

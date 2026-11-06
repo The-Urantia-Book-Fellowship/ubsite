@@ -1,0 +1,280 @@
+{% extends "base.html" %}{% set title = 'Help' %}
+{% from "_chrome.html" import gear_svg, cloud_sign, help_svg, glass_svg, player_svg, keep_svg, playp %}
+{% from "_para.html" import para %}
+{% from "_fold.html" import afold, compare %}
+{% from "_text.html" import chip, blanket, endnotes, quizcall %}
+{% from "_transport.html" import step %}
+{#- Help (Tigran, 2026-11-06): what each part of the page does, in chapters,
+    each illustrated with the site's own markup on real text, never a
+    screenshot or a typed ⏮ (build/fonts.py): a row of 11:7 with the entries
+    beside it, its box of what the whole section cites, the paragraph with a
+    1955 ring and a study note, whose cards open here as on the text's pages
+    (ub.js, with the article around them as host), the search box, the
+    transport bar, the player drawn still, the gear, the cloud in its states.
+    A page, not a dialog: an address to link to (/help#listening), in the
+    offline copy once (offline/pages.py misc), read with JavaScript off; the ?
+    at the header's corner is a link to it.  "Take the tour" and each
+    chapter's "Show me" start the tour (static/help.js) on a page of the
+    book; hidden until the script can run (:root.js).  Every word is in both
+    languages (ru.toml, help:*). #}
+{% block head %}
+{#- Only this page uses these, so they live here rather than in ub.css, which
+    every reader downloads (as api.html does).  The examples' frames, the
+    keys, and what the site's own markup needs to stand still in a frame. #}
+<style>
+.helppage .lead { font-size: 1.12rem; }
+.helppage .hnav { margin: 1.2rem 0 2rem; padding: 0; list-style: none; display: flex; flex-wrap: wrap;
+  gap: .35rem .9rem; font-size: .95rem; }
+.helppage .hnav a { color: var(--link); text-decoration: none; }
+.helppage .hnav a:hover { text-decoration: underline; }
+.helppage section { margin-top: 2.8rem; scroll-margin-top: 1rem; }
+.helppage h2 { margin: 0 0 .6rem; }
+.helppage .showme, .helppage .tourstart { margin: .2rem 0 0; }
+:root:not(.js) .helppage :is(.showme, .tourstart) { display: none; }
+.helppage .eg { margin: 1rem 0 1.2rem; padding: .9rem 1rem; border: 1px dashed var(--rule); border-radius: 6px;
+  --measure: 100%; --refw: 6; overflow: hidden; }
+.helppage .eg > :first-child { margin-top: 0; }
+.helppage .eg .cap { margin: .6rem 0 0; font-size: .85rem; color: var(--faint); }
+.helppage .eg .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 18ch); gap: 0 1.2rem; }
+.helppage .eg .a { display: block; }
+.helppage .eg .afold { display: none; }
+.helppage .eg .marginhead, .helppage .eg .cmphead { display: flex; position: static; }
+.helppage .eg .cmphead .cmpbtn { display: inline-flex; }
+.helppage .eg .find { max-width: 24rem; }
+.helppage .eg .transport, .helppage .eg .quizcall, .helppage .eg .blanket { margin: 0; }
+.helppage .eg .player { position: static; transform: none; display: inline-flex; max-width: 100%; }
+.helppage .eg .runhead { position: static; box-shadow: none; border: 1px solid var(--rule); border-radius: 4px; }
+.helppage .eg .tf .trfold { display: inline; }
+.helppage .eg .trfold::before { content: "› "; }
+.helppage .eg .icons { display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: center; }
+.helppage .eg .icons > span { display: inline-flex; flex-direction: column; align-items: center; gap: .3rem;
+  font-size: .8rem; color: var(--faint); text-align: center; }
+.helppage .playp { opacity: 1; cursor: default; }
+.helppage .playp.inline { display: inline-grid; vertical-align: -.2em; margin: 0 .1em; }
+.helppage .eg .player button { cursor: default; }
+.helppage .eg .egart { position: relative; }
+.helppage kbd { font: .85em/1 var(--sans); color: var(--ink); border: 1px solid var(--rule);
+  border-bottom-width: 2px; border-radius: 4px; padding: .1em .4em; background: var(--paper); white-space: nowrap; }
+.helppage table.keys { border-collapse: collapse; width: 100%; font-size: .95rem; margin: .6rem 0 0; }
+.helppage table.keys td { padding: .35rem .6rem .35rem 0; border-top: 1px solid var(--rule); vertical-align: top; }
+.helppage table.keys td:first-child { white-space: nowrap; width: 1%; padding-right: 1.2rem; }
+.helppage table.keys tr:first-child td { border-top: 0; }
+</style>
+{% endblock %}
+
+{#- One row of the text as a section's page sets it: the paragraph, with the
+    entries beside it (_text.html grid()), and ▶ under its reference where
+    listen.js would place it (after the reference, before the 1955 page),
+    drawn here since listen.js does not run on this page.  No anchor, no
+    dropped letter: an example, not the place.  The paragraph's stack is
+    _para.html's, written out so that the ▶ can stand in it. #}
+{% macro row(r, cs, n, play=True) -%}
+<div class="grid">
+  <div class="row">
+  <p class="t{% if r.p.gap_before %} pc{% endif %}"><span class="stk"><span class="num">{{ r.p.ref }}</span>
+         {%- if play %}{{ playp() }}{% endif %}
+         {%- if r.p.page_1955 %}<span class="pg" data-pg="{{ r.p.page_1955 }}"></span>{% endif %}</span>
+         {%- if r.p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}{{ r.p.html_hy|safe }}</p>
+  <div class="a">
+    {%- if cs %}
+      {{ afold(n) }}
+      <ul class="chips">
+      {% for c in cs %}<li>{{ chip(c) }}</li>{% endfor %}
+      </ul>
+    {%- endif -%}
+  </div>
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro showme(k) -%}
+<p><button type="button" class="pill showme" data-tour="{{ k }}">{{ t('Show me') }}</button></p>
+{%- endmacro %}
+
+{% block body %}
+<main class="prose helppage">
+  <h1>{{ t('Help') }}</h1>
+  <p class="lead">{{ t('help:intro') }}</p>
+  <p><button type="button" class="pill solid tourstart">{{ t('Take the tour') }}</button></p>
+  <ul class="hnav">
+    <li><a href="#text">{{ t('The text on the page') }}</a></li>
+    <li><a href="#index">{{ t('The index beside the text') }}</a></li>
+    <li><a href="#moving">{{ t('Moving about') }}</a></li>
+    <li><a href="#search">{{ t('Search|help') }}</a></li>
+    <li><a href="#listening">{{ t('Listening|help') }}</a></li>
+    <li><a href="#notes">{{ t('Notes and 1955 readings') }}</a></li>
+    <li><a href="#translations">{{ t('Translations and Compare') }}</a></li>
+    <li><a href="#settings">{{ t('Settings|help') }}</a></li>
+    <li><a href="#offline">{{ t('Working offline, and the app') }}</a></li>
+    <li><a href="#quiz">{{ t('The quiz|help') }}</a></li>
+    <li><a href="#russian">{{ t('The interface in Russian') }}</a></li>
+    <li><a href="#keys">{{ t('Keys') }}</a></li>
+    <li><a href="#about">{{ t('About this edition|help') }}</a></li>
+  </ul>
+
+  <section id="text">
+    <h2>{{ t('The text on the page') }}</h2>
+    <p>{{ t('help:text:1', play=playp(inline=True)) }}</p>
+    <p>{{ t('help:text:2') }}</p>
+    <div class="eg">
+      {{ row(eg_text, [], 0) }}
+      <p class="cap">{{ t('help:text:cap', play=playp(inline=True)) }}</p>
+    </div>
+    <p>{{ t('help:text:3') }}</p>
+  </section>
+
+  <section id="index">
+    <h2>{{ t('The index beside the text') }}</h2>
+    <p>{{ t('help:index:1') }}</p>
+    <div class="eg">
+      {{ row(eg_index, eg.citers.get(eg_index.p.id, []), eg.nciters.get(eg_index.p.id, 0)) }}
+      <p class="cap">{{ t('help:index:cap') }}</p>
+    </div>
+    {{ showme('chips') }}
+    <p>{{ t('help:index:2') }}</p>
+    <div class="eg">
+      {{ blanket(eg.paperwide, eg.blanket, eg.nwhole) }}
+    </div>
+    <p>{{ t('help:index:3') }}</p>
+  </section>
+
+  <section id="moving">
+    <h2>{{ t('Moving about') }}</h2>
+    <p>{{ t('help:moving:1') }}</p>
+    <div class="eg">
+      <form class="find" action="/search" role="search">
+        {{ glass_svg() }}
+        <input name="q" {{ ta('aria-label', 'Search') }} {{ ta('placeholder', 'a word, or a citation like 1:4.2') }} autocomplete="off"></form>
+    </div>
+    <p>{{ t('help:moving:2') }}</p>
+    {{ showme('contents') }}
+    <p>{{ t('help:moving:3') }}</p>
+    <div class="eg">
+      <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>
+        {%- for k in ('fb', 'prev', 'next', 'ff') %}
+        {{ step(k, go[k]) }}
+        {%- endfor %}
+      </nav>
+    </div>
+    <p>{{ t('help:moving:4') }}</p>
+    <p>{{ t('help:moving:5') }}</p>
+    <div class="eg">
+      <div class="runhead" role="region" {{ ta('aria-label', 'Running head') }}><span class="ref">{{ eg_text.p.ref }}</span><div class="mid"><p class="pn">{{ t('Paper {n}', n=eg.section.paper_n) }}<span class="tt">{{ paper.title }}</span></p><p class="au">{{ paper.author }}</p></div><span class="ctl"><a class="home" href="/" {{ ta('aria-label', 'Home') }}>{{ mark }}</a><span class="set">{{ gear_svg() }}</span></span></div>
+      <p class="cap">{{ t('help:moving:cap') }}</p>
+    </div>
+    {{ showme('runhead') }}
+  </section>
+
+  <section id="search">
+    <h2>{{ t('Search|help') }}</h2>
+    <p>{{ t('help:search:1') }}</p>
+    <p>{{ t('help:search:2') }}</p>
+    {{ showme('search') }}
+  </section>
+
+  <section id="listening">
+    <h2>{{ t('Listening|help') }}</h2>
+    <p>{{ t('help:listening:1', play=playp(inline=True)) }}</p>
+    <div class="eg">
+      {#- The bar as listen.js makeBar() builds it, its buttons inert: an
+          illustration, so hidden from assistive technology and the tab order. #}
+      <div class="player" aria-hidden="true"><button type="button" class="prev" tabindex="-1">{{ player_svg('prev') }}</button><button type="button" class="toggle" tabindex="-1">{{ player_svg('play') }}</button><button type="button" class="next" tabindex="-1">{{ player_svg('next') }}</button><span class="mid"><span class="where"><button type="button" class="at" tabindex="-1">{{ eg_text.p.ref }}</button><span class="who"></span></span><span class="voicebox"><button type="button" class="voice" tabindex="-1"><span>Merritt Horn</span></button></span></span><button type="button" class="keep" data-st="none" tabindex="-1">{{ keep_svg() }}</button><span class="ratebox"><button type="button" class="rate" tabindex="-1">1×</button></span><button type="button" class="close" tabindex="-1">{{ player_svg('close') }}</button></div>
+      <p class="cap">{{ t('help:listening:cap') }}</p>
+    </div>
+    <p>{{ t('help:listening:2') }}</p>
+    {{ showme('listen') }}
+  </section>
+
+  <section id="notes">
+    <h2>{{ t('Notes and 1955 readings') }}</h2>
+    <p>{{ t('help:notes:1') }}</p>
+    <div class="eg">
+      <article class="egart">
+      {{ row(eg_notes, [], 0, play=False) }}
+      {{ endnotes([eg_notes.p], eg.notes, eg.study) }}
+      </article>
+      <p class="cap">{{ t('help:notes:cap') }}</p>
+    </div>
+    {{ showme('notes') }}
+  </section>
+
+  <section id="translations">
+    <h2>{{ t('Translations and Compare') }}</h2>
+    <p>{{ t('help:translations:1') }}</p>
+    <div class="eg">
+      <div class="tf"><button class="trfold" type="button" aria-expanded="false">{{ t('{n} translations', n=3) }}</button></div>
+      <p class="cap">{{ t('help:translations:cap') }}</p>
+    </div>
+    <p>{{ t('help:translations:2') }}</p>
+    <div class="eg">
+      {{ compare() }}
+    </div>
+  </section>
+
+  <section id="settings">
+    <h2>{{ t('Settings|help') }}</h2>
+    <p>{{ t('help:settings:1') }}</p>
+    <div class="eg">
+      <div class="icons"><span><span class="gear">{{ gear_svg() }}</span>{{ t('Settings') }}</span><span><span class="theme">◐</span>{{ t('Light or dark') }}</span></div>
+    </div>
+    {{ showme('gear') }}
+  </section>
+
+  <section id="offline">
+    <h2>{{ t('Working offline, and the app') }}</h2>
+    <p>{{ t('help:offline:1') }}</p>
+    <div class="eg">
+      <div class="icons">
+        <span>{{ cloud_sign('on', 'none') }}{{ t('Online, no copy') }}</span>
+        <span>{{ cloud_sign('on', 'kept') }}{{ t('A copy is kept') }}</span>
+        <span>{{ cloud_sign('on', 'busy') }}{{ t('Downloading|cloud') }}</span>
+        <span>{{ cloud_sign('on', 'stale') }}{{ t('An update is waiting') }}</span>
+        <span>{{ cloud_sign('off', 'kept') }}{{ t('Offline, reading the copy') }}</span>
+      </div>
+    </div>
+    <p>{{ t('help:offline:2') }}</p>
+    {{ showme('cloud') }}
+  </section>
+
+  <section id="quiz">
+    <h2>{{ t('The quiz|help') }}</h2>
+    <p>{{ t('help:quiz:1') }}</p>
+    {%- if nquiz %}
+    <div class="eg">
+      {{ quizcall(nquiz, eg.section.paper_n) }}
+    </div>
+    {%- endif %}
+  </section>
+
+  <section id="russian">
+    <h2>{{ t('The interface in Russian') }}</h2>
+    <p>{{ t('help:russian:1') }}</p>
+  </section>
+
+  <section id="keys">
+    <h2>{{ t('Keys') }}</h2>
+    <table class="keys">
+      <tr><td><kbd>Space</kbd> <kbd>Page Down</kbd> <kbd>→</kbd></td><td>{{ t('On a screen') }}</td></tr>
+      <tr><td><kbd>Shift</kbd>+<kbd>Space</kbd> <kbd>Page Up</kbd> <kbd>←</kbd></td><td>{{ t('Back a screen') }}</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>X</kbd></td><td>{{ t('Search for the words selected; with none, go to the search box') }}</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>,</kbd></td><td>{{ t('Open or close Settings') }}</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>{{ t('Close a card, the running head or a dialog') }}</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd> <kbd>Home</kbd> <kbd>End</kbd></td><td>{{ t('In Settings: the tabs') }}</td></tr>
+      <tr><td><kbd>1</kbd>–<kbd>9</kbd> <kbd>Enter</kbd></td><td>{{ t('In the quiz: choose an answer; check, or go on') }}</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd> <kbd>Esc</kbd></td><td>{{ t('In the tour: back, next, end it') }}</td></tr>
+      <tr><td>{{ t('Headphones') }}</td><td>{{ t('Play, pause, the paragraph before or after, stop') }}</td></tr>
+    </table>
+  </section>
+
+  <section id="about">
+    <h2>{{ t('About this edition|help') }}</h2>
+    <p>{{ t('help:about:1') }}</p>
+    <p>{{ t('help:about:2') }}</p>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}
+{#- The tour's script, for "Take the tour" and "Show me"; on the text's pages
+    ub.js loads it when the tour is due. #}
+<script src="{{ asset('help.js') }}" defer></script>
+{% endblock %}

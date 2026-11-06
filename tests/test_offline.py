@@ -138,7 +138,7 @@ class Pages(unittest.TestCase):
         from test_appendix_pages import en
         from ubsite.app import STATIC
         body = en(call("/101:4")[2].decode())
-        for name in ("ub.css", "ub.js", "listen.js", "offline.js"):
+        for name in ("ub.css", "ub.js", "listen.js", "offline.js", "help.js"):
             h = hashlib.sha256((STATIC / name).read_bytes()).hexdigest()[:10]
             self.assertIn(f"/static/{name}?v={h}", body)
         self.assertIn('<link rel="manifest" href="/manifest.webmanifest">', body)

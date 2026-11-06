@@ -83,6 +83,9 @@ ELSEWHERE = {
          " (ub.css :is(.note, .pop) .src)",
     "γ": "42:5.1's SRT note names the Greek letter that became the 1955 'Y';"
          " UB Goudy has no Greek, and the serif behind it in the stack draws it",
+    "←": "the keys Help lists and the tour's cards name, set in the system UI face"
+         " (help.html and ub.css kbd)",
+    "→": "and the other arrow",
     "\u2060": "the word joiner that holds a 1955 ring to its word (ub.css"
               " a.fn::before); it draws nothing",
 }

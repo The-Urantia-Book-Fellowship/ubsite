@@ -204,7 +204,7 @@ def universe(con: sqlite3.Connection) -> dict:
         "SELECT paper_n, section_n, MAX(para_n) FROM paragraph GROUP BY paper_n, section_n")}
     misc = (["/", "/read", "/index", "/appendix"]
             + [f"/appendix/{r[0]}" for r in con.execute("SELECT letter FROM appendix ORDER BY letter")]
-            + ["/lists", "/lists/1955", "/lists/notes", "/lists/bibliography", "/changelog", "/api"]
+            + ["/lists", "/lists/1955", "/lists/notes", "/lists/bibliography", "/changelog", "/api", "/help"]
             + [f"/part/{r[0]}" for r in con.execute("SELECT n FROM part ORDER BY n")])
     # The papers the quiz has questions on (build/quiz.py), each a page /quiz/N.
     quiz = [n for (n,) in con.execute("SELECT paper_n FROM quiz_paper ORDER BY paper_n")]

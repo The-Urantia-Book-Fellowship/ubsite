@@ -90,7 +90,7 @@ T.env.globals["asset"] = asset
 # place of __CATALOG__.  Made again when any of them changes, as the dev
 # server runs; named by a hash of what it sends, so a build that changes
 # nothing moves nothing (CLAUDE.md trap 29).
-L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js")
+L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js", "help.js")
 L10N_JS = ROOT / "ubsite" / "l10n.js"
 
 
@@ -1456,6 +1456,37 @@ def _blocks(rows) -> list[dict]:
 def changelog(request: Request):
     rows = db().execute("SELECT * FROM changelog ORDER BY line").fetchall()
     return page(request, "changelog.html", blocks=_blocks(rows))
+
+
+# Help's examples are drawn from one section: 11:7, the one early section
+# with a box of what the whole section cites, 1955 readings and study notes
+# together; and from its paragraph with a ring and a note on one line.
+HELP_EXAMPLE = (11, 7)
+HELP_NOTES_PARA = "11:7.3"
+
+
+@app.get("/help", response_class=HTMLResponse)
+def help_page(request: Request):
+    """Help (templates/help.html; Tigran, 2026-11-06): what each part of the
+    page does, in chapters, each illustrated with the site's own markup on
+    the text of HELP_EXAMPLE, never a screenshot: the shortest paragraph
+    with entries beside it, the box of what the whole section cites, the
+    paragraph with a 1955 ring and a study note, the transport bar.  A page,
+    so that it has an address, works with JavaScript off and is in the
+    offline copy once (offline/pages.py misc); the tour (static/help.js)
+    starts from its buttons."""
+    con = db()
+    paper, sec = HELP_EXAMPLE
+    p = con.execute("SELECT * FROM paper WHERE n=?", (paper,)).fetchone()
+    s = con.execute("SELECT * FROM section WHERE paper_n=? AND n=?", (paper, sec)).fetchone()
+    d = section_text(con, p, s)
+    rows = [r for r in d["rows"] if "p" in r]
+    cited = [r for r in rows if d["citers"].get(r["p"]["id"])]
+    eg_index = min(cited, key=lambda r: len(r["p"]["text"]))
+    eg_text = min(rows, key=lambda r: len(r["p"]["text"]))
+    eg_notes = next(r for r in rows if r["p"]["ref"] == HELP_NOTES_PARA)
+    return page(request, "help.html", paper=p, eg=d, eg_text=eg_text, eg_index=eg_index, eg_notes=eg_notes,
+                go=transport(con, paper, sec), nquiz=queries.quiz_count(con, paper))
 
 
 # The passage /api shows a reply for: across a section's end, so that the reply

@@ -1785,6 +1785,23 @@
       if (gearBtn && tab) { gearBtn.click(); tab.click(); }
     });
   }
+
+  // Help, and the tour (static/help.js; Tigran, 2026-11-06).  The ? at the
+  // corner is a link to /help; its data-src is the tour's script, loaded
+  // here when the tour is due: never seen in this browser (localStorage
+  // ub_tour), or a step kept for this tab (sessionStorage).  Not on /help,
+  // which loads it itself, nor on the quiz's pages, whose keys 1-9 and Enter
+  // are their own, nor on the API's page, the stats or the board, nor where
+  // #listen starts the player as the page loads.  The script waits for
+  // Settings or What's new to close, and for the page to be visible.
+  var helpLink = document.querySelector('.top a.help'), tourDue = false;
+  try { tourDue = !!sessionStorage.getItem('ub_tour') || localStorage.getItem('ub_tour') !== 'seen'; } catch (e) {}
+  if (helpLink && helpLink.dataset.src && tourDue && !/^\/(help$|quiz|api$|stats$)/.test(location.pathname) &&
+      location.hash !== '#listen') {
+    var hs = document.createElement('script');
+    hs.src = helpLink.dataset.src;
+    document.head.appendChild(hs);
+  }
   window.addEventListener('beforeinstallprompt', function (ev) {
     ev.preventDefault();
     window.ubInstall = ev;

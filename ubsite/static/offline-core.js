@@ -173,6 +173,8 @@
     if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$|quiz\/board\/)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
     // A copy made before 2026-10-24 does not keep it.
     if (path === '/api') return { res: away(sh, T('The page about the text API is read online.')) };
+    // And one made before 2026-11-06 keeps no Help.
+    if (path === '/help') return { res: away(sh, T('The Help page is read online.')) };
     if (path === '/stats') return { res: away(sh, T('This page is read online.')) };
     if (path === '/quiz/board') return { res: away(sh, T('The quiz board is read online.')) };
     if ((m = /^\/quiz(?:\/(.*))?$/.exec(path))) {
