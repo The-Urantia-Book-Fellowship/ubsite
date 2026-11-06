@@ -739,9 +739,15 @@
   // `then` runs once it is in.
   function visit(url, isNew, y, then) {
     // In the reader's unit (base.html ubUnit): the rail's /101 is its first
-    // section's page to one reader and the whole paper's to another.
-    var u = new URL(url, location.href);
-    if (window.ubUnit) u = new URL(window.ubUnit(u.pathname + u.hash), location.href);
+    // section's page to one reader and the whole paper's to another; and in
+    // Compare while this tab is (base.html ubCompare).  Both take the path
+    // and the hash alone, so the query, a search's, is put back between
+    // them: until 2026-11-06 it was lost, and a search typed while listening
+    // with Follow along off showed the search page empty.
+    var u = new URL(url, location.href), at = u.pathname + u.hash;
+    if (window.ubCompare) at = window.ubCompare(at);
+    if (window.ubUnit) at = window.ubUnit(at);
+    u = new URL(at.replace(/#.*$/, '') + u.search + at.replace(/^[^#]*/, ''), location.href);
     url = u.href;
     var n = ++visiting, hash = u.hash;
     fetch(url, { credentials: 'same-origin', headers: { 'X-UB-Fetch': 'swap' } }).then(function (r) {
@@ -751,9 +757,13 @@
       if (n !== visiting) return;      // overtaken by a later one
       var doc = new DOMParser().parseFromString(got.html, 'text/html');
       if (!doc.querySelector('main')) throw new Error('not a page');
-      // A redirect (a citation searched for) lands at its real address.
-      if (isNew) push(got.url.split('#')[0] + hash);
-      else shown = bare(location.pathname, location.search);
+      // A redirect (a citation searched for) lands at its real address, in
+      // Compare while this tab is: the same page, the section's, under
+      // Compare's address (never the unit's, whose page this is not).
+      if (isNew) {
+        var fu = new URL(got.url, location.href);
+        push((window.ubCompare ? window.ubCompare(fu.pathname) : fu.pathname) + fu.search + hash);
+      } else shown = bare(location.pathname, location.search);
       swap(doc);
       if (y != null) scrollTo(0, y);
       else {

@@ -382,13 +382,22 @@
   // unit as it is clicked -- the rail's /15 to /15:0 with the setting off,
   // the rail's and a paragraph's /15:3 to /15#15:3 with it on, which on the
   // paper's own page is a place on it, and scrolls -- before listen.js or the
-  // browser follows it, so that no page is asked for twice.  In the capture
+  // browser follows it, so that no page is asked for twice.  And in Compare
+  // while this tab is (base.html ubCompare, 2026-11-06): a search hit's, a
+  // note's reference, the index's citations, Home's papers, /compare before
+  // the hash.  A link to a place on this page, a note's marker (#fn…), has
+  // the page's own path, so under /compare it is left alone.  In the capture
   // phase, so first.
   if (window.ubUnit) document.addEventListener('click', function (ev) {
     var a = ev.target.closest && ev.target.closest('a[href]');
     if (!a || a.origin !== location.origin) return;
-    var at = a.pathname + a.hash, to = window.ubUnit(at);
+    var at = a.pathname + a.hash, to = window.ubUnit(window.ubCompare ? window.ubCompare(at) : at);
     if (to !== at) a.href = to;
+    // A place on this page, the whole paper's (/1#1:2.9, a note's reference):
+    // where the page stands is kept in the entry's state, for Back (the
+    // hashchange below).
+    if (to.split('#')[0] === location.pathname && to.indexOf('#') > 0)
+      try { history.replaceState(Object.assign({}, history.state, { ubY: scrollY }), ''); } catch (e) {}
   }, true);
 
   // Bring the page's focus into view.  /61:7.18 renders the whole of 61:7 with
@@ -442,7 +451,19 @@
   });
   arrive();
   document.addEventListener('ub:page', arrive);
-  addEventListener('hashchange', arrive);
+  // Back on the whole paper's page from a place on it (#1:2.9, a note's
+  // reference followed) to its address with no place: the marks go, and the
+  // page returns to where it stood, kept in the entry's state as the place
+  // was left (the click handler above), since the browser puts it back only
+  // while Compare's and listen.js's entries have not asked it not to
+  // (scrollRestoration).  Until 2026-11-06 arrive() ran, and scrolled to the
+  // paragraph still marked.
+  addEventListener('hashchange', function () {
+    if (location.hash || !document.querySelector('article.whole')) return arrive();
+    Array.prototype.forEach.call(document.querySelectorAll('p.t.hit'), function (p) { p.classList.remove('hit'); });
+    var s = history.state;
+    if (s && s.ubY != null) { scrollTo({ top: s.ubY, behavior: 'instant' }); arriveTouched = Date.now(); }
+  });
 
   // The whole paper's page (paper.html): the section being read, the last
   // whose top is above the window's top, less a line -- where Settings' Whole
@@ -978,9 +999,14 @@
   // It has an address of its own, the page's with /compare after it, the same
   // page (app.py read_compare), which the head script marks on <html> before
   // first paint (.compare).  The toggle pushes it, and Back leaves it, drawn
-  // in place, the paragraph at the window's top kept there.  The transport
-  // bar and the Contents keep it on; the text's own links and the index's
-  // leave it.  In a section none of the ticked translations has, the page
+  // in place, the paragraph at the window's top kept there.  While it is on
+  // every link keeps it, put right as it is clicked (ubUnit's handler above,
+  // base.html ubCompare), and so do a citation typed into the box and an
+  // address typed into the tab (the head script's hop): it ends with the
+  // toggle, or Back past where it was turned on, which cmpDraw records
+  // (Tigran, 2026-11-06; until then the text's own links and the index's
+  // left it, the transport bar's and the Contents' alone keeping it,
+  // cmpLinks).  In a section none of the ticked translations has, the page
   // reads as usual, the address kept, so that the columns come back where
   // one resumes (Tigran, 2026-10-26).
   var CMP = /\/compare$/, cmpN = 0, cmpAt = location.pathname.replace(CMP, '');
@@ -1015,6 +1041,9 @@
   function cmpDraw() {
     var art = cmpArt(), on = cmpOn(), n = ++cmpN;
     document.documentElement.classList.toggle('compare', on);
+    // And the tab's memory of it (base.html ubCompareKeep): from a page of the
+    // book alone, so that a setting changed on a search's page leaves it.
+    if (window.ubCompareKeep) window.ubCompareKeep(location.pathname);
     cmpLinks(document, on);
     if (!art) return Promise.resolve();
     var b = art.querySelector('.cmphead .cmpbtn'), ks = on ? cmpKeys(art) : [],
@@ -1110,6 +1139,12 @@
     cmpGo();
   });
   addEventListener('pagehide', function () { history.scrollRestoration = 'auto'; });
+  // Shown again from the browser's page cache, by Back, no script runs: the
+  // tab's memory of Compare is put back to what this page says, which the
+  // toggle on another page since may have changed.
+  addEventListener('pageshow', function (ev) {
+    if (ev.persisted && window.ubCompareKeep) window.ubCompareKeep(location.pathname);
+  });
   // Back and Forward between this page and itself in Compare.  Any other
   // address is listen.js's to show, or the browser's.
   addEventListener('popstate', function () {

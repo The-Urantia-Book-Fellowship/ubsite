@@ -459,6 +459,68 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
            == ["en", "urantia-ru"], "a translation without the section has no column")
 
+        print("Compare kept as one moves about")                  # Tigran, 2026-11-06
+        pg.goto(BASE + "/1:1/compare")
+        pg.wait_for_selector("article.cmp .rc .rt")
+        pg.fill("form.find input", "Father")
+        pg.press("form.find input", "Enter")
+        pg.wait_for_selector("main.results")
+        hit = pg.evaluate("[...document.querySelectorAll('main.results ul.hits a')].map(a => a.getAttribute('href'))"
+                          ".find(h => /^\\/\\d+:\\d+\\.\\d+$/.test(h))")
+        pg.click(f'main.results a[href="{hit}"]')
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.url.endswith(hit + "/compare"), f"a search hit opens its paragraph in Compare ({pg.url})")
+        pg.goto(BASE + "/1:0")
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.url.endswith("/1:0/compare"), f"an address typed into the tab keeps it ({pg.url})")
+        # The study note citing 1:2.9 (data/study/001.toml), opened at its number.
+        note = pg.evaluate("document.querySelector('[id^=fnst] a[href=\"/1:2.9\"]').closest('[id^=fnst]').id")
+        pg.click(f'a.fn[href="#{note}"]')
+        pg.wait_for_selector(".pop.st")
+        pg.click('.pop.st a[href="/1:2.9"]')
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.url.endswith("/1:2.9/compare") and pg.locator("p.t.hit").count() == 1,
+           f"a study note's reference opens its paragraph in Compare ({pg.url})")
+        pg.fill("form.find input", "1:4.2")
+        pg.press("form.find input", "Enter")
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.url.endswith("/1:4.2/compare"), f"a citation typed into the box keeps it, past the server's redirect ({pg.url})")
+        pg.click(".cmphead .cmpbtn")                              # off
+        pg.wait_for_function("!document.querySelector('article.cmp')")
+        pg.reload()
+        pg.wait_for_selector("main.reader")
+        ok(pg.url.endswith("/1:4.2") and pg.evaluate("sessionStorage.getItem('ub_compare')") is None,
+           f"off, a reload is never put into Compare, and the tab has forgotten it ({pg.url})")
+        pg.click(".transport .next")
+        pg.wait_for_selector("main.reader")
+        ok(pg.url.endswith("/1:5"), f"and a link is bare ({pg.url})")
+        pg.go_back()
+        pg.go_back()
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.url.endswith("/1:4.2/compare"), f"Back past the toggle finds it on again ({pg.url})")
+        pg.go_forward()
+        pg.wait_for_function("!document.querySelector('article.cmp')")
+        ok(pg.url.endswith("/1:4.2") and pg.evaluate("sessionStorage.getItem('ub_compare')") is None,
+           f"and Forward over it leaves it, not bounced back in ({pg.url})")
+        pg.evaluate("ubSettings.set('whole', true)")
+        pg.goto(BASE + "/1/compare")
+        pg.wait_for_selector("article.cmp .cmphd")
+        pg.click(f'a.fn[href="#{note}"]')
+        pg.wait_for_selector(".pop.st")
+        pg.click('.pop.st a[href="/1:2.9"]')
+        pg.wait_for_function("document.getElementById('1:2.9').classList.contains('hit')")   # arrive(), on hashchange
+        ok(pg.url.endswith("/1/compare#1:2.9") and pg.locator("p.t.hit").count() == 1,
+           f"on the whole paper's page a note's reference is a place on it, in Compare ({pg.url})")
+        pg.go_back()
+        pg.wait_for_function("!location.hash && !document.querySelector('p.t.hit')")
+        top = pg.evaluate("(() => { const r = [...document.querySelectorAll('main p.t[id]')]"
+                          ".find(p => p.getBoundingClientRect().bottom > 40); return r ? r.id : null; })()")
+        ok(pg.url.endswith("/1/compare") and top == "1:0.1",
+           f"and Back returns to where the page stood, the mark gone (Tigran, 2026-11-06; {pg.url}, {top})")
+        pg.evaluate("ubSettings.set('whole', false)")
+        pg.click(".cmphead .cmpbtn")                              # off again: the pages after expect it so
+        pg.wait_for_function("!document.querySelector('article.cmp') && !sessionStorage.getItem('ub_compare')")
+
         print("The contents in a translation")
         pg.goto(BASE + "/1:1")
         opts = pg.evaluate("[...document.querySelectorAll('.railtr option')].map(o => o.textContent)")
@@ -623,6 +685,11 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok("not in the offline copy" in pg.inner_text("article.cmp .cmphd > .ch[data-k=urantia-ru] .gap")
            and pg.locator("article.cmp .rc[data-k=urantia-ru] .rt").count() == 0,
            "Compare offline draws the one kept, and one not kept says so over its column")
+        pg.goto(BASE + "/1:3")
+        pg.wait_for_selector("article.cmp .rc[data-k=ud] .rt")
+        ok(pg.url.endswith("/1:3/compare"), f"offline too an address typed keeps Compare, the worker answering its address ({pg.url})")
+        pg.click(".cmphead .cmpbtn")                              # off: the folds below
+        pg.wait_for_function("!document.querySelector('article.cmp') && !sessionStorage.getItem('ub_compare')")
         pg.goto(BASE + "/1:1")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .rt")
@@ -687,6 +754,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.locator("article.cmp .cmphd").count() == 8 and pg.locator("article.cmp .cmpnames").count() == 8,
            "Compare sets every section of the whole of Paper 1 in columns")
         ok(pg.locator("article.cmp .cmphd .gap").count() == 8, "each section's head says the translation is not kept")
+        pg.click(".cmphead .cmpbtn")                 # off: the tab would keep Compare for /101 below (2026-11-06)
+        pg.wait_for_function("!document.querySelector('article.cmp') && !sessionStorage.getItem('ub_compare')")
         pg.evaluate("ubSettings.set('translations', '')")
         pg.evaluate("ubSettings.set('whole', false)")
         pg.goto(BASE + "/read")                  # from another page: the same page's hash alone loads nothing

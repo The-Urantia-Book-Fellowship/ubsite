@@ -57,6 +57,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Compare translations now stays on as you move about: a search result, a reference in a study note or a translator's note, a citation in the index, a paper opened from the home page or the contents, a citation typed into the search box and an address typed into the browser all open in Compare while it is on, in the same tab, until you turn it off or go Back past where you turned it on; until now only the previous and next buttons and the contents kept it.
 - Greek words in the study notes now break at the syllable, as the English does, by TeX's patterns for ancient Greek, so that a long Greek word no longer spreads the line before it across a card.
 - Letting a kept recording go, in Settings' Offline tab, always asks first, a single paper's included; the check mark in the player's bar only shows that the paper is kept.
 - In Settings' Offline tab the copy's tick is now called Base, the translations you show beside the text stand first with the rest folded under a line that counts them, and the copy's line says that the site reads from it whenever the server cannot be reached, online or not.
@@ -104,6 +105,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- On a whole paper's page, Back after following a reference to a place on the same page, a study note's for example, returns to where the page stood; it stayed at the paragraph cited.
+- A search typed into the box while listening with Follow along off, when pages are shown without stopping the reading, now shows its results instead of an empty search page.
 - On the List of study notes a figure in a note is drawn at the size, and with the labels, its card gives it; the gyroscope's labels were set in the page's own size there, and ran over the drawing.
 - Under Recordings in Settings' Offline tab, a voice's row showed its download control before its list of files had come, and its tooltip promised the whole reading for 0.1 MB; the list now comes as the tab opens, with the reading's hours and size, and until it has the control is greyed. The line under the voices that says why nothing can be kept yet was set at the text's size; it is small and grey, as the tab's other notes are.
 - On a narrow screen, a word that would have fitted on its line is no longer carried down to the paragraph's last line to keep the last word from standing alone there, which left the line above stretched across the width, as in "7. The Unquali-" over "fied Absolute." on a phone.

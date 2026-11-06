@@ -53,6 +53,7 @@ class Address(unittest.TestCase):
     def test_a_view_in_compare_counts_for_its_section(self):
         self.assertEqual(page_kind("/1:1/compare"), ("section", "1:1"))
         self.assertEqual(page_kind("/1:1.3-4/compare"), ("section", "1:1"))
+        self.assertEqual(page_kind("/1/compare"), ("paper", "1"))
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
@@ -75,6 +76,16 @@ class Toggle(unittest.TestCase):
         body = get("/1:1", raw=True)[2]
         self.assertIn("if (/\\/compare$/.test(location.pathname)) r.classList.add('compare');", body)
         self.assertRegex(body, re.escape("article:has(' + f + ')>.cmphead{display:flex}"))
+
+    def test_the_tab_keeps_it_as_one_moves_about(self):
+        # Compare kept (2026-11-06): the tab's memory of it, written from every
+        # page of the book, read as a link is clicked, and on a page come to
+        # afresh alone (test_whole Unit runs the functions).
+        body = get("/1:1", raw=True)[2]
+        self.assertIn("window.ubCompareKeep = function", body)
+        self.assertIn("window.ubCompare = function", body)
+        self.assertIn("nav.type === 'navigate'", body)
+        self.assertIn("window.ubCompareKeep(location.pathname);", body)
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")

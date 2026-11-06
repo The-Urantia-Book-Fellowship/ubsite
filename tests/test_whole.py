@@ -141,6 +141,7 @@ class WholePaper(unittest.TestCase):
     def test_a_whole_paper_is_a_page_to_the_stats(self):
         self.assertEqual(page_kind("/15"), ("paper", "15"))
         self.assertEqual(page_kind("/015"), ("paper", "15"))
+        self.assertEqual(page_kind("/15/compare"), ("paper", "15"))
         self.assertEqual(page_kind("/15:3"), ("section", "15:3"))
 
 
@@ -163,6 +164,22 @@ CASES = {
 }
 
 
+# The head script's ubCompare, with the tab's memory of Compare off and on
+# (Compare kept as one moves about, 2026-11-06), and ubCompareKeep, which
+# writes it: 'set', 'removed', or None where the address is not the book's.
+CMP = {
+    "off": {a: a for a in ("/15", "/15:3", "/15:3.4-6#tr-ud", "/15/compare", "/15:3/compare#tr-ud", "/i/god", "/search", "/")},
+    "on": {"/15": "/15/compare", "/0": "/0/compare", "/15:3": "/15:3/compare", "/15:3.4": "/15:3.4/compare",
+           "/15:3.4-6": "/15:3.4-6/compare", "/15:3.4#tr-ud": "/15:3.4/compare#tr-ud",
+           "/15#15:3.4#tr-ud": "/15/compare#15:3.4#tr-ud", "/15#note15_3_4_0": "/15/compare#note15_3_4_0",
+           "/16:0#listen": "/16:0/compare#listen", "/15/compare": "/15/compare",
+           "/15:3/compare#tr-ud": "/15:3/compare#tr-ud", "/15:3/compare/x": "/15:3/compare/x",
+           "/i/god": "/i/god", "/i/god#e12": "/i/god#e12", "/search": "/search", "/quiz/15": "/quiz/15", "/": "/"},
+}
+KEEP = {"/15:3/compare": "set", "/15/compare": "set", "/15:3.4-6/compare": "set", "/15:3": "removed", "/15": "removed",
+        "/15:3.4": "removed", "/search": None, "/i/god": None, "/": None, "/15:3/compare/x": None, "/quiz/15": None}
+
+
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
 @unittest.skipUnless(shutil.which("node"), "Node is not installed")
 class Unit(unittest.TestCase):
@@ -180,6 +197,39 @@ class Unit(unittest.TestCase):
             for a, want in cases.items():
                 self.assertEqual(got[mode][a][0], want, f"{mode}: {a}")
                 self.assertEqual(got[mode][a][1], want, f"{mode}: {a}, again")   # idempotent
+
+    def test_compare_s_suffix_while_the_tab_is_in_it(self):
+        # In Node with a sessionStorage of their own; and with the memory on,
+        # ubUnit's partner in either order, for every address of CASES.
+        body = get("/", raw=True)[2]
+        unit = re.search(r"window\.ubUnit = function[\s\S]*?\n};", body)[0]
+        fn = re.search(r"window\.ubCompareKeep = function[\s\S]*?\nwindow\.ubCompare = function[\s\S]*?\n};", body)[0]
+        js = ("var document = { documentElement: { dataset: {} } }, window = {}, on = false, wrote = {};\n"
+              "var sessionStorage = { getItem: function (k) { return k === 'ub_compare' && on ? '1' : null; },"
+              " setItem: function (k) { wrote[k] = 'set'; }, removeItem: function (k) { wrote[k] = 'removed'; } };\n"
+              + unit + "\n" + fn + "\n"
+              "var cases = " + json.dumps(CMP) + ", out = {}, both = {}, kept = {};\n"
+              "for (var mode in cases) { on = mode === 'on'; out[mode] = {};"
+              " for (var a in cases[mode]) out[mode][a] = [window.ubCompare(a), window.ubCompare(window.ubCompare(a))]; }\n"
+              "on = true; var units = " + json.dumps({m: list(c) for m, c in CASES.items()}) + ";\n"
+              "for (var mode in units) { if (mode === 'on') document.documentElement.dataset.whole = 'true';"
+              " else delete document.documentElement.dataset.whole; both[mode] = {};"
+              " units[mode].forEach(function (a) {"
+              " both[mode][a] = [window.ubUnit(window.ubCompare(a)), window.ubCompare(window.ubUnit(a))]; }); }\n"
+              + json.dumps(list(KEEP)) + ".forEach(function (p) { wrote = {}; window.ubCompareKeep(p);"
+              " kept[p] = wrote.ub_compare || null; });\n"
+              "console.log(JSON.stringify({ out: out, both: both, kept: kept }));")
+        got = json.loads(subprocess.run(["node", "-"], input=js, capture_output=True, text=True, check=True).stdout)
+        for mode, cases in CMP.items():
+            for a, want in cases.items():
+                self.assertEqual(got["out"][mode][a][0], want, f"{mode}: {a}")
+                self.assertEqual(got["out"][mode][a][1], want, f"{mode}: {a}, again")   # idempotent
+        for mode, pairs in got["both"].items():
+            for a, (one, other) in pairs.items():
+                self.assertEqual(one, other, f"whole {mode}: {a}")
+                if re.match(r"/\d", a):
+                    self.assertRegex(one, r"/compare(#|$)", f"whole {mode}: {a}: {one}")
+        self.assertEqual(got["kept"], KEEP)
 
 
 if __name__ == "__main__":
