@@ -81,6 +81,16 @@ READING = [
     # among them, turn it always (ub.js turn()).
     ("tappage", "switch", "Tap to turn the page", False, [],
      "on a phone or a tablet: the lower half of the screen goes on, the upper half back"),
+    # The paragraph a reference points to, shown in a card of the notes' kind
+    # where the pointer rests on the reference, in a note's card or endnote, a
+    # 1955 card, an index entry or a search result; on a phone a tap shows it
+    # instead of going there, and the reference at the card's head goes
+    # (Tigran, 2026-11-07, for checking the notes' references on a desktop).
+    # Off unless a reader asks: a card at every rest of the pointer distracts a
+    # reader who follows none.  No CSS rule: ub.js reads it (pvOn), and lifts
+    # the paragraph from its section's page, so nothing reaches the server.
+    ("preview", "switch", "Paragraph previews", False, [],
+     "the paragraph a reference points to, in a card where the pointer rests; on a phone, at a tap"),
     # The whole paper on one page, /15 (templates/paper.html), with the two
     # paper buttons alone at its end, for reading the book straight through
     # with every distraction off (Tigran, 2026-10-30).  The one setting with

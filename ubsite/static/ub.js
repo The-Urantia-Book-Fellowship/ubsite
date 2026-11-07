@@ -1347,6 +1347,7 @@
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-label', mark.getAttribute('aria-label') || T.text('1955 reading'));
     el.tabIndex = -1;
+    if (note.dataset.k) el.dataset.tr = note.dataset.k;   // a translator's: which (pvLink)
     el.innerHTML = '<span class="arrow"></span>' +
       '<button type="button" class="x" ' + T.a('aria-label', 'Close') + '>×</button>' +
       '<div class="body">' + note.innerHTML + '</div>';
@@ -1376,6 +1377,162 @@
   });
   window.addEventListener('resize', place);
   document.addEventListener('ub:swap', function () { card = null; });
+
+  // Paragraph previews (settings.py `preview`; Tigran, 2026-11-07, for
+  // checking the study notes' references on a desktop).  With the switch on,
+  // a link to a paragraph of the book, /12:4.14 or /15:2.3-8, wherever it
+  // stands (a note's card or endnote, a 1955 card, an index entry, a search
+  // result), shows the paragraph itself in a card of the notes' kind where
+  // the pointer rests, and on a touch a tap shows it instead of going there,
+  // the reference at the card's head going.  The paragraph is lifted from its
+  // section's page, this one where the section is on it, else fetched once
+  // and kept, which offline the worker answers from the copy; its number,
+  // 1955 page, pilcrow, note numbers and rings go, so a preview carries the
+  // words alone and opens nothing further.  One at a time, over any note card
+  // that is open, which stays.
+  var PV = /^\/(\d+):(\d+)\.(\d+)(?:-(\d+))?$/, pv = null, pvSeq = 0, pvTimer = 0, pvHide = 0, pvPages = {};
+  function pvOn() { return document.documentElement.dataset.preview === 'true'; }
+  function pvLink(t) {
+    var a = t && t.closest && t.closest('a[href]'), m, c;
+    if (!a || a.closest('.pop.pv')) return null;
+    m = PV.exec(a.getAttribute('href') || '');
+    if (!m) return null;
+    // In a translator's note's card, or a translation's cell: that translation's
+    // paragraph (Tigran, 2026-11-07: a reader of a translation expects it).
+    c = a.closest('[data-tr], p.rt[data-k]');
+    return { a: a, p: m[1], s: m[2], n: +m[3], last: m[4] ? +m[4] : +m[3], tr: c ? (c.dataset.tr || c.dataset.k) : '' };
+  }
+  function pvPage(p, s) {
+    var url = '/' + p + ':' + s;
+    if (document.getElementById(p + ':' + s + '.1')) return Promise.resolve(document);
+    if (!pvPages[url]) pvPages[url] = fetch(url, { credentials: 'same-origin' }).then(function (r) {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.text();
+    }).then(function (h) { return new DOMParser().parseFromString(h, 'text/html'); })
+      .catch(function (e) { delete pvPages[url]; throw e; });
+    return pvPages[url];
+  }
+  function pvParas(doc, r) {
+    var out = [], n, p;
+    for (n = r.n; n <= Math.min(r.last, r.n + 5); n++) {
+      p = doc.getElementById(r.p + ':' + r.s + '.' + n);
+      if (!p) break;
+      p = p.cloneNode(true);
+      p.removeAttribute('id');
+      p.className = p.classList.contains('verse') ? 'verse' : '';
+      Array.prototype.forEach.call(p.querySelectorAll('.stk, .pcm, a.fn'), function (x) { x.remove(); });
+      out.push(p);
+    }
+    return out;
+  }
+  // A translation's words for the paragraphs, each with its language, as far
+  // as it has them from the first; none where it lacks the first, and the
+  // English stands in.
+  function pvTrParas(got, r) {
+    var out = [], n, h, p;
+    for (n = r.n; n <= Math.min(r.last, r.n + 5); n++) {
+      h = (got.t[r.tr] || {})[r.p + ':' + r.s + '.' + n];
+      if (h == null) break;
+      p = document.createElement('p');
+      p.lang = trBy[r.tr].lang;
+      p.innerHTML = h;
+      Array.prototype.forEach.call(p.querySelectorAll('a.fn'), function (x) { x.remove(); });
+      out.push(p);
+    }
+    return out;
+  }
+  function pvShut() {
+    clearTimeout(pvTimer); clearTimeout(pvHide); pvTimer = pvHide = 0; pvSeq++;
+    if (pv) { pv.el.remove(); pv = null; }
+  }
+  function pvPlace() {
+    if (!pv) return;
+    var H = pv.host.getBoundingClientRect(), M = pv.a.getBoundingClientRect(),
+        x = M.left + M.width / 2 - H.left,
+        left = Math.min(Math.max(x - 36, 8), H.width - pv.el.offsetWidth - 8);
+    pv.el.style.left = left + 'px';
+    pv.el.style.top = (M.bottom - H.top + 6) + 'px';
+    pv.el.querySelector('.arrow').style.left = (x - left - 6) + 'px';
+  }
+  function pvOpen(r, byTouch) {
+    pvShut();
+    var seq = pvSeq, ref = r.p + ':' + r.s + '.' + r.n + (r.last > r.n ? '-' + r.last : ''),
+        sec = document.querySelector('section[id="' + r.p + ':' + r.s + '"]'),
+        words = r.tr && trBy[r.tr]
+          ? trFetch(sec, r.p + ':' + r.s).then(function (got) { return pvTrParas(got, r); }, function () { return []; })
+          : Promise.resolve([]);
+    words.then(function (ps) {
+      if (ps.length) return { ps: ps, tr: r.tr };
+      return pvPage(r.p, r.s).then(function (doc) { return { ps: pvParas(doc, r), tr: '' }; });
+    }).then(function (got) {
+      if (seq !== pvSeq || !document.contains(r.a)) return;
+      var ps = got.ps, host, el, body;
+      if (!ps.length) return;
+      host = r.a.closest('article') || r.a.closest('main.results') || document.body;
+      el = document.createElement('div');
+      el.className = 'pop pv';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-label', ref);
+      el.tabIndex = -1;
+      el.innerHTML = '<span class="arrow"></span>' +
+        '<button type="button" class="x" ' + T.a('aria-label', 'Close') + '>×</button>' +
+        '<div class="body"><p class="pvref"><a href="/' + ref + '">' + ref + (r.last > r.n + 5 ? ' …' : '') + '</a>' +
+        (got.tr ? ' <span class="pvtr">' + trBy[got.tr].label + '</span>' : '') + '</p></div>';
+      body = el.querySelector('.body');
+      ps.forEach(function (p) { body.appendChild(p); });
+      host.appendChild(el);
+      pv = { a: r.a, el: el, host: host, touch: byTouch };
+      pvPlace();
+      if (byTouch) el.focus({ preventScroll: true });
+    }).catch(function () {});
+  }
+  function pvHideSoon() {
+    clearTimeout(pvHide);
+    pvHide = setTimeout(function () { if (pv && !pv.touch) pvShut(); }, 300);
+  }
+  // A mouse's rest: 350 ms on the link; off it, or off the card, 300 ms more,
+  // so that the card can be crossed into and scrolled.  A finger's or a pen's
+  // pointerover is a tap's, which the click below takes.
+  document.addEventListener('pointerover', function (ev) {
+    if (ev.pointerType !== 'mouse' || !pvOn()) return;
+    var r = pvLink(ev.target);
+    if (pv && (pv.el.contains(ev.target) || (r && r.a === pv.a))) { clearTimeout(pvHide); return; }
+    if (!r) return;
+    clearTimeout(pvTimer);
+    pvTimer = setTimeout(function () { if (pvOn()) pvOpen(r, false); }, 350);
+  });
+  document.addEventListener('pointerout', function (ev) {
+    if (ev.pointerType !== 'mouse') return;
+    var r = pvLink(ev.target), to = ev.relatedTarget;
+    if (r && !(to && r.a.contains(to))) clearTimeout(pvTimer);
+    if (!pv || pv.touch) return;
+    if ((pv.el.contains(ev.target) && !(to && pv.el.contains(to))) ||
+        (r && r.a === pv.a && !(to && r.a.contains(to)))) pvHideSoon();
+  });
+  // A tap (touch, as pointerdown set it): the card instead of the page, which
+  // the reference at its head reaches; the same tap again, a tap elsewhere,
+  // its × or Escape closes it.  In the capture phase, before the cards' own
+  // handler, so that a tap elsewhere closes the preview alone and a note card
+  // under it stays.
+  document.addEventListener('click', function (ev) {
+    if (!pvOn()) return;
+    var t = ev.target, r;
+    if (pv && pv.el.contains(t)) { if (t.closest('.x')) pvShut(); return; }
+    r = pvLink(t);
+    if (r && touch && !ev.button && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey && !ev.altKey) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      if (pv && pv.a === r.a) pvShut(); else pvOpen(r, true);
+      return;
+    }
+    if (pv && pv.touch) { pvShut(); ev.stopImmediatePropagation(); if (!t.closest('a[href]')) ev.preventDefault(); }
+  }, true);
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && pv) { pvShut(); ev.stopImmediatePropagation(); }
+  }, true);
+  window.addEventListener('resize', pvPlace);
+  document.addEventListener('ub:swap', pvShut);
+  document.addEventListener('ub:settings', function (ev) { if (ev.detail.key === 'preview' && !pvOn()) pvShut(); });
 
   // Turning the page (Tigran, 2026-10-20).  A phone's volume keys never reach a
   // web page: Chrome keeps them for the system (ContentUiEventHandler's
