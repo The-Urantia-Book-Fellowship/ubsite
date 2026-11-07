@@ -298,6 +298,23 @@ def translated(con: sqlite3.Connection, paper: int, sec: int) -> dict:
     return {"has": {pid: " ".join(ks) for pid, ks in has.items()}, "heads": heads, "rows": rows}
 
 
+def tr_parts(con: sqlite3.Connection, n: int) -> list[dict]:
+    """Each translation's divider of part n (build/translation.py _parts), for
+    the part's own page (templates/part.html; Tigran, 2026-11-07): its key,
+    language, title and short name, which name it over its divider as Compare
+    names a column; and the divider's own word and number, its title and the
+    sponsors' note, a list of its paragraphs.  Every translation's, in
+    Settings' order, since no setting reaches the server."""
+    try:
+        rows = con.execute(
+            "SELECT p.translation AS key, r.lang, r.title, r.label, p.label AS word, p.title AS head, p.sponsor"
+            " FROM tr_part p JOIN translation r ON r.key = p.translation WHERE p.n = ? ORDER BY r.ord",
+            (n,)).fetchall()
+    except sqlite3.Error:
+        return []                                # a database from before tr_part
+    return [dict(r, sponsor=r["sponsor"].split("\n")) for r in rows]
+
+
 def notes(con: sqlite3.Connection, where: str = "1", params: tuple = ()) -> list[dict]:
     """The 1955 readings `where` selects, in the order of the book.
 

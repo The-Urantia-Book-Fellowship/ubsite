@@ -209,6 +209,10 @@ INVARIANTS = [
      """SELECT COUNT(*) FROM translation t WHERE (SELECT COUNT(DISTINCT n) FROM tr_toc
          WHERE translation = t.key AND kind = 'part' AND n BETWEEN 1 AND 4) <> 4
          OR EXISTS (SELECT 1 FROM tr_toc WHERE translation = t.key AND kind = 'part' AND n NOT BETWEEN 1 AND 4)"""),
+    # Its four parts' dividers, for the part's own page (build/translation.py _parts).
+    ("a translation without its four parts' dividers, each with words",
+     """SELECT COUNT(*) FROM translation t WHERE (SELECT COUNT(*) FROM tr_part
+         WHERE translation = t.key AND n BETWEEN 1 AND 4 AND label <> '' AND title <> '' AND sponsor <> '') <> 4"""),
     ("a paper or section in a translation's contents it has not, or a paper it has not there",
      """SELECT (SELECT COUNT(*) FROM tr_toc c WHERE c.kind <> 'part' AND NOT EXISTS (
                  SELECT 1 FROM tr_paragraph t JOIN paragraph p ON p.id = t.paragraph_id

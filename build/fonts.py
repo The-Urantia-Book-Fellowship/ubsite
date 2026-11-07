@@ -117,6 +117,7 @@ def corpus_codepoints(con) -> set[str]:
               # The translations beside the text, and their titles (build/translation.py).
               "SELECT text FROM tr_paragraph",
               "SELECT text FROM tr_heading",
+              "SELECT label || title || sponsor FROM tr_part",   # the parts' dividers in translation
               "SELECT text FROM tr_source",             # what a translator's note cites
               # The SRT Committee's reasons a 1955 note shows, and those of the
               # note it refers to.

@@ -17,7 +17,7 @@ from test_appendix_pages import DB, get
 from ubsite import settings
 
 RE_BAR = re.compile(r'<nav class="transport"[^>]*>(.*?)</nav>', re.S)
-RE_LINK = re.compile(r'<a class="(\w+)" href="/([\d:]+)"(?: rel="\w+")? aria-label="([^"]+)" title="\3">')
+RE_LINK = re.compile(r'<a class="([\w ]+)" href="/([\d:]+)"(?: rel="\w+")? aria-label="([^"]+)" title="\3">')
 RE_OFF = re.compile(r'<span class="(\w+) off" aria-hidden="true">')
 
 
@@ -81,11 +81,18 @@ class Transport(unittest.TestCase):
         self.assertEqual(list(links), ["fb", "prev"])
 
     def test_a_parts_page_goes_on_to_its_first_section(self):
+        # Part I's to the Foreword while Settings' Foreword in Part I is on,
+        # and to Paper 1 with it off: both links, the CSS showing one
+        # (Tigran, 2026-11-07).
         self.assertEqual(len(self.parts), 4)
         for n, fp in self.parts:
             links, off = bar(f"/part/{n}")
             here = f"{fp}:{self.first[fp]}"
-            self.assertEqual(links, {"next": (here, f"Next section: {here}")}, n)
+            if n == 1:
+                self.assertEqual(links, {"next fwin": ("0:0", "Next section: 0:0"),
+                                         "next fwout": (here, f"Next section: {here}")})
+            else:
+                self.assertEqual(links, {"next": (here, f"Next section: {here}")}, n)
             self.assertEqual(off, [], n)
 
     def test_tooltips_are_on_by_default(self):

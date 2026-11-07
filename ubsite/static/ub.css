@@ -350,7 +350,51 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage h1 { font-size: 2.6rem; margin: .5rem 0 1.6rem; }
 .partpage .papernum { font-size: 1.25rem; }       /* as PAPER N is to its title */
 .partpage .sponsor { font-style: italic; margin: 0 auto; max-width: 32em; text-wrap: balance; }
+.partpage .sponsor p { margin: 0; }
+.partpage .sponsor p + p { margin-top: .7rem; }
 .partpage .transport { justify-content: flex-end; max-width: none; margin-top: 3.5rem; }
+/* And each translation's divider (part.html; Tigran, 2026-11-07): every one is
+   in the page, hidden until the head script's rule shows those ticked
+   (base.html ubTr), under the English in the reader's order, each under its
+   name as Compare's line of names gives it; the English's own name only
+   beside a column.  With Compare on, above the phone's width, a column each,
+   as Compare lays its columns: the dividers a grid, each a subgrid of its
+   four rows, the name, the part, the title and the note, level across the
+   columns.  ub.js draws nothing here: the address marks <html> (.compare),
+   and the columns' rules are keyed on data-translations too, the setting's
+   own attribute, so that at Compare's address with none ticked the page is
+   as it was.  The toggle stands centred over them, in its own box centred
+   (.cmphead's width is the measure's, beside the margin). */
+.partpage .dividers { display: flex; flex-direction: column; }
+.partpage .divider[data-k], .partpage .en > .who { display: none; }
+.partpage .divider[data-k] { margin-top: 2.6rem; padding-top: 1.8rem; border-top: 1px solid var(--rule); }
+.partpage .divider[data-k] h1 { font-size: 2rem; }
+.partpage .who { font-size: .82rem; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase;
+                 color: var(--faint); margin: 0 0 .8rem; }
+.partpage .who b { font-weight: inherit; color: var(--ink); }
+.partpage .cmphead { margin: -1.4rem auto 1.6rem; }
+@media (min-width: 62.01rem) {
+  :root.compare[data-translations] .partpage { max-width: none; }
+  :root.compare[data-translations] .partpage .dividers { display: grid; grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr); grid-template-rows: repeat(4, auto); gap: 0 2rem; align-items: start; }
+  :root.compare[data-translations] .partpage .en { display: grid; }
+  :root.compare[data-translations] .partpage .en > .who { display: block; }
+  :root.compare[data-translations] .partpage .divider { grid-template-rows: subgrid; grid-row: span 4;
+      margin-top: 0; padding-top: 0; border-top: 0; }
+  /* Four columns beside the rail are narrow: a word too long for its column
+     breaks at the edge rather than run over the next.  An item's own least
+     width is its longest word, which break-word does not change, so it must
+     be allowed to size to its track first. */
+  :root.compare[data-translations] .partpage .divider, :root.compare[data-translations] .partpage .divider > * {
+      min-width: 0; overflow-wrap: break-word; }
+  /* The note fills its column: centred by auto margins it would take its own
+     width, its longest word's, and run over the next column. */
+  :root.compare[data-translations] .partpage .divider .sponsor { margin: 0; max-width: none; }
+  :root.compare[data-translations] .partpage .divider h1 { font-size: 1.6rem; margin: .4rem 0 1rem; }
+  :root.compare[data-translations] .partpage .divider .papernum { font-size: 1rem; }
+  :root.compare[data-translations] .partpage .who { border-bottom: 1px solid var(--rule); padding-bottom: .35rem;
+      margin-bottom: 1.2rem; }
+}
 /* A paper's head is centred over the text column, as the book sets it: the
    paper's number, title and author, and the section's title.  It is as wide as
    the column: the measure here, and on a wide screen what the margin leaves, if
@@ -1956,6 +2000,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
      only where it says it is not at hand, named. */
   .cmphead { position: absolute; top: .1rem; right: 0; z-index: 1; margin: 0; }
   :root[data-index="off"] .cmphead { position: static; justify-content: flex-end; max-width: none; margin: 0 0 .6rem; }
+  :root .partpage .cmphead { position: static; justify-content: center; max-width: none; margin: -1.2rem auto 1.4rem; }
   .cmpbtn .long { display: none; }
   .cmpbtn .short { display: inline; }
   article.cmp .cmpnames, article.cmp .stars > .rs { display: none; }

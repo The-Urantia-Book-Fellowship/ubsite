@@ -260,14 +260,85 @@ class FoundationReader(unittest.TestCase):
         self.assertIn("uf-html-unread", self.read(a=PAPER0.replace('class="bte"', 'class="xyz"'))[1])
 
     def test_its_parts_from_the_page_that_lists_them(self):
-        page = "".join(f'<p class="paper"><a href="0{n}.html" title="x">Часть {r}</a></p>\n<h2>Т{r}</h2>\n'
+        note = {r: '<p class="btl ctr">Под.</p>\n' for r in ("I", "II", "III")}
+        note["IV"] = '<p class="btn ctr">Один.</p>\n<p class="btl ctr">Два.</p>\n'
+        page = "".join(f'<p class="paper"><a href="0{n}.html" title="x">Часть {r}</a></p>\n<h2>Т{r}</h2>\n{note[r]}'
                        for n, r in enumerate(("I", "II", "III", "IV"), 5))
+        own = '<p class="paper">Часть IV</p>\n<h2>ТIV</h2>\n' + note["IV"] + '<p class="btn pti"><a href="x">Документ 120</a></p>'
         report = Report()
-        self.assertEqual(uf_html.parts(zipped(a=page), report), {1: "ТI", 2: "ТII", 3: "ТIII", 4: "ТIV"})
+        got = uf_html.parts(zipped(a=page, b=own), report)
+        self.assertEqual(got[1], {"label": "Часть I", "title": "ТI", "sponsor": ["Под."]})
+        self.assertEqual((sorted(got), got[4]["sponsor"]), ([1, 2, 3, 4], ["Один.", "Два."]))
         self.assertEqual(report.problems, [])
         report = Report()
         uf_html.parts(zipped(a=page.split("<p", 4)[0]), report)
         self.assertEqual([p.code for p in report.problems], ["uf-parts-unread"])
+        # A part's own page that does not repeat the listing fails; so does a
+        # part listed without its note.
+        report = Report()
+        uf_html.parts(zipped(a=page, b=own.replace("Два.", "Три.")), report)
+        self.assertEqual([p.code for p in report.problems], ["uf-part-differs"])
+        report = Report()
+        uf_html.parts(zipped(a=page.replace("<h2>ТII</h2>\n" + note["II"], "<h2>ТII</h2>\n")), report)
+        self.assertEqual([p.code for p in report.problems], ["uf-parts-unread"])
+
+
+STY = ("\\def\\partitxt{ЧАСТЬ I}\n\\def\\partiup{ЦЕНТРАЛЬНАЯ ВСЕЛЕННАЯ}\n"
+       "\\def\\partimix{Часть I. Центральная вселенная}\n\\def\\partisub{При поддержке Корпуса.}\n"
+       "\\def\\partiitxt{ЧАСТЬ II}\n\\def\\partiiup{ЛОКАЛЬНАЯ}\n\\def\\partiimix{Часть II. Локальная}\n"
+       "\\def\\partiisub{При поддержке.}\n"
+       "\\def\\partiiitxt{ЧАСТЬ III}\n\\def\\partiiiup{ИСТОРИЯ}\n\\def\\partiiimix{Часть III. История}\n"
+       "\\def\\partiiisub{Созданы при поддержке.}\n"
+       "\\def\\partivtxt{ЧАСТЬ IV}\n\\def\\partivup{ЖИЗНЬ}\n\\def\\partivmix{Часть IV. Жизнь}\n"
+       "\\def\\partivsubone{Один.}\n\\def\\partivsubtwo{Два.}\n")
+
+
+class Parts(unittest.TestCase):
+    """A translation's four dividers, from its style or its parts page
+    (build/translation.py _tex_parts, _part_title, _parts)."""
+
+    def parts(self, key, src, sty=True):
+        report = Report()
+        got = translation._tex_parts(key, src, report) if sty else src
+        heads = {n: translation._part_title(key, p["title"], report, f"t {n}") for n, p in got.items()}
+        out = translation._parts(key, got, heads, report)
+        return out, heads, [(p.severity, p.code) for p in report.problems]
+
+    def test_its_style_s_dividers(self):
+        out, heads, problems = self.parts("ud", STY)
+        self.assertEqual(problems, [])
+        self.assertEqual(out[0], (1, "ЧАСТЬ I", "Центральная вселенная", "При поддержке Корпуса."))
+        self.assertEqual(out[3], (4, "ЧАСТЬ IV", "Жизнь", "Один.\nДва."))   # Part IV's two paragraphs
+        self.assertEqual(heads[1], ("Центральная вселенная", "Центральная вселенная"))  # its number cut, for the rail
+
+    def test_a_title_in_capitals_must_be_the_title(self):
+        _, _, problems = self.parts("ud", STY.replace("{ЛОКАЛЬНАЯ}", "{ЛОКАЛЬНАЯ ВСЕЛЕННАЯ}"))
+        self.assertEqual(problems, [("hard", "tr-part-title")])
+
+    def test_a_macro_missing_fails(self):
+        _, _, problems = self.parts("ud", STY.replace("\\def\\partivsubtwo{Два.}\n", ""))
+        self.assertEqual(problems, [("hard", "tr-part-undefined")])
+        _, _, problems = self.parts("ud", STY.replace("\\def\\partiiitxt{ЧАСТЬ III}\n", ""))
+        self.assertEqual(problems, [("hard", "tr-part-undefined")])
+
+    def test_a_label_is_its_word_and_the_numeral(self):
+        _, _, problems = self.parts("ud", STY.replace("{ЧАСТЬ II}", "{ЧАСТЬ III}"))
+        self.assertEqual(problems, [("hard", "tr-part-label")])
+
+    def test_markup_in_a_divider_fails(self):
+        _, _, problems = self.parts("ud", STY.replace("{При поддержке.}", "{При \\bibemph{поддержке}.}"))
+        self.assertEqual(problems, [("hard", "tr-part-markup")])
+
+    def test_the_foundation_s_slip_is_set_mended_and_declared(self):
+        src = {n: {"label": f"Часть {r}", "title": f"Том {r}", "sponsor": ["Подготовлено Корпусом."]}
+               for n, r in enumerate(("I", "II", "III", "IV"), 1)}
+        src[1]["sponsor"] = ["Подготовлено Увeрсским Корпусом."]        # a Latin e, as released
+        out, _, problems = self.parts("uf-ru", src, sty=False)
+        self.assertEqual(out[0][3], "Подготовлено Уверсским Корпусом.")
+        self.assertEqual(problems, [("warn", "tr-substituted")])
+        src[1]["sponsor"] = ["Подготовлено Уверсским Корпусом."]        # a release that mends it
+        _, _, problems = self.parts("uf-ru", src, sty=False)
+        self.assertEqual(problems, [("hard", "tr-substitute-gone")])
 
     def test_its_text_id_and_version_stamp(self):
         data = zipped(a="<p>Идентификационный номер текста: UF-RUS-001-1997-1.5<br />"

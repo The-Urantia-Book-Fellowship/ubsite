@@ -1726,18 +1726,32 @@ def part_page(request: Request, n: int):
     """A part's own page: its divider, as the book prints it, and nothing more.
 
     The rail's part titles link here, so a part opens on its title page rather
-    than only unfolding in the rail.
+    than only unfolding in the rail.  Each translation's divider is in the
+    page too, shown for those ticked (part.html, base.html ubTr), under the
+    English or, at /part/N/compare, a column each (Tigran, 2026-11-07).
     """
     con = db()
     part = con.execute("SELECT * FROM part WHERE n=?", (n,)).fetchone()
     if part is None:
         return missing(request, "There are four parts, I to IV.")
     # Its one way on is the transport bar's ⏭, to its first paper's first
-    # section (Tigran, 2026-10-14).
-    fp = part["first_paper"]
-    first = con.execute("SELECT MIN(n) FROM section WHERE paper_n=?", (fp,)).fetchone()[0]
-    nxt = {"href": f"/{fp}:{first}", "label": l10n.tr("Next section: {s}", s=f"{fp}:{first}")}
-    return page(request, "part.html", part=part, roman=ROMAN[n], nxt=nxt)
+    # section (Tigran, 2026-10-14).  Part I's goes to the Foreword while
+    # Settings' Foreword in Part I is on (Tigran, 2026-11-07; to Paper 1
+    # either way until then): the page carries both links, .fwin and .fwout,
+    # and the CSS shows one, since no setting reaches the server.
+    def on(paper: int) -> dict:
+        first = con.execute("SELECT MIN(n) FROM section WHERE paper_n=?", (paper,)).fetchone()[0]
+        return {"href": f"/{paper}:{first}", "label": l10n.tr("Next section: {s}", s=f"{paper}:{first}")}
+    nxt_fw = on(0) if n == 1 else None
+    return page(request, "part.html", part=part, roman=ROMAN[n], nxt=on(part["first_paper"]), nxt_fw=nxt_fw,
+                trs=queries.tr_parts(con, n))
+
+
+# Compare's address on a part's page, as a section's (read_compare, below):
+# the same page, which the address alone lays in columns (ub.css .dividers).
+@app.get("/part/{n:int}/compare", response_class=HTMLResponse)
+def part_compare(request: Request, n: int):
+    return part_page(request, n)
 
 
 NO_PAPER = "There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196."

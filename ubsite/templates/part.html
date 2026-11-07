@@ -1,22 +1,45 @@
 {% extends "base.html" %}
 {% from "_rail.html" import rail %}
 {% from "_transport.html" import step %}
+{% from "_fold.html" import compare %}
 {#- A part's own page, as the book's divider sets it (\\part in the press style):
     the part, its title on its printed lines, and the note of who sponsored its
-    papers.  No text: its first paper is the next page. #}
+    papers.  No text: its first paper is the next page.
+
+    And each translation's divider (tr_part; Tigran, 2026-11-07), every one,
+    hidden until Settings ticks it (base.html ubTr): under the English in the
+    reader's order, or with Compare on, at /part/N/compare, a column each on a
+    wide screen (ub.css .dividers).  Each is named as Compare names its column;
+    the English's name shows only beside them, so that with none ticked the
+    page is as it was. #}
 {% set title = tr('Part {r} — {title}', r=roman, title=part.title) %}
 {% block body %}
 <main class="reader">
   {{ rail(book(), none, none, part.n) }}
 
   <article class="partpage">
-    <header>
-      <p class="papernum">{{ part.label }}</p>
-      <h1>{% for line in part.title_lines.split("\n") %}{% if not loop.first %}<br>{% endif %}{{ line }}{% endfor %}</h1>
-      <p class="sponsor">{{ part.sponsor }}</p>
-    </header>
-    {#- On to the first paper: the transport bar's ⏭, alone, at the right. #}
-    <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>{{ step('next', nxt) }}</nav>
+    {% if trs %}{{ compare() }}{% endif %}
+    <div class="dividers">
+      <header class="divider en" lang="en">
+        <p class="who"><b>The Urantia Book</b> <span class="nobreak">(Uversa Press)</span></p>
+        <p class="papernum">{{ part.label }}</p>
+        <h1>{% for line in part.title_lines.split("\n") %}{% if not loop.first %}<br>{% endif %}{{ line }}{% endfor %}</h1>
+        <div class="sponsor"><p>{{ part.sponsor }}</p></div>
+      </header>
+      {%- for x in trs %}
+      <header class="divider" data-k="{{ x.key }}" lang="{{ x.lang }}">
+        <p class="who"><b>{{ x.title }}</b> <span class="nobreak">({{ x.label }})</span></p>
+        <p class="papernum">{{ x.word }}</p>
+        <h1>{{ x.head }}</h1>
+        <div class="sponsor">{% for line in x.sponsor %}<p>{{ line }}</p>{% endfor %}</div>
+      </header>
+      {%- endfor %}
+    </div>
+    {#- On to the first paper: the transport bar's ⏭, alone, at the right.
+        Part I's to the Foreword while Settings' Foreword in Part I is on, and
+        to Paper 1 with it off: both links, the CSS showing one (ub.css .fwin). #}
+    <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>
+      {%- if nxt_fw %}{{ step('next', nxt_fw, 'fwin') }}{{ step('next', nxt, 'fwout') }}{% else %}{{ step('next', nxt) }}{% endif %}</nav>
   </article>
 </main>
 {% endblock %}

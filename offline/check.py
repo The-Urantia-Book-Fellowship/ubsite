@@ -83,7 +83,7 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
     for p in ["/0:0.0-1", "/86:5.18", "/86:5.15-14", "/39:3.9-8", "/300:1", "/1:99", "/300",
               "/007:1", "/i/no-such-headword", f"/i/{no_path}/read", f"/i/{one_chapter}/read/theme",
               "/index/q", "/index/QQ", "/index/a", "/appendix/a", "/appendix/G", "/appendix/AB",
-              "/part/9", "/part/01", "/part/x", "/rail/300", "/rail/007", "/rail/xx", "/rail/UF-RUS", "/nothing", "/i/god/more",
+              "/part/9", "/part/01", "/part/x", "/part/1/compare", "/part/9/compare", "/part/1/compare/x", "/rail/300", "/rail/007", "/rail/xx", "/rail/UF-RUS", "/nothing", "/i/god/more",
               "/101:4.2:3", "/café", "/speech/01:4", "/speech/999:1", "/speech/1:99", "/speech/x",
               "/speech/1:4:5", "/speech/ud/01:1", "/speech/ud/100:1", "/speech/x/1:1", "/speech/ud/1:99",
               "/speech/ud/x", "/speech/ud/1:1:2", "/tr/01:1", "/tr/999:1", "/tr/1:99", "/tr/x", "/tr/1:1:2",

@@ -48,21 +48,29 @@ window.ubLang = function (r, v) {
 // on that line with the index off, and printed it.  Among the
 // search results, each one's list, in the reader's order (ub.css .trhits).  And
 // Compare's toggle, where one of them has the section (ub.css .cmphead); in
-// Compare the row's entries keep their own line.  One rule, since the keys are
-// the reader's own list; ub.js says it again on a change.
+// Compare the row's entries keep their own line.  And on a part's page each
+// one's divider, under the English or a column each (part.html, 2026-11-07).
+// One rule, since the keys are the reader's own list; ub.js says it again on
+// a change.
 window.ubTr = function (v) {
   var st = document.getElementById('ub-tr');
   if (!st) { st = document.createElement('style'); st.id = 'ub-tr'; document.head.appendChild(st); }
   var ks = String(v || '').split(' ').filter(function (k) { return /^[a-z0-9-]+$/.test(k); });
   var f = ks.map(function (k) { return '.tf[data-has~="' + k + '"]'; }).join(),
+      d = ks.map(function (k) { return '.divider[data-k="' + k + '"]'; }).join(),
       r = ':root[data-margin="off"]:not(.compare, [data-index="off"]) .grid>.row:has(>:is(' + f + '))',
       s = ks.map(function (k) { return '>[data-tr="' + k + '"]'; });
-  st.textContent = ks.length ? f + '{display:block}article:has(' + f + ')>.cmphead{display:flex}' +
+  st.textContent = ks.length ? f + '{display:block}article:has(' + f + ',' + d + ')>.cmphead{display:flex}' +
     '@media screen and (max-width:62rem){' + r +
     '{flex-flow:row wrap;align-items:baseline}' + r + '>:is(.a,.tf){display:contents}' +
     r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold{margin-right:1em}}' +
     '.trhits:has(' + s.join() + '){display:flex}' +
-    s.map(function (x, i) { return '.trhits' + x + '{display:block;order:' + i + '}'; }).join('') : '';
+    s.map(function (x, i) { return '.trhits' + x + '{display:block;order:' + i + '}'; }).join('') +
+    // A part's page (part.html): each ticked translation's divider, in the
+    // reader's order after the English's, and in Compare on a wide screen a
+    // column each (ub.css .dividers, keyed on data-translations).
+    ks.map(function (k, i) { return '.partpage .dividers>.divider[data-k="' + k + '"]{display:block;order:' + (i + 1) + '}'; }).join('') +
+    '@media (min-width:62.01rem){:root.compare .partpage .dividers>:is(' + d + '){display:grid}}' : '';
 };
 window.ubTitle = function () {
   var t = document.querySelector('title');
@@ -108,7 +116,8 @@ window.ubUnit = function (where) {
 // Compare kept as one moves about (Tigran, 2026-11-06).  Not a setting: a
 // mode of this tab, decided by the address of the last page of the book it
 // showed, /15:3/compare on and /15:3 off, and left as it was by any other
-// page, a search's, the index's, the quiz's, Home.  ubCompareKeep reads it
+// page, a search's, the index's, the quiz's, Home; a part's page, /part/1, is
+// one of the book's (2026-11-07).  ubCompareKeep reads it
 // off such an address; ubCompare gives an address of the book the suffix
 // while it is on, before the hash, and never takes it off: it ends with the
 // toggle, or Back past where it was turned on (ub.js cmpDraw).  Idempotent,
@@ -119,7 +128,7 @@ window.ubUnit = function (where) {
 // compare, below, is this page's own.  Until that day the text's own links
 // and the index's left Compare (DECISIONS.md).
 window.ubCompareKeep = function (path) {
-  var m = /^\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?(\/compare)?$/.exec(path);
+  var m = /^(?:\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?|\/part\/\d+)(\/compare)?$/.exec(path);
   if (!m) return;
   try { if (m[1]) sessionStorage.setItem('ub_compare', '1'); else sessionStorage.removeItem('ub_compare'); } catch (e) {}
 };
@@ -127,7 +136,7 @@ window.ubCompare = function (where) {
   var on = false;
   try { on = sessionStorage.getItem('ub_compare') === '1'; } catch (e) {}
   if (!on) return where;
-  var m = /^(\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?)(#.*)?$/.exec(where);
+  var m = /^(\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?|\/part\/\d+)(#.*)?$/.exec(where);
   return m ? m[1] + '/compare' + (m[2] || '') : where;
 };
 (function (r, D, B) {

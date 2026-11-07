@@ -1008,7 +1008,9 @@
   // left it, the transport bar's and the Contents' alone keeping it,
   // cmpLinks).  In a section none of the ticked translations has, the page
   // reads as usual, the address kept, so that the columns come back where
-  // one resumes (Tigran, 2026-10-26).
+  // one resumes (Tigran, 2026-10-26).  A part's page, /part/1/compare, draws
+  // nothing here: every translation's divider is in the page, and the
+  // address alone lays them in columns (part.html, ub.css .dividers).
   var CMP = /\/compare$/, cmpN = 0, cmpAt = location.pathname.replace(CMP, '');
   function cmpOn() { return CMP.test(location.pathname); }
   function cmpArt() { return document.querySelector('main.reader > article'); }
@@ -1020,11 +1022,12 @@
     });
     return String(load().translations || '').split(' ').filter(function (k) { return trBy[k] && has[k]; });
   }
-  // The transport bar's links and the rail's, to a section or a paper, with
-  // /compare after them while it is on (a paper's goes to its first section).
+  // The transport bar's links and the rail's, to a section, a paper or a
+  // part's page, with /compare after them while it is on (a paper's goes to
+  // its first section).
   function cmpLinks(root, on) {
     Array.prototype.forEach.call(root.querySelectorAll('.transport a[href], .rail a[href]'), function (a) {
-      var m = /^(\/\d+(?::\d+)?)(?:\/compare)?(#.*)?$/.exec(a.getAttribute('href'));
+      var m = /^(\/\d+(?::\d+)?|\/part\/\d+)(?:\/compare)?(#.*)?$/.exec(a.getAttribute('href'));
       if (m) a.setAttribute('href', m[1] + (on ? '/compare' : '') + (m[2] || ''));
     });
   }

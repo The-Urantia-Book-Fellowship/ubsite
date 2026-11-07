@@ -7,8 +7,8 @@
                 'prev': 'M3 2.5h2v11H3zM13.5 2.5v11L5.5 8z',
                 'next': 'M11 2.5h2v11h-2zM2.5 2.5v11l8-5.5z',
                 'ff': 'M1 2.5v11L8 8zM8 2.5v11L15 8z'} %}
-{% macro step(k, g) -%}
+{% macro step(k, g, cls='') -%}
 {%- set ico %}<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="{{ paths[k] }}"/></svg>{% endset %}
-{%- if g %}<a class="{{ k }}" href="{{ g.href }}"{% if k in ('prev', 'next') %} rel="{{ k }}"{% endif %} {{ ta('aria-label', g.label) }} {{ ta('title', g.label) }}>{{ ico }}</a>
+{%- if g %}<a class="{{ k }}{% if cls %} {{ cls }}{% endif %}" href="{{ g.href }}"{% if k in ('prev', 'next') %} rel="{{ k }}"{% endif %} {{ ta('aria-label', g.label) }} {{ ta('title', g.label) }}>{{ ico }}</a>
 {%- else %}<span class="{{ k }} off" aria-hidden="true">{{ ico }}</span>{% endif %}
 {%- endmacro %}

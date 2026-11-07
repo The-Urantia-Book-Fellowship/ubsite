@@ -73,6 +73,19 @@ CREATE TABLE tr_toc (
     CHECK ((kind = 'section') = (section_n IS NOT NULL))
 );
 
+-- Its four parts' dividers, as its style or its parts page writes them, for the
+-- part's own page (app.py part_page), as `part` holds the press's: plain text,
+-- as the press's are.  Its title is the rail's (tr_toc part), proper case where
+-- it has one; the sponsors' note is a paragraph to a line (Part IV's has two).
+CREATE TABLE tr_part (
+    translation  TEXT NOT NULL REFERENCES translation(key),
+    n            INTEGER NOT NULL CHECK (n BETWEEN 1 AND 4),
+    label        TEXT NOT NULL,         -- its word and number: ЧАСТЬ I, Часть I
+    title        TEXT NOT NULL,
+    sponsor      TEXT NOT NULL,         -- its paragraphs separated by a newline
+    PRIMARY KEY (translation, n)
+);
+
 -- A translator's note (ud's \fnst), at its place in the paragraph's text, set
 -- as build/study.py sets a study note: opened as a card at its number, which its
 -- marker in tr_paragraph.html_hy draws, <a class="fn" data-k="tn" data-n=…>.

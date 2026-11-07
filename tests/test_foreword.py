@@ -46,6 +46,16 @@ class ForewordInPartOne(unittest.TestCase):
                                r'<li><a href="/1"><b>1</b> ')
         self.assertEqual(body.count("fwin"), 1)
 
+    def test_the_parts_page(self):
+        # Part I's ⏭ goes to the Foreword with the switch on and to Paper 1
+        # with it off (2026-11-07); the other parts' to their first paper.
+        body = get("/part/1")[2]
+        self.assertRegex(body, r'<a class="next fwin" href="/0:0" rel="next" aria-label="Next section: 0:0"[^>]*>.*?</a>'
+                               r'<a class="next fwout" href="/1:0" rel="next" aria-label="Next section: 1:0"', )
+        nav = re.search(r'<nav class="transport"[^>]*>(.*?)</nav>', get("/part/2")[2], re.S).group(1)
+        self.assertIn('<a class="next" href="/32:0"', nav)
+        self.assertNotIn("fw", nav)
+
 
 if __name__ == "__main__":
     unittest.main()

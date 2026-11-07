@@ -128,6 +128,33 @@ class Rail(unittest.TestCase):
         self.assertEqual(r.count("<details open>"), 1)          # the part, and no paper
         self.assertIn('<li class="part here"><details open>', r)
 
+    def test_a_parts_page_carries_every_translation_s_divider(self):
+        # Each translation's, in Settings' order, hidden until ticked (base.html
+        # ubTr), each named as Compare names a column; Part IV's note two
+        # paragraphs; and the Compare toggle, at an address of its own.
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        keys = [k for (k,) in con.execute("SELECT key FROM translation ORDER BY ord")]
+        con.close()
+        status, _, body = get("/part/4")
+        self.assertEqual(status, 200)
+        self.assertIn('<header class="divider en" lang="en">\n        <p class="who"><b>The Urantia Book</b>'
+                      ' <span class="nobreak">(Uversa Press)</span></p>\n        <p class="papernum">PART IV</p>', body)
+        trs = re.findall(r'<header class="divider" data-k="([a-z0-9-]+)" lang="([a-z]+)">(.*?)</header>', body, re.S)
+        self.assertEqual([(k, lang) for k, lang, _ in trs], [(k, "ru") for k in keys])
+        for k, _, h in trs:
+            self.assertRegex(h, r'<p class="who"><b>[^<]+</b> <span class="nobreak">\([^)]+\)</span></p>', k)
+            self.assertRegex(h, r'<p class="papernum">\S+ IV</p>', k)
+            self.assertRegex(h, r"<h1>[^<]*Иисуса</h1>", k)
+            self.assertEqual(h.count("<p>"), 2, k)              # the note's two paragraphs
+            self.assertIn("апостола Андрея.</p></div>", h, k)
+        self.assertIn('class="cmpbtn"', body)
+        self.assertEqual(get("/part/4/compare")[2], body)      # Compare's address: the same page
+        self.assertEqual(get("/part/9/compare")[0], 404)
+        # The Foundation's Latin e is set as Cyrillic (build/translation.py PART_SUBSTITUTE).
+        body = get("/part/1")[2]
+        self.assertIn("Подготовлено Уверсским Корпусом", body)
+        self.assertNotIn("Увeрсским", body)
+
     def test_there_are_four_parts(self):
         for n in (0, 5):
             self.assertEqual(get(f"/part/{n}")[0], 404, n)

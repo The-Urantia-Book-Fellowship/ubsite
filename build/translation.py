@@ -111,6 +111,14 @@ SUBSTITUTE = {"urantia-ru": {"　": " "}}       # an ideographic space: 44:3.5, 
 # right elsewhere in a note (in \textgreek): ud's at 0:5.12 writes Galen's
 # century in Greek capital iotas, which UB Goudy has not, for the Roman II.
 NOTE_SUBSTITUTE = {"ud": {"Галена ΙΙ века": "Галена II века"}}
+# The same in a part's divider, by its words (_parts): the Foundation's 2024
+# Russian release writes «Увeрсским» with a Latin e, on its parts page and on
+# Part I's own, where no one can mend it; shown mended, declared (Tigran,
+# 2026-11-07).  One declared and found in no divider fails, so that its line
+# goes when a release mends it.
+PART_SUBSTITUTE = {"uf-ru": {"Увeрсским": "Уверсским"}}
+# A divider's word and number: ЧАСТЬ I, Часть IV.
+RE_PART_LABEL = re.compile(r"\S+ (I|II|III|IV)")
 RE_CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 # A word of both alphabets, «Cвинец» with a Latin C: a letter typed in the
 # other keyboard layout, which looks right on the page and is not what search
@@ -149,6 +157,7 @@ class Built:
     date: str | None = None      # a release's own date, where its source is no repository
     normalised: int = 0          # characters read as others (STYLE normalise)
     toc: list[tuple] = dataclasses.field(default_factory=list)   # its own contents (_toc)
+    parts: list[tuple] = dataclasses.field(default_factory=list)   # its four dividers (_parts)
 
 
 def meta() -> dict[str, dict]:
@@ -290,7 +299,7 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
     date = None
     notes_of: dict[int, list[str]] = {}
     if _uf(key):
-        papers, notes_of, word, date, mapping, part_titles = _uf_papers(key, repo, info, ours, report)
+        papers, notes_of, word, date, mapping, parts_src = _uf_papers(key, repo, info, ours, report)
         titles: dict[tuple[int, int], Key] = {}
         contents: dict[int, str] = {}            # its papers' own titles are its contents'
         info = dict(info, paper=word, numbers=False)
@@ -308,7 +317,7 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
         info = dict(info, paper=m.group(1) if m else "", numbers=bool(style.get("numbers")))
         papers = reader.read(key, repo["tex"], repo["at"], report, foreword)
         mapping, titles = _mapping(load_known().get(key, []))
-        part_titles = _tex_parts(key, read_at_rev(repo["path"], style["paper"], repo["at"]), report)
+        parts_src = _tex_parts(key, read_at_rev(repo["path"], style["paper"], repo["at"]), report)
         contents = _tex_contents(key, read_at_rev(repo["path"], style["contents"], repo["at"]), report)
     hyph = Hyphenator(hyphenation(key, repo, report), RUSSIAN)
     used: set[Key] = set()
@@ -431,9 +440,12 @@ def build(key: str, repo: dict, ours: dict[Key, dict], report) -> Built:
                         f" its number, and its style {'numbers it' if info['numbers'] else 'does not'}")
     paras.sort(key=lambda p: p.key)
     sources = _notes(key, paras, papers, mapping, ours, hyph, report)
-    toc = _toc(key, info, paras, headings, part_titles, contents, report)
+    # Its parts' titles, once, for its contents and its dividers alike.
+    part_heads = {n: _part_title(key, p["title"], report, f"{key} part {n}") for n, p in parts_src.items()}
+    toc = _toc(key, info, paras, headings, part_heads, contents, report)
+    parts = _parts(key, parts_src, part_heads, report)
     return Built(key, info, repo["commit"], paras, headings, len(theirs_seps), sources,
-                 date, tally["normalised"], toc)
+                 date, tally["normalised"], toc, parts)
 
 
 def slips(b: Built, report) -> None:
@@ -458,6 +470,9 @@ def slips(b: Built, report) -> None:
         scan(f"{n}:{s if s is not None else '-'} {kind}", text)
     for kind, n, s, html, _ in b.toc:
         scan(f"contents {kind} {n}" + (f":{s}" if s is not None else ""), strip_tags(html))
+    for n, label, title, sponsor in b.parts:
+        for what, text in (("label", label), ("title", title), ("sponsor", sponsor)):
+            scan(f"part {n} {what}", text)
     known = {tuple(r) for k, *r in _rows(KNOWN_MIXED) if k == b.key}
     for where, word in sorted(found - known):
         report.hard("tr-mixed-alphabets", f"{b.key} {where}",
@@ -477,16 +492,98 @@ def slips(b: Built, report) -> None:
 # «Часть I. Центральная вселенная...»: the rail writes them itself.
 RE_PART_HEAD = re.compile(r"\S+ (?:I|II|III|IV)\.\s+")
 RE_UPAPERTITLE = re.compile(r"\\upapertitle\{(\d+)\}(?=\{)")
-PART_MACRO = {1: "partimix", 2: "partiimix", 3: "partiiimix", 4: "partivmix"}
+PART_MACRO = {1: "parti", 2: "partii", 3: "partiii", 4: "partiv"}
 
 
-def _tex_parts(key: str, sty: str, report) -> dict[int, str]:
-    """Its four parts' titles, TeX as written: its style's \\partimix ... \\partivmix."""
-    out = {}
-    for n, name in PART_MACRO.items():
+def _tex_parts(key: str, sty: str, report) -> dict[int, dict]:
+    """Its four parts' dividers, TeX as written, from its style, as the press's
+    come from its (readers/press.py read_parts): \\partitxt, its word and
+    number; \\partiup, the title in capitals; \\partimix, in proper case,
+    which titles it (_part_title); and \\partisub, the sponsors' note, or
+    \\partivsubone and \\partivsubtwo, two paragraphs, as both set Part IV's.
+    {n: {label, up, title, sponsor: [paragraphs]}}; one missing fails."""
+    where = f"{key}:{STYLE[key]['paper']}"
+
+    def macro(name):
         m = re.search(r"\\def\\" + name + r"(?=\{)", sty)
-        if m:
-            out[n] = reader._brace(sty, m.end())[0].strip()
+        return reader._brace(sty, m.end())[0].strip() if m else None
+    out = {}
+    for n, stem in PART_MACRO.items():
+        got = {what: macro(stem + what) for what in ("txt", "up", "mix")}
+        for what, v in got.items():
+            if v is None:
+                report.hard("tr-part-undefined", where, f"no \\def\\{stem}{what}")
+        sub, one, two = macro(stem + "sub"), macro(stem + "subone"), macro(stem + "subtwo")
+        if sub is not None and one is None and two is None:
+            sponsor = [sub]
+        elif sub is None and one is not None and two is not None:
+            sponsor = [one, two]
+        else:
+            report.hard("tr-part-undefined", where, f"\\{stem}sub, or \\{stem}subone and \\{stem}subtwo, not both")
+            sponsor = [x for x in (sub, one, two) if x is not None]
+        out[n] = {"label": got["txt"] or "", "up": got["up"], "title": got["mix"] or "", "sponsor": sponsor}
+    return out
+
+
+def _part_title(key: str, body: str, report, where: str) -> tuple[str, str]:
+    """A part's title as the rail and its divider show it, (text, html):
+    expanded, its own word and number cut (RE_PART_HEAD), Cyrillic required."""
+    text, spans, notes = _expand(key, body, report, where)
+    if notes:
+        report.hard("tr-note-in-heading", where, "a note in a part's title")
+    html = render(text, spans)
+    if m := RE_PART_HEAD.match(text):
+        if not html.startswith(m.group()):
+            report.hard("tr-toc-part", where, f"its title {text[:40]!r} begins with its number in markup")
+        text, html = text[m.end():], html[m.end():]
+    if not RE_CYRILLIC.search(text):
+        report.hard("tr-not-russian", where, f"a part's title {text[:40]!r} has no Cyrillic")
+    return text, html
+
+
+def _parts(key: str, parts: dict[int, dict], titles: dict[int, tuple[str, str]], report) -> list[tuple]:
+    """Its four dividers, for the part's own page (tr_part; app.py part_page),
+    each (n, label, title, sponsor): its word and number, its title as the
+    rail has it, and the sponsors' note, a paragraph to a line.  Plain text,
+    as the press's are: a span or a note in one fails.  Its title in
+    capitals, where its style has one, must be the title but for case, as a
+    paper's title must be its contents' (slips)."""
+    subs = PART_SUBSTITUTE.get(key, {})
+    used: set[str] = set()
+
+    def plain(body: str, where: str) -> str:
+        for was, to in subs.items():
+            if was in body:
+                report.warn("tr-substituted", where, f"{was!r} set as {to!r}: the source's own slip")
+                body = body.replace(was, to)
+                used.add(was)
+        text, spans, notes = _expand(key, body, report, where)
+        if spans or notes:
+            report.hard("tr-part-markup", where, f"a divider with markup: {text[:40]!r}")
+        if not RE_CYRILLIC.search(text):
+            report.hard("tr-not-russian", where, f"{text[:40]!r} has no Cyrillic")
+        return text
+    out = []
+    for n, p in sorted(parts.items()):
+        if not (p["label"] and p["title"] and p["sponsor"]):
+            continue                             # reported by _tex_parts or uf_html.parts
+        where = f"{key} part {n}"
+        label = plain(p["label"], f"{where} label")
+        m = RE_PART_LABEL.fullmatch(label)
+        if not m or uf_html.ROMAN[m.group(1)] != n:
+            report.hard("tr-part-label", where, f"its label {label!r} is not its word and the numeral {n}")
+        title = titles[n][0]
+        if p.get("up") is not None:
+            up = plain(p["up"], f"{where} title in capitals")
+            if up.casefold() != title.casefold():
+                report.hard("tr-part-title", where, f"its title in capitals {up!r} is not its title {title!r}")
+        sponsor = [plain(x, f"{where} sponsor") for x in p["sponsor"]]
+        if not sponsor:
+            report.hard("tr-part-undefined", where, "no sponsors' note")
+        out.append((n, label, title, "\n".join(sponsor)))
+    for was in sorted(set(subs) - used):
+        report.hard("tr-substitute-gone", key, f"{was!r} is declared (PART_SUBSTITUTE) and no divider has it:"
+                    " take it out")
     return out
 
 
@@ -509,11 +606,11 @@ def _caps(text: str) -> bool:
     return any(c.isalpha() for c in text) and text == text.upper()
 
 
-def _toc(key: str, info: dict, paras: list[TPara], headings, parts: dict[int, str],
+def _toc(key: str, info: dict, paras: list[TPara], headings, parts: dict[int, tuple[str, str]],
          contents: dict[int, str], report) -> list[tuple]:
     """Its own contents, as the left rail shows them when a reader chooses it
     (ub.js tocApply), each entry (kind, n, section_n, html, caps): its four
-    parts' titles, as its style or its parts page writes them; each paper's it
+    parts' titles, as its style or its parts page writes them (_part_title); each paper's it
     has, as its printed contents give it (ud's \\upaper is in capitals, its
     contents are not), or failing that its own; and each section's it has,
     without the number its title may carry, which the rail adds.  What it has
@@ -526,10 +623,6 @@ def _toc(key: str, info: dict, paras: list[TPara], headings, parts: dict[int, st
         if notes:
             report.hard("tr-note-in-heading", where, "a note in its contents")
         html = render(text, spans)
-        if kind == "part" and (m := RE_PART_HEAD.match(text)):
-            if not html.startswith(m.group()):
-                report.hard("tr-toc-part", where, f"its title {text[:40]!r} begins with its number in markup")
-            text, html = text[m.end():], html[m.end():]
         if not RE_CYRILLIC.search(text):
             report.hard("tr-not-russian", where, f"its contents' {kind} {text[:40]!r} has no Cyrillic")
         out.append((kind, n, s, html, int(_caps(text))))
@@ -538,7 +631,8 @@ def _toc(key: str, info: dict, paras: list[TPara], headings, parts: dict[int, st
         if n not in parts:
             report.hard("tr-toc-part", f"{key} part {n}", "no title for it")
             continue
-        entry("part", n, None, parts[n], f"{key} part {n}")
+        text, html = parts[n]
+        out.append(("part", n, None, html, int(_caps(text))))
     have = sorted({p.key[0] for p in paras})
     own = {p: (text, html) for p, s, kind, text, html in headings if kind == "title"}
     for n in have:
@@ -822,6 +916,7 @@ def store(con, built: list[Built], ours_: dict[Key, dict]) -> None:
         con.executemany("INSERT INTO tr_heading VALUES (?,?,?,?,?,?)",
                         [(b.key, *h) for h in b.headings])
         con.executemany("INSERT INTO tr_toc VALUES (?,?,?,?,?,?)", [(b.key, *t) for t in b.toc])
+        con.executemany("INSERT INTO tr_part VALUES (?,?,?,?,?)", [(b.key, *t) for t in b.parts])
 
 
 def roundtrip(con, report) -> None:

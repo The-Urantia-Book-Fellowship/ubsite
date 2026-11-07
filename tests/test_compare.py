@@ -75,7 +75,7 @@ class Toggle(unittest.TestCase):
     def test_the_head_script_reads_the_address_and_shows_it_where_a_ticked_one_has_the_section(self):
         body = get("/1:1", raw=True)[2]
         self.assertIn("if (/\\/compare$/.test(location.pathname)) r.classList.add('compare');", body)
-        self.assertRegex(body, re.escape("article:has(' + f + ')>.cmphead{display:flex}"))
+        self.assertRegex(body, re.escape("article:has(' + f + ',' + d + ')>.cmphead{display:flex}"))
 
     def test_the_tab_keeps_it_as_one_moves_about(self):
         # Compare kept (2026-11-06): the tab's memory of it, written from every

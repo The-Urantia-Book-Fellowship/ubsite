@@ -154,13 +154,15 @@ CASES = {
             "/15#fnref15_3_4_0": "/15:3.4#fnref15_3_4_0", "/15#listen": "/15:0#listen", "/15#16:3": "/15:0#16:3",
             "/15:3#note15_3_4_0": "/15:3#note15_3_4_0",
             "/15/compare": "/15:0/compare", "/15/compare#15:3": "/15:3/compare", "/15/compare#15:3.4#tr-ud": "/15:3.4/compare#tr-ud",
-            "/15:3/compare": "/15:3/compare", "/15:3.4/compare#tr-ud": "/15:3.4/compare#tr-ud", "/i/god": "/i/god", "/": "/"},
+            "/15:3/compare": "/15:3/compare", "/15:3.4/compare#tr-ud": "/15:3.4/compare#tr-ud", "/i/god": "/i/god", "/": "/",
+            "/part/1": "/part/1", "/part/1/compare": "/part/1/compare"},
     "on": {"/15": "/15", "/15:0": "/15", "/15:3": "/15#15:3", "/15:3.4": "/15#15:3.4", "/15:3.4-6": "/15#15:3.4-6",
            "/15:0.3": "/15#15:0.3", "/15:3.4#tr-ud": "/15#15:3.4#tr-ud", "/15:3.4#note15_3_4_0": "/15#note15_3_4_0",
            "/15:3.4#notetn_ud_15_3_4_0": "/15#notetn_ud_15_3_4_0", "/16:0#listen": "/16#16:0#listen",
            "/15#15:3": "/15#15:3", "/15#listen": "/15#listen",
            "/15:3/compare": "/15/compare#15:3", "/15:0/compare": "/15/compare", "/15:3.4/compare#tr-ud": "/15/compare#15:3.4#tr-ud",
-           "/15/compare": "/15/compare", "/15/compare#15:3": "/15/compare#15:3", "/i/god": "/i/god"},
+           "/15/compare": "/15/compare", "/15/compare#15:3": "/15/compare#15:3", "/i/god": "/i/god",
+           "/part/1": "/part/1", "/part/1/compare": "/part/1/compare"},
 }
 
 
@@ -168,16 +170,21 @@ CASES = {
 # (Compare kept as one moves about, 2026-11-06), and ubCompareKeep, which
 # writes it: 'set', 'removed', or None where the address is not the book's.
 CMP = {
-    "off": {a: a for a in ("/15", "/15:3", "/15:3.4-6#tr-ud", "/15/compare", "/15:3/compare#tr-ud", "/i/god", "/search", "/")},
+    "off": {a: a for a in ("/15", "/15:3", "/15:3.4-6#tr-ud", "/15/compare", "/15:3/compare#tr-ud", "/i/god", "/search", "/",
+                           "/part/1", "/part/1/compare")},
     "on": {"/15": "/15/compare", "/0": "/0/compare", "/15:3": "/15:3/compare", "/15:3.4": "/15:3.4/compare",
            "/15:3.4-6": "/15:3.4-6/compare", "/15:3.4#tr-ud": "/15:3.4/compare#tr-ud",
            "/15#15:3.4#tr-ud": "/15/compare#15:3.4#tr-ud", "/15#note15_3_4_0": "/15/compare#note15_3_4_0",
            "/16:0#listen": "/16:0/compare#listen", "/15/compare": "/15/compare",
            "/15:3/compare#tr-ud": "/15:3/compare#tr-ud", "/15:3/compare/x": "/15:3/compare/x",
-           "/i/god": "/i/god", "/i/god#e12": "/i/god#e12", "/search": "/search", "/quiz/15": "/quiz/15", "/": "/"},
+           "/i/god": "/i/god", "/i/god#e12": "/i/god#e12", "/search": "/search", "/quiz/15": "/quiz/15", "/": "/",
+           # A part's page is the book's too (2026-11-07).
+           "/part/1": "/part/1/compare", "/part/4#listen": "/part/4/compare#listen", "/part/1/compare": "/part/1/compare",
+           "/part/x": "/part/x", "/part": "/part"},
 }
 KEEP = {"/15:3/compare": "set", "/15/compare": "set", "/15:3.4-6/compare": "set", "/15:3": "removed", "/15": "removed",
-        "/15:3.4": "removed", "/search": None, "/i/god": None, "/": None, "/15:3/compare/x": None, "/quiz/15": None}
+        "/15:3.4": "removed", "/search": None, "/i/god": None, "/": None, "/15:3/compare/x": None, "/quiz/15": None,
+        "/part/1/compare": "set", "/part/1": "removed", "/part/1/compare/x": None, "/part/x": None}
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")

@@ -116,27 +116,43 @@ def release(data: bytes) -> tuple[set[str], set[str]]:
     return ids, stamps
 
 
-# The parts, on the page that lists them ("01-Parts.html", "01-Части.html"):
-# each its word and number, linking the part's page, then its title.
-RE_PART = re.compile(r'<p class="paper"><a [^>]*>(\S+) (I|II|III|IV)</a></p>\s*<h2>(.*?)</h2>', re.S)
+# The parts, on the page that lists them ("01-Parts.html", "01-Части.html")
+# and on each part's own page: its word and number, linking the part's page on
+# the one that lists them, its title, and the sponsors' note, one paragraph or
+# two (Part IV's).
+RE_PART = re.compile(r'<p class="paper">(?:<a [^>]*>)?(\S+ (I|II|III|IV))(?:</a>)?</p>\s*<h2>(.*?)</h2>'
+                     r'((?:\s*<p class="bt[ln] ctr">.*?</p>)*)', re.S)
+RE_SPONSOR = re.compile(r'<p class="bt[ln] ctr">(.*?)</p>', re.S)
 ROMAN = {"I": 1, "II": 2, "III": 3, "IV": 4}
 
 
-def parts(data: bytes, report) -> dict[int, str]:
-    """{n: its title, HTML as written} for the four parts, from the one page
-    that lists them, in order; anything else fails."""
+def parts(data: bytes, report) -> dict[int, dict]:
+    """{n: {label, title, sponsor: [paragraphs]}}, HTML as written, for the
+    four parts, from the one page that lists them, in order, each with its
+    note; and each part's own page, where there is one, must repeat the
+    listing word for word.  Anything else fails."""
     found = []
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         for name in sorted(z.namelist()):
             if name.endswith(".html"):
-                got = RE_PART.findall(z.read(name).decode("utf-8"))
+                got = [(ROMAN[r], {"label": label, "title": title.strip(), "sponsor": RE_SPONSOR.findall(subs)})
+                       for label, r, title, subs in RE_PART.findall(z.read(name).decode("utf-8"))]
                 if got:
                     found.append((name, got))
-    if len(found) != 1 or [ROMAN[r] for _, r, _ in found[0][1]] != [1, 2, 3, 4]:
-        report.hard("uf-parts-unread", ", ".join(n for n, _ in found) or "-",
+    lists = [(name, got) for name, got in found if len(got) > 1]
+    if len(lists) != 1 or [n for n, _ in lists[0][1]] != [1, 2, 3, 4]:
+        report.hard("uf-parts-unread", ", ".join(n for n, _ in lists) or "-",
                     "not one page listing parts I to IV in order")
         return {}
-    return {ROMAN[r]: title.strip() for _, r, title in found[0][1]}
+    name, got = lists[0]
+    out = dict(got)
+    for n, p in out.items():
+        if not p["sponsor"]:
+            report.hard("uf-parts-unread", name, f"part {n} has no sponsors' note")
+    for other, one in found:
+        if len(one) == 1 and one[0][1] != out[one[0][0]]:
+            report.hard("uf-part-differs", other, f"part {one[0][0]}'s own page does not repeat {name}")
+    return out
 
 
 def read(data: bytes, report) -> dict[int, Paper]:

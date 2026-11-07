@@ -219,7 +219,8 @@
       if (a.toUpperCase() !== a && a.length === 1) return { res: redirect('/appendix/' + a.toUpperCase(), 301) };
       return { res: missing(sh, T('The appendices are lettered A to F.'), path) };
     }
-    if ((m = /^\/part\/([0-9]+)$/.exec(path))) {
+    // A part's page, and the same page at Compare's address (app.py part_compare).
+    if ((m = /^\/part\/([0-9]+)(\/compare)?$/.exec(path))) {
       var part = '/part/' + parseInt(m[1], 10);
       if (sh.miscset[part]) return { chunk: 'misc', make: function (d) { return html(200, stored(sh, d.pages[part])); } };
       return { res: missing(sh, T('There are four parts, I to IV.'), path) };
