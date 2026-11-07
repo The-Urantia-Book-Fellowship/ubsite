@@ -1,0 +1,417 @@
+# Paper 12, The Universe of Universes: the British Study Edition has nine
+# notes on it at d6c3206, eight carried (the edition's four sources among them,
+# under the keys earlier papers gave three of them) and one 1955 reading dropped
+# without a ruling, the press's apparatus being complete (12:4.15 "outer space
+# in the realms").  Block's chart of March 14, 2020 names three sources, Baker's
+# Universe Unfolding (1932), Overstreet's Enduring Quest (1931) and Strong's New
+# World-Religion (1915), and sets Jeans's Through Space and Time (1934) beside
+# 12:4.12 as a comparison: his findings are added as notes of their own, credited
+# to him, each checked in the original (Baker in ../block-sources/originals/,
+# Overstreet, Strong and Jeans in Tigran's copies, originals/LIBRARY.tsv).  The
+# rest was found in review, with no credit line: Eddington's essay of 1925 behind
+# both of Overstreet's similes at 12:9.2 (Tigran's copy); Mill's Logic (1843) and
+# Lewes (1875) behind the water of 12:9.3 (originals/); Hubble's own note of 1936
+# on the name island universes (originals/); Plato's cave in Jowett's Republic
+# (originals/); Overstreet's quantitative and qualitative at 12:6.5; the Hubble
+# constant's history brought up to date; the Paradise-Havona day; and the Bible
+# behind 12:7.5, 12:7.12 and 12:8.1.  Four of Tigran's Russian notes in ud that
+# the English edition lacks are carried into English (12:3.10, 12:5.3, 12:5.6,
+# 12:8.10).  The review, numbered F1-F39 in the order of the text, is
+# var/study/review-012.md.  All 39 ruled Yes by Tigran on 2026-11-07, the four
+# questions answered yes, keep: F18 as his, F30 with the physicist's sentence
+# and, at his asking, the book's own gloss on "conditioned by mind", F2 and F29
+# kept; the percentages as figures (F9) and F18 without its coordinates at his
+# asking the same day.
+
+paper = 12
+chart = "https://urantiabooksources.com/wp-content/uploads/2020/03/012.pdf"
+chart_date = 2020-03-14          # as Block dates it on its first page
+
+# The works the notes quote, each under the key and words earlier papers gave
+# it where it has one.  The edition's Baker, carried under Paper 32's key.
+[[source]]
+key = "Baker1932"
+origin = "3b5e97e201d65668"
+tex = '''Robert H. Baker, \emph{The Universe Unfolding: The Story of Man's Increasing Comprehension of the Universe Around Him} (Baltimore: The Williams \& Wilkins Company, 1932).'''
+
+# The edition's Eddington, its title put right (Space, Time and Gravitation);
+# checked in Tigran's copy of the 1953 reprint, the same pages, and the page
+# confirmed in the Archive's scan of the 1920 printing.
+[[source]]
+key = "Eddington1920"
+origin = "f54e30fe0ccd65ea"
+tex = '''Arthur Eddington, \emph{Space, Time and Gravitation: An Outline of the General Relativity Theory} (Cambridge: at the University Press, 1920).'''
+
+# Added: F34 quotes it (pp. 199, 201, 202), Tigran's copy of the American
+# issue; public in his library.
+[[source]]
+key = "Eddington1925"
+origin = "none"
+tex = '''Arthur S. Eddington, ``The Domain of Physical Science'', in \emph{Science, Religion and Reality}, edited by Joseph Needham (New York: The Macmillan Company, 1925), pp.~187--218.'''
+
+# Added: F6 quotes it (p. 25, PDF page 38), the Digital Library of India's
+# copy on the Archive, read by OCR.
+[[source]]
+key = "Hubble1936"
+origin = "none"
+tex = '''Edwin Hubble, \emph{The Realm of the Nebulae} (New Haven: Yale University Press, 1936).'''
+
+# Added: F12 quotes it (pp. 214-215), Block's comparison, in Tigran's copy;
+# not public in his library.
+[[source]]
+key = "Jeans1934"
+origin = "none"
+tex = '''James Jeans, \emph{Through Space and Time} (Cambridge: at the University Press, 1934).'''
+
+# Added: F37 quotes it (pp. 130 and 369, PDF pages 146 and 385), the Boston
+# author's edition on the Archive.
+[[source]]
+key = "Lewes"
+origin = "none"
+tex = '''George Henry Lewes, \emph{Problems of Life and Mind}, first series, \emph{The Foundations of a Creed}, vol.~II (Boston: James R. Osgood and Company, 1875).'''
+
+# Added: F37 quotes it (p. 426, PDF page 446), the first edition on the Archive.
+[[source]]
+key = "Mill"
+origin = "none"
+tex = '''John Stuart Mill, \emph{A System of Logic, Ratiocinative and Inductive}, vol.~I (London: John W. Parker, 1843).'''
+
+# The edition's Overstreet, under Paper 2's key and words; Tigran's copy.
+[[source]]
+key = "Overstreet"
+origin = "dbbce280ae2b1872"
+tex = '''H.~A. Overstreet, \emph{The Enduring Quest: A Search for a Philosophy of Life} (New York: W.~W. Norton \& Company, Inc., 1931).'''
+
+# Added: F31 quotes it (p. 214, PDF page 462), Jowett's third edition on the
+# Archive.
+[[source]]
+key = "Plato"
+origin = "none"
+tex = '''Plato, \emph{The Republic}, in \emph{The Dialogues of Plato}, translated into English with analyses and introductions by Benjamin Jowett, third edition, vol.~III (Oxford: at the Clarendon Press, 1892).'''
+
+# Added: F27 and F28 cite it (pp. 317 and 318, PDF pages 335 and 336), under
+# Paper 3's key and words.
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# The edition's Strong, under Paper 5's key and words; Tigran's copy.
+[[source]]
+key = "Strong"
+origin = "4d9e5bfb0d5d69e5"
+tex = '''Josiah Strong, \emph{The New World-Religion} (Garden City, New York: Doubleday, Page \& Company, 1915).'''
+
+# F1, proposed: the word nebula in the astronomy of the day, the English
+# counterpart of Tigran's Russian note here; Baker p. 123
+[[note]]
+at = "12:1.12"
+after = "a nebular family"
+origin = "none"
+credit = "block"
+tex = '''\bibemph{Nebula} was still, in the astronomy of the day, the name of what are now called galaxies as well as of the clouds of gas and dust within our own: Baker's book of 1932, one of the sources of this paper, speaks of the ``great nebula'' in Andromeda as one of ``the external spiral systems'' (\cite{Baker1932}, p.~123), and the paper has both senses, a family of nebulae here that no superuniverse boundary divides, nebulae as ``physical universes in process of formation'' at \bibref[12:2.2]{p012 2:2}, and Andromeda, ``this far-distant nebula'', at \bibref[15:4.7]{p015 4:7}. Galaxies, the newer word, comes in at \bibref[12:2.3]{p012 2:3}.'''
+
+# F2, proposed: the paper's distances beside the astronomy of the day's, and
+# where that puts Andromeda; Baker p. 132
+[[note]]
+at = "12:1.14"
+after = "twenty-five million light-years"
+origin = "none"
+tex = '''The distances are of the order of the astronomy of the day's. The nearest of the external galaxies, Andromeda and Triangulum, were then put ``of the order of a million light years'' away, and the most remote known 250 times farther (Baker~\cite{Baker1932}, p.~132); the book has the light of Andromeda leaving it ``almost one million years ago'' and the nebula ``outside the inhabited superuniverse'' (\bibref[15:4.7]{p015 4:7}), while ``the vast Milky Way starry system represents the central nucleus of Orvonton'' (\bibref[15:3.1]{p015 3:1}). Read with this paragraph, that sets Andromeda beyond the quiet zone of four hundred thousand light-years and about where the first outer space level begins, half a million beyond the grand universe, where, by \bibref[12:2.5]{p012 2:5}, nothing lives; I note only that \bibref[15:4.7]{p015 4:7} calls Andromeda ``very active'' in sun making, as this paragraph has the outer level all ``energizing forces''. Andromeda's distance today is 2.5 million light-years, the distances of the 1930s having been doubled by Baade's revision of 1952 (see the note at \bibref[12:4.14]{p012 4:14}).'''
+
+# F3, carried: the edition's note, its spelling put right and Baker's page
+# and words added
+[[note]]
+at = "12:2.2"
+after = "or three nebulae"
+origin = "1238dbb9ac2796c2"
+credit = "block"
+tex = '''That is galaxies. The unaided eye can see only two galaxies in the Northern Hemisphere: M31 (Andromeda) and M33 (Triangulum). These very objects are named in Baker's book (\cite{Baker1932}, p.~123: ``the nearest of the external spiral systems, and the only ones visible to the naked eye''), which served as one of the sources of this paper. The Large and Small Magellanic Clouds are visible only in the Southern Hemisphere and are considered to be satellites of our Galaxy. Therefore, the Andromeda galaxy is situated \bibemph{outside the borders of the superuniverse of Orvonton}. See also \bibref[15:4.7]{p015 4:7}.'''
+
+# F4, added: Block's finding, Baker p. 133
+[[note]]
+at = "12:2.2"
+after = "your present instruments"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~133: ``Thirty million galaxies inhabit the region of space around us which is open to inspection with present telescopes, a region five hundred million light years across. Doubtless many more lie hidden behind the dark clouds of our own system.'' Here they are ``millions upon millions'', and the millions beyond the instruments' range are the next paragraph's.'''
+
+# F5, carried: the edition's note, with Baker's words and the telescope's
+# history put right
+[[note]]
+at = "12:2.3"
+after = "future, new telescopes"
+origin = "1b1ecb80fcf340aa"
+credit = "block"
+tex = '''According to Baker~\cite{Baker1932}, p.~133, the ``new'' telescope is the 200-inch, then only projected: ``The projected 200-inch telescope will show additional multitudes; it should in fact bring into view more than 200 million galaxies, if their distribution continues as we now observe it'', where the paper says no less than 375 million. It was paid for by the Rockefeller Foundation's grant of 1928, built on Palomar Mountain from 1936, and dedicated on June 3, 1948, as the Hale Telescope.'''
+
+# F6, proposed: the name island universes, from Hubble's own note of 1936,
+# the English counterpart of Tigran's Russian note here
+[[note]]
+at = "12:2.3"
+after = "island universes"
+origin = "none"
+tex = '''\bibemph{Island universes} was the nineteenth century's name for the nebulae taken to be stellar systems like our own, and Hubble in 1936 could already write of it as a name with a history: it ``was used in von Humboldt's \emph{Kosmos} (Vol.~III [1850]), presumably for the first time'', as \emph{Weltinseln}, ``world islands'' in the English translation of 1855, and ``the transition to `island universes' is an obvious step, but the writer has not ascertained the first use of the term'' (\cite{Hubble1936}, p.~25, note). Whether the spirals were such, Shapley and Curtis debated in 1920, and the Cepheids Hubble found in Andromeda in 1923 and 1924 settled; by 1932 Baker writes of ``external galaxies''. The paper takes the question up again for some of them: ``formerly believed to be in outer space'', they are on Orvonton's fringe (see the next note).'''
+
+# F7, added: Block's finding, Baker p. 136
+[[note]]
+at = "12:2.3"
+after = "galactic system of Orvonton"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~136: ``But the boundaries of our supergalaxy are not yet definitely surveyed. To the galactic system proper we have already added tentatively the Magellanic Clouds; and we may presently find cause for annexing the Andromeda and Triangulum spirals and other neighboring systems. Natural lines of cleavage will appear with a more complete understanding of the motions of these systems.'' The paper annexes the ``other neighboring systems'' to Orvonton, the Magellanic Clouds perhaps among them (next note), but not Andromeda, which it keeps outside (\bibref[15:4.7]{p015 4:7}); Baker's ``motions'' become its nebulae ``traveling along with us''.'''
+
+# F8, carried: the edition's note, unchanged
+[[note]]
+at = "12:2.3"
+after = "along with us."
+origin = "4a8ddbdb399a6126"
+tex = '''The Large and Small Magellanic Clouds may be referred to here.'''
+
+# F9, proposed: the English counterpart of Tigran's Russian note here
+[[note]]
+at = "12:3.10"
+after = "realms of outer space"
+origin = "none"
+tex = '''That is, with the remaining 15\% of all mind activity.'''
+
+# F10, added: Block's finding, Overstreet pp. 109-110
+[[note]]
+at = "12:3.12"
+after = "noncomputable"
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, pp.~109--110, of ``the psychological individual'': he ``is a significant form of reality. He is not lightly to be brushed aside. If indeed he seems to fall outside the computabilities of the mechanical world, there may be a reason for that. He may be of an order of reality not reducible to the limited regularities of physical existence. He may demand for his formulation a higher kind of calculus as yet undiscovered.'' Here the circuit is recognized and nothing responsive to it measured, the researchers of \bibref[12:3.7]{p012 3:7} having computed the other three.'''
+
+# F11, added: Block's finding, Baker pp. 136-137
+[[note]]
+at = "12:4.1"
+after = "the center of gravity"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, pp.~136--137: ``The great galaxies and supergalaxies are no more fixed in position than are their individual stars, or the planets that we may imagine revolving around their stars. Everything in the physical universe, so far as we know, is in motion.'' The paper keeps everything in motion and adds the one exception, for which Baker's physics has no place.'''
+
+# F12, added: Block's comparison, Jeans pp. 214-215, checked in Tigran's copy
+[[note]]
+at = "12:4.12"
+after = "all pervaded space"
+origin = "none"
+credit = "block"
+tex = '''Jeans~\cite{Jeans1934}, pp.~214--215, gives the two pictures of the receding nebulae in turn. The first is an explosion: ``When a shell bursts on a battlefield the fragments travel at different speeds, those which travel fastest also travelling farthest \ldots\ This is exactly the law of the receding nebulae, and makes it look as though, at some instant in the past, the universe had suddenly burst into fragments.'' The second is straws on a river: ``the nebulae are not moving through space, but with space---they are straws shewing us in what way the currents of space are flowing, and the law that speed is proportional to distance suggests that space is expanding uniformly. Probably the latter explanation is the best, because we now think that space is curved, and round, and finite in amount---rather like the surface of a balloon.'' The paragraph rejects the first picture, the ``outward flight at ever-increasing velocities'', for the second, ``the present outward and uniform expansion of the physical creations of all pervaded space'', and makes it a breath.'''
+
+# F13, carried: the edition's note, its figures corrected (525 for 522; Hubble's
+# own values; 66.93 for 6,93) and brought up to date
+[[note]]
+at = "12:4.14"
+after = "million light-years"
+origin = "aec406cce35b3b78"
+tex = '''The value of the Hubble constant given in the text, a hundred miles a second for every million light-years, is about 525\,km/s/Mpc, close to the values Hubble himself found: 558 with Humason in 1931 (\emph{Astrophysical Journal} 74, 43) and 526 in \emph{The Realm of the Nebulae} (1936). Hubble's distances rested on the dependence between the period and the luminosity of the variable stars called Cepheids. The revision of the zero point of this dependence by Walter Baade in 1952 doubled the distances and halved the constant; by 1956 Humason, Mayall and Sandage had 180\,km/s/Mpc (\emph{Astronomical Journal} 61, 97), and the modern values are smaller still: $67.4\pm0.5$ from the cosmic microwave background (Planck, 2018) and $73.0\pm1.0$ from Cepheids and supernovae (Riess and others, 2022), a disagreement, the ``Hubble tension'', that is itself a subject of research.'''
+
+# F14, added: Block's finding, Baker pp. 137-139; and what the 200-inch found
+[[note]]
+at = "12:4.14"
+after = "thirty thousand miles a second"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~137: ``If the lines in the spectrum are displaced from their normal positions toward the violet, the star is approaching; if they are displaced toward the red, it is receding; and the amount of the displacement reveals the speed of approach or recession, in miles a second.'' And pp.~138--139: ``With allowance for this, Hubble and Humason find that the velocity of recession of the external systems increases at the rate of about a hundred miles a second for every million light years increase in distance. As the extreme, thus far, a member of a great cluster of galaxies in Leo at the distance of a hundred million light years exhibits a velocity of recession of 12,000 miles a second. Are these velocities to be taken literally? \ldots\ It remains for the future to produce an explanation of these motions that will be acceptable to all.'' The paper's ``more than'' a hundred, and its thirty thousand miles a second to come, extend Baker's rate; with the 200-inch telescope Humason reached, by 1956, a redshift of a fifth in the Hydra cluster, some 60,000 kilometres or 37,000 miles a second (Humason, Mayall and Sandage, \emph{Astronomical Journal} 61, 97).'''
+
+# F15, carried: the edition's note, the book's title, chapter and page put
+# right and Eddington's words added
+[[note]]
+at = "12:4.14"
+after = "time-space distortions"
+origin = "e74e5b87dc407e46"
+tex = '''This possibility was pointed out by Eddington in 1920, in \emph{Space, Time and Gravitation}, chapter~X, ``Towards Infinity'' (\cite{Eddington1920}, p.~161): in de Sitter's world natural phenomena are slowed at great distances, so that ``the vibrations of an atom are slower, and its characteristic spectral lines will appear displaced to the red. We should generally interpret this as a Doppler effect, implying that the nebula is receding \ldots\ but it is also possible that the interpretation of spectral displacement as a receding velocity is erroneous; and the effect is really the slowing of atomic vibrations predicted by de Sitter's theory.'''''
+
+# F16, added: Block's finding, Baker p. 71
+[[note]]
+at = "12:4.16"
+after = "equilibrant of gravity"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~71, of the globular clusters: ``One of nature's devices for compensating gravitation, which by itself might reduce our complex system of stars to a single great lump, is to set the celestial bodies in motion. The centrifugal effect of the rotation of the globular cluster offsets the gravitational urge toward the center, resulting in a stable structure that may well endure as long as its individual stars.'' The paper makes a general principle of the device, with space as the other complement.'''
+
+# F17, proposed: the Paradise-Havona day, 14:1.12
+[[note]]
+at = "12:5.1"
+after = "arbitrarily so recognized"
+origin = "none"
+tex = '''The Paradise-Havona standard day is the time the spheres of the inner Havona circuit take to go once around Paradise, ``just seven minutes, three and one-eighth seconds less than one thousand years of the present Urantia leap-year calendar'' (\bibref[14:1.12]{p014 1:12}), which the book sets beside Psalms~90:4 and 2~Peter~3:8, a day as a thousand years; it is the standard of the seven superuniverses (\bibref[14:1.13]{p014 1:13}).'''
+
+# F18, proposed: Tigran's Russian note here, in English (question 1)
+[[note]]
+at = "12:5.3"
+after = "is Paradise area"
+origin = "none"
+tex = '''Area, and not place: it is precisely the area of Paradise that is said to be nontemporal. Is this related in some way to a property of phase space, in which there is no distance between two points, while one may well speak of the area of a triangle with its vertices at three such points? It is just this area that figures, strangely, in the evolution propagators of quantum mechanics when it is reformulated in terms of Wigner functions.'''
+
+# F19, proposed: the English counterpart of Tigran's Russian note here, 130:7.6
+[[note]]
+at = "12:5.6"
+after = "levels of time cognizance"
+origin = "none"
+tex = '''Three levels of the cognizance of time, where there are seven conceptions of space: ``There are seven different conceptions of space as it is conditioned by time. Space is measured by time, not time by space'' (\bibref[130:7.6]{p130 7:6}); and the first of the three, time as a succession of events, is the one that gives way as man ascends, when ``circular simultaneity'' displaces ``the linear sequence of events'' (\bibref[130:7.5]{p130 7:5}).'''
+
+# F20, added: Block's finding, Overstreet pp. 91-99
+[[note]]
+at = "12:5.10"
+after = "high order of self-realization"
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}: the animal and the plant ``apparently cannot clearly prevision a future'' (p.~92), where man's needs ``admit a new element---a more or less clear previsioning of the future'' (p.~91); the ethics of the older ages ``were chiefly static: the ethics of obedience, decorum, safe behavior'' (p.~99); and of the three answers he weighs to the question how to live, Hedonism, Stoicism and Self-Realization (pp.~94--98), ``Stoicism is noble, perhaps, but it seems less than fully intelligent. May not the unintelligence lie in the fact that this endurance theory does not accept man on his essentially human level? It really accepts him on the animal level'' (pp.~96--97). The paragraph has his prevision, his static ethics ``just slightly superanimal'', and two of his three headings in one clause.'''
+
+# F21, added: Block's finding, Overstreet p. 100; Tigran's Russian note here
+# gives the source too
+[[note]]
+at = "12:5.11"
+after = "cause of such events"
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, p.~100: ``Apparently, then, we have here discovered, on our human level, a highly significant process. Perhaps its greatest significance lies in the fact that it discloses a new kind of causality---causality by reference to the future. But the future does not yet exist. Thus it is, in a sense, causality by reference to the non-existent. Obviously such causality is not found in the physical world.'' The paper's word for it is \bibemph{cosmic}.'''
+
+# F22, proposed: Overstreet's quantitative and qualitative, pp. 59-61, which
+# Block's chart does not set here
+[[note]]
+at = "12:6.5"
+after = "gravity-measurement sense"
+origin = "none"
+tex = '''The distinction is the one Overstreet~\cite{Overstreet} draws from the water that hydrogen and oxygen make (see the notes at \bibref[12:9.3]{p012 9:3}): ``While the quantitative result could have been predicted, namely, the sum of two atoms of hydrogen and one atom of oxygen, equalling, now, three atoms, the qualitative result could not have been predicted'' (p.~59); ``We can predict perfectly the quantitative sum of the combination, but we are powerless to predict the qualitative results'' (p.~60); and, once made, ``we can make the same combination millions of times and expect the same results'' (p.~61), which is the paragraph's ``partially predictable when subjected to critical observation''. Overstreet keeps the unpredictable for life and mind; the paragraph extends it to ``new associations of forces, either physical, mindal, or spiritual''.'''
+
+# F23, carried: the edition's note, with Strong's words (pp. 39 and 42), the
+# credit line correcting Block's quotation from the original
+[[note]]
+at = "12:7.2"
+after = "habits of God"
+origin = "545ea3ae034fce8c"
+credit = "block"
+corrects = '''``He does things the same way every time because he does things the best way every time'' for his ``He does the same things every time, because he does the best things every time'''''
+tex = '''This statement is taken from Strong~\cite{Strong}, p.~39: ``God is perfectly free in a universe of laws, because they are the methods of his activities. Natural laws, so called, are the eternal habits of God. They are the same yesterday, to-day, and forever, because he is ever the same \ldots\ He does things the same way every time because he does things the best way every time.'' And p.~42: ``Indeed theology has unmistakably taught the arbitrariness of the divine will \ldots\ God's law, whether natural or moral, is absolutely reasonable. It is founded in the nature of things and is as far removed as possible from anything capricious, despotic, or dictatorial.'' The paragraph keeps the habits, the best way every time, and ``dictatorial and arbitrary''; nature as ``in a limited sense the physical habit of God'' is at \bibref[4:2.1]{p004 2:1}, and the spirit world as the habit of the Son at \bibref[7:0.4]{p007 0:4}.'''
+
+# F24, added: Block's finding, Strong p. 39, the sonata; the credit line
+# correcting his quotation from the original
+[[note]]
+at = "12:7.4"
+after = "own voluntary acts"
+origin = "none"
+credit = "block"
+corrects = '''``but rather that he is the master of both'' for his ``but rather the master of both'''''
+tex = '''Strong~\cite{Strong}, p.~39, goes on: ``If a musician plays a sonata precisely the same way again and again, we do not infer that he is the slave either of the instrument or of the composition, but rather that he is the master of both. Absolute perfection means unvarying perfection.'' The paper's ``habit-bound slave'' answers the slave of the instrument; and on the same page Strong quotes the verse the paragraph ends with, ``with whom there is no variableness, neither shadow of turning''.'''
+
+# F25, carried: the edition's note, with the verse's words
+[[note]]
+at = "12:7.4"
+after = "shadow of changing.”"
+origin = "ae37d9b4d1d4bb3a"
+tex = '''James~1:17: ``Every good gift and every perfect gift is from above, and cometh down from the Father of lights, with whom is no variableness, neither shadow of turning.'' The paper's ``changing'' is its own for the King James ``turning''; the Revised Version has ``neither shadow that is cast by turning''.'''
+
+# F26, proposed: Malachi 3:6
+[[note]]
+at = "12:7.5"
+after = "he changes not"
+origin = "none"
+tex = '''Malachi~3:6: ``For I \bibemph{am} the \textsc{Lord}, I change not; therefore ye sons of Jacob are not consumed.'' The paragraph keeps the first half, and for the second gives its own: the dependability of his doing the same thing in the same way.'''
+
+# F27, proposed: Acts 17:27-28 and 1 Corinthians 3:16; Sadler p. 317
+[[note]]
+at = "12:7.12"
+after = "have our being"
+origin = "none"
+tex = '''Acts~17:27--28, Paul at Athens: ``though he be not far from every one of us: For in him we live, and move, and have our being''; and 1~Corinthians~3:16, ``the Spirit of God dwelleth in you''. The paragraph has Paul's three verbs in another order, each with its adverb, and the Father ``not very far from any one of you''; Sadler notes the paraphrase in his study of the paper (\cite{Sadler2003}, p.~317).'''
+
+# F28, proposed: John 4:24, and the note at 9:2.1; Sadler p. 318
+[[note]]
+at = "12:8.1"
+after = "“God is spirit,”"
+origin = "none"
+tex = '''John~4:24, ``God \bibemph{is} a Spirit'' in the King James, ``God is spirit'' in the versions since 1946, the Greek having no article: see the note at \bibref[9:2.1]{p009 2:1}. Sadler gives the verse here (\cite{Sadler2003}, p.~318). The book's own gloss follows at \bibref[12:8.14]{p012 8:14}: ``Spirit is the fundamental reality of the personality experience of all creatures because God is spirit.'''''
+
+# F29, proposed: which seven levels, 0:1.3, 106:0.2, 4:4.5
+[[note]]
+at = "12:8.9"
+after = "relative cosmic reality"
+origin = "none"
+tex = '''Which seven the paper does not say. The book lists seven levels of total Deity's function in the Foreword, static to ultimate (\bibref[0:1.3]{p000 1:3}), and seven levels of reality in Paper 106, incomplete finites to infinity (\bibref[106:0.2]{p106 0:2}); and \bibref[4:4.5]{p004 4:5} has God's absoluteness pervading ``all seven levels of universe reality''.'''
+
+# F30, proposed: Tigran's Russian note here, in English, with a physicist's
+# sense of the words added (question 2)
+[[note]]
+at = "12:8.10"
+after = "conditioned by mind"
+origin = "none"
+tex = '''In what sense is matter modified by motion? Here lies a great riddle. One sense is the physicist's: in relativity the source of gravitation, and what responds to it, is not mass alone but energy and momentum together, so that a body's gravitational action and response do depend on its motion, and a hot gas weighs more than a cold one; but the paragraph may mean more than this. And conditioned by mind: here the book glosses itself. ``Mind universally dominates matter'' (\bibref[42:12.15]{p042 12:15}); the energy that answers linear gravity answers at the same time ``the manipulations of the Universe Power Directors and their associates'' (\bibref[16:4.12]{p016 4:12}), the living ``power-control creatures of the Third Source and Center'' who segregate, direct and intensify the physical energies (\bibref[9:3.6]{p009 3:6}, \bibref[29:4.20]{p029 4:20}), as he himself is ``the manipulator of energy'' (\bibref[9:3.5]{p009 3:5}); and Paper 116 speaks of ``the energy-controlling mind'' (\bibref[116:5.15]{p116 5:15}). Nearer home, the matter of a living body goes where its mind sends it, up the stairs against gravity: the exception the paragraph makes is seen in every creature that moves. Antigravity is not it: ``it is not the action of mind'' (\bibref[9:3.3]{p009 3:3}).'''
+
+# F31, added: Block's comparison, Overstreet pp. 173-174, with the figure's
+# own source, Plato, from Jowett
+[[note]]
+at = "12:8.16"
+after = "spirit substance"
+origin = "none"
+credit = "block"
+tex = '''The figure is Plato's cave, \emph{Republic}~VII, 514a--515a, in Jowett's words: ``Behold! human beings living in an underground den, which has a mouth open towards the light and reaching all along the den; here they have been from their childhood, and have their legs and necks chained so that they cannot move \ldots\ Above and behind them a fire is blazing at a distance \ldots\ Like ourselves, I replied; and they see only their own shadows, or the shadows of one another, which the fire throws on the opposite wall of the cave'' (\cite{Plato}, p.~214). Overstreet retells it, with the light coming in at the mouth and the figures walking on a wall, and sums it up: ``That was Plato's account of life: a self-deluding commerce with shadows'' (\cite{Overstreet}, pp.~173--174). Plato's shadows are cast by things carried past the fire; the paper's are cast by mind in the light of spirit, ``but this does not invalidate the reality of matter-energy'' (\bibref[12:8.15]{p012 8:15}).'''
+
+# F32, added: Block's finding, Overstreet p. 100
+[[note]]
+at = "12:9.1"
+after = "nonmaterial value"
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, p.~100: ``Somehow, in all this, the significant destiny of man begins dimly to be seen---only dimly, indeed, for the ultimate destiny is doubtless beyond us. But dimly we can see man, the curious dreamer of dreams, casting his dreams ahead of him---catching up to them---and again casting them ahead.'' Here the dreams are ``new and spirit goals'', and the catching up a response to their ``cosmic allurements''.'''
+
+# F33, added: Block's finding, Overstreet pp. 30, 32-33 and 38
+[[note]]
+at = "12:9.2"
+after = "single contact"
+origin = "none"
+credit = "block"
+tex = '''Three of Overstreet's illustrations in one paragraph (\cite{Overstreet}). Richard Jones, met once with a toothache and judged ``a sulky person not worth knowing'': ``If, however, you insist that, for yourself, a single contact with an individual is enough, you may persist in holding to your initial judgment \ldots\ Obviously you come to know the real individual only as you know him from many points of view'' (pp.~32--33). Music: ``Music is mathematical physics. Unless one knows mathematical physics one cannot know music \ldots\ He will see a whole range of figures, each figure indicating a tone's vibrations. `But where is the music?' he might ask'' (p.~30). And the telephone: to hold ourselves to exact knowledge alone ``would be---following Eddington once more---like supposing that the numbers attached to the names of telephone subscribers gave an adequate account of each subscriber'' (p.~38). The paper adds love as the secret, and the subscriber's \bibemph{character}.'''
+
+# F34, proposed: Eddington's essay of 1925 behind both of Overstreet's similes
+[[note]]
+at = "12:9.2"
+after = "concerning his character"
+origin = "none"
+tex = '''Both similes are Eddington's before they are Overstreet's, from his essay of 1925 on what exact science can and cannot know (\cite{Eddington1925}). Of the pointer readings physics measures: ``our exact knowledge is of the readings, not of the qualities. The former have as much resemblance to the latter as a telephone-number has to a subscriber'' (p.~199). Of music: ``The theory of music starts as though we were about to build up a science every whit as exact as physics \ldots\ But it is unimaginable that any system of measurements could be correlated to tune in such a way that knowledge of these measurements would be accepted as equivalent to knowledge of tune'' (p.~201). And of the subscriber, ``an entity with various aspects; he is (1) a number, (2) a plug-hole, (3) a voice, and even (4) a human being'', whom the operator may dissect into digits, ``but we cannot analyse a human being into four parts corresponding to the digits of his telephone number'' (p.~202).'''
+
+# F35, carried: the edition's note, its grammar smoothed
+[[note]]
+at = "12:9.3"
+after = "Mathematics"
+origin = "3cf30553d33d9cc8"
+tex = '''Mathematics is a creation of the material mind, just as morontia mathematics corresponds to the morontia type of mind: see \bibref[112:1.11]{p112 1:11}.'''
+
+# F36, added: Block's finding, Overstreet pp. 59-60
+[[note]]
+at = "12:9.3"
+after = "liquid water"
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, pp.~59--60, on emergent evolution, ``the third alternative'' between a wholly predictable life and an uncontrollable one: ``The basic idea is that in new combinations there is something more than the additive result, or the mere sum \ldots\ Hydrogen and oxygen brought together in the correct proportions eventuate in a fluid called water. Water, however, is not simply the sum of hydrogen and oxygen. It is something qualitatively new, something that cannot be found by the most searching examination of the gas, hydrogen, nor of the gas, oxygen. No amount of previous knowledge of the atomic structure of hydrogen and oxygen could, apparently, give a knowledge of this peculiar fluid that results from combining the two gases.'' His note refers the reader to Lloyd Morgan's \emph{Emergent Evolution} (1923). The paper's ``superadditive'' is his ``more than the additive result'', and its mathematics, philosophy, physics and chemistry his ``previous knowledge''.'''
+
+# F37, proposed: the example's pedigree, Mill 1843 and Lewes 1875
+[[note]]
+at = "12:9.3"
+after = "mechanistic cosmology"
+origin = "none"
+tex = '''The example is older than emergent evolution. Mill made water the type of a result that is not the sum of its causes: ``The chemical combination of two substances produces, as is well known, a third substance with properties entirely different from those of either of the two substances separately, or of both of them taken together. Not a trace of the properties of hydrogen or of oxygen is observable in those of their compound, water'' (\cite{Mill}, p.~426). Lewes, who gave such results the name \bibemph{emergent}, ``unlike its components in so far as these are incommensurable'' (\cite{Lewes}, p.~369), took the same liquid: ``This emergent liquid is not a third thing super-added to the two gases; it is these two under a new form'' (p.~130). Mill's own moral was a logician's: that chemistry, for this reason, is not a deductive science, as mechanics is.'''
+
+# F38, added: Block's finding, Overstreet p. 39, with the chapter it closes
+[[note]]
+at = "12:9.5"
+after = "mechanistic materialism"
+origin = "none"
+credit = "block"
+tex = '''The three bondages are the three targets of Overstreet's second chapter, ``A False Way of Thinking: The Fallacy of Abstraction'' (\cite{Overstreet}, pp.~27--41), in its order: abstraction, ``Knowledge is abstract when something has been drawn away from the fulness of its reality and made to stand by itself'' (p.~33); exactness, in his question ``Is Exact Knowledge the Only Kind of Knowledge?'', which is to say mathematics (pp.~37--38); and ``Materialism was the view which reared this falsity of abstraction into a philosophy of life'' (p.~39).'''
+
+# F39, added: Block's finding, Overstreet p. 107
+[[note]]
+at = "12:9.6"
+after = "personality identity"
+origin = "none"
+credit = "block"
+tex = '''Overstreet~\cite{Overstreet}, p.~107, of the psychological individual: ``What is most characteristic of him is that he is, as it were, nucleated. What I call my self is the central reality which I carry around. Everything that comes within my experience moves, so to speak, around that nucleus of selfhood \ldots\ Sometimes the nucleus breaks up, and we have a multiple personality. When that happens there is not a proper individual, but something weak, ineffective, and torn to pieces.'' The paper makes the nucleus spirit, and the breaking up the self's usurping of it.'''
+
+# Dropped without a ruling: a 1955 reading the press gives.
+[[dropped]]
+at = "12:4.15"
+origin = "5303e3f460cbd951"
+why = "a 1955 reading: the press's \\fnc{outer space in the realms} at 12:4.15 gives it"

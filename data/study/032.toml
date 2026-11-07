@@ -98,7 +98,7 @@ tex = '''Genesis~1:26: ``Let us make man in our image, after our likeness''. \bi
 at = "32:2.9"
 after = "inhabited planets in Nebadon,"
 origin = "none"
-tex = '''A local universe is one hundred constellations of one hundred systems, each eventually of about a thousand inhabited spheres (\bibref[32:0.1]{p032 0:1}): about 10,000,000 in all (\bibref[15:2.5]{p015 2:5}). The 3,840,101 are a little over 38 percent of that, and the universe ``young''. Satania, ``fairly typical'', has 619 of its thousand (\bibref[15:14.5]{p015 14:5}), with more than two hundred more planets evolving towards habitation.'''
+tex = '''A local universe is one hundred constellations of one hundred systems, each eventually of about a thousand inhabited spheres (\bibref[32:0.1]{p032 0:1}): about 10,000,000 in all (\bibref[15:2.5]{p015 2:5}). The 3,840,101 are a little over 38\% of that, and the universe ``young''. Satania, ``fairly typical'', has 619 of its thousand (\bibref[15:14.5]{p015 14:5}), with more than two hundred more planets evolving towards habitation.'''
 
 # F2: the arithmetic shown, and what it assumes said: the paper does not say
 # that the other four of the five have three worlds each.
