@@ -574,8 +574,8 @@ p.t.head { text-align: center; }
 .a .at a { color: var(--faint); text-decoration: none; }
 .a .at a:hover { color: var(--ink); }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
-p.t.hit, p.t.now, .rt.now, .tree li:target { scroll-margin-top: 3rem; }
-p.t.hit, p.t.named { background: color-mix(in oklch, var(--link) 12%, transparent);
+p.t.hit, p.t.now, .rt.hit, .rt.now, .tree li:target { scroll-margin-top: 3rem; }
+p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 /* The paragraph's full reference, so the reader always knows which one this is;
    Settings can turn it off.  Text, not a link, since 2026-10-31 (Tigran): a

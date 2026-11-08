@@ -279,14 +279,38 @@ def run() -> int:
 
         print("A wide screen, the Contents folded away")
         ctx2 = b.new_context(viewport={"width": 1280, "height": 900})
+        ctx2.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
         pg2 = ctx2.new_page()
         pg2.on("pageerror", lambda e: errors.append(str(e)))
         pg2.goto(BASE + "/101:4")
         pg2.evaluate("ubSettings.set('rail', 'folded')")
         settle(pg2)
         ok(pg2.evaluate("document.documentElement.dataset.rail") == "folded", "folded by its setting")
+        # A mouse's click shows it after a moment (ub.js DBL), which a
+        # double-click's second press cancels (Tigran, 2026-11-08).
         pg2.click("[id='101:4.3']")
         settle(pg2)
+        ok(not shown(pg2), "a mouse's click waits a moment")
+        pg2.wait_for_timeout(400)
+        ok(shown(pg2), "and then shows the head")
+        pg2.click("[id='101:4.3']")
+        settle(pg2)
+        ok(not shown(pg2), "a click while it shows hides it at once")
+        pg2.dblclick("[id='101:4.3']")
+        pg2.wait_for_timeout(550)
+        ok(not shown(pg2) and not pg2.evaluate("getSelection().isCollapsed") and
+           not pg2.evaluate("document.querySelector('main .named')"),
+           "a double-click selects a word, with no head and nothing tinted")
+        pg2.keyboard.press("Control+x")
+        settle(pg2)
+        ok(pg2.evaluate("document.activeElement === document.querySelector('.find input') && "
+                        "document.querySelector('.find input').value !== ''"),
+           "Ctrl+X puts it in the search box")
+        pg2.keyboard.press("Escape")
+        settle(pg2)
+        pg2.evaluate("getSelection().removeAllRanges()")
+        pg2.click("[id='101:4.3']")
+        pg2.wait_for_timeout(550)
         ok(shown(pg2), "a click on a paragraph shows the head")
         pg2.click(".runhead .ref")
         settle(pg2)

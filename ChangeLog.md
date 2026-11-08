@@ -63,6 +63,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- With translations in parallel columns, a tap on a translation's paragraph tints that paragraph alone, not the English beside it, and the running head names it.
 - Compare translations is no longer a button at the head of the text but a setting, Translations in parallel columns, under the list in Settings' Translations tab: kept like the others, in every tab and on every visit until you turn it off, and turned on or off in place, the paragraph you were reading staying at the top; an old address such as /1:1/compare opens the page as your settings show it.
 - On the changelog's page each release's headings, Added, Changed, Removed, Fixed and For developers, are tabs, one list shown at a time with how many entries it holds; without scripts, and in print, the page is the file as before.
 - Compare translations now stays on as you move about: a search result, a reference in a study note or a translator's note, a citation in the index, a paper opened from the home page or the contents, a citation typed into the search box and an address typed into the browser all open in Compare while it is on, in the same tab, until you turn it off or go Back past where you turned it on; until now only the previous and next buttons and the contents kept it.
@@ -113,6 +114,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- With translations in parallel columns, a search result in a translation, or in one of its translator's notes, marks that translation's paragraph in its column rather than the English, and brings it into view under the columns' names, which no longer cover the first line of the paragraph arrived at.
+- A double-click on a word selects it and nothing more: its first click no longer brings down the running head and tints the paragraph, and Ctrl+X puts the word in the search box even at the top of the page, where the running head used to stay over the box.
 - The study note at 12:8.9 on the seven levels of relative cosmic reality no longer sets the Foreword's seven levels of Deity function beside the seven levels of reality of Paper 106, which the book never connects: it now says that the book names the seven three times and lists seven levels of reality once, at 106:0.3, as a convenient compromise symbolization.
 - Part I's title page goes on to the Foreword while Foreword in Part I is on, and to Paper 1 with it off; it went to Paper 1 either way.
 - With the interface in Russian, the Foreword is «Предисловие» wherever the interface speaks of it, not «Foreword»: on the home page, «Предисловие и документы 1–31», in Settings, in the tooltips of the buttons at a section's end and in the quiz; the contents, the Contents at the left and the Foreword's own page still name it Foreword, as the book does.

@@ -28,7 +28,26 @@ class RunningHead(unittest.TestCase):
         self.assertRegex(block, r"[^\n]*\.runhead[^\n]*display: none")
 
     def test_named_paragraph_is_tinted_as_a_hit(self):
-        self.assertIn("p.t.hit, p.t.named {", CSS)
+        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named {", CSS)
+
+    def test_a_translation_tapped_in_columns_is_named_alone(self):
+        # Never the English beside it (Tigran, 2026-11-08): its own reference
+        # in the head, and Back from the Contents kept by the row's English.
+        self.assertIn("return t.closest('p.t[id], .rc p.rt') ||", JS)
+        self.assertIn("head.querySelector('.ref').textContent = p.id || p.dataset.ref;", JS)
+        self.assertIn("toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)));", JS)
+
+    def test_a_double_click_is_never_a_tap(self):
+        # A mouse's click shows the head after DBL, which the second press
+        # cancels; Ctrl+X takes the head away, or it covers the box at the
+        # page's top (Tigran, 2026-11-08).
+        self.assertIn("var headSoon = 0, headBy = 0, DBL = 350;", JS)
+        self.assertIn("if (!touch && (!head || head.hidden)) {", JS)
+        self.assertIn("document.addEventListener('mousedown', function (ev) {\n    if (ev.detail < 2) return;\n    clearTimeout(headSoon);", JS)
+        start = JS.index("function hideHead() {")
+        self.assertIn("clearTimeout(headSoon);", JS[start:JS.index("}", start)])
+        start = JS.index("// Ctrl+X searches")
+        self.assertIn("hideHead();\n      back = { value: box.value", JS[start:])
 
     def test_dash_is_generated_content(self):
         # So that build/fonts.py, which reads content: strings and never a
@@ -45,7 +64,7 @@ class RunningHead(unittest.TestCase):
     def test_reference_is_a_button_to_the_contents(self):
         # With the Contents' chevron after it, drawn and not a glyph.
         self.assertIn("ref = document.createElement('button')", JS)
-        self.assertIn("ref.addEventListener('click', function () { var p = headP; hideHead(); toContents(p); })", JS)
+        self.assertIn("ref.addEventListener('click', function () {\n      var p = headP;\n      hideHead();", JS)
         self.assertIn('.runhead .ref::after { content: "";', CSS)
 
     def test_home_is_the_mark_and_a_link(self):

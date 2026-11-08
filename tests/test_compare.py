@@ -89,6 +89,38 @@ class Setting(unittest.TestCase):
         self.assertIn("document.documentElement.classList.toggle('compare', on);", js)
 
 
+class SearchHit(unittest.TestCase):
+    """A search's hit in a translation, /0:0.1#tr-ud, in columns: that
+    translation's paragraph is marked, never the English beside it (Tigran,
+    2026-11-08).  Driven in Chrome by hand; these hold the script's parts."""
+
+    JS = (ROOT / "ubsite/static/ub.js").read_text()
+
+    def test_the_mark_moves_to_its_column_and_back(self):
+        js = self.JS
+        self.assertIn("var row = p.closest('.row'), rt = row && row.querySelector('.rc[data-k=\"' + k + '\"] p.rt[data-ref=\"' + p.id + '\"]');", js)
+        self.assertIn("      cmpHit();\n      // listen.js puts each translation's ▶ in its cells.", js)
+        start = js.index("function cmpUndraw(art) {")
+        self.assertIn("var p = document.getElementById(rt.dataset.ref);", js[start:start + 600])
+
+    def test_the_hash_is_read_before_arrive_first_runs(self):
+        js = self.JS
+        self.assertLess(js.index("var TR_HASH = "), js.index("\n  arrive();\n"))
+        self.assertEqual(js.count("var TR_HASH = "), 1)
+        self.assertIn("focus = cmpHit() || focus;", js)
+
+    def test_every_letting_go_takes_either_mark(self):
+        js = self.JS
+        self.assertIn("var HIT = 'p.t.hit, .rc p.rt.hit';", js)
+        self.assertNotIn("querySelectorAll('p.t.hit'), function (p) { p.classList.remove('hit'); }", js)
+        self.assertIn("querySelectorAll('p.t.hit, .rc p.rt.hit')", (ROOT / "ubsite/static/listen.js").read_text())
+        css = (ROOT / "ubsite/static/ub.css").read_text()
+        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named {", css)
+
+    def test_placed_under_the_columns_names(self):
+        self.assertIn("if (floor) scrollBy({ top: focus.getBoundingClientRect().top - floor - 12, behavior: 'instant' });", self.JS)
+
+
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
 class Heads(unittest.TestCase):
     """Each column's titles, as its own TeX sets them: its word for a Paper

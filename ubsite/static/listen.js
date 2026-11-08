@@ -564,7 +564,7 @@
       makeBar();
       // The paragraph the page was opened at has served its purpose: from now
       // on the mark is what is being read.
-      Array.prototype.forEach.call(document.querySelectorAll('p.t.hit'),
+      Array.prototype.forEach.call(document.querySelectorAll('p.t.hit, .rc p.rt.hit'),
                                    function (p) { p.classList.remove('hit'); });
     }
     k = i;

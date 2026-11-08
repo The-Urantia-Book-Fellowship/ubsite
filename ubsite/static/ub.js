@@ -421,7 +421,7 @@
       m = whole && (/^#(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?(?:#.*)?$/.exec(location.hash) ||
                     /^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?(\d+)_(\d+)_(\d+)_\d+$/.exec(location.hash));
       if (m) {
-        Array.prototype.forEach.call(document.querySelectorAll('p.t.hit'), function (p) { p.classList.remove('hit'); });
+        Array.prototype.forEach.call(document.querySelectorAll(HIT), function (p) { p.classList.remove('hit'); });
         for (i = +m[3]; m[3] && i <= +(m[4] || m[3]); i++) {
           el = document.getElementById(m[1] + ':' + m[2] + '.' + i);
           if (el) el.classList.add('hit');
@@ -431,17 +431,36 @@
       focus = focus || (location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)))) ||
               document.querySelector('.hit');
     } catch (e) {}
+    // A translation's hit in its column, once Compare has drawn it.
+    focus = cmpHit() || focus;
     if (!focus) return;
     // Placed now, again a frame on, and once the fonts are in, unless the
     // reader has scrolled meanwhile: by hand, since the browser itself moves
     // the page as what is above the focus changes height (scroll anchoring),
-    // so the scroll position says nothing.
-    var t = Date.now(), put = function () { if (arriveTouched <= t) focus.scrollIntoView({ block: 'start' }); };
+    // so the scroll position says nothing.  In columns, under their names,
+    // which stay at the window's top and are two to six lines of the small
+    // type tall, by the width and how many columns (2026-11-08: they covered
+    // the paragraph's first line); on a phone they are not shown.
+    var t = Date.now(), put = function () {
+      if (arriveTouched > t) return;
+      var art = focus.closest && focus.closest('article.cmp'), names = art && art.querySelector('.cmpnames'),
+          floor = names && names.offsetHeight;
+      focus.scrollIntoView({ block: 'start' });
+      if (floor) scrollBy({ top: focus.getBoundingClientRect().top - floor - 12, behavior: 'instant' });
+    };
     put();
     requestAnimationFrame(put);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(put);
   }
   var arriveTouched = 0;
+  // The paragraph marked as the place the page opened at: the English, or in
+  // columns a translation's, where a search's hit in it opened the page (cmpHit).
+  var HIT = 'p.t.hit, .rc p.rt.hit';
+  // A search's hit in a translation, /0:1.13#tr-ud, or in a translator's
+  // note, /0:5.10#notetn_ud_0_5_10_0, on the whole paper's page after the
+  // place (/0#0:1.13#tr-ud): arriveTr's, and cmpHit's in columns.  Here,
+  // before arrive() first runs.
+  var TR_HASH = /^#(?:\d+:\d+(?:\.\d+(?:-\d+)?)?#)?(?:tr-([a-z0-9-]+)|note(tn_([a-z0-9-]+)_\d+_\d+_\d+_\d+))$/;
   ['wheel', 'touchmove', 'keydown'].forEach(function (e) {
     addEventListener(e, function () { arriveTouched = Date.now(); }, { passive: true });
   });
@@ -455,7 +474,7 @@
   // paragraph still marked.
   addEventListener('hashchange', function () {
     if (location.hash || !document.querySelector('article.whole')) return arrive();
-    Array.prototype.forEach.call(document.querySelectorAll('p.t.hit'), function (p) { p.classList.remove('hit'); });
+    Array.prototype.forEach.call(document.querySelectorAll(HIT), function (p) { p.classList.remove('hit'); });
     var s = history.state;
     if (s && s.ubY != null) { scrollTo({ top: s.ubY, behavior: 'instant' }); arriveTouched = Date.now(); }
   });
@@ -883,8 +902,8 @@
   // again when the fonts are in and the text has reflowed, as arriveNote()
   // places a study note's.
   function arriveTr() {
-    if (cmpOn()) return;                                   // in their columns (cmpArrive)
-    var m = /^#(?:\d+:\d+(?:\.\d+(?:-\d+)?)?#)?(?:tr-([a-z0-9-]+)|note(tn_([a-z0-9-]+)_\d+_\d+_\d+_\d+))$/.exec(location.hash),
+    if (cmpOn()) return;                                   // in their columns (cmpHit, cmpArrive)
+    var m = TR_HASH.exec(location.hash),
         hit = m && document.querySelector('p.t.hit'), row = hit && hit.closest('.row'),
         tf = row && row.querySelector('.tf'), k = m && (m[1] || m[3]), b = tf && tf.querySelector('.trfold');
     if (!b || trKeys(tf).indexOf(k) < 0) return;
@@ -1016,6 +1035,10 @@
   function cmpUndraw(art) {
     if (!art.classList.contains('cmp')) return;
     if (card && card.mark.closest('.rc')) shut(false);
+    Array.prototype.forEach.call(art.querySelectorAll('.rc p.rt.hit'), function (rt) {
+      var p = document.getElementById(rt.dataset.ref);
+      if (p) p.classList.add('hit');
+    });
     Array.prototype.forEach.call(art.querySelectorAll('.cmpnames, .cmphd, .rc, .stars > .rs'), function (el) {
       el.remove();
     });
@@ -1087,12 +1110,31 @@
           }).join(''));
         });
       });
+      cmpHit();
       // listen.js puts each translation's ▶ in its cells.
       document.dispatchEvent(new CustomEvent('ub:cmp', { detail: art }));
     };
     return Promise.all(Array.prototype.map.call(secs, function (sec) {
       return trFetch(sec, sec.id).then(function (got) { return got; }, function () { return null; });
     })).then(draw);
+  }
+  // A search's hit in a translation (#tr-ud, or a translator's note's,
+  // templates/search.html), in columns: the paragraph marked is that
+  // translation's, in its column, never the English beside it (Tigran,
+  // 2026-11-08), where the column has it; where it has not, the English
+  // keeps the mark.  Moved, never made, so a mark let go of stays so as the
+  // columns are drawn again; and back on the English as they go (cmpUndraw).
+  // The first so marked, which arrive() brings into view, or null.
+  function cmpHit() {
+    var m = TR_HASH.exec(location.hash), k = m && (m[1] || m[3]), art = document.querySelector('main article.cmp');
+    if (!k || !art) return null;
+    Array.prototype.forEach.call(art.querySelectorAll('p.t.hit'), function (p) {
+      var row = p.closest('.row'), rt = row && row.querySelector('.rc[data-k="' + k + '"] p.rt[data-ref="' + p.id + '"]');
+      if (!rt) return;
+      p.classList.remove('hit');
+      rt.classList.add('hit');
+    });
+    return art.querySelector('.rc p.rt.hit');
   }
   // The paragraph at the window's top, kept there as the page is drawn again,
   // from its start, below the columns' names; at the page's head, the head.  A
@@ -1593,11 +1635,16 @@
   function clampY() {
     return Math.max(0, Math.min(scrollY, document.documentElement.scrollHeight - innerHeight));
   }
-  // The paragraph tapped, or the English one of the row a translation's cell is in.
+  // The paragraph tapped.  In columns a translation's own (p.rt), tinted
+  // alone, never the English beside it (Tigran, 2026-11-08), and its cell's
+  // first where the tap was in the cell but on none, on its name; the English
+  // one of the row where it was on neither.
   function paraOf(t) {
-    var row;
-    return (t.closest && t.closest('p.t[id]')) ||
-           ((row = t.closest && t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || null;
+    var cell, row;
+    if (!t.closest) return null;
+    return t.closest('p.t[id], .rc p.rt') ||
+           ((cell = t.closest('.rc')) && cell.querySelector('p.rt')) ||
+           ((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || null;
   }
   // The first paragraph on the screen: a verso's running head.
   function firstOnScreen() {
@@ -1639,7 +1686,13 @@
     ref.type = 'button';
     ref.className = 'ref';
     T.attr(ref, 'title', 'Show in the contents');
-    ref.addEventListener('click', function () { var p = headP; hideHead(); toContents(p); });
+    // A translation's paragraph is kept for Back by its row's English one,
+    // which has the id.
+    ref.addEventListener('click', function () {
+      var p = headP;
+      hideHead();
+      toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)));
+    });
     head.insertBefore(ref, head.firstChild);
     // Home and the gear together at the right: the site's mark, the header's
     // own drawing, as a link to the home page; and the gear.
@@ -1675,7 +1728,7 @@
     if (headP) headP.classList.remove('named');
     headP = p;
     p.classList.add('named');
-    head.querySelector('.ref').textContent = p.id;
+    head.querySelector('.ref').textContent = p.id || p.dataset.ref;
     head.querySelector('.pn').innerHTML = h.num + '<span class="tt"></span>';
     head.querySelector('.tt').textContent = h.title;
     head.querySelector('.au').textContent = h.author;
@@ -1686,25 +1739,48 @@
     arriveTouched = Date.now();
   }
   function hideHead() {
+    clearTimeout(headSoon);
+    headSoon = 0;
     if (headP) headP.classList.remove('named');
     headP = null;
     if (head) head.hidden = true;
   }
+  // A tap on the text also lets go of the paragraph the page opened at
+  // (p.t.hit: the server's mark on a section's page, arrive()'s on the whole
+  // paper's), which stayed tinted beside the one named and had no other way
+  // to be let go of (Tigran, 2026-10-31), as listen.js lets go of it when
+  // playing starts: one thing on the page is marked.
+  function unhit() {
+    Array.prototype.forEach.call(document.querySelectorAll(HIT), function (p) { p.classList.remove('hit'); });
+  }
   // True when the tap was the head's: to show it, or to hide it.  Not a
-  // mouse's second click, a double-click, which would show and hide it in a
-  // blink; a finger's quick second tap, which Chrome counts the same, is
-  // the tap that hides it.
+  // mouse's second click, a double-click; a finger's quick second tap, which
+  // Chrome counts the same, is the tap that hides it.  A mouse's click hides
+  // the head at once, but shows it only after a moment, DBL, which the second
+  // press of a double-click cancels (mousedown, below): a double-click selects
+  // a word, for Ctrl+X, and should do nothing else.  Until 2026-11-08 its
+  // first click showed the head and tinted the paragraph, and at the page's
+  // top the head stayed over the search box Ctrl+X had filled (Tigran: "the
+  // first part of the double-click is interpreted as a tap").
+  var headSoon = 0, headBy = 0, DBL = 350;
   function tapHead(ev) {
-    var t = ev.target, tap, band;
+    var t = ev.target, tap, band, p;
     if (ev.button || (ev.detail > 1 && !touch) || selDown || !t.closest || !t.closest('main') || !getSelection().isCollapsed ||
         t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .cites, .blanket, .marginhead, .player, .pop, dialog') ||
         !document.querySelector('main p.t[id]')) return false;
-    // A tap on the text also lets go of the paragraph the page opened at
-    // (p.t.hit: the server's mark on a section's page, arrive()'s on the whole
-    // paper's), which stayed tinted beside the one named and had no other way
-    // to be let go of (Tigran, 2026-10-31), as listen.js lets go of it when
-    // playing starts: one thing on the page is marked.
-    Array.prototype.forEach.call(document.querySelectorAll('main p.t.hit'), function (p) { p.classList.remove('hit'); });
+    if (!touch && (!head || head.hidden)) {
+      clearTimeout(headSoon);
+      p = paraOf(t);
+      headSoon = setTimeout(function () {
+        headSoon = 0;
+        if (!getSelection().isCollapsed) return;
+        unhit();
+        showHead(p && p.isConnected ? p : firstOnScreen());
+        headBy = Date.now();
+      }, DBL);
+      return true;
+    }
+    unhit();
     tap = document.documentElement.dataset.tappage === 'true' && touch;
     band = ev.clientY < BAND * parseFloat(getComputedStyle(document.documentElement).fontSize);
     if (head && !head.hidden) { hideHead(); return !tap || band; }
@@ -1712,6 +1788,15 @@
     showHead(tap ? firstOnScreen() : paraOf(t) || firstOnScreen());
     return true;
   }
+  // The second press of a mouse's double-click, or the third of a triple
+  // click: the first click's head is never shown, or, where the double-click
+  // was slower than DBL and it was, it goes again.
+  document.addEventListener('mousedown', function (ev) {
+    if (ev.detail < 2) return;
+    clearTimeout(headSoon);
+    headSoon = 0;
+    if (headP && Date.now() - headBy < 1000) hideHead();
+  }, true);
   addEventListener('scroll', function () {
     if (headP && Math.abs(clampY() - headAt) > headSlack) hideHead();
   }, { passive: true });
@@ -1810,6 +1895,9 @@
           (t.closest && t.closest('input, textarea, select, [contenteditable]')) ||
           document.querySelector('dialog[open]')) return;
       ev.preventDefault();
+      // The running head goes, or at the page's top, where going up to the
+      // box hardly scrolls, it stays over the box (Tigran, 2026-11-08).
+      hideHead();
       back = { value: box.value, y: scrollY, ranges: [] };
       for (i = 0; i < sel.rangeCount; i++) back.ranges.push(sel.getRangeAt(i).cloneRange());
       if (!sel.isCollapsed) words = chosen();
