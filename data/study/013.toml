@@ -1,0 +1,337 @@
+# Paper 13, The Sacred Spheres of Paradise: the British Study Edition has two
+# notes on it at d6c3206, both Tigran's own and both carried, rewritten: the
+# luminescence of 13:0.4, now citing Vavilov's book as the Bibliography cites a
+# work (the 1961 Academy volume, 159 pages, whose p. 138 the note gives), with
+# Sadler's "(Firefly?)" and the book's own suns that shine without heat; and the
+# reckoning of "nineteen hundred years ago" at 13:1.8, now from the papers' own
+# dates (A.D. 1934; August 21, 7 B.C.) so that it does not age.  Block has no
+# chart for the paper, and the press has no 1955 reading in it.  Everything
+# else was found in review, with no credit line: the Bible behind the paper's
+# quoted phrases (John 1:18, Galatians 4:4, 1 Timothy 3:16, Hebrews 1:14,
+# Matthew 5:48, Deuteronomy 29:29, the creeds' right hand of the Father, James
+# 4:8 and 2 Chronicles 15:2, the Deities' light); the seven worlds as the seven
+# associations of three persons, in the Master Spirits' order; the names in
+# -ington, from Mills's dictionary in Tigran's library (originals/LIBRARY.tsv);
+# the book's own fuller words elsewhere on the Secrets of Supremacy, the
+# Perfectors of Wisdom and Divinington, the Adjusters' home, the Gravity
+# Messengers, the Master Spirits' three addresses, reflectivity, trinitization,
+# the Solitary Messengers and the Power Directors, seraphic transport, the
+# reversion directors, the soul, sixth- and seventh-stage spirits, the Most
+# Holy Sphere, the Paradise cycle and the seven levels; one of Tigran's
+# Russian notes in ud carried into English (13:0.3); and one remark of Dr
+# Sadler's.  Sadler's Analytic Study of Part I, pp. 324-338 on this paper
+# (originals/), was read whole.  The review, numbered F1-F30 in the order of
+# the text, is var/study/review-013.md.  Ruled by Tigran on 2026-11-08, in
+# chat: all approved but F13, the edition's reckoning of "nineteen hundred
+# years ago", dropped as useless, so 29 notes; and F30 corrected the same day
+# at his question, since the book nowhere connects the Foreword's seven levels
+# of Deity function with any seven levels of reality: the note now says what
+# the book says and no more.  Question 2 (Vavilov's publisher and his p. 138)
+# stays open until he looks at his copy.
+
+paper = 13
+chart = "none"
+
+# The works the notes quote, each under the key and words earlier papers gave
+# it where it has one.
+
+# Carried from Paper 3's key and words: F2, F3, F10 and F27 quote it; checked in
+# the republication, pp. 324, 326, 327 and 328 (PDF pages 342, 344, 345, 346).
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# Added: F3 cites it, as the edition's note did inline ("See p.138 of ``О
+# <<тёплом>> и <<холодном>> свете'', С.И. Вавилов, 1961").  The edition of 1961
+# is the Academy of Sciences' volume that prints the two popular works together,
+# Glaz i Solntse first, 159 pages (the Astronomical Museum of Kyiv University's
+# catalogue, which also says the cold-light essay was first published in 1942,
+# from a lecture given at Yoshkar-Ola in 1941, and that the volume's text is
+# that of vol. IV of Vavilov's Collected Works, 1956); the page is Tigran's, not
+# seen here: his library holds Glaz i Solntse alone (1950, 1976), without the
+# essay.  The publisher is the series', to be confirmed from his copy.
+[[source]]
+key = "Vavilov"
+origin = "none"
+tex = '''S.~I. Vavilov, \emph{Глаз и Солнце. О ``тёплом'' и ``холодном'' свете} [The Eye and the Sun. On ``Warm'' and ``Cold'' Light] (Moscow: Izdatel'stvo Akademii nauk SSSR, 1961).'''
+
+# Added: F8 cites it; Tigran's Kindle copy, read as text, the entries Kensington
+# and Washington (originals/LIBRARY.tsv; the library's page answers 403).
+[[source]]
+key = "Mills"
+origin = "none"
+tex = '''A.~D. Mills, \emph{A Dictionary of English Place-Names}, 2nd ed. (Oxford: Oxford University Press, 1998).'''
+
+# ---- 13:0.3
+
+# F1, proposed: Tigran's note in ud at these words, carried into English as his
+# (question 1); the nucleus is the book's own word, 42:1.2
+[[note]]
+at = "13:0.3"
+after = "close proximity to the eternal Isle"
+origin = "none"
+tex = '''Paradise, being the nucleus of every ultimaton (\bibref[42:1.2]{p042 1:2}), cannot be at different distances from different points of pervaded space, for on Paradise there is no space-time metric, though there does seem to be something like a symplectic structure there.'''
+
+# F2, proposed: the Deities' light in the Bible; Sadler's "Deity Luminosity"
+# verses, p. 326
+[[note]]
+at = "13:0.3"
+after = "central shining of the eternal Deities"
+origin = "none"
+tex = '''The Bible's figure for the Deities' own light: ``God is light, and in him is no darkness at all'' (1~John~1:5); the Father ``dwelling in the light which no man can approach unto; whom no man hath seen, nor can see'' (1~Timothy~6:16); ``Who coverest thyself with light as with a garment'' (Psalms~104:2). The Father's worlds reflect this light, and the Son's give out their own (\bibref[13:0.4]{p013 0:4}). Sadler lists these verses under ``Deity Luminosity'' in his study of this paragraph (\cite{Sadler2003}, p.~326).'''
+
+# ---- 13:0.4
+
+# F3, the edition's, rewritten: Vavilov cited as a source, with his definition;
+# Sadler's firefly, p. 324; the book's own suns without heat.  The comparison
+# of troops and crowd is the edition's, from Tigran's reading of p. 138.
+[[note]]
+at = "13:0.4"
+after = "light without heat"
+origin = "7ab55c621b2d66a0"
+tex = '''The scientific term for light without heat is \bibemph{luminescence}: light a body gives out beyond its thermal radiation, and for longer than a period of the light's oscillation, as Vavilov defined it. Its sources can be compared with those of thermal (black-body, that is ``light with heat'') radiation as the orderly movements of troops are compared with the chaotic pushing and running of a crowd: Vavilov~\cite{Vavilov}, p.~138. Sadler's guess at the paragraph before, ``Light without heat. (Firefly?)'' (\cite{Sadler2003}, p.~324), is the textbook example: the firefly's light is a luminescence with next to no heat in it. The book has such light elsewhere: ``Light, that is, light without heat, is another of the nonspiritual manifestations of the Deities'' (\bibref[3:2.3]{p003 2:3}); ``there are also suns which shine without heat'' (\bibref[15:6.8]{p015 6:8}); and each superuniverse capital ``has a sun which gives forth light without heat, like the satellites of Paradise'' (\bibref[15:7.1]{p015 7:1}).'''
+
+# ---- 13:1.1
+
+# F4, proposed: nether Paradise, 11:5.1
+[[note]]
+at = "13:1.1"
+after = "directly concerned with personality"
+origin = "none"
+tex = '''Of nether Paradise, \bibref[11:5.1]{p011 5:1}: ``personalities do not sojourn there. It has nothing whatever to do with the affairs of spirit intelligences''; it is where ``all physical-energy and cosmic-force circuits have their origin''. The Son's worlds are section~3 of this paper: ``Personality is not present on these Paradise satellites'' (\bibref[13:3.2]{p013 3:2}).'''
+
+# ---- 13:1.2
+
+# F5, proposed: the Trinitized Secrets of Supremacy, Paper 18
+[[note]]
+at = "13:1.2"
+after = "the Trinitized Secrets of Supremacy"
+origin = "none"
+tex = '''Paper~18 describes them: seventy, ``a corps of ten'' to each of the seven worlds, ``not creators, but \ldots\ supreme and ultimate administrators'' (\bibref[18:1.1]{p018 1:1}); each ten resembles the Deity or Deity association of its world, the ten of Divinington the Father, the ten of Ascendington all three (\bibref[18:1.3]{p018 1:3}). The ``ten Secrets of Supremacy who direct Ascendington'' are at \bibref[13:2.9]{p013 2:9}.'''
+
+# F6, proposed: the author's order and Divinington, 19:2.2, 107:3.3-6
+[[note]]
+at = "13:1.2"
+after = "that world is wholly forbidden to me"
+origin = "none"
+tex = '''The author is a Perfector of Wisdom (\bibref[13:4.8]{p013 4:8}), and Paper~19 says the same of the whole order: they ``passed through the wisdom of Paradise, of Havona, and except for Divinington, of the Father's Paradise spheres'' (\bibref[19:2.2]{p019 2:2}). Divinington is the one sphere named in the three injunctions given to beings of high spiritual orders, the third being ``Never to attempt a landing on the shores of Divinington'' (\bibref[107:3.3--6]{p107 3:3}); ``the shores of Divinington'' is this paper's phrase too (\bibref[13:2.7]{p013 2:7}).'''
+
+# ---- 13:1.3
+
+# F7, proposed: the seven worlds are the seven associations of three persons,
+# in the Master Spirits' order; 16:0.1, 16:3.1, 17:3.1, 18:1.3
+[[note]]
+at = "13:1.3"
+after = "Deities composing the Paradise Trinity"
+origin = "none"
+tex = '''Three persons can be taken one, two or three at a time in seven ways and no more, and the seven worlds are those seven, each named the ``bosom'' of its persons as the paper goes on: the Father, the Son, the Spirit, the Father and the Son, the Father and the Spirit, the Son and the Spirit, and all three. In the same order the Seven Master Spirits are ``primary expressions of the seven possible associations of triune Deity'' (\bibref[16:3.1]{p016 3:1}; the likenesses one by one, \bibref[16:3.2--14]{p016 3:2}), the seven Reflective Spirits of each superuniverse reflect ``the seven possible combinations'' (\bibref[17:3.1]{p017 3:1}), and the ten Secrets of Supremacy of each world resemble its association (\bibref[18:1.3]{p018 1:3}). ``There are just seven associative possibilities, and only seven, inherent in three Deities,'' says \bibref[16:0.1]{p016 0:1}, ``and this explains why the universe is operated in seven grand divisions.'''''
+
+# ---- 13:1.4
+
+# F8, proposed: the names in -ington; Mills, under Kensington and Washington
+[[note]]
+at = "13:1.4"
+after = "DIVININGTON"
+origin = "none"
+tex = '''The seven names are English coinages on the pattern of the English town names in \emph{-ington}, Kensington, Washington: Old English \emph{-ing-tun}, ``estate associated with'' a named man (Mills~\cite{Mills}, under Kensington and Washington). Here the stem names the world's persons or its people: divinity, the Son, the Spirit, the vicegerents (``to act as vicegerents of the Gods'', \bibref[13:1.12]{p013 1:12}), the solitary, whether the Father's ``solitary acts'' of this paragraph or the Solitary Messengers domiciled there (\bibref[13:1.16]{p013 1:16}, where the paper warns that the name is no pedigree), the seraphim, and the ascenders.'''
+
+# F9, proposed: the Adjusters' home, 107:3.1-2, 107:3.10, 16:3.2, 108:1.9
+[[note]]
+at = "13:1.4"
+after = "Paradise rendezvous of the Thought Adjusters"
+origin = "none"
+tex = '''Their home world as Paper~107 has it: all their dispatch and return ``seem to be centered on the sacred sphere of Divinington'' (\bibref[107:3.1]{p107 3:1}), where a returning Adjuster perhaps meets ``the specialized manifestation of the Father's divinity which is reported to be situated on this secret sphere'' (\bibref[107:3.2]{p107 3:2}), this paragraph's ``special manifestation''. The Personalized Adjusters are ``christened on Divinington'' and permanently domiciled there (\bibref[107:3.10]{p107 3:10}), under a chief who ``presides over the College of Personalized Adjusters on Divinington'' with Master Spirit Number One for adviser (\bibref[16:3.2]{p016 3:2}). An Adjuster's journey from Divinington to Urantia takes ``117 hours, 42 minutes, and 7 seconds'', nearly all of it registration on Uversa (\bibref[108:1.9]{p108 1:9}).'''
+
+# ---- 13:1.5
+
+# F10, proposed: Deuteronomy 29:29; Sadler sets it at 13:1.1, p. 327
+[[note]]
+at = "13:1.5"
+after = "from our full understanding"
+origin = "none"
+tex = '''Deuteronomy~29:29: ``The secret things belong unto the \textsc{Lord} our God: but those things which are revealed belong unto us and to our children for ever.'' The paper's rule is the same, the withheld and the permitted, and the Secrets of Supremacy have it for their name. Sadler sets the verse at \bibref[13:1.1]{p013 1:1}: ``One Bible reference bears out the idea of secrecy'' (\cite{Sadler2003}, p.~327).'''
+
+# ---- 13:1.6
+
+# F11, proposed: the Gravity Messengers, 31:2.1-2, 23:3.2
+[[note]]
+at = "13:1.6"
+after = "of the Gravity Messengers"
+origin = "none"
+tex = '''``Gravity Messengers hail from Divinington, and they are modified and personalized Adjusters'' (\bibref[31:2.2]{p031 2:2}); they serve the finaliters alone, ``able to transcend time and space'' (\bibref[31:2.1]{p031 2:1}), and are among the ``gravity traversers'' who go ``anywhere any time---instanter'' (\bibref[23:3.2]{p023 3:2}).'''
+
+# ---- 13:1.8
+
+# F12, proposed: Galatians 4:4, Job 14:1, Matthew 11:11
+[[note]]
+at = "13:1.8"
+after = "is literally born of woman"
+origin = "none"
+tex = '''Galatians~4:4: ``God sent forth his Son, made of a woman, made under the law''; the Greek is \textgreek{γενόμενον ἐκ γυναικός}, ``born of a woman'' in the Revised Version, and the phrase is Job's for every man, ``Man that is born of a woman is of few days'' (Job~14:1; Matthew~11:11). The paper's ``literally'' insists on the point of Galatians, a birth and no appearance, told at \bibref[122:8.1]{p122 8:1}.'''
+
+# F14, proposed: 1 Timothy 3:16, with the reading
+[[note]]
+at = "13:1.8"
+after = "it is a universal mystery"
+origin = "none"
+tex = '''1~Timothy~3:16: ``great is the mystery of godliness: God was manifest in the flesh, justified in the Spirit, seen of angels, preached unto the Gentiles, believed on in the world, received up into glory.'' The paper keeps Paul's word, mystery, and makes it the universe's: the one incarnation Paul knew ``is occurring right along throughout the universes''. (The oldest Greek manuscripts read \textgreek{ὃς}, ``He who was manifested in the flesh'', as the Revised Version has it; ``God'' is the later reading the King James follows.)'''
+
+# ---- 13:1.9
+
+# F15, proposed: the Master Spirits' three Paradise addresses; 11:4.2, 29:1.3,
+# 16:0.12
+[[note]]
+at = "13:1.9"
+after = "Here forgather the Seven Master Spirits"
+origin = "none"
+tex = '''The Master Spirits have three Paradise addresses in this paper: their home here, ``their personal stations, their power focuses, on the periphery of Paradise'' (\bibref[13:4.2]{p013 4:2}), and the seven executive spheres from which they govern (\bibref[13:4.6]{p013 4:6}). The stations on the periphery are the ``force-focal headquarters'' of \bibref[11:4.2]{p011 4:2} and \bibref[29:1.3]{p029 1:3}, each slowly circulating so as to stay opposite its superuniverse (\bibref[16:0.12]{p016 0:12}).'''
+
+# ---- 13:1.10
+
+# F16, proposed: what the reader has been told of reflectivity; 9:7, with its
+# notes, 17:3, Paper 28
+[[note]]
+at = "13:1.10"
+after = "the impenetrable mysteries of reflectivity"
+origin = "none"
+tex = '''What the reader has been told is \bibref[9:7.1--5]{p009 7:1}, with its notes, where the Conjoint Actor's power ``to see, hear, sense, and know all things as they transpire throughout a superuniverse'' is already called ``unique and inexplicable'' and the Supreme's mind is conjectured behind it; the Reflective Spirits are \bibref[17:3.1]{p017 3:1}, and the reflective seconaphim Paper~28, section~4. ``Reflectivity is a secret of God the Spirit'' is this paper's addition.'''
+
+# ---- 13:1.12
+
+# F17, proposed: trinitization, 22:7.1-3; Solitarington's share, 13:1.18
+[[note]]
+at = "13:1.12"
+after = "the secrets of trinitization"
+origin = "none"
+tex = '''Paper~22 says the same from the other side: ``The techniques of trinitization are among the secrets of Vicegerington and Solitarington and are revealable to, and understandable by, none save those who have passed through these unique experiences'' (\bibref[22:7.1]{p022 7:1}). The adventure the next paragraph holds out to a glorified mortal is the finaliters' trinitizing of a creature-trinitized son (\bibref[22:7.2]{p022 7:2}), allowed once to each pair (\bibref[22:7.3]{p022 7:3}); Solitarington's share is at \bibref[13:1.18]{p013 1:18}.'''
+
+# ---- 13:1.16
+
+# F18, proposed: the two orders' parentage, 23:1.1, 29:1.1
+[[note]]
+at = "13:1.16"
+after = "or their superangelic associates"
+origin = "none"
+tex = '''The caution is borne out where the two orders are described: the Solitary Messengers were brought into being by the Infinite Spirit alone, ``immediately following the creation of the Seven Spirits of the Havona Circuits'' (\bibref[23:1.1]{p023 1:1}), and the Supreme Power Directors by the Seven Master Spirits, ``the first recorded instance of the derivation of semimaterial progeny from true spirit ancestry'' (\bibref[29:1.1]{p029 1:1}). Neither has the Father in its parentage; both are on the Father-Spirit world by function.'''
+
+# ---- 13:1.19
+
+# F19, proposed: Hebrews 1:14, quoted; 26:1.1; Paper 9's note at 9:0.1
+[[note]]
+at = "13:1.19"
+after = "heirs of salvation"
+origin = "none"
+tex = '''Hebrews~1:14, of the angels: ``Are they not all ministering spirits, sent forth to minister for them who shall be heirs of salvation?'' (\textgreek{λειτουργικὰ πνεύματα}). The paper quotes it to mark who is not meant by it, the orders that serve on other errands than the salvation of mortals. The book's title for the angels is from this verse too, ``the ministering-spirit associates of the evolutionary and ascending will creatures'' (\bibref[26:1.1]{p026 1:1}), and the note at \bibref[9:0.1]{p009 0:1} has it for the Spirit's whole family.'''
+
+# ---- 13:1.20
+
+# F20, proposed: seraphic transport as a mortal may see it, 39:5.12-13; the
+# velocities, 23:3.2
+[[note]]
+at = "13:1.20"
+after = "the mystery of seraphic transport"
+origin = "none"
+tex = '''What a mortal may see of it is at \bibref[39:5.12--13]{p039 5:12}: the ``wings'' of a transport seraphim are ``energy insulators---friction shields'', and the passenger, ``inducted into the transit sleep'', is laid on the angel and the shields closed over him. Enseraphimed, a being travels at ``triple velocity, about 558,840 miles per second'', three times the speed of light, where the unenseraphimed are held to 186,280 (\bibref[23:3.2]{p023 3:2}). How the shields carry a personality through space is the secret.'''
+
+# ---- 13:1.21
+
+# F21, proposed: the reversion directors, 48:4.1-3, 26:1.1
+[[note]]
+at = "13:1.21"
+after = "what the reversion directors were"
+origin = "none"
+tex = '''The reversion directors are Paper~48's ``ministers of the exalted humor of the morontia and spirit realms'', ``directors of change and relaxation'', likened there, with apologies, to ``the higher types of humorists on Urantia'' (\bibref[48:4.2--3]{p048 4:2}): the ascendant life ``is about equally divided between work and play'' (\bibref[48:4.1]{p048 4:1}), and the angels too ``have a large capacity for appreciation of the ministrations of the reversion directors'' (\bibref[26:1.1]{p026 1:1}). Ascendington is to be the Havona pilgrim's play.'''
+
+# ---- 13:1.22
+
+# F22, proposed: the soul, 0:5.10, 111:2.4-7; the superadditive of 12:9.3
+[[note]]
+at = "13:1.22"
+after = "within the mind of a mortal and material creature"
+origin = "none"
+tex = '''The Foreword's definition: ``The soul of man is an experiential acquirement \ldots\ the indwelling spirit becomes the father of a new reality in human experience. The mortal and material mind is the mother of this same emerging reality'' (\bibref[0:5.10]{p000 5:10}); and Paper~111's three factors, the mind, the indwelling spirit, and ``the relationship between material mind and divine spirit, which connotes a value and carries a meaning not found in either'': ``It is the soul'' (\bibref[111:2.4--7]{p111 2:4}). That the relation yields what neither term holds is the paper's mystery, and Paper~12's ``superadditive'' (\bibref[12:9.3]{p012 9:3}).'''
+
+# ---- 13:2.1
+
+# F23, proposed: sixth- and seventh-stage spirits, 40:10.11-12, 31:3.3
+[[note]]
+at = "13:2.1"
+after = "seventh-stage spirit beings"
+origin = "none"
+tex = '''The finaliters of the present age are ``of record as only sixth-stage spirits'', with ``one more step'' before them whose nature is unknown (\bibref[31:3.3]{p031 3:3}); ``unfinished creatures---sixth-stage spirits'' (\bibref[40:10.11]{p040 10:11}). What the seventh stage is the book does not say, beyond that the Trinity embrace gives a finaliter ``everything which a finaliter will sometime achieve as a seventh-stage spirit'' (\bibref[40:10.12]{p040 10:12}); here it may cost him his residence on Paradise.'''
+
+# ---- 13:2.4
+
+# F24, proposed: the Most Holy Sphere, 11:3.1, with Paper 11's note there
+[[note]]
+at = "13:2.4"
+after = "the Most Holy Sphere"
+origin = "none"
+tex = '''The innermost of the three spheres of upper Paradise, ``reserved for the functions of worship, trinitization, and high spiritual attainment'' (\bibref[11:3.1]{p011 3:1}, where a note sets its name beside the tabernacle's); the residential Holy Area lies about it in seven zones (\bibref[11:3.3]{p011 3:3}).'''
+
+# ---- 13:2.7
+
+# F25, proposed: the creeds' right hand of the Father; the note at 5:2.2;
+# 21:4.4, 142:7.13
+[[note]]
+at = "13:2.7"
+after = "right hand of the Father"
+origin = "none"
+tex = '''The creeds' words, not the Bible's: the New Testament has the right hand ``of God'' (Mark~16:19, Acts~7:55, Colossians~3:1), ``of power'' (Matthew~26:64) and ``of the Majesty on high'' (Hebrews~1:3), and the Nicene Creed ``sitteth on the right hand of the Father''; see the note at \bibref[5:2.2]{p005 2:2}, where the paper first sets the right hand of the Father, the Paradise Sons' place, beside the ``bosom of the Father'', open to every creature. A Creator Son goes there after each bestowal (\bibref[21:4.4]{p021 4:4}), and Jesus spoke of ascending to it (\bibref[142:7.13]{p142 7:13}).'''
+
+# ---- 13:2.8
+
+# F26, proposed: Matthew 5:48; the book's mandate, 1:0.3, 1:0.6; 18:1.4
+[[note]]
+at = "13:2.8"
+after = "deity perfect"
+origin = "none"
+tex = '''Matthew~5:48: ``Be ye therefore perfect, even as your Father which is in heaven is perfect'' (\textgreek{τέλειοι}), the book's ``supreme mandate'', ``Be you perfect, even as I am perfect'' (\bibref[1:0.3]{p001 0:3}, \bibref[1:0.6]{p001 0:6}). The paper's gloss is the distinction creature perfect, deity perfect; and Paper~18 adds that the secrets are no bar to the Deities themselves: ``The Deities are an open book to all who attain divine perfection, but all the Secrets of Supremacy can never be fully attained'' (\bibref[18:1.4]{p018 1:4}).'''
+
+# ---- 13:2.10
+
+# F27, proposed: Dr Sadler's remark at 13:1.2, p. 328 (question 3)
+[[note]]
+at = "13:2.10"
+after = "future Supreme-Ultimate"
+origin = "none"
+tex = '''Sadler, at \bibref[13:1.2]{p013 1:2}: ``In another age will they be `Secrets of Ultimacy'? Yes---probably'' (\cite{Sadler2003}, p.~328). This paragraph is as near as the paper comes to saying so.'''
+
+# ---- 13:3.2
+
+# F28, proposed: the Paradise cycle; the note at 11:6.4
+[[note]]
+at = "13:3.2"
+after = "about two billion years of Urantia time"
+origin = "none"
+tex = '''The Paradise cycle is the respiration of space, \bibref[11:6.1--4]{p011 6:1}; the note at \bibref[11:6.4]{p011 6:4} sets its two billion years beside the astronomy of the 1930s, whose expansion ran back about 1.9 billion years, and \bibref[12:4.14]{p012 4:14} has the rate.'''
+
+# ---- 13:4.5
+
+# F29, proposed: James 4:8, 2 Chronicles 15:2
+[[note]]
+at = "13:4.5"
+after = "humbly obedient to the choosing of the creatures of the realms"
+origin = "none"
+tex = '''James~4:8: ``Draw nigh to God, and he will draw nigh to you''; and the prophet to Asa, ``The \textsc{Lord} is with you, while ye be with him; and if ye seek him, he will be found of you; but if ye forsake him, he will forsake you'' (2~Chronicles~15:2). The paper's ``ebb and flow'' is this, with its reason given: the differential is the creature's, not the Deities', ``inherent in the freewill endowment of personal creatures'' (\bibref[13:4.4]{p013 4:4}).'''
+
+# ---- 13:4.7
+
+# F30, proposed, and corrected on 2026-11-08 at Tigran's question: the book
+# never says which seven, and the Foreword's seven (0:1.3) are levels of Deity
+# function, not of reality; its levels of reality are three (0:1.11-13).  The
+# one sevenfold list of levels of reality is 106:0.3-9, called a convenient
+# compromise symbolization at 106:0.10.
+[[note]]
+at = "13:4.7"
+after = "all seven levels of universe reality"
+origin = "none"
+tex = '''Which seven the paper does not say, nor does the book anywhere: ``all seven levels of universe reality'' at \bibref[4:4.5]{p004 4:5} and ``the seven levels of relative cosmic reality'' at \bibref[12:8.9]{p012 8:9} are no more enumerated than here. The one place the book lists seven levels of reality is \bibref[106:0.2--9]{p106 0:2}, incomplete finites, maximum finites, transcendentals, ultimates, coabsolutes, absolutes and infinity, and its author calls them ``convenient compromise symbolizations of the present universe age and for the mortal perspective'' (\bibref[106:0.10]{p106 0:10}); whether these are the seven meant, the book does not say. The Foreword's seven at \bibref[0:1.3]{p000 1:3} are levels on which Deity functions, another thing; its levels of reality are three, finite, absonite and absolute (\bibref[0:1.11--13]{p000 1:11}).'''
+
+# The edition's second note, dropped at Tigran's ruling (2026-11-08): a count that
+# ages by a year every year.
+[[dropped]]
+at = "13:1.8"
+origin = "f3b34033394e8933"
+why = "the edition's reckoning of ``nineteen hundred years ago'', 2,027 years by 2021, which ages by a year every year; dropped as useless at Tigran's ruling, 2026-11-08"
