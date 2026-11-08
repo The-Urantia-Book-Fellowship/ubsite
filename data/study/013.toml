@@ -26,8 +26,9 @@
 # years ago", dropped as useless, so 29 notes; and F30 corrected the same day
 # at his question, since the book nowhere connects the Foreword's seven levels
 # of Deity function with any seven levels of reality: the note now says what
-# the book says and no more.  Question 2 (Vavilov's publisher and his p. 138)
-# stays open until he looks at his copy.
+# the book says and no more.  Question 2 answered the same day: his copy of the
+# 1961 volume, public in his library, confirms the publisher and p. 138, which F3
+# now quotes.
 
 paper = 13
 chart = "none"
@@ -43,18 +44,19 @@ origin = "none"
 tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
 
 # Added: F3 cites it, as the edition's note did inline ("See p.138 of ``О
-# <<тёплом>> и <<холодном>> свете'', С.И. Вавилов, 1961").  The edition of 1961
-# is the Academy of Sciences' volume that prints the two popular works together,
-# Glaz i Solntse first, 159 pages (the Astronomical Museum of Kyiv University's
-# catalogue, which also says the cold-light essay was first published in 1942,
-# from a lecture given at Yoshkar-Ola in 1941, and that the volume's text is
-# that of vol. IV of Vavilov's Collected Works, 1956); the page is Tigran's, not
-# seen here: his library holds Glaz i Solntse alone (1950, 1976), without the
-# essay.  The publisher is the series', to be confirmed from his copy.
+# <<тёплом>> и <<холодном>> свете'', С.И. Вавилов, 1961"); checked in Tigran's
+# copy of the 1961 volume (originals/LIBRARY.tsv, public: the Bibliography links
+# it), the Academy of Sciences' printing of the two popular works together: the
+# title page (PDF page 2) and p. 138 (PDF page 139), where the definition and
+# the crowd and the troops stand, read in the page images, the scan having no
+# text layer.  The essay was first published in 1942, from a lecture given at
+# Yoshkar-Ola in 1941 (the Astronomical Museum of Kyiv University's catalogue).
+# The title as the book prints it, «теплом» without the diaeresis; the essay is
+# pp. 113-159, p. 138 in its chapter two, «Холодный свет» и люминесценция.
 [[source]]
 key = "Vavilov"
 origin = "none"
-tex = '''S.~I. Vavilov, \emph{Глаз и Солнце. О ``тёплом'' и ``холодном'' свете} [The Eye and the Sun. On ``Warm'' and ``Cold'' Light] (Moscow: Izdatel'stvo Akademii nauk SSSR, 1961).'''
+tex = '''S.~I. Vavilov, \emph{Глаз и Солнце. О ``теплом'' и ``холодном'' свете} [The Eye and the Sun. On ``Warm'' and ``Cold'' Light] (Moscow: Izdatel'stvo Akademii nauk SSSR, 1961).'''
 
 # Added: F8 cites it; Tigran's Kindle copy, read as text, the entries Kensington
 # and Washington (originals/LIBRARY.tsv; the library's page answers 403).
@@ -90,7 +92,7 @@ tex = '''The Bible's figure for the Deities' own light: ``God is light, and in h
 at = "13:0.4"
 after = "light without heat"
 origin = "7ab55c621b2d66a0"
-tex = '''The scientific term for light without heat is \bibemph{luminescence}: light a body gives out beyond its thermal radiation, and for longer than a period of the light's oscillation, as Vavilov defined it. Its sources can be compared with those of thermal (black-body, that is ``light with heat'') radiation as the orderly movements of troops are compared with the chaotic pushing and running of a crowd: Vavilov~\cite{Vavilov}, p.~138. Sadler's guess at the paragraph before, ``Light without heat. (Firefly?)'' (\cite{Sadler2003}, p.~324), is the textbook example: the firefly's light is a luminescence with next to no heat in it. The book has such light elsewhere: ``Light, that is, light without heat, is another of the nonspiritual manifestations of the Deities'' (\bibref[3:2.3]{p003 2:3}); ``there are also suns which shine without heat'' (\bibref[15:6.8]{p015 6:8}); and each superuniverse capital ``has a sun which gives forth light without heat, like the satellites of Paradise'' (\bibref[15:7.1]{p015 7:1}).'''
+tex = '''The scientific term for light without heat is \bibemph{luminescence}, defined by Vavilov as ``an excess of light over the thermal radiation, possessing a finite duration'' (\cite{Vavilov}, p.~138). Its sources can be compared with those of thermal (black-body, that is ``light with heat'') radiation as the orderly movements of troops are compared with the chaotic pushing and running of a crowd, which is Vavilov's own figure on the same page: ``One may compare, with every justification, excitation by heat and, say, by ultraviolet rays with the action of a disorderly, unorganized crowd of people, chaotically jostling and running in all directions, and the action of the same people marching purposefully, in military order. The number of people is the same, the energy is the same, but in the one case there is disorder and chaos, in the other order, discipline and purpose. The heat of our habitual sources of light is by no means an inevitable mark of every source of light, but only the expression of its great imperfection.'' Sadler's guess at the paragraph before, ``Light without heat. (Firefly?)'' (\cite{Sadler2003}, p.~324), is the textbook example: the firefly's light is a luminescence with next to no heat in it. The book has such light elsewhere: ``Light, that is, light without heat, is another of the nonspiritual manifestations of the Deities'' (\bibref[3:2.3]{p003 2:3}); ``there are also suns which shine without heat'' (\bibref[15:6.8]{p015 6:8}); and each superuniverse capital ``has a sun which gives forth light without heat, like the satellites of Paradise'' (\bibref[15:7.1]{p015 7:1}).'''
 
 # ---- 13:1.1
 
