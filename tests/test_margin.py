@@ -20,7 +20,7 @@ import re
 import sqlite3
 import unittest
 
-from test_appendix_pages import DB, get
+from test_appendix_pages import DB, ROOT, get
 from ubsite import queries
 
 
@@ -124,6 +124,19 @@ class Margin(unittest.TestCase):
             self.assertEqual(body.count(head), 1, url)
         self.assertRegex(get("/1:0")[2], r"<article[^>]*>\s*" + re.escape(head))
         self.assertNotIn("marginhead", get("/part/4")[2])          # a part's page has no index
+
+    def test_folding_keeps_the_place_being_read(self):
+        # The index's fold and, on a wide screen, the Contents' change the
+        # text's width, and the browser keeps no place as the text reflows:
+        # ub.js keepPlace takes it before and brings it back after (Tigran,
+        # 2026-11-08), a paragraph marked on the screen or the letter on the
+        # line at the window's top.  Driven in Chrome by hand.
+        js = (ROOT / "ubsite/static/ub.js").read_text()
+        self.assertIn("return keepPlace(function () { window.ubSettings.set('margin', load().margin === false); });", js)
+        self.assertIn("else keepPlace(function () { window.ubSettings.set('rail', shut ? 'open' : 'folded'); });", js)
+        self.assertIn("var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .rt.now)';", js)
+        self.assertIn("if (scrollY <= 0) return null;", js)
+        self.assertIn("requestAnimationFrame(function () { placeBack(pl); });", js)
 
     def test_each_box_says_how_many_entries_it_holds(self):
         # Entries, not lines: a group of one headword's entries is one line.

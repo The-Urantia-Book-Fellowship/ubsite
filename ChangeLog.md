@@ -114,6 +114,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- Folding or unfolding the index, or the contents on a wide screen, keeps your place in the text: the paragraph you arrived at or tapped stays where it was, or else the line at the top of the window, where the text used to reflow under you and leave you somewhere else.
 - With translations in parallel columns, a search result in a translation, or in one of its translator's notes, marks that translation's paragraph in its column rather than the English, and brings it into view under the columns' names, which no longer cover the first line of the paragraph arrived at.
 - A double-click on a word selects it and nothing more: its first click no longer brings down the running head and tints the paragraph, and Ctrl+X puts the word in the search box even at the top of the page, where the running head used to stay over the box.
 - The study note at 12:8.9 on the seven levels of relative cosmic reality no longer sets the Foreword's seven levels of Deity function beside the seven levels of reality of Paper 106, which the book never connects: it now says that the book names the seven three times and lists seven levels of reality once, at 106:0.3, as a convenient compromise symbolization.

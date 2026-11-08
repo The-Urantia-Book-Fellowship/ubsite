@@ -631,6 +631,69 @@
   });
   document.addEventListener('ub:swap', function () { contentsAt = null; });
 
+  // The place being read, kept as a fold changes the text's width (Tigran,
+  // 2026-11-08: unfolding the index at 44:1.13 took him a screen and more
+  // away, to scroll back to the paragraph by hand).  The browser keeps no
+  // place as the column narrows or widens: the scroll position stays, and the
+  // text above reflows.  So the place is taken before the change and brought
+  // back to the same height after it: a paragraph marked on the screen (the
+  // one the page opened at, the one tapped, the one being read aloud), its
+  // top; or else the line at the window's top, by the letter there, so that a
+  // paragraph begun above the window is kept at the line being read.  At the
+  // page's top the page stays at its top.  Columns keep their own (cmpGo).
+  var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .rt.now)';
+  function placeNow() {
+    var ms = document.querySelectorAll(MARKED), ps, i, r, p = null, c, n, at, q, rs;
+    if (scrollY <= 0) return null;
+    for (i = 0; i < ms.length; i++) {
+      r = ms[i].getBoundingClientRect();
+      if (r.height && r.top >= 0 && r.top < innerHeight) return { el: ms[i], y: r.top };
+    }
+    ps = document.querySelectorAll('main p.t[id]');
+    for (i = 0; i < ps.length; i++) {
+      r = ps[i].getBoundingClientRect();
+      if (r.height && r.bottom > 4) { p = ps[i]; break; }
+    }
+    if (!p) return null;
+    if (r.top >= 4) return { el: p, y: r.top };
+    c = document.caretPositionFromPoint ? document.caretPositionFromPoint(r.left + r.width / 2, 6) : null;
+    if (c) { n = c.offsetNode; at = c.offset; }
+    else if (document.caretRangeFromPoint && (c = document.caretRangeFromPoint(r.left + r.width / 2, 6))) {
+      n = c.startContainer; at = c.startOffset;
+    }
+    if (n && n.nodeType === 3 && n.length && p.contains(n)) {
+      at = Math.min(at, n.length - 1);
+      q = document.createRange();
+      q.setStart(n, at);
+      q.setEnd(n, at + 1);
+      rs = q.getClientRects();
+      if (rs.length) return { el: p, node: n, at: at, y: rs[0].top };
+    }
+    return { el: p, y: r.top };
+  }
+  function placeBack(pl) {
+    var y = null, q, rs;
+    if (!pl || !pl.el.isConnected) return;
+    if (pl.node && pl.node.isConnected && pl.at < pl.node.length) {
+      q = document.createRange();
+      q.setStart(pl.node, pl.at);
+      q.setEnd(pl.node, pl.at + 1);
+      rs = q.getClientRects();
+      if (rs.length) y = rs[0].top;
+    }
+    if (y === null) y = pl.el.getBoundingClientRect().top;
+    if (Math.abs(y - pl.y) >= 1) scrollBy({ top: y - pl.y, behavior: 'instant' });
+  }
+  function keepPlace(change) {
+    var pl = placeNow();
+    change();
+    if (!pl) return;
+    placeBack(pl);
+    // Again a frame on, when what the change set off has been drawn.
+    requestAnimationFrame(function () { placeBack(pl); });
+    arriveTouched = Date.now();
+  }
+
   // The button at the rail's head folds it (ub.css .railfold).  On a wide
   // screen away to the left, kept as the setting 'rail' (settings.py KEPT); on
   // a phone up to its one line, which every page starts as, so a class on the
@@ -653,8 +716,9 @@
     if (!b) return;
     rail = b.closest('.rail');
     shut = railShut(rail);
+    // On a phone the Contents open above the text, where the button is.
     if (phone.matches) rail.classList.toggle('shown', shut);
-    else window.ubSettings.set('rail', shut ? 'open' : 'folded');
+    else keepPlace(function () { window.ubSettings.set('rail', shut ? 'open' : 'folded'); });
     railSync();
     if (shut) railView();
   });
@@ -684,7 +748,8 @@
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('.indexfold, .afold');
     if (!b) return;
-    if (b.classList.contains('indexfold')) return window.ubSettings.set('margin', load().margin === false);
+    if (b.classList.contains('indexfold'))
+      return keepPlace(function () { window.ubSettings.set('margin', load().margin === false); });
     b.parentNode.classList.toggle('shown');
     indexSync();
   });
