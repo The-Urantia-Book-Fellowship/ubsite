@@ -131,7 +131,8 @@ class Rail(unittest.TestCase):
     def test_a_parts_page_carries_every_translation_s_divider(self):
         # Each translation's, in Settings' order, hidden until ticked (base.html
         # ubTr), each named as Compare names a column; Part IV's note two
-        # paragraphs; and the Compare toggle, at an address of its own.
+        # paragraphs.  Compare is a setting (2026-11-08), and its old address
+        # goes to the page.
         con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
         keys = [k for (k,) in con.execute("SELECT key FROM translation ORDER BY ord")]
         con.close()
@@ -147,9 +148,9 @@ class Rail(unittest.TestCase):
             self.assertRegex(h, r"<h1>[^<]*Иисуса</h1>", k)
             self.assertEqual(h.count("<p>"), 2, k)              # the note's two paragraphs
             self.assertIn("апостола Андрея.</p></div>", h, k)
-        self.assertIn('class="cmpbtn"', body)
-        self.assertEqual(get("/part/4/compare")[2], body)      # Compare's address: the same page
-        self.assertEqual(get("/part/9/compare")[0], 404)
+        self.assertNotIn("cmpbtn", body)
+        status, headers, _ = get("/part/4/compare")
+        self.assertEqual((status, headers.get("location")), (301, "/part/4"))
         # The Foundation's Latin e is set as Cyrillic (build/translation.py PART_SUBSTITUTE).
         body = get("/part/1")[2]
         self.assertIn("Подготовлено Уверсским Корпусом", body)

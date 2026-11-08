@@ -159,7 +159,8 @@ class Dialog(unittest.TestCase):
         self.assertNotIn('class="cr"', self._li("ud"))
 
     def test_its_value_is_one_hidden_input(self):
-        self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations"])
+        # And Compare's switch under the list (settings.py `compare`, 2026-11-08).
+        self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations", "compare"])
 
     def test_a_fold_is_handed_their_names(self):
         got = json.loads(re.search(r'<script type="application/json" id="ub-translations">(.*?)</script>',

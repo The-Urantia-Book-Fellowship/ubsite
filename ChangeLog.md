@@ -63,6 +63,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Compare translations is no longer a button at the head of the text but a setting, Translations in parallel columns, under the list in Settings' Translations tab: kept like the others, in every tab and on every visit until you turn it off, and turned on or off in place, the paragraph you were reading staying at the top; an old address such as /1:1/compare opens the page as your settings show it.
 - On the changelog's page each release's headings, Added, Changed, Removed, Fixed and For developers, are tabs, one list shown at a time with how many entries it holds; without scripts, and in print, the page is the file as before.
 - Compare translations now stays on as you move about: a search result, a reference in a study note or a translator's note, a citation in the index, a paper opened from the home page or the contents, a citation typed into the search box and an address typed into the browser all open in Compare while it is on, in the same tab, until you turn it off or go Back past where you turned it on; until now only the previous and next buttons and the contents kept it.
 - Greek words in the study notes now break at the syllable, as the English does, by TeX's patterns for ancient Greek, so that a long Greek word no longer spreads the line before it across a card.
@@ -137,6 +138,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- Compare is the setting `compare` (settings.py), drawn by ub.js under the class `.compare` on <html>, which the head script sets from it before first paint; `ubCompare`, `ubCompareKeep`, the tab's `ub_compare` and the links' `/compare` are gone, and /N:S/compare, /N/compare and /part/N/compare answer with a 301 to the page's own address, in the offline copy too.
 - `tr_part` holds each translation's four dividers, its word and number, its title and the sponsors' note, plain text as `part` holds the press's, read from its style's `\part<N>txt`, `up`, `mix` and `sub` (`subone` and `subtwo` for Part IV) or the Foundation's parts page, which each of its part pages must repeat; the Foundation's Russian «Увeрсским», a Latin e, is set as Cyrillic under `build/translation.py PART_SUBSTITUTE`, which fails when a release mends it. `/part/N/compare` is `/part/N`, the same page, as `/1:1/compare` is `/1:1`.
 - Each recording's list of files by paper is a route, /offline/audio/<key>.json, and a chunk of the offline copy, audio-<key>; the worker keeps a recording's files in a cache of its own, ub-audio-<key>, fetched with X-UB-Fetch: keep, which /stats does not count as a listen, and answers Range requests for a kept file itself.
 - The Urantia Foundation's zips live in data/uf/, one per release, never committed, each named in data/uf/MANIFEST.tsv by its digest and text id; sources.toml points there.

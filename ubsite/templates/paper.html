@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% from "_text.html" import textof, endnotes, quizcall %}
 {% from "_rail.html" import rail %}
-{% from "_fold.html" import indexfold, compare %}
+{% from "_fold.html" import indexfold %}
 {% from "_transport.html" import step %}
 {#- The whole paper on one page, /15 (app.py paper_page): Settings' Whole
     paper (settings.py `whole`, Tigran, 2026-10-30), for reading the book
@@ -13,8 +13,8 @@
     paper buttons alone, to the papers before and after by their own
     addresses: the section buttons are what the mode leaves out.  The rail
     marks no section; ub.js marks the one being read as the page scrolls.
-    Compare, /15/compare, sets every section beside the translations ticked
-    (ub.js cmpDraw).  Offline the copy joins this page from its sections'
+    Compare, Settings' Translations in parallel columns, sets every section
+    beside the translations ticked (ub.js cmpDraw).  Offline the copy joins this page from its sections'
     pieces (offline/pages.py holes). #}
 {% set title = same(paper.n ~ ' — ' ~ paper.title) %}
 {% block body %}
@@ -25,9 +25,6 @@
       one indent down the whole paper (ub.css .num, section.html). #}
   <article class="whole" style="--refw: {{ refw }}">
     {{ indexfold() }}
-    {%- if texts|selectattr('trv')|list %}
-    {{ compare() }}
-    {%- endif %}
     <header class="papertop">
       {%- if paper.n %}
       <p class="papernum">{{ t('Paper {n}', n=paper.n) }}</p>

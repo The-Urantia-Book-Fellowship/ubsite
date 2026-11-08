@@ -1728,7 +1728,8 @@ def part_page(request: Request, n: int):
     The rail's part titles link here, so a part opens on its title page rather
     than only unfolding in the rail.  Each translation's divider is in the
     page too, shown for those ticked (part.html, base.html ubTr), under the
-    English or, at /part/N/compare, a column each (Tigran, 2026-11-07).
+    English or, with Settings' Translations in parallel columns, a column each
+    (Tigran, 2026-11-07).
     """
     con = db()
     part = con.execute("SELECT * FROM part WHERE n=?", (n,)).fetchone()
@@ -1747,11 +1748,10 @@ def part_page(request: Request, n: int):
                 trs=queries.tr_parts(con, n))
 
 
-# Compare's address on a part's page, as a section's (read_compare, below):
-# the same page, which the address alone lays in columns (ub.css .dividers).
-@app.get("/part/{n:int}/compare", response_class=HTMLResponse)
+# Compare's old address on a part's page, as a section's (read_compare, below).
+@app.get("/part/{n:int}/compare")
 def part_compare(request: Request, n: int):
-    return part_page(request, n)
+    return uncompare(request)
 
 
 NO_PAPER = "There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196."
@@ -1849,22 +1849,30 @@ def whole_audio(texts: list[dict]) -> dict:
 
 
 # Compare, the text and the translations a reader has ticked side by side
-# (ROADMAP item 15, step 2), has an address of its own, /1:1/compare, so that
-# Back leaves it and a reload or a link keeps it.  It is the same page as
-# /1:1, byte for byte: ub.js draws the columns from /tr/, as a fold draws its
-# translations, so no setting reaches the server and the offline copy holds
-# no page more (offline-core.js resolve).  The whole paper's too, /1/compare,
-# the same page as /1, every section in columns (Tigran, 2026-10-30).
+# (ROADMAP item 15, step 2), had an address of its own from 2026-10-26,
+# /1:1/compare, the same page as /1:1, byte for byte, and the whole paper's,
+# /1/compare, and a part's, /part/1/compare.  Since 2026-11-08 it is a setting,
+# Translations in parallel columns (settings.py `compare`; Tigran), and an
+# address kept from before goes to the page's own for good, which the reader's
+# settings show: a link never changes them.  The hash goes with it, the
+# browser's.  An address that is no page of the book is the 404 it was,
+# naming itself (read).  offline-core.js resolve() answers the same.
+def uncompare(request: Request) -> RedirectResponse:
+    return RedirectResponse(request.url.path[:-len("/compare")], status_code=301)
+
+
 @app.get("/{paper:int}/compare")
 def paper_compare(request: Request, paper: int):
-    return paper_page(request, paper)
+    return uncompare(request)
 
 
 @app.get("/{ref}/compare", response_class=HTMLResponse)
 def read_compare(request: Request, ref: str):
     if ref == "api":
         raise HTTPException(404)               # a program's, answered in JSON (http_error)
-    return read(request, ref)
+    if not RE_REF.match(ref):
+        return read(request, ref)
+    return uncompare(request)
 
 
 @app.get("/{ref}", response_class=HTMLResponse)

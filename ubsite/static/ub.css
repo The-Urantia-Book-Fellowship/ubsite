@@ -357,14 +357,13 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
    in the page, hidden until the head script's rule shows those ticked
    (base.html ubTr), under the English in the reader's order, each under its
    name as Compare's line of names gives it; the English's own name only
-   beside a column.  With Compare on, above the phone's width, a column each,
-   as Compare lays its columns: the dividers a grid, each a subgrid of its
-   four rows, the name, the part, the title and the note, level across the
-   columns.  ub.js draws nothing here: the address marks <html> (.compare),
-   and the columns' rules are keyed on data-translations too, the setting's
-   own attribute, so that at Compare's address with none ticked the page is
-   as it was.  The toggle stands centred over them, in its own box centred
-   (.cmphead's width is the measure's, beside the margin). */
+   beside a column.  With Compare on (settings.py `compare`), above the
+   phone's width, a column each, as Compare lays its columns: the dividers a
+   grid, each a subgrid of its four rows, the name, the part, the title and
+   the note, level across the columns.  ub.js draws nothing here: the
+   columns' rules are keyed on .compare, which the head script sets from the
+   setting and ub.js keeps, and on data-translations too, the list's own
+   attribute, so that with none ticked the page is as it was. */
 .partpage .dividers { display: flex; flex-direction: column; }
 .partpage .divider[data-k], .partpage .en > .who { display: none; }
 .partpage .divider[data-k] { margin-top: 2.6rem; padding-top: 1.8rem; border-top: 1px solid var(--rule); }
@@ -372,7 +371,6 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage .who { font-size: .82rem; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase;
                  color: var(--faint); margin: 0 0 .8rem; }
 .partpage .who b { font-weight: inherit; color: var(--ink); }
-.partpage .cmphead { margin: -1.4rem auto 1.6rem; }
 @media (min-width: 62.01rem) {
   :root.compare[data-translations] .partpage { max-width: none; }
   :root.compare[data-translations] .partpage .dividers { display: grid; grid-auto-flow: column;
@@ -748,9 +746,9 @@ x-ru { font-synthesis: small-caps; }
      or half of what the gap leaves where that is more: the grid's two tracks grow
      alike until the margin's is 26ch.  The head above it and the box of what the
      whole section cites are as wide, so that the head is centred over the text. */
-  :root:not([data-margin="off"], [data-index="off"]) :is(.papertop, .blanket, .cmphead) {
+  :root:not([data-margin="off"], [data-index="off"]) :is(.papertop, .blanket) {
          max-width: min(var(--measure), max(100% - 26ch - 2rem, (100% - 2rem) / 2)); }
-  :root[data-width="full"]:not([data-margin="off"], [data-index="off"]) :is(.papertop, .cmphead) {
+  :root[data-width="full"]:not([data-margin="off"], [data-index="off"]) .papertop {
          max-width: calc(100% - 26ch - 2rem); }
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
@@ -802,7 +800,7 @@ x-ru { font-synthesis: small-caps; }
   :root[data-margin="off"][data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
          grid-template-columns: minmax(0, 1fr); }
 }
-:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .transport, .prose, .cmphead) { max-width: none; }
+:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .transport, .prose) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
 :root[data-width="full"] .applist { columns: 24rem; }
 /* A superscript (28,012th, a card's "11th edition") raised above its line's
@@ -929,34 +927,17 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .row:not(:has(> .verse)) > .tf .rt:not(.opening, .head),
 article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark)) { text-indent: 1em; }
 
-/* Compare (ROADMAP item 15, step 2; templates/_fold.html compare, ub.js): the
-   English and each translation ticked, a column each, a row to a paragraph,
-   laid on the grid's columns as a paragraph and its entries are, the margin's
-   last.  Its toggle stands at the head of the text, centred over it, between
-   the Contents' button and the Index's, and scrolls away with the paper's head
-   (Tigran, 2026-10-26): a pill with two columns drawn in it, as in the mockup
-   he settled on, filled when pressed.  Shown only where a ticked translation
-   has the section (base.html ubTr), so with none ticked nothing moves.  On a
-   phone it stands at the end of the Index's line, its words shorter. */
-.cmphead { display: none; justify-content: center; max-width: var(--measure); margin: -.35rem 0 1rem; }
-.cmpbtn { display: inline-flex; align-items: center; gap: .45em; font: inherit; font-size: .95rem;
-  color: var(--faint); background: none; border: 1px solid var(--rule); border-radius: 999px;
-  padding: .28em .85em; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-/* Its words are capitals, which a line box centres too high, keeping room for
-   descenders they never have: trimmed to the capitals' own height, each
-   language's face its own, they stand centred in the pill, level with the
-   drawn columns (Tigran, 2026-10-26).  A browser without text-box sets them
-   a pixel or so high, as before. */
-.cmpbtn span { font-size: .8em; letter-spacing: .12em; text-transform: uppercase;
-               text-box: trim-both cap alphabetic; }
-.cmpbtn svg { width: 1.15em; height: .95em; fill: none; stroke: currentColor; stroke-width: 1.5; }
-.cmpbtn svg path { stroke-width: 1.1; }
-.cmpbtn .short { display: none; }
-@media (hover: hover) { .cmpbtn:hover { color: var(--ink); } }
-.cmpbtn[aria-pressed="true"] { color: var(--link); border-color: var(--link); background: var(--card); }
-/* In Compare the folds give way to the columns, from first paint (the head
-   script marks <html> from the address), and the paper's head to the heads of
-   the columns. */
+/* Compare (ROADMAP item 15, step 2; settings.py `compare`, ub.js cmpDraw):
+   the English and each translation ticked, a column each, a row to a
+   paragraph, laid on the grid's columns as a paragraph and its entries are,
+   the margin's last.  A setting since 2026-11-08 (Tigran): until then a
+   toggle at the head of the text, a pill with two columns drawn in it,
+   between the Contents' button and the Index's (.cmphead, .cmpbtn). */
+/* In Compare the folds give way to the columns, from first paint, and the
+   paper's head to the heads of the columns.  Keyed on the class, which the
+   head script sets from the setting and ub.js cmpDraw keeps, never on
+   data-compare: the setting changes before Compare has measured the
+   paragraph at the window's top, which a fold shown at once would move. */
 :root.compare .grid > .row > .tf, article.cmp > .papertop, article.cmp > section > .papertop { display: none; }
 /* Over the columns, a line naming each, which stays at the window's top, level
    with the Contents' and the Index's buttons, while the columns are in view,
@@ -2002,16 +1983,10 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   .grid > .row .tr { order: 4; }
   .verse + .a:not(:empty) { margin-top: -.4rem; }
   .blanket ul { columns: 1; }
-  /* Compare: its toggle at the end of the Index's line, its words shorter;
-     and each paragraph with its translations under it, each named, boxed as
-     a fold is, then its entries.  The English's head alone, as in the
-     mockup: three would fill the screen before the text.  A translation's
-     only where it says it is not at hand, named. */
-  .cmphead { position: absolute; top: .1rem; right: 0; z-index: 1; margin: 0; }
-  :root[data-index="off"] .cmphead { position: static; justify-content: flex-end; max-width: none; margin: 0 0 .6rem; }
-  :root .partpage .cmphead { position: static; justify-content: center; max-width: none; margin: -1.2rem auto 1.4rem; }
-  .cmpbtn .long { display: none; }
-  .cmpbtn .short { display: inline; }
+  /* Compare: each paragraph with its translations under it, each named,
+     boxed as a fold is, then its entries.  The English's head alone, as in
+     the mockup: three would fill the screen before the text.  A
+     translation's only where it says it is not at hand, named. */
   article.cmp .cmpnames, article.cmp .stars > .rs { display: none; }
   article.cmp .grid > .cmphd > .papertop { margin: 0 0 1.2rem; }
   article.cmp .cmphd > .ch + .ch:not(:has(> .gap)), article.cmp .cmphd > .ch + .ch > :not(.who, .gap) { display: none; }
@@ -2036,7 +2011,6 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   body { font-size: 11pt; background: #fff; color: #000; }
   .reader, .grid, .grid > .row { display: block; }
   .trfold, .cmpnames { display: none; }
-  .cmphead { display: none !important; }        /* over ubTr's rule, which names the translations */
   p.t { orphans: 3; widows: 3; max-width: none; }
   /* A margin column does not survive a page break, so the apparatus prints as
      notes after its paragraph instead. */

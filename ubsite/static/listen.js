@@ -674,7 +674,7 @@
       var t = trOf(key), kk = null;
       if (same(P, D)) {
         // The page shows the section that has ended: the next one takes its place.
-        push(to.href + (CMP.test(location.pathname) ? '/compare' : ''));   // ub.js: Compare goes on
+        push(to.href);
         swap(doc);
         scrollTo(0, 0);
         D = P;
@@ -701,11 +701,8 @@
   // along is off, the site's own pages are fetched and swapped in instead
   // (every page has one <main>).  With Follow along on, a link loads its page
   // as ever, and playing stops.  Anything that goes wrong falls back to that.
-  // A page and the same page in Compare (ub.js) are one page here: Compare
-  // draws itself in place, and its own entries in the history are its own.
-  var CMP = /\/compare$/;
-  function bare(path, search) { return path.replace(CMP, '') + search; }
-  var moved = false, visiting = 0, shown = bare(location.pathname, location.search);
+  function addr(path, search) { return path + search; }
+  var moved = false, visiting = 0, shown = addr(location.pathname, location.search);
   function roaming() { return !!bar && !S.get().follow; }
   // The address for what is now to be shown.  The page being left keeps its
   // scroll position, for Back.
@@ -714,7 +711,7 @@
     history.pushState(null, '', url);
     history.scrollRestoration = 'manual';
     moved = true;
-    shown = bare(location.pathname, location.search);
+    shown = addr(location.pathname, location.search);
   }
   function swap(doc) {
     document.querySelector('main').replaceWith(document.adoptNode(doc.querySelector('main')));
@@ -739,13 +736,11 @@
   // `then` runs once it is in.
   function visit(url, isNew, y, then) {
     // In the reader's unit (base.html ubUnit): the rail's /101 is its first
-    // section's page to one reader and the whole paper's to another; and in
-    // Compare while this tab is (base.html ubCompare).  Both take the path
-    // and the hash alone, so the query, a search's, is put back between
-    // them: until 2026-11-06 it was lost, and a search typed while listening
-    // with Follow along off showed the search page empty.
+    // section's page to one reader and the whole paper's to another.  It
+    // takes the path and the hash alone, so the query, a search's, is put
+    // back after: until 2026-11-06 it was lost, and a search typed while
+    // listening with Follow along off showed the search page empty.
     var u = new URL(url, location.href), at = u.pathname + u.hash;
-    if (window.ubCompare) at = window.ubCompare(at);
     if (window.ubUnit) at = window.ubUnit(at);
     u = new URL(at.replace(/#.*$/, '') + u.search + at.replace(/^[^#]*/, ''), location.href);
     url = u.href;
@@ -757,13 +752,9 @@
       if (n !== visiting) return;      // overtaken by a later one
       var doc = new DOMParser().parseFromString(got.html, 'text/html');
       if (!doc.querySelector('main')) throw new Error('not a page');
-      // A redirect (a citation searched for) lands at its real address, in
-      // Compare while this tab is: the same page, the section's, under
-      // Compare's address (never the unit's, whose page this is not).
-      if (isNew) {
-        var fu = new URL(got.url, location.href);
-        push((window.ubCompare ? window.ubCompare(fu.pathname) : fu.pathname) + fu.search + hash);
-      } else shown = bare(location.pathname, location.search);
+      // A redirect (a citation searched for) lands at its real address.
+      if (isNew) push(got.url.split('#')[0] + hash);
+      else shown = addr(location.pathname, location.search);
       swap(doc);
       if (y != null) scrollTo(0, y);
       else {
@@ -787,7 +778,7 @@
     if (!a || a.target || a.hasAttribute('download')) return;
     var u = new URL(a.href, location.href);
     if (u.origin !== location.origin || SKIP.test(u.pathname)) return;
-    if (bare(u.pathname, u.search) === shown && u.hash) return;   // a place on this page
+    if (addr(u.pathname, u.search) === shown && u.hash) return;   // a place on this page
     ev.preventDefault();
     visit(u.href, true);
   });
@@ -800,7 +791,7 @@
   // Back and Forward: the address has changed, so the page must too -- in the
   // page while listening, else by loading it.
   addEventListener('popstate', function (ev) {
-    if (!moved || bare(location.pathname, location.search) === shown) return;
+    if (!moved || addr(location.pathname, location.search) === shown) return;
     if (bar) visit(location.href, false, ev.state ? ev.state.y : null);
     else { history.scrollRestoration = 'auto'; location.reload(); }
   });

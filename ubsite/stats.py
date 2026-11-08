@@ -120,8 +120,9 @@ def classify(ua: str) -> dict:
 
 # ---- pages -------------------------------------------------------------------------
 # A section read in Compare, /1:1/compare, is a view of the section, and a
-# paper read in Compare, /15/compare, of the paper (2026-11-06, since links keep
-# Compare).  A paper's address, /15, is the whole paper on one page since
+# paper read in Compare, /15/compare, of the paper (2026-11-06, since links kept
+# Compare); kept for the visits recorded until 2026-11-08, when Compare became
+# a setting and those addresses a redirect (app.py read_compare).  A paper's address, /15, is the whole paper on one page since
 # 2026-10-30 (Settings' Whole paper); until then a redirect, and never a view.
 RE_SECTION = re.compile(r"^/(\d+):(\d+)(?:\.\d+(?:-\d+)?)?(?:/compare)?$")
 RE_PAPER = re.compile(r"^/(\d+)(?:/compare)?$")

@@ -267,11 +267,11 @@
     };
     // A setting that means nothing while the one it needs is off (settings.py
     // NEEDS) is shown, greyed, and cannot be changed: 'off', or a switch's false,
-    // or, where it needs a value (data-is), any other.
+    // or a list's '', none ticked; or, where it needs a value (data-is), any other.
     // And a setting whose own needs are not met greys those that need it.
     var unmet = function (o, el) {
       var v = o[el.dataset.needs];
-      if (el.dataset.is ? String(v) !== el.dataset.is : v === 'off' || v === false) return true;
+      if (el.dataset.is ? String(v) !== el.dataset.is : v === 'off' || v === false || v === '') return true;
       var dep = form.querySelector('[data-needs] [name="' + el.dataset.needs + '"]');
       return !!dep && unmet(o, dep.closest('[data-needs]'));
     };
@@ -382,16 +382,12 @@
   // unit as it is clicked -- the rail's /15 to /15:0 with the setting off,
   // the rail's and a paragraph's /15:3 to /15#15:3 with it on, which on the
   // paper's own page is a place on it, and scrolls -- before listen.js or the
-  // browser follows it, so that no page is asked for twice.  And in Compare
-  // while this tab is (base.html ubCompare, 2026-11-06): a search hit's, a
-  // note's reference, the index's citations, Home's papers, /compare before
-  // the hash.  A link to a place on this page, a note's marker (#fn…), has
-  // the page's own path, so under /compare it is left alone.  In the capture
+  // browser follows it, so that no page is asked for twice.  In the capture
   // phase, so first.
   if (window.ubUnit) document.addEventListener('click', function (ev) {
     var a = ev.target.closest && ev.target.closest('a[href]');
     if (!a || a.origin !== location.origin) return;
-    var at = a.pathname + a.hash, to = window.ubUnit(window.ubCompare ? window.ubCompare(at) : at);
+    var at = a.pathname + a.hash, to = window.ubUnit(at);
     if (to !== at) a.href = to;
     // A place on this page, the whole paper's (/1#1:2.9, a note's reference):
     // where the page stands is kept in the entry's state, for Back (the
@@ -455,8 +451,7 @@
   // reference followed) to its address with no place: the marks go, and the
   // page returns to where it stood, kept in the entry's state as the place
   // was left (the click handler above), since the browser puts it back only
-  // while Compare's and listen.js's entries have not asked it not to
-  // (scrollRestoration).  Until 2026-11-06 arrive() ran, and scrolled to the
+  // while listen.js's entries have not asked it not to (scrollRestoration).  Until 2026-11-06 arrive() ran, and scrolled to the
   // paragraph still marked.
   addEventListener('hashchange', function () {
     if (location.hash || !document.querySelector('article.whole')) return arrive();
@@ -514,11 +509,10 @@
         d.querySelector('ol')) return;
     var rail = li.closest('.rail'), a = d.querySelector('summary a');
     if (!rail || !a) return;
-    var n = a.getAttribute('href').slice(1).replace(/\/compare$/, '');   // /4, or in Compare /4/compare
+    var n = a.getAttribute('href').slice(1);
     var put = function (html) {
       if (d.querySelector('ol')) return;
       d.insertAdjacentHTML('beforeend', html);
-      if (/\/compare$/.test(location.pathname)) cmpLinks(d, true);
       var k = tocKey();
       if (k && tocGot[k]) tocDraw(d.querySelector('ol'), tocGot[k]);
     };
@@ -705,7 +699,7 @@
   // (ub.css), and .tocready shows it, drawn or not: offline, a translation not
   // kept leaves the rail in English.
   var tocGot = {}, tocEn = new WeakMap(), ROMAN = ['', 'I', 'II', 'III', 'IV'];
-  var RE_RAILA = /^\/(?:part\/([0-9]+)|([0-9]+)(?::([0-9]+))?)(?:\/compare)?$/;
+  var RE_RAILA = /^\/(?:part\/([0-9]+)|([0-9]+)(?::([0-9]+))?)$/;
   function tocTicked() {
     return String(load().translations || '').split(' ').filter(function (k) { return trBy[k]; });
   }
@@ -889,7 +883,7 @@
   // again when the fonts are in and the text has reflowed, as arriveNote()
   // places a study note's.
   function arriveTr() {
-    if (/\/compare$/.test(location.pathname)) return;      // in their columns (cmpArrive)
+    if (cmpOn()) return;                                   // in their columns (cmpArrive)
     var m = /^#(?:\d+:\d+(?:\.\d+(?:-\d+)?)?#)?(?:tr-([a-z0-9-]+)|note(tn_([a-z0-9-]+)_\d+_\d+_\d+_\d+))$/.exec(location.hash),
         hit = m && document.querySelector('p.t.hit'), row = hit && hit.closest('.row'),
         tf = row && row.querySelector('.tf'), k = m && (m[1] || m[3]), b = tf && tf.querySelector('.trfold');
@@ -986,33 +980,30 @@
   document.addEventListener('ub:swap', trSync);
   document.addEventListener('ub:trkept', function () { trGot = {}; trSync(); cmpDraw(); });
 
-  // Compare (ROADMAP item 15, step 2; templates/_fold.html compare): the page
-  // drawn again, the English and each translation ticked side by side, a
-  // column each in the reader's order, a row to a paragraph, which the grid
-  // aligns as it aligns a paragraph and its entries (ub.css article.cmp).  A
-  // translation with no paragraph in the section has no column.  Over the
-  // columns a line naming each, which stays at the window's top while they
-  // are in view, and under it each one's own paper and section titles, as its
-  // TeX sets them (/tr/'s data-head).  Drawn from the fragment the folds
+  // Compare (ROADMAP item 15, step 2; settings.py `compare`, Translations in
+  // parallel columns): the page drawn again, the English and each translation
+  // ticked side by side, a column each in the reader's order, a row to a
+  // paragraph, which the grid aligns as it aligns a paragraph and its entries
+  // (ub.css article.cmp); below 62rem each translation stands under its
+  // paragraph.  A translation with no paragraph in the section has no column.
+  // Over the columns a line naming each, which stays at the window's top while
+  // they are in view, and under it each one's own paper and section titles, as
+  // its TeX sets them (/tr/'s data-head).  Drawn from the fragment the folds
   // fetch, and again whenever what it shows changes.
   //
-  // It has an address of its own, the page's with /compare after it, the same
-  // page (app.py read_compare), which the head script marks on <html> before
-  // first paint (.compare).  The toggle pushes it, and Back leaves it, drawn
-  // in place, the paragraph at the window's top kept there.  While it is on
-  // every link keeps it, put right as it is clicked (ubUnit's handler above,
-  // base.html ubCompare), and so do a citation typed into the box and an
-  // address typed into the tab (the head script's hop): it ends with the
-  // toggle, or Back past where it was turned on, which cmpDraw records
-  // (Tigran, 2026-11-06; until then the text's own links and the index's
-  // left it, the transport bar's and the Contents' alone keeping it,
-  // cmpLinks).  In a section none of the ticked translations has, the page
-  // reads as usual, the address kept, so that the columns come back where
-  // one resumes (Tigran, 2026-10-26).  A part's page, /part/1/compare, draws
-  // nothing here: every translation's divider is in the page, and the
-  // address alone lays them in columns (part.html, ub.css .dividers).
-  var CMP = /\/compare$/, cmpN = 0, cmpAt = location.pathname.replace(CMP, '');
-  function cmpOn() { return CMP.test(location.pathname); }
+  // A setting since 2026-11-08 (Tigran), kept as every setting is, so that
+  // every page of the book opens in it while it is on, and drawn in place,
+  // the paragraph at the window's top kept there, as it is turned on or off.
+  // Until then a toggle at the head of the text, at an address of its own,
+  // /1:1/compare, which the tab kept as one moved about (2026-11-06); those
+  // addresses go to the page's own now (app.py read_compare).  The head
+  // script's class .compare hides the folds before first paint (ub.css).  In a
+  // section none of the ticked translations has, the page reads as usual.  A
+  // part's page draws nothing here: every translation's divider is in the
+  // page, and the setting alone lays them in columns (part.html, ub.css
+  // .dividers).
+  var cmpN = 0;
+  function cmpOn() { return load().compare === true; }
   function cmpArt() { return document.querySelector('main.reader > article'); }
   // The ticked translations that have any paragraph here, in the reader's order.
   function cmpKeys(art) {
@@ -1021,15 +1012,6 @@
       tf.dataset.has.split(' ').forEach(function (k) { has[k] = true; });
     });
     return String(load().translations || '').split(' ').filter(function (k) { return trBy[k] && has[k]; });
-  }
-  // The transport bar's links and the rail's, to a section, a paper or a
-  // part's page, with /compare after them while it is on (a paper's goes to
-  // its first section).
-  function cmpLinks(root, on) {
-    Array.prototype.forEach.call(root.querySelectorAll('.transport a[href], .rail a[href]'), function (a) {
-      var m = /^(\/\d+(?::\d+)?|\/part\/\d+)(?:\/compare)?(#.*)?$/.exec(a.getAttribute('href'));
-      if (m) a.setAttribute('href', m[1] + (on ? '/compare' : '') + (m[2] || ''));
-    });
   }
   function cmpUndraw(art) {
     if (!art.classList.contains('cmp')) return;
@@ -1040,18 +1022,15 @@
     art.classList.remove('cmp');
     art.style.removeProperty('--cols');
   }
-  // Draws what the address and Settings say; its promise is kept once drawn.
+  // Draws what Settings say; its promise is kept once drawn.
   function cmpDraw() {
     var art = cmpArt(), on = cmpOn(), n = ++cmpN;
+    // The folds give way, or come back (ub.css :root.compare): the head
+    // script set it before first paint, and here it follows the setting, once
+    // cmpGo has measured the paragraph to keep.
     document.documentElement.classList.toggle('compare', on);
-    // And the tab's memory of it (base.html ubCompareKeep): from a page of the
-    // book alone, so that a setting changed on a search's page leaves it.
-    if (window.ubCompareKeep) window.ubCompareKeep(location.pathname);
-    cmpLinks(document, on);
     if (!art) return Promise.resolve();
-    var b = art.querySelector('.cmphead .cmpbtn'), ks = on ? cmpKeys(art) : [],
-        secs = art.querySelectorAll('section[data-trv]');
-    if (b) b.setAttribute('aria-pressed', String(on));
+    var ks = on ? cmpKeys(art) : [], secs = art.querySelectorAll('section[data-trv]');
     if (!ks.length || !secs.length) { cmpUndraw(art); return Promise.resolve(); }
     // Each section of the page in columns: the one of a section's page, or
     // every one of the whole paper's (paper.html), each with the names of
@@ -1129,34 +1108,8 @@
       if (row) scrollBy({ top: row.getBoundingClientRect().top - Math.max(floor || 0, Math.min(at.top, 120)), behavior: 'instant' });
     });
   }
-  // The browser would put back, a frame after Back, where the page was
-  // scrolled when Compare was turned on or off, over the paragraph kept: its
-  // two entries are left to this, as listen.js leaves its own.  Leaving the
-  // page, a reload puts back its place again.
-  document.addEventListener('click', function (ev) {
-    var b = ev.target.closest && ev.target.closest('.cmphead .cmpbtn');
-    if (!b) return;
-    history.scrollRestoration = 'manual';
-    history.pushState(null, '', location.pathname.replace(CMP, '') + (cmpOn() ? '' : '/compare') +
-                                location.search + location.hash);
-    cmpGo();
-  });
-  addEventListener('pagehide', function () { history.scrollRestoration = 'auto'; });
-  // Shown again from the browser's page cache, by Back, no script runs: the
-  // tab's memory of Compare is put back to what this page says, which the
-  // toggle on another page since may have changed.
-  addEventListener('pageshow', function (ev) {
-    if (ev.persisted && window.ubCompareKeep) window.ubCompareKeep(location.pathname);
-  });
-  // Back and Forward between this page and itself in Compare.  Any other
-  // address is listen.js's to show, or the browser's.
-  addEventListener('popstate', function () {
-    if (location.pathname.replace(CMP, '') !== cmpAt ||
-        document.documentElement.classList.contains('compare') === cmpOn()) return;
-    cmpGo();
-  });
-  // Opened at Compare's address: drawn, then the paragraph cited brought into
-  // view again, as the rows have changed height, unless the reader has
+  // Opened with it on: drawn, then the paragraph cited brought into view
+  // again, as the rows have changed height, unless the reader has
   // scrolled meanwhile (by hand: the fonts coming in move the page too, and
   // the whole paper's columns take a while); and a translator's note's card
   // opened from its column.
@@ -1173,12 +1126,9 @@
     });
   }
   cmpArrive();
-  document.addEventListener('ub:swap', function () {
-    cmpAt = location.pathname.replace(CMP, '');
-    cmpDraw();
-  });
+  document.addEventListener('ub:swap', cmpDraw);
   document.addEventListener('ub:settings', function (ev) {
-    if (ev.detail.key === 'translations') cmpGo();
+    if (ev.detail.key === 'translations' || ev.detail.key === 'compare') cmpGo();
   });
   // Part I is open in the Foreword's rail for the Foreword's sake (templates/
   // _rail.html), and its line of script shuts it where Settings puts the
@@ -1747,7 +1697,7 @@
   function tapHead(ev) {
     var t = ev.target, tap, band;
     if (ev.button || (ev.detail > 1 && !touch) || selDown || !t.closest || !t.closest('main') || !getSelection().isCollapsed ||
-        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .cites, .blanket, .marginhead, .cmphead, .player, .pop, dialog') ||
+        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .cites, .blanket, .marginhead, .player, .pop, dialog') ||
         !document.querySelector('main p.t[id]')) return false;
     // A tap on the text also lets go of the paragraph the page opened at
     // (p.t.hit: the server's mark on a section's page, arrive()'s on the whole

@@ -310,7 +310,7 @@
     var from = LAND;
     try {
       var ref = new URL(document.referrer);
-      if (ref.origin === location.origin && /^\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?(?:\/compare)?$/.test(ref.pathname)) from = ref.pathname;
+      if (ref.origin === location.origin && /^\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?$/.test(ref.pathname)) from = ref.pathname;
     } catch (e) {}
     document.querySelectorAll('.showme, .tourstart').forEach(function (b) {
       b.addEventListener('click', function () {

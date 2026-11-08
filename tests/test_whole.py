@@ -2,7 +2,7 @@
 
 A paper's address is the whole paper: every section's text, as its own page
 sets it, under one head, the paper's notes at its end, and a transport bar of
-the two paper buttons alone; in Compare, /15/compare, the same page.  Whether a reader sees it or the paper's first
+the two paper buttons alone, every section in columns with Settings' Translations in parallel columns.  Whether a reader sees it or the paper's first
 section is the setting, decided in the browser by base.html's ubUnit, which
 these hold to its cases in Node, as test_l10n holds l10n.js.  Each section's
 piece of the text is byte for byte the piece in its own page, which is what
@@ -118,12 +118,13 @@ class WholePaper(unittest.TestCase):
         self.assertEqual(j["voices"]["mh"]["segs"][0][0], None)
         self.assertNotIn("whole", j)
 
-    def test_compare_is_the_same_page_with_its_toggle(self):
+    def test_compare_s_old_address_goes_to_the_page(self):
         plain, cmp = get("/15", raw=True), get("/15/compare", raw=True)
-        self.assertEqual((plain[0], cmp[0]), (200, 200))
-        self.assertEqual(plain[2], cmp[2])
-        self.assertEqual(plain[2].count('class="cmphead"'), 1)
-        # Each section carries the version its translations are asked for under.
+        self.assertEqual(plain[0], 200)
+        self.assertEqual((cmp[0], cmp[1].get("location")), (301, "/15"))
+        self.assertNotIn("cmphead", plain[2])
+        # Each section carries the version its translations are asked for under,
+        # which Compare draws its columns from (ub.js cmpDraw).
         self.assertEqual(len(re.findall(r'<section id="15:\d+" data-trv="[0-9a-f]{12}">', plain[2])),
                          len(self.sections[15]))
 
@@ -152,39 +153,15 @@ CASES = {
             "/15#15:3.4#tr-ud": "/15:3.4#tr-ud", "/15#note15_3_4_0": "/15:3.4#note15_3_4_0",
             "/15#notest15_3_4_0": "/15:3.4#notest15_3_4_0", "/15#notetn_ud_15_3_4_0": "/15:3.4#notetn_ud_15_3_4_0",
             "/15#fnref15_3_4_0": "/15:3.4#fnref15_3_4_0", "/15#listen": "/15:0#listen", "/15#16:3": "/15:0#16:3",
-            "/15:3#note15_3_4_0": "/15:3#note15_3_4_0",
-            "/15/compare": "/15:0/compare", "/15/compare#15:3": "/15:3/compare", "/15/compare#15:3.4#tr-ud": "/15:3.4/compare#tr-ud",
-            "/15:3/compare": "/15:3/compare", "/15:3.4/compare#tr-ud": "/15:3.4/compare#tr-ud", "/i/god": "/i/god", "/": "/",
-            "/part/1": "/part/1", "/part/1/compare": "/part/1/compare"},
+            "/15:3#note15_3_4_0": "/15:3#note15_3_4_0", "/i/god": "/i/god", "/": "/", "/part/1": "/part/1",
+            # Compare's old addresses, a redirect since 2026-11-08, are no unit's.
+            "/15/compare": "/15/compare", "/15:3/compare": "/15:3/compare"},
     "on": {"/15": "/15", "/15:0": "/15", "/15:3": "/15#15:3", "/15:3.4": "/15#15:3.4", "/15:3.4-6": "/15#15:3.4-6",
            "/15:0.3": "/15#15:0.3", "/15:3.4#tr-ud": "/15#15:3.4#tr-ud", "/15:3.4#note15_3_4_0": "/15#note15_3_4_0",
            "/15:3.4#notetn_ud_15_3_4_0": "/15#notetn_ud_15_3_4_0", "/16:0#listen": "/16#16:0#listen",
-           "/15#15:3": "/15#15:3", "/15#listen": "/15#listen",
-           "/15:3/compare": "/15/compare#15:3", "/15:0/compare": "/15/compare", "/15:3.4/compare#tr-ud": "/15/compare#15:3.4#tr-ud",
-           "/15/compare": "/15/compare", "/15/compare#15:3": "/15/compare#15:3", "/i/god": "/i/god",
-           "/part/1": "/part/1", "/part/1/compare": "/part/1/compare"},
+           "/15#15:3": "/15#15:3", "/15#listen": "/15#listen", "/i/god": "/i/god", "/part/1": "/part/1",
+           "/15/compare": "/15/compare", "/15:3/compare": "/15:3/compare"},
 }
-
-
-# The head script's ubCompare, with the tab's memory of Compare off and on
-# (Compare kept as one moves about, 2026-11-06), and ubCompareKeep, which
-# writes it: 'set', 'removed', or None where the address is not the book's.
-CMP = {
-    "off": {a: a for a in ("/15", "/15:3", "/15:3.4-6#tr-ud", "/15/compare", "/15:3/compare#tr-ud", "/i/god", "/search", "/",
-                           "/part/1", "/part/1/compare")},
-    "on": {"/15": "/15/compare", "/0": "/0/compare", "/15:3": "/15:3/compare", "/15:3.4": "/15:3.4/compare",
-           "/15:3.4-6": "/15:3.4-6/compare", "/15:3.4#tr-ud": "/15:3.4/compare#tr-ud",
-           "/15#15:3.4#tr-ud": "/15/compare#15:3.4#tr-ud", "/15#note15_3_4_0": "/15/compare#note15_3_4_0",
-           "/16:0#listen": "/16:0/compare#listen", "/15/compare": "/15/compare",
-           "/15:3/compare#tr-ud": "/15:3/compare#tr-ud", "/15:3/compare/x": "/15:3/compare/x",
-           "/i/god": "/i/god", "/i/god#e12": "/i/god#e12", "/search": "/search", "/quiz/15": "/quiz/15", "/": "/",
-           # A part's page is the book's too (2026-11-07).
-           "/part/1": "/part/1/compare", "/part/4#listen": "/part/4/compare#listen", "/part/1/compare": "/part/1/compare",
-           "/part/x": "/part/x", "/part": "/part"},
-}
-KEEP = {"/15:3/compare": "set", "/15/compare": "set", "/15:3.4-6/compare": "set", "/15:3": "removed", "/15": "removed",
-        "/15:3.4": "removed", "/search": None, "/i/god": None, "/": None, "/15:3/compare/x": None, "/quiz/15": None,
-        "/part/1/compare": "set", "/part/1": "removed", "/part/1/compare/x": None, "/part/x": None}
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
@@ -204,39 +181,6 @@ class Unit(unittest.TestCase):
             for a, want in cases.items():
                 self.assertEqual(got[mode][a][0], want, f"{mode}: {a}")
                 self.assertEqual(got[mode][a][1], want, f"{mode}: {a}, again")   # idempotent
-
-    def test_compare_s_suffix_while_the_tab_is_in_it(self):
-        # In Node with a sessionStorage of their own; and with the memory on,
-        # ubUnit's partner in either order, for every address of CASES.
-        body = get("/", raw=True)[2]
-        unit = re.search(r"window\.ubUnit = function[\s\S]*?\n};", body)[0]
-        fn = re.search(r"window\.ubCompareKeep = function[\s\S]*?\nwindow\.ubCompare = function[\s\S]*?\n};", body)[0]
-        js = ("var document = { documentElement: { dataset: {} } }, window = {}, on = false, wrote = {};\n"
-              "var sessionStorage = { getItem: function (k) { return k === 'ub_compare' && on ? '1' : null; },"
-              " setItem: function (k) { wrote[k] = 'set'; }, removeItem: function (k) { wrote[k] = 'removed'; } };\n"
-              + unit + "\n" + fn + "\n"
-              "var cases = " + json.dumps(CMP) + ", out = {}, both = {}, kept = {};\n"
-              "for (var mode in cases) { on = mode === 'on'; out[mode] = {};"
-              " for (var a in cases[mode]) out[mode][a] = [window.ubCompare(a), window.ubCompare(window.ubCompare(a))]; }\n"
-              "on = true; var units = " + json.dumps({m: list(c) for m, c in CASES.items()}) + ";\n"
-              "for (var mode in units) { if (mode === 'on') document.documentElement.dataset.whole = 'true';"
-              " else delete document.documentElement.dataset.whole; both[mode] = {};"
-              " units[mode].forEach(function (a) {"
-              " both[mode][a] = [window.ubUnit(window.ubCompare(a)), window.ubCompare(window.ubUnit(a))]; }); }\n"
-              + json.dumps(list(KEEP)) + ".forEach(function (p) { wrote = {}; window.ubCompareKeep(p);"
-              " kept[p] = wrote.ub_compare || null; });\n"
-              "console.log(JSON.stringify({ out: out, both: both, kept: kept }));")
-        got = json.loads(subprocess.run(["node", "-"], input=js, capture_output=True, text=True, check=True).stdout)
-        for mode, cases in CMP.items():
-            for a, want in cases.items():
-                self.assertEqual(got["out"][mode][a][0], want, f"{mode}: {a}")
-                self.assertEqual(got["out"][mode][a][1], want, f"{mode}: {a}, again")   # idempotent
-        for mode, pairs in got["both"].items():
-            for a, (one, other) in pairs.items():
-                self.assertEqual(one, other, f"whole {mode}: {a}")
-                if re.match(r"/\d", a):
-                    self.assertRegex(one, r"/compare(#|$)", f"whole {mode}: {a}: {one}")
-        self.assertEqual(got["kept"], KEEP)
 
 
 if __name__ == "__main__":

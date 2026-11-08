@@ -49,11 +49,13 @@
 "Listening|tab" = "Аудио"
 "Offline|tab" = "Офлайн"
 
-# The Translations tab (Tigran's mockup, 2026-10-26).  Compare is not yet built,
-# so neither sentence names it yet.
-"tr:intro" = { en = "The translations shown under the text, folded. Their order here is the order of a fold’s tabs.", ru = "Переводы, которые показываются под текстом в свёрнутом виде. В этом же порядке идут вкладки под абзацем." }
+# The Translations tab (Tigran's mockup, 2026-10-26), and its switch for
+# the columns, Compare's place since 2026-11-08 (settings.py TRANSLATIONS).
+"tr:intro" = { en = "The translations shown under the text, folded, or beside it in columns (below). Their order here is the order of a fold’s tabs and of the columns.", ru = "Переводы, которые показываются под текстом в свёрнутом виде или рядом с ним в колонках (см. ниже). В этом же порядке идут вкладки под абзацем и колонки." }
 "Shown, in this order" = "Показываются, в этом порядке"
 "tr:none" = { en = "None yet: tick one below to show it under the text.", ru = "Пока ни одного: отметьте перевод ниже, чтобы он показывался под текстом." }
+"Translations in parallel columns" = "Переводы в параллельных колонках"
+"a column each beside the English; on a narrow screen, each under its paragraph" = "каждый своей колонкой рядом с английским; на узком экране — каждый под своим абзацем"
 "Other translations" = "Другие переводы"
 "Russian" = "Русский"
 "Move up" = "Выше"
@@ -208,8 +210,6 @@
 
 "Paper {n}" = "Документ {n}"
 "{a} and {b}" = "{a} и {b}"
-"Compare translations" = "Сравнить переводы"
-"Compare" = "Сравнить"
 "{n} index entries" = { en = ["{n} index entry", "{n} index entries"], ru = ["{n} рубрика указателя", "{n} рубрики указателя", "{n} рубрик указателя"] }
 "{n} index entries across this whole paper" = { en = ["{n} index entry across this whole paper", "{n} index entries across this whole paper"], ru = ["{n} рубрика указателя на весь документ", "{n} рубрики указателя на весь документ", "{n} рубрик указателя на весь документ"] }
 "{n} index entries across this whole section" = { en = ["{n} index entry across this whole section", "{n} index entries across this whole section"], ru = ["{n} рубрика указателя на весь раздел", "{n} рубрики указателя на весь раздел", "{n} рубрик указателя на весь раздел"] }
@@ -554,7 +554,6 @@
 "Search|help" = "Поиск"
 "Listening|help" = "Аудио"
 "Notes and 1955 readings" = "Примечания и разночтения 1955 года"
-"Translations and Compare" = "Переводы и сравнение"
 "Settings|help" = "Настройки"
 "Working offline, and the app" = "Работа офлайн и приложение"
 "The quiz|help" = "Викторина"
@@ -584,7 +583,7 @@
 "help:notes:cap" = { en = "A paragraph with a 1955 reading’s ring and a study note’s number. Tap them.", ru = "Абзац с кольцом разночтения 1955 года и номером примечания. Нажмите на них." }
 "help:translations:1" = { en = "Three Russian translations can be read with the English: Tigran Aivazian’s <i>Урантийские документы</i>, with notes of its own; the translation of the Urantia Book Society of Greater New York; and Urantia Foundation’s. Tick them in Settings, in the <b>Translations</b> tab, in the order you want. Each paragraph then has a line under it that opens them in tabs.", ru = "Вместе с английским можно читать три русских перевода: <i>Урантийские документы</i> Тиграна Айвазяна, со своими примечаниями; перевод Общества Книги Урантии Большого Нью-Йорка; и перевод Фонда Урантия. Отметьте их в Настройках, на вкладке <b>Переводы</b>, в нужном вам порядке. Тогда под каждым абзацем появится строка, которая раскрывает их во вкладках." }
 "help:translations:cap" = { en = "The fold under a paragraph, once a translation is ticked.", ru = "Строка под абзацем, когда отмечен перевод." }
-"help:translations:2" = { en = "<b>Compare</b>, a button at the head of the text, sets the English and the translations side by side, a column each, paragraph against paragraph, and stays on as you move through the book until you turn it off. The contents can be shown in a translation too, from the list on the Contents line. A part’s title page shows the translations you have ticked as well, under the English, or beside it with Compare on.", ru = "<b>Сравнение</b>, кнопка над текстом, ставит английский и переводы рядом, по колонке каждому, абзац против абзаца, и остаётся включённым, пока вы идёте по книге, пока вы его не выключите. Содержание тоже можно показать по переводу — из списка в строке Содержания. Титульная страница части тоже показывает отмеченные переводы: под английским, а при включённом Сравнении — рядом с ним." }
+"help:translations:2" = { en = "<b>Translations in parallel columns</b>, a switch in the same tab, sets the English and the translations side by side, a column each, paragraph against paragraph, on every page until you turn it off; on a phone each translation stands under its paragraph. The contents can be shown in a translation too, from the list on the Contents line. A part’s title page shows the translations you have ticked as well, under the English, or beside it in columns.", ru = "<b>Переводы в параллельных колонках</b>, переключатель на той же вкладке, ставит английский и переводы рядом, по колонке каждому, абзац против абзаца, на каждой странице, пока вы его не выключите; на телефоне каждый перевод стоит под своим абзацем. Содержание тоже можно показать по переводу — из списка в строке Содержания. Титульная страница части тоже показывает отмеченные переводы: под английским, а в колонках — рядом с ним." }
 "help:settings:1" = { en = "The gear in the header, or <kbd>Ctrl</kbd>+<kbd>,</kbd>, opens Settings, in five tabs: <b>Reading</b> (theme, size, line spacing, typeface, width, alignment, tapping to turn the page, the whole paper on one page, paragraph previews), <b>Show</b> (what stands beside the text: the index, red letter, references, pilcrows, notes, the 1955 readings, the quiz, tooltips), <b>Translations</b>, <b>Listening</b> (the voice, its speed, following along) and <b>Offline</b>. The button beside the title restores the defaults. Everything is kept in this browser only; nothing is sent anywhere.", ru = "Шестерёнка в шапке или <kbd>Ctrl</kbd>+<kbd>,</kbd> открывает Настройки в пяти вкладках: <b>Чтение</b> (тема, размер, межстрочный интервал, шрифт, ширина, выравнивание, листание касанием, документ целиком на одной странице, просмотр абзацев), <b>Показ</b> (что стоит рядом с текстом: указатель, красные слова, номера, знаки абзаца, примечания, разночтения 1955 года, викторина, подсказки), <b>Переводы</b>, <b>Аудио</b> (голос, скорость, слежение за чтением) и <b>Офлайн</b>. Кнопка рядом с заголовком восстанавливает настройки по умолчанию. Всё хранится только в этом браузере; никуда ничего не отправляется." }
 "Light or dark" = "Светлая или тёмная"
 "help:offline:1" = { en = "The cloud in the header is the sign of the offline copy. Tap it, or open Settings’ <b>Offline</b> tab, and tick <b>Base</b>: the whole site, about 48 MB, is kept in this browser and opens without a connection, and keeps itself up to date. Translations and the recordings, a paper or a part at a time, can be kept too. <b>Install as an app</b> puts it on the home screen or in the dock, where it opens on its own.", ru = "Облако в шапке — знак офлайн-копии. Нажмите на него или откройте вкладку <b>Офлайн</b> в Настройках и отметьте <b>Основа</b>: весь сайт, около 48 МБ, сохранится в этом браузере, будет открываться без связи и сам обновляться. Переводы и записи, по документу или по части, тоже можно сохранить. <b>Установить как приложение</b> помещает сайт на главный экран или в док, откуда он открывается сам по себе." }
@@ -640,7 +639,7 @@
 "tour:notes:title" = { en = "Notes, and the 1955 readings", ru = "Примечания и разночтения 1955 года" }
 "tour:notes" = { en = "A small raised number is a study note; a tiny ring marks words the 1955 printing had otherwise. Tap either to read it in a card.", ru = "Маленькая приподнятая цифра — примечание; крошечное кольцо отмечает слова, которые в издании 1955 года читались иначе. Нажмите — и откроется карточка." }
 "tour:gear:title" = { en = "Settings", ru = "Настройки" }
-"tour:gear" = { en = "Typeface, size and theme; what is shown beside the text; Russian translations under each paragraph, or side by side in Compare; the voice and its speed. Kept in this browser only.", ru = "Шрифт, размер и тема; что показывать рядом с текстом; русские переводы под каждым абзацем или бок о бок в режиме сравнения; голос и его скорость. Хранится только в этом браузере." }
+"tour:gear" = { en = "Typeface, size and theme; what is shown beside the text; Russian translations under each paragraph, or beside the English in columns; the voice and its speed. Kept in this browser only.", ru = "Шрифт, размер и тема; что показывать рядом с текстом; русские переводы под каждым абзацем или рядом с английским в колонках; голос и его скорость. Хранится только в этом браузере." }
 "tour:cloud:title" = { en = "Read offline", ru = "Читать офлайн" }
 "tour:cloud" = { en = "The whole site can be kept in this browser, to read with no connection, and installed as an app. This sign shows whether a copy is kept here, and opens the tab where that is done.", ru = "Весь сайт можно сохранить в этом браузере, чтобы читать без связи, и установить как приложение. Этот значок показывает, есть ли здесь копия, и открывает вкладку, где это делается." }
 "tour:help:title" = { en = "Help", ru = "Справка" }

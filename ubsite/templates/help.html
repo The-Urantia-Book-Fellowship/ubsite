@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% set title = 'Help' %}
 {% from "_chrome.html" import gear_svg, cloud_sign, help_svg, glass_svg, player_svg, keep_svg, playp %}
 {% from "_para.html" import para %}
-{% from "_fold.html" import afold, compare %}
+{% from "_fold.html" import afold %}
 {% from "_text.html" import chip, blanket, endnotes, quizcall %}
 {% from "_transport.html" import step %}
 {#- Help (Tigran, 2026-11-06): what each part of the page does, in chapters,
@@ -38,8 +38,7 @@
 .helppage .eg .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 18ch); gap: 0 1.2rem; }
 .helppage .eg .a { display: block; }
 .helppage .eg .afold { display: none; }
-.helppage .eg .marginhead, .helppage .eg .cmphead { display: flex; position: static; }
-.helppage .eg .cmphead .cmpbtn { display: inline-flex; }
+.helppage .eg .marginhead { display: flex; position: static; }
 .helppage .eg .find { max-width: 24rem; }
 .helppage .eg .transport, .helppage .eg .quizcall, .helppage .eg .blanket { margin: 0; }
 .helppage .eg .player { position: static; transform: none; display: inline-flex; max-width: 100%; }
@@ -103,7 +102,7 @@
     <li><a href="#search">{{ t('Search|help') }}</a></li>
     <li><a href="#listening">{{ t('Listening|help') }}</a></li>
     <li><a href="#notes">{{ t('Notes and 1955 readings') }}</a></li>
-    <li><a href="#translations">{{ t('Translations and Compare') }}</a></li>
+    <li><a href="#translations">{{ t('Translations') }}</a></li>
     <li><a href="#settings">{{ t('Settings|help') }}</a></li>
     <li><a href="#offline">{{ t('Working offline, and the app') }}</a></li>
     <li><a href="#quiz">{{ t('The quiz|help') }}</a></li>
@@ -199,16 +198,13 @@
   </section>
 
   <section id="translations">
-    <h2>{{ t('Translations and Compare') }}</h2>
+    <h2>{{ t('Translations') }}</h2>
     <p>{{ t('help:translations:1') }}</p>
     <div class="eg">
       <div class="tf"><button class="trfold" type="button" aria-expanded="false">{{ t('{n} translations', n=3) }}</button></div>
       <p class="cap">{{ t('help:translations:cap') }}</p>
     </div>
     <p>{{ t('help:translations:2') }}</p>
-    <div class="eg">
-      {{ compare() }}
-    </div>
   </section>
 
   <section id="settings">

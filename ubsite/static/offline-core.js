@@ -219,8 +219,9 @@
       if (a.toUpperCase() !== a && a.length === 1) return { res: redirect('/appendix/' + a.toUpperCase(), 301) };
       return { res: missing(sh, T('The appendices are lettered A to F.'), path) };
     }
-    // A part's page, and the same page at Compare's address (app.py part_compare).
-    if ((m = /^\/part\/([0-9]+)(\/compare)?$/.exec(path))) {
+    // Compare's old address on a part's page goes to the page (app.py part_compare).
+    if ((m = /^(\/part\/[0-9]+)\/compare$/.exec(path))) return { res: redirect(m[1], 301) };
+    if ((m = /^\/part\/([0-9]+)$/.exec(path))) {
       var part = '/part/' + parseInt(m[1], 10);
       if (sh.miscset[part]) return { chunk: 'misc', make: function (d) { return html(200, stored(sh, d.pages[part])); } };
       return { res: missing(sh, T('There are four parts, I to IV.'), path) };
@@ -242,15 +243,18 @@
       if (!sh.papers[pr]) return { res: text(404, 'No such paper.\n') };
       return { chunk: 'paper-' + pr, make: function (d) { return { status: 200, type: HTML, body: d.railsecs }; } };
     }
-    // Compare's address (app.py read_compare, paper_compare) is the page's
-    // with /compare after it, the same page.  A paper's number is the whole
-    // paper (app.py paper_page, since 2026-10-30); a copy from before it
-    // sends on to the paper's first section, as the server did.
-    var cm = /^(\/[^\/]+)\/compare$/.exec(path), at = cm ? cm[1] : path;
+    // Compare's old address (app.py read_compare, paper_compare) goes to the
+    // page's own, a setting since 2026-11-08; one that is no page of the book
+    // is the 404 it was.  A paper's number is the whole paper (app.py
+    // paper_page, since 2026-10-30); a copy from before it sends on to the
+    // paper's first section, as the server did.
+    var cm = /^\/([^\/]+)\/compare$/.exec(path), at = path;
+    if (cm && (/^[0-9]+$/.test(cm[1]) || RE_REF.test(cm[1]))) return { res: redirect('/' + cm[1], 301) };
+    if (cm) at = '/' + cm[1];
     if ((m = /^\/([0-9]+)$/.exec(at))) {
       var pn = parseInt(m[1], 10), secs = sh.papers[String(pn)];
       if (!secs) return { res: missing(sh, T('There is no Paper {n}. The Foreword is Paper 0, and the papers run to 196.', { n: pn }), path) };
-      var first = redirect('/' + pn + ':' + Math.min.apply(null, secs) + (cm ? '/compare' : ''), 307);
+      var first = redirect('/' + pn + ':' + Math.min.apply(null, secs), 307);
       return { chunk: 'paper-' + pn, make: function (d) { return d.whole ? whole(sh, d, pn) : first; } };
     }
     if ((m = /^\/([^\/]+)$/.exec(at))) {

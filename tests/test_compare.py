@@ -1,12 +1,13 @@
 """Compare, the text and the translations a reader has ticked side by side.
 
-ROADMAP item 15, step 2 (Tigran, 2026-10-26).  Its address is a section's with
-/compare after it, the same page byte for byte, which ub.js draws in columns
-from /tr/: so a reload or a link keeps it, and no setting reaches the server.
-A paper's number is the whole paper, in Compare too, every section in columns
-(test_whole).  The toggle is in every page whose section has a translation, after
-the Index's head and before the paper's, shown by the head script only where
-one the reader has ticked has it.  Rendered through the app as ASGI, as
+ROADMAP item 15, step 2 (Tigran, 2026-10-26), drawn by ub.js in columns from
+/tr/.  A setting since 2026-11-08, Translations in parallel columns
+(settings.py `compare`), in the Translations tab: until then a toggle at the
+head of the text, at an address of its own, the section's with /compare after
+it, which the tab kept as one moved about.  Those addresses go to the page's
+own now, which the reader's settings show; one that is no page of the book is
+the 404 it was.  A paper's number is the whole paper, in Compare too, every
+section in columns (test_whole).  Rendered through the app as ASGI, as
 test_appendix_pages does; skipped when var/ub.db has not been built.
 """
 
@@ -14,78 +15,78 @@ import json
 import re
 import unittest
 
-from test_appendix_pages import DB, get
+from test_appendix_pages import DB, ROOT, get
+from ubsite.settings import NEEDS, TRANSLATIONS
 from ubsite.stats import page_kind
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
 class Address(unittest.TestCase):
-    def test_it_is_the_same_page(self):
-        for ref in ("1:1", "1:1.3-4", "0:0", "144:5", "196:3.2"):
-            plain, cmp = get("/" + ref, raw=True), get(f"/{ref}/compare", raw=True)
-            self.assertEqual(plain[0], 200, ref)
-            self.assertEqual(cmp[0], 200, ref)
-            self.assertEqual(plain[2], cmp[2], ref)
+    def test_an_old_address_goes_to_the_page_for_good(self):
+        for ref in ("1:1", "1:1.3-4", "0:0", "144:5", "196:3.2", "1", "007", "300", "1:99", "1:1.99",
+                    "part/1", "part/9"):
+            status, headers, _ = get(f"/{ref}/compare")
+            self.assertEqual((status, headers.get("location")), (301, "/" + ref), ref)
 
-    def test_a_whole_paper_in_compare_is_the_same_page(self):
-        plain, cmp = get("/1", raw=True), get("/1/compare", raw=True)
-        self.assertEqual((plain[0], cmp[0]), (200, 200))
-        self.assertEqual(plain[2], cmp[2])
-        self.assertIn('class="cmphead"', plain[2])
-        # Not a query of /N: nothing but the address says Compare.
-        self.assertEqual(get("/1?compare=true")[2], get("/1")[2])
-
-    def test_what_is_not_there_is_said_as_without_it(self):
-        for ref, words in (("1:99", "Paper 1 has no section 99."), ("300", "There is no Paper 300."),
-                           ("1:1.99", "There is no paragraph 1:1.99"), ("x", "There is no page at this address."),
-                           ("search", "There is no page at this address.")):
+    def test_what_is_no_page_of_the_book_is_said_as_before(self):
+        for ref in ("x", "search"):
             status, _, body = get(f"/{ref}/compare")
             self.assertEqual(status, 404, ref)
-            self.assertIn(words, body, ref)
+            self.assertIn("There is no page at this address.", body, ref)
             self.assertIn(f"<code>/{ref}/compare</code>", body, ref)
         self.assertEqual(get("/i/god/compare")[0], 404)
+        self.assertEqual(get("/1:1/compare/x")[0], 404)
 
     def test_the_api_answers_its_own_404(self):
         status, _, body = get("/api/compare")
         self.assertEqual(status, 404)
         self.assertEqual(json.loads(body)["error"], "There is no such endpoint.")
 
-    def test_a_view_in_compare_counts_for_its_section(self):
+    def test_a_view_recorded_in_compare_counts_for_its_section(self):
         self.assertEqual(page_kind("/1:1/compare"), ("section", "1:1"))
         self.assertEqual(page_kind("/1:1.3-4/compare"), ("section", "1:1"))
         self.assertEqual(page_kind("/1/compare"), ("paper", "1"))
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
-class Toggle(unittest.TestCase):
-    def test_it_stands_between_the_index_s_head_and_the_paper_s(self):
-        body = get("/1:1")[2]
-        self.assertEqual(body.count('<div class="cmphead">'), 1)
-        self.assertLess(body.index('<div class="marginhead">'), body.index('<div class="cmphead">'),
-                        body.index('<header class="papertop">'))
-        self.assertIn('<button class="cmpbtn" type="button" aria-pressed="false">', body)
-        self.assertIn('<span class="long">Compare translations</span><span class="short">Compare</span>', body)
-
-    def test_its_words_in_russian(self):
+class Setting(unittest.TestCase):
+    def test_a_switch_under_the_list_greyed_while_none_is_ticked(self):
+        self.assertEqual([s[0] for s in TRANSLATIONS], ["translations", "compare"])
+        key, kind, label, default, _, hint = TRANSLATIONS[1]
+        self.assertEqual((kind, label, default), ("switch", "Translations in parallel columns", False))
+        self.assertIn("narrow screen", hint)
+        self.assertEqual(NEEDS["compare"], "translations")
         body = get("/1:1", raw=True)[2]
-        self.assertIn('<span class="long"><x-en>Compare translations</x-en>'
-                      '<x-ru lang="ru">Сравнить переводы</x-ru></span>', body)
-        self.assertIn('<span class="short"><x-en>Compare</x-en><x-ru lang="ru">Сравнить</x-ru></span>', body)
+        panel = body[body.index('id="set-p-translations"'):body.index('id="set-p-listening"')]
+        self.assertLess(panel.index('class="trlist trshown"'), panel.index('name="compare"'))
+        self.assertIn('<label data-needs="translations"><input type="checkbox" name="compare"> '
+                      '<x-en>Translations in parallel columns</x-en>'
+                      '<x-ru lang="ru">Переводы в параллельных колонках</x-ru>', panel)
 
-    def test_the_head_script_reads_the_address_and_shows_it_where_a_ticked_one_has_the_section(self):
-        body = get("/1:1", raw=True)[2]
-        self.assertIn("if (/\\/compare$/.test(location.pathname)) r.classList.add('compare');", body)
-        self.assertRegex(body, re.escape("article:has(' + f + ',' + d + ')>.cmphead{display:flex}"))
+    def test_a_list_none_ticked_greys_what_needs_it(self):
+        js = (ROOT / "ubsite/static/ub.js").read_text()
+        self.assertIn("v === 'off' || v === false || v === ''", js)
 
-    def test_the_tab_keeps_it_as_one_moves_about(self):
-        # Compare kept (2026-11-06): the tab's memory of it, written from every
-        # page of the book, read as a link is clicked, and on a page come to
-        # afresh alone (test_whole Unit runs the functions).
+    def test_no_toggle_and_no_address_kept(self):
+        for url in ("/1:1", "/1", "/part/1", "/help"):
+            body = get(url, raw=True)[2]
+            self.assertNotIn("cmphead", body, url)
+            self.assertNotIn("cmpbtn", body, url)
+            self.assertNotIn("ubCompare", body, url)
+            self.assertNotIn("/compare", body, url)
+
+    def test_the_head_script_sets_its_class_from_the_setting(self):
+        # The class, which ub.js cmpDraw keeps, never data-compare, which
+        # changes before Compare has measured the paragraph to keep in place.
         body = get("/1:1", raw=True)[2]
-        self.assertIn("window.ubCompareKeep = function", body)
-        self.assertIn("window.ubCompare = function", body)
-        self.assertIn("nav.type === 'navigate'", body)
-        self.assertIn("window.ubCompareKeep(location.pathname);", body)
+        self.assertIn("if (('compare' in s ? s.compare : D.compare) === true) r.classList.add('compare');", body)
+        self.assertIn(':root[data-margin="off"]:not(.compare, [data-index="off"])', body)
+        self.assertIn(':root.compare .partpage .dividers', body)
+        css = (ROOT / "ubsite/static/ub.css").read_text()
+        self.assertNotIn("[data-compare", css)
+        self.assertIn(':root.compare .grid > .row > .tf', css)
+        js = (ROOT / "ubsite/static/ub.js").read_text()
+        self.assertIn("document.documentElement.classList.toggle('compare', on);", js)
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")

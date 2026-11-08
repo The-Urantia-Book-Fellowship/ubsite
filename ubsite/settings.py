@@ -182,6 +182,21 @@ SHOW = [
 # translations()), and ub.js keeps it.
 TRANSLATIONS = [
     ("translations", "translations", "Translations", "", [], ""),
+    # Compare: the English and each translation ticked side by side, a column
+    # each, a row to a paragraph (ub.js cmpDraw); below 62rem each translation
+    # stands under its paragraph.  A setting since 2026-11-08 (Tigran: "this
+    # option is now persistent across many scenarios, so its natural place is
+    # in Settings, not as a UI element on every text page"): until then a pill
+    # at the head of the text, "Compare translations", at an address of its
+    # own, /1:1/compare, which the tab kept as one moved about (2026-11-06).
+    # Those addresses go to the page's own now (app.py read_compare).  Here,
+    # under the list, which it means nothing without, and greyed while none
+    # is ticked (NEEDS).  ub.js draws the columns, and again in place when it
+    # changes; the folds and a part's dividers are keyed on the class
+    # .compare, which the head script sets from it before first paint and
+    # ub.js keeps (base.html), never on data-compare (ub.css).
+    ("compare", "switch", "Translations in parallel columns", False, [],
+     "a column each beside the English; on a narrow screen, each under its paragraph"),
 ]
 SPEEDS = (0.8, 0.9, 1, 1.1, 1.25, 1.5)
 LISTEN = [
@@ -277,10 +292,12 @@ SITE_DEFAULTS: dict[str, dict] = {}
 # study notes off any of theirs.  A pair is a setting that means something
 # only while another has that value: which of the browser's voices, while the
 # browser's voice is chosen.  A setting whose own needs are not met greys
-# those that need it too: the browser's voices with Listening off.
+# those that need it too: the browser's voices with Listening off.  And the
+# translations in columns while none is ticked, `translations` being '' then.
 NEEDS = {"voice": "listen", "bvoice": ("voice", "browser"), "trvoices": "listen", "rate": "listen",
          "follow": "listen", "onward": "listen", "notesearch": "notes",
-         "indexsearch": "index", "studysearch": "studynotes", "quizboard": "quiz"}
+         "indexsearch": "index", "studysearch": "studynotes", "quizboard": "quiz",
+         "compare": "translations"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:

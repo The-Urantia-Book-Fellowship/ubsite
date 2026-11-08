@@ -46,10 +46,10 @@ window.ubLang = function (r, v) {
 // screen, since a printed page is narrower than 62rem too (ub.css, print).
 // Until 2026-10-31 the rule, which outranks ub.css's, showed the entries' fold
 // on that line with the index off, and printed it.  Among the
-// search results, each one's list, in the reader's order (ub.css .trhits).  And
-// Compare's toggle, where one of them has the section (ub.css .cmphead); in
-// Compare the row's entries keep their own line.  And on a part's page each
-// one's divider, under the English or a column each (part.html, 2026-11-07).
+// search results, each one's list, in the reader's order (ub.css .trhits).  In
+// Compare (settings.py `compare`, .compare below) the row's entries keep their own line.  And
+// on a part's page each one's divider, under the English or a column each
+// (part.html, 2026-11-07).
 // One rule, since the keys are the reader's own list; ub.js says it again on
 // a change.
 window.ubTr = function (v) {
@@ -60,7 +60,7 @@ window.ubTr = function (v) {
       d = ks.map(function (k) { return '.divider[data-k="' + k + '"]'; }).join(),
       r = ':root[data-margin="off"]:not(.compare, [data-index="off"]) .grid>.row:has(>:is(' + f + '))',
       s = ks.map(function (k) { return '>[data-tr="' + k + '"]'; });
-  st.textContent = ks.length ? f + '{display:block}article:has(' + f + ',' + d + ')>.cmphead{display:flex}' +
+  st.textContent = ks.length ? f + '{display:block}' +
     '@media screen and (max-width:62rem){' + r +
     '{flex-flow:row wrap;align-items:baseline}' + r + '>:is(.a,.tf){display:contents}' +
     r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold{margin-right:1em}}' +
@@ -89,61 +89,30 @@ window.ubTitle = function () {
 // #fnref…), stands alone, /15#note15_3_4_0, and any other after the place,
 // /15#15:3.4#tr-ud (ub.js arrive).  Off, a paper's becomes its first
 // section's, /15 -> /15:0, every paper opening with one, and a place after #
-// its own address again.  Compare's suffix stays where it is, before the
-// hash: /15:3/compare -> /15/compare#15:3 (ub.js cmpDraw draws the whole
-// paper's sections each).  Idempotent: what it gives it leaves alone, which
+// its own address again.  Idempotent: what it gives it leaves alone, which
 // is what makes going there safe.  ub.js puts links right as they are clicked, and
 // listen.js what it fetches, so the hop below is for an address typed, kept
 // or followed from elsewhere.
 window.ubUnit = function (where) {
   var whole = document.documentElement.dataset.whole === 'true',
-      m = /^\/(\d+)(?::(\d+)(?:\.(\d+(?:-\d+)?))?)?(\/compare)?(#.*)?$/.exec(where);
+      m = /^\/(\d+)(?::(\d+)(?:\.(\d+(?:-\d+)?))?)?(#.*)?$/.exec(where);
   if (!m) return where;
-  var p = m[1], s = m[2], n = m[3], cmp = m[4] || '', h = m[5] || '', c;
+  var p = m[1], s = m[2], n = m[3], h = m[4] || '', c;
   if (whole) {
     if (s === undefined) return where;
-    if (/^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?\d+_\d+_\d+_\d+$/.test(h)) return '/' + p + cmp + h;
-    if (s === '0' && !n && !h) return '/' + p + cmp;
-    return '/' + p + cmp + '#' + p + ':' + s + (n ? '.' + n : '') + h;
+    if (/^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?\d+_\d+_\d+_\d+$/.test(h)) return '/' + p + h;
+    if (s === '0' && !n && !h) return '/' + p;
+    return '/' + p + '#' + p + ':' + s + (n ? '.' + n : '') + h;
   }
   if (s !== undefined) return where;
   c = /^#(\d+):(\d+)(?:\.(\d+(?:-\d+)?))?(#.*)?$/.exec(h);
-  if (c && c[1] === p) return '/' + p + ':' + c[2] + (c[3] ? '.' + c[3] : '') + cmp + (c[4] || '');
+  if (c && c[1] === p) return '/' + p + ':' + c[2] + (c[3] ? '.' + c[3] : '') + (c[4] || '');
   c = /^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?(\d+)_(\d+)_(\d+)_\d+$/.exec(h);
-  if (c && c[1] === p) return '/' + p + ':' + c[2] + '.' + c[3] + cmp + h;
-  return '/' + p + ':0' + cmp + h;
-};
-// Compare kept as one moves about (Tigran, 2026-11-06).  Not a setting: a
-// mode of this tab, decided by the address of the last page of the book it
-// showed, /15:3/compare on and /15:3 off, and left as it was by any other
-// page, a search's, the index's, the quiz's, Home; a part's page, /part/1, is
-// one of the book's (2026-11-07).  ubCompareKeep reads it
-// off such an address; ubCompare gives an address of the book the suffix
-// while it is on, before the hash, and never takes it off: it ends with the
-// toggle, or Back past where it was turned on (ub.js cmpDraw).  Idempotent,
-// and ubUnit's partner in either order: /15:3.4#tr-ud -> /15:3.4/compare#tr-ud
-// -> /15/compare#15:3.4#tr-ud.  Kept in sessionStorage, this tab's and no
-// other's, read each time; where there is none, Compare is as a link has it.
-// Never data-<key> on <html>, which is a setting's (settings.py); the class
-// compare, below, is this page's own.  Until that day the text's own links
-// and the index's left Compare (DECISIONS.md).
-window.ubCompareKeep = function (path) {
-  var m = /^(?:\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?|\/part\/\d+)(\/compare)?$/.exec(path);
-  if (!m) return;
-  try { if (m[1]) sessionStorage.setItem('ub_compare', '1'); else sessionStorage.removeItem('ub_compare'); } catch (e) {}
-};
-window.ubCompare = function (where) {
-  var on = false;
-  try { on = sessionStorage.getItem('ub_compare') === '1'; } catch (e) {}
-  if (!on) return where;
-  var m = /^(\/\d+(?::\d+(?:\.\d+(?:-\d+)?)?)?|\/part\/\d+)(#.*)?$/.exec(where);
-  return m ? m[1] + '/compare' + (m[2] || '') : where;
+  if (c && c[1] === p) return '/' + p + ':' + c[2] + '.' + c[3] + h;
+  return '/' + p + ':0' + h;
 };
 (function (r, D, B) {
   r.classList.add('js');
-  // Compare's address, /1:1/compare (app.py read_compare): the same page, which
-  // ub.js draws in columns.  The folds go at once.
-  if (/\/compare$/.test(location.pathname)) r.classList.add('compare');
   // The tab's icon says which site this is, the book burgundy on one of them
   // (app.py SITES).  Chosen here, from the page's own address, since the same
   // pages are served at both, and the offline copy holds them once for both.
@@ -169,20 +138,18 @@ window.ubCompare = function (where) {
   }
   window.ubLang(r, 'lang' in s ? s.lang : D.lang);
   window.ubTr('translations' in s ? s.translations : D.translations);
-  // This address in the reader's unit (ubUnit, above), and in Compare while
-  // this tab is (ubCompare), or the page is left for it before it is drawn,
-  // with no entry in the history, as the server's redirect left none.
-  // Compare's suffix on a page come to afresh alone: typed, a bookmark, or
-  // the box's citation sent on by the server (app.py search); never on Back,
-  // Forward or a reload, which would put a reader who left Compare by Back
-  // into it again.  The page is fetched twice then, as it is for the unit:
-  // the server knows no mode.  Not the same step twice in three seconds: a
-  // worker from before Whole paper (sw.js, offline-core.js) still answers /15
-  // with its first section, and would send a reader who has it on back and
-  // forth until the copy is updated; the page stays as it is instead.
-  var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || null,
-      fresh = nav ? nav.type === 'navigate' : !!(performance.navigation && performance.navigation.type === 0),
-      here = location.pathname + location.hash, to = window.ubUnit(fresh ? window.ubCompare(here) : here), last = null;
+  // Compare (settings.py `compare`): the folds give way at once to the columns
+  // ub.js draws.  A class, not the setting's data-compare, since it is what is
+  // drawn: ub.js cmpDraw keeps it, after measuring the paragraph at the
+  // window's top, which a change of the setting must not move first.
+  if (('compare' in s ? s.compare : D.compare) === true) r.classList.add('compare');
+  // This address in the reader's unit (ubUnit, above), or the page is left for
+  // it before it is drawn, with no entry in the history, as the server's
+  // redirect left none.  Not the same step twice in three seconds: a worker
+  // from before Whole paper (sw.js, offline-core.js) still answers /15 with
+  // its first section, and would send a reader who has it on back and forth
+  // until the copy is updated; the page stays as it is instead.
+  var here = location.pathname + location.hash, to = window.ubUnit(here), last = null;
   if (to !== here) {
     try { last = (sessionStorage.getItem('ub_unit') || '').split('\n'); } catch (e) {}
     if (last && last[0] === here && last[1] === to && Date.now() - last[2] < 3000) {
@@ -192,10 +159,6 @@ window.ubCompare = function (where) {
       location.replace(to.replace(/#.*$/, '') + location.search + to.replace(/^[^#]*/, ''));
     }
   }
-  // What this page says of Compare, kept for the pages after: after the hop,
-  // which reads it, and whatever the hop did, since a page left for its
-  // Compare address keeps again there.
-  window.ubCompareKeep(location.pathname);
   // The contents in a translation (ub.js tocApply): the rail's tree waits
   // unseen until they are drawn, and shows after 1.5 s whatever happens.
   if (r.dataset.toc) setTimeout(function () { r.classList.add('tocready'); }, 1500);

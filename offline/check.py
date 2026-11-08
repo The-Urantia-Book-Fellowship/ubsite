@@ -19,7 +19,8 @@ Node runs static/offline-core.js on the copy, as the service worker does
   - addresses the server explains or redirects: a paragraph that is not there,
     a range that runs backwards, a paper or section there is none of, a
     reading path a headword does not have, or not by theme, and Compare's
-    address, a section's page with /compare after it;
+    old address, a section's page with /compare after it, which goes to the
+    page's own since Compare became a setting (2026-11-08);
   - search: every query in tests/fixtures/offline-queries.txt and every one a
     reader has typed into this machine's dev server (var/visits.db), in each of
     its lists and a page past the first, byte for byte with app.search();
