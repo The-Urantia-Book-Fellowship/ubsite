@@ -65,9 +65,12 @@
   }
   var NOPAGE = T.k('There is no page at this address.');
   // templates/offline.html: an address the copy does not hold, read online.
+  // Marked `away`, as a 404 is by its status: no answer of the copy's own,
+  // which the worker gives only where the network has failed (sw.js).
   function away(sh, msg) {
-    var a = sh.away;
-    return html(200, compose(sh, a.t, a.h, '', a.b[0] + msg + a.b[1], a.s));
+    var a = sh.away, r = html(200, compose(sh, a.t, a.h, '', a.b[0] + msg + a.b[1], a.s));
+    r.away = true;
+    return r;
   }
 
   // A section's page from its paper's chunk: its rail put back, its section

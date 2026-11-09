@@ -40,7 +40,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 RAIL1 = """document.querySelector('.rail a[href="/1"]').textContent"""
 BASE = "http://localhost:8131"
 SERVER = """
-import os, pathlib, sys, types
+import asyncio, os, pathlib, sys, types
 os.environ["UB_VISITS"] = "off"
 sys.path.insert(0, sys.argv[2])
 import uvicorn
@@ -56,6 +56,21 @@ async def newer_worker(request, call_next):
         return await call_next(request)
     body = A.service_worker(types.SimpleNamespace(headers={})).body + TAG.read_bytes()
     return Response(body, media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+
+# A recording's file that is not there while the test has named it in FAIL,
+# each asking of it counted in ASKED; and a slow network, for any address
+# asked with e2e-slow in its query (the review of 2026-11-09).
+FAIL, ASKED = A.OFFLINE.with_name("audio-fail"), A.OFFLINE.with_name("audio-asked")
+
+@A.app.middleware("http")
+async def test_network(request, call_next):
+    if FAIL.exists() and request.url.path == FAIL.read_text().strip():
+        with ASKED.open("a") as f:
+            f.write(request.url.path + "\\n")
+        return Response("gone for the test\\n", status_code=404, media_type="text/plain")
+    if "e2e-slow" in request.url.query:
+        await asyncio.sleep(5.5)
+    return await call_next(request)
 
 uvicorn.run(A.app, host="127.0.0.1", port=8131, log_level="info")
 """
@@ -574,7 +589,21 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         row = "dialog.settings .recrow[data-n='161'] .keep"
         ok(pg.get_attribute(row, "data-st") == "none" and pg.get_attribute(row, "title") == "Keep Paper 161 offline (17 MB)",
            f"Paper 161's row offers to keep it ({pg.get_attribute(row, 'title')!r})")
+        # Its third file not there: the download stops, and asks for it once,
+        # where it asked again at once, for ever (review of 2026-11-09), and the
+        # tab offers to try again, which, the file back, keeps the paper.
+        gone = "/audio/mh/paper161/P161_02.mp3"
+        fail, tries = copy.with_name("audio-fail"), copy.with_name("audio-asked")
+        fail.write_text(gone)
         pg.click(row)
+        pg.wait_for_selector("dialog.settings .offrec .why .recagain", timeout=120000)
+        pg.wait_for_timeout(3000)
+        n = len(tries.read_text().split()) if tries.exists() else 0
+        ok(n == 1, f"a file that fails is asked for once, not again and again ({n} times in 3 s)")
+        ok(en(pg, "dialog.settings .offrec .why").startswith("The download stopped: paper161/P161_02.mp3 could not be fetched (404). Try again"),
+           f"and the tab says why, with Try again ({en(pg, 'dialog.settings .offrec .why')!r})")
+        fail.unlink()
+        pg.click("dialog.settings .offrec .why .recagain")
         pg.wait_for_function(f"document.querySelector(\"{row}\").dataset.st === 'kept'", timeout=120000)
         kept = pg.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.map(k => new URL(k.url).pathname).sort())")
         ok(kept == [f"/audio/mh/paper161/P161_0{i}.mp3" for i in range(4)], f"its four files are in the cache ({kept})")
@@ -592,6 +621,13 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         print("Offline")
         pg.reload()
         ok(pg.evaluate("!!navigator.serviceWorker.controller"), "the page is the worker's")
+        # A slow network, 5.5 s, past the worker's WAIT of 4: an address the copy
+        # holds nothing for is the network's to answer, however long it takes,
+        # where until 2026-11-09 the copy's own 404 or "read online" answered at
+        # 4 s and the site's was thrown away (a stylesheet of a newer build).
+        got = pg.evaluate("Promise.all(['/static/ub.css?v=e2e-slow', '/quiz/board?e2e-slow=1'].map(u =>"
+                          " fetch(u).then(r => r.text().then(t => [r.status, t.includes('read online')]))))")
+        ok(got == [[200, False], [200, False]], f"a slow network's answer is waited for where the copy has none ({got})")
         ctx.set_offline(True)
         probe = ("async (a) => { try { const r = await fetch(a[0], a[1] ? {headers: {Range: a[1]}} : {});"
                  " const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-range'), b.byteLength]; }"

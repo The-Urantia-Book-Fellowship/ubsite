@@ -74,7 +74,16 @@
     return sw.ready.then(function (reg) {
       return new Promise(function (resolve) {
         var ch = new MessageChannel();
-        ch.port1.onmessage = function (e) { resolve(e.data); };
+        // A command the worker refused, {error} alone (a translation let go
+        // while a download runs, a recording whose list could not be had), is
+        // no state: what is so now is asked for and shown instead, so that
+        // the change is seen not made.  Until 2026-11-09 it was drawn as a
+        // download that had stopped, in English, every translation's tick
+        // cleared.
+        ch.port1.onmessage = function (e) {
+          if (cmd !== 'state' && e.data && 'error' in e.data && !('have' in e.data)) ask('state').then(resolve);
+          else resolve(e.data);
+        };
         var msg = { cmd: cmd };
         for (var k in more || {}) msg[k] = more[k];
         reg.active.postMessage(msg, [ch.port2]);
@@ -108,8 +117,11 @@
     show(s);
     keepUp(s);
   }
-  var last = null;
+  var last = null, leaving = false;
   function show(s) {
+    // The worker's word as a copy is let go (off) comes from a recording's
+    // file stopped on the way, and would put the tick back.
+    if (leaving && s !== null) return;
     last = s;
     watch(s);
     trs(s);
@@ -427,9 +439,10 @@
   }
   function off() {
     copyBox.disabled = true;
+    leaving = true;
     ask('remove').then(function () {
       return sw.getRegistration('/');
-    }).then(function (reg) { return reg && reg.unregister(); }).then(function () { show(null); });
+    }).then(function (reg) { return reg && reg.unregister(); }).then(function () { leaving = false; show(null); });
   }
   // Update now, tapped (or Try again), or made by itself (keepUp).  Said here
   // at once, not left to the worker: the button goes, so a second tap cannot
@@ -577,7 +590,10 @@
     });
   }
   document.addEventListener('ub:offtab', function () { recWanted = true; ensureAll(); });
-  window.addEventListener('online', function () { if (recWanted) ensureAll(); });
+  window.addEventListener('online', function () {
+    if (recWanted) ensureAll();
+    if (last && last.audio && last.audio.error) pump(last, true);
+  });
   // Loaded by the tab's own opening (ub.js), the event is past: the panel
   // shown says so.
   if (panel.classList.contains('on')) { recWanted = true; ensureAll(); }
@@ -697,7 +713,7 @@
     recBox.querySelector('.recstate').innerHTML = total && room !== null ? T('offline:rechead', { s: size(total), r: size(room) })
       : total ? T('kept, {s}', { s: size(total) }) : room !== null ? T('Room for about {s} in this browser.', { s: size(room) }) : '';
     recBox.querySelector('.going').hidden = !queue.length;
-    hold(!!queue.length);
+    hold(!!queue.length && !(a && a.error));
     var why = recBox.querySelector('.why');
     why.innerHTML = a && a.error ? T('The download stopped: {e}.', { e: a.words || T.same(a.error) }) +
                       (on ? ' <button type="button" class="recagain"><span>' + T('Try again') + '</span></button>' : '')
@@ -707,10 +723,13 @@
     pump(s);
   }
   // The next file asked for while the queue is not empty, nothing runs, and
-  // the page is online; the reply, shown, asks for the next.
-  function pump(s) {
+  // the page is online; the reply, shown, asks for the next.  Not after a file
+  // that failed, until Try again (`again`) or the browser is online again: a
+  // full phone, a 404 or a damaged file was fetched again at once, for ever,
+  // up to 27 MB a time, the screen held on (review of 2026-11-09).
+  function pump(s, again) {
     var a = s && !s.removed && s.audio;
-    if (!a || !a.queue.length || a.busy || s.busy || !online() || pumping) return;
+    if (!a || !a.queue.length || a.busy || s.busy || !online() || pumping || (a.error && !again)) return;
     pumping = true;
     ask('keep').then(function (r) { pumping = false; show(r); }, function () { pumping = false; });
   }
@@ -733,7 +752,7 @@
   recBox.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('button');
     if (!b) return;
-    if (b.classList.contains('recagain')) { pumping = false; pump(last); return; }
+    if (b.classList.contains('recagain')) { pumping = false; pump(last, true); return; }
     if (!b.classList.contains('keep')) return;
     ev.preventDefault();
     ev.stopPropagation();                        // not the fold's

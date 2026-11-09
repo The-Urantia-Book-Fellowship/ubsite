@@ -472,7 +472,13 @@ function fromCopy(c, url) {
   try { path = decodeURIComponent(url.pathname); } catch (e) { return Promise.resolve(null); }
   var plan = self.ubOffline.resolve(path, c.shell, location.origin, c.kept);
   if (plan === null) return Promise.resolve(null);
-  if (plan.res) return Promise.resolve(respond(c, plan.res));
+  if (plan.res) {
+    // A not-found page of its own, or one saying the address is read online,
+    // is `ubWeak`: the copy holds nothing for it (the fetch handler).
+    var r = respond(c, plan.res);
+    r.ubWeak = !!plan.res.away || plan.res.status >= 400;
+    return Promise.resolve(r);
+  }
   if (plan.search) return database(c).then(function (d) {
     return respond(c, self.ubOffline.search(d.db, d.mem, c.shell, url.searchParams, d.kept));
   });
@@ -497,9 +503,6 @@ self.addEventListener('fetch', function (e) {
   if (self.ubOffline.HOSTED.indexOf(url.pathname) >= 0) return;
   e.respondWith(copy().then(function (c) {
     if (!c) return fetch(req);
-    var mine = function () {
-      return fromCopy(c, url).then(function (r) { return r || Promise.reject(new Error('not in the copy')); });
-    };
     // The network even where the browser says it is offline: Chrome can say so
     // with the network working, until it is restarted, and until 2026-10-27
     // every page then came from the copy (a laptop moved from Wi-Fi to a
@@ -507,22 +510,41 @@ self.addEventListener('fetch', function (e) {
     // fetch fails at once and the copy answers, not what the cache happens to
     // hold: a translation not kept says so, though it was read online.
     var net = self.navigator.onLine === false ? new Request(req, { cache: 'no-store' }) : req;
+    // The copy answers a page it holds once the network has taken WAIT, and
+    // anything it has once the network has failed.  Not, at WAIT, a 404 of its
+    // own or a page saying the address is read online (ubWeak): until
+    // 2026-11-09 those beat a slow network, and its answer was thrown away,
+    // the stylesheet of a build the copy did not have yet among them, which
+    // left the page unstyled (review of 2026-11-09).
     return new Promise(function (resolve, reject) {
-      var settled = false, timer = null;
-      var fall = function (why) {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        mine().then(resolve, function () { reject(why); });
-      };
-      timer = setTimeout(function () { fall(new Error('the network took too long')); }, WAIT);
-      fetch(net).then(function (r) {
-        if (r.status >= 500) return fall(new Error('the server answered ' + r.status));
+      var settled = false, timer = null, asked = null, failed = null, bad = null;
+      var settle = function (r) {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
         resolve(r);
-      }, fall);
+      };
+      var fall = function (now) {
+        if (!asked) asked = fromCopy(c, url).then(null, function () { return null; });
+        asked.then(function (r) {
+          if (settled) return;
+          if (r && (now || !r.ubWeak)) return settle(r);
+          if (!now) return;
+          if (bad) return settle(bad);             // the server's 5xx, where the copy has nothing
+          settled = true;
+          reject(failed);
+        });
+      };
+      timer = setTimeout(function () { fall(false); }, WAIT);
+      fetch(net).then(function (r) {
+        if (r.status < 500) return settle(r);
+        bad = r;
+        failed = new Error('the server answered ' + r.status);
+        fall(true);
+      }, function (err) {
+        failed = err;
+        fall(true);
+      });
     });
   }));
 });
@@ -745,10 +767,18 @@ function drop(k) {
 }
 
 // Everything this worker keeps, for a reader who unticks the offline copy in
-// Settings (offline.js off).
+// Settings (offline.js off).  A recording's file on the way first stopped, its
+// queue emptied, and its end waited for: it made its cache and meta again
+// after they were deleted, with no worker left to let them go (review of
+// 2026-11-09).
 function remove() {
   held = null;
-  return caches.keys().then(function (ks) {
+  if (audioAbort) audioAbort.abort();
+  return updateMeta(function (meta) { if (meta.audio) meta.audio.queue = []; }).then(function () {
+    return audioRunning;
+  }).then(null, function () {}).then(function () {
+    return caches.keys();
+  }).then(function (ks) {
     return Promise.all(ks.filter(function (k) {
       return k === META || k === ENGINE || k.indexOf(COPY) === 0 || k.indexOf(AUDIO) === 0;
     })
