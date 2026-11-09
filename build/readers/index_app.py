@@ -133,17 +133,20 @@ def read_appendices(texdir: pathlib.Path, report,
             # The headword is the name alone.  It used to be the whole printed
             # line less a final period -- "actors (44:2.10)", "abandonters q.v"
             # -- which no reader would type and no search could match.
-            name = label(src, where, report)
-            name_html = label(src, where, report, sup=True)
+            # Not `name`, the appendix's own (\iappendixname), which until
+            # 2026-11-09 each row wrote over: B's was stored as its last row,
+            # "worship builders".
+            head = label(src, where, report)
+            head_html = label(src, where, report, sup=True)
             qv = bool(re.search(r"\\qv\b", line))
             entries.append(Entry(
                 where=where, scope=letter.upper(), letter=letter.upper(), level=1,
-                headword=name, headword_html=name_html, text=text, text_expanded=text,
-                chain=[text], path=text, path_plain=name, path_html=name_html,
+                headword=head, headword_html=head_html, text=text, text_expanded=text,
+                chain=[text], path=text, path_plain=head, path_html=head_html,
                 cites=RE_CIT.findall(line), xrefs=xrefs,
                 qv=qv, raw=line, src_text=src, ord=ordinal,
-                qv_target=name if qv else None,
-                qv_target_html=name_html if qv else None))
+                qv_target=head if qv else None,
+                qv_target_html=head_html if qv else None))
 
         out.append(Appendix(letter.upper(), name, title, entries, events))
     return out

@@ -40,6 +40,8 @@ RE_LAYOUT   = re.compile(r"\\hspace\*?\{[^{}]*\}|\\setlength\{[^{}]*\}\{[^{}]*\}
 # web gives it back.  (144:3.13 met the same clash and kept its \pc, cancelling
 # the extra space with \vspace{-\baselineskip} instead.)
 RE_PC_REMOVED = re.compile(r"%.*\\pc at (\d+):(\d+)\.(\d+) has been removed")
+# A group mark before a paragraph's address: \pc, or its twin \pcman.
+RE_PC = re.compile(r"\\pc(?:man)?(?![A-Za-z])")
 # A \vs whose body is one group pushed in by a fraction of the column is a
 # heading within the text, not prose: 0:12.10 "{\hspace*{0.15\columnwidth}\itshape
 # ACKNOWLEDGMENT}", which heads the Acknowledgment.  The press indents it; the
@@ -215,6 +217,12 @@ def read_paper(path: pathlib.Path, report) -> Paper:
             ex = inline(body)
             if prefix.strip():
                 ex.flags.update(inline(prefix).flags)
+            # Whatever the table makes of it, a group mark there is the
+            # paragraph's gap_before: a table that drops one loses its pilcrow
+            # without a word, as STRIP did \pcman's until 2026-11-09.
+            if RE_PC.search(prefix) and not ex.flags.get("gap_before"):
+                report.hard("pc-dropped", f"{where}:{lineno}",
+                            f"{p}:{s}.{n} has a group mark before it that set no gap_before")
             place(Paragraph(p, s, n, "vs", lineno, ex, bool(RE_HEADING.match(body))))
             continue
 
@@ -283,8 +291,11 @@ def read_paper(path: pathlib.Path, report) -> Paper:
         else:
             q.ex.flags["gap_before"] = 1.0
 
+    # A line nothing claimed may hold text that never reaches the site: a hard
+    # failure, as CLAUDE.md §6 says, which until 2026-11-09 it was only said to
+    # be (a warning).
     for p in pending:
-        report.warn("unclaimed-line", p.split(":")[0] + ":" + p.split(":")[1],
+        report.hard("unclaimed-line", p.split(":")[0] + ":" + p.split(":")[1],
                     p.split(": ", 1)[1])
 
     if not sections and paras:

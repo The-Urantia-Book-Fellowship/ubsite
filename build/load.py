@@ -21,6 +21,8 @@ sys.path.insert(0, str(VENDOR))
 import cite   # noqa: E402
 import xref   # noqa: E402
 
+from .heads import Heads  # noqa: E402
+
 # The papers each part holds; its words come from the press style (read_parts).
 PARTS = [(1, 1, 31), (2, 32, 56), (3, 57, 119), (4, 120, 196)]
 
@@ -187,15 +189,17 @@ def load_index(con, az, apps, para_key, report) -> None:
                          v.month_label, v.text, line, line_sup, int(reads_on), lh or line))
             cites_of(eid, v.where, v.cites)
 
-    # Cross-references, resolved once the whole tree exists.
-    heads = {}
+    # Cross-references, resolved once the whole tree exists: to a headword as
+    # it is written before one that folds alike (build/heads.py, trap 8).
+    named = []
     paths = {}
     for row in con.execute("SELECT id, level, headword, path FROM index_entry"
                            " WHERE scope='az' ORDER BY id"):
         i, level, head, path = row
         if level == 1 and head:
-            heads.setdefault(xref.fold(head), i)
+            named.append((i, head))
         paths.setdefault(_path_key(path), i)
+    heads = Heads(named)
 
     for e in list(az) + [x for a in apps for x in a.entries]:
         src = by_where.get(e.where)
@@ -233,7 +237,7 @@ def load_index(con, az, apps, para_key, report) -> None:
             if e.where in qv_head:
                 head, via = qv_head[e.where], "qv"
             else:
-                head, via = heads.get(xref.fold(e.headword)), "name"
+                head, via = heads.get(e.headword), "name"
             if head is not None:
                 con.execute("INSERT INTO appendix_head VALUES (?,?,?)",
                             (by_where[e.where], head, via))
@@ -258,22 +262,22 @@ def _path_key(path: str) -> str:
 _RE_CONJ = re.compile(r"\s+and\s+|\s*,\s*")
 
 
-def _resolve(target: str, heads: dict):
+def _resolve(target: str, heads: Heads):
     """Which of xref.resolves()'s routes got there, and the head entry if one.
 
     Mirrors that function's order so the recorded route is the one the print
     gate would have taken.
     """
     for reading in xref.readings(target):
-        h = heads.get(xref.fold(reading.split(":")[0]))
+        h = heads.get(reading.split(":")[0])
         if h is not None:
             return "head", h
         parts = [p for p in _RE_CONJ.split(reading) if p.strip()]
-        if len(parts) > 1 and all(xref.fold(p) in heads for p in parts):
-            return "conjunction", heads[xref.fold(parts[0])]
+        if len(parts) > 1 and all(p in heads for p in parts):
+            return "conjunction", heads[parts[0]]
     members = xref.expand_range(target)
-    if members and all(xref.fold(m) in heads for m in members):
-        return "range", heads[xref.fold(members[0])]
+    if members and all(m in heads for m in members):
+        return "range", heads[members[0]]
     return None, None
 
 

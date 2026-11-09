@@ -113,9 +113,21 @@ INVARIANTS = [
          AND text_html NOT LIKE '%<a class="hw" href="/i/%</a> <i>q.v.</i>'"""),
     ("every See and See also has its link",
      "SELECT COUNT(*) FROM xref WHERE kind IN ('see', 'seealso') AND href IS NULL"),
+    # Two headwords fold alike (trap 8), "Ammonites" the tribe and "ammonites"
+    # the fossils; a reference written as one of them is that one, which until
+    # 2026-11-09 the first by id was (build/heads.py).
+    ("a reference written as a headword is, goes to that headword",
+     """SELECT COUNT(*) FROM xref x JOIN index_entry e
+         ON e.scope = 'az' AND e.level = 1 AND e.headword = TRIM(x.target)
+         WHERE x.route = 'head' AND x.head_entry_id <> e.id
+           AND e.id = (SELECT MIN(id) FROM index_entry f WHERE f.scope = 'az' AND f.level = 1
+                         AND f.headword = e.headword)"""),
     ("every entry's root is a level-1 entry",
      """SELECT COUNT(*) FROM index_entry e JOIN index_entry r ON r.id = e.root_id
          WHERE r.level <> 1"""),
+    # Its \iappendixname, which until 2026-11-09 B to F stored as their last row.
+    ("every appendix is named as its file names it",
+     "SELECT COUNT(*) FROM appendix WHERE name NOT LIKE 'APPENDIX ' || letter || ':%'"),
     ("every chronology event has a sortable year",
      "SELECT COUNT(*) FROM chronology_event WHERE year_sort IS NULL"),
     ("every index entry has an anchor",

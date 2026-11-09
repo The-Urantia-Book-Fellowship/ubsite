@@ -116,6 +116,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- In the index, ammonites under animals and under marine life, among the types named, goes to the fossils, where it went to the Ammonites, the tribe.
+- Twenty paragraphs have their pilcrow again, the mark of a new group of paragraphs in the 1955 printing, which the site had lost where the text places it by hand: 17:0.2 and 17:0.10, and eighteen in 104:4 and 104:5.
 - Unticking the offline copy while a recording was downloading lets that recording go too, where its file came on into the browser after the copy was gone and the tick came back; and letting go of a translation while the copy updates leaves it ticked, where it said the download had stopped and cleared every translation's tick.
 - On a slow connection, what the offline copy has nothing for waits for the site, however long it takes, where after four seconds the copy answered that the page was not found or was read online and the site's answer was thrown away, a stylesheet just after the site was updated among them, which left the page unstyled.
 - A recording kept offline whose file fails to come, for want of room in the browser or because it is not on the site, stops with Try again, where it was fetched again at once, without end, up to 27 MB a time, with the screen held on; it tries once more by itself when the browser comes back online.
@@ -148,6 +150,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- Text version 9: twenty paragraphs' `group_before` is true, 17:0.2, 17:0.10 and eighteen in 104:4-5, where the press's `\pcman`, the twin of `\pc` it places by hand, was stripped (`build/press_macros.py`). The build now fails on a group mark that sets no `gap_before` (`pc-dropped`) and on a line of the press nothing claims (`unclaimed-line`, until now a warning); a cross-reference finds its headword as written before by its fold (`build/heads.py`), which a gate holds; and `appendix.name` is each appendix's own, APPENDIX B: CELESTIAL BEINGS, TYPES, where B to F held their last row's.
 - deploy/ubsite.service runs uvicorn with --no-access-log, whose access log put every request in the journal with the reader's address (forwarded by nginx) and the search; both nginx blocks limit /stats, whose password check costs 16 MB a try, to ten a minute in a zone of its own, ubsite_stats. Each host needs the unit copied in, systemctl daemon-reload and a restart, and its nginx block installed again, as root (deploy/README.md). nginx's own access log, set on each host, still keeps addresses.
 - visits.db is written with PRAGMA secure_delete on, and its log truncated after a new day's salt is made, so that the day before's salt leaves the file; a visits.db from before keeps old salts in its free pages until it is vacuumed (sqlite3 var/visits.db VACUUM).
 - The quiz board's POSTs run in the thread pool, off the event loop, and a body nested deeper than json.loads reads is a 400, where it was a 500.

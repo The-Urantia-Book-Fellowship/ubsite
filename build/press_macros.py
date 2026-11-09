@@ -42,6 +42,11 @@ OVERRIDES: dict[str, Spec] = {
                note="start of a blank-line-delimited group in the 1955 printing. "
                     "Typographic in print; the British edition prints it as a "
                     "visible section mark."),
+    "pcman": Spec(FLAG, opt=1, kind="gap_before",
+                  note="\\pc's twin, placed by hand (the press's style defines it as \\pc[#1]: the "
+                       "distinct name keeps its autobalance from rewriting it).  The same "
+                       "group mark: left to upstream's STRIP until 2026-11-09, which lost the "
+                       "pilcrow of the 20 paragraphs that have it (17:0.2, 17:0.10, 104:4-5)."),
     "ublistelem": Spec(SPAN, args=1, kind="listmark",
                        note="list label ('1.', 'a.', 'IV.'). NOT an <ol>: the marker "
                             "is real text the index quotes, so converting it would "

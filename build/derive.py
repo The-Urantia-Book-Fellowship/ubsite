@@ -17,6 +17,8 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "vendor" / "index"))
 import xref  # noqa: E402
 
+from .heads import Heads  # noqa: E402
+
 
 def reverse_map(con) -> None:
     """paragraph -> citing entries, filed by citation precision.
@@ -168,11 +170,10 @@ def links(con, report) -> int:
     resolved: "1. administrative assistants" links its words, not its number.
     """
     slug = dict(con.execute("SELECT id, slug FROM index_entry WHERE slug IS NOT NULL"))
-    heads: dict[str, int] = {}
-    for i, h in con.execute("SELECT id, headword FROM index_entry"
-                            " WHERE scope='az' AND level=1 AND headword IS NOT NULL"
-                            " ORDER BY id"):
-        heads.setdefault(xref.fold(h), i)
+    # A headword as it is written before one that folds alike (heads.py).
+    heads = Heads(con.execute("SELECT id, headword FROM index_entry"
+                              " WHERE scope='az' AND level=1 AND headword IS NOT NULL"
+                              " ORDER BY id"))
 
     def a(text, href):
         return f'<a class="hw" href="{href}">{text}</a>'
@@ -182,18 +183,18 @@ def links(con, report) -> int:
             if not name.endswith(reading):
                 continue
             lead = name[:len(name) - len(reading)]
-            h = heads.get(xref.fold(reading.split(":")[0]))
+            h = heads.get(reading.split(":")[0])
             if h is not None:
                 return lead + a(reading, f"/i/{slug[h]}")
             bits = RE_CONJ_KEEP.split(reading)
             parts = bits[0::2]
-            if len(parts) > 1 and all(xref.fold(p) in heads for p in parts):
+            if len(parts) > 1 and all(p in heads for p in parts):
                 return lead + "".join(
-                    a(b, f"/i/{slug[heads[xref.fold(b)]]}") if k % 2 == 0 else b
+                    a(b, f"/i/{slug[heads[b]]}") if k % 2 == 0 else b
                     for k, b in enumerate(bits))
         members = xref.expand_range(target)
-        if members and all(xref.fold(m) in heads for m in members):
-            return a(name, f"/i/{slug[heads[xref.fold(members[0])]]}")
+        if members and all(m in heads for m in members):
+            return a(name, f"/i/{slug[heads[members[0]]]}")
         return None
 
     html = {}
