@@ -139,6 +139,8 @@ The `/stats` password is pi5's: its hash was copied, so one password opens both.
 
 Everything in it is unprivileged except the one `sudo systemctl restart ubsite` on each host that its step 4 authorised.
 
+On each host the code goes first to `~/ubsite.next`, beside the live tree, and is copied into `~/ubsite` only once the venv, the offline copy and the database are there, the moment before the restart: Jinja reads a changed template at once, so until 2026-11-09, when the code went straight into the live tree, the old process drew the new templates over the minutes the rest took, and went on doing so where a later step failed. `~/ubsite.next` stays between deploys, so each sends only what changed.
+
 `/healthz` reports `{"ok":true,"paragraphs":14586}`. It queries the database rather than merely returning 200, so a deploy that ships a missing or truncated `ub.db` fails at the push instead of at a reader. The script polls it for 30s and prints the unit's status if it never comes up, and then stops, before the next host.
 
 The database is shipped to `var/ub.db.new` and then `mv`d, so a half-transferred file is never the one being served.

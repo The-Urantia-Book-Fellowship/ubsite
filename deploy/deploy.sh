@@ -125,6 +125,29 @@ if [ -n "$(git status --porcelain -- data/quiz)" ]; then
     exit 1
 fi
 
+# What a host's tree keeps that no deploy sends, and so never deletes: the copy
+# to $NEXT leaves them out, and the swap from $NEXT into $DEST leaves them be.
+EXCLUDES=(--exclude '.git/' --exclude '.venv/' --exclude '__pycache__/' --exclude 'var/'
+          --exclude 'export/' --exclude 'data/uf/*.zip')
+NEXT="$DEST.next"
+
+# The venv, synced to the requirements staged in $NEXT before any of it is
+# live.  Created once, then only synced: uv 0.12 refuses to create a venv over
+# an existing one, so an unconditional `uv venv` failed every deploy but the first.
+venv() {
+    echo "==> venv on $1"
+    ssh "$1" "cd $DEST && { [ -x .venv/bin/python ] || $UV venv --python \$(cat $NEXT/.python-version) >/dev/null; } && $UV pip sync -q $NEXT/requirements.txt"
+}
+
+# The staged code into the live tree, on the host itself: seconds, and only
+# once everything else is there.  With --no-restart too, as before.  By
+# checksum, which a local copy of a few megabytes can afford: rsync's quick
+# check passes over a file of the same size and time.
+code_in() {
+    echo "==> the code from $NEXT into $DEST"
+    ssh "$1" "rsync -a --checksum --delete ${EXCLUDES[*]@Q} $NEXT/ $DEST/"
+}
+
 # One host: everything from here on is done once for each, with what was built above.
 ship() {
     local HOST="$1"
@@ -133,25 +156,25 @@ ship() {
     echo
     echo "=== $HOST"
 
-    echo "==> rsync to $HOST:$DEST"
+    echo "==> rsync to $HOST:$NEXT, swapped in just before the restart"
     # Excluded: .venv (per-architecture, the target builds its own), var/ except the
     # database, and everything only the build needs.  So is a file git neither
     # tracks nor ignores, being in no commit: a draft beside the code, an editor's
     # swap file (INTEGRATION.md, 2026-10-19).  What the build makes is ignored, and goes;
     # the Foundation's zips in data/uf/, ignored too, do not: a host serves the
     # database and never holds a source (2026-11-04).
+    #
+    # Into $NEXT, beside the live tree, and into it only once everything else is
+    # there, the moment before the restart (code_in, below).  Until 2026-11-09 it
+    # went into the live tree first: Jinja reads a changed template at once and
+    # l10n a changed ru.toml, so for the minutes the database and the offline
+    # copy took, the old Python drew the new templates (a4cdc0f's `sites|tojson`
+    # would have failed every page), and for good where a step after failed.
     local -a untracked=()
     while IFS= read -r f; do untracked+=(--exclude "/$f"); done \
         < <(git -C "$HERE" ls-files --others --exclude-standard)
-    rsync -az --delete \
-        --exclude '.git/' \
-        --exclude '.venv/' \
-        --exclude '__pycache__/' \
-        --exclude 'var/' \
-        --exclude 'export/' \
-        --exclude 'data/uf/*.zip' \
-        "${untracked[@]}" \
-        "$HERE"/ "$HOST:$DEST"/
+    ssh "$HOST" "mkdir -p $DEST"
+    rsync -az --delete "${EXCLUDES[@]}" "${untracked[@]}" "$HERE"/ "$HOST:$NEXT"/
 
     # The visit counter's place database (`make geoip`, monthly), which the rsync
     # above skips with the rest of var/.  rsync writes a temporary file and renames
@@ -209,12 +232,7 @@ ship() {
         local served
         served=$(ssh "$HOST" "cd $DEST && [ -f var/ub.db ] && .venv/bin/python -c \"import sqlite3; print('\\n'.join(r[0] for r in sqlite3.connect('file:var/ub.db?mode=ro', uri=True).execute(\\\"$LIST\\\")))\" 2>/dev/null" || true)
 
-        echo "==> shipping var/ub.db ($(du -h var/ub.db | cut -f1))"
-        ssh "$HOST" "mkdir -p $DEST/var"
-        # To a temp name then mv, so a half-transferred database is never the one
-        # being served. mv within a filesystem is atomic.
-        rsync -az --info=progress2 var/ub.db "$HOST:$DEST/var/ub.db.new"
-        ssh "$HOST" "mv $DEST/var/ub.db.new $DEST/var/ub.db"
+        venv "$HOST"
 
         # The offline copy (offline/, `make offline`), made from this database: its
         # chunks first, adding and never deleting, so that a reader updating from
@@ -238,6 +256,15 @@ ship() {
             echo "$stale" | ssh "$HOST" "cd $DEST/var/offline/c && xargs -r rm -f --"
         fi
 
+        # The database last of what is copied, the restart a moment after
+        # (code_in): the old Python never runs long on the new database.
+        echo "==> shipping var/ub.db ($(du -h var/ub.db | cut -f1))"
+        ssh "$HOST" "mkdir -p $DEST/var"
+        # To a temp name then mv, so a half-transferred database is never the one
+        # being served. mv within a filesystem is atomic.
+        rsync -az --info=progress2 var/ub.db "$HOST:$DEST/var/ub.db.new"
+        ssh "$HOST" "mv $DEST/var/ub.db.new $DEST/var/ub.db"
+
         # Prune: an AI file neither the new database nor the one it replaced names.
         # grep exits 1 when it passes nothing, as it does while there are no AI
         # files at all; under pipefail that would end the script, before the restart.
@@ -250,10 +277,8 @@ ship() {
         fi
     fi
 
-    echo "==> venv on $HOST"
-    # Created once, then only synced: uv 0.12 refuses to create a venv over an
-    # existing one, so an unconditional `uv venv` failed every deploy but the first.
-    ssh "$HOST" "cd $DEST && { [ -x .venv/bin/python ] || $UV venv --python \$(cat .python-version) >/dev/null; } && $UV pip sync -q requirements.txt"
+    [ "$BUILD" = 1 ] || venv "$HOST"
+    code_in "$HOST"
 
     if [ "$RESTART" = 1 ]; then
         echo "==> restart"
