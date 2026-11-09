@@ -65,9 +65,6 @@
   function hours(sec) { return T.tr('{h} h', { h: Math.round(sec / 3600) }); }
   function day(iso) { return T.date(iso, false); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
-  // The index turned off in Settings: what the tab says of the copy leaves it
-  // out, as the page does (settings.py `index`).
-  function noIndex() { return !!window.ubSettings && window.ubSettings.get().index === false; }
   // The browser saving data: the copy is not updated by itself (keepUp), and
   // Update now is offered instead.
   function saving() { return !!(navigator.connection && navigator.connection.saveData); }
@@ -153,9 +150,12 @@
                        (err ? '<br>' + T('The last update stopped: {e}.', { e: err }) : '');
       mark('stale', T.tr('An update to the offline copy is waiting ({s})', { s: mb(up.fetch) }));
     } else {
+      // The index's date whatever Settings' `index`: the copy keeps the index
+      // either way, and counts it in its size (Tigran, 2026-11-09; until then
+      // the line left it out while the index was off, so a phone with it off
+      // and a desktop with it on described the same copy differently).
       var at = { d: day(have.made), t: day(have.text.date), i: day(have.index.date), s: mb(have.bytes) };
-      line.innerHTML = (noIndex() ? T('Up to date: kept as the site was on {d}, with the text of {t}, {s} in this browser.', at)
-                                  : T('Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser.', at)) +
+      line.innerHTML = T('Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser.', at) +
                        ' ' + T('Whenever the server cannot be reached, online or not, the site reads from it by itself.');
       // A recording downloading shows on the cloud as the copy's download does.
       var rb = s.audio && s.audio.busy;

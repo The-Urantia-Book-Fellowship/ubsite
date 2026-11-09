@@ -459,7 +459,6 @@
 "It updates by itself once online." = "Она обновится сама, когда появится сеть."
 "The last update stopped: {e}." = "Последнее обновление остановилось: {e}."
 "An update to the offline copy is waiting ({s})" = "Офлайн-копию можно обновить ({s})"
-"Up to date: kept as the site was on {d}, with the text of {t}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t}; в этом браузере занимает {s}."
 "Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t} и указателем от {i}; в этом браузере занимает {s}."
 "Whenever the server cannot be reached, online or not, the site reads from it by itself." = "Когда сервер недоступен — в сети вы или нет, — сайт сам читает из неё."
 "It can be downloaded only online." = "Загрузить её можно только в сети."
