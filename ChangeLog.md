@@ -116,6 +116,12 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- With the translations in parallel columns, a search result opened while listening is brought into view once its columns are drawn, putting Settings back to their defaults keeps the place being read, and folding the index keeps the line being read under the columns' names, where each left you elsewhere.
+- A reload, or Back to a page the browser no longer holds, opens it where you were, after moving about while listening, where it opened at its top.
+- Back to a page the browser held in its memory shows it as Settings now say, its size, theme, translations and columns, where it came back as they were when you left it.
+- While listening, Help's Take the tour and Show me start the tour, where they did nothing.
+- Opening a paper's sections in the contents at the left, after its link had been followed while listening or opened in a new tab, shows them, where it left the page and stopped the reading.
+- With a mouse, the tour's step on the running head shows the head and lights it, where it lit the paragraph and the head came a moment later, and could stay over the next step.
 - In the index, ammonites under animals and under marine life, among the types named, goes to the fossils, where it went to the Ammonites, the tribe.
 - Twenty paragraphs have their pilcrow again, the mark of a new group of paragraphs in the 1955 printing, which the site had lost where the text places it by hand: 17:0.2 and 17:0.10, and eighteen in 104:4 and 104:5.
 - Unticking the offline copy while a recording was downloading lets that recording go too, where its file came on into the browser after the copy was gone and the tick came back; and letting go of a translation while the copy updates leaves it ticked, where it said the download had stopped and cleared every translation's tick.
@@ -150,6 +156,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- Compare's old addresses, /N:S/compare and the rest, keep their query on the 301, here and in the offline copy (`sw.js` `fromCopy`); `window.ubHead` shows and hides the running head for the tour (`help.js`), which made a click until now; and `tools/help_e2e.py` checks that step with a mouse.
 - Text version 9: twenty paragraphs' `group_before` is true, 17:0.2, 17:0.10 and eighteen in 104:4-5, where the press's `\pcman`, the twin of `\pc` it places by hand, was stripped (`build/press_macros.py`). The build now fails on a group mark that sets no `gap_before` (`pc-dropped`) and on a line of the press nothing claims (`unclaimed-line`, until now a warning); a cross-reference finds its headword as written before by its fold (`build/heads.py`), which a gate holds; and `appendix.name` is each appendix's own, APPENDIX B: CELESTIAL BEINGS, TYPES, where B to F held their last row's.
 - deploy/ubsite.service runs uvicorn with --no-access-log, whose access log put every request in the journal with the reader's address (forwarded by nginx) and the search; both nginx blocks limit /stats, whose password check costs 16 MB a try, to ten a minute in a zone of its own, ubsite_stats. Each host needs the unit copied in, systemctl daemon-reload and a restart, and its nginx block installed again, as root (deploy/README.md). nginx's own access log, set on each host, still keeps addresses.
 - visits.db is written with PRAGMA secure_delete on, and its log truncated after a new day's salt is made, so that the day before's salt leaves the file; a visits.db from before keeps old salts in its free pages until it is vacuumed (sqlite3 var/visits.db VACUUM).

@@ -134,6 +134,20 @@ def run() -> int:
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(200)
         ok(step(pg) is None and not pg.query_selector(".tour-card") and seen(pg) == "seen", "Escape ends it for good")
+        # The running head's step with a mouse: the head shown at once and lit,
+        # where a click made by the tour waited 350 ms for a double-click, and
+        # the paragraph was lit instead (review of 2026-11-09).
+        pg.evaluate("ubTour.start('runhead')")
+        card(pg)
+        lit = pg.evaluate("""() => { const h = document.querySelector('.runhead');
+            if (!h || h.hidden) return 'no head';
+            const r = document.querySelector('.tour-ring').getBoundingClientRect(), b = h.getBoundingClientRect();
+            return Math.abs(r.top - (b.top - 6)) < 3 && Math.abs(r.height - (b.height + 12)) < 3 ? 'head' : 'not the head'; }""")
+        ok(lit == "head", f"with a mouse, the running head's step lights the head: {lit}")
+        pg.keyboard.press("ArrowRight")
+        pg.wait_for_timeout(600)
+        ok(pg.evaluate("!document.querySelector('.runhead') || document.querySelector('.runhead').hidden"),
+           "and the next step hides it")
         pg.close()
 
         print("Controls the page lacks")

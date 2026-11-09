@@ -713,6 +713,11 @@
     moved = true;
     shown = addr(location.pathname, location.search);
   }
+  // Leaving the page, its entry's scroll is the browser's again: a reload, or
+  // Back to it after the page cache has let it go, puts back its place.  The
+  // manual push() sets stayed on the entry, and the page opened at its top;
+  // ub.js reset it with Compare's code until 2026-11-08 (review of 2026-11-09).
+  addEventListener('pagehide', function () { history.scrollRestoration = 'auto'; });
   function swap(doc) {
     document.querySelector('main').replaceWith(document.adoptNode(doc.querySelector('main')));
     // The tab's title, its element whole, with its Russian (base.html), and in
@@ -770,7 +775,9 @@
   }
   // A quiz's page runs quiz.js, which a swapped <main> would leave unrun: it
   // loads as ever, and the reading stops.
-  var SKIP = /^\/(static|audio|speech|healthz|favicon|apple-touch-icon|quiz)\b/;
+  // And Help, whose buttons help.js binds only on a page loaded there
+  // (review of 2026-11-09: swapped in, they did nothing).
+  var SKIP = /^\/(static|audio|speech|healthz|favicon|apple-touch-icon|quiz|help)\b/;
   document.addEventListener('click', function (ev) {
     if (!roaming() || ev.defaultPrevented || ev.button || ev.metaKey || ev.ctrlKey ||
         ev.shiftKey || ev.altKey) return;

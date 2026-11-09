@@ -83,17 +83,18 @@
   }
   function onBook() { return !!document.querySelector('main p.t[id]'); }
 
-  // The running head, shown for real as a tap on the text shows it (ub.js
-  // tapHead), and lit; hidden again as the step is left.
+  // The running head, shown for real as a tap on the text shows it, and lit;
+  // hidden again as the step is left.  By ub.js's own (ubHead), not a click
+  // made here, which a mouse's DBL holds back 350 ms since 2026-11-08: the
+  // step lit the paragraph, and the head came after (review of 2026-11-09).
   function showHead(p) {
     if (!p) return null;
     p.scrollIntoView({ block: 'center', behavior: 'instant' });
-    p.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: 10, clientY: innerHeight / 2 }));
+    if (window.ubHead) window.ubHead.show(p);
     return drawn(document.querySelector('.runhead')) || p;
   }
   function hideHead() {
-    var head = document.querySelector('.runhead');
-    if (head && !head.hidden) head.click();
+    if (window.ubHead) window.ubHead.hide();
   }
 
   // ---- drawing -------------------------------------------------------------

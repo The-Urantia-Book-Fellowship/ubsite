@@ -473,9 +473,14 @@ function fromCopy(c, url) {
   var plan = self.ubOffline.resolve(path, c.shell, location.origin, c.kept);
   if (plan === null) return Promise.resolve(null);
   if (plan.res) {
+    // Compare's old address goes on with its query, as app.py uncompare's
+    // 301 does: resolve() is given the path alone.
+    var res = plan.res;
+    if (res.status === 301 && res.location && url.search && res.location.indexOf('?') < 0)
+      res = { status: 301, location: res.location + url.search };
     // A not-found page of its own, or one saying the address is read online,
     // is `ubWeak`: the copy holds nothing for it (the fetch handler).
-    var r = respond(c, plan.res);
+    var r = respond(c, res);
     r.ubWeak = !!plan.res.away || plan.res.status >= 400;
     return Promise.resolve(r);
   }

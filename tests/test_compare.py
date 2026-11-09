@@ -28,6 +28,12 @@ class Address(unittest.TestCase):
             status, headers, _ = get(f"/{ref}/compare")
             self.assertEqual((status, headers.get("location")), (301, "/" + ref), ref)
 
+    def test_with_its_query(self):
+        # A 301 is kept by the browser: a query it dropped was gone for good.
+        for ref in ("1:4.2", "1", "part/1"):
+            status, headers, _ = get(f"/{ref}/compare?utm_source=x&q=god")
+            self.assertEqual((status, headers.get("location")), (301, f"/{ref}?utm_source=x&q=god"), ref)
+
     def test_what_is_no_page_of_the_book_is_said_as_before(self):
         for ref in ("x", "search"):
             status, _, body = get(f"/{ref}/compare")

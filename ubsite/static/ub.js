@@ -128,6 +128,25 @@
       for (var k in DEF) announce(k, o);
     }
   };
+  // Shown again from the browser's page cache, by Back or Forward, the page
+  // runs no script: what Settings changed on another page since is put on
+  // this one, and announced as if changed here, where it came back in the
+  // size, the theme or the columns it was left in (review of 2026-11-09);
+  // with Whole paper changed, in its other unit, as the head script would.
+  var shownWith = load();
+  document.addEventListener('ub:settings', function (ev) { shownWith = ev.detail.all; });
+  addEventListener('pageshow', function (ev) {
+    if (!ev.persisted) return;
+    var o = load(), was = shownWith, k, here, to;
+    apply(o);
+    shownWith = o;
+    for (k in DEF) if (was[k] !== o[k]) announce(k, o);
+    if (was.whole !== o.whole && window.ubUnit) {
+      here = location.pathname + location.hash;
+      to = window.ubUnit(here);
+      if (to !== here) location.replace(to.replace(/#.*$/, '') + location.search + to.replace(/^[^#]*/, ''));
+    }
+  });
 
   // ◐ flips light and dark, a shortcut to the setting.
   var b = document.querySelector('.theme');
@@ -528,7 +547,12 @@
         d.querySelector('ol')) return;
     var rail = li.closest('.rail'), a = d.querySelector('summary a');
     if (!rail || !a) return;
-    var n = a.getAttribute('href').slice(1);
+    // The paper's number from where its link goes, whatever the unit: the
+    // click handler above makes /4 into /4:0 with Whole paper off, and
+    // /rail/4:0, asked for since, is no page, so the page was left (review
+    // of 2026-11-09).
+    var n = (/^\/(\d+)/.exec(a.pathname) || [])[1];
+    if (!n) return;
     var put = function (html) {
       if (d.querySelector('ol')) return;
       d.insertAdjacentHTML('beforeend', html);
@@ -643,22 +667,32 @@
   // page's top the page stays at its top.  Columns keep their own (cmpGo).
   var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .rt.now)';
   function placeNow() {
-    var ms = document.querySelectorAll(MARKED), ps, i, r, p = null, c, n, at, q, rs;
+    var ms = document.querySelectorAll(MARKED), ps, i, r, p = null, c, n, at, q, rs, top = 0, over;
     if (scrollY <= 0) return null;
+    // What stands over the text at the window's top, Compare's names stuck
+    // there and the running head: the line read is the first under them.
+    // The probe at 6 px found the names, and the place fell back to the
+    // paragraph's top (review of 2026-11-09).
+    over = Array.prototype.slice.call(document.querySelectorAll('main article.cmp .cmpnames'));
+    if (head && !head.hidden) over.push(head);
+    over.forEach(function (el) {
+      var b = el.getBoundingClientRect();
+      if (b.height && b.top <= 1 && b.bottom > top) top = b.bottom;
+    });
     for (i = 0; i < ms.length; i++) {
       r = ms[i].getBoundingClientRect();
-      if (r.height && r.top >= 0 && r.top < innerHeight) return { el: ms[i], y: r.top };
+      if (r.height && r.top >= top && r.top < innerHeight) return { el: ms[i], y: r.top };
     }
     ps = document.querySelectorAll('main p.t[id]');
     for (i = 0; i < ps.length; i++) {
       r = ps[i].getBoundingClientRect();
-      if (r.height && r.bottom > 4) { p = ps[i]; break; }
+      if (r.height && r.bottom > top + 4) { p = ps[i]; break; }
     }
     if (!p) return null;
-    if (r.top >= 4) return { el: p, y: r.top };
-    c = document.caretPositionFromPoint ? document.caretPositionFromPoint(r.left + r.width / 2, 6) : null;
+    if (r.top >= top + 4) return { el: p, y: r.top };
+    c = document.caretPositionFromPoint ? document.caretPositionFromPoint(r.left + r.width / 2, top + 6) : null;
     if (c) { n = c.offsetNode; at = c.offset; }
-    else if (document.caretRangeFromPoint && (c = document.caretRangeFromPoint(r.left + r.width / 2, 6))) {
+    else if (document.caretRangeFromPoint && (c = document.caretRangeFromPoint(r.left + r.width / 2, top + 6))) {
       n = c.startContainer; at = c.startOffset;
     }
     if (n && n.nodeType === 3 && n.length && p.contains(n)) {
@@ -1100,6 +1134,9 @@
   function cmpUndraw(art) {
     if (!art.classList.contains('cmp')) return;
     if (card && card.mark.closest('.rc')) shut(false);
+    // The running head naming a translation's paragraph goes with it, which
+    // it went on naming, detached (review of 2026-11-09).
+    if (headP && headP.closest('.rc') && art.contains(headP)) hideHead();
     Array.prototype.forEach.call(art.querySelectorAll('.rc p.rt.hit'), function (rt) {
       var p = document.getElementById(rt.dataset.ref);
       if (p) p.classList.add('hit');
@@ -1233,9 +1270,25 @@
     });
   }
   cmpArrive();
-  document.addEventListener('ub:swap', cmpDraw);
+  // A page listen.js swaps in is drawn in columns too, and once drawn, which
+  // moves the paragraph cited as the rows grow, arrived at again, as
+  // cmpArrive does for a page loaded: arrive() ran on ub:page before the
+  // columns were there (review of 2026-11-09).
+  var cmpSwapped = null;
+  document.addEventListener('ub:swap', function () { cmpSwapped = cmpDraw(); });
+  document.addEventListener('ub:page', function () {
+    var drawn = cmpSwapped, t = Date.now();
+    cmpSwapped = null;
+    if (drawn && cmpOn()) drawn.then(function () { if (arriveTouched <= t) arrive(); });
+  });
+  // Once for both settings, where ↺ announces every setting in turn: a second
+  // cmpGo measured the page the first had just undrawn, and undid the place
+  // it kept (review of 2026-11-09).
+  var cmpSoon = false;
   document.addEventListener('ub:settings', function (ev) {
-    if (ev.detail.key === 'translations' || ev.detail.key === 'compare') cmpGo();
+    if (ev.detail.key !== 'translations' && ev.detail.key !== 'compare' || cmpSoon) return;
+    cmpSoon = true;
+    Promise.resolve().then(function () { cmpSoon = false; cmpGo(); });
   });
   // Part I is open in the Foreword's rail for the Foreword's sake (templates/
   // _rail.html), and its line of script shuts it where Settings puts the
@@ -1810,6 +1863,20 @@
     headP = null;
     if (head) head.hidden = true;
   }
+  // The tour's (help.js): the head shown for a paragraph at once, as a tap
+  // shows it, and hidden.  Not by a click the tour makes, which a mouse's DBL
+  // holds back since 2026-11-08: the step lit the paragraph, and the head came
+  // after, unlit, and could stay over the next step (review of 2026-11-09).
+  window.ubHead = {
+    show: function (p) {
+      clearTimeout(headSoon);
+      headSoon = 0;
+      unhit();
+      showHead(p || firstOnScreen());
+      headBy = Date.now();
+    },
+    hide: hideHead
+  };
   // A tap on the text also lets go of the paragraph the page opened at
   // (p.t.hit: the server's mark on a section's page, arrive()'s on the whole
   // paper's), which stayed tinted beside the one named and had no other way
@@ -1839,6 +1906,12 @@
       headSoon = setTimeout(function () {
         headSoon = 0;
         if (!getSelection().isCollapsed) return;
+        // Not a paragraph the page has left meanwhile, by a page turned, the
+        // text scrolled or a place on it followed from the rail: it named one
+        // off the screen, and stopped arrive() placing the page (review of
+        // 2026-11-09).
+        var r = p && p.isConnected && p.getBoundingClientRect();
+        if (r && (r.bottom <= 0 || r.top >= innerHeight)) return;
         unhit();
         showHead(p && p.isConnected ? p : firstOnScreen());
         headBy = Date.now();

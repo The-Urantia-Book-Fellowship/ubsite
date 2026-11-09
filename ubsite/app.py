@@ -1906,7 +1906,10 @@ def whole_audio(texts: list[dict]) -> dict:
 # browser's.  An address that is no page of the book is the 404 it was,
 # naming itself (read).  offline-core.js resolve() answers the same.
 def uncompare(request: Request) -> RedirectResponse:
-    return RedirectResponse(request.url.path[:-len("/compare")], status_code=301)
+    # With its query, which a 301, kept by the browser, would otherwise lose
+    # for good (review of 2026-11-09); sw.js fromCopy keeps it too.
+    q = request.url.query
+    return RedirectResponse(request.url.path[:-len("/compare")] + (f"?{q}" if q else ""), status_code=301)
 
 
 @app.get("/{paper:int}/compare")
