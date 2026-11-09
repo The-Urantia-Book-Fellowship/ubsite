@@ -39,6 +39,14 @@ class Greek(unittest.TestCase):
             with self.subTest(entry):
                 self.assertEqual(broken(h, entry.replace("-", "")), entry)
 
+    def test_a_long_pattern_applies(self):
+        # hyph-grc.tex has 38 patterns of 11 to 16 letters, which a search
+        # window of 10 never reached: this word broke at 1,4,6,9,11 (review of
+        # 2026-11-09).
+        h = Hyphenator((), GREEK)
+        self.assertEqual(sorted(h.patterns("ὁποιουστινασοῦν")), [1, 4, 7, 9, 12])
+        self.assertGreater(h.longest, 10)
+
     def test_the_minimums_are_polyglossias(self):
         # The pattern file says 1/1; polyglossia sets 2/3 where a gloss says
         # nothing, and TeX printed ἔλεος, ἀπό and θεός whole.

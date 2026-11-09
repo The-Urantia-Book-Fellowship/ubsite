@@ -40,7 +40,9 @@ def build_srt(repos, report) -> pathlib.Path | None:
     index, press = repos["index"]["path"], repos["press"]["path"]
     script = index / "build_srt.py"
     if not script.exists():
-        report.warn("oracle-missing", str(script), "build_srt.py not found")
+        # A failure, not a warning: without it the text is held to nothing
+        # (review of 2026-11-09; cli.py used a copy of 2026-10-13 instead).
+        report.hard("oracle-missing", str(script), "build_srt.py not found")
         return None
 
     sandbox = ROOT / "var" / "oracle"
@@ -65,7 +67,7 @@ def build_italics(repos, report) -> pathlib.Path | None:
     press = repos["press"]["path"]
     script = press / "tools" / "text-verify" / "extract_tex.py"
     if not script.exists():
-        report.warn("oracle-missing", str(script), "extract_tex.py not found")
+        report.hard("oracle-missing", str(script), "extract_tex.py not found")
         return None
 
     sandbox = ROOT / "var" / "pressverify"

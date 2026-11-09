@@ -3,9 +3,13 @@
 Derived mechanically from the press project's own exhaustive inventory, then
 overridden only where this project needs a distinction that theirs discards.
 
-The derivation is the point: ``assert_covers_upstream()`` compares key sets, so
-the day a new macro appears in the book, *this* build fails too instead of
-quietly emitting whatever the tokenizer happened to do with it.
+The derivation is the point: the table is upstream's keys, so the day a new
+macro appears in the book and in upstream's table, it is in ours, and one in
+the book that upstream lacks fails the expander as an unknown macro, instead of
+quietly emitting whatever the tokenizer happened to do with it.  An override
+must name a macro upstream has, or it would be dropped without a word: that
+`build_table` refuses (until 2026-11-09 ``assert_covers_upstream()`` compared
+the table with the upstream it was made from, which could never fail).
 """
 
 from __future__ import annotations
@@ -63,6 +67,9 @@ OVERRIDES: dict[str, Spec] = {
 
 
 def build_table() -> dict[str, Spec]:
+    lost = sorted(set(OVERRIDES) - set(_upstream.TABLE))      # assert_covers_upstream(), below
+    if lost:
+        raise SystemExit(f"press_macros: overrides naming no macro upstream has: {lost}")
     table: dict[str, Spec] = {}
     for name, up in _upstream.TABLE.items():
         if name in OVERRIDES:
@@ -84,14 +91,10 @@ ITALIC_OPENING_MACROS = set(getattr(_upstream, "ITALIC_OPENING_MACROS", ()))
 
 
 def assert_covers_upstream() -> list[str]:
-    """Key-set equality with upstream.  A new macro upstream fails us too."""
-    ours, theirs = set(TABLE), set(_upstream.TABLE)
-    problems = []
-    for missing in sorted(theirs - ours):
-        problems.append(f"upstream has {missing!r}, we do not")
-    for extra in sorted(ours - theirs):
-        problems.append(f"we have {extra!r}, upstream does not")
-    return problems
+    """Every override names a macro upstream has: build_table walks upstream's
+    names, so one it lacks would be dropped without a word."""
+    return [f"the override {n!r} names no macro upstream has"
+            for n in sorted(set(OVERRIDES) - set(_upstream.TABLE))]
 
 
 if __name__ == "__main__":

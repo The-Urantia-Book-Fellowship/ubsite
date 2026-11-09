@@ -336,11 +336,18 @@ def main(argv: list[str]) -> int:
         print(f"  srt {srt}")
         print(f"  italics {ital}")
 
+        # Every gate below runs on what it needs, or fails saying what it
+        # lacked: until 2026-11-09 a missing oracle fell back to copies built
+        # weeks before (the index's data/srt.jsonl, the press's artifacts/), and
+        # a missing input skipped its gate and passed (review of 2026-11-09).
+        def absent(what: str) -> int:
+            print(f"  {what} absent: this gate cannot run, and fails")
+            return 1
+
         print("\n== press text ==")
         papers = read_all(repos["press"]["tex"], report)
-        rc = text_run(papers,
-                      load_oracle(srt or repos["index"]["path"] / "data" / "srt.jsonl"),
-                      load_deltas(root / "tests" / "known-oracle-deltas.tsv"))
+        rc = (text_run(papers, load_oracle(srt), load_deltas(root / "tests" / "known-oracle-deltas.tsv"))
+              if srt else absent("the srt oracle"))
         print("\n== section titles vs press HTML ==")
         from .checks.check_titles import load_press_titles, run as titles_run
         htmldir = repos["press"]["path"] / "misc" / "html"
@@ -348,23 +355,24 @@ def main(argv: list[str]) -> int:
             rc |= titles_run(papers, load_press_titles(htmldir),
                              load_deltas(root / "tests" / "known-title-deltas.tsv"))
         else:
-            print("  press misc/html absent -- skipped")
+            rc |= absent("press misc/html")
         print("\n== edition alignment ==")
-        rc |= align_run(repos["study"]["tex"],
-                        repos["index"]["path"] / "data" / "srt.jsonl", {}, repos["study"]["at"])
+        # Against the oracle just built from the press as it stands, not the
+        # index's own copy of it, which was of 2026-10-13.
+        rc |= align_run(repos["study"]["tex"], srt, {}, repos["study"]["at"]) if srt else absent("the srt oracle")
         print("\n== study notes ==")
         from .checks.check_study import run as study_run
         rc |= study_run(repos["study"], config.block(), report)
         print("\n== quiz ==")
         from .checks.check_quiz import run as quiz_run
-        rc |= quiz_run(config.ROOT / "var" / "ub.db")
+        dbf = root / "var" / "ub.db"
+        rc |= quiz_run(dbf) if dbf.exists() else absent("var/ub.db (make data)")
         print("\n== italic spans vs press artifacts ==")
         from .checks.check_spans import load_press_italics, run as span_run
-        art = ital or (repos["press"]["path"] / "artifacts" / "text-verify" / "tex")
-        if art and art.is_dir():
-            rc |= span_run(papers, load_press_italics(art))
+        if ital and ital.is_dir():
+            rc |= span_run(papers, load_press_italics(ital))
         else:
-            print("  press artifacts absent -- skipped")
+            rc |= absent("the italics oracle")
 
         print("\n== index ==")
         from .checks.check_index import check_citations, check_xrefs
@@ -388,8 +396,10 @@ def main(argv: list[str]) -> int:
               f"deep-linkable to an exact sub-entry, {x['headword_only']} "
               f"resolve to the headword only")
 
-        dbf = root / "var" / "ub.db"
-        if dbf.exists():
+        if not dbf.exists():
+            print("\n== database ==")
+            rc |= absent("var/ub.db (make data)")
+        else:
             from . import db as _db
             from .checks.check_db import run as db_run
             print("\n== database ==")

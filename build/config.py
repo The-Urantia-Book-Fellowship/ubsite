@@ -14,9 +14,16 @@ import tomllib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
+# A source repo is a master (CLAUDE.md §0): `git status` there refreshes its
+# .git/index and takes index.lock while it does, which a git command of the
+# session working in it can fail on, and which `make paranoid` does not see.
+# --no-optional-locks keeps it to reading (review of 2026-11-09).
+GIT = ["git", "--no-optional-locks"]
+
+
 def _git(repo: pathlib.Path, *args: str) -> str | None:
     try:
-        out = subprocess.run(["git", "-C", str(repo), *args],
+        out = subprocess.run([*GIT, "-C", str(repo), *args],
                              capture_output=True, text=True, timeout=30)
         return out.stdout.strip() if out.returncode == 0 else None
     except (OSError, subprocess.SubprocessError):
@@ -39,7 +46,7 @@ def dirty_files(path: pathlib.Path, tex: str) -> list[str]:
     """What makes it dirty, as `git status --short` writes it: each tracked file
     with uncommitted changes, and each untracked file under tex/ ('?? ...')."""
     def lines(*args: str) -> list[str]:
-        out = subprocess.run(["git", "-C", str(path), *args], capture_output=True, text=True, timeout=30)
+        out = subprocess.run([*GIT, "-C", str(path), *args], capture_output=True, text=True, timeout=30)
         return out.stdout.splitlines() if out.returncode == 0 else []
     return (lines("status", "--short", "--untracked-files=no")
             + ["?? " + f for f in lines("ls-files", "--others", "--exclude-standard", "--", tex)])

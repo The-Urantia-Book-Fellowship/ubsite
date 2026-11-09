@@ -123,6 +123,10 @@ class Hyphenator:
     def __init__(self, entries, language: Language = ENGLISH):
         self.lang = language
         self.pats, self.knuth_exc = _load_knuth(language.patterns, language.encoding)
+        # Liang's search reaches as far as the longest pattern: hyph-grc.tex has
+        # 38 of 11 to 16 letters, which a window of 10 never applied (review of
+        # 2026-11-09); English's are 8 at most, Russian's 7.
+        self.longest = max(map(len, self.pats), default=0)
         self.entries: dict[str, frozenset[int]] = {}
         for raw in entries:                      # a later entry wins, as in TeX
             self.entries[raw.replace("-", "").lower()] = points_of(raw)
@@ -135,7 +139,7 @@ class Hyphenator:
         word = "." + w + "."
         v = [0] * (len(word) + 1)
         for i in range(len(word)):
-            for j in range(i + 1, min(len(word), i + 10) + 1):
+            for j in range(i + 1, min(len(word), i + self.longest) + 1):
                 n = self.pats.get(word[i:j])
                 if n:
                     for k, x in enumerate(n):

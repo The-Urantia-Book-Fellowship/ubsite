@@ -83,7 +83,7 @@ The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, 
 
 - `build/` — LaTeX → `var/ub.db`, stdlib only
   - `expand.py` — the span-emitting expander. Plain text plus code-point spans.
-  - `press_macros.py` — derived from press's own table, with 5 overrides; asserts key-set equality, so a new macro upstream fails our build too
+  - `press_macros.py` — derived from press's own table, with 7 overrides (`\pcman` the seventh, 2026-11-09), each of which must name a macro upstream has; a macro in the book that upstream's table lacks fails the expander as unknown
   - `index_macros.py` — the index's closed 25-macro set, plain and HTML renderers
   - `readers/` — pure file → dataclasses; `_io.py` is the only module allowed to open a source path, always mode `'r'`
   - `render.py` — `(text, spans) → HTML`. **The only renderer.**

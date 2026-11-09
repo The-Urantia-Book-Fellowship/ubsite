@@ -18,11 +18,15 @@ variant_1955_explained = 167     # of those, with the SRT Committee's reason (bu
                                  # 102:3.11 111:0.4 112:1.7), all explained by the committee
 listmark_spans       = 2397      # \ublistelem
 dotleader_spans      = 26        # \bibdf
-em_spans             = 2294      # 2,299 \bibemph less the 5 inside \fnc bodies,
-                                 # which emit no paragraph text (p059 p102x2 p111 p112):
-                                 # they are the 1955 notes' own italics, in footnote.html
-gap_before_flags     = 4185      # 4,186 \pc less one occurrence inside a comment
-                                 # at p048.tex:114
+em_spans             = 2295      # 2,294 at 5222a215: \bibemph less the 5 inside \fnc
+                                 # bodies, which emit no paragraph text (p059 p102x2 p111
+                                 # p112), the 1955 notes' own italics, in footnote.html;
+                                 # 2,295 measured at press 911b96c on 2026-11-09
+gap_before_flags     = 4208      # 4,188 \pc and 20 \pcman, its twin placed by hand, at
+                                 # press 911b96c on 2026-11-09 (4,185 at 5222a215, one
+                                 # \pc in a comment at p048.tex:114 then); the 20 were
+                                 # stripped until 2026-11-09.  Read by no gate yet: the
+                                 # reader holds each mark to its flag (press.py pc-dropped)
 # Hyphenation (build/hyphen.py), measured at press 806c7ac on 2026-10-12: Knuth's
 # hyphen.tex, hyphenmins 2/3, the 523 entries of tex/urantia-hyphen-en.tex, and \-.
 # Since 2026-10-31 a paragraph's last word carries none but its \- (DECISIONS.md,
