@@ -91,6 +91,16 @@ F:XII.8
 191:2.5secs
 101:4.2.3
 101: 4.2
+# Ranges past the book, which are no citation (app.py citable(), 2026-11-09):
+# expanded, the first asked a worker for 3 GB, and the last was a 500.
+1:1.1-99999999
+1:1-99999999secs
+Papers 0-99999999
+1:1.1-99999999999999999999
+1:1.1-15000
+1:1.1-14000
+١:١
+１:１
 # Hits whose text holds a superscript (611,121st), in the text, the index
 # and the committee's reasons, each set as the page sets it.
 Architect

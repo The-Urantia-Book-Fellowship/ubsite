@@ -22,6 +22,7 @@
 limit_req_zone $binary_remote_addr zone=ubsite_search:10m rate=30r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=40r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_board:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=ubsite_stats:10m rate=10r/m;
 
 server {
     listen 80;
@@ -99,6 +100,17 @@ server {
         # (build/fonts.py): SBL Greek goes from 1.1 MB to 0.4 MB.  A gzipped
         # reply's ETag is weakened to W/"…", which Starlette's 304 still matches.
         gzip_types text/css text/javascript image/svg+xml font/ttf font/otf;
+    }
+
+    # The owner's page of visits (ubsite/stats.py): its password is checked with
+    # scrypt, 43 ms and 16 MB a try, so a run of guesses could fill the unit's
+    # MemoryMax.  Ten a minute is more than the owner reloads it (review,
+    # 2026-11-09).
+    location = /stats {
+        limit_req zone=ubsite_stats burst=10 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
     }
 
     location = /healthz {

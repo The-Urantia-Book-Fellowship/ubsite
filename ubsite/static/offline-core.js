@@ -329,6 +329,21 @@
     }
     return null;
   }
+  // app.py citable(): words whose ranges together span more than the book's
+  // 14,586 paragraphs are no citation, and are searched for as words; parse()
+  // and expand() make a list of every number a range names, and Papers
+  // 0-99999999 held the worker in a loop.
+  var RE_RANGE = new RegExp('([0-9]+)\\s*[-' + EN + ']\\s*([0-9]+)', 'g');
+  function citable(q) {
+    if (Array.from(q).length > 200) return false;
+    var m, span = 0;
+    RE_RANGE.lastIndex = 0;
+    while ((m = RE_RANGE.exec(q)) !== null) {
+      if (m[1].length > 6 || m[2].length > 6) return false;
+      span += Math.max(parseInt(m[2], 10) - parseInt(m[1], 10), 0);
+    }
+    return span <= 14586;
+  }
   function expand(c) {
     if (c.kind === 'paper') return c.papers.map(function (p) { return [p, null, null]; });
     if (c.kind === 'sec') return flatten(c.spans).map(function (s) { return [c.paper, s, null]; });
@@ -503,7 +518,7 @@
   function search(db, mem, sh, params, kept) {
     var lastOf = function (k, dflt) { var all = params.getAll(k); return all.length ? all[all.length - 1] : dflt; };
     var q = lastOf('q', '').trim(), scope = lastOf('in', ''), pageNo = lastOf('page', '1');
-    var jump = q ? parse(q) : null;
+    var jump = q && citable(q) ? parse(q) : null;
     if (jump !== null) {
       var tg = expand(jump);
       if (tg.length) {
@@ -603,7 +618,7 @@
         return { line: line, card: r.card };
       }));
     }
-    var body = draw(q, scope, heads, idx, txt, old, stu, found, q ? suggest(q) : []);
+    var body = draw(q, scope, heads, idx, txt, old, stu, found, q && citable(q) ? suggest(q) : []);
     // The title piece begins inside its tag (offline/pages.py cut): a search's
     // has no Russian of its own, being what was typed.
     return html(200, compose(sh, '>' + esc(q), sh.search.h, esc(q), body, sh.search.s));

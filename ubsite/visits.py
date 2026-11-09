@@ -97,6 +97,7 @@ class Recorder:
         self.reader = None
         self.reader_mtime = None
         self.day: str | None = None
+        self.newday = False
         self.salt = b""
         self.agents: dict[str, int] = {}
         self.places: dict[tuple, int] = {}
@@ -148,6 +149,11 @@ class Recorder:
             con = sqlite3.connect(self.path, timeout=5, check_same_thread=False)
             con.execute("PRAGMA journal_mode = WAL")
             con.execute("PRAGMA synchronous = NORMAL")
+            # A deleted row's bytes overwritten, not left in a free page: the
+            # day's salt above all (_salt), which until 2026-11-09 stayed in the
+            # file after it was deleted, and with it, yesterday's visitor numbers
+            # could be made again from an address and a browser.
+            con.execute("PRAGMA secure_delete = ON")
             con.executescript(SCHEMA.read_text())
             self.con, self.day, self.agents, self.places = con, None, {}, {}
         return self.con
@@ -156,12 +162,14 @@ class Recorder:
         """The day's salt, shared by both workers: whichever comes first makes it.
 
         Every other day's is deleted, so yesterday's numbers cannot be made
-        again from an address and a browser.
+        again from an address and a browser: overwritten (secure_delete), and
+        the log that held it emptied once the day's first batch is written
+        (_write), since WAL keeps a page's old contents until it is reused.
         """
         if day != self.day:
             con.execute("INSERT OR IGNORE INTO salt VALUES (?, ?)", (day, os.urandom(16)))
             self.salt = con.execute("SELECT value FROM salt WHERE day=?", (day,)).fetchone()[0]
-            self.day = day
+            self.day, self.newday = day, True
         con.execute("DELETE FROM salt WHERE day < ?", (day,))
         return self.salt
 
@@ -252,6 +260,12 @@ class Recorder:
             con.executemany(
                 "INSERT INTO api_call(ts, day, visitor, path, since, version, whole, status,"
                 " referrer, agent_id, place_id) VALUES (?,?,?,?,?,?,?,?,?,?,?)", calls)
+        if self.newday:
+            # The log emptied, and yesterday's salt with it.  Where another
+            # worker or /stats is reading, SQLite's own checkpoints write over
+            # it in time.
+            self.newday = False
+            con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
 
 
 RECORDER = Recorder()

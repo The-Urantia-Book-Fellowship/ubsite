@@ -191,6 +191,8 @@ class Routes(unittest.TestCase):
         self.assertEqual(self.post("/quiz/board/answers", {"t": T1, "a": []})[0], 404)
         self.assertEqual(call("POST", "/quiz/board/join", b"not json")[0], 400)
         self.assertEqual(call("POST", "/quiz/board/join", b"[]")[0], 400)
+        # Deeper than json.loads goes, inside the size allowed: a 500 until 2026-11-09.
+        self.assertEqual(call("POST", "/quiz/board/join", b"[" * (board.MAX_BODY - 1))[0], 400)
         self.assertEqual(call("POST", "/quiz/board/join", b"x" * (board.MAX_BODY + 1))[0], 413)
         self.post("/quiz/board/join", {"t": T1, "n": "Gonod"})
         self.assertEqual(self.post("/quiz/board/join", {"t": T2, "n": "gonod"})[0], 409)

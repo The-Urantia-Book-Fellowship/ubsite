@@ -21,8 +21,12 @@ WorkingDirectory=/home/tigran/ubsite
 
 # No --reload: that is a development watcher. Two workers on four cores leaves
 # headroom for the other two services; one would saturate the link anyway.
+# No access log: uvicorn's wrote each request to the journal, with the reader's
+# address (it trusts nginx's X-Forwarded-For) and what they searched for, where
+# the site promises that no IP address is kept (visits.py; review, 2026-11-09).
 ExecStart=/home/tigran/ubsite/.venv/bin/uvicorn ubsite.app:app \
-    --host 127.0.0.1 --port 8130 --workers 2 --loop uvloop --http httptools
+    --host 127.0.0.1 --port 8130 --workers 2 --loop uvloop --http httptools \
+    --no-access-log
 
 Restart=on-failure
 RestartSec=5

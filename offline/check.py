@@ -93,7 +93,11 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               # The quiz: a paper without questions, a paper there is not, a number
               # written otherwise, a word, Compare's address after it.
               f"/quiz/{no_quiz}", "/quiz/197", "/quiz/01", "/quiz/x", "/quiz/-1", "/quiz/compare",
-              "/quiz/1/compare", "/quiz/1/x"]:
+              "/quiz/1/compare", "/quiz/1/x",
+              # Digits other than 0-9 (app.py RE_REF, 2026-11-09).  Not a newline
+              # after an address, which both answer 404 (tests/test_addresses.py)
+              # but name differently: Starlette's URL drops it.
+              "/１:１", "/١:١", "/１"]:
         jobs.append((p, "", True))
     # Every list a search has, by its `in`: each translation's too, by its key.
     keys = [t["key"] for t in shell["tr"]["order"]]
@@ -101,7 +105,8 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
         for scope in ("", "index", "text", "notes", "study", *keys):
             jobs.append(("/search", urllib.parse.urlencode({"q": q, **({"in": scope} if scope else {})}), True))
     for q in ("god", "prayer", "adjuster"):
-        for scope, page in (("index", "2"), ("text", "3"), ("text", "999"), ("text", "0"), ("index", "x")):
+        for scope, page in (("index", "2"), ("text", "3"), ("text", "999"), ("text", "0"), ("index", "x"),
+                            ("text", "²"), ("text", "٢"), ("text", "1" + "0" * 5000), ("text", "0" * 30 + "2")):
             jobs.append(("/search", urllib.parse.urlencode({"q": q, "in": scope, "page": page}), True))
     for q in ("бог", "все"):
         for scope, page in ((keys[0], "2"), (keys[-1], "3"), (keys[-1], "999")):

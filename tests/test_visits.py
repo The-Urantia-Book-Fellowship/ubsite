@@ -225,6 +225,21 @@ class Salt(Counted):
             self.assertEqual(self.rows("SELECT day FROM salt"), [("2026-01-02",)])
         self.assertNotEqual(first, second)
 
+    def test_the_old_salt_is_gone_from_the_file(self):
+        # Deleted is not enough: a free page, or the log, kept its bytes, and
+        # with them yesterday's numbers could be made again (2026-11-09).
+        rec = visits.RECORDER
+        item = ("view", 0, QUIET4, CHROME, "/", "", 200, "", "h", "", None, None)
+        with mock.patch.object(visits, "today", return_value="2026-01-01"):
+            rec.put(item)
+            (old,), = self.rows("SELECT value FROM salt")
+        with mock.patch.object(visits, "today", return_value="2026-01-02"):
+            rec.put(item)
+            rec.flush()
+        for f in (self.db, self.db.with_name(self.db.name + "-wal")):
+            if f.exists():
+                self.assertNotIn(old, f.read_bytes(), f.name)
+
 
 class Agents(unittest.TestCase):
     def test_classify(self):

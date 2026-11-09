@@ -119,7 +119,7 @@ browser that never loaded the stylesheet, is counted under <a href="#machines">M
 {%- for l in r.links %}
 <tr><td class="wrap">{{ l.host }}
   {%- for url, k in l.urls %}{% if url.rstrip('/') != ('https://' ~ l.host) and url.rstrip('/') != ('https://www.' ~ l.host) %}
-  <div class="sub"><a href="{{ url }}" rel="noreferrer noopener" target="_blank">{{ url }}</a> {{ k }}</div>{% endif %}{% endfor %}</td>
+  <div class="sub">{% if url.startswith(('https://', 'http://')) %}<a href="{{ url }}" rel="noreferrer noopener" target="_blank">{{ url }}</a>{% else %}{{ url }}{% endif %} {{ k }}</div>{% endif %}{% endfor %}</td>
   <td class="fig">{{ n(l.n) }}</td></tr>
 {%- else %}<tr><td class="sub">None yet.</td></tr>
 {%- endfor %}

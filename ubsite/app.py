@@ -33,6 +33,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from fastapi.templating import Jinja2Templates  # noqa: E402
 from markupsafe import Markup, escape  # noqa: E402
+from starlette.concurrency import run_in_threadpool  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
 from ubsite import api, board, l10n, queries, settings, stats, visits  # noqa: E402
@@ -157,8 +158,20 @@ T.env.globals["reading_time"] = reading_time
 APP_OWN = (" OR (e.scope IN ('B','C','D','E','F')"
            " AND e.id NOT IN (SELECT entry_id FROM appendix_head))")
 
-RE_REF = re.compile(r"^(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?$")
+# A paragraph's, a section's or a range's address, whole (fullmatch): digits
+# 0-9 alone, as offline-core.js RE_REF takes them.  Until 2026-11-09 it was
+# \d and $, so /１:１, in fullwidth digits, and /1:1 with a newline after it
+# were pages here and not in the offline copy.
+RE_REF = re.compile(r"([0-9]+):([0-9]+)(?:\.([0-9]+)(?:-([0-9]+))?)?")
 RE_TERM = re.compile(r'"([^"]*)"?|(\S+)')
+# SQLite binds an integer only below 2**63, and raised OverflowError, a 500,
+# for a number in an address larger than that (/9223372036854775808:0, /quiz/…,
+# /part/…, /tr/…).  It names nothing in the book: such a number is answered as
+# any the book has not, never asked of the database, as the offline copy
+# answers it (offline-core.js resolve).
+SQL_INT = 2**63
+# A section's address in the routes that serve one to a script (/tr/, /speech/).
+RE_SEC = re.compile(r"([0-9]{1,18}):([0-9]{1,18})")
 
 # How many hits each list shows on the overview, and per page once a list is
 # opened on its own with ?in=index, ?in=text, ?in=notes, ?in=study, or a
@@ -584,7 +597,7 @@ def translations_of(ref: str, v: str = ""):
     has, not only those a reader ticked, so that no setting reaches the server.
     Asked for under its version (the article's data-trv), the answer is kept
     for good, as /rail/N's is."""
-    m = re.fullmatch(r"(\d+):(\d+)", ref)
+    m = RE_SEC.fullmatch(ref)
     got = translated(int(m[1]), int(m[2])) if m else None
     if not got or not got["v"]:
         return Response("No translation has this section.\n", status_code=404, media_type="text/plain")
@@ -762,7 +775,7 @@ def speech(ref: str):
     heading first with ref null.  listen.js fetches it only when that voice is
     chosen, so a page carries its text once.
     """
-    m = re.fullmatch(r"(\d+):(\d+)", ref)
+    m = RE_SEC.fullmatch(ref)
     rows = db().execute(
         "SELECT p.ref, x.text FROM speech x JOIN section s ON s.id=x.section_id"
         " LEFT JOIN paragraph p ON p.id=x.paragraph_id"
@@ -780,7 +793,7 @@ def speech_tr(key: str, ref: str):
     (build/speech.py derive_tr), in the shape /speech/ sends the English's:
     its heading first, where it titles the section, then each paragraph it
     has.  404 for a section it has none of."""
-    m = re.fullmatch(r"(\d+):(\d+)", ref)
+    m = RE_SEC.fullmatch(ref)
     try:
         rows = db().execute(
             "SELECT p.ref, x.text FROM tr_speech x JOIN section s ON s.id=x.section_id"
@@ -1043,6 +1056,31 @@ def contents(request: Request):
     return page(request, "contents.html", parts=parts, papers=papers)
 
 
+# A citation typed into the search box opens its first target, but cite.py
+# makes a list of every number a range names, one at a time, as it parses
+# (Papers 1-3, 1:2-5secs) and as it expands: 1:1.1-99999999 asked a worker for
+# 3 GB, more than the unit's MemoryMax, whose end is the service stopped, and
+# 1:1.1-99999999999999999999 was a 500 (review of 2026-11-09).  The book has
+# 14,586 paragraphs, so words whose ranges together span more name nothing in
+# it, and are searched for as words, as are a long query's and those written
+# in other digits than 0-9, which offline-core.js never read as a citation.
+# offline-core.js citable() is the same rule.
+RE_RANGE = re.compile(r"([0-9]+)\s*[-–]\s*([0-9]+)")
+
+
+def citable(q: str) -> bool:
+    """Whether the search box's words may be read as a citation (cite.parse,
+    cite.diagnose) without making more than the book's paragraphs of it."""
+    if len(q) > 200 or re.search(r"(?![0-9])\d", q):
+        return False
+    span = 0
+    for a, b in RE_RANGE.findall(q):
+        if len(a) > 6 or len(b) > 6:
+            return False
+        span += max(int(b) - int(a), 0)
+    return span <= 14586
+
+
 @app.get("/search", response_class=HTMLResponse)
 def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
            page_no: str = Query("1", alias="page")):
@@ -1058,7 +1096,7 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
     """
     q = q.strip()
     con = db()
-    jump = cite.parse(q) if q else None
+    jump = cite.parse(q) if q and citable(q) else None
     if jump is not None:
         tg = list(jump.expand())
         if tg:
@@ -1074,7 +1112,11 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             return RedirectResponse(to, status_code=303)
     trs = translations()
     scope = scope if scope in ("index", "text", "notes", "study", *(x["key"] for x in trs)) else ""
-    number = int(page_no) if page_no.isdigit() and int(page_no) > 0 else 1
+    # Digits 0-9 alone, as offline-core.js reads them: "²".isdigit() is True,
+    # and int("²") was a 500, as was a page of 5,000 digits, more than int()
+    # reads; a number that long is past the last page, where it opens (_window).
+    digits = page_no.lstrip("0") if re.fullmatch(r"[0-9]+", page_no) else ""
+    number = (int(digits) if len(digits) <= 18 else 10**18) if digits else 1
     fq = fts_query(q)
     heads, idx, txt, old, stu, found_tr = [], None, None, None, None, []
     if q and scope in ("", "index"):
@@ -1197,7 +1239,7 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
                               + (stu["n"] if stu and scope == "study" else 0)
                               + sum(x["hits"]["n"] for x in found_tr if scope == x["key"]))
     return page(request, "search.html", q=q, scope=scope, idx=idx, txt=txt, old=old, stu=stu,
-                trs=found_tr, heads=heads, diagnose=cite.diagnose(q) if q else None)
+                trs=found_tr, heads=heads, diagnose=cite.diagnose(q) if q and citable(q) else None)
 
 
 def _study_hit(n: dict, s: Markup) -> dict:
@@ -1677,9 +1719,15 @@ async def _board_post(request: Request, act) -> JSONResponse:
         return _board_json(request, {"error": "too large"}, 413)
     try:
         got = json.loads(raw)
-        if not isinstance(got, dict):
-            raise ValueError
-        return _board_json(request, act(got))
+    except (ValueError, RecursionError):        # [[[[… 16 KB deep: a 500 until 2026-11-09
+        got = None
+    if not isinstance(got, dict):
+        return _board_json(request, {"error": "json"}, 400)
+    # In a thread, as a plain route runs: the board's SQLite waits up to 5 s
+    # for its lock, and reads the whole board after, which on the event loop
+    # held every other page of this worker meanwhile.
+    try:
+        return _board_json(request, await run_in_threadpool(act, got))
     except ValueError:
         return _board_json(request, {"error": "json"}, 400)
     except board.Refused as e:
@@ -1705,7 +1753,7 @@ def quiz_paper_page(request: Request, n: int):
     """A paper's questions, asked one at a time (quiz.js), and without
     JavaScript, or in print, listed with each answer under a fold."""
     con = db()
-    p = con.execute("SELECT * FROM paper WHERE n=?", (n,)).fetchone()
+    p = con.execute("SELECT * FROM paper WHERE n=?", (n,)).fetchone() if n < SQL_INT else None
     if p is None:
         return missing(request, l10n.tr(NO_PAPER, n=n))
     papers = queries.quiz_papers(con)
@@ -1732,7 +1780,7 @@ def part_page(request: Request, n: int):
     (Tigran, 2026-11-07).
     """
     con = db()
-    part = con.execute("SELECT * FROM part WHERE n=?", (n,)).fetchone()
+    part = con.execute("SELECT * FROM part WHERE n=?", (n,)).fetchone() if n < SQL_INT else None
     if part is None:
         return missing(request, "There are four parts, I to IV.")
     # Its one way on is the transport bar's ⏭, to its first paper's first
@@ -1790,7 +1838,7 @@ def paper_page(request: Request, paper: int):
     sections was never a page (Tigran, 2026-10-09).
     """
     con = db()
-    p = con.execute("SELECT * FROM paper WHERE n=?", (paper,)).fetchone()
+    p = con.execute("SELECT * FROM paper WHERE n=?", (paper,)).fetchone() if paper < SQL_INT else None
     if p is None:
         return missing(request, l10n.tr(NO_PAPER, n=paper))
     secs = con.execute("SELECT * FROM section WHERE paper_n=? ORDER BY n", (paper,)).fetchall()
@@ -1870,23 +1918,23 @@ def paper_compare(request: Request, paper: int):
 def read_compare(request: Request, ref: str):
     if ref == "api":
         raise HTTPException(404)               # a program's, answered in JSON (http_error)
-    if not RE_REF.match(ref):
+    if not RE_REF.fullmatch(ref):
         return read(request, ref)
     return uncompare(request)
 
 
 @app.get("/{ref}", response_class=HTMLResponse)
 def read(request: Request, ref: str):
-    m = RE_REF.match(ref)
+    m = RE_REF.fullmatch(ref)
     if not m:
         return missing(request, "There is no page at this address.")
     paper, sec = int(m.group(1)), int(m.group(2))
     focus = int(m.group(3)) if m.group(3) else None
     last = int(m.group(4)) if m.group(4) else focus
     con = db()
-    p = con.execute("SELECT * FROM paper WHERE n=?", (paper,)).fetchone()
+    p = con.execute("SELECT * FROM paper WHERE n=?", (paper,)).fetchone() if paper < SQL_INT else None
     s = con.execute("SELECT * FROM section WHERE paper_n=? AND n=?",
-                    (paper, sec)).fetchone()
+                    (paper, sec)).fetchone() if p and sec < SQL_INT else None
     if p is None:
         return missing(request, l10n.tr(NO_PAPER, n=paper))
     if s is None:
