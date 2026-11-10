@@ -70,7 +70,7 @@ A release is a tag `vX.Y.Z` on `main`, numbered by [Semantic Versioning](https:/
 | asset | what |
 |---|---|
 | `ub.db` | the database, about 214 MB |
-| `offline-<site>.tar` | the offline copy for each site's profile, about 73 MB each: the copy a reader downloads, 48 MB, and each translation's, a download of its own that a reader chooses (section 4) |
+| `offline-<site>.tar` | the offline copy for each site's profile, about 73 MB each: the copy every reader's browser downloads by itself and reads from, 48 MB (since 2026-11-10; a reader's choice before), and each translation's, a download of its own that a reader chooses (section 4) |
 | `manifest.json` | the release, the code's commit, the schema version, the commits of the sources it was built from (for the Foundation's translation, the SHA-256 of its release), the text API's version, the counts, and the SHA-256 of each asset |
 
 As `deploy.sh` does today, a release refuses a database built from uncommitted sources. The Fellowship's continuity does not rest on the maintainer's building it: `README.md` says how to build, and section 10 proposes a test of exactly that.
@@ -110,7 +110,7 @@ Every site that runs the reader has a profile, chosen by its host name, saying:
 
 A feature switched off by the profile is in the site's code but not drawn, linked, routed or offered. The profile holds a few large switches, not one for every element: every switch doubles what has to be tested. When testing finds a problem every reader would have, not only a preference of the Fellowship's audience, it is fixed for every site rather than switched off on one.
 
-**Each profile has its own offline copy.** Work offline keeps the site's own pages in the reader's browser, and a page carries its header and footer. So the Fellowship's site gets a copy built with its own header, made with each release; the maintainer's sites share theirs. Each translation is a download of its own beside the copy, which a reader chooses in Settings; a translation the profile switches off is not offered.
+**Each profile has its own offline copy.** Work offline keeps the site's own pages in the reader's browser, every reader's since 2026-11-10, where the pages are then read from, and a page carries its header and footer. So the Fellowship's site gets a copy built with its own header, made with each release; the maintainer's sites share theirs. Each translation is a download of its own beside the copy, which a reader chooses in Settings; a translation the profile switches off is not offered.
 
 Every gate runs under each profile.
 

@@ -213,12 +213,26 @@ window.ubUnit = function (where) {
         <path d="M0 0h45v10H0z" fill="#fff"/><path d="M0 10h45v10H0z" fill="#0039a6"/>
         <path d="M0 20h45v10H0z" fill="#d52b1e"/></svg></button>
   </span>
-  {#- Help, and the tour (Tigran, 2026-11-06): a link to the page /help, so it
-      works with JavaScript off and offline, the last thing in the header: the
-      corner on a wide screen and on a phone alike (ub.css a.help).  Its
-      data-src is the tour's script, which ub.js loads when the tour is due:
-      on a first visit, or a step kept for the tab (static/help.js). #}
-  <a class="help" href="/help" {{ ta('aria-label', 'Help') }} {{ ta('title', 'Help and tour') }} data-src="{{ asset('help.js') }}">{{ chrome.help_svg() }}</a>
+  {#- Help, and the tour (Tigran, 2026-11-06), the last thing in the header:
+      the corner on a wide screen and on a phone alike (ub.css .top .help).  A
+      menu since 2026-11-10 (Tigran; a link to /help until then): Help, the
+      page; What's new?, what the site's last update brought, which opened by
+      itself after one until then (static/offline.js); and About, a small
+      window saying what the site is and where its source is kept (ub.js,
+      which draws it: the shell holds one dialog, Settings', by which
+      offline/pages.py cuts it).  A <details>, and every item a link, so that
+      it opens and each goes somewhere with JavaScript off and offline: the
+      changelog, and Help's own About.  Its data-src is the tour's script,
+      which ub.js loads when the tour is due: on a first visit, or a step kept
+      for the tab (static/help.js). #}
+  <details class="help" data-src="{{ asset('help.js') }}" data-repo="{{ repo }}">
+    <summary {{ ta('aria-label', 'Help') }} {{ ta('title', 'Help, What’s new, About') }}>{{ chrome.help_svg() }}</summary>
+    <div class="helpitems">
+      <a href="/help">{{ t('Help') }}</a>
+      <a class="whatsnew" href="/changelog">{{ t('What’s new?') }}</a>
+      <a class="about" href="/help#about">{{ t('About') }}</a>
+    </div>
+  </details>
 </header>
 <dialog class="settings" aria-labelledby="settings-title">
   {#- Rendered from ubsite/settings.py; ub.js fills in the values and keeps them.
@@ -326,21 +340,21 @@ window.ubUnit = function (where) {
           (Tigran): online or offline, and which site this is, which ub.js
           reads from the page's own address, never written here, since the
           offline copy's pages are made under one name for both hosts; the copy,
-          a tick: ticked, it is downloaded and kept up to date by itself,
-          unticked, let go, as a translation is.  Not a setting, as what the
-          copy holds is the worker's (sw.js), so ↺ never removes it and nothing
-          is stored; disabled until offline.js runs.  Under it what the copy is,
-          or how far its download has gone.  Then the translations kept in the
+          "Base", which every browser fetches and keeps up to date by itself
+          and reads the site from (Tigran, 2026-11-10; a tick until then, which
+          downloaded it and let it go), so a name and its hint, with nothing to
+          tick.  Under it what the copy is, or how far its download has gone,
+          which offline.js writes.  Then the translations kept in the
           copy, each a download of its own (ROADMAP item 15), the worker keeping
           them with it (meta.tr): a tick downloads one at once, with the copy
           where none is kept yet, and an untick lets it go (Tigran, 2026-10-26
-          and 30); its last line says why one cannot be changed.  Not .trlist,
+          and 30), asking first (2026-11-10); its last line says why one cannot be changed.  Not .trlist,
           which is the Translations tab's own (ub.js).  Last, the offer to
           install the site as an app, where the browser makes one. #}
       <p class="net"><span class="conn">{{ t('Online') }}</span> <span class="host"></span></p>
       <div class="offcopy">
-      <label><input type="checkbox" class="copy" disabled> {{ t('Base') }}
-        <small>{{ t('offline:copyhint') }}</small></label>
+      <p class="sub">{{ t('Base') }}</p>
+      <p class="hint">{{ t('offline:copyhint') }}</p>
       <p class="state" aria-live="polite"></p>
       </div>
       <div class="offtr">

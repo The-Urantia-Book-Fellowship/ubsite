@@ -193,18 +193,36 @@ a:hover { text-decoration-thickness: 2px; }
 @media (hover: hover) { .top .flag:hover { opacity: .8; } }
 /* Help (base.html, templates/help.html; Tigran, 2026-11-06): a question mark
    in a ring, drawn as the gear is, the last thing in the header, after the
-   flags: the corner.  A link to the page, shown with JavaScript off too. */
-a.help { display: block; color: var(--faint); align-self: center; line-height: 0; text-decoration: none; }
-a.help svg { width: 1.15rem; height: 1.15rem; display: block; overflow: visible; }
-a.help :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
-a.help .dot { fill: currentColor; stroke: none; }
-a.help:hover { color: var(--ink); }
+   flags: the corner.  A menu since 2026-11-10, a <details> that opens with
+   JavaScript off too: under the mark, its right edge on the mark's, Help,
+   What's new? and About, each a link (a link to /help alone until then). */
+.top .help { position: relative; align-self: center; }
+.top .help > summary { display: block; list-style: none; color: var(--faint); line-height: 0; cursor: pointer; }
+.top .help > summary::-webkit-details-marker { display: none; }
+.top .help > summary svg { width: 1.15rem; height: 1.15rem; display: block; overflow: visible; }
+.top .help > summary :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.top .help > summary .dot { fill: currentColor; stroke: none; }
+.top .help > summary:hover, .top .help[open] > summary { color: var(--ink); }
+.top .helpitems { position: absolute; z-index: 20; top: calc(100% + .5rem); right: -.35rem; display: grid;
+  min-width: 9rem; padding: .3rem 0; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / .22); }
+.top .helpitems a { padding: .34rem .95rem; color: var(--ink); font-size: .95rem; line-height: 1.3;
+  text-decoration: none; white-space: nowrap; }
+.top .helpitems a:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+@media (hover: hover) {
+  .top .helpitems a:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); }
+}
+/* About (ub.js): What's new's dialog, narrower, with the site's words and the
+   address of its source. */
+.offnews.about { width: min(26rem, calc(100vw - 2rem)); }
+.offnews.about p { margin: .5rem 0 0; }
+.offnews.about .repo a { overflow-wrap: anywhere; }
 /* On a phone the corner is the end of the name's line, which has room: the
    nav under the search box has none, the more in Russian.  So the flags come
    second, the ? with them, the search box after them on a line of its own. */
 @media (max-width: 40rem) {
   .top .langs { order: 1; margin-left: auto; }
-  .top a.help { order: 1; }
+  .top .help { order: 1; }
   .top .find { order: 2; flex-basis: 100%; }
   .top nav { order: 3; }
 }
@@ -1565,15 +1583,18 @@ dialog.settings .seg :is(.sp1, .sp2, .sp3, .sp4) { min-height: calc(.92rem * 1.5
    menu until 2026-10-30: its first line online or offline, and which site
    this is at the line's right, as an address is written, or under it at the
    right when the line is full (the same build is at two addresses; Tigran,
-   2026-10-15); the copy's tick, and under it, indented to its words, what
-   the copy is, or how far its download has gone, with its buttons; the
+   2026-10-15); the copy's name, "Base", as the translations' heading is set,
+   its hint, and what the copy is, or how far its download has gone, with its
+   buttons (a tick until 2026-11-10, the two lines indented to its words); the
    translations (above); and the offer to install the site as an app, under a
    rule. */
 dialog.settings .net { display: flex; flex-wrap: wrap; column-gap: .8rem; margin: 0 0 .45rem;
   font-size: .82rem; letter-spacing: .06em; font-variant-caps: small-caps; color: var(--faint); }
 dialog.settings .net .host { margin-left: auto; font-variant-caps: normal; letter-spacing: 0;
   white-space: nowrap; }
-dialog.settings .offcopy .state { margin: .1rem 0 0 1.35rem; font-size: .85rem; color: var(--faint); }
+dialog.settings .offcopy .sub { margin-top: 0; }
+dialog.settings .offcopy .hint { margin: 0; font-size: .85rem; color: var(--faint); }
+dialog.settings .offcopy .state { margin: .1rem 0 0; font-size: .85rem; color: var(--faint); }
 dialog.settings .offcopy .state:empty { display: none; }
 dialog.settings .offcopy .state button { margin-top: .3rem; }
 dialog.settings .install { margin: .8rem 0 0; padding-top: .7rem; border-top: 1px solid var(--rule); }
@@ -1602,6 +1623,7 @@ dialog.settings :is(.offcopy, .install) button > span { position: relative; top:
   .offnews .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); }
 }
 .offnews .since { margin: 0 0 .2rem; color: var(--faint); font-size: .88rem; }
+.offnews .since:empty { display: none; }
 .offnews h3 { margin: .8rem 0 .2rem; font-size: .82rem; font-weight: 400; letter-spacing: .06em;
   font-variant-caps: small-caps; color: var(--faint); }
 .offnews ul { margin: 0; padding-left: 1.1rem; }

@@ -229,9 +229,11 @@ LISTEN = [
 ]
 # Work offline has a tab, Offline, and no setting in it: what it holds is the
 # worker's, not a reader's choice to store (base.html, the panel's own markup;
-# static/offline.js).  The copy's tick downloads it and lets it go, and a kept
-# copy is updated by itself whenever the site is open and online, then What's
-# new, and the page reloaded once that is closed.  Until 2026-10-30 a switch
+# static/offline.js).  The copy is every browser's, fetched by itself (a tick
+# from 2026-10-30 to 2026-11-10, which downloaded it and let it go), and is
+# updated by itself whenever the site is open and online, without a word
+# since 2026-11-10 (What's new at its end, and the page reloaded once that
+# was closed, until then; it is in the ?'s menu now).  Until 2026-10-30 a switch
 # here, "Keep the offline copy up to date" (`autoupdate`, on by default), could
 # turn that off, leaving Update now in the cloud's menu to the reader; Tigran
 # had the menu's work moved into this tab, and the tick do both.  A stored

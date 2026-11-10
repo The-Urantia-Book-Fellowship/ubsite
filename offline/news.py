@@ -1,6 +1,8 @@
 """What's new: the site's own changes, newest first, for the copy's manifest.
 
-A copy that is out of date offers "What's new" beside its Update button
+The ? at the header's corner offers "What's new?", which lists what a copy's
+last update brought, from the copy's own list (static/offline.js; since
+2026-11-10), and a copy that is out of date offers "What's new" beside its Update button
 (static/offline.js), and lists what changed after the copy was made.  The
 changes are ChangeLog.md's entries for readers, those under Added, Changed,
 Deprecated, Removed, Fixed and Security in a version, never For developers;

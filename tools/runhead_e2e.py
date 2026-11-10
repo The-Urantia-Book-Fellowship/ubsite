@@ -325,11 +325,23 @@ def run() -> int:
     return 1 if fails else 0
 
 
+# The server with no offline copy to offer (the manifest a 404), so that no page
+# registers the worker and fetches the copy, 48 MB to each fresh context: since
+# 2026-11-10 every page does where the site has one (static/offline.js).  The
+# cloud is shown all the same.  tools/offline_e2e.py is the test of the copy.
+NO_COPY = """
+import pathlib, sys
+import uvicorn
+import ubsite.app as A
+A.OFFLINE = pathlib.Path(sys.argv[1])
+uvicorn.run(A.app, host="127.0.0.1", port=int(sys.argv[2]), log_level="warning")
+"""
+
+
 def main() -> int:
     env = dict(os.environ, UB_VISITS="off")
-    srv = subprocess.Popen([str(ROOT / ".venv" / "bin" / "python"), "-m", "uvicorn", "ubsite.app:app",
-                            "--host", "127.0.0.1", "--port", "8132", "--log-level", "warning"],
-                           cwd=ROOT, env=env)
+    srv = subprocess.Popen([str(ROOT / ".venv" / "bin" / "python"), "-c", NO_COPY,
+                            str(ROOT / "var" / "no-offline-copy"), "8132"], cwd=ROOT, env=env)
     try:
         for _ in range(100):
             try:

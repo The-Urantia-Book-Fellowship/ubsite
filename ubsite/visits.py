@@ -324,6 +324,17 @@ class Counter:
             # /speech/<P:S> the English, /speech/<key>/<P:S> a translation's.
             tr, _, ref = path[len("/speech/"):].rpartition("/")
             kind, rest = "listen", ("browser:" + tr if tr else "browser", ref)
+        elif path == "/offline/manifest.json":
+            # The worker asking whether its copy is the site's, at most once
+            # an hour (sw.js check()), or a page about to fetch one
+            # (offline.js): a browser, as the stylesheet's fetch says one.
+            # Since 2026-11-10 every browser keeps the copy and reads the
+            # pages and the stylesheet from it, so what still reaches here, a
+            # recording played, a search the copy leaves to the server, a page
+            # while the copy is out of date, would otherwise be a machine's.
+            if status not in (200, 304):
+                return
+            kind, rest = "browser", ()
         elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/", "/quiz/board/")):
             return                                 # /rail/N: a paper opened in the left rail;
                                                    # /offline/: a copy downloading (sw.js);

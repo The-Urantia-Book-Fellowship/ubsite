@@ -24,6 +24,10 @@ limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=40r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_board:10m rate=10r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_stats:10m rate=10r/m;
 
+# nginx's own copies of the offline copy's chunks. See deploy/ubsite.nginx.
+proxy_cache_path /var/cache/ubsite-nginx levels=1:2 keys_zone=ubsite_chunks:1m
+                 max_size=600m inactive=60d use_temp_path=off;
+
 server {
     listen 80;
     server_name ubsite.sigmaai.au;
@@ -100,6 +104,18 @@ server {
         # (build/fonts.py): SBL Greek goes from 1.1 MB to 0.4 MB.  A gzipped
         # reply's ETag is weakened to W/"…", which Starlette's 304 still matches.
         gzip_types text/css text/javascript image/svg+xml font/ttf font/otf;
+    }
+
+    # The offline copy's chunks, kept by nginx once the app has sent each.
+    # See deploy/ubsite.nginx for the reasons.
+    location ~ "^/offline/c/[0-9a-f]{16}\.gz$" {
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+        proxy_cache ubsite_chunks;
+        proxy_cache_key $uri;
+        proxy_cache_valid 200 365d;
+        proxy_cache_lock on;
+        add_header X-Cache $upstream_cache_status;
     }
 
     # The owner's page of visits (ubsite/stats.py): its password is checked with

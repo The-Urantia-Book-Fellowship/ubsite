@@ -1,12 +1,19 @@
-// Work offline: the service worker a reader registers by downloading the copy
-// from the menu of the icon at the header's corner (static/offline.js), and
-// nobody else.  It keeps the copy that `make offline` builds (offline/), and
-// answers the site's addresses from it when the network does not.
+// Work offline: the service worker every page registers where one can run
+// (static/offline.js), since 2026-11-10 (Tigran; until then only a reader who
+// ticked the copy in Settings had it).  It keeps the copy that `make offline`
+// builds (offline/), which every browser fetches by itself on its first
+// visit, and answers the site's addresses from it.
 //
-// Network first.  Online, every request goes to the server as if this were
-// not here, so a reader sees the live site and the visit counter counts them.
-// The copy answers when the network fails, takes longer than WAIT, or the
-// server is down (a 5xx): a page, a search, a stylesheet, as the server would.
+// The copy first, while it is known to be the site's build (`sure`, below)
+// and the browser says it is online: a page, a search, a stylesheet, as the
+// server would send it, byte for byte and unmarked, with the server not asked
+// at all, so the visit counter does not count it.  Otherwise the network
+// first, as it was for every request until 2026-11-10: a copy out of date, or
+// one a new worker has not asked about yet, a browser that says it is
+// offline, an address the copy has no page for, and what depends on a
+// translation the reader shows and does not keep (`shown`).  There the copy
+// answers when the network fails, takes longer than WAIT, or the server is
+// down (a 5xx), and a page it answers so says so on its footer (respond).
 // What the copy does not hold -- the API, a recording not kept -- is left to
 // fail; the text the browser's voice reads is in it, so that voice reads
 // offline, and a recording a reader keeps, a paper, a part or a voice at a
@@ -19,7 +26,7 @@
 // read, so the copy takes the room it took to download: unpacked, it is
 // three and a half times that.  A copy knows its build; asking for /offline/manifest.json, at
 // most once an hour while online, says whether the site's is another, and by
-// how many bytes.  offline.js tells the reader, and updates when asked.
+// how many bytes.  offline.js tells the reader, and has it updated by itself.
 //
 // The translations are each a download of their own, which a reader chooses
 // in Settings' Offline tab (offline.js): the manifest lists them apart from the
@@ -50,7 +57,13 @@ self.addEventListener('activate', function (e) {
       return Promise.all(ks.filter(function (k) { return k.url !== new URL(V.wasm, location).href; })
                            .map(function (k) { return c.delete(k); }));
     });
-  }).then(function () { return self.clients.claim(); }));
+  }).then(function () {
+    // A worker new to this browser, or to the copy it finds: it may route or
+    // join otherwise than the worker the copy was fetched by, so it asks the
+    // site before it answers from the copy first (`sure`), at the next page's
+    // check, which is not put off for the hour.
+    return updateMeta(function (meta) { meta.sure = false; meta.checked = 0; });
+  }).then(null, function () {}).then(function () { return self.clients.claim(); }));
 });
 
 // ---- What is kept --------------------------------------------------------
@@ -60,6 +73,13 @@ self.addEventListener('activate', function (e) {
 // download; `tr`, the translations kept, each at the build of its own it was
 // fetched at; `audio`, the papers of each voice asked for and not yet whole
 // (The recordings kept, below), never what is kept, which the caches say.
+// `sure`: the copy is the site's build, by the last check or a download just
+// ended, and this worker has asked since it took over; only then does the
+// copy answer first (the fetch handler).  `shown`: the translations the
+// reader shows beside the text, as the page last said (ub.js, {cmd:
+// 'shown'}), the worker having no other way to Settings.  `since`: when the
+// copy before the last update was made, for What's new (offline.js), which
+// lists what that update brought.
 function readMeta() {
   return caches.open(META).then(function (c) { return c.match('/offline/meta'); })
     .then(function (r) { return r ? r.json() : {}; });
@@ -75,9 +95,36 @@ function writeMeta(m) {
 // it has just deleted.  So no one writes back a meta read before a wait.
 var metaQ = Promise.resolve();
 function updateMeta(change) {
-  var p = metaQ.then(readMeta).then(function (m) { change(m); return writeMeta(m).then(function () { return m; }); });
+  var p = metaQ.then(readMeta).then(function (m) { change(m); return writeMeta(m).then(function () { return note(m); }); });
   metaQ = p.catch(function () {});
   return p;
+}
+// `sure` and `shown` as meta has them, for the fetch handler, which cannot
+// read meta for every request: read once per worker, in the queue, so that no
+// change is overtaken, and noted again at each change.
+// What a page has said since this worker started (`said`) is the word, at
+// once, before meta has it: a fold asks for its section's translations as
+// soon as one is ticked.
+var sure = false, shown = null, said = null, wrote = null, knownP = null;
+function note(m) {
+  sure = !!m.sure;
+  wrote = Array.isArray(m.shown) ? m.shown.join(' ') : null;
+  shown = said || (Array.isArray(m.shown) ? m.shown : null);
+  return m;
+}
+function showing(tr) {
+  var ks = Array.isArray(tr) ? tr.filter(function (k) { return typeof k === 'string'; }) : [];
+  said = shown = ks;
+  return known().then(function () {
+    return wrote === ks.join(' ') ? null : updateMeta(function (meta) { meta.shown = ks; });
+  }).then(function () { return null; });
+}
+function known() {
+  if (!knownP) {
+    knownP = metaQ.then(readMeta).then(note).then(null, function () {});
+    metaQ = knownP;
+  }
+  return knownP;
 }
 // Where a chunk is kept, gzipped.  A copy kept before 2026-10-14 has its
 // chunks unpacked, under have/: they are read as they are, and an update
@@ -450,20 +497,31 @@ function audioAnswer(req, path, key) {
 }
 
 // ---- Answering -----------------------------------------------------------
-function respond(c, r) {
+function respond(c, r, fell) {
   if (r.location) return Response.redirect(new URL(r.location, location).href, r.status);
   var body = r.body;
-  // A page from the copy says so: ub.css draws its date in the footer,
-  // "October 18, 2026", and in Russian «18 октября 2026 г.» (static l10n.js).
-  if (/^text\/html/.test(r.type)) {
+  // A page the copy answers because the network did not (`fell`) says so:
+  // ub.css draws its date in the footer, "October 18, 2026", and in Russian
+  // «18 октября 2026 г.» (static l10n.js), and ub.js strikes the cloud
+  // through.  One it answers first is the server's page as it is.
+  if (fell && /^text\/html/.test(r.type)) {
     var d = T.date(c.made, true);
     body = body.replace('\n<footer>', '\n<footer data-copy="' + d.en + '"' +
                         (T.bilingual ? ' data-copy-ru="' + d.ru + '"' : '') + '>');
   }
   return new Response(body, { status: r.status, headers: { 'Content-Type': r.type } });
 }
-// What the copy answers for this request, or null.
-function fromCopy(c, url) {
+// Whether the copy holds every translation the reader shows: only then is
+// what depends on them (offline-core.js resolve(), `tr`: a section's
+// translations, a search) the same from the copy as from the server, which
+// sends them all.  Not known until a page has said.
+function covered(c) {
+  return !!shown && shown.every(function (k) { return c.kept.indexOf(k) >= 0; });
+}
+// What the copy answers for this request, or null: `fell`, because the
+// network did not; otherwise first, and then null too where the answer
+// depends on a translation shown and not kept.
+function fromCopy(c, url, fell) {
   var asset = c.byUrl[url.pathname + url.search];
   if (asset) return bytes(c, asset.name).then(function (r) {
     return new Response(r.body, { headers: { 'Content-Type': asset.type } });
@@ -471,7 +529,7 @@ function fromCopy(c, url) {
   var path;
   try { path = decodeURIComponent(url.pathname); } catch (e) { return Promise.resolve(null); }
   var plan = self.ubOffline.resolve(path, c.shell, location.origin, c.kept);
-  if (plan === null) return Promise.resolve(null);
+  if (plan === null || (!fell && plan.tr && !covered(c))) return Promise.resolve(null);
   if (plan.res) {
     // Compare's old address goes on with its query, as app.py uncompare's
     // 301 does: resolve() is given the path alone.
@@ -480,17 +538,17 @@ function fromCopy(c, url) {
       res = { status: 301, location: res.location + url.search };
     // A not-found page of its own, or one saying the address is read online,
     // is `ubWeak`: the copy holds nothing for it (the fetch handler).
-    var r = respond(c, res);
+    var r = respond(c, res, fell);
     r.ubWeak = !!plan.res.away || plan.res.status >= 400;
     return Promise.resolve(r);
   }
   if (plan.search) return database(c).then(function (d) {
-    return respond(c, self.ubOffline.search(d.db, d.mem, c.shell, url.searchParams, d.kept));
+    return respond(c, self.ubOffline.search(d.db, d.mem, c.shell, url.searchParams, d.kept), fell);
   });
   if (plan.chunks) return Promise.all(plan.chunks.map(function (n) { return chunk(c, n); })).then(function (ds) {
-    return respond(c, plan.make(ds));
+    return respond(c, plan.make(ds), fell);
   });
-  return chunk(c, plan.chunk).then(function (data) { return respond(c, plan.make(data)); });
+  return chunk(c, plan.chunk).then(function (data) { return respond(c, plan.make(data), fell); });
 }
 
 self.addEventListener('fetch', function (e) {
@@ -506,7 +564,8 @@ self.addEventListener('fetch', function (e) {
   // Nor what depends on the host: a copy kept before 2026-10-15 holds the
   // manifest and the touch icon as one host sent them.
   if (self.ubOffline.HOSTED.indexOf(url.pathname) >= 0) return;
-  e.respondWith(copy().then(function (c) {
+  e.respondWith(Promise.all([copy(), known()]).then(function (got) {
+    var c = got[0];
     if (!c) return fetch(req);
     // The network even where the browser says it is offline: Chrome can say so
     // with the network working, until it is restarted, and until 2026-10-27
@@ -521,7 +580,7 @@ self.addEventListener('fetch', function (e) {
     // 2026-11-09 those beat a slow network, and its answer was thrown away,
     // the stylesheet of a build the copy did not have yet among them, which
     // left the page unstyled (review of 2026-11-09).
-    return new Promise(function (resolve, reject) {
+    var network = function () { return new Promise(function (resolve, reject) {
       var settled = false, timer = null, asked = null, failed = null, bad = null;
       var settle = function (r) {
         if (settled) return;
@@ -530,7 +589,7 @@ self.addEventListener('fetch', function (e) {
         resolve(r);
       };
       var fall = function (now) {
-        if (!asked) asked = fromCopy(c, url).then(null, function () { return null; });
+        if (!asked) asked = fromCopy(c, url, true).then(null, function () { return null; });
         asked.then(function (r) {
           if (settled) return;
           if (r && (now || !r.ubWeak)) return settle(r);
@@ -550,6 +609,21 @@ self.addEventListener('fetch', function (e) {
         failed = err;
         fall(true);
       });
+    }); };
+    // The copy first (2026-11-10): while it is the site's build and the
+    // browser says it is online.  Not a 404 of its own, a page saying the
+    // address is read online, nor what depends on a translation shown and not
+    // kept: those are the network's, as before.  A browser that says it is
+    // offline goes to the network as before too, where the fetch fails at
+    // once and the copy answers marked: Chrome can say so with the network
+    // working (above), and the site's answer is the last word.  The scripts
+    // and the stylesheet go as the pages do, though their addresses name
+    // their content: a page the server sends is counted as a reader's by its
+    // stylesheet's fetch (visits.py), so that is the server's whenever the
+    // page is.
+    if (!(sure && c.manifest.format === FORMAT && self.navigator.onLine !== false)) return network();
+    return fromCopy(c, url, false).then(null, function () { return null; }).then(function (r) {
+      return r && !r.ubWeak ? r : network();
     });
   }));
 });
@@ -573,7 +647,8 @@ function state() {
                   tr: c.kept.slice(), trs: (m.translations || []).map(function (t) {
                     return { key: t.key, bytes: t.bytes, raw: t.raw };
                   }) } : null,
-      latest: meta.latest || null, checked: meta.checked || 0, busy: busy, error: meta.error || null,
+      latest: meta.latest || null, checked: meta.checked || 0, sure: !!meta.sure, since: meta.since || null,
+      busy: busy, error: meta.error || null,
       words: meta.error && meta.words || null, audio: got[2]
     };
   });
@@ -627,6 +702,9 @@ function check(force) {
           meta.checked = Date.now();
           meta.latest = meta.current !== m.build || Object.keys(tr).some(function (k) { return by[k] !== tr[k]; })
             ? latest : null;
+          // The copy is the site's, said by the site just now: it answers
+          // first until a check says otherwise (the fetch handler).
+          meta.sure = !meta.latest && !full;
         });
       });
     });
@@ -643,11 +721,14 @@ function check(force) {
 function download(want) {
   if (running) return running;
   busy = { done: 0, total: 0, adding: [], copy: false };
-  var had = {}, was = null;
+  var had = {}, was = null, wasMade = null;
   running = readMeta().then(function (meta) {
     had = meta.tr || {};
     was = meta.current || null;
     if (!want) want = Object.keys(had);
+    return copy();
+  }).then(function (c) {
+    wasMade = c ? c.made : null;
     return fetch('/offline/manifest.json', { cache: 'no-cache' });
   }).then(function (r) {
     if (!r.ok) throw stopped(T.k('the site has no offline copy ({s})'), { s: r.status });
@@ -717,9 +798,11 @@ function download(want) {
         });
       }).then(function () {
         return updateMeta(function (meta) {
+          if (was && was !== m.build && wasMade) meta.since = wasMade;
           meta.current = m.build;
           meta.checked = Date.now();
           meta.latest = null;
+          meta.sure = true;
           meta.error = meta.words = null;
           meta.tr = {};
           trs.forEach(function (t) { meta.tr[t.key] = t.build; });
@@ -771,30 +854,15 @@ function drop(k) {
   }).then(tell);
 }
 
-// Everything this worker keeps, for a reader who unticks the offline copy in
-// Settings (offline.js off).  A recording's file on the way first stopped, its
-// queue emptied, and its end waited for: it made its cache and meta again
-// after they were deleted, with no worker left to let them go (review of
-// 2026-11-09).
-function remove() {
-  held = null;
-  if (audioAbort) audioAbort.abort();
-  return updateMeta(function (meta) { if (meta.audio) meta.audio.queue = []; }).then(function () {
-    return audioRunning;
-  }).then(null, function () {}).then(function () {
-    return caches.keys();
-  }).then(function (ks) {
-    return Promise.all(ks.filter(function (k) {
-      return k === META || k === ENGINE || k.indexOf(COPY) === 0 || k.indexOf(AUDIO) === 0;
-    })
-                         .map(function (k) { return caches.delete(k); }));
-  });
-}
-
-// offline.js asks: {cmd: 'state' | 'check' | 'get' | 'drop' | 'remove' |
-// 'keep' | 'unkeep' | 'stop', force, tr, voice, papers}, and the answer, the
-// state, comes back on the message's port.  `get` may name the translations
-// to keep, `tr`, a list of their keys, and `drop` names the one to let go.
+// offline.js asks: {cmd: 'state' | 'check' | 'get' | 'drop' | 'keep' |
+// 'unkeep' | 'stop' | 'shown' | 'news', force, tr, voice, papers}, and the
+// answer, the state, comes back on the message's port; `news` answers with
+// the copy's own list of what changed (its manifest's `news`), for What's
+// new, with the server not asked.  `get` may name the translations
+// to keep, `tr`, a list of their keys, and `drop` names the one to let go;
+// `shown`, from ub.js, names those the reader shows beside the text, written
+// only where they have changed.  There is no `remove` since 2026-11-10: the
+// copy is every browser's, let go only by the browser's own site data.
 // `keep` names a voice and its papers to keep, or nothing, to fetch the next
 // file of the queue; `unkeep` a voice and papers to let go.  A check's says
 // too whether it reached the site: `reached` true or false, or none where it
@@ -813,7 +881,8 @@ self.addEventListener('message', function (e) {
           }, function (err) {
             return state().then(function (s) { if (err && err.away) s.reached = false; return s; });
           })
-        : cmd === 'remove' ? remove().then(function () { return { removed: true }; })
+        : cmd === 'shown' ? showing(tr)
+        : cmd === 'news' ? copy().then(function (c) { return (c && c.manifest.news) || { items: [], earlier: false }; })
         : state();
   e.waitUntil(p.then(function (s) { if (port) port.postMessage(s); },
                      function (err) { if (port) port.postMessage({ error: String(err && err.message || err) }); }));

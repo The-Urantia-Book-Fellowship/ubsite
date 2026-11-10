@@ -8,7 +8,11 @@ applies to the whole history, not only from the day it was written.
 A *visit* is one browser on one UTC day: the visitor number is salted afresh
 each day, so the same reader on two days counts twice, by design.  A view
 counts as a person's when its visitor-day also fetched /static/ub.css (a
-browser that renders the page) and its user agent is no known bot.
+browser that renders the page), or /offline/manifest.json (one whose worker
+asks whether its copy is current: since 2026-11-10 every browser keeps the
+site and reads the stylesheet from its copy), and its user agent is no known
+bot.  A page a browser reads from its copy never reaches the server, and is
+not counted (Tigran, 2026-11-10).
 
 The page is behind HTTP Basic auth, against an scrypt hash in var/stats.passwd
 (`python -m ubsite.stats passwd`).  Without that file /stats does not exist.

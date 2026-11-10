@@ -1,10 +1,13 @@
-"""Work offline, end to end, in Chrome: turn it on, keep a translation in it,
-read and search with the network off, learn of a newer copy and take it, with
-the site's newer worker,
+"""Work offline, end to end, in Chrome: a first visit, which fetches the copy
+with nothing tapped, the browser saving data or not, keep a translation in
+it, read from the copy with the server not asked, read and search with the
+network off, learn of a newer copy and take it, with the site's newer worker,
 the page reloading itself after, survive an update that fails, say offline
 while the site is gone though the browser is online, and online while the
-browser says offline with the site there, keep it up to date by itself, with
-What's new at the end, and turn it off.
+browser says offline with the site there, keep it up to date by itself,
+without a word, What's new? in the ?'s menu listing what the update brought;
+and a first visit in a browser of its own, which goes on with a download that
+was cut short, and reads from the copy first (2026-11-10).
 
     make e2e          (make offline, then .venv/bin/python tools/offline_e2e.py)
 
@@ -31,6 +34,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.parse
 import urllib.request
 
 from playwright.sync_api import sync_playwright
@@ -184,7 +188,9 @@ SAYS_OFFLINE = """try { if (sessionStorage.getItem('ubSaysOffline'))
 # The browser saving data, in the pages of a tab where sessionStorage says so:
 # the copy is then not updated by itself, and the tab offers Update now
 # (offline.js saving).  The one way, since 2026-10-30, to update by hand.
-SAVES_DATA = """try { if (sessionStorage.getItem('ubSavesData'))
+# Or where the test has set a cookie saying so, which it can before a tab's
+# first page (the first visit, below).
+SAVES_DATA = """try { if (sessionStorage.getItem('ubSavesData') || /ubSavesData=1/.test(document.cookie))
   Object.defineProperty(navigator, 'connection', { value: { saveData: true }, configurable: true }); } catch (e) {}"""
 
 # What the page shows while an update runs, in the tab and on the icon's
@@ -243,8 +249,37 @@ def offline_tab(pg) -> None:
     unfold(pg)
 
 
-# The copy's tick: unticked and to be ticked, as with none kept.
-COPY_CLEAR = "(i => !i.checked && !i.disabled)(document.querySelector('dialog.settings .offcopy input'))"
+def asked_for(log: pathlib.Path, path: str) -> int:
+    """How many times the server has been asked for `path`, with any query
+    where `path` names none, by its log, which writes a path as uvicorn
+    quotes it, 102%3A3, and a query as it came."""
+    at, sep, query = path.partition("?")
+    return len(re.findall('"GET ' + re.escape(urllib.parse.quote(at) + sep + query) + "[ ?]", log.read_text()))
+
+
+# Whether the worker's copy answers first: sw.js meta.sure.
+SURE = ("async () => { const r = await (await caches.open('ub-meta')).match('/offline/meta');"
+        " return r ? !!(await r.json()).sure : null; }")
+
+
+def until(pg, fn: str, want=True, timeout: int = 15000, arg=None) -> bool:
+    """Wait until the page's function `fn`, which may be async, answers
+    `want`.  Playwright's wait_for_function does not wait for a promise: it
+    takes one as true, at once."""
+    end = time.time() + timeout / 1000
+    while time.time() < end:
+        try:
+            if pg.evaluate(fn, arg) == want:
+                return True
+        except Exception:                          # noqa: BLE001  the page is between two documents
+            pass
+        pg.wait_for_timeout(100)
+    return False
+
+
+# A search for a word the Russian translations have, as the server's log
+# writes its address.
+BOG = "/search?q=%D0%B1%D0%BE%D0%B3"
 
 
 # A translation's row in it: its words, as a reader of English has them.
@@ -318,13 +353,20 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         errors = []
         pg.on("pageerror", lambda e: errors.append(str(e)))
 
-        print("Turning it on")
+        print("A first visit, the browser saving data")
+        # Saving data or not, the copy is fetched by itself (Tigran,
+        # 2026-11-10: 49 MB is not too much); saving data only holds back the
+        # updates after it, which this test then takes by hand, with Update now.
+        ctx.add_cookies([{"name": "ubSavesData", "value": "1", "url": BASE}])
         pg.goto(BASE + "/101:4")
+        pg.evaluate("sessionStorage.setItem('ubSavesData', '1')")
+        ctx.clear_cookies()
         ok(pg.get_attribute("p.t .playp", "aria-label") == "Listen to this section, from its heading",
            "online, the first paragraph's play button starts the section")
         i = icon(pg)
-        ok(i["shown"] and i["net"] == "on" and i["have"] == "none" and i["title"] == "Online",
-           f"the icon at the header's corner says online, with no copy ({i})")
+        ok(i["shown"] and i["net"] == "on" and not pg.locator("footer[data-copy]").count()
+           and not pg.evaluate("!!navigator.serviceWorker.controller"),
+           f"the first page is the server's, with no worker yet; the icon at the header's corner says online ({i['title']!r})")
         host = pg.evaluate("getComputedStyle(document.querySelector('.brand .host'), '::before').content")
         ok(host == '"localhost:8131"' and not pg.inner_text(".brand .host"),
            f"the site's address stands under the name, drawn from the page's own, written by no server ({host})")
@@ -338,26 +380,29 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            "whose first line says online, and names the site from its address")
         ok(not pg.locator("dialog.settings .panel.offline input[name]").count(),
            "and which stores no setting: the copy and its translations are the worker's")
-        pg.wait_for_function(COPY_CLEAR, timeout=10000)
-        hint = pg.evaluate(EN + "(document.querySelector('dialog.settings .offcopy small'))")
-        ok(re.search(r", about \d+\.\d MB, kept", hint), f"the copy's tick is clear, its hint saying what it costs ({hint!r})")
         m = json.loads((copy / "manifest.json").read_text())
-        sizes = [tr_row(pg, t["key"]) for t in m["translations"]]
-        ok(pg.evaluate("[...document.querySelectorAll('.offtrs input')].every(i => !i.disabled && !i.checked)")
-           and all(x.endswith(" MB") for x in sizes)
-           and "downloads the offline copy with it" in pg.inner_text("dialog.settings .offtr .why"),
-           f"the translations are offered too, each with its size, a tick to download the copy with it ({sizes})")
-        ud = next(t for t in m["translations"] if t["key"] == "ud")
         t = time.time()
-        before = log.read_text().count("/offline/c/")
-        pg.check(".offtrs input[value=ud]")
         wait_state(pg, "t.startsWith('Up to date')", 120000)
         said = pg.inner_text(STATE)
         print(f"  downloaded in {time.time() - t:.1f} s: " + said)
-        ok(pg.is_checked("dialog.settings .offcopy input") and tr_row(pg, "ud").startswith("kept"),
-           "a translation ticked with no copy kept downloads the copy with it, and both are ticked")
+        hint = pg.evaluate(EN + "(document.querySelector('dialog.settings .offcopy .hint'))")
+        ok(not pg.locator("dialog.settings .offcopy input").count() and not pg.locator("dialog.settings .offcopy button").count()
+           and hint.startswith("The whole site, which this browser keeps"),
+           f"the copy, Base, has no tick and no button: it came by itself, with nothing tapped, the browser saving data ({hint!r})")
+        fetched = log.read_text().count("/offline/c/")
+        ok(fetched == len(m["chunks"]), f"fetching each of its chunks once, and no translation's ({fetched} chunks)")
+        sizes = [tr_row(pg, t["key"]) for t in m["translations"]]
+        ok(pg.evaluate("[...document.querySelectorAll('.offtrs input')].every(i => !i.disabled && !i.checked)")
+           and all(x.endswith(" MB") for x in sizes),
+           f"the translations are offered, each with its size, for the reader to choose ({sizes})")
+        ud = next(t for t in m["translations"] if t["key"] == "ud")
+        before = log.read_text().count("/offline/c/")
+        pg.check(".offtrs input[value=ud]")
+        tr_kept(pg, "ud")
+        wait_state(pg, "t.startsWith('Up to date')", 120000)
+        said = pg.inner_text(STATE)
         fetched = log.read_text().count("/offline/c/") - before
-        ok(fetched == len(m["chunks"]) + len(ud["chunks"]), f"fetching each chunk of the two once ({fetched} chunks)")
+        ok(fetched == len(ud["chunks"]), f"a translation ticked is fetched at once, its chunks alone ({fetched} chunks)")
         kept = pg.evaluate(KEPT)
         ok(kept["gz"] == len(m["chunks"]) + len(ud["chunks"]), f"the copy and the translation, in one cache ({kept})")
         ok(icon(pg)["have"] == "kept", f"the icon says a copy is kept ({icon(pg)['title']!r})")
@@ -369,26 +414,32 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         used = pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
         print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
         ok(used < (m["bytes"] + ud["bytes"]) * 1.25, "it keeps the copy gzipped, as it came")
-        # Unticking the copy deletes the translations kept in it too, so it
-        # asks first (Tigran, 2026-10-31); cancelled, nothing is let go.
-        asked = []
-        pg.remove_listener("dialog", accept)
-        pg.once("dialog", lambda d: (asked.append(d.message), d.dismiss()))
-        pg.click("dialog.settings .offcopy input")
-        pg.on("dialog", accept)
-        print(f"  asked: {asked[0] if asked else None!r}")
-        ok(asked and "every translation kept in it" in asked[0]
-           and f"about {(m['bytes'] + ud['bytes']) / 1e6:.1f} MB" in asked[0],
-           "unticking the copy asks first, naming the translations and what it would take to have them again")
-        ok(pg.is_checked("dialog.settings .offcopy input") and tr_row(pg, "ud").startswith("kept")
-           and pg.evaluate(KEPT) == kept and icon(pg)["have"] == "kept",
-           "and cancelled, the tick comes back and the copy and the translation stay")
+        ok("asks the server only for what it does not hold" in said, "and that the site reads from it")
+        # The copy first (2026-11-10): a page it holds comes from it, the
+        # server not asked, and is the server's page, with no mark on it.
+        ok(pg.evaluate(SURE) is True, "the copy just fetched is the site's, and answers first")
+        pg.keyboard.press("Escape")
+        ok(not pg.is_visible("dialog.settings"), "Escape closes Settings")
+        n = asked_for(log, "/102:3")
+        pg.goto(BASE + "/102:3")
+        ok(asked_for(log, "/102:3") == n and pg.locator("p.t[id='102:3.1']").count() == 1
+           and pg.evaluate("!!navigator.serviceWorker.controller"),
+           f"online, the next page is read from the copy, and the server is not asked for it ({pg.title()!r})")
+        ok(not pg.locator("footer[data-copy]").count() and icon(pg)["net"] == "on",
+           "it is the server's page, unmarked, and the icon says online")
+        n = asked_for(log, "/search?q=mercy")
+        pg.goto(BASE + "/search?q=mercy")
+        ok(asked_for(log, "/search?q=mercy") == n and "In the text" in pg.inner_text("main"),
+           "and so is a search, with no translation shown that the copy lacks")
+        n = asked_for(log, "/static/ub.css")
+        pg.reload()
+        ok(asked_for(log, "/static/ub.css") == n, "nor is the stylesheet asked for")
+        pg.goto(BASE + "/101:4")
         pg.keyboard.press("Escape")
         ok(not pg.is_visible("dialog.settings"), "Escape closes Settings")
         # Updated by hand, with Update now, until "Kept up to date by itself":
         # the browser saving data is the one case, besides a try that stopped,
         # where the copy is not updated by itself (offline.js saving).
-        pg.evaluate("sessionStorage.setItem('ubSavesData', '1')")
 
         print("A translation kept in it")
         offline_tab(pg)
@@ -396,11 +447,26 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         sizes = [tr_row(pg, t["key"]) for t in m["translations"]]
         ok(all(x.endswith(" MB") for x in sizes) and pg.is_hidden("dialog.settings .offtr .why"),
            f"with a copy kept, each is offered with its size, the one kept saying so ({sizes})")
+        # Unticking one asks first (Tigran, 2026-11-10); cancelled, nothing is
+        # let go and the tick comes back.
+        asked.clear()
+        pg.remove_listener("dialog", accept)
+        pg.once("dialog", lambda d: d.dismiss())
+        pg.click(".offtrs input[value=ud]")
+        pg.on("dialog", accept)
+        print(f"  asked: {asked[0] if asked else None!r}")
+        ok(asked and asked[0] == "This deletes Урантийские документы (Aivazian) from this browser, "
+                                 f"{ud['bytes'] / 1e6:.1f} MB. To have it again, you would tick it and download it anew.",
+           "unticking a translation asks first, naming it and what it takes")
+        pg.wait_for_timeout(300)
+        ok(pg.is_checked(".offtrs input[value=ud]") and tr_row(pg, "ud").startswith("kept")
+           and pg.evaluate(KEPT)["gz"] == len(m["chunks"]) + len(ud["chunks"]),
+           "and cancelled, the tick comes back and the translation stays")
         pg.uncheck(".offtrs input[value=ud]")
         pg.wait_for_function("document.querySelector('.offtrs input[value=ud]').closest('li')"
                              ".querySelector('.st').textContent.startsWith('kept') === false", timeout=10000)
         kept = pg.evaluate(KEPT)
-        ok(kept["gz"] == len(m["chunks"]), f"unticked, it is let go, the copy staying ({kept})")
+        ok(kept["gz"] == len(m["chunks"]), f"accepted, it is let go, the copy staying ({kept})")
         # Its chunks come from the browser's own cache now, so the server's log
         # cannot count them: the copy's cache can.
         pg.check(".offtrs input[value=ud]")
@@ -428,7 +494,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         words = lambda i: pg.evaluate("i => document.querySelectorAll('.tf.open .rt')[i].textContent"
                                       ".replace(/\u00ad/g, '')", i)
         ok("Из всех имен, под которыми" in words(0),
-           "opened, it shows the first in the reader's order, the USGNY's")
+           "opened, it shows the first in the reader's order, the USGNY's, which the copy does not keep:"
+           " the section's translations are the server's while one shown is not kept")
         pg.locator(".tf.open .trtabs button[data-tab=ud]").click()
         pg.wait_for_function("document.querySelector('.tf.open .rt').textContent.includes('Из всех имён')")
         ok(True, "a tab shows another, Aivazian's")
@@ -540,7 +607,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.evaluate("ubSettings.set('translations', '')")
         pg.click(".gear")
         pg.click("#set-t-translations")
-        ok(pg.is_disabled("dialog.settings input[name=compare]"), "with none ticked its switch is greyed")
+        ok(pg.is_disabled("dialog.settings input[name=compare]"),
+           f"with none ticked its switch is greyed ({pg.url}, {pg.evaluate('ubSettings.get().translations')!r},"
+           f" {pg.get_attribute('dialog.settings label:has(input[name=compare])', 'class')!r})")
         pg.keyboard.press("Escape")
         pg.evaluate("ubSettings.set('translations', 'urantia-ru ud')")
 
@@ -705,7 +774,6 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         print("  " + pg.inner_text("dialog.settings .net"))
         ok(pg.inner_text("dialog.settings .net").lower().startswith("offline"), "and so does the tab's first line")
         ok(pg.inner_text("dialog.settings .net .host") == "localhost:8131", "and names the site from the copy too")
-        ok(pg.is_disabled("dialog.settings .offcopy input"), "offline, the copy cannot be let go: it is all the site there is")
         hosted = pg.evaluate("Promise.all(['/manifest.webmanifest', '/apple-touch-icon.png'].map(u =>"
                              " fetch(u).then(r => r.status, () => 'none')))")
         ok(hosted == ["none", "none"], f"the app's manifest and touch icon are the server's alone ({hosted})")
@@ -758,6 +826,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                              ".querySelector('.st').textContent.startsWith('kept') === false", timeout=10000)
         kept = pg.evaluate(KEPT)
         ok(kept["gz"] == len(m["chunks"]), f"unticked, offline too, it is let go ({kept})")
+        ok(asked and "You are offline: it can be downloaded again only once you are online." in asked[-1],
+           f"asked first, saying that offline it cannot be had again until online ({(asked or [''])[-1][-75:]!r})")
         pg.keyboard.press("Escape")
         pg.wait_for_function("(document.querySelector('.tf.open .gap') || {}).textContent", timeout=10000)
         ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "and the folds open say so at once")
@@ -847,7 +917,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            and pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "disabled") is None,
            "offline, a paper not kept cannot be asked for, and one kept can be let go")
         pg.click("dialog.settings .recrow[data-n='161'] .keep")
-        pg.wait_for_function("caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", timeout=10000)
+        until(pg, "() => caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", True, 10000)
         ok(asked and asked[-1].startswith("This deletes 1 paper of Merritt Horn from this browser, 17 MB.")
            and pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "data-st") == "none",
            f"asked first, and let go, its cache goes with its last file ({(asked or [''])[-1][:60]!r})")
@@ -910,6 +980,11 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            "after a reload, the icon's dot says an update is waiting")
         ok(not pg.is_visible("dialog.settings") and not pg.locator(".offnote").count(),
            "and nothing else does until the tab is opened")
+        n = asked_for(log, "/102:4")
+        pg.goto(BASE + "/102:4")
+        ok(asked_for(log, "/102:4") == n + 1 and pg.evaluate(SURE) is False and not pg.locator("footer[data-copy]").count(),
+           "a copy out of date does not answer first: the page is the server's")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=5000)
         # Offline and online again: the copy stays, out of date, and says so.
         ctx.set_offline(True)
         offline_tab(pg)
@@ -917,7 +992,6 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         print("  offline: " + pg.inner_text(STATE))
         ok(not pg.locator("dialog.settings .offcopy .get").count() and icon(pg)["have"] == "stale",
            "offline, the copy is still kept and still out of date, with no button to update it")
-        ok(pg.is_disabled("dialog.settings .offcopy input"), "nor can it be let go, while it is all the site there is")
         ctx.set_offline(False)
         pg.wait_for_selector("dialog.settings .offcopy .get", timeout=10000)
         ok(pg.evaluate("caches.keys().then(k => k.some(n => n.startsWith('ub-copy-')))"),
@@ -932,8 +1006,30 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         said = pg.evaluate("caches.open('e2e').then(c => Promise.all(['/installed', '/got'].map(u =>"
                            " c.match(u).then(r => r && r.text()))))")
         ok(said == ["newer", "get"], f"the site's newer worker came with it, and fetched the copy ({said})")
+        ok(pg.evaluate(SURE) is True, "and the copy it fetched answers first again")
         pg.evaluate("caches.delete('e2e')")
         (copy.parent / "sw-tag").unlink()
+        pg.keyboard.press("Escape")
+        # The worker changed again (the tag gone): the one that takes over
+        # asks the site before it answers from a copy another worker fetched.
+        # The site's word on its copy is kept from it meanwhile (the manifest a
+        # 404), so that the page's own check does not say it first.
+        fail.write_text("/offline/manifest.json")
+        pg.goto(BASE + "/read")
+        ok(until(pg, SURE, False, 30000), "a worker new to the copy takes over, and does not answer from it yet")
+        n = asked_for(log, "/102:5")
+        pg.goto(BASE + "/102:5")
+        ok(asked_for(log, "/102:5") == n + 1 and not pg.locator("footer[data-copy]").count(),
+           "until it has asked, a page is the server's")
+        fail.unlink()
+        offline_tab(pg)
+        wait_state(pg, "t.startsWith('Up to date')")
+        until(pg, SURE, True)
+        pg.keyboard.press("Escape")
+        n = asked_for(log, "/102:6")
+        pg.goto(BASE + "/102:6")
+        ok(asked_for(log, "/102:6") == n, "a worker new to the copy asks the site, and then answers from it first")
+        offline_tab(pg)
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.goto(BASE + "/")
@@ -1027,8 +1123,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         print("  " + pg.inner_text("dialog.settings .net") + ": " + pg.inner_text(STATE))
         i = icon(pg)
         ok(i["net"] == "off" and i["have"] == "stale", f"a page from the site, which then went: the icon says offline ({i['title']!r})")
-        ok(not pg.locator("dialog.settings .offcopy .get").count() and not pg.locator("dialog.settings .offcopy .newsbtn").count()
-           and pg.is_disabled("dialog.settings .offcopy input"), "and the tab offers no Update now or What's new, nor lets the copy go")
+        ok(not pg.locator("dialog.settings .offcopy .get").count() and not pg.locator("dialog.settings .offcopy .newsbtn").count(),
+           "and the tab offers no Update now or What's new")
         pg.keyboard.press("Escape")
         pg.reload()
         ok(pg.locator("footer[data-copy]").count() == 1, "a page loaded now comes from the copy")
@@ -1084,23 +1180,37 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         (copy / gone["file"]).write_bytes(kept)
         change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, by itself"), d)[1])
         before = log.read_text().count("/offline/c/")
+        build = json.loads((copy / "manifest.json").read_text())["build"]
         pg.evaluate(HOUR_LATER)
         pg.goto(BASE + "/read")
         pg.evaluate("window.ubStay = 1")
-        pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=60000)
-        said = pg.inner_text("#offnews")
-        print("  " + " | ".join(said.split("\n")))
-        ok("just been updated" in said and f"number {change.n}" in said and f"number {change.n - 1}" in said
-           and pg.locator("#offnews li").count() == 2,
-           "with no tap, the copy is updated, and What's new says so, listing what changed since the copy kept")
-        ok("Closing this reloads the page" in said, "saying what closing it does")
+        ok(until(pg, "async b => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())"
+                     ".current === b", True, 60000, build), "with no tap, the copy is updated")
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == 1, f"it fetched only what changed ({fetched} chunk)")
+        pg.wait_for_timeout(1000)
+        ok(pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews") and not pg.locator("dialog[open]").count()
+           and icon(pg)["have"] == "kept",
+           "without a word: no What's new opens by itself, and the page is not reloaded (Tigran, 2026-11-10)")
+        # What's new? is in the ?'s menu, and lists what the update brought:
+        # this build's change, and the one that stopped's.
+        pg.click(".top .help > summary")
+        pg.click(".top .helpitems a.whatsnew")
+        pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=10000)
+        said = pg.inner_text("#offnews")
+        print("  " + " | ".join(said.split("\n")))
+        ok("New since December" in said and f"number {change.n}" in said and f"number {change.n - 1}" in said
+           and pg.locator("#offnews li").count() == 2,
+           "What's new?, in the ?'s menu, lists what changed since the copy kept before")
+        n = asked_for(log, "/offline/manifest.json")
+        pg.click("#offnews .x")
+        pg.click(".top .help > summary")
+        pg.click(".top .helpitems a.whatsnew")
+        pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=10000)
+        ok(asked_for(log, "/offline/manifest.json") == n, "from the copy's own list, the server not asked")
+        pg.click("#offnews .x")
         pg.wait_for_timeout(500)
-        ok(pg.evaluate("window.ubStay") == 1, "the page waits for What's new to close")
-        with pg.expect_event("load", timeout=10000):
-            pg.click("#offnews .x")
-        ok(not pg.evaluate("window.ubStay") and icon(pg)["have"] == "kept", "and reloads once it is closed")
+        ok(pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews"), "and closing it reloads nothing")
         ctx.set_offline(True)
         pg.goto(BASE + "/")
         ok(pg.title() == "The Urantia Book, by itself", "offline, the copy is the newer one")
@@ -1111,20 +1221,19 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         wait_state(pg, "t.startsWith('Up to date')")
         pg.keyboard.press("Escape")
         pg.evaluate("window.ubStay = 1")
+        build = json.loads((copy / "manifest.json").read_text())["build"]
         ctx.set_offline(False)
-        pg.wait_for_selector("#offnews", state="visible", timeout=60000)
-        ok(f"number {change.n}" in pg.inner_text("#offnews"), "coming online, the copy is updated by itself")
-        with pg.expect_event("load", timeout=10000):
-            pg.keyboard.press("Escape")
-        ok(not pg.evaluate("window.ubStay"), "and Escape closes What's new, reloading the page")
+        ok(until(pg, "async b => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())"
+                     ".current === b", True, 60000, build) and pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews"),
+           "coming online, the copy is updated by itself, without a word")
         # A build with nothing for a reader in its news: updated, and nothing said.
         change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, quietly"), d)[1], news=False)
         build = json.loads((copy / "manifest.json").read_text())["build"]
         pg.evaluate(HOUR_LATER)
         pg.goto(BASE + "/read")
         pg.evaluate("window.ubStay = 1")
-        pg.wait_for_function("async b => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())"
-                             ".current === b", arg=build, timeout=60000)
+        until(pg, "async b => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())"
+                  ".current === b", True, 60000, build)
         pg.wait_for_timeout(1000)
         ok(pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews") and icon(pg)["have"] == "kept",
            "with nothing listed for it, the copy is updated without a word, and the page not reloaded")
@@ -1143,21 +1252,19 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                     " dispatchEvent(new Event('online'))")
         pg.wait_for_timeout(1500)
         ok(log.read_text().count("/offline/c/") == before, "out of view, the copy is not updated by itself")
+        build = json.loads((copy / "manifest.json").read_text())["build"]
         pg.evaluate("delete document.hidden; delete document.visibilityState;"
                     " document.dispatchEvent(new Event('visibilitychange'))")
-        pg.wait_for_selector("#offnews", state="visible", timeout=60000)
-        said = pg.inner_text("#offnews")
-        ok(f"number {change.n}" in said and "The next page you open is the new one" in said,
-           "in view again, it is, and What's new says that the next page is the new one")
-        pg.click("#offnews .x")
+        ok(until(pg, "async b => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())"
+                     ".current === b", True, 60000, build), "in view again, it is")
         pg.wait_for_timeout(1000)
-        ok(pg.evaluate("window.ubStay") == 1 and pg.locator(".player").count() == 1,
-           "closing it, while listening, does not reload the page")
+        ok(pg.evaluate("window.ubStay") == 1 and pg.locator(".player").count() == 1 and pg.is_hidden("#offnews"),
+           "without a word, and the reading goes on")
         pg.click(".player button.close") if pg.locator(".player button.close").count() else None
         pg.keyboard.press("Escape")
         ok(not errors, f"no script errors ({errors[:2]})")
 
-        print("Turning it off")
+        print("The bar's ↓")
         ctx.set_offline(False)
         pg.goto(BASE + "/161:1")
         pg.locator("p.t .playp").first.click()
@@ -1167,33 +1274,118 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.length)") == 4,
            "the bar's ↓ keeps the paper being heard")
         pg.click(".player button.close")
-        pg.goto(BASE + "/read")
         offline_tab(pg)
-        pg.uncheck("dialog.settings .offcopy input")
-        pg.wait_for_function(COPY_CLEAR, timeout=10000)
-        ok(asked and "recording" in asked[-1] and "Base" in asked[-1],
-           f"unticking Base asks first, naming the recordings kept too ({(asked or [''])[-1][:70]!r})")
-        ok(pg.evaluate("caches.keys().then(k => k.length)") == 0,
-           "accepted, nothing is kept: the translation and the recording kept with it")
-        ok(icon(pg)["have"] == "none", "and the icon says so")
-        ok(pg.evaluate("[...document.querySelectorAll('.offtrs input')].every(i => !i.checked && !i.disabled)"),
-           "and the translations are offered again, with the copy")
-
-        print("On again in the same page, which keeps its worker")
-        (copy / gone["file"]).write_bytes(kept)
-        pg.check("dialog.settings .offcopy input")
-        wait_state(pg, "t.startsWith('Up to date')", 120000)
+        ok(not pg.locator("dialog.settings .offcopy input").count() and not pg.locator("dialog.settings .offcopy button").count(),
+           "and nothing in the tab lets the copy go")
         pg.keyboard.press("Escape")
-        ctx.set_offline(True)
-        pg.goto(BASE + "/search?q=thought+adjuster")
-        ok("In the text" in pg.inner_text("main"), "a search answers offline")
-        ctx.set_offline(False)
+        ok(not errors, f"no script errors ({errors[:2]})")
+        ctx.close()
+
+        print("A first visit")
+        # A browser of its own, saving no data: the copy is fetched with
+        # nothing tapped, once the page has loaded (Tigran, 2026-11-10).
+        (copy / gone["file"]).write_bytes(kept)
+        m = json.loads((copy / "manifest.json").read_text())
+        ctx = b.new_context()
+        ctx.add_init_script(SAYS_OFFLINE)
+        ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
+        pg = ctx.new_page()
+        errors = []
+        pg.on("pageerror", lambda e: errors.append(str(e)))
+        before = log.read_text().count("/offline/c/")
+        pg.goto(BASE + "/101:4")
+        ok(not pg.evaluate("!!navigator.serviceWorker.controller") and not pg.locator("footer[data-copy]").count(),
+           "the first page is the server's, with no worker yet")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'busy'", timeout=20000)
+        print("  " + icon(pg)["title"])
+        ok(True, "with nothing tapped, the copy starts downloading, and the icon says so")
+        # The worker stopped half way, as the browser stops one whose page has
+        # gone, or whose message has run five minutes: the next page goes on
+        # with the download, with what it had.
+        until(pg, "() => caches.keys().then(async ks => { for (const k of ks) if (k.startsWith('ub-copy-'))"
+                  " return (await (await caches.open(k)).keys()).length > 60; return false; })", True, 60000)
+        cdp = ctx.new_cdp_session(pg)
+        cdp.send("ServiceWorker.enable")
+        cdp.send("ServiceWorker.stopAllWorkers")
+        pg.wait_for_timeout(1000)
+        first = log.read_text().count("/offline/c/") - before
+        ok(0 < first < len(m["chunks"]) and pg.evaluate("caches.open('ub-meta').then(c => c.match('/offline/meta'))"
+                                                        ".then(r => r ? r.json() : {}).then(x => !x.current)"),
+           f"the worker stopped part of the way through, with no copy yet ({first} of {len(m['chunks'])} chunks)")
+        pg.goto(BASE + "/101:5")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'kept'", timeout=120000)
+        fetched = log.read_text().count("/offline/c/") - before
+        ok(len(m["chunks"]) <= fetched <= len(m["chunks"]) + 4,
+           f"the next page goes on with it by itself, fetching only what it lacked ({fetched} fetches for {len(m['chunks'])} chunks)")
+        ok(pg.evaluate(SURE) is True and pg.evaluate(KEPT)["gz"] == len(m["chunks"]), "and the copy is whole, and answers first")
+        n = asked_for(log, "/101:6")
+        pg.goto(BASE + "/101:6")
+        ok(asked_for(log, "/101:6") == n and not pg.locator("footer[data-copy]").count() and icon(pg)["net"] == "on",
+           "the page after is read from the copy, the server not asked, unmarked")
         offline_tab(pg)
-        pg.uncheck("dialog.settings .offcopy input")
-        pg.wait_for_function(COPY_CLEAR, timeout=10000)
-        ok(pg.evaluate("caches.keys().then(k => k.length)") == 0, "off: nothing is kept")
-        pg.goto(BASE + "/read")
-        ok(pg.evaluate("navigator.serviceWorker.getRegistration('/').then(r => !r)"), "the worker is gone")
+        wait_state(pg, "t.startsWith('Up to date')")
+        ok(pg.evaluate("[...document.querySelectorAll('.offtrs input')].every(i => !i.checked && !i.disabled)"),
+           "no translation came with it: each is offered, for the reader to choose")
+        pg.keyboard.press("Escape")
+        pg.click(".top .help > summary")
+        pg.click(".top .helpitems a.whatsnew")
+        pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=10000)
+        said = en(pg, "#offnews .since")
+        days = pg.locator("#offnews h3").count()
+        ok(said == "The latest changes:" and 1 <= days <= 3,
+           f"What's new?, with a copy never yet updated, lists the latest changes ({said!r}, {days} days)")
+        pg.click("#offnews .x")
+        # A translation shown and not kept: what depends on it is the server's.
+        pg.evaluate("ubSettings.set('translations', 'urantia-ru')")
+        n, t0 = asked_for(log, BOG), asked_for(log, "/tr/1:1")
+        pg.goto(BASE + BOG)
+        ok(asked_for(log, BOG) == n + 1 and not pg.locator(".notkept").count()
+           and pg.locator(".trhits [data-tr=urantia-ru] li").count() > 0,
+           "with a translation shown that the copy does not keep, a search is the server's")
+        pg.goto(BASE + "/1:1")
+        pg.locator(".tf .trfold").first.click()
+        pg.wait_for_selector(".tf.open .rt")
+        ok(asked_for(log, "/tr/1:1") == t0 + 1 and "Из всех имен" in pg.evaluate("document.querySelector('.tf.open .rt').textContent.replace(/\u00ad/g, '')"),
+           "and so are a section's translations, which the fold shows")
+        # Kept, they come from the copy.
+        offline_tab(pg)
+        pg.check(".offtrs input[value=urantia-ru]")
+        tr_kept(pg, "urantia-ru")
+        pg.keyboard.press("Escape")
+        n, t0 = asked_for(log, BOG), asked_for(log, "/tr/1:2")
+        pg.goto(BASE + BOG)
+        ok(asked_for(log, BOG) == n and pg.locator(".trhits [data-tr=urantia-ru] li").count() > 0,
+           "kept, the search is the copy's, the translation's hits with it")
+        pg.goto(BASE + "/1:2")
+        pg.locator(".tf .trfold").first.click()
+        pg.wait_for_selector(".tf.open .rt")
+        ok(asked_for(log, "/tr/1:2") == t0, "and the fold's translations are the copy's")
+        # One more ticked on a search the copy answered, which says of it that
+        # it is not kept: the page is asked for again, of the server.
+        pg.goto(BASE + BOG)
+        n = asked_for(log, BOG)
+        ok(pg.locator(".trhits [data-tr=uf-ru] > .notkept").count() == 1 and pg.locator(".trhits [data-tr=uf-ru]").is_hidden(),
+           "the copy's search says of one not kept that it is not, in a list not shown")
+        with pg.expect_event("load", timeout=10000):
+            pg.evaluate("ubSettings.set('translations', 'urantia-ru uf-ru')")
+        ok(asked_for(log, BOG) == n + 1 and not pg.locator(".notkept").count()
+           and pg.locator(".trhits [data-tr=uf-ru] li").count() > 0,
+           "a translation ticked on a search the copy answered has the page again from the server, with its hits")
+        pg.evaluate("ubSettings.set('translations', '')")
+        # The site gone, the browser online: the site goes on, from the copy.
+        srv.stop()
+        pg.goto(BASE + "/101:7")
+        ok(pg.locator("p.t[id='101:7.1']").count() == 1 and not pg.locator("footer[data-copy]").count(),
+           "with the server gone, the site goes on: a page from the copy as before")
+        pg.goto(BASE + "/stats")
+        ok(pg.locator("footer[data-copy]").count() == 1 and "read online" in pg.inner_text("main"),
+           "and a page the copy does not hold says it is read online, marked as the copy's")
+        offline_tab(pg)
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.net === 'off'", timeout=10000)
+        ok(pg.inner_text("dialog.settings .net").lower().startswith("offline"), "the tab, asking the site, says offline")
+        pg.keyboard.press("Escape")
+        srv.start()
+        ok(not errors, f"no script errors ({errors[:2]})")
         log_text = log.read_text()
         again = [ln for ln in log_text.splitlines() if "/offline/sqlite3.js" in ln]
         ok(any(" 304 " in ln for ln in again),

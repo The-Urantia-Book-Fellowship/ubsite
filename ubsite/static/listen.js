@@ -352,7 +352,8 @@
     // Kept, the ✓ is a sign and no more: letting go is Settings' alone, which
     // asks first (Tigran, 2026-11-04, after a tap here deleted a paper).
     b.disabled = st === 'kept';
-    var words = st === 'busy' ? T.k('Downloading: {a} of {b}; tap to stop')
+    // On the queue with no file of it under way yet, there is nothing to count.
+    var words = st === 'busy' ? (busy ? T.k('Downloading: {a} of {b}; tap to stop') : T.k('Downloading…'))
               : st === 'kept' ? T.k('This paper\u2019s recording is kept offline')
               : st === 'some' ? T.k('This paper\u2019s recording is kept in part; tap to keep the rest')
               : T.k('Keep this paper\u2019s recording offline');

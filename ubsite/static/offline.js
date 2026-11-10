@@ -2,36 +2,44 @@
 // .offline), which does what the cloud's menu did until 2026-10-30 (Tigran:
 // the translations' ticks, greyed until a copy had been got from the menu,
 // were counter-intuitive, so the tab does the whole of it, and the menu is
-// gone): online or offline, and which site this is; the copy, a tick that
-// downloads it and lets it go, with what it is, or how far its download has
-// gone, under it; the translations kept in it; and the offer to install the
-// site as an app.  And what the cloud at the header's corner shows of the
-// copy, data-have: none, kept, stale (an update is waiting: the flame's dot)
-// or busy.  ub.js shows the cloud, says online or offline, opens the tab from
-// it, and loads this when the tab opens, or at once on a page the worker
-// controls.  The worker (static/sw.js) does the work, and answers {cmd} on a
-// message port with its state:
+// gone): online or offline, and which site this is; the copy, "Base", with
+// what it is, or how far its download has gone, under it; the translations
+// kept in it; and the offer to install the site as an app.  And what the
+// cloud at the header's corner shows of the copy, data-have: none, kept,
+// stale (an update is waiting: the flame's dot) or busy.  ub.js shows the
+// cloud, says online or offline, opens the tab from it, and loads this on
+// every page: at once on one the worker controls, once it has loaded on one
+// it does not.  The worker (static/sw.js) does the work, and answers {cmd} on
+// a message port with its state:
 //
 //   have    the copy kept: {build, made, text, index, bytes, raw, tr, trs}, or null
 //   latest  the site's, when it is another: {made, fetch, full, ...}, or null
 //   busy    {done, total, adding, copy} in bytes while downloading
 //   error   why the last download stopped
 //
-// Ticking the copy registers the worker, which fetches the copy; unticking it
-// removes the copy and unregisters the worker, once the reader has said yes
-// to what that deletes (drop).  Nothing else does: the copy stays through
-// going offline and online again, and the worker answers from it whenever
-// the network does not.  Until 2026-10-14 all this was in Settings, a switch
-// turned on or off, and a reader who turned it off to be "online" again lost
-// the copy (Tigran); the tick is named for the copy now, not for a mode.
+// Every browser keeps the copy, and reads the site from it (Tigran,
+// 2026-11-10): a page with no worker registers it, once the site's manifest
+// has answered, and the worker fetches the copy, with nothing tapped (sized,
+// on); a first download that stopped, the reader gone or the worker ended by
+// the browser, goes on by itself from the next page, with what it had
+// (keepUp).  In every browser, saving data or short of room alike (Tigran,
+// 2026-11-10: "49 MB is not too much.  If it grows into hundreds of MB we'll
+// revisit this"); only not again within the hour of a download that failed,
+// when the tab says so, with Try again.  There is no letting it go but the
+// browser's own site data.  From 2026-10-30 until then it was a tick, which registered
+// the worker and fetched the copy, and unticked removed both, asking first;
+// until 2026-10-14 a switch in Settings, which a reader turned off to be
+// "online" again, and lost the copy (Tigran).
 //
 // A kept copy is updated by itself whenever a check finds it out of date with
 // the site reached and this page in view: as a page loads, as the browser
 // comes online, and as the page comes into view again (keepUp).  Only from a
-// page the reader has open, never in the background.  At its end What's new
-// opens, saying what changed since the copy before, and the page reloads once
-// it is closed (told).  Update now stays only where the copy will not update
-// itself: the browser saving data, or the same update having stopped within
+// page the reader has open, never in the background.  Without a word, and
+// with no reload: the next page opened is the new one (Tigran, 2026-11-10;
+// until then What's new opened at its end, and the page reloaded once it was
+// closed).  What's new is the reader's to open, from the ? at the header's
+// corner (ub.js, 'ub:news'), and lists what the last update brought.  Update
+// now stays only where the copy will not update itself: the browser saving data, or the same update having stopped within
 // the hour, when it is Try again.  Until 2026-10-30 Settings' "Keep the
 // offline copy up to date" could turn this off, leaving Update now to a reader
 // who kept the copy as it was until they chose; most would forget it, and
@@ -40,7 +48,7 @@
 // The translations beside the text are each a download of their own (Tigran,
 // 2026-10-26): a tick downloads one at once, with the copy where none is kept
 // yet (2026-10-30), or with an update of the copy if it is out of date, and an
-// untick lets it go, online or not.  What the copy keeps is the worker's
+// untick lets it go, online or not, asking first (2026-11-10).  What the copy keeps is the worker's
 // (sw.js meta.tr), not a setting, so ↺ never removes one; and it is kept up to
 // date with the copy.  `ub:trkept` tells ub.js's folds when it changes.
 (function () {
@@ -48,7 +56,7 @@
   if (!panel || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
   window.ubOfflineUI = {};
   var sw = navigator.serviceWorker, line = panel.querySelector('.offcopy .state'),
-      copyBox = panel.querySelector('.offcopy input'), inst = panel.querySelector('.install'), kept = false;
+      inst = panel.querySelector('.install'), kept = false;
   // The interface's words (ubsite/l10n.js): what the tab says is HTML in both
   // languages, which CSS chooses between (T()).
   var T = window.ubT;
@@ -68,8 +76,14 @@
   // The browser saving data: the copy is not updated by itself (keepUp), and
   // Update now is offered instead.
   function saving() { return !!(navigator.connection && navigator.connection.saveData); }
-  // Listening: closing What's new then reloads nothing, which would stop it.
-  function listening() { return !!document.querySelector('.player'); }
+  // Storage the browser will not clear under pressure.  Chrome and Safari
+  // decide by themselves; Firefox asks the reader, so there it is asked only
+  // with something the reader did (`act`): a translation ticked, a recording
+  // kept, a button tapped.
+  function persist(act) {
+    if (!navigator.storage || !navigator.storage.persist || (!act && /Firefox\//.test(navigator.userAgent))) return;
+    navigator.storage.persist().catch(function () {});
+  }
   function ask(cmd, more) {
     return sw.ready.then(function (reg) {
       return new Promise(function (resolve) {
@@ -117,25 +131,21 @@
     show(s);
     keepUp(s);
   }
-  var last = null, leaving = false;
+  var last = null, refused = null;
   function show(s) {
-    // The worker's word as a copy is let go (off) comes from a recording's
-    // file stopped on the way, and would put the tick back.
-    if (leaving && s !== null) return;
     last = s;
     watch(s);
     trs(s);
     recShow(s);
-    kept = !!s && !s.removed;
-    // The copy's tick: ticked while a copy is kept or fetched, and not to be
-    // changed while a download runs, nor offline: none can be fetched then,
-    // and a copy kept is all the site there is.
-    copyBox.checked = kept;
-    copyBox.disabled = !!(s && s.busy) || !online();
+    // `kept`: a worker is registered, with a copy or on its way to one.
+    kept = !!s;
     if (!kept) {
       mark('none');
       return sized();
     }
+    // The hint's size is for a copy not yet kept (sized); kept, the line
+    // under it says what it takes.
+    if (s.have) Array.prototype.forEach.call(panel.querySelectorAll('.offcopy .size'), function (el) { el.textContent = ''; });
     // Why a download stopped: its words as the worker kept them, or the
     // browser's own.
     var have = s.have, up = s.latest, err = s.error ? s.words || T.same(s.error) : null;
@@ -146,6 +156,8 @@
       mark('busy', have ? (of ? T.tr('Updating the offline copy: {a} of {b}', of) : T.tr('Updating the offline copy…'))
                         : (of ? T.tr('Downloading the offline copy: {a} of {b}', of) : T.tr('Downloading the offline copy…')));
     } else if (!have) {
+      // No copy yet, and none on its way: it stopped, and goes on by itself
+      // from the next page (keepUp), or at once from the button.
       line.innerHTML = (err ? T('The download stopped: {e}.', { e: err }) : T('The download did not finish.')) +
                        (online() ? ' <button type="button" class="get"><span>' + T('Try again') + '</span></button>' : '');
       mark('none', T.tr('Online; the offline copy did not finish downloading'));
@@ -168,7 +180,7 @@
       // and a desktop with it on described the same copy differently).
       var at = { d: day(have.made), t: day(have.text.date), i: day(have.index.date), s: mb(have.bytes) };
       line.innerHTML = T('Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser.', at) +
-                       ' ' + T('Whenever the server cannot be reached, online or not, the site reads from it by itself.');
+                       ' ' + T('The site reads from it, and asks the server only for what it does not hold.');
       // A recording downloading shows on the cloud as the copy's download does.
       var rb = s.audio && s.audio.busy;
       mark(rb ? 'busy' : 'kept', rb ? T.tr('Downloading {v}: Paper {n}, {a} of {b}',
@@ -183,7 +195,7 @@
   // copy too.
   var trBox = panel.querySelector('.offtr'), trSig = null, offer = null;
   function trs(s) {
-    var have = s && !s.removed && s.have, busy = s && s.busy, on = online(), by = {};
+    var have = s && s.have, busy = s && s.busy, on = online(), by = {};
     var mine = (have && have.tr) || [], err = s && s.error ? s.words || T.same(s.error) : null;
     ((have && have.trs) || offer || []).forEach(function (t) { by[t.key] = t; });
     var of = busy && busy.total && { a: mb(busy.done), b: mb(busy.total) };
@@ -225,48 +237,68 @@
   document.addEventListener('ub:settings', function (ev) {
     if (ev.detail && ev.detail.key === 'translations') trFold();
   });
-  // The copy's tick: ticked, the worker is registered and fetches the copy
-  // (on); unticked, the copy is removed and the worker unregistered (off).  A
-  // translation's tick: the copy's translations and this one, fetched now,
+  // A translation's tick: the copy's translations and this one, fetched now,
   // the site's worker asked for first, as an update asks, or with no copy
   // kept, the copy with it; an update of the copy with it ends as one made by
-  // itself does (told).  An untick: let go at once.
+  // itself does, without a word.  An untick lets it go, once the reader has
+  // said yes to it: it asks first, naming the translation and what it takes,
+  // and offline that it can be had again only once online, as a recording's
+  // let-go asks (Tigran, 2026-11-10; from 2026-10-26 it let go at once, and a
+  // stray tap deleted 12 MB).  Cancelled, the tick comes back.
   panel.addEventListener('change', function (ev) {
     var box = ev.target;
-    if (box.type !== 'checkbox') return;
-    if (box === copyBox) return box.checked ? on() : drop();
-    if (!box.closest('.offtrs')) return;
-    var have = last && !last.removed && last.have;
-    if (!box.checked) return ask('drop', { tr: box.value }).then(function (s) { show(s); fresh(); });
+    if (box.type !== 'checkbox' || !box.closest('.offtrs')) return;
+    var have = last && last.have;
+    if (!box.checked) {
+      var w = box.closest('li').querySelector('.w'), t = ((have && have.trs) || []).filter(function (x) { return x.key === box.value; })[0],
+          p = { t: T.same(w ? w.textContent.replace(/\s+/g, ' ').trim() : box.value), s: mb(t ? t.bytes : 0) };
+      if (!window.confirm(online() ? T.text('offline:trdrop', p) : T.text('offline:trdropoff', p))) {
+        box.checked = true;
+        return;
+      }
+      return ask('drop', { tr: box.value }).then(function (s) { show(s); fresh(); });
+    }
+    persist(true);
     if (!have) return on([box.value]);
-    var was = last.latest ? have.made : null;
     going = true;
-    show(Object.assign({}, last, { busy: { done: 0, total: 0, adding: [box.value], copy: !!was } }));
-    newest().then(function () { return ask('get', { tr: (have.tr || []).concat(box.value) }); }).then(function (s) {
+    show(Object.assign({}, last, { busy: { done: 0, total: 0, adding: [box.value], copy: !!last.latest } }));
+    newestWorker().then(function () { return ask('get', { tr: (have.tr || []).concat(box.value) }); }).then(function (s) {
       going = false;
       show(s);
       if (s && s.error) fresh();
-      else if (was) told(was);
     }, function () { going = false; });
   });
 
   // While a download goes on, the worker says how far it is.  A worker can be
   // stopped by the browser mid-way and say nothing more; if it is quiet for a
   // while, ask it, and show what it says: the copy before, and the button.
+  // A download it has lost so (the browser ends a worker's message after five
+  // minutes, and a first copy on a slow line takes longer) is no longer this
+  // page's under way, and goes on by itself with what it had (keepUp).
   var quiet = null;
   function watch(s) {
     clearTimeout(quiet);
     if (s && (s.busy || (s.audio && s.audio.queue.length)))
-      quiet = setTimeout(function () { pumping = false; ask('state').then(show); }, 20000);
+      quiet = setTimeout(function () {
+        pumping = false;
+        ask('state').then(function (now) {
+          var lost = !!s.busy && now && !now.busy;
+          if (lost) going = false;
+          show(now);
+          if (lost) keepUp(now);
+        });
+      }, 20000);
   }
-  // Before there is a copy: what it would cost, in the tick's hint (base.html,
+  // Before there is a worker: what the copy costs, in its hint (base.html,
   // offline:copyhint), and each translation's size, from the site's manifest;
-  // the tick itself is greyed until that has come.  A site that does not
-  // answer, or answers 5xx, is offline here too, and one that answers is
-  // online.
+  // and, the manifest come, the worker registered and the copy fetched by
+  // itself (on), unless a download failed within the hour, when the line
+  // says so and offers it again.  A site that does
+  // not answer, or answers 5xx, is offline here too, and one that answers is
+  // online; one with no copy built (a 404: `make serve` before `make
+  // offline`) registers nothing.
   function sized() {
     line.textContent = '';
-    copyBox.disabled = true;
     var gone = function () { reach(false); return Promise.reject(); };
     fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
       if (r.status >= 500) return gone();
@@ -279,8 +311,11 @@
         el.innerHTML = T('offline:about', { s: mb(m.bytes) });
       });
       offer = m.translations || [];
-      copyBox.disabled = false;
       trs(last);
+      if (going) return;
+      if (!triedLately(FIRST)) return on();
+      line.innerHTML = (refused || T('The download did not finish.')) + ' <button type="button" class="get"><span>' +
+                       T('Try again') + '</span></button>';
     }, function () {
       if (kept) return;
       line.innerHTML = !online() ? T('It can be downloaded only online.') : T('This site has no offline copy yet.');
@@ -288,8 +323,19 @@
     });
   }
 
-  // What's new: what changed on the site after this copy was made, from the
-  // manifest an update would fetch (offline/news.py), newest first, by day.
+  // What's new: what changed on the site, by day, newest first, from the
+  // `news` a manifest carries (offline/news.py).  Opened by the reader, from
+  // the ? at the header's corner (ub.js, 'ub:news') or beside Update now,
+  // never by itself (Tigran, 2026-11-10; from 2026-10-25 until then it opened
+  // at the end of an update made by itself, and closing it reloaded the
+  // page).  Which list, and since when:
+  //   an update waiting   the site's, since the copy kept was made;
+  //   a copy up to date   the copy's own, from the worker, the server not
+  //                       asked: what its last update brought, since the copy
+  //                       before it was made (sw.js meta.since); or, where it
+  //                       has never been updated, or that update brought
+  //                       nothing for a reader, the three newest days;
+  //   no copy             the site's, the three newest days.
   // Until 2026-10-23 it added a line of its own where the text or the index
   // was newer than the copy's, "The index as of October 23"; a new revision of
   // either has a line in the changelog now, which that only repeated (Tigran).
@@ -297,15 +343,12 @@
   // a popover outside a modal dialog is inert while that is open, and
   // cannot be closed (until 2026-10-30 it was a popover inside the cloud's
   // menu's).  Escape, its ×, and a tap outside it close it.  At its foot, the
-  // whole changelog, the page /changelog (2026-10-18).  After an update made
-  // by itself, it says so, and lists what changed since the copy before,
-  // whose date is `since` until it closes (told).
-  var news = document.createElement('dialog'), since = null;
+  // whole changelog, the page /changelog (2026-10-18).
+  var news = document.createElement('dialog');
   news.id = 'offnews';
   news.className = 'offnews';
   news.setAttribute('aria-labelledby', 'offnews-title');
   document.body.appendChild(news);
-  news.addEventListener('close', function () { since = null; });
   news.addEventListener('click', function (ev) {
     var r = news.getBoundingClientRect();
     if (ev.target.closest('.x') || (ev.target === news && (ev.clientX < r.left || ev.clientX > r.right ||
@@ -316,15 +359,16 @@
     whatsNew();
     if (!news.open) news.showModal();
   }
+  window.ubOfflineUI.news = openNews;
   function manifest() {
     return fetch('/offline/manifest.json', { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
       return r.json();
     });
   }
-  // What the manifest lists after `made`, by day, newest first: '' for nothing.
-  function listed(m, made) {
-    var days = {}, order = [], n = m.news || { items: [] };
+  // What the list `n` has after `made`, by day, newest first: '' for nothing.
+  function listed(n, made) {
+    var days = {}, order = [];
     function put(d, html) {
       if (!days[d]) { days[d] = []; order.push(d); }
       days[d].push(html);
@@ -337,23 +381,34 @@
       return '<h3>' + T(day(d)) + '</h3><ul><li>' + days[d].join('</li><li>') + '</li></ul>';
     }).join('') + (n.earlier && oldest && made < oldest.t ? '<p class="earlier">' + T('And earlier changes.') + '</p>' : '') : '';
   }
+  // Its three newest days: the list is newest first, so everything after the
+  // first entry of a fourth day.
+  function newest(n) {
+    var seen = [], cut = '';
+    n.items.some(function (x) {
+      if (seen.indexOf(x.d) < 0) seen.push(x.d);
+      if (seen.length > 3) cut = x.t;
+      return seen.length > 3;
+    });
+    return listed(n, cut);
+  }
   function whatsNew() {
-    var made = since || (last && last.have && last.have.made);
+    var have = last && last.have, stale = !!(have && last.latest), since = have && !stale && last.since;
     news.innerHTML = '<div class="bar"><h2 id="offnews-title">' + T('What’s new') + '</h2>' +
       '<button type="button" class="x" ' + T.a('aria-label', 'Close') + ' ' +
       T.a('title', 'Close') + '><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>' +
-      '</svg></button></div><p class="since">' +
-      (since ? T('The offline copy has just been updated. New since its last update, on {d}:', { d: day(since) })
-             : made ? T('Since your copy, kept as the site was on {d}:', { d: day(made) }) : '') +
-      '</p><div class="days">…</div>' +
-      (since ? '<p class="then">' + (listening() ? T('The next page you open is the new one.')
-                                                 : T('Closing this reloads the page, so that it is the new one too.')) + '</p>'
-             : '') +
+      '</svg></button></div><p class="since"></p><div class="days">…</div>' +
       '<p class="all"><a href="/changelog">' + T('The whole changelog') + '</a></p>';
-    var out = news.querySelector('.days');
-    if (!made) { out.textContent = ''; return; }
-    manifest().then(function (m) {
-      out.innerHTML = listed(m, made) || '<p>' + T('Nothing is listed for this update.') + '</p>';
+    var head = news.querySelector('.since'), out = news.querySelector('.days');
+    var own = function () { return ask('news'); };
+    var site = function () { return manifest().then(function (m) { return m.news || { items: [] }; }); };
+    (stale ? site().then(null, own) : have ? own() : site()).then(function (n) {
+      var html = stale ? listed(n, have.made) : since ? listed(n, since) : '';
+      if (html) head.innerHTML = stale ? T('Since your copy, kept as the site was on {d}:', { d: day(have.made) })
+                                       : T('New since {d}:', { d: day(since) });
+      else if (stale) html = '<p>' + T('Nothing is listed for this update.') + '</p>';
+      else if ((html = newest(n))) head.innerHTML = T('The latest changes:');
+      out.innerHTML = html || '<p>' + T('Nothing is listed for this update.') + '</p>';
     }, function () {
       out.innerHTML = T('The list could not be fetched just now.');
     });
@@ -361,20 +416,20 @@
 
   // A download that stopped asks whether the site is still there: if not, its
   // buttons go with it, rather than come back to do nothing again.  An update
-  // that ends whole reloads this page, so that it is the new one too, playing
-  // or not (Tigran, 2026-10-18); while What's new is open, once it closes.
-  // One made by itself (`was`, the date of the copy before) says so first
-  // (told).  One that stops is not made by itself again for an hour (failed).
-  // `trs` names the translations to fetch with the copy (a first copy got by a
-  // translation's tick).
-  function get(update, was, trs) {
+  // that ends whole, asked for by a tap on Update now (`reloads`), reloads
+  // this page, so that it is the new one too, playing or not (Tigran,
+  // 2026-10-18); while What's new is open, once it closes.  One made by
+  // itself reloads nothing and says nothing: the next page is the new one
+  // (2026-11-10).  One that stops is not made by itself again for an hour
+  // (failed).  `trs` names the translations to fetch with the copy (a first
+  // copy got by a translation's tick).
+  function get(reloads, trs) {
     return ask('get', trs ? { tr: trs } : {}).then(function (s) {
       show(s);
       if (s && s.error) {
-        failed(s.latest && s.latest.build);
+        failed(s.have ? s.latest && s.latest.build : FIRST);
         fresh();
-      } else if (was) told(was);
-      else if (update) reload();
+      } else if (reloads) reload();
     });
   }
   function reload() {
@@ -387,7 +442,7 @@
   // The browser itself looks only as a page loads online: an app kept open
   // across a deploy would otherwise take the copy with the old worker, and a
   // reader going offline at once would keep it.
-  function newest() {
+  function newestWorker() {
     return sw.getRegistration('/').then(function (reg) {
       return reg && reg.update().then(function () {
         var w = reg.installing || reg.waiting;
@@ -399,50 +454,28 @@
       });
     }).catch(function () {});
   }
-  // The copy, ticked: the worker registered, and the copy fetched, with the
+  // The first copy: the worker registered, and the copy fetched, with the
   // translations `trs` where a translation's tick asked for it.  Said at once,
-  // as an update is, so that the tick does not look as if it did nothing.  A
-  // first copy reloads nothing.
+  // as an update is.  A first copy reloads nothing: the page stays the
+  // server's, and the next is the copy's, which is the same.
   // `rec`, a recording's papers asked for before any copy was kept, {voice,
   // papers}, go on its queue once the copy is in (2026-11-04).
   function on(trs, rec) {
     going = true;
-    show({ have: null, latest: null, busy: { done: 0, total: 0, adding: trs || [], copy: true }, error: null, removed: false });
+    show({ have: null, latest: null, busy: { done: 0, total: 0, adding: trs || [], copy: true }, error: null });
     sw.register('/sw.js', { scope: '/', updateViaCache: 'none' }).then(function () {
-      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
-      return get(false, null, trs);
+      persist(!!(trs || rec));
+      return get(false, trs);
     }).then(function () {
       if (rec && last && last.have) return ask('keep', rec).then(show);
     }).catch(function (e) {
+      // Not registered: said (sized), and not tried again by itself for an
+      // hour.
+      refused = T('This browser would not keep it: {e}', { e: e && e.message || e });
+      failed(FIRST);
+      going = false;
       show(null);
-      line.innerHTML = T('This browser would not keep it: {e}', { e: e && e.message || e });
     }).then(function () { going = false; });
-  }
-  // Unticked: the copy removed and the worker unregistered.  A tick named for
-  // the copy is not mistaken for going online, which was the bug of
-  // 2026-10-14; but it deletes every translation kept in the copy with it,
-  // and having them again means ticking each and downloading it all anew, so
-  // it asks first, saying so and how much that is (Tigran, 2026-10-31; from
-  // 2026-10-30 it let go at once).  `have.bytes` is the copy with the
-  // translations kept (sw.js state()).  Cancelled, the tick comes back and
-  // nothing is done.  A first download that stopped keeps nothing whole, and
-  // is let go without asking.
-  function drop() {
-    var have = last && !last.removed && last.have, rec = recBytes(last && last.audio),
-        p = have && { s: rec ? size(have.bytes + rec) : mb(have.bytes) };
-    if (have && !window.confirm(rec ? T.text('offline:droprec', p)
-                                    : have.tr && have.tr.length ? T.text('offline:dropall', p) : T.text('offline:drop', p))) {
-      copyBox.checked = true;
-      return;
-    }
-    off();
-  }
-  function off() {
-    copyBox.disabled = true;
-    leaving = true;
-    ask('remove').then(function () {
-      return sw.getRegistration('/');
-    }).then(function (reg) { return reg && reg.unregister(); }).then(function () { leaving = false; show(null); });
   }
   // Update now, tapped (or Try again), or made by itself (keepUp).  Said here
   // at once, not left to the worker: the button goes, so a second tap cannot
@@ -451,8 +484,8 @@
   function update(itself) {
     var have = last && last.have;
     going = true;
-    show(Object.assign({}, last || {}, { busy: { done: 0, total: 0 }, removed: false }));
-    return newest().then(function () { return get(!!have, itself && have && have.made); })
+    show(Object.assign({}, last || {}, { busy: { done: 0, total: 0 } }));
+    return newestWorker().then(function () { return get(!!have && !itself); })
       .then(function () { going = false; }, function () { going = false; });
   }
 
@@ -463,7 +496,10 @@
   // from the page before a link was followed, or from a tick there, is this
   // page's to finish: asking the worker for it again waits for the one
   // running.
-  var TRIED = 'ub_offline_auto', HOUR = 3600 * 1000, tried = null;
+  // A first copy goes by the same rule, under FIRST where a build would be:
+  // with a worker and no copy, at each of these moments it is fetched, what
+  // it had carried over (sw.js download()), saving data or not.
+  var TRIED = 'ub_offline_auto', HOUR = 3600 * 1000, tried = null, FIRST = 'first';
   function failed(build) {
     if (!build) return;
     tried = { build: build, at: Date.now() };
@@ -475,43 +511,30 @@
     return !!t && t.build === build && Date.now() - t.at < HOUR;
   }
   function keepUp(s) {
-    if (going || !s || !s.have || document.hidden || !online()) return;
+    if (going || !s || !online()) return;
+    if (!s.have) {
+      if (s.busy) {
+        going = true;
+        return get(false).then(function () { going = false; }, function () { going = false; });
+      }
+      if (!triedLately(FIRST)) update(true);
+      return;
+    }
+    if (document.hidden) return;
     if (s.busy) {
       going = true;
-      return get(true, s.have.made).then(function () { going = false; }, function () { going = false; });
+      return get(false).then(function () { going = false; }, function () { going = false; });
     }
     if (!s.latest || triedLately(s.latest.build) || saving()) return;
     update(true);
   }
-  // Its end: What's new says that the copy has just been updated and lists
-  // what changed since the copy before (`was`), and the page reloads once it
-  // is closed, as after Update now; while listening, it does not, which would
-  // stop the reading.  With nothing listed, no reader would see a difference:
-  // nothing is said and nothing reloaded, and the next page is the new one.
-  // It waits for the page to be in view, and for Settings to close.
-  function told(was) {
-    var dlg = document.querySelector('dialog[open]');
-    if (dlg) return dlg.addEventListener('close', function () { told(was); }, { once: true });
-    if (document.hidden) {
-      var seen = function () {
-        if (document.hidden) return;
-        document.removeEventListener('visibilitychange', seen);
-        told(was);
-      };
-      return document.addEventListener('visibilitychange', seen);
-    }
-    manifest().then(function (m) {
-      if (!listed(m, was)) return;
-      since = was;
-      openNews();
-      if (!listening()) reload();
-    }, function () {});
-  }
-
   panel.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('button');
     if (!b) return;
-    if (b.classList.contains('get')) update(false);
+    if (b.classList.contains('get')) {
+      persist(true);
+      if (kept) update(false); else on();
+    }
     else if (b.classList.contains('newsbtn')) openNews();
     else if (b.classList.contains('app') && window.ubInstall) {
       window.ubInstall.prompt();
@@ -667,7 +690,7 @@
     T.attr(btn, 'aria-label', key, p);
   }
   function recShow(s) {
-    var a = s && !s.removed && s.audio || null, have = s && !s.removed && s.have, on = online();
+    var a = s && s.audio || null, have = s && s.have, on = online();
     var queue = (a && a.queue) || [], busy = a && a.busy, total = recBytes(a), nolist = false;
     Array.prototype.forEach.call(recBox.querySelectorAll('.recvoice'), function (det) {
       var key = det.dataset.key, v = (a && a.voices && a.voices[key]) || { kept: [], partial: {}, bytes: 0 },
@@ -728,7 +751,7 @@
   // full phone, a 404 or a damaged file was fetched again at once, for ever,
   // up to 27 MB a time, the screen held on (review of 2026-11-09).
   function pump(s, again) {
-    var a = s && !s.removed && s.audio;
+    var a = s && s.audio;
     if (!a || !a.queue.length || a.busy || s.busy || !online() || pumping || (a.error && !again)) return;
     pumping = true;
     ask('keep').then(function (r) { pumping = false; show(r); }, function () { pumping = false; });
@@ -738,13 +761,14 @@
   // let-go always asks first, a paper's too: a tap deleted a paper unwarned on
   // the first evening (Tigran, 2026-11-04).
   function recAct(st, key, ns) {
-    var have = last && !last.removed && last.have;
+    var have = last && last.have;
     if (st === 'busy') return ask('stop', { voice: key, papers: ns }).then(show);
     if (st === 'kept') {
       var list = recIdx[key], b = ns.reduce(function (t, n) { return t + (list && list.byN[n] ? list.byN[n].bytes : 0); }, 0);
       if (!window.confirm(T.text('offline:recdrop', { n: ns.length, v: recName(key), s: size(b) }))) return Promise.resolve();
       return ask('unkeep', { voice: key, papers: ns }).then(show);
     }
+    persist(true);
     if (!have) return Promise.resolve(on(null, { voice: key, papers: ns }));
     return ask('keep', { voice: key, papers: ns }).then(function (r) { show(r); estimate(); });
   }
@@ -826,7 +850,7 @@
   // Opening the tab asks the site afresh, and so do the browser's online and
   // offline: whatever it says, so that a page from the copy learns that the
   // site is back, and the site's answer is the last word.  With no copy, the
-  // manifest is asked for again, for the tick and the sizes.
+  // worker, the manifest is asked for again, for the sizes and the copy.
   function fresh() {
     if (kept) ask('check', { force: true }).then(heard);
     else show(null);
@@ -840,4 +864,6 @@
     if (!document.hidden && kept) ask('check', { force: !online() }).then(heard);
   });
   window.addEventListener('offline', function () { if (last) show(last); fresh(); });
+  // What's new, asked for from the ? before this had loaded (ub.js).
+  if (window.ubNewsDue) { window.ubNewsDue = false; openNews(); }
 })();

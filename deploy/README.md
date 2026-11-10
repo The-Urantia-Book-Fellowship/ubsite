@@ -193,3 +193,35 @@ cd ~/ubsite && .venv/bin/python -m ubsite.board list
 .venv/bin/python -m ubsite.board rename "OLD" "NEW"
 ```
 
+---
+
+## The offline copy's chunks, kept by nginx
+
+Every browser fetches the offline copy since 2026-11-10, about 48 MB in some 420 chunks on a first visit, and until then each chunk was read and sent by the app, two workers, for every browser. nginx now keeps each chunk the app has sent once (`proxy_cache`, in the location `~ "^/offline/c/[0-9a-f]{16}\.gz$"` of both server blocks) and answers the next browser from its own file, without asking the app. A chunk is named by the hash of what it holds, so a kept one is never out of date; what a deploy changes has a new name, and the app sends that once more. `deploy.sh` is unchanged, and so are the permissions of `~/ubsite`.
+
+**A cache, not the files themselves.** nginx runs as `www-data`, and the home directory is closed to it on both hosts (`drwx------` on pi5, `drwxr-x---` on the VPS), so a `location` with an `alias` to `~/ubsite/var/offline/c/` would answer 403. The cache needs nothing opened.
+
+**Where it is, and what keeps it from growing.** `/var/cache/ubsite-nginx`, which nginx makes for itself, owned by `www-data`, when it reads the file (`nginx -t` makes it too). It makes the last level of the path only, so this is one level under `/var/cache`, which both hosts have; `/var/cache/nginx` is on neither. nginx's cache manager deletes a chunk nobody has asked for in 60 days (`inactive=60d`) and, past 600 MB, those asked for longest ago first (`max_size=600m`); a build is 74 MB with the three translations. `~/ubsite/var/offline/c` itself is pruned by `deploy.sh`, as before, of what neither the new manifest nor the one before names. Everything under `/var/cache/ubsite-nginx` may be deleted at any time: nginx fills it again from the app.
+
+**To install it**, as root, which is Tigran's to run (CLAUDE.md, Privilege). The installed files were the repository's on 2026-11-10 (the `diff` of step 3 above), so this brings the cache and nothing else:
+
+```
+# pi5
+sudo install -m0644 -o root -g root deploy/ubsite.nginx /etc/nginx/sites-available/ubsite.ddns.net
+sudo nginx -t && sudo systemctl reload nginx
+# the VPS
+sudo install -m0644 -o root -g root deploy/ubsite-sigmaai.nginx /etc/nginx/sites-available/ubsite.sigmaai.au
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Then, through nginx itself, with a chunk the manifest names, on each site:
+
+```
+c=$(curl -s https://ubsite.sigmaai.au/offline/manifest.json | python3 -c 'import json, sys; print(json.load(sys.stdin)["chunks"][0]["file"])')
+curl -sI https://ubsite.sigmaai.au/offline/$c | grep -i x-cache     # MISS
+curl -sI https://ubsite.sigmaai.au/offline/$c | grep -i x-cache     # HIT
+```
+
+Before the install the same `curl -sI` shows nothing: the app answers a HEAD with 405, and it is nginx's cache that turns one into a GET. `sudo du -sh /var/cache/ubsite-nginx` says how much it holds.
+
+**Tried here first** (2026-11-10), since no test of the app sees nginx (trap 19): nginx 1.28.3, the VPS's version (pi5 has 1.26.3), built in a scratch directory and run as an ordinary user in front of the dev server with these two files, only the ports, the certificate and the paths changed. A chunk was a MISS and then a HIT, byte for byte the file, by GET, HEAD, a range and with a query added, the app asked once; a name that is no chunk was the app's 404 each time and was not kept; `/offline/c` stayed the app's 404, with no redirect; the manifest, a page, `/api` and the stylesheet went as before; and with `max_size=5m` the 48 MB of a whole copy was cut to 3.3 MB within seconds. `tests/test_nginx.py` holds the pattern to the app's `RE_CHUNK`, the key to the path alone, the directory to one level under `/var/cache`, and both limits in place.

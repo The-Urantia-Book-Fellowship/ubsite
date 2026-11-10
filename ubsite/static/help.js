@@ -57,7 +57,7 @@
     { k: 'notes', ch: 'notes', title: 'tour:notes:title', text: 'tour:notes', at: 'main a.fn' },
     { k: 'gear', ch: 'settings', title: 'tour:gear:title', text: 'tour:gear', at: '.top .gear' },
     { k: 'cloud', ch: 'offline', title: 'tour:cloud:title', text: 'tour:cloud', at: '.top .offline' },
-    { k: 'help', ch: '', title: 'tour:help:title', text: 'tour:help', at: '.top a.help', last: true }
+    { k: 'help', ch: '', title: 'tour:help:title', text: 'tour:help', at: '.top .help > summary', last: true }
   ];
   // The words, named here as literals so that the catalog carries them
   // (ubsite/l10n.py script_keys).
@@ -210,7 +210,7 @@
     h = '<button type="button" class="x" ' + T.a('aria-label', 'Close') + ' ' + T.a('title', 'Close') + '>' + X + '</button>';
     if (s.k === 'welcome') {
       logo = document.querySelector('.brand .logo');
-      qi = document.querySelector('.top a.help svg');
+      qi = document.querySelector('.top .help > summary svg');
       h += (logo ? logo.outerHTML.replace('class="logo"', 'class="logo mark"') : '') +
            '<h2 id="tour-title">' + T('Welcome|tour') + '</h2>' +
            '<p>' + T('tour:welcome', { q: T.html(qi ? '<span class="qi">' + qi.outerHTML + '</span>' : '?') }) + '</p>' +

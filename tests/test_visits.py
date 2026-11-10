@@ -155,6 +155,16 @@ class Pages(Counted):
             call(path)
         self.assertEqual(self.rows("SELECT path FROM view"), [])
 
+    @unittest.skipUnless((ROOT / "var" / "offline" / "manifest.json").exists(), "var/offline not built")
+    def test_a_copy_asking_whether_it_is_current_is_a_browser(self):
+        """Since 2026-11-10 the stylesheet comes from the browser's own copy,
+        so the worker's question to the site says a browser as its fetch did."""
+        call("/offline/manifest.json")
+        self.assertEqual(len(self.rows("SELECT * FROM browser")), 1)
+        call("/offline/c/0123456789abcdef.gz")
+        self.assertEqual(len(self.rows("SELECT * FROM browser")), 1)
+        self.assertEqual(self.rows("SELECT path FROM view"), [])
+
     def test_an_api_call_is_not_a_view(self):
         site = {"user-agent": "ExampleSite/1.0 (+https://example.org)"}
         call("/api/v1/text", "since=0", headers=site)

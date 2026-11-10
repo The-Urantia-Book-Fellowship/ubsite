@@ -167,7 +167,9 @@ class Pages(unittest.TestCase):
         self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), [])
         self.assertNotIn("autoupdate", settings.defaults())
         self.assertIn('<p class="net"><span class="conn">', fs.group(1))
-        self.assertIn('<input type="checkbox" class="copy" disabled> Base', fs.group(1))
+        # The copy is every browser's since 2026-11-10: a name, with no tick.
+        self.assertIn('<p class="sub">Base</p>', fs.group(1))
+        self.assertNotIn('class="copy"', fs.group(1))
         # The recordings' block: a fold to each voice, its control a button
         # drawn by offline.js, never a checkbox or a setting (2026-11-04).
         self.assertIn('<details class="recvoice" data-key="mh"><summary>', fs.group(1))

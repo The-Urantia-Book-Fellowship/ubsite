@@ -147,18 +147,18 @@
 "and so on through the book" = "и так далее, по всей книге"
 
 # The Offline tab (base.html, offline.js), the cloud's menu until 2026-10-30:
-# the copy, a tick, its size filled in by offline.js (the span); then the
-# translations kept in the copy, each a download of its own (2026-10-26).
+# the copy, "Base", every browser's since 2026-11-10 (a tick until then), its
+# size filled in by offline.js (the span); then the translations kept in the
+# copy, each a download of its own (2026-10-26).
 "Base" = "База"
-"offline:copyhint" = { en = 'the whole site<span class="size"></span>, kept in this browser and updated by itself whenever the site is open and online', ru = 'весь сайт<span class="size"></span>; хранится в этом браузере и обновляется сама, когда сайт открыт и есть сеть' }
+"offline:copyhint" = { en = 'The whole site<span class="size"></span>, which this browser keeps and updates by itself, and reads from: pages and search open at once, with a connection or without.', ru = 'Весь сайт<span class="size"></span>; браузер сам хранит и обновляет его и читает из него: страницы и поиск открываются сразу, со связью или без.' }
 "offline:about" = { en = ", about {s}", ru = ", около {s}" }
 "Translations" = "Переводы"
 "offline:trwith" = { en = "Ticking one downloads the offline copy with it.", ru = "Если отметить перевод, вместе с ним загрузится и офлайн-копия." }
 "offline:trstale" = { en = "The offline copy is out of date: downloading a translation updates it too.", ru = "Офлайн-копия устарела: загрузка перевода обновит и её." }
-"offline:dropall" = { en = "This deletes the offline copy from this browser, and with it every translation kept in it. To have them again, you would tick Base and each translation again, and download it all anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера, а с ней и все сохранённые в ней переводы. Чтобы вернуть их, придётся снова отметить «База» и каждый перевод и заново загрузить всё — около {s}." }
-"offline:drop" = { en = "This deletes the offline copy from this browser. To have it again, you would tick Base again, and download it anew, about {s}.", ru = "Офлайн-копия будет удалена из этого браузера. Чтобы вернуть её, придётся снова отметить «База» и заново загрузить её — около {s}." }
-"offline:droprec" = { en = "This deletes the offline copy from this browser, and with it every translation and recording kept in it, {s} in all. To have them again, you would tick Base and each of them again, and download it all anew.", ru = "Офлайн-копия будет удалена из этого браузера, а с ней все сохранённые переводы и записи чтения — всего {s}. Чтобы вернуть их, придётся снова отметить «База» и каждый из них и заново загрузить всё." }
 "offline:troffline" = { en = "Offline, a translation can be let go, and downloaded once online.", ru = "Без сети перевод можно удалить, а загрузить — когда сеть появится." }
+"offline:trdrop" = { en = "This deletes {t} from this browser, {s}. To have it again, you would tick it and download it anew.", ru = "Перевод «{t}» будет удалён из этого браузера, {s}. Чтобы вернуть его, придётся снова отметить его и загрузить заново." }
+"offline:trdropoff" = { en = "This deletes {t} from this browser, {s}. You are offline: it can be downloaded again only once you are online.", ru = "Перевод «{t}» будет удалён из этого браузера, {s}. Сейчас вы не в сети: загрузить его снова можно будет, только когда появится сеть." }
 "Other translations · {n}" = "Другие переводы · {n}"
 "All translations · {n}" = "Все переводы · {n}"
 # The recordings kept for listening offline (2026-11-04; base.html .offrec,
@@ -460,14 +460,13 @@
 "The last update stopped: {e}." = "Последнее обновление остановилось: {e}."
 "An update to the offline copy is waiting ({s})" = "Офлайн-копию можно обновить ({s})"
 "Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t} и указателем от {i}; в этом браузере занимает {s}."
-"Whenever the server cannot be reached, online or not, the site reads from it by itself." = "Когда сервер недоступен — в сети вы или нет, — сайт сам читает из неё."
+"The site reads from it, and asks the server only for what it does not hold." = "Сайт читает из неё, а к серверу обращается только за тем, чего в ней нет."
 "It can be downloaded only online." = "Загрузить её можно только в сети."
 "This site has no offline copy yet." = "У этого сайта пока нет офлайн-копии."
 "And earlier changes." = "И более ранние изменения."
-"The offline copy has just been updated. New since its last update, on {d}:" = "Офлайн-копия только что обновилась. Нового с прошлого обновления, {d}:"
+"New since {d}:" = "Нового с {d}:"
+"The latest changes:" = "Последние изменения:"
 "Since your copy, kept as the site was on {d}:" = "С вашей копии, сохранённой такой, каким сайт был {d}:"
-"The next page you open is the new one." = "Следующая страница, которую вы откроете, будет уже новой."
-"Closing this reloads the page, so that it is the new one too." = "Когда вы это закроете, страница перезагрузится и тоже станет новой."
 "The whole changelog" = "Вся история изменений"
 "Nothing is listed for this update." = "Для этого обновления ничего не указано."
 "The list could not be fetched just now." = "Список сейчас не удалось загрузить."
@@ -543,7 +542,14 @@
 # of both is Tigran's to revise; the keys stay.
 
 "Help" = "Справка"
-"Help and tour" = "Справка и экскурсия"
+"Help, What’s new, About" = "Справка, что нового, о сайте"
+"What’s new?" = "Что нового?"
+"About" = "О сайте"
+# About (ub.js openAbout): a small window from the ?'s menu.
+"About this site" = "Об этом сайте"
+"about:1" = { en = "<i>The Urantia Book</i> in the Uversa Press edition, read together with its index, so that the index works in both directions: from a concept into the text, and from any paragraph back to everything the index says about it.", ru = "<i>Книга Урантии</i> в издании Uversa Press вместе с её указателем, который работает в обе стороны: от понятия — к тексту и от любого абзаца — ко всему, что говорит о нём указатель." }
+"about:repo" = { en = "The site’s source is on GitHub: {a}", ru = "Исходный код сайта — на GitHub: {a}" }
+"about:more" = { en = "The edition, its licence and the changelog", ru = "Издание, его лицензия и история изменений" }
 "Take the tour" = "Экскурсия по сайту"
 "Show me" = "Показать"
 "help:intro" = { en = "This is <i>The Urantia Book</i> in the Uversa Press edition, read together with its index: beside every paragraph stands everything the index says about it, and from any entry you can go back to every passage it cites. This page says what each part of the page does. The tour shows it on the page itself.", ru = "Это <i>Книга Урантии</i> в издании Uversa Press вместе с её указателем: рядом с каждым абзацем стоит всё, что о нём говорит указатель, а из любой рубрики можно вернуться ко всем отрывкам, на которые она ссылается. Эта страница объясняет, что делает каждая часть страницы. Экскурсия показывает это на самой странице." }
@@ -585,8 +591,8 @@
 "help:translations:2" = { en = "<b>Translations in parallel columns</b>, a switch in the same tab, sets the English and the translations side by side, a column each, paragraph against paragraph, on every page until you turn it off; on a phone each translation stands under its paragraph. The contents can be shown in a translation too, from the list on the Contents line. A part’s title page shows the translations you have ticked as well, under the English, or beside it in columns.", ru = "<b>Переводы в параллельных колонках</b>, переключатель на той же вкладке, ставит английский и переводы рядом, по колонке каждому, абзац против абзаца, на каждой странице, пока вы его не выключите; на телефоне каждый перевод стоит под своим абзацем. Содержание тоже можно показать по переводу — из списка в строке Содержания. Титульная страница части тоже показывает отмеченные переводы: под английским, а в колонках — рядом с ним." }
 "help:settings:1" = { en = "The gear in the header, or <kbd>Ctrl</kbd>+<kbd>,</kbd>, opens Settings, in five tabs: <b>Reading</b> (theme, size, line spacing, typeface, width, alignment, tapping to turn the page, the whole paper on one page, paragraph previews), <b>Show</b> (what stands beside the text: the index, red letter, references, pilcrows, notes, the 1955 readings, the quiz, tooltips), <b>Translations</b>, <b>Listening</b> (the voice, its speed, following along) and <b>Offline</b>. The button beside the title restores the defaults. Everything is kept in this browser only; nothing is sent anywhere.", ru = "Шестерёнка в шапке или <kbd>Ctrl</kbd>+<kbd>,</kbd> открывает Настройки в пяти вкладках: <b>Чтение</b> (тема, размер, межстрочный интервал, шрифт, ширина, выравнивание, листание касанием, документ целиком на одной странице, просмотр абзацев), <b>Показ</b> (что стоит рядом с текстом: указатель, красные слова, номера, знаки абзаца, примечания, разночтения 1955 года, викторина, подсказки), <b>Переводы</b>, <b>Аудио</b> (голос, скорость, слежение за чтением) и <b>Офлайн</b>. Кнопка рядом с заголовком восстанавливает настройки по умолчанию. Всё хранится только в этом браузере; никуда ничего не отправляется." }
 "Light or dark" = "Светлая или тёмная"
-"help:offline:1" = { en = "The cloud in the header is the sign of the offline copy. Tap it, or open Settings’ <b>Offline</b> tab, and tick <b>Base</b>: the whole site, about 48 MB, is kept in this browser and opens without a connection, and keeps itself up to date. Translations and the recordings, a paper or a part at a time, can be kept too. <b>Install as an app</b> puts it on the home screen or in the dock, where it opens on its own.", ru = "Облако в шапке — знак офлайн-копии. Нажмите на него или откройте вкладку <b>Офлайн</b> в Настройках и отметьте <b>Основа</b>: весь сайт, около 48 МБ, сохранится в этом браузере, будет открываться без связи и сам обновляться. Переводы и записи, по документу или по части, тоже можно сохранить. <b>Установить как приложение</b> помещает сайт на главный экран или в док, откуда он открывается сам по себе." }
-"Online, no copy" = "В сети, без копии"
+"help:offline:1" = { en = "The cloud in the header is the sign of the offline copy. The whole site, about 48 MB, downloads into this browser by itself on your first visit and keeps itself up to date; the site then reads from it, so pages and search open at once, and go on working without a connection. Tap the cloud, or open Settings’ <b>Offline</b> tab, to see it, as <b>Base</b>; translations and the recordings, a paper or a part at a time, can be kept there too. <b>Install as an app</b> puts it on the home screen or in the dock, where it opens on its own.", ru = "Облако в шапке — знак офлайн-копии. Весь сайт, около 48 МБ, сам загружается в этот браузер при первом посещении и сам обновляется; после этого сайт читает из копии, так что страницы и поиск открываются сразу и продолжают работать без связи. Нажмите на облако или откройте вкладку <b>Офлайн</b> в Настройках, чтобы увидеть её: она называется <b>База</b>; там же можно сохранить переводы и записи, по документу или по части. <b>Установить как приложение</b> помещает сайт на главный экран или в док, откуда он открывается сам по себе." }
+"Online, no copy yet" = "В сети, копии пока нет"
 "A copy is kept" = "Копия сохранена"
 "Downloading|cloud" = "Загружается"
 "An update is waiting" = "Ждёт обновление"
@@ -640,7 +646,7 @@
 "tour:gear:title" = { en = "Settings", ru = "Настройки" }
 "tour:gear" = { en = "Typeface, size and theme; what is shown beside the text; Russian translations under each paragraph, or beside the English in columns; the voice and its speed. Kept in this browser only.", ru = "Шрифт, размер и тема; что показывать рядом с текстом; русские переводы под каждым абзацем или рядом с английским в колонках; голос и его скорость. Хранится только в этом браузере." }
 "tour:cloud:title" = { en = "Read offline", ru = "Читать офлайн" }
-"tour:cloud" = { en = "The whole site can be kept in this browser, to read with no connection, and installed as an app. This sign shows whether a copy is kept here, and opens the tab where that is done.", ru = "Весь сайт можно сохранить в этом браузере, чтобы читать без связи, и установить как приложение. Этот значок показывает, есть ли здесь копия, и открывает вкладку, где это делается." }
+"tour:cloud" = { en = "The whole site keeps itself in this browser, about 48 MB, so that pages open at once and can be read with no connection; it can be installed as an app too. This sign shows the copy’s state, and opens the tab that says what is kept.", ru = "Весь сайт сам сохраняется в этом браузере, около 48 МБ, чтобы страницы открывались сразу и читались без связи; его можно и установить как приложение. Этот значок показывает состояние копии и открывает вкладку, где видно, что сохранено." }
 "tour:help:title" = { en = "Help", ru = "Справка" }
-"tour:help" = { en = "All of this, with every key and every setting, is in Help, and the tour can be taken again from there. Enjoy the book.", ru = "Всё это, со всеми клавишами и настройками, есть в Справке; оттуда же можно повторить экскурсию. Приятного чтения." }
+"tour:help" = { en = "All of this, with every key and every setting, is in Help, the first thing under this mark, and the tour can be taken again from there; What’s new? under it lists the site’s latest changes. Enjoy the book.", ru = "Всё это, со всеми клавишами и настройками, есть в Справке — первый пункт под этим знаком; оттуда же можно повторить экскурсию. Пункт «Что нового?» под ней перечисляет последние изменения сайта. Приятного чтения." }
 "The Help page is read online." = "Страница Справки читается онлайн."

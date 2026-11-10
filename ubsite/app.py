@@ -681,6 +681,10 @@ T.env.globals["bilingual"] = lambda: l10n.BILINGUAL
 # mark and the home page's logo are the same on both.
 SITES = {"ubsite.ddns.net": "-burgundy", "ubsite.sigmaai.au": ""}
 T.env.globals["sites"] = SITES
+# Where the site's source is kept, which About names (base.html, the ? at the
+# header's corner; ub.js draws the window).
+REPO = "https://github.com/The-Urantia-Book-Fellowship/ubsite"
+T.env.globals["repo"] = REPO
 
 
 def _site(request: Request) -> tuple[str, str]:
@@ -809,9 +813,12 @@ def speech_tr(key: str, ref: str):
 
 
 # --------------------------------------------------------------------------
-# Work offline.  A reader who turns it on in Settings registers /sw.js, which
+# Work offline.  Every page registers /sw.js where a worker can run, which
 # downloads the copy that `make offline` built (offline/, var/offline/) and
-# answers from it when the network does not.  Nobody else runs the worker.
+# answers from it, first while the copy is the site's build, and otherwise
+# when the network does not (Tigran, 2026-11-10; until then only a reader who
+# ticked the copy in Settings ran the worker, which went to the network
+# first).
 
 # SQLite's WebAssembly build (vendor/sqlite-wasm/), which searches the copy.
 ENGINE = {"sqlite3.js": "text/javascript", "sqlite3.wasm": "application/wasm"}

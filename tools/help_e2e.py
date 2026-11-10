@@ -177,7 +177,37 @@ def run() -> int:
         ok(pg.query_selector(".tour-card .prev") is not None, "with Back alive")
         pg.goto(BASE + "/101:4")
         pg.wait_for_timeout(300)
-        pg.click(".top a.help")             # by the link, as a reader comes: the referrer is the page
+        # The ? is a menu (2026-11-10): Help, What's new?, About.  With the tour
+        # put away, which would come back over this page and shield the header.
+        pg.evaluate("sessionStorage.removeItem('ub_tour'); localStorage.setItem('ub_tour', 'seen')")
+        pg.reload()
+        pg.wait_for_timeout(300)
+        pg.click(".top .help > summary")
+        items = pg.evaluate("[...document.querySelectorAll('.top .helpitems a')].map(a => a.querySelector('x-en').textContent)")
+        ok(pg.is_visible(".top .helpitems") and items == ["Help", "What’s new?", "About"], f"the ? opens a menu ({items})")
+        pg.keyboard.press("Escape")
+        ok(pg.is_hidden(".top .helpitems"), "which Escape shuts")
+        pg.click(".top .help > summary")
+        pg.click("main")
+        ok(pg.is_hidden(".top .helpitems"), "and so does a tap elsewhere")
+        pg.click(".top .help > summary")
+        pg.click(".top .helpitems a.about")
+        pg.wait_for_selector("#about", state="visible", timeout=3000)
+        said = pg.evaluate("(d => { const c = d.cloneNode(true); c.querySelectorAll('x-ru').forEach(x => x.remove()); return c.textContent; })(document.getElementById('about'))")
+        repo = pg.get_attribute("#about .repo a", "href")
+        ok(pg.is_hidden(".top .helpitems") and "read together with its index" in said
+           and repo == "https://github.com/The-Urantia-Book-Fellowship/ubsite"
+           and pg.inner_text("#about .repo a") == "github.com/The-Urantia-Book-Fellowship/ubsite",
+           f"About opens a small window: what the site is, and where its source is kept ({repo})")
+        pg.click("#about .x")
+        ok(pg.is_hidden("#about") and pg.url == BASE + "/101:4", "its × closes it, the page where it was")
+        pg.click(".top .help > summary")
+        pg.click(".top .helpitems a.whatsnew")
+        pg.wait_for_selector("#offnews", state="visible", timeout=8000)
+        ok(pg.url == BASE + "/101:4", "What's new? opens its window over the page (this server has no copy to list from)")
+        pg.keyboard.press("Escape")
+        pg.click(".top .help > summary")
+        pg.click('.top .helpitems a[href="/help"]')     # by the link, as a reader comes: the referrer is the page
         pg.wait_for_url(BASE + "/help", timeout=5000)
         pg.wait_for_timeout(300)
         pg.evaluate("document.querySelector('.tourstart').click()")
@@ -253,10 +283,22 @@ def run() -> int:
     return 1 if fails else 0
 
 
+# The server with no offline copy to offer (the manifest a 404), so that no page
+# registers the worker and fetches the copy, 48 MB to each fresh context: since
+# 2026-11-10 every page does where the site has one (static/offline.js).  The
+# cloud is shown all the same.  tools/offline_e2e.py is the test of the copy.
+NO_COPY = """
+import pathlib, sys
+import uvicorn
+import ubsite.app as A
+A.OFFLINE = pathlib.Path(sys.argv[1])
+uvicorn.run(A.app, host="127.0.0.1", port=int(sys.argv[2]), log_level="warning")
+"""
+
+
 def main() -> int:
     env = dict(os.environ, UB_VISITS="off")
-    srv = subprocess.Popen([sys.executable, "-m", "uvicorn", "ubsite.app:app", "--host", "127.0.0.1", "--port", "8133",
-                            "--log-level", "warning"], cwd=ROOT, env=env)
+    srv = subprocess.Popen([sys.executable, "-c", NO_COPY, str(ROOT / "var" / "no-offline-copy"), "8133"], cwd=ROOT, env=env)
     try:
         for _ in range(100):
             try:

@@ -18,6 +18,18 @@ limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=40r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_board:10m rate=10r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_stats:10m rate=10r/m;
 
+# Where nginx keeps the offline copy's chunks it has sent once (the location
+# for /offline/c/ below).  The directory is nginx's own, made by it as it
+# starts (and by `nginx -t`): it cannot read ~/ubsite/var, the home directory
+# being closed to www-data, and nothing there changes for this.  It makes the
+# last level of the path only, which is why this is not /var/cache/nginx/…,
+# a directory neither host has.  Two things keep it from growing, both the
+# work of nginx's cache manager: a chunk nobody has asked for in 60 days is
+# deleted (inactive), and past 600 MB those asked for longest ago go first
+# (max_size).  A megabyte of keys is about 8,000 chunks; a build has under 500.
+proxy_cache_path /var/cache/ubsite-nginx levels=1:2 keys_zone=ubsite_chunks:1m
+                 max_size=600m inactive=60d use_temp_path=off;
+
 server {
     listen 80;
     server_name ubsite.ddns.net;
@@ -108,6 +120,31 @@ server {
         # (build/fonts.py): SBL Greek goes from 1.1 MB to 0.4 MB.  A gzipped
         # reply's ETag is weakened to W/"…", which Starlette's 304 still matches.
         gzip_types text/css text/javascript image/svg+xml font/ttf font/otf;
+    }
+
+    # The offline copy's chunks (app.py offline_chunk), which every browser
+    # fetches since 2026-11-10, about 48 MB on a first visit.  The app sends each
+    # once and nginx keeps it (proxy_cache_path, above); the next browser's is
+    # nginx's own file, and Python is not asked.  A chunk is named by the hash
+    # of what it holds, so a kept one is never out of date, and what a deploy
+    # changes has a new name.  The app says a year (its Cache-Control), which is
+    # what nginx goes by; proxy_cache_valid stands in where a reply says nothing.
+    #
+    #   - The pattern is the app's RE_CHUNK (tests/test_nginx.py holds the two
+    #     together), so nothing but a chunk is kept, and a 404 never is.
+    #   - A regex, not the prefix /offline/c/, which would answer /offline/c
+    #     with a 301 that the app sends back: trap 19's loop.
+    #   - The key is the path alone.  With the query in it, as by default,
+    #     ?1, ?2 … would each be kept as one more copy of the same chunk.
+    #   - X-Cache says MISS or HIT, to see it working.
+    location ~ "^/offline/c/[0-9a-f]{16}\.gz$" {
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+        proxy_cache ubsite_chunks;
+        proxy_cache_key $uri;
+        proxy_cache_valid 200 365d;
+        proxy_cache_lock on;
+        add_header X-Cache $upstream_cache_status;
     }
 
     # The owner's page of visits (ubsite/stats.py): its password is checked with

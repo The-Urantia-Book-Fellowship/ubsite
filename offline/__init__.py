@@ -1,8 +1,9 @@
 """Work offline: the site, kept in a reader's browser.
 
-A reader who turns on "Work offline" in Settings registers a service worker
-(ubsite/static/sw.js) that downloads what this package builds, and answers the
-site's addresses from it when the network does not.  It holds the book with
+Every page registers a service worker (ubsite/static/sw.js) that downloads
+what this package builds, and answers the site's addresses from it: first,
+while it is the site's build, and otherwise when the network does not (since
+2026-11-10; a reader's own choice in Settings until then).  It holds the book with
 its margin index and 1955 readings, the index's concept pages, every
 headword's reading path, the appendices and the lists, and a database to
 search them by; and each recording's list of files by paper (audio-<key>),

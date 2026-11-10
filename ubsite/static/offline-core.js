@@ -109,7 +109,10 @@
   // it), in app.py's order: {res} now, {chunk, make(data)} from a chunk,
   // {chunks, make(datas)} from several, {search}, or null where the copy has no
   // say (the API, the recordings, the worker's own files), so the network's
-  // failure stands.  `origin` is where the copy is read, as location.origin
+  // failure stands.  `tr` marks the two whose answer is the server's only with
+  // every translation kept, a section's translations and a search: the worker
+  // answers those first only where the copy keeps every translation the
+  // reader shows (sw.js covered()).  `origin` is where the copy is read, as location.origin
   // gives it; `kept`, the keys of the translations the reader keeps in it.
   function resolve(path, sh, origin, kept) {
     var m, d;
@@ -121,7 +124,7 @@
       return html(200, stored(sh, d.pages[path]).split(API_BASE).join(origin + '/'));
     } };
     if (sh.miscset[path]) return { chunk: 'misc', make: function (d) { return html(200, stored(sh, d.pages[path])); } };
-    if (path === '/search') return { search: true };
+    if (path === '/search') return { search: true, tr: true };
     if ((m = /^\/speech\/([^\/]*[^\/0-9:][^\/]*)\/(.*)$/.exec(path))) {
       // A translation's, as the browser's voice reads it (app.py speech_tr),
       // from its own download, twenty papers to a chunk, if the reader keeps
@@ -158,7 +161,7 @@
       if (!has.length) return { res: text(404, 'No translation has this section.\n') };
       var mine = has.filter(function (x) { return (kept || []).indexOf(x.key) >= 0; });
       return { chunks: mine.map(function (x) { return 'tr-' + x.key + '-' + Math.floor(parseInt(tp, 10) / 20); }),
-        make: function (ds) {
+        tr: true, make: function (ds) {
           var f = sh.tr.frame;
           return html(200, f[0] + ds.map(function (d) { return d[at][0]; }).join('') +
                            ds.map(function (d) { return d[at][1]; }).join('') + f[1]);
@@ -704,7 +707,7 @@
     function trList(e) {
       var x = e.x, h = e.hits,
           s = '<section data-tr="' + x.key + '"><h2><bdi lang="' + x.lang + '">' + esc(x.title) + '</bdi> <span class="nobreak">(' + x.label + ')</span>';
-      if (!h) return s + '</h2>\n<p class="none">' + T('tr:notkept') + '</p></section>';
+      if (!h) return s + '</h2>\n<p class="none notkept">' + T('tr:notkept') + '</p></section>';
       s += ' ' + count(h) + '</h2>\n';
       if (h.rows.length)
         s += '<ul class="hits">' + h.rows.map(function (r) {

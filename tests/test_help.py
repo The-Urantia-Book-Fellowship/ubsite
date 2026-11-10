@@ -25,14 +25,18 @@ CHAPTERS = ["text", "index", "moving", "search", "listening", "notes", "translat
 
 
 class Static(unittest.TestCase):
-    def test_help_is_a_link_in_the_shell_with_its_script(self):
+    def test_help_is_a_menu_in_the_shell_with_its_script(self):
+        """A <details> since 2026-11-10, each item a link, so that it opens and
+        goes somewhere with JavaScript off (a link to /help alone before)."""
         base = (TEMPLATES / "base.html").read_text(encoding="utf-8")
         head, _, _ = base.partition("</dialog>")
-        self.assertRegex(head, r'<a class="help" href="/help" \{\{ ta\(\'aria-label\', \'Help\'\) \}\}'
-                               r' \{\{ ta\(\'title\', \'Help and tour\'\) \}\} data-src="\{\{ asset\(\'help\.js\'\) \}\}">')
+        self.assertRegex(head, r'<details class="help" data-src="\{\{ asset\(\'help\.js\'\) \}\}" data-repo="\{\{ repo \}\}">\n'
+                               r'    <summary \{\{ ta\(\'aria-label\', \'Help\'\) \}\}')
+        menu = head[head.index('<details class="help"'):head.index('</header>')]
+        self.assertEqual(re.findall(r'<a (?:class="\w+" )?href="([^"]+)">', menu), ["/help", "/changelog", "/help#about"])
         # After the flags, the last thing in the header: the corner on both layouts.
-        self.assertRegex(head, r'<a class="help"[^\n]*\n</header>')
-        self.assertLess(head.index('<span class="langs"'), head.index('<a class="help"'))
+        self.assertRegex(head, r'</details>\n</header>')
+        self.assertLess(head.index('<span class="langs"'), head.index('<details class="help"'))
         # One dialog in the shell: offline/pages.py cut() takes the first </dialog>.
         self.assertEqual(base.count("<dialog"), 1)
 
@@ -113,15 +117,18 @@ class Pages(unittest.TestCase):
             self.assertIn(f'data-have="{have}"', body)
         self.assertIn('/static/help.js?v=', body)
         # The ? is on this page too, and on the text's.
-        self.assertIn('<a class="help" href="/help"', body)
+        self.assertIn('<details class="help" data-src=', body)
         self.assertNotIn("tour-card", body)
 
-    def test_every_page_carries_the_help_link_and_its_script(self):
+    def test_every_page_carries_the_help_menu_and_its_script(self):
         from test_appendix_pages import get
+        from ubsite.app import REPO
         for path in ("/", "/101:4", "/i/humor", "/quiz", "/nothing"):
             body = get(path)[2]
-            self.assertRegex(body, r'<a class="help" href="/help" aria-label="Help"[^>]*'
-                                   r' title="Help and tour"[^>]* data-src="/static/help\.js\?v=\w+">', path)
+            self.assertRegex(body, r'<details class="help" data-src="/static/help\.js\?v=\w+" data-repo="'
+                                   + re.escape(REPO) + r'">\s*<summary aria-label="Help"[^>]* title="Help, What’s new, About"', path)
+            for item in ('<a href="/help">', '<a class="whatsnew" href="/changelog">', '<a class="about" href="/help#about">'):
+                self.assertIn(item, body, path)
 
     def test_help_is_a_misc_page_of_the_copy(self):
         from offline import pages

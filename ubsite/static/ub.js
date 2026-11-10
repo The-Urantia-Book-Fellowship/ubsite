@@ -48,7 +48,19 @@
     if (window.ubLang) window.ubLang(r, o.lang);
     if (window.ubTr) window.ubTr(o.translations);
   }
+  // The translations shown beside the text, told to the worker (sw.js, {cmd:
+  // 'shown'}), which has no other way to Settings: what depends on them, a
+  // section's translations and a search, it answers from its copy first only
+  // where the copy keeps them all, and otherwise leaves to the server, which
+  // sends every one (sw.js covered()).  With each change, before anyone hears
+  // of it and asks for a section's again; and as a page loads (below, with
+  // the cloud).
+  function shownTo(o) {
+    var sw = navigator.serviceWorker, w = sw && sw.controller;
+    if (w) w.postMessage({ cmd: 'shown', tr: String(o.translations || '').split(' ').filter(Boolean) });
+  }
   function announce(k, o) {
+    shownTo(o);
     document.dispatchEvent(new CustomEvent('ub:settings', { detail: { key: k, all: o } }));
   }
   // The browser's own voices (Web Speech) in a language, English unless
@@ -1097,6 +1109,20 @@
   });
   document.addEventListener('ub:swap', trSync);
   document.addEventListener('ub:trkept', function () { trGot = {}; trSync(); cmpDraw(); });
+  // A search the copy answered (sw.js) says of a translation it does not keep
+  // that it is not kept (offline-core.js trList, .notkept), in a list no one
+  // sees until that translation is shown.  Ticked now, online, the page is
+  // asked for again once Settings closes: the worker has heard (shownTo), and
+  // leaves it to the server, which lists every translation.
+  document.addEventListener('ub:settings', function (ev) {
+    if (ev.detail.key !== 'translations' || navigator.onLine === false) return;
+    if (!String(ev.detail.all.translations || '').split(' ').some(function (k) {
+      return k && document.querySelector('.trhits > section[data-tr="' + k + '"] > .notkept');
+    })) return;
+    var dlg = document.querySelector('dialog.settings[open]');
+    if (dlg) dlg.addEventListener('close', function () { location.reload(); }, { once: true });
+    else location.reload();
+  });
 
   // Compare (ROADMAP item 15, step 2; settings.py `compare`, Translations in
   // parallel columns): the page drawn again, the English and each translation
@@ -2062,11 +2088,14 @@
   // Work offline, at the header's corner where a service worker can run: an
   // icon that says whether this page is online or offline, and whether a copy
   // is kept (ub.css .top .offline), and opens Settings at its Offline tab,
-  // which keeps the copy (base.html; until 2026-10-30 a menu of its own,
-  // #offmenu, under the icon, and until 2026-10-14 a switch in Settings).
+  // which says what the copy is (base.html; until 2026-10-30 a menu of its
+  // own, #offmenu, under the icon, and until 2026-10-14 a switch in Settings).
   // static/offline.js runs the tab, and says what the copy is on the icon,
-  // then 'ub:offline'.  It is loaded when the tab opens, or at once on a page
-  // the worker answers for, to say whether its copy is still the site's.  The
+  // then 'ub:offline'.  It is loaded on every page since 2026-11-10 (Tigran:
+  // every browser keeps the copy, and reads the site from it): at once on a
+  // page the worker answers for, to say whether its copy is still the site's;
+  // on any other once the page has loaded and the browser is idle, to
+  // register the worker and fetch the copy; and when the tab opens.  The
   // browser's own offer to install the site waits in the tab too, rather than
   // in a banner of its own.
   var cloud = document.querySelector('.top .offline'), offpanel = document.querySelector('dialog.settings .panel.offline');
@@ -2076,8 +2105,9 @@
     // And Settings' tab for it: the tab and its panel.
     document.querySelectorAll('dialog.settings .offline').forEach(function (el) { el.hidden = false; });
     // Offline (data-net) is the site out of reach: the browser says so, or the
-    // worker answered for this page from its copy, which sw.js writes on the
-    // footer; after that, as the browser says, and as the worker's check of
+    // worker answered for this page from its copy because the network did not,
+    // which sw.js writes on the footer (a page it answers first, online, is
+    // the server's as it is, unmarked); after that, as the browser says, and as the worker's check of
     // the site says, which offline.js writes on the icon.  Each time the
     // browser speaks, offline.js asks at once whether the site is there, and
     // where the page starts offline: the site's answer is the last word, as
@@ -2112,9 +2142,26 @@
     window.addEventListener('online', function () { net(true); });
     window.addEventListener('offline', function () { net(false); });
     document.addEventListener('ub:offline', label);
+    var atRest = function () {
+      if (window.requestIdleCallback) window.requestIdleCallback(script, { timeout: 4000 });
+      else setTimeout(script, 1000);
+    };
     if (navigator.serviceWorker.controller) script();
+    else if (document.readyState === 'complete') atRest();
+    else window.addEventListener('load', atRest);
     // And by Settings' Offline tab, whose words are its to say.
     document.addEventListener('ub:offtab', script);
+    // And by What's new?, in the ?'s menu (below): offline.js's dialog, opened
+    // at once where the script is in, and as it ends where it is not yet.
+    document.addEventListener('ub:news', function () {
+      if (window.ubOfflineUI && window.ubOfflineUI.news) return window.ubOfflineUI.news();
+      window.ubNewsDue = true;
+      script();
+    });
+    // The translations shown, to the worker (shownTo, above): as the page
+    // loads, and when a worker takes it over.
+    shownTo(load());
+    navigator.serviceWorker.addEventListener('controllerchange', function () { shownTo(load()); });
     // A tap on the icon opens Settings at that tab, as the gear opens Settings.
     cloud.addEventListener('click', function () {
       var gearBtn = document.querySelector('.gear'), tab = document.getElementById('set-t-offline');
@@ -2123,20 +2170,77 @@
   }
 
   // Help, and the tour (static/help.js; Tigran, 2026-11-06).  The ? at the
-  // corner is a link to /help; its data-src is the tour's script, loaded
-  // here when the tour is due: never seen in this browser (localStorage
+  // corner is a menu (below; a link to /help until 2026-11-10); its data-src
+  // is the tour's script, loaded here when the tour is due: never seen in this browser (localStorage
   // ub_tour), or a step kept for this tab (sessionStorage).  Not on /help,
   // which loads it itself, nor on the quiz's pages, whose keys 1-9 and Enter
   // are their own, nor on the API's page, the stats or the board, nor where
   // #listen starts the player as the page loads.  The script waits for
   // Settings or What's new to close, and for the page to be visible.
-  var helpLink = document.querySelector('.top a.help'), tourDue = false;
+  var helpLink = document.querySelector('.top .help'), tourDue = false;
   try { tourDue = !!sessionStorage.getItem('ub_tour') || localStorage.getItem('ub_tour') !== 'seen'; } catch (e) {}
   if (helpLink && helpLink.dataset.src && tourDue && !/^\/(help$|quiz|api$|stats$)/.test(location.pathname) &&
       location.hash !== '#listen') {
     var hs = document.createElement('script');
     hs.src = helpLink.dataset.src;
     document.head.appendChild(hs);
+  }
+
+  // The ?'s menu (base.html; Tigran, 2026-11-10): a <details>, which the
+  // browser opens and shuts at its mark; shut here by Escape, by a tap
+  // anywhere else, and by one of its items.  Help is a link.  What's new? is
+  // offline.js's dialog, what the last update brought, where Work offline can
+  // run (the cloud shown), asked for by 'ub:news', which the cloud's block
+  // above hears; elsewhere the link goes on to the changelog.  About is a
+  // small window drawn here, as What's new's is drawn: what the site is, and
+  // where its source is kept.
+  if (helpLink && helpLink.tagName === 'DETAILS') {
+    var shutHelp = function () { helpLink.open = false; };
+    document.addEventListener('click', function (ev) {
+      if (helpLink.open && !helpLink.contains(ev.target)) shutHelp();
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Escape' || !helpLink.open) return;
+      shutHelp();
+      helpLink.querySelector('summary').focus();
+    });
+    var aboutDlg = null;
+    var openAbout = function () {
+      if (!aboutDlg) {
+        var url = helpLink.dataset.repo || '';
+        aboutDlg = document.createElement('dialog');
+        aboutDlg.id = 'about';
+        aboutDlg.className = 'offnews about';
+        aboutDlg.setAttribute('aria-labelledby', 'about-title');
+        aboutDlg.innerHTML = '<div class="bar"><h2 id="about-title">' + T('About this site') + '</h2>' +
+          '<button type="button" class="x" ' + T.a('aria-label', 'Close') + ' ' + T.a('title', 'Close') +
+          '><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>' +
+          '<p>' + T('about:1') + '</p>' +
+          (url ? '<p class="repo">' + T('about:repo', { a: T.html('<a href="' + T.esc(url) + '" rel="noopener">' +
+                                                                T.esc(url.replace(/^https?:\/\//, '')) + '</a>') }) + '</p>' : '') +
+          '<p class="all"><a href="/help#about">' + T('about:more') + '</a></p>';
+        document.body.appendChild(aboutDlg);
+        aboutDlg.addEventListener('click', function (ev) {
+          var r = aboutDlg.getBoundingClientRect();
+          if (ev.target.closest('.x') || (ev.target === aboutDlg && (ev.clientX < r.left || ev.clientX > r.right ||
+                                                                     ev.clientY < r.top || ev.clientY > r.bottom)))
+            aboutDlg.close();
+        });
+      }
+      if (!aboutDlg.open) aboutDlg.showModal();
+    };
+    helpLink.querySelector('.helpitems').addEventListener('click', function (ev) {
+      var a = ev.target.closest && ev.target.closest('a');
+      if (!a || ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) return;
+      shutHelp();
+      if (a.classList.contains('about') && window.HTMLDialogElement) {
+        ev.preventDefault();
+        openAbout();
+      } else if (a.classList.contains('whatsnew') && cloud && !cloud.hidden) {
+        ev.preventDefault();
+        document.dispatchEvent(new Event('ub:news'));
+      }
+    });
   }
   // The changelog's tabs (templates/changelog.html; Tigran, 2026-11-06: the
   // lists under Added, Changed, Removed and Fixed had grown long).  Each
