@@ -75,7 +75,6 @@ ASCII = "".join(map(chr, range(0x20, 0x7F)))
 # Characters the site draws on purpose in another face, and where.  The gate
 # excuses these and nothing else.
 ELSEWHERE = {
-    "◐": "the theme button, set in the system UI face (ub.css .theme)",
     "↑": "Settings' Translations: one moved up the order, set in the system UI face"
          " (ub.css dialog.settings .mv button)",
     "↓": "and moved down",

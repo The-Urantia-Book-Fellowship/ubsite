@@ -38,7 +38,11 @@ class Static(unittest.TestCase):
         # layouts.  Last in the controls' box since 2026-11-10, the box last in
         # the header, so that on a phone the controls wrap as one (ub.css .ctl).
         self.assertRegex(head, r'</details>\n  </div>\n</header>')
-        self.assertLess(head.index('<div class="ctl">'), head.index('<nav>'))
+        self.assertLess(head.index('<div class="ctl">'), head.index('<button class="gear"'))
+        # No nav and no theme button in the header since the same day.
+        top = head[head.index('<header class="top">'):head.index('</header>')]
+        self.assertNotIn('<nav', top)
+        self.assertNotIn('class="theme"', top)
         self.assertLess(head.index('<span class="langs"'), head.index('<details class="help"'))
         # One dialog in the shell: offline/pages.py cut() takes the first </dialog>.
         self.assertEqual(base.count("<dialog"), 1)

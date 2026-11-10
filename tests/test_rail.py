@@ -170,7 +170,8 @@ class Rail(unittest.TestCase):
 
     def test_folded_is_kept_but_not_in_the_dialog(self):
         # The rail's fold, and the index's: each button is its only control;
-        # the language, the flags' (2026-10-25); and a fold's tab of translations,
+        # the language was the flags' alone until 2026-11-10, when it came
+        # into the dialog's Reading tab (test_settings_dialog); and a fold's tab of translations,
         # the fold's (2026-10-26); and the contents in a translation, the rail's
         # list's (2026-10-27).
         d = settings.defaults()
@@ -178,7 +179,7 @@ class Rail(unittest.TestCase):
         # A language's browser voice is in it where a translation is in that language.
         ru = [{"key": "ud", "lang": "ru", "label": "Aivazian", "language": l10n.tr("Russian")}]
         shown = [it["key"] for g in settings.groups([], ru) for it in g["items"]]
-        self.assertEqual(sorted(set(d) - set(shown)), ["lang", "margin", "rail", "toc", "trtab"])
+        self.assertEqual(sorted(set(d) - set(shown)), ["margin", "rail", "toc", "trtab"])
         self.assertEqual(len(shown), len(set(shown)))
 
     def test_139_names_its_combined_section(self):

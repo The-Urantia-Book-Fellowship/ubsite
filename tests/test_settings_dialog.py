@@ -56,6 +56,25 @@ class Tabs(unittest.TestCase):
             got = list(dict.fromkeys(re.findall(r'name="(\w+)"', body)))
             self.assertEqual(got, want, g["key"])
 
+    def test_the_language_first_each_choice_in_its_own(self):
+        """Interface language, first in Reading (Tigran, 2026-11-10): each
+        choice written in its own language and marked so, never translated,
+        and the row hidden until ub.js finds the site draws both."""
+        reading = re.split(r'<div class="panel[ "]', self.dialog)[1]
+        self.assertEqual(list(dict.fromkeys(re.findall(r'name="(\w+)"', reading)))[:4], ["lang", "theme", "uisize", "size"])
+        self.assertIn('<div class="row langrow" hidden>', reading)
+        self.assertRegex(reading, r'<label lang="en"><input type="radio" name="lang" value="en"><span>English</span></label>\s*'
+                                  r'<label lang="ru"><input type="radio" name="lang" value="ru"><span>Русский</span></label>')
+        self.assertNotIn("Английский", reading)
+        self.assertNotIn("lang", [k[0] for k in settings.KEPT])
+        self.assertIn("lang", settings.SPARED)
+
+    def test_two_sizes_interface_first(self):
+        keys = [s[0] for s in settings.READING]
+        self.assertLess(keys.index("uisize"), keys.index("size"))
+        sizes = {s[0]: [c[0] for c in s[4]] for s in settings.READING if s[0] in ("uisize", "size")}
+        self.assertEqual(sizes["uisize"], sizes["size"])
+
     def test_no_fieldsets_left(self):
         self.assertNotIn("<fieldset", self.dialog)
         self.assertNotIn("<legend", self.dialog)

@@ -44,6 +44,9 @@ window.ubLang = function (r, v) {
 // entries and its translations on one line (Tigran, 2026-10-26): folded, not
 // turned off, which leaves `margin` as it was (settings.py `index`), and on the
 // screen, since a printed page is narrower than 62rem too (ub.css, print).
+// The line stands close under its paragraph, with the row's space after it,
+// as the entries' line does alone (Tigran, 2026-11-10: it stood nearer the
+// next paragraph, the boxes' margins, which place it, going with the boxes).
 // Until 2026-10-31 the rule, which outranks ub.css's, showed the entries' fold
 // on that line with the index off, and printed it.  Among the
 // search results, each one's list, in the reader's order (ub.css .trhits).  In
@@ -62,7 +65,8 @@ window.ubTr = function (v) {
       s = ks.map(function (k) { return '>[data-tr="' + k + '"]'; });
   st.textContent = ks.length ? f + '{display:block}' +
     '@media screen and (max-width:62rem){' + r +
-    '{flex-flow:row wrap;align-items:baseline}' + r + '>:is(.a,.tf){display:contents}' +
+    '{flex-flow:row wrap;align-items:baseline;margin-bottom:1rem}' + r + '>:is(.a,.tf){display:contents}' +
+    r + ' :is(.afold,.trfold){margin-top:-.4rem}' +
     r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold{margin-right:1em}}' +
     '.trhits:has(' + s.join() + '){display:flex}' +
     s.map(function (x, i) { return '.trhits' + x + '{display:block;order:' + i + '}'; }).join('') +
@@ -178,13 +182,13 @@ window.ubUnit = function (where) {
     {{ ta('placeholder', 'a word, or a citation like 1:4.2') }} autocomplete="off"></form>
   {#- The controls, in one box so that on a phone they wrap as one: at the
       end of the name's line where they fit, else together on the line under
-      it (ub.css .top .ctl).  No Contents or Index among them since 2026-11-10
-      (Tigran): on a page of the book the rail is the contents and the margin
-      the index, each with its own button, and elsewhere the home page names
-      both, under Other ways in. #}
+      it (ub.css .top .ctl).  Since 2026-11-10 (Tigran) no Contents or Index
+      among them, which stood in a nav before the rest: on a page of the
+      book the rail is the contents and the margin the index, each with its
+      own button, and elsewhere the home page names both, under Other ways in;
+      and no half-disc, the theme's shortcut, which Settings' Theme does, its
+      default the device's own. #}
   <div class="ctl">
-  <nav>
-    <button class="theme" type="button" {{ ta('aria-label', 'Theme') }}>◐</button>
     {#- Hidden until ub.js runs: with JavaScript off there is nothing to set. #}
     <button class="gear" type="button" {{ ta('aria-label', 'Settings') }} {{ ta('title', 'Settings (Ctrl+,)') }}
             aria-keyshortcuts="Control+Comma" aria-haspopup="dialog" hidden>
@@ -197,8 +201,7 @@ window.ubUnit = function (where) {
     <button class="offline" type="button" {{ ta('aria-label', 'Online') }} {{ ta('title', 'Online') }}
       hidden data-net="on" data-have="none" data-src="{{ asset('offline.js') }}">
       {{ chrome.cloud_svg() }}</button>
-  </nav>
-  {#- The interface's language, at the corner, after the nav: the Union Jack and the Russian
+  {#- The interface's language, at the corner, after the cloud: the Union Jack and the Russian
       tricolour, each named in its own language, the one chosen full and the
       other faded (Tigran, 2026-10-25).  Drawn, never emoji, which Windows
       has none of.  Hidden until ub.js runs, and while the site has only
@@ -288,6 +291,18 @@ window.ubUnit = function (where) {
             its hint. #}
           <label class="{{ c.cls }}"{% if c.hint %} {{ ta('title', c.hint) }}{% endif %}><input type="radio"
             name="{{ it.key }}" value="{{ c.value }}"{% if c.label == 'A' or not c.label %} {{ ta('aria-label', c.hint) }}{% endif %}><span>{{ c.label if c.label == 'A' or not c.label else t(c.label) }}</span></label>
+        {%- endfor %}
+        </div></div>
+      {%- elif it.kind == 'language' %}
+      {#- The interface's language (settings.py lang): each choice in its own
+          language and never translated, so that a reader who cannot read the
+          one the page is in finds the other.  Hidden until ub.js finds the
+          site draws both (l10n.py BILINGUAL), as the flags are; checked by
+          ub.js for the language in effect while the setting is "auto". #}
+      <div class="row langrow" hidden><span id="set-{{ it.key }}">{{ t(it.label) }}</span>
+        <div class="seg" role="radiogroup" aria-labelledby="set-{{ it.key }}">
+        {%- for c in it.choices %}
+          <label lang="{{ c.value }}"><input type="radio" name="{{ it.key }}" value="{{ c.value }}"><span>{{ c.label }}</span></label>
         {%- endfor %}
         </div></div>
       {%- elif it.kind == 'radio' %}

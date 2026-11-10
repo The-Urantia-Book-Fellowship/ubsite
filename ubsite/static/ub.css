@@ -59,8 +59,18 @@ math { font-family: "Garamond Math", math; }
   --wrong: oklch(0.52 0.13 40);
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
-     modern face and wanted browser zoom to be comfortable. */
-  --size: clamp(1.3rem, 1.1rem + 0.6vw, 1.55rem);
+     modern face and wanted browser zoom to be comfortable.  The reading
+     text's size, whatever the interface's: in rems of the root at its
+     Standard, --r0, times Settings' Text size, --tx (below, "Two sizes"). */
+  --r0: calc(1rem / var(--ui));
+  --size: calc(var(--tx) * clamp(calc(1.3 * var(--r0)), calc(1.1 * var(--r0) + 0.6vw), calc(1.55 * var(--r0))));
+  /* A rem of the reading text: what the book's heads are set in (.papertop,
+     .partpage), and a card's least size, so that they keep their proportion
+     to the text. */
+  --tk: calc(var(--tx) / var(--ui));
+  /* --size as the interface would have it, which follows Interface text size
+     alone: the tour's card, which explains the controls, not the text. */
+  --usize: clamp(1.3rem, 1.1rem + 0.6vw, 1.55rem);
   /* The site is set 1.4 to the line, and the book's text (p.t) at --lead,
      which Settings' Line spacing sets: 1.25 unless a reader chooses otherwise.
      Both were 1.55, which Tigran found too open, worst on a phone (2026-10-12).
@@ -70,9 +80,12 @@ math { font-family: "Garamond Math", math; }
   --dl: calc(var(--lead) - 1.55);
   /* In ch, so the measure follows the type size instead of staying fixed at a
      pixel width and losing characters per line as the text grows.  `ch` is the
-     width of "0", which is narrow in Goudy, so 60ch sets about 68 characters --
-     the range this face reads best at. */
-  --measure: 60ch;
+     width of "0", which is narrow in Goudy, so 58ch sets about 70 characters
+     to a full line, counted over 240 of them in four papers, the soft hyphens
+     not counted (Tigran, 2026-11-10: "let's make it about 70").  It was 60ch,
+     which the frame's 90rem held to 826px at Standard, about 67 characters,
+     and fewer beside the Contents and the index on a narrower window. */
+  --measure: 58ch;
   /* UB Goudy keeps 0.438em under the baseline for its long descenders (hhea
      960/438), so the middle of its line box stands 0.261em above the baseline,
      and its capitals' middle 0.356em: a word centred in a box sits 0.095em high.
@@ -149,10 +162,9 @@ a:hover { text-decoration-thickness: 2px; }
 .brand .host { font-size: .66rem; letter-spacing: .07em; color: var(--faint); margin-top: .15em;
                white-space: nowrap; }
 .brand .host::before { content: var(--host, ""); }
-/* The controls (base.html .ctl): the nav's ◐, gear and cloud, the flags and
-   the ?, at the header's end, the ? the corner. */
+/* The controls (base.html .ctl): the gear, the cloud, the flags and the ?,
+   at the header's end, the ? the corner. */
 .top .ctl { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
-.top nav { display: flex; gap: 1rem; align-items: baseline; }
 /* The search box is the first thing a visitor should find, so it is a field
    of its own tone with a magnifier, not a hairline on the paper (2026-10-09:
    it blended into the background).  --field is a token per theme: blue mixed
@@ -168,10 +180,6 @@ a:hover { text-decoration-thickness: 2px; }
 .find .glass { position: absolute; left: .75rem; top: 50%; width: .95rem; height: .95rem;
   transform: translateY(-50%); pointer-events: none; color: var(--link); }
 .find .glass * { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
-/* ◐ is not in UB Goudy, so it is set in the system face on purpose rather
-   than left to the browser's fallback (build/fonts.py ELSEWHERE). */
-.theme { background: none; border: 0; color: var(--faint); cursor: pointer; font-size: 1rem;
-  font-family: system-ui, sans-serif; }
 /* Settings: a gear, drawn, not a glyph -- U+2699 turns into an emoji on some
    systems.  It was a row of three sliders until Tigran asked for the usual
    gear (2026-10-14).  The running head's gear (.runhead .set, below) is the
@@ -181,7 +189,7 @@ a:hover { text-decoration-thickness: 2px; }
 :is(.gear, .runhead .set) svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
 :is(.gear, .runhead .set) :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
 .eg .gear { cursor: default; }
-.gear:hover, .theme:hover, .top .offline:hover { color: var(--ink); }
+.gear:hover, .top .offline:hover { color: var(--ink); }
 /* The flags beside it (base.html .langs): the interface in English or in
    Russian, the one chosen full, the other faded, each in its own proportions,
    edged so that the white of the tricolour shows on the paper. */
@@ -218,14 +226,20 @@ a:hover { text-decoration-thickness: 2px; }
 .offnews.about { width: min(26rem, calc(100vw - 2rem)); }
 .offnews.about p { margin: .5rem 0 0; }
 .offnews.about .repo a { overflow-wrap: anywhere; }
-/* On a phone the search box has a line of its own, the last, since its
-   placeholder wants nearly the whole width (316px in Russian), and the
-   controls come before it: at the end of the name's line where they fit, as
-   from about 500px, else all together on the line under it, the ? at its
-   end.  Until 2026-11-10 the flags and the ? stood beside the name and the
-   nav, with Contents and Index, under the box, which made three lines, and
-   four where the ? did not fit beside the flags (360px in English). */
+/* On a phone the header is two lines: the name with the controls at its
+   end, the gear, the cloud and the ?, closer together, and the search box on
+   a line of its own, since its placeholder wants nearly the whole width
+   (316px in Russian).  The flags are not drawn there (Tigran, 2026-11-10):
+   Settings' Interface language, first in Reading, does what they do.  Where
+   even so the controls do not fit beside the name (320px in English, or a
+   larger interface), they go all together to the line under it, the ? at
+   its end.  Until that day the flags and the ? stood beside the name and a
+   nav, with Contents, Index and the theme's shortcut, under the box: three
+   lines, and four where the ? did not fit beside the flags (360px in
+   English). */
 @media (max-width: 40rem) {
+  .top, .top .ctl { column-gap: .6rem; }
+  .top .langs { display: none; }
   .top .ctl { order: 1; }
   .top .find { order: 2; flex-basis: 100%; }
 }
@@ -258,8 +272,15 @@ footer p { margin: .2rem 0; }
    references stood in on a wide screen, 4.4rem, empty with them turned off;
    they stand at the paragraph's start now, as on a phone (.stk), and the gap
    is a gap (Tigran, 2026-10-20). */
+/* Measured, the frame is made from the measure: the text's, the gap and the
+   margin's 26ch beside it, and the rail's 16rem, the gaps and the padding, so
+   that the text column is the measure wherever the window has room, at every
+   size of the interface (Tigran, 2026-11-10).  It was 90rem, which held the
+   column below the measure, and moved it with the interface's size once the
+   text had a size of its own.  Each part folded away gives up its room
+   (below), so the page stays centred. */
 .reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 2.4rem;
-          padding: 2rem 1.2rem 0; max-width: 90rem; margin: 0 auto; }
+          padding: 2rem 1.2rem 0; max-width: calc(var(--measure) + 26ch + 22.8rem); margin: 0 auto; }
 /* The left rail is the whole book (templates/_rail.html), everything closed but
    the paper being read.  Each level stands in by the chevron's width, so a
    title lines up under its parent's and a wrapped one hangs. */
@@ -368,8 +389,8 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage { width: 100%; max-width: 40rem; margin: 0 auto; padding-top: 3rem; }
 .partpage header { text-align: center; }
 .partpage :is(h1, .sponsor) { color: var(--text); }
-.partpage h1 { font-size: 2.6rem; margin: .5rem 0 1.6rem; }
-.partpage .papernum { font-size: 1.25rem; }       /* as PAPER N is to its title */
+.partpage h1 { font-size: calc(2.6rem * var(--tk)); margin: .5rem 0 1.6rem; }
+.partpage .papernum { font-size: calc(1.25rem * var(--tk)); }       /* as PAPER N is to its title */
 .partpage .sponsor { font-style: italic; margin: 0 auto; max-width: 32em; text-wrap: balance; }
 .partpage .sponsor p { margin: 0; }
 .partpage .sponsor p + p { margin-top: .7rem; }
@@ -388,7 +409,7 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage .dividers { display: flex; flex-direction: column; }
 .partpage .divider[data-k], .partpage .en > .who { display: none; }
 .partpage .divider[data-k] { margin-top: 2.6rem; padding-top: 1.8rem; border-top: 1px solid var(--rule); }
-.partpage .divider[data-k] h1 { font-size: 2rem; }
+.partpage .divider[data-k] h1 { font-size: calc(2rem * var(--tk)); }
 .partpage .who { font-size: .82rem; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase;
                  color: var(--faint); margin: 0 0 .8rem; }
 .partpage .who b { font-weight: inherit; color: var(--ink); }
@@ -409,8 +430,8 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
   /* The note fills its column: centred by auto margins it would take its own
      width, its longest word's, and run over the next column. */
   :root.compare[data-translations] .partpage .divider .sponsor { margin: 0; max-width: none; }
-  :root.compare[data-translations] .partpage .divider h1 { font-size: 1.6rem; margin: .4rem 0 1rem; }
-  :root.compare[data-translations] .partpage .divider .papernum { font-size: 1rem; }
+  :root.compare[data-translations] .partpage .divider h1 { font-size: calc(1.6rem * var(--tk)); margin: .4rem 0 1rem; }
+  :root.compare[data-translations] .partpage .divider .papernum { font-size: calc(1rem * var(--tk)); }
   :root.compare[data-translations] .partpage .who { border-bottom: 1px solid var(--rule); padding-bottom: .35rem;
       margin-bottom: 1.2rem; }
 }
@@ -425,6 +446,10 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 h1 { font-size: 2.1rem; font-weight: 400; line-height: 1.15; margin: .2rem 0 .3rem; }
 h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
      font-variant-caps: small-caps; letter-spacing: .03em; }
+/* The book's heads follow Text size with the text, in rems of it (--tk). */
+.papertop h1 { font-size: calc(2.1rem * var(--tk)); }
+.papertop h2 { font-size: calc(1.3rem * var(--tk)); }
+.papertop .papernum { font-size: calc(1rem * var(--tk)); }
 .author { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
 /* The whole paper on one page (paper.html, Settings' Whole paper): each
    section under its own title, in a head of its own set as the paper's is,
@@ -726,12 +751,19 @@ p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
 :root:not([data-lang="ru"]) x-ru, :root[data-lang="ru"] x-en { display: none; }
 x-ru { font-synthesis: small-caps; }
 :root:is([data-margin="off"], [data-index="off"]) .grid { grid-template-columns: minmax(0, var(--measure)); }
-/* Text size scales the root, so everything set in rem follows, as with the
-   browser's zoom.  Standard is 112.5% (settings.py); "largest" was the step
-   above "larger" until 2026-10-14, and is its size still. */
-:root { font-size: 112.5%; }
-:root[data-size="smaller"] { font-size: 100%; }
-:root:is([data-size="larger"], [data-size="largest"]) { font-size: 125%; }
+/* Two sizes (Tigran, 2026-11-10).  Interface text size (settings.py uisize)
+   scales the root, so everything set in rem follows, as with the browser's
+   zoom; --ui is its step against Standard, 112.5%.  Text size (size) is the
+   reading text's step, --tx, by which --size is set, in rems of the root at
+   Standard (:root, above): so the reading text follows Text size alone, and
+   the interface Interface text size alone.  Until then Text size was the
+   root's, as Interface text size is now.  "largest" was the step above
+   "larger" until 2026-10-14, and is its size still. */
+:root { font-size: 112.5%; --ui: 1; --tx: 1; }
+:root[data-uisize="smaller"] { font-size: 100%; --ui: calc(100 / 112.5); }
+:root[data-uisize="larger"] { font-size: 125%; --ui: calc(125 / 112.5); }
+:root[data-size="smaller"] { --tx: calc(100 / 112.5); }
+:root:is([data-size="larger"], [data-size="largest"]) { --tx: calc(125 / 112.5); }
 /* Line spacing: the book's text (p.t) and a 1955 reading's card and endnote,
    which are read as the text is, wherever they open; never the site around
    them, the lists, search or the margin (Tigran, 2026-10-12: "only to the text,
@@ -752,9 +784,13 @@ x-ru { font-synthesis: small-caps; }
                                 font-synthesis: small-caps; }
 :root[data-face="sans"] body  { font-family: var(--sans); font-size-adjust: .43;
                                 font-synthesis: small-caps; }
-/* Their figures are wider for their letters than Goudy's, so 60ch held 64
-   characters to a line where Goudy holds 58: a narrower measure keeps the line. */
-:root:is([data-face="serif"], [data-face="sans"]) { --measure: 54ch; --lift: 0em; }
+/* Their figures are wider for their letters than Goudy's, so the same ch
+   holds fewer characters: each has the measure that sets about 70 to a line
+   too, counted as Goudy's was (2026-11-10; 54ch for both until then, about 67
+   and 62). */
+:root:is([data-face="serif"], [data-face="sans"]) { --lift: 0em; }
+:root[data-face="serif"] { --measure: 56ch; }
+:root[data-face="sans"] { --measure: 60ch; }
 /* Width: Full.  No frame and no measure: the rail is wide enough that a paper's
    title stands on one line (the longest, 9's, is 50 characters), the text takes
    what the margin leaves, and lists take as many columns as fit.  The rail's
@@ -784,8 +820,9 @@ x-ru { font-synthesis: small-caps; }
    After Full's columns, so as to win over them. */
 @media (min-width: 62.01rem) {
   :root[data-rail="folded"] .reader { grid-template-columns: 0 minmax(0, 1fr);
-                                      max-width: calc(90rem - 16rem); }
-  :root[data-rail="folded"][data-width="full"] .reader { max-width: none; }
+                                      max-width: calc(var(--measure) + 26ch + 6.8rem); }
+  :root[data-rail="folded"][data-width="full"] .reader { max-width: none;
+         column-gap: calc(2.25 * var(--r0) - 1.2rem); }
   :root[data-rail="folded"] .rail { overflow: visible; }
   :root[data-rail="folded"] .rail > ol, :root[data-rail="folded"] .railfold span { display: none; }
   :root[data-rail="folded"] .railfold { width: .8rem; margin-left: -.2rem; padding: 0 0 .9rem; }
@@ -810,12 +847,22 @@ x-ru { font-synthesis: small-caps; }
   :root:is([data-margin="off"], [data-index="off"]) .reader > article:has(> .marginhead) {
          padding-right: 2rem; }
   :root:is([data-margin="off"], [data-index="off"]):not([data-width="full"]) .reader:has(> article > .marginhead) {
-         max-width: calc(90rem - 26ch); }
+         max-width: calc(var(--measure) + 22.8rem); }
   :root:is([data-margin="off"], [data-index="off"])[data-rail="folded"]:not([data-width="full"])
-       .reader:has(> article > .marginhead) { max-width: calc(90rem - 16rem - 26ch); }
+       .reader:has(> article > .marginhead) { max-width: calc(var(--measure) + 6.8rem); }
   :root[data-margin="off"] .path { max-width: calc(var(--measure) + 2rem + 2.4rem);
                                    padding-right: 3.2rem; }
-  :root[data-margin="off"][data-width="full"] .path { max-width: none; }
+  :root[data-margin="off"][data-width="full"] .path { max-width: none; padding-right: calc(2 * var(--r0)); }
+  /* Full, the margins left beside the text where the rail and the index fold
+     away are a fixed width, whatever the interface's size or the text's,
+     2.25 and 2 rems of the root at Standard, 40.5px and 36px (Tigran,
+     2026-11-10: "too wide, even at the Smaller Interface text size", which
+     made them 58px and 51px, and 72px and 64px at Larger; 30% under the
+     first).  Each chevron stays where it was, level with the header's mark
+     and its last icon, in what is left of the gap. */
+  :root[data-width="full"]:is([data-margin="off"], [data-index="off"]) .reader > article:has(> .marginhead) {
+         padding-right: calc(2 * var(--r0) - 1.2rem); }
+  :root[data-margin="off"][data-width="full"] .indexfold { right: calc(1rem - 2 * var(--r0)); }
   :root[data-margin="off"] :is(.path .row, details.gap > summary, button.foldup) {
          grid-template-columns: minmax(0, var(--measure)); }
   :root[data-margin="off"][data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
@@ -968,9 +1015,17 @@ article.cmp .cmpnames { position: sticky; top: 0; z-index: 2; background: var(--
   padding: 1rem 0 .3rem; margin-top: -1rem; border-bottom: 1px solid var(--rule);
   font-size: .8rem; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
 article.cmp .cmpnames .cn { margin: 0; }
+/* A translation's ×, at its name's top right corner, stops showing it, as
+   the × in Settings' Translations does (Tigran, 2026-11-10; ub.js cmpDraw).
+   Not the English's, which is always shown. */
+article.cmp .cmpnames .cn:has(> .cnx) { position: relative; padding-right: 1.6rem; }
+article.cmp .cmpnames .cnx { position: absolute; top: 0; right: 0; padding: 0 .2rem; border: 0;
+  background: none; color: var(--faint); font: inherit; font-size: 1.15rem; line-height: 1; cursor: pointer; }
+article.cmp .cmpnames .cnx:hover { color: var(--ink); }
+article.cmp .cmpnames .cnx:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
 article.cmp .cmpnames b { font-weight: inherit; color: var(--ink); }
 article.cmp .grid > .cmphd > .papertop { max-width: none; margin: 1.2rem 0 1.6rem; }
-article.cmp .cmphd h1 { font-size: 1.6rem; }
+article.cmp .cmphd h1 { font-size: calc(1.6rem * var(--tk)); }
 article.cmp .cmphd .who, article.cmp .rc .who { display: none; }
 /* Small capitals in Cyrillic, which EB Garamond has none of, as x-ru's are. */
 article.cmp [lang="ru"] { font-synthesis: small-caps; }
@@ -1064,10 +1119,11 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
    have on a tablet, .77, and never go below 1.05rem, which is what they were
    everywhere: the text grows with the window (--size), and at 1.05rem a card
    was .81 of it on a phone but .68 on a desktop, too small there (Tigran,
-   2026-10-19, on phone and tablet "perfect").  Its width is in its own ems,
-   so a line holds as many words at every size. */
+   2026-10-19, on phone and tablet "perfect"), the least in rems of the
+   reading text (--tk), which Settings' Text size sets.  Its width is in its
+   own ems, so a line holds as many words at every size. */
 .pop { position: absolute; z-index: 5; width: min(23.8em, calc(100% - 1rem)); padding-top: 1.65rem;
-       font-size: max(1.05rem, calc(var(--size) * .77)); line-height: var(--lead); color: var(--text);
+       font-size: max(calc(1.05rem * var(--tk)), calc(var(--size) * .77)); line-height: var(--lead); color: var(--text);
        font-variant-numeric: lining-nums;
        background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
        border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
@@ -1244,7 +1300,7 @@ main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .tour-ring { position: fixed; z-index: 8; pointer-events: none; border-radius: 6px;
   box-shadow: 0 0 0 2px var(--link), 0 0 0 6px color-mix(in oklch, var(--link) 25%, transparent); }
 .tour-card { position: fixed; z-index: 9; width: min(23.8em, calc(100vw - 1.5rem)); padding: .9rem 1.1rem 1rem;
-  font-size: max(1.05rem, calc(var(--size) * .77)); line-height: 1.4; color: var(--ink);
+  font-size: max(1.05rem, calc(var(--usize) * .77)); line-height: 1.4; color: var(--ink);
   background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
   border-radius: 8px; box-shadow: 0 .6rem 2rem var(--shade), 0 .1rem .3rem var(--shade); }
 .tour-card.sheet { left: .75rem !important; right: .75rem; width: auto; top: auto !important;
@@ -1299,7 +1355,7 @@ main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   color: var(--link); }
 .player .where .at:active { background: none; text-decoration: underline; }
 /* × is not in the UB Goudy subset -- it is not in the book -- so the speed is
-   set in the system face, like ◐. */
+   set in the system face. */
 .player .rate { min-width: 2.9rem; border-radius: 3px; font: .8rem system-ui, sans-serif;
   color: var(--faint); }
 /* The voice being heard, after the reference: a tap opens the list of voices,

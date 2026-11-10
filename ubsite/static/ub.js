@@ -160,14 +160,6 @@
     }
   });
 
-  // ◐ flips light and dark, a shortcut to the setting.
-  var b = document.querySelector('.theme');
-  if (b) b.addEventListener('click', function () {
-    var t = load().theme;
-    var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-    window.ubSettings.set('theme', dark ? 'light' : 'dark');
-  });
-
   var gear = document.querySelector('.gear'), dlg = document.querySelector('dialog.settings');
   if (gear && dlg && dlg.showModal) {
     gear.hidden = false;
@@ -207,6 +199,10 @@
     // Each control shows its setting's value; a radio group whose value has no
     // button (the voice before one is chosen) shows its first, and a menu
     // whose value is gone (a voice this device no longer has) its first.
+    // The interface's language, a row only where the site draws both
+    // (l10n.py BILINGUAL), as the flags are shown (below).
+    var langRow = form.querySelector('.langrow');
+    if (langRow && T.bilingual) langRow.hidden = false;
     var fill = function () {
       listVoices();
       var o = load();
@@ -214,8 +210,10 @@
         if (!(el.name in DEF)) return;
         if (el.type === 'checkbox') el.checked = o[el.name] !== false;
         else if (el.type === 'radio') {
+          // The language before one is chosen, "auto", is the one in effect.
+          var v = el.name === 'lang' && o.lang === 'auto' ? T.lang() : o[el.name];
           var group = form.querySelectorAll('[name="' + el.name + '"]');
-          var hit = form.querySelector('[name="' + el.name + '"][value="' + String(o[el.name]) + '"]');
+          var hit = form.querySelector('[name="' + el.name + '"][value="' + String(v) + '"]');
           el.checked = hit ? el === hit : el === group[0];
         } else {
           el.value = String(o[el.name]);
@@ -1207,7 +1205,10 @@
             heads = '<div class="row cmphd">';
         ks.forEach(function (k, i) {
           var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 2) + '"', paper = j === 0;
-          names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> <span class="nobreak">(' + x.label + ')</span></p>';
+          // And its ×, which stops showing it (Tigran, 2026-11-10; below).
+          names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> <span class="nobreak">(' + x.label + ')</span>' +
+                   '<button type="button" class="cnx" data-k="' + k + '" ' + T.a('aria-label', 'Hide this translation') + ' ' +
+                   T.a('title', 'Hide this translation') + '>×</button></p>';
           heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
                    (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
                    (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +
@@ -1306,6 +1307,17 @@
     var drawn = cmpSwapped, t = Date.now();
     cmpSwapped = null;
     if (drawn && cmpOn()) drawn.then(function () { if (arriveTouched <= t) arrive(); });
+  });
+  // A column's ×, at its name's corner, takes that translation out of those
+  // shown, as Settings' Translations does, and the columns are drawn again
+  // without it, the place kept (below); a copy kept offline keeps it.  On the
+  // document, since listen.js swaps <main>.
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('article.cmp .cmpnames .cnx');
+    if (!b) return;
+    window.ubSettings.set('translations', String(load().translations || '').split(' ').filter(function (k) {
+      return k && k !== b.dataset.k;
+    }).join(' '));
   });
   // Once for both settings, where ↺ announces every setting in turn: a second
   // cmpGo measured the page the first had just undrawn, and undid the place

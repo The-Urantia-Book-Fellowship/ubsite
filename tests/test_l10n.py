@@ -174,8 +174,10 @@ console.log(JSON.stringify({
 
 class Settings(unittest.TestCase):
     def test_the_language_is_kept_and_spared(self):
+        # In the dialog since 2026-11-10, first in Reading, which the flags
+        # set too; kept in KEPT, with no place in the dialog, until then.
         self.assertEqual(settings.defaults()["lang"], "auto")
-        self.assertIn("lang", [k[0] for k in settings.KEPT])
+        self.assertEqual(settings.READING[0][:2], ("lang", "language"))
         self.assertEqual(settings.SPARED, ["lang"])
 
 

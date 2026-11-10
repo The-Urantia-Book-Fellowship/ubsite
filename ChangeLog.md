@@ -10,6 +10,9 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- In Translations in parallel columns, a × at the corner of each translation's column stops showing it, as the × in Settings' Translations tab does.
+- Interface text size, in Settings' Reading tab above Text size, sets the size of everything around the text: the header, the Contents, the index in the margin, Settings and the player.
+- Interface language, the first row of Settings' Reading tab, switches the site between English and Russian, as the flags at the header's corner do.
 - Settings' Offline tab has a switch under Base, Automatic updates: turned off, the copy in this browser stays as it is, and the site goes on reading from it, until you tap Update now, which stands there with What's new, listing what the update would bring.
 - About, in the ? menu at the header's corner: a small window that says what the site is and gives the address of its source on GitHub.
 - Paper 13, The Sacred Spheres of Paradise, has study notes, 29 of them, one the edition's, rewritten (the luminescence of light without heat, now citing Vavilov's book in the Bibliography, with Dr Sadler's firefly and the book's own suns that shine without heat), and the rest found in review, since Matthew Block has no chart: the seven worlds as the seven ways three persons can be taken together, in the Master Spirits' order; their names in -ington, after the English towns; the Bible behind the paper's quoted phrases (the bosom of the Father of John 1:18, born of woman of Galatians 4:4, the mystery of 1 Timothy 3:16, the ministering spirits of Hebrews 1:14, the perfect of Matthew 5:48, the secret things of Deuteronomy 29:29, the creeds' right hand of the Father, and James 4:8 behind the ebb and flow of the Deities' presence); and the book's own fuller words elsewhere on the Secrets of Supremacy, the Perfectors of Wisdom and Divinington, the Adjusters' home, the Gravity Messengers, the Master Spirits' three Paradise addresses, reflectivity, trinitization, the Solitary Messengers' and the Power Directors' parentage, seraphic transport, the reversion directors, the soul, the sixth- and seventh-stage spirits, the Most Holy Sphere, the Paradise cycle and the seven levels of universe reality, which the book names three times and never lists. The Bibliography gains Vavilov's The Eye and the Sun, with On Warm and Cold Light (1961), and Mills's Dictionary of English Place-Names.
@@ -65,7 +68,10 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
-- On a phone the header's controls, the theme, Settings, the cloud, the flags and the ?, stand together, beside the name where there is room and otherwise on the line under it, with the search box below them, so that the header takes three lines at most, where it took four on a narrow phone in English.
+- Width Measured sets about 70 characters to a line, in each typeface, wherever the window has room, and the same at every interface size.
+- In Full width, the margins beside the text where the Contents and the index fold away are narrower, and the same whatever the interface's or the text's size, so the lines break at the same words at every interface size.
+- Text size, in Settings' Reading tab, now sets the size of the text you read, the book, its translations, its notes and each page's own words, and leaves the rest of the site as it is, which Interface text size now sets.
+- On a phone the header takes two lines, the name with Settings, the cloud and the ? beside it, and the search box under them; the flags are not shown there, Settings' Interface language doing what they do.
 - Update now, in Settings' Offline tab, is drawn as a button, with What's new beside it.
 - Unticking a translation in Settings' Offline tab asks before it deletes it from the browser, saying how much that is, and, offline, that it can be downloaded again only once you are online.
 - The ? at the header's corner opens a menu: Help, the page it used to open, What's new? and About.
@@ -121,12 +127,14 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Removed
 
+- The half-dark circle in the header, which turned the theme light or dark: Settings' Theme does the same, and follows the device unless you choose otherwise.
 - The header's Contents and Index links: the contents are at the left of every page of the book and the index in its margin, each with its own button, and the home page names both under Other ways in.
 - The tick "Base" in Settings' Offline tab, which downloaded the offline copy and, unticked, deleted it: the copy is every browser's now, and is let go only by clearing the site's data in the browser.
 - Settings' Keep the offline copy up to date: a kept copy always does, and Update now is offered only when it cannot, with the browser's data saver on or after an update that stopped.
 
 ### Fixed
 
+- On a phone with the index folded, the line under a paragraph that opens its index entries and its translations stands close under that paragraph, where it stood nearer the next one.
 - Settings' Offline tab gives the size of Base alone under it, 48 MB, where it added the translations kept to it, each of which has its size on its own row.
 - The ↓ in the player's bar, tapped to keep a paper's recording, no longer stops on a script error while the paper waits its turn to download.
 - With the translations in parallel columns, a search result opened while listening is brought into view once its columns are drawn, putting Settings back to their defaults keeps the place being read, and folding the index keeps the line being read under the columns' names, where each left you elsewhere.
