@@ -149,9 +149,10 @@ a:hover { text-decoration-thickness: 2px; }
 .brand .host { font-size: .66rem; letter-spacing: .07em; color: var(--faint); margin-top: .15em;
                white-space: nowrap; }
 .brand .host::before { content: var(--host, ""); }
-.top nav { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
-.top nav a { font-size: .92rem; text-decoration: none; color: var(--faint); }
-.top nav a:hover, .top .mode { color: var(--ink); }
+/* The controls (base.html .ctl): the nav's ◐, gear and cloud, the flags and
+   the ?, at the header's end, the ? the corner. */
+.top .ctl { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
+.top nav { display: flex; gap: 1rem; align-items: baseline; }
 /* The search box is the first thing a visitor should find, so it is a field
    of its own tone with a magnifier, not a hairline on the paper (2026-10-09:
    it blended into the background).  --field is a token per theme: blue mixed
@@ -217,14 +218,16 @@ a:hover { text-decoration-thickness: 2px; }
 .offnews.about { width: min(26rem, calc(100vw - 2rem)); }
 .offnews.about p { margin: .5rem 0 0; }
 .offnews.about .repo a { overflow-wrap: anywhere; }
-/* On a phone the corner is the end of the name's line, which has room: the
-   nav under the search box has none, the more in Russian.  So the flags come
-   second, the ? with them, the search box after them on a line of its own. */
+/* On a phone the search box has a line of its own, the last, since its
+   placeholder wants nearly the whole width (316px in Russian), and the
+   controls come before it: at the end of the name's line where they fit, as
+   from about 500px, else all together on the line under it, the ? at its
+   end.  Until 2026-11-10 the flags and the ? stood beside the name and the
+   nav, with Contents and Index, under the box, which made three lines, and
+   four where the ? did not fit beside the flags (360px in English). */
 @media (max-width: 40rem) {
-  .top .langs { order: 1; margin-left: auto; }
-  .top .help { order: 1; }
+  .top .ctl { order: 1; }
   .top .find { order: 2; flex-basis: 100%; }
-  .top nav { order: 3; }
 }
 /* Work offline's icon, at the header's corner: a cloud, struck through while
    offline; a check in it while a copy is kept, an arrow while one downloads,

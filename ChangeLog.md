@@ -65,6 +65,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- On a phone the header's controls, the theme, Settings, the cloud, the flags and the ?, stand together, beside the name where there is room and otherwise on the line under it, with the search box below them, so that the header takes three lines at most, where it took four on a narrow phone in English.
 - Update now, in Settings' Offline tab, is drawn as a button, with What's new beside it.
 - Unticking a translation in Settings' Offline tab asks before it deletes it from the browser, saying how much that is, and, offline, that it can be downloaded again only once you are online.
 - The ? at the header's corner opens a menu: Help, the page it used to open, What's new? and About.
@@ -120,6 +121,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Removed
 
+- The header's Contents and Index links: the contents are at the left of every page of the book and the index in its margin, each with its own button, and the home page names both under Other ways in.
 - The tick "Base" in Settings' Offline tab, which downloaded the offline copy and, unticked, deleted it: the copy is every browser's now, and is let go only by clearing the site's data in the browser.
 - Settings' Keep the offline copy up to date: a kept copy always does, and Update now is offered only when it cannot, with the browser's data saver on or after an update that stopped.
 

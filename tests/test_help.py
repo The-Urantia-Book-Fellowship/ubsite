@@ -34,8 +34,11 @@ class Static(unittest.TestCase):
                                r'    <summary \{\{ ta\(\'aria-label\', \'Help\'\) \}\}')
         menu = head[head.index('<details class="help"'):head.index('</header>')]
         self.assertEqual(re.findall(r'<a (?:class="\w+" )?href="([^"]+)">', menu), ["/help", "/changelog", "/help#about"])
-        # After the flags, the last thing in the header: the corner on both layouts.
-        self.assertRegex(head, r'</details>\n</header>')
+        # After the flags, the last thing in the header: the corner on both
+        # layouts.  Last in the controls' box since 2026-11-10, the box last in
+        # the header, so that on a phone the controls wrap as one (ub.css .ctl).
+        self.assertRegex(head, r'</details>\n  </div>\n</header>')
+        self.assertLess(head.index('<div class="ctl">'), head.index('<nav>'))
         self.assertLess(head.index('<span class="langs"'), head.index('<details class="help"'))
         # One dialog in the shell: offline/pages.py cut() takes the first </dialog>.
         self.assertEqual(base.count("<dialog"), 1)

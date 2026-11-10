@@ -176,9 +176,14 @@ window.ubUnit = function (where) {
     <input name="q" value="{{ q|default('') }}" {{ ta('aria-label', 'Search') }}
     {{ ta('title', 'Search (Ctrl+X, with any words selected)') }} aria-keyshortcuts="Control+X"
     {{ ta('placeholder', 'a word, or a citation like 1:4.2') }} autocomplete="off"></form>
+  {#- The controls, in one box so that on a phone they wrap as one: at the
+      end of the name's line where they fit, else together on the line under
+      it (ub.css .top .ctl).  No Contents or Index among them since 2026-11-10
+      (Tigran): on a page of the book the rail is the contents and the margin
+      the index, each with its own button, and elsewhere the home page names
+      both, under Other ways in. #}
+  <div class="ctl">
   <nav>
-    <a href="/read">{{ t('Contents') }}</a>
-    <a class="ix" href="/index">{{ t('Index') }}</a>
     <button class="theme" type="button" {{ ta('aria-label', 'Theme') }}>◐</button>
     {#- Hidden until ub.js runs: with JavaScript off there is nothing to set. #}
     <button class="gear" type="button" {{ ta('aria-label', 'Settings') }} {{ ta('title', 'Settings (Ctrl+,)') }}
@@ -233,6 +238,7 @@ window.ubUnit = function (where) {
       <a class="about" href="/help#about">{{ t('About') }}</a>
     </div>
   </details>
+  </div>
 </header>
 <dialog class="settings" aria-labelledby="settings-title">
   {#- Rendered from ubsite/settings.py; ub.js fills in the values and keeps them.
