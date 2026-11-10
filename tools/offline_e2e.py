@@ -409,8 +409,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         made = datetime.datetime.fromisoformat(m["made"].replace("Z", "+00:00"))
         ok(f"kept as the site was on {made:%B} {made.day}, with the text of" in said,
            "the tab says when the site was as the copy keeps it")
-        ok(f"{(m['bytes'] + ud['bytes']) / 1e6:.1f} MB in this browser" in said,
-           "and counts the translation in what the browser keeps")
+        # Base's size is Base's alone: the translation's is on its own row
+        # (Tigran, 2026-11-10; until then the line counted it too, and a
+        # reader would add the rows to it).
+        ok(f"{m['bytes'] / 1e6:.1f} MB in this browser" in said
+           and tr_row(pg, "ud") == f"kept, {ud['bytes'] / 1e6:.1f} MB",
+           f"and says the copy's own size, the translation's on its own row ({tr_row(pg, 'ud')})")
         used = pg.evaluate("navigator.storage.estimate().then(e => e.usage)")
         print(f"  the browser keeps {used / 1e6:.1f} MB: {m['bytes'] / 1e6:.1f} MB gzipped, {m['raw'] / 1e6:.1f} MB unpacked")
         ok(used < (m["bytes"] + ud["bytes"]) * 1.25, "it keeps the copy gzipped, as it came")
@@ -477,8 +481,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            f"ticked again, it is downloaded at once, into the copy's own cache, beside the rest ({kept})")
         ok(not pg.is_checked(".offtrs input[value=urantia-ru]"), "the other is not kept")
         wait_state(pg, "t.startsWith('Up to date')")
-        ok(f"{(m['bytes'] + ud['bytes']) / 1e6:.1f} MB in this browser" in pg.inner_text(STATE),
-           "the tab counts it in what the browser keeps")
+        ok(f"{m['bytes'] / 1e6:.1f} MB in this browser" in pg.inner_text(STATE)
+           and tr_row(pg, "ud") == f"kept, {ud['bytes'] / 1e6:.1f} MB",
+           "the copy's line still says its own size, and the translation's row its own")
         pg.keyboard.press("Escape")
 
         print("Translations beside the text")
@@ -1078,8 +1083,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         kept = pg.evaluate(KEPT)
         ok(kept["gz"] == len(m2["chunks"]) + len(ud["chunks"]), f"and lets the one before it go ({kept})")
         ud2 = next(t for t in m2["translations"] if t["key"] == "ud")
-        ok(f"{(m2['bytes'] + ud2['bytes']) / 1e6:.1f} MB in this browser" in pg.inner_text(STATE),
-           "the tab counting it still")
+        ok(f"{m2['bytes'] / 1e6:.1f} MB in this browser" in pg.inner_text(STATE)
+           and tr_row(pg, "ud") == f"kept, {ud2['bytes'] / 1e6:.1f} MB",
+           "the copy's line saying its own size still, and the translation's row the revision's")
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.evaluate("ubSettings.set('translations', 'ud')")

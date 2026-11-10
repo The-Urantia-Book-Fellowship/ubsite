@@ -635,15 +635,16 @@ self.addEventListener('fetch', function (e) {
 // download itself is `running`.
 var busy = null, running = null;
 // What the copy is: its build, its date, the text's and the index's, and its
-// size with the translations kept (`tr`), and every translation its manifest
-// lists, with its size (`trs`), for Settings' Offline tab.
+// own size, without the translations kept (`tr`), and every translation its
+// manifest lists, with its size (`trs`), for Settings' Offline tab, which
+// says each on its own row.  Until 2026-11-10 the copy's size counted the
+// translations kept, 74.4 MB under Base over three rows of their own, which a
+// reader would add to it (Tigran).
 function state() {
   return Promise.all([readMeta(), copy(), audioState()]).then(function (got) {
     var meta = got[0], c = got[1], m = c && c.manifest;
-    var mine = m ? (m.translations || []).filter(function (t) { return c.kept.indexOf(t.key) >= 0; }) : [];
-    var sum = function (k) { return mine.reduce(function (n, t) { return n + t[k]; }, m[k]); };
     return {
-      have: m ? { build: m.build, made: m.made, text: m.text, index: m.index, bytes: sum('bytes'), raw: sum('raw'),
+      have: m ? { build: m.build, made: m.made, text: m.text, index: m.index, bytes: m.bytes, raw: m.raw,
                   tr: c.kept.slice(), trs: (m.translations || []).map(function (t) {
                     return { key: t.key, bytes: t.bytes, raw: t.raw };
                   }) } : null,

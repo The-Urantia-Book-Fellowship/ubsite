@@ -123,6 +123,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- Settings' Offline tab gives the size of Base alone under it, 48 MB, where it added the translations kept to it, each of which has its size on its own row.
 - The ↓ in the player's bar, tapped to keep a paper's recording, no longer stops on a script error while the paper waits its turn to download.
 - With the translations in parallel columns, a search result opened while listening is brought into view once its columns are drawn, putting Settings back to their defaults keeps the place being read, and folding the index keeps the line being read under the columns' names, where each left you elsewhere.
 - A reload, or Back to a page the browser no longer holds, opens it where you were, after moving about while listening, where it opened at its top.
@@ -164,6 +165,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The worker's state gives the copy's own size (`have.bytes`, `have.raw`), without the translations kept, each of which is in `have.trs`.
 - nginx keeps the offline copy's chunks once the app has sent each (`proxy_cache` in `/var/cache/ubsite-nginx`, for the location `~ "^/offline/c/[0-9a-f]{16}\.gz$"`, the app's `RE_CHUNK`, keyed by the path alone), and answers the next browser from its own file without asking the app; a chunk unasked for 60 days is deleted, and past 600 MB those asked for longest ago. A cache and not the files themselves, since nginx cannot read `~/ubsite`. Each host's server block must be installed again, as root (`deploy/README.md`).
 - The service worker is registered by every page where one can run, and answers from the offline copy first while the copy is the site's build (`meta.sure`, set by a check of `/offline/manifest.json` or a download just ended, cleared when a check finds a newer build and when a new worker takes over) and the browser says it is online; otherwise network first, as before. A page it answers first is the server's byte for byte, with no `data-copy` on its footer, which now marks only a page the copy answered because the network did not. `/tr/P:S` and `/search` are answered first only where the copy keeps every translation the reader shows, which `ub.js` tells the worker (`{cmd: 'shown'}`); the `remove` command is gone.
 - The worker keeps when the copy before the last update was made (`meta.since`, in its state), and answers `{cmd: 'news'}` with the copy's own `news`, from which What's new lists without asking the server. The ? in the shell is a `<details class="help">` whose three items are links (`/help`, `/changelog`, `/help#about`), with the tour's script in its `data-src` and the repository's address, `app.py REPO`, in `data-repo`.
