@@ -39,11 +39,23 @@
 // until then What's new opened at its end, and the page reloaded once it was
 // closed).  What's new is the reader's to open, from the ? at the header's
 // corner (ub.js, 'ub:news'), and lists what the last update brought.  Update
-// now stays only where the copy will not update itself: the browser saving data, or the same update having stopped within
-// the hour, when it is Try again.  Until 2026-10-30 Settings' "Keep the
-// offline copy up to date" could turn this off, leaving Update now to a reader
-// who kept the copy as it was until they chose; most would forget it, and
-// find the copy "broken" (Tigran, 2026-10-25).
+// now stands where the copy will not update itself: the reader having turned
+// that off, the browser saving data, or the same update having stopped within
+// the hour.
+//
+// Automatic updates, the switch under Base (Tigran, 2026-11-10: with the
+// copy every browser's, a reader must be able to keep the one they have, his
+// case a server no longer to be trusted): off, the copy is fetched again only
+// by Update now, beside What's new, which lists what the update would bring;
+// and the worker goes on answering from it first though the site has another
+// build (sw.js `pinned`), which is the half that matters, an out-of-date copy
+// being otherwise passed over for the server.  What it is, is the worker's
+// (state.auto, {cmd: 'auto'}), not a setting: ↺ never turns it on again, and
+// the worker knows it before a page's scripts run.  It does not govern the
+// first copy.  Until 2026-10-30 a setting, "Keep the offline copy up to
+// date", did the first half of this, leaving Update now to a reader who kept
+// the copy as it was until they chose; most would forget it, and find the
+// copy "broken" (Tigran, 2026-10-25), so it is on unless turned off.
 //
 // The translations beside the text are each a download of their own (Tigran,
 // 2026-10-26): a tick downloads one at once, with the copy where none is kept
@@ -56,7 +68,7 @@
   if (!panel || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
   window.ubOfflineUI = {};
   var sw = navigator.serviceWorker, line = panel.querySelector('.offcopy .state'),
-      inst = panel.querySelector('.install'), kept = false;
+      inst = panel.querySelector('.install'), autoBox = panel.querySelector('.offcopy input.auto'), kept = false;
   // The interface's words (ubsite/l10n.js): what the tab says is HTML in both
   // languages, which CSS chooses between (T()).
   var T = window.ubT;
@@ -137,6 +149,13 @@
     watch(s);
     trs(s);
     recShow(s);
+    // Automatic updates: as the worker has it, on unless it says off (a
+    // worker from before the switch says nothing); greyed until there is a
+    // copy to hold, and while one downloads.
+    if (autoBox) {
+      autoBox.checked = !s || s.auto !== false;
+      autoBox.disabled = !s || !s.have || !!s.busy;
+    }
     // `kept`: a worker is registered, with a copy or on its way to one.
     kept = !!s;
     if (!kept) {
@@ -159,18 +178,20 @@
       // No copy yet, and none on its way: it stopped, and goes on by itself
       // from the next page (keepUp), or at once from the button.
       line.innerHTML = (err ? T('The download stopped: {e}.', { e: err }) : T('The download did not finish.')) +
-                       (online() ? ' <button type="button" class="get"><span>' + T('Try again') + '</span></button>' : '');
+                       (online() ? ' <button type="button" class="pill solid get">' + T('Try again') + '</button>' : '');
       mark('none', T.tr('Online; the offline copy did not finish downloading'));
     } else if (up) {
       // Out of date.  Online it is updated by itself at once (keepUp), unless
-      // the browser is saving data or this update stopped within the hour:
-      // then Update now and What's new.  Offline, once online.
-      var held = online() && (saving() || triedLately(up.build));
+      // the reader has turned that off, the browser is saving data or this
+      // update stopped within the hour: then Update now and What's new.
+      // Offline, once online: by itself, or by the reader.
+      var off = s.auto === false, held = online() && (off || saving() || triedLately(up.build));
       line.innerHTML = T('Out of date: kept as the site was on {d}, which has changed since.', { d: day(have.made) }) + ' ' +
-                       (held ? '<br><button type="button" class="get"><span>' + T('Update now ({s})', { s: mb(up.fetch) }) +
-                               '</span></button> <button type="button" class="newsbtn"><span>' +
-                               T('What’s new') + '</span></button>'
-                             : online() ? '' : T('It updates by itself once online.')) +
+                       (held ? '<br><button type="button" class="pill solid get">' + T('Update now ({s})', { s: mb(up.fetch) }) +
+                               '</button> <button type="button" class="pill newsbtn">' +
+                               T('What’s new') + '</button>'
+                             : online() ? '' : off ? T('It can be updated once online.')
+                             : T('It updates by itself once online.')) +
                        (err ? '<br>' + T('The last update stopped: {e}.', { e: err }) : '');
       mark('stale', T.tr('An update to the offline copy is waiting ({s})', { s: mb(up.fetch) }));
     } else {
@@ -245,10 +266,22 @@
   // and offline that it can be had again only once online, as a recording's
   // let-go asks (Tigran, 2026-11-10; from 2026-10-26 it let go at once, and a
   // stray tap deleted 12 MB).  Cancelled, the tick comes back.
+  // Automatic updates, ticked or unticked: the worker told, which keeps it
+  // (sw.js setAuto), and what it then says shown; turned on with an update
+  // waiting, that is fetched at once, as a page's load would fetch it.
   panel.addEventListener('change', function (ev) {
     var box = ev.target;
+    if (box === autoBox) return ask('auto', { on: box.checked }).then(function (s) { show(s); keepUp(s); });
     if (box.type !== 'checkbox' || !box.closest('.offtrs')) return;
     var have = last && last.have;
+    // A translation's download fetches the site's copy as it is now, so with
+    // the copy out of date it updates that too: said on the tab's last line
+    // (offline:trstale), and with the updating turned off asked first, the
+    // reader having chosen to keep the copy as it is.
+    if (box.checked && have && last.latest && last.auto === false && !window.confirm(T.text('offline:trupdate'))) {
+      box.checked = false;
+      return;
+    }
     if (!box.checked) {
       var w = box.closest('li').querySelector('.w'), t = ((have && have.trs) || []).filter(function (x) { return x.key === box.value; })[0],
           p = { t: T.same(w ? w.textContent.replace(/\s+/g, ' ').trim() : box.value), s: mb(t ? t.bytes : 0) };
@@ -314,8 +347,8 @@
       trs(last);
       if (going) return;
       if (!triedLately(FIRST)) return on();
-      line.innerHTML = (refused || T('The download did not finish.')) + ' <button type="button" class="get"><span>' +
-                       T('Try again') + '</span></button>';
+      line.innerHTML = (refused || T('The download did not finish.')) + ' <button type="button" class="pill solid get">' +
+                       T('Try again') + '</button>';
     }, function () {
       if (kept) return;
       line.innerHTML = !online() ? T('It can be downloaded only online.') : T('This site has no offline copy yet.');
@@ -490,9 +523,10 @@
   }
 
   // An update made by itself: when a check finds the copy out of date, with
-  // the site reached and this page in view, unless the browser is saving
-  // data, or this browser tried the same update by itself within the hour and
-  // it stopped (Update now offers it then).  A download already under way,
+  // the site reached and this page in view, unless the reader has turned the
+  // updating off (state.auto false), the browser is saving data, or this
+  // browser tried the same update by itself within the hour and it stopped
+  // (Update now offers it in each case).  A download already under way,
   // from the page before a link was followed, or from a tick there, is this
   // page's to finish: asking the worker for it again waits for the one
   // running.
@@ -525,7 +559,7 @@
       going = true;
       return get(false).then(function () { going = false; }, function () { going = false; });
     }
-    if (!s.latest || triedLately(s.latest.build) || saving()) return;
+    if (!s.latest || s.auto === false || triedLately(s.latest.build) || saving()) return;
     update(true);
   }
   panel.addEventListener('click', function (ev) {

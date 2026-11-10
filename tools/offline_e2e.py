@@ -262,6 +262,13 @@ SURE = ("async () => { const r = await (await caches.open('ub-meta')).match('/of
         " return r ? !!(await r.json()).sure : null; }")
 
 
+# What the worker keeps under a key of its meta (sw.js): `current`, the copy's
+# build; `auto`, false while Automatic updates is turned off, and absent on.
+META = "async k => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())[k]"
+# Automatic updates, the switch under Base (base.html .offauto).
+AUTO = "dialog.settings .offcopy input.auto"
+
+
 def until(pg, fn: str, want=True, timeout: int = 15000, arg=None) -> bool:
     """Wait until the page's function `fn`, which may be async, answers
     `want`.  Playwright's wait_for_function does not wait for a promise: it
@@ -386,9 +393,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         said = pg.inner_text(STATE)
         print(f"  downloaded in {time.time() - t:.1f} s: " + said)
         hint = pg.evaluate(EN + "(document.querySelector('dialog.settings .offcopy .hint'))")
-        ok(not pg.locator("dialog.settings .offcopy input").count() and not pg.locator("dialog.settings .offcopy button").count()
+        ok(not pg.locator("dialog.settings .offcopy input:not(.auto)").count()
+           and not pg.locator("dialog.settings .offcopy button").count()
            and hint.startswith("The whole site, which this browser keeps"),
            f"the copy, Base, has no tick and no button: it came by itself, with nothing tapped, the browser saving data ({hint!r})")
+        ok(pg.is_checked(AUTO) and pg.is_enabled(AUTO) and pg.evaluate(META, "auto") is None,
+           "Automatic updates stands under it, on, with nothing kept of it until it is turned off")
         fetched = log.read_text().count("/offline/c/")
         ok(fetched == len(m["chunks"]), f"fetching each of its chunks once, and no translation's ({fetched} chunks)")
         sizes = [tr_row(pg, t["key"]) for t in m["translations"]]
@@ -1270,6 +1280,105 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.keyboard.press("Escape")
         ok(not errors, f"no script errors ({errors[:2]})")
 
+        print("Automatic updates turned off")
+        # Tigran, 2026-11-10: a reader keeps the copy they have.  Off, nothing
+        # is fetched by itself, and the copy answers first though the site has
+        # another build, until Update now; what it is, is the worker's, so
+        # Restore the defaults leaves it.
+        ctx.set_offline(False)
+        pg.goto(BASE + "/read")
+        offline_tab(pg)
+        wait_state(pg, "t.startsWith('Up to date')")
+        held = pg.evaluate(META, "current")
+        pg.click(AUTO)
+        ok(until(pg, META, False, 15000, "auto") and not pg.is_checked(AUTO), "turned off, the worker keeps it so")
+        pg.click("#set-t-show")
+        pg.check("dialog.settings input[name=pages]")
+        pg.click("dialog.settings .reset")
+        ok(until(pg, "() => ubSettings.get().pages === false"), "Restore the defaults puts the settings back")
+        offline_tab(pg)
+        pg.wait_for_timeout(300)
+        ok(pg.evaluate(META, "auto") is False and not pg.is_checked(AUTO),
+           "and leaves Automatic updates off: it is the worker's, not a setting")
+        pg.keyboard.press("Escape")
+        change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, held back"), d)[1])
+        build = json.loads((copy / "manifest.json").read_text())["build"]
+        before = log.read_text().count("/offline/c/")
+        pg.evaluate(HOUR_LATER)
+        pg.goto(BASE + "/read")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=10000)
+        pg.wait_for_timeout(1500)
+        ok(log.read_text().count("/offline/c/") == before and pg.evaluate(META, "current") == held != build,
+           f"a newer build is not fetched by itself ({icon(pg)['title']!r})")
+        ok(pg.evaluate(SURE) is False, "the copy is known not to be the site's build")
+        n = asked_for(log, "/102:7")
+        pg.goto(BASE + "/102:7")
+        ok(asked_for(log, "/102:7") == n and pg.locator("p.t[id='102:7.1']").count() == 1
+           and not pg.locator("footer[data-copy]").count(),
+           "and still answers first: the server is not asked for a page it holds, which is unmarked")
+        n = asked_for(log, "/")
+        pg.goto(BASE + "/")
+        ok(pg.title() == "The Urantia Book, listening" and asked_for(log, "/") == n,
+           f"the page is the copy's, as it was kept, not the site's ({pg.title()!r})")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=10000)
+        offline_tab(pg)
+        wait_state(pg, "t.includes('changed since')")
+        print("  " + pg.inner_text(STATE))
+        ok(pg.is_visible("dialog.settings .offcopy .get") and pg.is_visible("dialog.settings .offcopy .newsbtn")
+           and icon(pg)["net"] == "on" and not pg.is_checked(AUTO),
+           "the icon says an update is waiting, and the tab offers Update now and What's new")
+        pg.click("dialog.settings .offcopy .newsbtn")
+        pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=10000)
+        ok(f"number {change.n}" in pg.inner_text("#offnews") and pg.locator("#offnews li").count() == 1,
+           "What's new lists what the update would bring, before it is taken")
+        pg.click("#offnews .x")
+        # A translation's download would update the copy too: asked first.
+        asked.clear()
+        pg.remove_listener("dialog", accept)
+        pg.once("dialog", lambda d: d.dismiss())
+        pg.click(".offtrs input[value=urantia-ru]")
+        pg.on("dialog", accept)
+        pg.wait_for_timeout(500)
+        print(f"  asked: {asked[0] if asked else None!r}")
+        ok(asked and asked[0].startswith("The offline copy is out of date, and Automatic updates are off: ")
+           and not pg.is_checked(".offtrs input[value=urantia-ru]") and log.read_text().count("/offline/c/") == before
+           and pg.evaluate(META, "current") == held,
+           "a translation ticked asks first, since its download would update the copy; cancelled, nothing is fetched")
+        ctx.set_offline(True)
+        wait_state(pg, "t.includes('can be updated once online')", 10000)
+        ok(not pg.locator("dialog.settings .offcopy .get").count(),
+           "offline, the tab says it can be updated once online, not that it updates by itself")
+        ctx.set_offline(False)
+        pg.wait_for_selector("dialog.settings .offcopy .get", timeout=10000)
+        update(pg)
+        ok(pg.evaluate(META, "current") == build and pg.evaluate(META, "auto") is False and not pg.is_checked(AUTO)
+           and log.read_text().count("/offline/c/") == before + 1,
+           "Update now brings the site's build, what changed alone, and the switch stays off")
+        pg.keyboard.press("Escape")
+        change(copy, lambda d: (d["pages"]["/"].update(t=">The Urantia Book, held again"), d)[1])
+        held, build = build, json.loads((copy / "manifest.json").read_text())["build"]
+        before = log.read_text().count("/offline/c/")
+        pg.evaluate(HOUR_LATER)
+        pg.goto(BASE + "/read")
+        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=10000)
+        pg.wait_for_timeout(1500)
+        ok(log.read_text().count("/offline/c/") == before and pg.evaluate(META, "current") == held,
+           "nor is the build after that fetched by itself")
+        # Turned on again with an update waiting: fetched at once, with no tap
+        # on Update now, without a word and with no reload, as any made by itself.
+        offline_tab(pg)
+        wait_state(pg, "t.includes('changed since')")
+        pg.evaluate("window.ubStay = 1")
+        pg.click(AUTO)
+        ok(until(pg, META, build, 60000, "current") and pg.evaluate(META, "auto") is None,
+           "turned on again, the update waiting is fetched at once, and the worker keeps nothing of the switch")
+        wait_state(pg, "t.startsWith('Up to date')")
+        ok(pg.is_checked(AUTO) and pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews")
+           and log.read_text().count("/offline/c/") == before + 1,
+           "by itself: the page is not reloaded, and nothing is said")
+        pg.keyboard.press("Escape")
+        ok(not errors, f"no script errors ({errors[:2]})")
+
         print("The bar's ↓")
         ctx.set_offline(False)
         pg.goto(BASE + "/161:1")
@@ -1281,7 +1390,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            "the bar's ↓ keeps the paper being heard")
         pg.click(".player button.close")
         offline_tab(pg)
-        ok(not pg.locator("dialog.settings .offcopy input").count() and not pg.locator("dialog.settings .offcopy button").count(),
+        ok(not pg.locator("dialog.settings .offcopy input:not(.auto)").count()
+           and not pg.locator("dialog.settings .offcopy button").count(),
            "and nothing in the tab lets the copy go")
         pg.keyboard.press("Escape")
         ok(not errors, f"no script errors ({errors[:2]})")

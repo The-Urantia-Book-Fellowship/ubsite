@@ -237,8 +237,13 @@ LISTEN = [
 # here, "Keep the offline copy up to date" (`autoupdate`, on by default), could
 # turn that off, leaving Update now in the cloud's menu to the reader; Tigran
 # had the menu's work moved into this tab, and the tick do both.  A stored
-# `autoupdate` is ignored.  Shown only where Work offline can run: ub.js
-# unhides the tab with the cloud.
+# `autoupdate` is ignored.  The switch is back since 2026-11-10, "Automatic
+# updates", under Base (Tigran: with the copy every browser's, a reader must
+# be able to keep the one they have), and is still no setting: the worker
+# keeps it (sw.js meta.auto), which must know it before any script of the
+# page runs, so the box has no name, nothing is stored here, and ↺ leaves it
+# as it is, as it leaves the translations kept.  Shown only where Work
+# offline can run: ub.js unhides the tab with the cloud.
 OFFLINE: list[tuple] = []
 
 

@@ -63,6 +63,32 @@ class Worker(unittest.TestCase):
             data = (ROOT / "vendor/sqlite-wasm" / name).read_bytes()
             self.assertEqual(v[k], f"/offline/{name}?v={hashlib.sha256(data).hexdigest()[:10]}")
 
+    # The worker's commands, by name: append-only.  A reader who has turned
+    # Automatic updates off (2026-11-10) keeps a copy of a build before the
+    # worker's, since the browser replaces the worker whatever the copy; the
+    # copy's pages ask as their build's offline.js asked, and Update now is
+    # `get`.  A command renamed or dropped would leave such a reader with a
+    # button that does nothing, and no way back but the browser's site data.
+    COMMANDS = ("state", "check", "get", "drop", "keep", "unkeep", "stop", "shown", "news", "auto")
+
+    def test_the_worker_answers_every_command_it_ever_did(self):
+        static = ROOT / "ubsite" / "static"
+        src = (static / "sw.js").read_text(encoding="utf-8")
+        handler = src[src.index("self.addEventListener('message'"):]
+        for cmd in self.COMMANDS:
+            with self.subTest(cmd=cmd):
+                if cmd == "state":           # what a command it does not know falls to
+                    self.assertRegex(handler, r":\s*state\(\);")
+                else:
+                    self.assertIn(f"cmd === '{cmd}'", handler)
+        # And the pages send none it lacks.
+        sent = set()
+        for name in ("offline.js", "ub.js", "listen.js"):
+            js = (static / name).read_text(encoding="utf-8")
+            sent |= set(re.findall(r"\bask\('(\w+)'", js)) | set(re.findall(r"\bcmd: '(\w+)'", js))
+        self.assertTrue(sent)
+        self.assertLessEqual(sent, set(self.COMMANDS))
+
     def test_the_engine_is_sent_gzipped_when_asked(self):
         data = (ROOT / "vendor/sqlite-wasm/sqlite3.wasm").read_bytes()
         status, h, body = call("/offline/sqlite3.wasm", headers={"accept-encoding": "gzip, br"})
@@ -166,6 +192,12 @@ class Pages(unittest.TestCase):
         self.assertTrue(fs)
         self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), [])
         self.assertNotIn("autoupdate", settings.defaults())
+        # Automatic updates is back under Base since 2026-11-10, and is no
+        # setting either: a box with no name, which ub.js and Restore the
+        # defaults pass by, drawn ticked and greyed until offline.js has the
+        # worker's word (sw.js meta.auto).  Its name and no hint (Tigran).
+        self.assertIn('<label class="offauto"><input type="checkbox" class="auto" checked disabled> Automatic updates</label>',
+                      fs.group(1))
         self.assertIn('<p class="net"><span class="conn">', fs.group(1))
         # The copy is every browser's since 2026-11-10: a name, with no tick.
         self.assertIn('<p class="sub">Base</p>', fs.group(1))

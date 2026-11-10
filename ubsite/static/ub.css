@@ -1597,12 +1597,22 @@ dialog.settings .offcopy .hint { margin: 0; font-size: .85rem; color: var(--fain
 dialog.settings .offcopy .state { margin: .1rem 0 0; font-size: .85rem; color: var(--faint); }
 dialog.settings .offcopy .state:empty { display: none; }
 dialog.settings .offcopy .state button { margin-top: .3rem; }
+/* Automatic updates, the copy's own switch, under what the copy is; greyed
+   as a setting that cannot be changed is (.idle), until a copy is kept. */
+dialog.settings .offcopy .offauto { margin-top: .5rem; }
+dialog.settings .offcopy .offauto:has(input:disabled) { opacity: .45; cursor: default; }
 dialog.settings .install { margin: .8rem 0 0; padding-top: .7rem; border-top: 1px solid var(--rule); }
-dialog.settings :is(.offcopy, .install) button { padding: .05rem .55rem; font: inherit; font-size: .85rem;
+/* Update now, Try again and What's new are the site's buttons (.pill, solid
+   for the one that acts, as the quiz's and the tour's), at the dialog's own
+   size and not the state line's small one (Tigran, 2026-11-10: "the Update
+   now should look like a button"; small outlined labels until then, as
+   Install as an app is, below). */
+dialog.settings .offcopy .state .pill { margin: .5rem .3rem 0 0; font-size: .95rem; }
+dialog.settings :is(.offcopy, .install) button:not(.pill) { padding: .05rem .55rem; font: inherit; font-size: .85rem;
   color: var(--link); background: none; border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; }
 /* Each label in a span of its own (offline.js), set level with its box as
    the Settings pills are (--lift): Goudy, centred, sits high. */
-dialog.settings :is(.offcopy, .install) button > span { position: relative; top: var(--lift); }
+dialog.settings :is(.offcopy, .install) button:not(.pill) > span { position: relative; top: var(--lift); }
 /* What's new (static/offline.js): a dialog of its own, centred, over
    Settings where it is opened from there, and scrolling within with its
    title row in view, as Settings does.  A popover until 2026-10-30, over the

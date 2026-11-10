@@ -356,6 +356,16 @@ window.ubUnit = function (where) {
       <p class="sub">{{ t('Base') }}</p>
       <p class="hint">{{ t('offline:copyhint') }}</p>
       <p class="state" aria-live="polite"></p>
+      {#- Automatic updates (Tigran, 2026-11-10): on unless the reader turns it
+          off, when the copy stays as it is, and answers first though the site
+          has another build, until Update now.  A switch to look at, and no
+          setting: it has no name, so ub.js and ↺ pass it by, and what it is is
+          the worker's (sw.js meta.auto), which offline.js draws and tells.
+          Greyed until a copy is kept.  Its name alone, with no hint: mine,
+          "off, the copy stays as it is until you tap Update now", read after
+          the name as "Automatic updates off", the ticked state (Tigran, the
+          same day: "It is self-explanatory"). #}
+      <label class="offauto"><input type="checkbox" class="auto" checked disabled> {{ t('Automatic updates') }}</label>
       </div>
       <div class="offtr">
       <p class="sub">{{ t('Translations') }}</p>

@@ -28,6 +28,17 @@
 // most once an hour while online, says whether the site's is another, and by
 // how many bytes.  offline.js tells the reader, and has it updated by itself.
 //
+// Unless the reader has turned that off (Settings' Offline tab, Automatic
+// updates; Tigran, 2026-11-10): the copy is then held (`pinned`, meta.auto
+// false), fetched again only by Update now, and answers first whether or not
+// it is the site's build, so that a reader goes on with the copy they have
+// while the site moves on; until then an out-of-date copy never answered
+// first, and turning the download off alone would have left every page to
+// the server.  The check still asks, so the tab can say an update waits and
+// what it costs.  It holds the copy, not this worker, which the browser
+// replaces with whatever /sw.js the server sends: what that means is in
+// DECISIONS.md, Work offline.
+//
 // The translations are each a download of their own, which a reader chooses
 // in Settings' Offline tab (offline.js): the manifest lists them apart from the
 // copy (offline/pack.py), and the worker keeps those chosen in the copy's own
@@ -79,7 +90,10 @@ self.addEventListener('activate', function (e) {
 // reader shows beside the text, as the page last said (ub.js, {cmd:
 // 'shown'}), the worker having no other way to Settings.  `since`: when the
 // copy before the last update was made, for What's new (offline.js), which
-// lists what that update brought.
+// lists what that update brought.  `auto`: false while the reader has turned
+// the updating off ({cmd: 'auto'}), and absent otherwise; kept here and
+// nowhere else, since it is the page's own request the worker answers by it,
+// before any script of the page has run, so no setting could say it.
 function readMeta() {
   return caches.open(META).then(function (c) { return c.match('/offline/meta'); })
     .then(function (r) { return r ? r.json() : {}; });
@@ -99,15 +113,17 @@ function updateMeta(change) {
   metaQ = p.catch(function () {});
   return p;
 }
-// `sure` and `shown` as meta has them, for the fetch handler, which cannot
-// read meta for every request: read once per worker, in the queue, so that no
-// change is overtaken, and noted again at each change.
+// `sure`, `shown` and whether the copy is held (`pinned`: meta.auto false) as
+// meta has them, for the fetch handler, which cannot read meta for every
+// request: read once per worker, in the queue, so that no change is
+// overtaken, and noted again at each change.
 // What a page has said since this worker started (`said`) is the word, at
 // once, before meta has it: a fold asks for its section's translations as
 // soon as one is ticked.
-var sure = false, shown = null, said = null, wrote = null, knownP = null;
+var sure = false, pinned = false, shown = null, said = null, wrote = null, knownP = null;
 function note(m) {
   sure = !!m.sure;
+  pinned = m.auto === false;
   wrote = Array.isArray(m.shown) ? m.shown.join(' ') : null;
   shown = said || (Array.isArray(m.shown) ? m.shown : null);
   return m;
@@ -621,7 +637,12 @@ self.addEventListener('fetch', function (e) {
     // their content: a page the server sends is counted as a reader's by its
     // stylesheet's fetch (visits.py), so that is the server's whenever the
     // page is.
-    if (!(sure && c.manifest.format === FORMAT && self.navigator.onLine !== false)) return network();
+    // And a copy the reader holds as it is (`pinned`: Automatic updates
+    // turned off) answers first whatever the site's build, and a worker
+    // newer than it reads it as one does offline; not a copy of another
+    // format, which this worker cannot be sure to read: a change of FORMAT
+    // ends a hold, and the pages are the server's until Update now.
+    if (!((sure || pinned) && c.manifest.format === FORMAT && self.navigator.onLine !== false)) return network();
     return fromCopy(c, url, false).then(null, function () { return null; }).then(function (r) {
       return r && !r.ubWeak ? r : network();
     });
@@ -649,7 +670,7 @@ function state() {
                     return { key: t.key, bytes: t.bytes, raw: t.raw };
                   }) } : null,
       latest: meta.latest || null, checked: meta.checked || 0, sure: !!meta.sure, since: meta.since || null,
-      busy: busy, error: meta.error || null,
+      auto: meta.auto !== false, busy: busy, error: meta.error || null,
       words: meta.error && meta.words || null, audio: got[2]
     };
   });
@@ -855,11 +876,22 @@ function drop(k) {
   }).then(tell);
 }
 
+// The updating turned off or on, from Settings' Offline tab (offline.js):
+// meta.auto false while it is off, and gone while it is on, as in a browser
+// that never asked.  Every page open hears (tell), and updates by itself
+// again where it was turned on with an update waiting (offline.js keepUp).
+function setAuto(on) {
+  return updateMeta(function (meta) {
+    if (on) delete meta.auto;
+    else meta.auto = false;
+  }).then(tell);
+}
+
 // offline.js asks: {cmd: 'state' | 'check' | 'get' | 'drop' | 'keep' |
-// 'unkeep' | 'stop' | 'shown' | 'news', force, tr, voice, papers}, and the
-// answer, the state, comes back on the message's port; `news` answers with
-// the copy's own list of what changed (its manifest's `news`), for What's
-// new, with the server not asked.  `get` may name the translations
+// 'unkeep' | 'stop' | 'shown' | 'news' | 'auto', force, tr, voice, papers,
+// on}, and the answer, the state, comes back on the message's port; `news`
+// answers with the copy's own list of what changed (its manifest's `news`),
+// for What's new, with the server not asked.  `get` may name the translations
 // to keep, `tr`, a list of their keys, and `drop` names the one to let go;
 // `shown`, from ub.js, names those the reader shows beside the text, written
 // only where they have changed.  There is no `remove` since 2026-11-10: the
@@ -868,6 +900,10 @@ function drop(k) {
 // file of the queue; `unkeep` a voice and papers to let go.  A check's says
 // too whether it reached the site: `reached` true or false, or none where it
 // did not ask, or failed otherwise (a 404: the site is there, with no copy).
+// `auto` turns the updating on or off (`on`).  A command keeps its name and
+// its meaning for ever, and the state its fields: a copy held is of a build
+// before this worker's, and its pages' offline.js asks as that build asked,
+// Update now (`get`) above all (tests/test_offline.py holds the list).
 self.addEventListener('message', function (e) {
   var cmd = e.data && e.data.cmd, port = e.ports && e.ports[0];
   var tr = e.data && e.data.tr, voice = e.data && e.data.voice, ns = e.data && e.data.papers;
@@ -883,6 +919,7 @@ self.addEventListener('message', function (e) {
             return state().then(function (s) { if (err && err.away) s.reached = false; return s; });
           })
         : cmd === 'shown' ? showing(tr)
+        : cmd === 'auto' ? setAuto(e.data.on !== false)
         : cmd === 'news' ? copy().then(function (c) { return (c && c.manifest.news) || { items: [], earlier: false }; })
         : state();
   e.waitUntil(p.then(function (s) { if (port) port.postMessage(s); },
