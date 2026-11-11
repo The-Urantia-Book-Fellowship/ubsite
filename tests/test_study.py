@@ -434,6 +434,24 @@ class Study(unittest.TestCase):
         self.assertIn('<span class="lang" lang="grc">οὐρανός</span>', html)
         self.assertEqual(text, "so 23−1=7 and שְׁמַע and οὐρανός")
 
+    def test_what_is_typed_against_a_formula_stays_with_it(self):
+        # 14:1.9 (2026-11-11): "$N_7=245+\delta$, $\epsilon>0$" broke before the
+        # comma, a formula being a box the browser may break a line beside.
+        M = '<math xmlns="http://www.w3.org/1998/Math/MathML">'
+        (text, html, _), bad = self.expand(r"with $a$, $b$ and ($c$); the $k$\ts{th} one, $d$ alone")
+        self.assertEqual(bad, [])
+        self.assertIn(f'<span class="nobreak">{M}<mi>a</mi></math>,</span> ', html)
+        self.assertIn(f'<span class="nobreak">({M}<mi>c</mi></math>);</span>', html)
+        self.assertIn(f'<span class="nobreak">{M}<mi>k</mi></math><sup>th</sup></span>', html)
+        self.assertIn(f' {M}<mi>d</mi></math> alone', html)
+        self.assertEqual(text, "with a, b and (c); the kth one, d alone")
+        # Not through a hyphen, where a line may break; nor across a span's edge.
+        (_, html, _), bad = self.expand(r"an $n$-dimensional space, \bibemph{so ($x$}), and $y$.")
+        self.assertEqual(bad, [])
+        self.assertIn(f' {M}<mi>n</mi></math>-dimensional', html)
+        self.assertIn(f'<em>so ({M}<mi>x</mi></math></em>),', html)
+        self.assertIn(f'<span class="nobreak">{M}<mi>y</mi></math>.</span>', html)
+
     def test_a_figure_is_drawn_inline_with_its_labels_as_math(self):
         # Tigran, 2026-11-05: the gyroscope at 9:3.3, data/study/figures/.
         with mock.patch.object(study, "FIGURES", pathlib.Path(self.data) / "figures"):
@@ -444,8 +462,8 @@ class Study(unittest.TestCase):
                 '</foreignObject></svg>\n', encoding="utf-8")
             (text, html, _), bad = self.expand(r"turns at $\Omega$. \figure{wheel} Its weight")
             self.assertEqual(bad, [])
-            self.assertIn('<math xmlns="http://www.w3.org/1998/Math/MathML">'
-                          '<mi mathvariant="normal">Ω</mi></math>. <svg class="sfig"', html)
+            self.assertIn('<span class="nobreak"><math xmlns="http://www.w3.org/1998/Math/MathML">'
+                          '<mi mathvariant="normal">Ω</mi></math>.</span> <svg class="sfig"', html)
             self.assertIn('<div class="lab"><math xmlns="http://www.w3.org/1998/Math/MathML">'
                           '<mi>ω</mi></math></div></foreignObject></svg> Its weight', html)
             self.assertEqual(text, "turns at Ω. ω Its weight")

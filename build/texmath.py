@@ -40,6 +40,26 @@ CHARS = {"-": "−", "*": "∗"}
 FUNCTIONS = {"cos", "sin"}
 OPCHARS = set("+-=<>()[]/,;:!|*.×")
 SPACES = {",": "0.1667em", " ": "0.25em"}
+# A bracket written plainly is the size of the text, as TeX sets it: only
+# \left and \right stretch one, and they are not in the set.  MathML's own
+# rule is the opposite, every bracket of a row stretched to the row's height
+# and centred on the axis, so 11:8.9's g(r, θ) stood in brackets as tall as the
+# fraction after it; and a bracket that carries a script, the ) of (-1)^k, is
+# not one of the row's, so Chrome left it where it was and moved its partner:
+# 14:1.9's "crooked" brackets, one lower than the other (Tigran, 2026-11-11).
+FENCES = set("()[]{}|")
+# TeX's rule for a sign (The TeXbook, Appendix G, rule 5): it is no binary
+# operator where nothing stands before it to operate on, at the start of its
+# list or after another operator, a relation, an opening bracket or a comma;
+# it is then set close to its number, (−1), = −2.  MathML takes a sign in the
+# middle of a row for binary, and set ( − 1 ).
+SIGNS = set("+−±")
+_NOTHING_BEFORE = set("+−±×⋅∗" "=<>:≈≠⊂→⩾⩽∈⇒" "([{" ",;")
+
+
+def _mo(ch: str, unary: bool = False) -> str:
+    attrs = ' stretchy="false"' if ch in FENCES else ' form="prefix"' if unary else ""
+    return f"<mo{attrs}>{html.escape(ch, quote=False)}</mo>"
 
 # Unicode's mathematical alphanumerics: the letters of \mathbf, \mathcal and
 # \mathbb.  Where a letter was encoded before that block (ℝ, ℳ), the block
@@ -134,6 +154,24 @@ class _Parser:
         self.i += 1
         return t
 
+    def unary(self) -> bool:
+        """Whether the sign just taken has nothing before it to operate on
+        (SIGNS, above): by the token before it, a space apart."""
+        j = self.i - 2
+        while j >= 0 and self.toks[j][0] == "cmd" and self.toks[j][1] in SPACES:
+            j -= 1
+        if j < 0:
+            return True
+        kind, v = self.toks[j]
+        if kind in ("{", "^", "_"):
+            return True
+        if kind == "op":
+            return v in _NOTHING_BEFORE
+        if kind == "cmd":
+            return (OPERATORS.get(v) in _NOTHING_BEFORE or v in FUNCTIONS
+                    or v in ("sum", "int", "limits", "over"))
+        return False
+
     def seq(self, closing: bool) -> str:
         """Nodes up to the group's end; a \\over splits them into a fraction."""
         nodes: list[str] = []
@@ -196,7 +234,7 @@ class _Parser:
         if kind == "id":
             return f"<mi>{v}</mi>", False
         if kind == "op":
-            return f"<mo>{html.escape(v, quote=False)}</mo>", False
+            return _mo(v, v in SIGNS and self.unary()), False
         if kind in "^_":
             raise MathError(f"a {v} with nothing to stand on")
         if kind == "}":
@@ -214,7 +252,7 @@ class _Parser:
         if v == "infty":                       # the quiz's answer "$\infty$" (build/quiz.py)
             return "<mi>∞</mi>", False
         if v in OPERATORS:
-            return f"<mo>{OPERATORS[v]}</mo>", False
+            return _mo(OPERATORS[v], OPERATORS[v] in SIGNS and self.unary()), False
         if v in SPACES:
             return f'<mspace width="{SPACES[v]}"/>', False
         if v in ("sum", "int"):
@@ -244,7 +282,7 @@ class _Parser:
                 if t[0] == "}":
                     break
                 if t[0] == "op":
-                    out.append(f"<mo>{html.escape(t[1], quote=False)}</mo>")
+                    out.append(_mo(t[1]))
                     continue
                 if t[0] not in ("id", "num"):
                     raise MathError(f"\\{v} holds {t[1]!r}, not letters")

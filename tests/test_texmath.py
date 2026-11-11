@@ -62,15 +62,16 @@ class Forms(unittest.TestCase):
 
     def test_an_integral_and_a_set(self):
         self.assertEqual(body("\\{\\int x\\,d\\mu|n\\in \\mathbb {N}\\}"),
-                         "<mo>{</mo><mo>∫</mo><mi>x</mi><mspace width=\"0.1667em\"/><mi>d</mi><mi>μ</mi>"
-                         "<mo>|</mo><mi>n</mi><mo>∈</mo><mi>ℕ</mi><mo>}</mo>")
+                         "<mo stretchy=\"false\">{</mo><mo>∫</mo><mi>x</mi><mspace width=\"0.1667em\"/>"
+                         "<mi>d</mi><mi>μ</mi><mo stretchy=\"false\">|</mo><mi>n</mi><mo>∈</mo><mi>ℕ</mi>"
+                         "<mo stretchy=\"false\">}</mo>")
         self.assertIn('<munderover><mo movablelimits="false">∫</mo>', body("\\int\\limits_0^1 x"))
 
     def test_a_times_sign_as_written(self):
         self.assertEqual(body("70×6"), "<mn>70</mn><mo>×</mo><mn>6</mn>")
 
     def test_a_bold_group_keeps_its_brackets(self):
-        self.assertEqual(body("\\mathbf {A(r)}"), "<mi>𝐀</mi><mo>(</mo><mi>𝐫</mi><mo>)</mo>")
+        self.assertEqual(body("\\mathbf {A(r)}"), '<mi>𝐀</mi><mo stretchy="false">(</mo><mi>𝐫</mi><mo stretchy="false">)</mo>')
 
     def test_letters_of_a_style_are_their_own_characters(self):
         self.assertEqual(body("\\mathbb{R}"), "<mi>ℝ</mi>")
@@ -95,7 +96,8 @@ class Forms(unittest.TestCase):
         # browser sets it upright, and TeX's thin space stands before a letter or
         # a number, not before a bracket, as its spacing table has it.
         self.assertEqual(body("\\cos\\theta"), '<mi>cos</mi><mspace width="0.1667em"/><mi>θ</mi>')
-        self.assertEqual(body("\\cos(x)"), "<mi>cos</mi><mo>(</mo><mi>x</mi><mo>)</mo>")
+        self.assertEqual(body("\\cos(x)"),
+                         '<mi>cos</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo>')
         self.assertEqual(body("\\cos^2\\theta"),
                          '<msup><mi>cos</mi><mn>2</mn></msup><mspace width="0.1667em"/><mi>θ</mi>')
         self.assertEqual(body("{3\\cos^2\\theta - 1 \\over 2}"),
@@ -103,6 +105,40 @@ class Forms(unittest.TestCase):
                          '<mspace width="0.1667em"/><mi>θ</mi><mo>−</mo><mn>1</mn></mrow><mn>2</mn></mfrac>')
         self.assertEqual(body("\\sin\\theta"), '<mi>sin</mi><mspace width="0.1667em"/><mi>θ</mi>')
         self.assertEqual(texmath.drawn(texmath.convert("\\cos\\theta")), {"c", "o", "s", "𝜃"})
+
+    def test_a_plain_bracket_never_stretches(self):
+        # 14:1.9's $N_k=35k+(-1)^k+3$ (Tigran, 2026-11-11: "the parentheses are
+        # crooked, one lower than the other"): MathML stretches a row's brackets
+        # to the row and centres them, and the ) that carries the k is not one
+        # of the row's, so the ( moved and the ) did not.  TeX stretches a
+        # bracket only for \left and \right, which are not in the set.
+        self.assertEqual(body("(-1)^k"),
+                         '<mo stretchy="false">(</mo><mo form="prefix">−</mo><mn>1</mn>'
+                         '<msup><mo stretchy="false">)</mo><mi>k</mi></msup>')
+        for tex in ("f(a,b)", "[1-x]", "\\{a\\}", "|x|", "g(r,\\theta)={GM \\over r^2}(R/r)^2"):
+            with self.subTest(tex=tex):
+                out = body(tex)
+                for ch in "()[]{}|":
+                    self.assertNotIn(f"<mo>{ch}</mo>", out)
+        # An accent's mark still stretches over what it stands on.
+        self.assertEqual(body("\\overline{ab}"),
+                         '<mover accent="true"><mrow><mi>a</mi><mi>b</mi></mrow><mo>¯</mo></mover>')
+
+    def test_a_sign_with_nothing_before_it_is_no_binary_operator(self):
+        # TeX's rule: at the start of its list, or after an operator, a
+        # relation, an opening bracket or a comma, a sign is set close to its
+        # number; MathML takes one in the middle of a row for binary.
+        unary = '<mo form="prefix">−</mo>'
+        for tex in ("-1", "(-1)", "P_2=-{1 \\over 2}", "10^{-5}", "(a,-b)", "a\\times -b", "a=\\,-1",
+                    "{1 \\over -2}", "\\cos -x"):
+            with self.subTest(tex=tex):
+                self.assertIn(unary, body(tex))
+        for tex in ("2^3-1", "x_{k}-1", "(a)-b", "n!-1", "3\\cos^2\\theta-1", "\\mu-1", "|-1|", "N_{k-1}"):
+            with self.subTest(tex=tex):
+                self.assertIn("<mo>−</mo>", body(tex))
+                self.assertNotIn(unary, body(tex))
+        self.assertEqual(body("\\pm 1"), '<mo form="prefix">±</mo><mn>1</mn>')
+        self.assertEqual(body("a+b"), "<mi>a</mi><mo>+</mo><mi>b</mi>")
 
     def test_a_root_draws_the_radical_sign(self):
         # No token carries it: the browser draws √ for <msqrt> from the font,

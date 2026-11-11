@@ -88,6 +88,32 @@ RE_LEADING_HYPHEN = re.compile(r"(?:^|(?<=[\s(\[/“‘]))-[^\W\d_]+")
 # Measured between the places a line may break anyway: a space, a dash, a slash.
 RE_TIED = re.compile(r"[^\s\u00a0\u202f—–/-]+(?:[\u00a0\u202f][^\s\u00a0\u202f—–/-]+)+")
 TIED_MAX = 24
+# What is typed against a formula stays on its line, as TeX sets it, which
+# breaks a line at a space: to a browser a formula is a box, with a break
+# allowed on either side of it, and 14:1.9's ", ε > 0" began a line
+# (2026-11-11).  The punctuation that opens or closes around it, always; and
+# whatever else is typed against it, an ordinal's "th", a number, where that is
+# short and has no hyphen or dash, after which a line may break anyway.
+RE_MATH_RUN = re.compile(f"[^\\s\u00a0\u202f]*[{chr(SENTINEL)}-{chr(FIG_SENTINEL - 1)}][^\\s\u00a0\u202f]*")
+GLUE_MAX = 16
+
+
+def glued(text: str) -> list[tuple[int, int]]:
+    """Where each formula of `text`, a private-use character, and what is typed
+    against it are to be kept together: (start, end), more than the formula."""
+    out = []
+    for m in RE_MATH_RUN.finditer(text):
+        run = m.group()
+        at = [k for k, c in enumerate(run) if SENTINEL <= ord(c) < FIG_SENTINEL]
+        left, right = run[:at[0]], run[at[-1] + 1:]
+        if len(left) > GLUE_MAX or re.search("[-–—]", left):
+            left = re.search(r"[(\[“‘]*$", left).group()
+        if len(right) > GLUE_MAX or re.search("[-–—]", right):
+            right = re.match(r"[,.;:!?)\]’”]*", right).group()
+        a, b = m.start() + at[0] - len(left), m.start() + at[-1] + 1 + len(right)
+        if b - a > 1:
+            out.append((a, b))
+    return out
 # A paragraph's reference is a link only as \bibref sets it; written bare,
 # 187:4.1, it is text, and nothing said so: Paper 11's review wrote all 49 of
 # its references so, and Tigran asked why none was a link (2026-11-05).
@@ -555,6 +581,11 @@ def expand(tex: str, paras, sources: dict, where: str, report,
     for i in range(len(maths)):
         if ex.text.count(chr(SENTINEL + i)) != 1:
             report.hard("study-math-lost", where, f"${maths[i]}$ did not survive its macro")
+    # Kept with what is typed against it (glued), unless that would cross
+    # another span's edge, which render() cannot nest.
+    for a, b in glued(ex.text):
+        if not any(s.start < a < s.end < b or a < s.start < b < s.end for s in ex.spans):
+            ex.spans.append(Span(a, b, "nobreak"))
     html = render(ex.text, ex.spans, shy=hyphenator.points(ex.text, ex.spans) if hyphenator else ())
     for i, m in enumerate(maths):
         try:
