@@ -1,0 +1,32 @@
+<svg class="sfig" viewBox="0 0 320 300" role="img" aria-label="The two belts of dark gravity bodies. Above, as rings round Havona: the inner turning counterclockwise, the outer clockwise, and a dashed line from the center across both. Below, the cut along that line: the inner belt a tube, three concentric circles, h high; the outer a thin upright wall, h/5 thick, its height of 10,000h broken off above and below" xmlns="http://www.w3.org/2000/svg">
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="52" cy="54" rx="30" ry="26" stroke-width="1.2"/>
+<ellipse cx="52" cy="54" rx="44" ry="38" stroke-width="1.2"/>
+<path d="M52 54H104" stroke-width="1" stroke-dasharray="4 3"/>
+<path d="M12 150H246" stroke-width="1" stroke-dasharray="4 3"/>
+<circle cx="122" cy="150" r="30" stroke-width="1.2"/>
+<circle cx="122" cy="150" r="20" stroke-width="1.2"/>
+<circle cx="122" cy="150" r="10" stroke-width="1.2"/>
+<path d="M164 120V180M160 120H168M160 180H168" stroke-width="1"/>
+<path d="M214 10H226V34L214 38ZM214 46L226 42V254L214 258ZM214 266L226 262V290H214Z" fill="currentColor" fill-opacity=".16" stroke-width="1.2"/>
+<path d="M252 10V290M248 10H256M248 290H256" stroke-width="1"/>
+<path d="M197 226H207M233 226H243" stroke-width="1"/>
+</g>
+<g fill="currentColor" stroke="none">
+<ellipse cx="52" cy="54" rx="13" ry="11" fill-opacity=".16"/>
+<ellipse cx="52" cy="54" rx="3" ry="2.5"/>
+<polygon points="48,28 55,25.2 55,30.8"/>
+<polygon points="56,80 49,77.2 49,82.8"/>
+<polygon points="56,16 49,13.2 49,18.8"/>
+<polygon points="48,92 55,89.2 55,94.8"/>
+<polygon points="5,150 12,146.5 12,153.5"/>
+<polygon points="214,226 207,223.2 207,228.8"/>
+<polygon points="226,226 233,223.2 233,228.8"/>
+</g>
+<foreignObject x="14" y="155" width="66" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">to Havona</div></foreignObject>
+<foreignObject x="171" y="124" width="14" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$h$</div></foreignObject>
+<foreignObject x="82" y="186" width="80" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">inner belt</div></foreignObject>
+<foreignObject x="128" y="12" width="80" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:right">outer belt</div></foreignObject>
+<foreignObject x="258" y="141" width="60" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab">$10,000h$</div></foreignObject>
+<foreignObject x="150" y="217" width="42" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:right">$h/5$</div></foreignObject>
+</svg>

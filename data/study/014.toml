@@ -1,0 +1,447 @@
+# Paper 14, The Central and Divine Universe: the British Study Edition has one
+# note on it at d6c3206, Tigran's own, the arithmetic of the seven circuits at
+# 14:1.9, carried and rewritten (F3): his formula and his conclusion kept, his
+# Russian note's simpler formula put first, and the appeal to Wolfram
+# Mathematica replaced by the reason, that the two excesses of an arithmetic
+# progression always make up 40/7 million.  Block has no chart for the paper,
+# and the press has no 1955 reading in it.  Everything else was found in
+# review, with no credit line: Plato's Timaeus behind the pattern universe
+# (Jowett's third edition, ../block-sources/originals/, the volume Paper 12
+# quotes the Republic from); the two verses joined at 14:1.12 and the
+# arithmetic of the Paradise-Havona day; the dark gravity bodies beside the
+# astronomers' dark matter of 1937 (Zwicky, originals/); the shape of the two
+# belts from the paper's own figures; Madison's "If men were angels" beside
+# 14:3.1 (the first edition of The Federalist, originals/); Revelation 21:27;
+# and the book's own fuller words elsewhere on the Spirits of the Circuits,
+# time on Paradise, triata and gravita, the hundred elements, the gravity
+# circuits, predictability, the Eternals of Days, Grandfanda, the concession of
+# a beginning, the billion systems, the Havoners' destinies, the unrevealed
+# orders, the seven stages of the ascent, fairness, the psychic circles, the
+# seven circuits in Paper 26, curiosity, the purpose of Havona, the Eternal
+# Son's bestowals, the Word, the Supreme in Havona and the finding of him, the
+# Creative Spirits' stages, Majeston, and the schools.  Four of Tigran's
+# Russian notes in ud are carried into English (14:1.12, 14:5.5, 14:6.17,
+# 14:6.33), each with the book's words that bear it out.  Sadler's Analytic
+# Study of Part I, pp. 339-355 on this paper (originals/), was read whole: its
+# only Bible references are the two verses at 14:1.12.  The Archive's full-text
+# search and the text of 511 books on Tigran's philosophy shelf and in
+# originals/ were searched for the paper's phrases, section 5's above all, and
+# nothing was found behind them.  The review, numbered F1-F39 in the order of
+# the text, is var/study/review-014.md.  Ruled by Tigran on 2026-11-11, in the
+# review's table and in chat: all 39 approved.  At his asking that day F10 has
+# a figure of the two belts (figures/dark-belts.svg), and The Federalist's
+# author stands in the Bibliography as "Publius [James Madison]", F16 saying
+# "writing as Publius".
+
+paper = 14
+chart = "none"
+
+# The works the notes quote, each under the key and words earlier papers gave
+# it where it has one.
+
+# Added: F16 quotes it, vol. II, p. 118 (PDF page 364), in Number LI; the
+# first edition on the Archive, both volumes in one file (originals/).  Its
+# title page names no author and each essay is signed PUBLIUS (No. LI on
+# p. 122, PDF page 368); No. 51 is Madison's by the usual attribution, hence
+# the brackets, the convention for an author the title page does not name.
+# Tigran asked why the brackets (2026-11-11) and chose "Publius [James
+# Madison]", who signed and who wrote, with "writing as Publius" in F16.
+[[source]]
+key = "Madison"
+origin = "none"
+tex = '''Publius [James Madison], \emph{The Federalist: A Collection of Essays, Written in Favour of the New Constitution}, No.~LI, vol.~II (New-York: J.~and A.~M'Lean, 1788).'''
+
+# Added: F2 and F19 quote it, pp. 449 and 456 (PDF pages 697 and 704), the
+# Timaeus in the volume of Jowett's third edition that Paper 12 quotes the
+# Republic from under the key Plato; a key names one work, so the Timaeus has
+# its own.
+[[source]]
+key = "PlatoTimaeus"
+origin = "none"
+tex = '''Plato, \emph{Timaeus}, in \emph{The Dialogues of Plato}, translated into English with analyses and introductions by Benjamin Jowett, third edition, vol.~III (Oxford: at the Clarendon Press, 1892).'''
+
+# Carried from Paper 3's key and words: F6 cites it, p. 341 (PDF page 359).
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# Added: F8 quotes it, pp. 218, 232 and 238 (PDF pages 2, 16 and 22), the
+# Astrophysics Data System's scan (originals/).
+[[source]]
+key = "Zwicky"
+origin = "none"
+tex = '''F.~Zwicky, ``On the Masses of Nebulae and of Clusters of Nebulae'', \emph{The Astrophysical Journal} 86 (1937), 217--246.'''
+
+# ---- 14:0.1
+
+# F1, proposed: where the mass is, 12:1.10; the seven trillion, 15:2.9
+[[note]]
+at = "14:0.1"
+after = "almost unbelievable mass"
+origin = "none"
+tex = '''Most of the mass is not in the billion worlds but about them: ``Owing to the enormous encircling masses of the dark gravity bodies about the fringe of the central universe, the mass content of this central creation is far in excess of the total known mass of all seven sectors of the grand universe'' (\bibref[12:1.10]{p012 1:10}), and the seven superuniverses hold ``approximately seven trillion inhabitable worlds'' (\bibref[15:2.9]{p015 2:9}). The dark gravity bodies are described at \bibref[14:1.14--18]{p014 1:14}.'''
+
+# ---- 14:0.2
+
+# F2, proposed: Plato's Timaeus, 28c-29b and 37d, in Jowett, pp. 449 and 456;
+# the Foreword's definition, by the note at 11:9.5; 4:0.2
+[[note]]
+at = "14:0.2"
+after = "the pattern universe"
+origin = "none"
+tex = '''The thought is as old as Plato's \emph{Timaeus}, where the maker of the world works from an eternal pattern: ``Which of the patterns had the artificer in view when he made the world,---the pattern of the unchangeable, or of that which is created? \ldots\ Every one will see that he must have looked to the eternal'', and the world so made ``must therefore of necessity \ldots\ be a copy of something'' (\cite{PlatoTimaeus}, p.~449; 28c--29b). Time itself belongs to the copy: ``he resolved to have a moving image of eternity \ldots\ and this image we call time'' (p.~456; 37d). The paper's pattern differs from Plato's in two things: it is no idea but a universe of a billion worlds, ``actual and literal'' (\bibref[14:2.1]{p014 2:1}); and it has many copyists, each Creator Son striving ``to make his own universe eventually attain to these Paradise-Havona levels of perfection'' (\bibref[14:6.27]{p014 6:27}). The Foreword's definition, ``Pattern is a master design from which copies are made'', is in the note at \bibref[11:9.5]{p011 9:5}, and \bibref[4:0.2]{p004 0:2} says that Havona ``may serve as the pattern creation for all other universes''.'''
+
+# ---- 14:1.9
+
+# F3, the edition's, rewritten: his formula and conclusion kept; the formula of
+# his note in ud, N_k = 35k, put first; the appeal to Wolfram Mathematica
+# replaced by the reasons, each recomputed: a geometric progression from about
+# 35 to about 245 sums to 793-820, a harmonic one to 635-665, and for an
+# arithmetic one epsilon + delta = 40/7 identically, whence his range of mu,
+# whose mid-point, mu = 20/7, gives lambda = 35 exactly
+[[note]]
+at = "14:1.9"
+after = "proportionate numbers intervening"
+origin = "bf7c3b7796418a79"
+tex = '''The round numbers are those of $N_k=35k$, the worlds (in millions) of the $k$\ts{th} circuit: 35 on the first, 245 on the seventh, and $\sum\limits_{k=1}^7 35k=980$ in all, 20 short of the billion; hence ``upwards of'' and ``over''. One possible distribution in whole millions is given by the following neat formula: $N_k=35k+(-1)^k+3$, that is 37, 74, 107, 144, 177, 214 and 247, with $\sum\limits_{k=1}^7 N_k=1000$. It keeps $(N_{k+1}-N_{k-1})/2=35$, but it is not proportionate in any of the usual senses, arithmetic, geometric or harmonic; of the three it comes closest to the arithmetic, since $(N_{k+1}+N_{k-1})/2=N_k-2(-1)^k$, and never reaches it. Strict proportionality asks that each circuit's number be a mean of its neighbours', $N_k=f(N_{k+1},N_{k-1})$, with $N_1=35+\epsilon$, $N_7=245+\delta$, $\epsilon>0$, $\delta>0$ and a total of 1000; in principle $f$ could be any quasi\hyp{}arithmetic mean in Kolmogorov's sense, but take the three classical ones. The geometric mean, $f(a,b)=\sqrt{ab}$, makes the numbers a geometric progression, and one that runs from about 35 to about 245 adds up to some 800; the harmonic mean, $f(a,b)=2ab/(a+b)$, gives some 650: neither can reach the billion. The arithmetic mean, $f(a,b)=(a+b)/2$, makes them an arithmetic progression, $N_k=\lambda k+\mu$ with $28\lambda+7\mu=1000$, and then $\epsilon=(20+21\mu)/28$ and $\delta=5-3\mu/4$, so that $\epsilon+\delta=40/7$ whatever $\mu$ is: the two excesses always make up 5.7 million between them. So there is no solution with both below 2 million, and both are below 3 million only for $8/3<\mu<64/21$. In the middle of that range lies the simplest solution of all, $\mu=20/7$ and $\lambda=35$, that is $N_k=35k+20/7$: the missing 20 million shared equally among the seven circuits, 37.9 million worlds on the first and 247.9 on the seventh, within about a million of the whole numbers above on every circuit, and strictly proportionate, as the text demands. (With $\mu=0$ the numbers are as 1 to 7, $N_k=250k/7$: 35.7 million on the first circuit but a full 250 on the seventh, which would hardly be called ``over two hundred and forty-five''.)'''
+
+# F4, proposed: the Seven Spirits of the Circuits, 17:5.2-5, 26:2.6
+[[note]]
+at = "14:1.9"
+after = "one of the Seven Spirits of the Circuits"
+origin = "none"
+tex = '''Described at \bibref[17:5.1--5]{p017 5:1} and \bibref[26:2.6]{p026 2:6}: the collective creation of the Seven Master Spirits, each ``limited to the permeation of a single Havona circuit'', an impersonal presence with whom a pilgrim cannot ``hold personal communion'', and whose personal offspring are the tertiary supernaphim. They ``were not a part of the original pattern universe'': they ``undoubtedly appeared as a creative response of the Master Spirits to the emerging purpose of the Supreme Being, and they were discovered in function upon the organization of the grand universe''.'''
+
+# ---- 14:1.11
+
+# F5, proposed: time and Paradise, 11:2.11; motion and time, 12:5.1
+[[note]]
+at = "14:1.11"
+after = "Time is not reckoned on Paradise"
+origin = "none"
+tex = '''\bibref[11:2.11]{p011 2:11}: ``Time, as you understand it, is not a feature of Paradise existence, though the citizens of the central Isle are fully conscious of nontime sequence of events.'' Time comes with motion, ``motion is essential to time'' (\bibref[12:5.1]{p012 5:1}), and Havona is the nearest thing to Paradise that moves: hence a year for each circuit, shortest on the innermost, and the standard day of the next paragraph.'''
+
+# ---- 14:1.12
+
+# F6, proposed: Tigran's note in ud at these words gives the Psalm (89:5 in the
+# Russian numbering); carried into English with the verse of Peter joined to it
+# and Sadler's page
+[[note]]
+at = "14:1.12"
+after = "as but a watch in the night.”"
+origin = "none"
+tex = '''Two verses are joined here. Psalms~90:4: ``For a thousand years in thy sight are but as yesterday when it is past, and as a watch in the night''; and 2~Peter~3:8: ``one day is with the Lord as a thousand years, and a thousand years as one day.'' The day is Peter's, the watch in the night the psalmist's. Sadler sets both verses at this paragraph (\cite{Sadler2003}, p.~341).'''
+
+# F7, proposed: the arithmetic of the day; the other standard days, 46:1.2,
+# 33:6.7, 15:7.2
+[[note]]
+at = "14:1.12"
+after = "the present Urantia leap-year calendar"
+origin = "none"
+tex = '''The present calendar, the Gregorian, has 97 leap years in every 400, so that a thousand of its years average 365,242.5 days, or 31,556,952,000 seconds. Seven minutes, three and one-eighth seconds are 423.125 seconds, so the Paradise-Havona day is 31,556,951,576.875 seconds, that is 365,242 days, 11 hours, 52 minutes and 56.875 seconds: short of the thousand years by about one part in 75 million. The other standard days the book gives are Satania's, ``three days of Urantia time, less one hour, four minutes, and fifteen seconds'' (\bibref[46:1.2]{p046 1:2}); Nebadon's, ``eighteen days and six hours of Urantia time, plus two and one-half minutes'' (\bibref[33:6.7]{p033 6:7}); and Orvonton's, ``almost thirty days of Urantia time'' (\bibref[15:7.2]{p015 7:2}).'''
+
+# ---- 14:1.14
+
+# F8, proposed: what the book says of the dark gravity bodies elsewhere, 11:8.7
+# and 12:1.10; the astronomers' dark matter of 1937, Zwicky pp. 218, 232, 238;
+# the modern sense of the words (Planck 2018: 0.120 of cold dark matter against
+# 0.0224 of ordinary matter, in the paper's units, 84%); the last sentence is
+# the review's own reading (question 1)
+[[note]]
+at = "14:1.14"
+after = "neither reflect nor absorb light"
+origin = "none"
+tex = '''Of what they are made the book says only what they are not: ``The dark gravity bodies encircling Havona are neither triata nor gravita, and their drawing power discloses both forms of physical gravity, linear and absolute'' (\bibref[11:8.7]{p011 8:7}); and of their mass, that with them the central universe outweighs all seven superuniverses (\bibref[12:1.10]{p012 1:10}). When this was written the astronomers' ``dark matter'' was ordinary matter that does not shine. Zwicky, who in 1937 found in the nebulae of the Coma cluster some 500 times the sun's mass for each sun's worth of light, against about 3 among the stars around the sun, meant by it ``cool and cold stars, macroscopic and microscopic solid bodies, and gases'', matter that dims the light passing through it (\cite{Zwicky}, pp.~218, 232). Matter that neither gives out, reflects nor absorbs light, and is known by its gravity alone, is what physics has since come to mean by the words, and the Planck measurements of 2018 make it about 84\% of all the matter there is. The paper's bodies are not that matter: they are a belt about Havona, ``unique in the master universe'' (\bibref[14:1.18]{p014 1:18}); but the two marks it gives them are the modern definition, and their preponderance of mass is the modern finding. How bodies that do not absorb light can hide what lies behind them the paper does not say. In physics as we have it, the only hold such a body has on light is its gravity, which bends it; the same paper of Zwicky's proposed a search for nebulae acting as gravitational lenses (p.~238).'''
+
+# ---- 14:1.15
+
+# F9, proposed: the alternation through the master universe, 14:1.3, 12:4.15,
+# and its reason, 12:4.16; Paper 11's note at 11:7.9 points here
+[[note]]
+at = "14:1.15"
+after = "These alternate directions of motion"
+origin = "none"
+tex = '''The alternation runs through the whole master universe: the ten circuits of Paradise and Havona clockwise (\bibref[14:1.3]{p014 1:3}), the inner belt of dark gravity bodies counterclockwise, the outer clockwise, the seven superuniverses counterclockwise, the first outer space level clockwise and the second counterclockwise (\bibref[12:4.15]{p012 4:15}). Of the reason \bibref[12:4.16]{p012 4:16} says: ``It is probable that these alternate directions of successive space processions of the universes have something to do with the intramaster universe gravity technique of the Universal Absolute, which consists of a co-ordination of forces and an equalization of space tensions.'' See the note at \bibref[11:7.9]{p011 7:9}.'''
+
+# ---- 14:1.16
+
+# F10, proposed: the outer belt's shape from the paragraph's own figures:
+# 10,000 h high and a fifty-thousandth of that thick, h/5; with a figure,
+# figures/dark-belts.svg, at Tigran's asking (2026-11-11): the belts as rings
+# round Havona, and the cut through them
+[[note]]
+at = "14:1.16"
+after = "fifty thousand times that of the transverse diameter"
+origin = "none"
+tex = '''On the plain reading of the figures they give the outer belt's shape. If the inner belt, a tube of three rings one within another, is $h$ high, the outer is $10,000h$ high, and its thickness, the transverse diameter, is a fifty-thousandth of that, $h/5$: a wall ten thousand times as high as the tube and a fifth as thick as the tube is high, standing on edge (``arranged perpendicularly'') across the plane in which the worlds revolve. \figure{dark-belts} The figure shows, at the top, the two belts as rings round Havona, the inner turning counterclockwise and the outer clockwise (\bibref[14:1.15]{p014 1:15}), and under it what a cut along the dashed line would show: the tube and the wall in their proportions, except for the wall's height, which is broken off; drawn whole, it would be ten thousand times the tube's. How far the belts lie from Havona and from each other the paper does not say.'''
+
+# ---- 14:2.2
+
+# F11, proposed: triata and gravita, 42:2.16-17, 11:8.7, with Paper 11's note
+# on Uversa's names
+[[note]]
+at = "14:2.2"
+after = "Havona energies are threefold"
+origin = "none"
+tex = '''Uversa's names for the two are \bibemph{triata} and \bibemph{gravita}: ``Havona energy systems are not dual; they are triune'' (\bibref[42:2.16--17]{p042 2:16}), while the physical systems of the superuniverses ``are dual in constitution and are known as gravita'' (\bibref[11:8.7]{p011 8:7}; see the note at \bibref[11:8.5]{p011 8:5}). This paper has the first of the names at \bibref[14:3.6]{p014 3:6}.'''
+
+# ---- 14:2.3
+
+# F12, proposed: the hundred elements of a dual universe, 42:7.4, and of
+# morontia material, 48:1.3; the multiplication
+[[note]]
+at = "14:2.3"
+after = "exactly one thousand basic chemical elements"
+origin = "none"
+tex = '''Against the hundred of the superuniverses: ``There are just one hundred distinguishable atomic materializations of space-energy in a dual universe; that is the maximum possible organization of matter in Nebadon'' (\bibref[42:7.4]{p042 7:4}); the architectural worlds have besides ``exactly one hundred forms of a unique energy organization called morontia material'' (\bibref[48:1.3]{p048 1:3}). The senses follow by multiplication: seven energies in seven phases of excitation, $7\times7=49$; and the range of the spirit orders, seventy to two hundred and ten, is from once to three times the seventy of the morontia senses.'''
+
+# ---- 14:2.7
+
+# F13, proposed: the rule of spirit gravity, 7:1.2-3; the four circuits, 12:3.1-5
+[[note]]
+at = "14:2.7"
+after = "more fully spiritualized"
+origin = "none"
+tex = '''The rule is at \bibref[7:1.3]{p007 1:3}: ``Spirit realities respond to the drawing power of the center of spiritual gravity in accordance with their qualitative value, their actual degree of spirit nature''; nor does the pull weaken with distance: ``It does not decrease in accordance with the square of the distance of its transmission'' (\bibref[7:1.2]{p007 1:2}). This paragraph, the one before and the one after name three of the four absolute-gravity circuits of \bibref[12:3.1--5]{p012 3:1}, those of Paradise, of the Son and of the Spirit; the fourth is the personality gravity of the Father.'''
+
+# ---- 14:2.9
+
+# F14, proposed: predictability, 7:1.8, 9:6.8, 12:6.5
+[[note]]
+at = "14:2.9"
+after = "but mind phenomena and personality volition are not"
+origin = "none"
+tex = '''The earlier papers found the same of each in turn: ``All reactions of the spirit-gravity circuit of the grand universe are predictable'' (\bibref[7:1.8]{p007 1:8}); ``The mind-gravity circuit is dependable \ldots\ but not all the observable function of mind is predictable'' (\bibref[9:6.8]{p009 6:8}); ``The universe is highly predictable only in the quantitative or gravity-measurement sense'' (\bibref[12:6.5]{p012 6:5}). Havona's perfection leaves its creatures their freedom, which is why the next sentence infers that sin is impossible there, from the record, and does not assert it.'''
+
+# F15, proposed: Revelation 21:27; 30:4.21, 10:6.17
+[[note]]
+at = "14:2.9"
+after = "prematurely admitted to the central universe"
+origin = "none"
+tex = '''Compare Revelation~21:27, of the heavenly city: ``And there shall in no wise enter into it any thing that defileth, neither whatsoever worketh abomination, or maketh a lie: but they which are written in the Lamb's book of life.'' The sifting is over long before Havona: from the day a mortal leaves his local universe his status ``is forever settled. Superuniverse wards have never been known to go astray'' (\bibref[30:4.21]{p030 4:21}); and in the central universe the judgments of the Ancients of Days ``exist in theory only; there fairness is self-evident in perfection, and Havona perfection precludes all possibility of disharmony'' (\bibref[10:6.17]{p010 6:17}).'''
+
+# ---- 14:3.1
+
+# F16, proposed: Madison, The Federalist, No. 51 (vol. II, p. 118 of the first
+# edition); the superuniverses' branches, 15:11.1, 15:12.1; 71:3.9
+[[note]]
+at = "14:3.1"
+after = "the height of the ideals of true self-government"
+origin = "none"
+tex = '''Compare Madison, writing as Publius, in \emph{The Federalist}, No.~51: ``But what is government itself but the greatest of all reflections on human nature? If men were angels, no government would be necessary. If angels were to govern men, neither external nor internal controls on government would be necessary'' (\cite{Madison}, p.~118). The next paragraph gives Madison's reason: ``There is no need of government among such perfect and near-perfect intelligences.'' Between Havona and Urantia the book has the degrees: a superuniverse has its executive and its deliberative branch (\bibref[15:11.1]{p015 11:1}) and its courts (\bibref[15:12.1]{p015 12:1}), and of the states of earth it says, ``That state is best which co-ordinates most while governing least'' (\bibref[71:3.9]{p071 3:9}).'''
+
+# ---- 14:3.3
+
+# F17, proposed: the Eternals of Days, 18:2.1-3; why no two worlds are alike,
+# 14:5.6
+[[note]]
+at = "14:3.3"
+after = "the resident Eternal of Days"
+origin = "none"
+tex = '''\bibref[18:2.1--3]{p018 2:1}: the Eternals of Days ``number exactly one billion, one for each of the Havona spheres'', Supreme Trinity Personalities who ``function without rotation or reassignment'' and have developed their spheres ``entirely in accordance with their own personal ideas and ideals. They visit each other's planets, but they do not copy or imitate; they are always and wholly original'': which is why no two of the worlds are alike (\bibref[14:5.6]{p014 5:6}).'''
+
+# ---- 14:3.4
+
+# F18, proposed: the landing, 26:4.11-12; Grandfanda, 24:6.8
+[[note]]
+at = "14:3.4"
+after = "the receiving worlds of the outer or seventh circuit"
+origin = "none"
+tex = '''They are carried ``past the dark gravity bodies of Havona to the outer planetary circuit by the transport personalities of the primary order of seconaphim'' (\bibref[26:4.11]{p026 4:11}) and land on the pilot world of the seventh circuit (\bibref[26:4.12]{p026 4:12}). The first to land was Grandfanda, of ``planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one'' (\bibref[24:6.8]{p024 6:8}). The stages inward are at \bibref[14:5.4]{p014 5:4}.'''
+
+# ---- 14:4.10
+
+# F19, proposed: the same concession at 8:1.9-10; Plato's "tale which is
+# probable", Timaeus 29c-d, Jowett p. 449
+[[note]]
+at = "14:4.10"
+after = "require a concept of “beginnings.”"
+origin = "none"
+tex = '''Paper~8 made the same concession when it told the origin of the Infinite Spirit and of Havona together: ``the Infinite Spirit testifies that, since he is eternal, so also is the central universe eternal. And this is the traditional starting point of the history of the universe of universes'' (\bibref[8:1.9]{p008 1:9}); ``we thus portray the sequential origin of the Third Source and Center as an interpretative condescension to the time-bound and space-conditioned mind of mortal creatures. The mind of man must have a starting point'' (\bibref[8:1.10]{p008 1:10}). Plato makes it too: of the eternal pattern one may speak with certainty, of the making of its copy we must ``accept the tale which is probable and enquire no further'' (\cite{PlatoTimaeus}, p.~449; 29d).'''
+
+# ---- 14:4.11
+
+# F20, proposed: the billion systems of a superuniverse, 15:2.3-8, multiplied
+# out; the Material Sons, 51:1.1
+[[note]]
+at = "14:4.11"
+after = "a billion local systems in a superuniverse"
+origin = "none"
+tex = '''By \bibref[15:2.3--8]{p015 2:3} a superuniverse is ten major sectors, each of a hundred minor sectors, each of a hundred local universes, each of a hundred constellations, each of a hundred systems: $10\times100\times100\times100\times100=1,000,000,000$ systems, as many as Havona has worlds. The material order of sonship is that of the Material Sons and Daughters, the Adams and Eves (\bibref[51:1.1]{p051 1:1}).'''
+
+# ---- 14:4.14
+
+# F21, proposed: the Havoners' destinies, 19:6.3-4, 31:1.1
+[[note]]
+at = "14:4.14"
+after = "future unrevealed destinies"
+origin = "none"
+tex = '''\bibref[19:6.3--4]{p019 6:3}: ``Havoners may evolve in status, may have an unrevealed future eternity-destiny'', as those do who ``qualify for membership in the Mortal Corps of the Finality''; ``millions upon millions'' of them are on its waiting list (\bibref[31:1.1]{p031 1:1}), and since no more are being created, ``the number of natives remaining in Havona is constantly diminishing''.'''
+
+# ---- 14:4.18
+
+# F22, proposed: the Bible's pattern, by Paper 11's note at 11:3.1
+[[note]]
+at = "14:4.18"
+after = "these pattern spheres on high"
+origin = "none"
+tex = '''Pattern is the Bible's word for the heavenly original as well: Moses was to make the tabernacle ``according to the pattern shewed to thee in the mount'' (Hebrews~8:5, from Exodus~25:40; see the note at \bibref[11:3.1]{p011 3:1}). There it is the pattern of a sanctuary, here of every order of creature; on the pattern universe as a whole see the note at \bibref[14:0.2]{p014 0:2}.'''
+
+# ---- 14:4.21
+
+# F23, proposed: Paper 30's two classifications and their unrevealed orders
+[[note]]
+at = "14:4.21"
+after = "omitted from the personality classifications"
+origin = "none"
+tex = '''The classifications are Paper~30's: the Paradise classification of living beings (\bibref[30:1.1]{p030 1:1}) and the Uversa personality register (\bibref[30:2.1]{p030 2:1}). The first names what it leaves out, group by group: ``Unrevealed Trinity-origin Beings'', ``Unrevealed Sons of God'', ``Unrevealed Ascenders'' and more.'''
+
+# ---- 14:5.1
+
+# F24, proposed: the seven stages of the ascending career, 30:4.1-8
+[[note]]
+at = "14:5.1"
+after = "prepared for eventual transit to Havona"
+origin = "none"
+tex = '''\bibref[30:4.1--8]{p030 4:1} sets out the career in seven stages: planetary mortals, sleeping survivors, mansion world students, morontia progressors, superuniverse wards, Havona pilgrims and Paradise arrivals.'''
+
+# ---- 14:5.3
+
+# F25, proposed: the other sum for fairness, 2:4.4; 10:6.17.  "Perhaps
+# because" is the review's reading
+[[note]]
+at = "14:5.3"
+after = "would be denominated fairness"
+origin = "none"
+tex = '''At \bibref[2:4.4]{p002 4:4} the sum is another: ``Eternal justice and divine mercy together constitute what in human experience would be called fairness.'' There mercy is one of the two terms; here righteousness stands in its place, perhaps because in Havona nothing waits to be forgiven: in the central universe ``fairness is self-evident in perfection'' (\bibref[10:6.17]{p010 6:17}).'''
+
+# ---- 14:5.4
+
+# F26, proposed: the seven psychic circles, 110:6.1
+[[note]]
+at = "14:5.4"
+after = "the circles of progress in the human mind have been designated"
+origin = "none"
+tex = '''The seven psychic circles of \bibref[110:6.1]{p110 6:1}, counted as Havona's are, from the seventh inward to the first: ``Entrance upon the seventh circle marks the beginning of true human personality function. Completion of the first circle denotes the relative maturity of the mortal being.'''''
+
+# F27, proposed: the same road in Paper 26, a section to each circuit
+[[note]]
+at = "14:5.4"
+after = "admission to the Corps of the Finality"
+origin = "none"
+tex = '''Paper~26 goes over the same road, a section to each circuit, under the names of the secondary supernaphim who serve the pilgrims on it (\bibref[26:4.2--9]{p026 4:2}): the pilgrim helpers of the seventh circle (\bibref[26:5.1]{p026 5:1}), the supremacy guides of the sixth (\bibref[26:6.1]{p026 6:1}), the Trinity guides of the fifth (\bibref[26:7.1]{p026 7:1}), the Son finders of the fourth (\bibref[26:8.1]{p026 8:1}), the Father guides of the third (\bibref[26:9.1]{p026 9:1}), the counselors and advisers of the second (\bibref[26:10.1]{p026 10:1}) and the complements of rest of the first (\bibref[26:11.1]{p026 11:1}).'''
+
+# ---- 14:5.5
+
+# F28, proposed: Tigran's note in ud at this word, carried into English, with
+# the word's model and the transport personalities of Havona, 26:3.9
+[[note]]
+at = "14:5.5"
+after = "ensupernaphimed"
+origin = "none"
+tex = '''That is, carried within a transport supernaphim, as one is carried within a transport seraphim in the local creations: the word is made on \bibemph{enseraphimed} (\bibref[39:2.11--12]{p039 2:11}, \bibref[39:5.13--14]{p039 5:13}). The transport personalities of Havona are tertiary supernaphim, who ``stand ready to serve all who must come and go in the service of Havona, and who are not space traversers'' (\bibref[26:3.9]{p026 3:9}).'''
+
+# ---- 14:5.11
+
+# F29, proposed: where the endowment comes from, 36:5.9; 16:7.1
+[[note]]
+at = "14:5.11"
+after = "a part of the inborn and divine endowment"
+origin = "none"
+tex = '''It is the fourth of the seven adjutant mind-spirits: ``The spirit of knowledge---the curiosity-mother of adventure and discovery, the scientific spirit'' (\bibref[36:5.9]{p036 5:9}); and ``scientific curiosity'' is one of the three ``inalienables of human nature'', with moral intuition and spiritual insight (\bibref[16:7.1]{p016 7:1}).'''
+
+# ---- 14:6.6
+
+# F30, proposed: the purpose of Havona as Paper 4 began with it, 4:0.2
+[[note]]
+at = "14:6.6"
+after = "supreme parental satisfaction"
+origin = "none"
+tex = '''Paper~4 opened with this: ``the purpose in creating the perfect central universe of Havona was purely the satisfaction of the divine nature. Havona may serve as the pattern creation for all other universes and as the finishing school for the pilgrims of time on their way to Paradise; however, such a supernal creation must exist primarily for the pleasure and satisfaction of the perfect and infinite Creators'' (\bibref[4:0.2]{p004 0:2}). The section is that sentence drawn out, for seven orders of beings in turn.'''
+
+# ---- 14:6.13
+
+# F31, proposed: the Eternal Son's seven bestowals and the first Michael's,
+# 7:5.5-9, with Paper 7's note there
+[[note]]
+at = "14:6.13"
+after = "the spirit and technique of the bestowal ministry"
+origin = "none"
+tex = '''The seven bestowals of \bibref[7:5.5--9]{p007 5:5}: ``Long, long ago the Eternal Son bestowed himself upon each of the circuits of the central creation'', not as an ascender or a Havoner, ``He existed as himself''; and the first-born Michael afterwards ``literally passed through the circuits of the central universe'' with the pilgrims, in the days of Grandfanda. See the note at \bibref[7:5.9]{p007 5:9}.'''
+
+# ---- 14:6.15
+
+# F32, proposed: John 1:1, by Paper 6's note at 6:1.3
+[[note]]
+at = "14:6.15"
+after = "the Son is the Word of the Father"
+origin = "none"
+tex = '''John~1:1: ``In the beginning was the Word, and the Word was with God, and the Word was God'', which \bibref[6:1.3]{p006 1:3} says would have been the truth had it been written of the Eternal Son; see the note there.'''
+
+# ---- 14:6.17
+
+# F33, proposed: Tigran's note in ud at these words ("That is, with Havona
+# itself"), carried into English with 8:1.7
+[[note]]
+at = "14:6.17"
+after = "absolute coexistence with this divine achievement"
+origin = "none"
+tex = '''That is, with Havona itself: ``The Infinite Spirit eternalizes concurrently with the birth of the Havona worlds, this central universe being created by him and with him and in him'' (\bibref[8:1.7]{p008 1:7}).'''
+
+# ---- 14:6.23
+
+# F34, proposed: the Supreme in Havona, 0:7.7, 0:8.10
+[[note]]
+at = "14:6.23"
+after = "the spiritual reality of the Supreme Being"
+origin = "none"
+tex = '''The Foreword: ``God the Supreme in Havona is the personal spirit reflection of the triune Paradise Deity'' (\bibref[0:7.7]{p000 7:7}). His other phase, the power of the Almighty, is evolving in the superuniverses, and the two are one: ``The Almighty Supreme, evolving on the value-level of nonpersonal activities, and the spirit person of God the Supreme are one reality---the Supreme Being'' (\bibref[0:8.10]{p000 8:10}).'''
+
+# ---- 14:6.32
+
+# F35, proposed: the stages of a Creative Spirit's career, 17:6.3-10
+[[note]]
+at = "14:6.32"
+after = "secure their prepersonal training"
+origin = "none"
+tex = '''The stages of a Creative Spirit's career are at \bibref[17:6.3--10]{p017 6:3}. This is the second, ``Preliminary Creatorship Training'', which runs with her future consort's own, when she ``becomes group conscious of destiny'' (\bibref[17:6.4]{p017 6:4}); she is not yet a person, and becomes one only at the fourth (\bibref[17:6.7]{p017 6:7}).'''
+
+# ---- 14:6.33
+
+# F36, proposed: Tigran's note in ud at "sponsors", carried into English: the
+# confirmation at the end of the local universe career, 30:4.21
+[[note]]
+at = "14:6.33"
+after = "jointly sponsors with an associated Creator Son"
+origin = "none"
+tex = '''The sponsoring is at the end of the local universe career: before leaving for the superuniverse the mortals of time ``are recipients of spirit confirmation from the Creator Son and the local universe Mother Spirit'' (\bibref[30:4.21]{p030 4:21}).'''
+
+# ---- 14:6.36
+
+# F37, proposed: Majeston, 17:2.2-5; why the Daughter Spirits do not return,
+# 34:4.7
+[[note]]
+at = "14:6.36"
+after = "personalized in Majeston on Paradise"
+origin = "none"
+tex = '''Majeston is ``the reflectivity chief and Paradise center of all the work of the forty-nine Reflective Spirits'', personalized when the last of them had appeared: ``the first supreme creative act of the Supreme Being'' (\bibref[17:2.2--5]{p017 2:2}). The Daughter Spirits are not likely to return because a Universe Mother Spirit ``never leaves the local universe headquarters world'' (\bibref[34:4.7]{p034 4:7}).'''
+
+# ---- 14:6.38
+
+# F38, proposed: attained, not found: 26:6.2-3, 56:6.4, 16:3.19
+[[note]]
+at = "14:6.38"
+after = "Here mortals attain pre-Paradise Deity—the Supreme Being"
+origin = "none"
+tex = '''Attain, but in this age not find. On the sixth circuit the pilgrims ``achieve a new realization of Supreme Divinity'', yet ``No personalized presence of Supremacy is perceptible to the ascenders'' (\bibref[26:6.2--3]{p026 6:2}); they achieve ``personality comprehension of the Supreme on the outer circuits of Havona, they do not actually find the Supreme Being as they are destined to find the Paradise Deities. Even the finaliters, sixth-stage spirits, have not found the Supreme Being'' (\bibref[56:6.4]{p056 6:4}). Meanwhile the Seventh Master Spirit ``functions in the place of the God of ascendant creatures in the matter of personal relationships'' (\bibref[16:3.19]{p016 3:19}).'''
+
+# ---- 14:6.41
+
+# F39, proposed: the school as the book's figure, 28:7.1, 14:5.9; the outer
+# space levels, 12:1.14-16
+[[note]]
+at = "14:6.41"
+after = "the primary schools of outer space"
+origin = "none"
+tex = '''The school is the book's standing figure for the ascent: the worlds about Uversa are ``the finishing schools of the universes of time, presenting the preparatory course for the seven-circuited university of Havona'' (\bibref[28:7.1]{p028 7:1}), and each Havona world is ``a veritable university of surprises'' (\bibref[14:5.9]{p014 5:9}). Here the whole scheme is moved outward a step, to the day when the outer space levels of \bibref[12:1.14--16]{p012 1:14} are peopled and theirs are the primary schools.'''
