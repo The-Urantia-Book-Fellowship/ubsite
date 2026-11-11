@@ -193,14 +193,16 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # c0db98c: one headword fewer, two gone and one new.  One more since
 # 2026-10-24: the page about the text API, kept with the address it is read at.
 [offline]
-measured_on = "2026-11-09"
-pages       = 10611      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,879 reading paths,
+measured_on = "2026-11-11"
+pages       = 10612      # 1,626 sections, 4,736 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,879 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
                          # 197 more the same day: the whole paper's page, /N, joined from its
                          # sections' pieces, 0.3 MB in all (Settings' Whole paper); one more
                          # since 2026-11-01, at index 682e07d: vale of tears, read by theme too;
-                         # and one since 2026-11-09, at index 9483c80: terrestrial escape
+                         # and one since 2026-11-09, at index 9483c80: terrestrial escape;
+                         # and one since 2026-11-11, at index 1a29371: a headword more, war in
+                         # heaven, which sends to Lucifer rebellion
 paths       = 3879       # 2,057 headwords in book order, 1,822 of them by theme too (1,820 until
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
                          # 1,821 until 2026-11-09: terrestrial escape cites a second chapter since its reading of Papers 49-52)
