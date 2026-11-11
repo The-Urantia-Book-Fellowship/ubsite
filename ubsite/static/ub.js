@@ -1537,7 +1537,9 @@
   // and kept, which offline the worker answers from the copy; its number,
   // 1955 page, pilcrow, note numbers and rings go, so a preview carries the
   // words alone and opens nothing further.  One at a time, over any note card
-  // that is open, which stays.
+  // that is open, which stays.  A range is shown whole, the card scrolling
+  // (Tigran, 2026-11-11: 30:4.1-8, the seven stages of the ascent, stopped at
+  // the fifth; six paragraphs at most until then, with "…" at the head).
   var PV = /^\/(\d+):(\d+)\.(\d+)(?:-(\d+))?$/, pv = null, pvSeq = 0, pvTimer = 0, pvHide = 0, pvPages = {};
   function pvOn() { return document.documentElement.dataset.preview === 'true'; }
   function pvLink(t) {
@@ -1562,7 +1564,7 @@
   }
   function pvParas(doc, r) {
     var out = [], n, p;
-    for (n = r.n; n <= Math.min(r.last, r.n + 5); n++) {
+    for (n = r.n; n <= r.last; n++) {
       p = doc.getElementById(r.p + ':' + r.s + '.' + n);
       if (!p) break;
       p = p.cloneNode(true);
@@ -1578,7 +1580,7 @@
   // English stands in.
   function pvTrParas(got, r) {
     var out = [], n, h, p;
-    for (n = r.n; n <= Math.min(r.last, r.n + 5); n++) {
+    for (n = r.n; n <= r.last; n++) {
       h = (got.t[r.tr] || {})[r.p + ':' + r.s + '.' + n];
       if (h == null) break;
       p = document.createElement('p');
@@ -1588,6 +1590,20 @@
       out.push(p);
     }
     return out;
+  }
+  // More than one: each begins with its number in its section, small and
+  // raised, as a verse's in a Bible (Tigran, 2026-11-11, once a range was
+  // shown whole); drawn from data-n (ub.css .pvn), as the pilcrow is drawn,
+  // so that copying the words never takes a number along.  They run from the
+  // first, pvParas and pvTrParas stopping at the first one missing.
+  function pvNumber(ps, r) {
+    if (ps.length > 1) ps.forEach(function (p, i) {
+      var s = document.createElement('sup');
+      s.className = 'pvn';
+      s.dataset.n = r.n + i;
+      p.insertBefore(s, p.firstChild);
+    });
+    return ps;
   }
   function pvShut() {
     clearTimeout(pvTimer); clearTimeout(pvHide); pvTimer = pvHide = 0; pvSeq++;
@@ -1614,7 +1630,7 @@
       return pvPage(r.p, r.s).then(function (doc) { return { ps: pvParas(doc, r), tr: '' }; });
     }).then(function (got) {
       if (seq !== pvSeq || !document.contains(r.a)) return;
-      var ps = got.ps, host, el, body;
+      var ps = pvNumber(got.ps, r), host, el, body;
       if (!ps.length) return;
       host = r.a.closest('article') || r.a.closest('main.results') || document.body;
       el = document.createElement('div');
@@ -1624,7 +1640,7 @@
       el.tabIndex = -1;
       el.innerHTML = '<span class="arrow"></span>' +
         '<button type="button" class="x" ' + T.a('aria-label', 'Close') + '>×</button>' +
-        '<div class="body"><p class="pvref"><a href="/' + ref + '">' + ref + (r.last > r.n + 5 ? ' …' : '') + '</a>' +
+        '<div class="body"><p class="pvref"><a href="/' + ref + '">' + ref + '</a>' +
         (got.tr ? ' <span class="pvtr">' + trBy[got.tr].label + '</span>' : '') + '</p></div>';
       body = el.querySelector('.body');
       ps.forEach(function (p) { body.appendChild(p); });

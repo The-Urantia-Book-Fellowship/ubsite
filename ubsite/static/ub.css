@@ -1175,6 +1175,11 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
 .pop.pv .pvref a { color: var(--link); text-decoration: none; }
 .pop.pv .pvref .pvtr { font-variant-caps: normal; letter-spacing: 0; color: var(--faint); font-size: .85em; }
 .pop.pv p.verse { text-align: start; }
+/* More than one paragraph: each with its number in its section, small, raised
+   and faint as the reference beside the text is (Tigran, 2026-11-11), drawn
+   from data-n, so that copying the words never takes it along. */
+.pop.pv sup.pvn { font-size: .62em; color: var(--faint); margin-right: .3em; user-select: none; }
+.pop.pv sup.pvn::before { content: attr(data-n); }
 
 /* As wide as the text: its measure is taken at the text's size, so the smaller
    size is its list's alone. */
