@@ -137,6 +137,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- With Whole paper and Paragraph previews both on, a tap on a reference on a phone shows the paragraph in a card, where it went to the place instead; and under the pointer, a reference already followed once shows its preview again.
+- On a phone, dragging on past the top or the bottom of a long note's card no longer moves the text under it, nor does a drag begun on the card's top edge, beside the ×.
 - In a study note's formula the brackets are the size of the text and level with each other, where one of a pair could stand lower than the other or both as tall as a fraction beside them; a minus sign after a bracket or an equals sign stands close to its number; and a comma or a full stop after a formula no longer begins the next line.
 - On a phone with the index folded, the line under a paragraph that opens its index entries and its translations stands close under that paragraph, where it stood nearer the next one.
 - Settings' Offline tab gives the size of Base alone under it, 48 MB, where it added the translations kept to it, each of which has its size on its own row.

@@ -1486,6 +1486,35 @@
     card.el.style.top = (M.bottom - H.top + 6) + 'px';
     card.el.querySelector('.arrow').style.left = (x - left - 6) + 'px';
   }
+  // A finger's drag on a card is the card's (Tigran, 2026-11-12: on his phone,
+  // dragging on past the end of a long note moved the text under it).  The
+  // words are held by overscroll-behavior (ub.css .pop .body), which Chrome
+  // honours wherever it was tried, but the strip above them, the ×'s, is not
+  // part of what scrolls, and a drag begun there moved the page.  So a
+  // stroke's first move decides it, once: where the words can scroll that way
+  // the browser has the stroke, as ever; where they cannot, at their end, in
+  // a card too short to scroll, or on the strip, the stroke is cancelled, and
+  // being no scroll at all it passes to nothing, whatever the browser makes
+  // of the stylesheet.  Two fingers are the browser's, a pinch, and so is a
+  // stroke while words are selected, a long press and its drag.  On the card
+  // alone, never the document: no other touch on the page waits for script.
+  function popTouch(el) {
+    var body = el.querySelector('.body'), x0 = 0, y0 = 0, mine = null;
+    el.addEventListener('touchstart', function (ev) {
+      x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY; mine = null;
+    }, { passive: true });
+    el.addEventListener('touchmove', function (ev) {
+      var t = ev.touches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+      if (ev.touches.length > 1 || !getSelection().isCollapsed) return;
+      if (mine === null) {
+        if (!dx && !dy) return;
+        mine = body.contains(ev.target) && (Math.abs(dy) >= Math.abs(dx)
+          ? (dy > 0 ? body.scrollTop > 1 : body.scrollHeight - body.clientHeight - body.scrollTop > 1)
+          : (dx > 0 ? body.scrollLeft > 1 : body.scrollWidth - body.clientWidth - body.scrollLeft > 1));
+      }
+      if (!mine && ev.cancelable) ev.preventDefault();
+    }, { passive: false });
+  }
   function open(mark) {
     var note = document.getElementById(mark.getAttribute('href').slice(1)),
         host = mark.closest('article') || mark.closest('main.results');
@@ -1500,6 +1529,7 @@
       '<button type="button" class="x" ' + T.a('aria-label', 'Close') + '>×</button>' +
       '<div class="body">' + note.innerHTML + '</div>';
     host.appendChild(el);
+    popTouch(el);
     card = { mark: mark, el: el, host: host };
     mark.classList.add('on');
     mark.setAttribute('aria-expanded', 'true');
@@ -1540,7 +1570,13 @@
   // that is open, which stays.  A range is shown whole, the card scrolling
   // (Tigran, 2026-11-11: 30:4.1-8, the seven stages of the ascent, stopped at
   // the fifth; six paragraphs at most until then, with "…" at the head).
-  var PV = /^\/(\d+):(\d+)\.(\d+)(?:-(\d+))?$/, pv = null, pvSeq = 0, pvTimer = 0, pvHide = 0, pvPages = {};
+  // The address is read in both its forms, /30:4.1-8 as the server writes it
+  // and /30#30:4.1-8 as ubUnit makes it with Whole paper on: the Whole paper
+  // handler, above, has the click first and rewrites the link, so that until
+  // 2026-11-12 a tap with Whole paper on found no paragraph in it and went
+  // there (Tigran, on his phone), and a reference once followed never showed
+  // its preview under the pointer again.
+  var PV = /^\/(\d+)(?::|#\1:)(\d+)\.(\d+)(?:-(\d+))?$/, pv = null, pvSeq = 0, pvTimer = 0, pvHide = 0, pvPages = {};
   function pvOn() { return document.documentElement.dataset.preview === 'true'; }
   function pvLink(t) {
     var a = t && t.closest && t.closest('a[href]'), m, c;
@@ -1645,6 +1681,7 @@
       body = el.querySelector('.body');
       ps.forEach(function (p) { body.appendChild(p); });
       host.appendChild(el);
+      popTouch(el);
       pv = { a: r.a, el: el, host: host, touch: byTouch };
       pvPlace();
       if (byTouch) el.focus({ preventScroll: true });
