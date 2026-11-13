@@ -338,24 +338,29 @@ window.ubUnit = function (where) {
       {%- endfor %}
       {#- What a fold needs of each: its name in a tab, and who made it. #}
       <script type="application/json" id="ub-translations">{{ translations_json()|safe }}</script>
-      {%- elif it.kind == 'trvoices' %}
-      {#- A menu of voices for each translation, which its ▶ in Compare reads
-          with, by its short name, as Compare names it: a recording of it
-          first, where there is one, which is what its ▶ plays until another
-          is chosen (data-rec, its key), then the browser's own choice, then
-          the browser's voices in its language, filled in by ub.js, which
-          shows those ticked and keeps them all in the hidden input, the
-          setting's value (settings.py trvoices). #}
-      <div class="trvoices"{{ needs|safe }} hidden><input type="hidden" name="{{ it.key }}">
+      {%- elif it.kind == 'voices' %}
+      {#- The voices, a menu against each text, the English first and then
+          each translation by its short name, as its column names it
+          (settings.py `voice`; Tigran, 2026-11-13).  A menu has the
+          recordings of its text (data-rec), the first of which reads it until
+          another voice is chosen, then the browser's voices in its language
+          by name, which ub.js fills in, each once: no "Automatic", and no
+          "Your browser's voice" beside them, which stands only until the
+          browser has listed its voices (option.any).  ub.js shows a
+          translation's row while it is ticked, and keeps what is chosen:
+          `voice` and `bvoice` for the English, `trvoices` for the rest, the
+          three settings these menus set, each in a hidden input as every
+          setting has a control of its name in its panel. #}
+      <div class="setvoices"{{ needs|safe }}><input type="hidden" name="voice"><input type="hidden" name="bvoice"><input type="hidden" name="trvoices">
       <p class="sub">{{ t(it.label) }}</p>
       {%- for c in it.choices %}
-      <label class="row set-bvoice" data-k="{{ c.value }}" data-lang="{{ c.lang }}"{% if c.rec %} data-rec="{{ c.rec[0].key }}"{% endif %} hidden>{{ c.label }} <select>
-        {%- if c.rec %}
-        <option value=""{{ ru(c.rec[0].label) }}>{{ tt(c.rec[0].label) }}</option>
-        <option value="browser"{{ ru('Your browser’s voice') }}>{{ tt('Your browser’s voice') }}</option>
-        {%- else %}
-        <option value=""{{ ru('Automatic') }}>{{ tt('Automatic') }}</option>
-        {%- endif %}</select></label>
+      <label class="row set-bvoice" data-k="{{ c.value }}" data-lang="{{ c.lang }}"{% if c.rec %} data-rec="{{ c.rec[0].key }}"{% endif %}{% if c.value %} hidden{% endif %}>{{ c.label if c.value else t(c.label) }} <select>
+        {#- Every recording of the English; a translation's first, which is
+            what `trvoices` leaves it with (the value ''). #}
+        {%- for v in (c.rec[:1] if c.value else c.rec) %}{% set w = tr('{a} · {b}', a=tr(v.label), b=tr(v.hint)) if v.hint else v.label %}
+        <option value="{{ '' if c.value else v.key }}" data-rec{{ ru(w) }}>{{ tt(w) }}</option>
+        {%- endfor %}
+        <option value="{{ 'browser' if c.rec or not c.value else '' }}" class="any"{{ ru('Your browser’s voice') }}>{{ tt('Your browser’s voice') }}</option></select></label>
       {%- endfor %}
       </div>
       {%- elif it.kind == 'select' %}

@@ -134,13 +134,10 @@
 "Merritt Horn" = "Мерритт Хорн"
 "Grigory Voyner" = "Григорий Войнер"
 "Your browser’s voice" = "Голос вашего браузера"
-"spoken by this browser, which keeps the screen on while it reads" = "читает сам браузер; пока он читает, экран не гаснет"
 "an AI voice" = "голос ИИ"
 "Listening controls" = "Кнопки прослушивания"
 "the play buttons beside each paragraph, for the English text and the translations" = "кнопки воспроизведения у каждого абзаца, для английского текста и для переводов"
-"Browser voice" = "Голос браузера"
-"Automatic" = "Автоматически"
-"Voices for the translations" = "Голоса для переводов"
+"Voices" = "Голоса"
 "{a} · {b}" = "{a} · {b}"
 "Speed" = "Скорость"
 "{r}×" = "{r}×"
@@ -404,7 +401,6 @@
 
 # --- ub.js: Settings, the folds, a note's card
 
-"Automatic: {v}" = "Автоматически: {v}"
 "Restore every setting to its default?" = "Вернуть все настройки к значениям по умолчанию?"
 "Show the contents" = "Показать содержание"
 "Fold the contents away" = "Свернуть содержание"

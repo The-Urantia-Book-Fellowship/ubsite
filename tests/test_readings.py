@@ -144,22 +144,47 @@ class Pages(unittest.TestCase):
         self.assertEqual(len(names), 1624)
 
     def test_settings_keep_it_from_the_english_text(self):
+        """Settings' Voices: a menu against each text, the English first; a
+        text's recordings in its own menu and no other's."""
         from ubsite import app as A
         groups = {g["key"]: g for g in settings.groups(A.voices(), A.translations())}
         items = {it["key"]: it for it in groups["listening"]["items"]}
-        self.assertEqual([c["value"] for c in items["voice"]["choices"]], ["mh", "browser"])
-        rec = {c["value"]: [v["key"] for v in c["rec"]] for c in items["trvoices"]["choices"]}
-        self.assertEqual(rec, {"ud": [], "urantia-ru": ["voyner"], "uf-ru": []})
-        self.assertEqual(items["trvoices"]["label"], "Voices for the translations")
+        self.assertEqual(items["voice"]["label"], "Voices")
+        texts = items["voice"]["choices"]
+        self.assertEqual([(c["value"], c["label"], c["lang"]) for c in texts],
+                         [("", "English text", "en"), ("ud", "Aivazian", "ru"), ("urantia-ru", "USGNY", "ru"),
+                          ("uf-ru", "UF-RUS", "ru")])
+        self.assertEqual({c["value"]: [v["key"] for v in c["rec"]] for c in texts},
+                         {"": ["mh"], "ud": [], "urantia-ru": ["voyner"], "uf-ru": []})
+        # The two settings the menus set besides have no control of their own.
+        self.assertEqual({k: items[k]["kind"] for k in ("bvoice", "trvoices")}, {"bvoice": "part", "trvoices": "part"})
         body = get("/15:3", raw=True)[2]
-        menu = re.search(r'<label class="row set-bvoice" data-k="urantia-ru"[^>]*>.*?</label>', body, re.S)[0]
-        self.assertIn('data-rec="voyner"', menu)
-        # The recording first, and the default: the value with nothing stored.
-        self.assertEqual(re.findall(r'<option value="([^"]*)"', menu), ["", "browser"])
-        self.assertIn('<option value="" data-ru="Григорий Войнер">Grigory Voyner</option>', menu)
-        other = re.search(r'<label class="row set-bvoice" data-k="uf-ru"[^>]*>.*?</label>', body, re.S)[0]
-        self.assertNotIn("data-rec", other)
-        self.assertEqual(re.findall(r'<option value="([^"]*)"', other), [""])
+        rows = re.findall(r'<label class="row set-bvoice" data-k="([^"]*)" data-lang="(\w+)"([^>]*)>(.*?)</label>', body, re.S)
+        self.assertEqual([(k, lang) for k, lang, _a, _b in rows],
+                         [("", "en"), ("ud", "ru"), ("urantia-ru", "ru"), ("uf-ru", "ru")])
+        menu = {k: (attrs, inner) for k, _lang, attrs, inner in rows}
+        options = {k: re.findall(r'<option value="([^"]*)"( data-rec| class="any")', inner) for k, (_a, inner) in menu.items()}
+        # The English text's: its recording by its key, then what stands for
+        # the browser's voices until it has listed them.  Shown from the first.
+        self.assertEqual(options[""], [("mh", " data-rec"), ("browser", ' class="any"')])
+        self.assertIn('<option value="mh" data-rec data-ru="Мерритт Хорн">Merritt Horn</option>', menu[""][1])
+        self.assertIn('data-rec="mh"', menu[""][0])
+        self.assertNotIn("hidden", menu[""][0])
+        # A translation's: the recording first, and the default, the value
+        # with nothing stored; hidden until ub.js finds it ticked.
+        self.assertEqual(options["urantia-ru"], [("", " data-rec"), ("browser", ' class="any"')])
+        self.assertIn('<option value="" data-rec data-ru="Григорий Войнер">Grigory Voyner</option>', menu["urantia-ru"][1])
+        self.assertIn('data-rec="voyner"', menu["urantia-ru"][0])
+        self.assertIn("hidden", menu["urantia-ru"][0])
+        self.assertEqual(options["uf-ru"], [("", ' class="any"')])
+        self.assertNotIn("data-rec", menu["uf-ru"][0])
+        # No voice is a radio button any more, the browser's have no menu of
+        # their own, and none is listed twice (Tigran, 2026-11-13).
+        dialog = body[body.index('<dialog class="settings"'):body.index("</dialog>")]
+        for gone in ('type="radio" name="voice"', '<select name="bvoice"', "Automatic<", "v-browser"):
+            self.assertNotIn(gone, dialog)
+        for name in ("Merritt Horn", "Grigory Voyner"):                # its menu, and the Offline tab's recordings
+            self.assertEqual(dialog.count(f">{name}<"), 2, name)
 
     def test_the_offline_tab_names_its_translation(self):
         body = get("/15:3", raw=True)[2]

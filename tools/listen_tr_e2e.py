@@ -9,7 +9,9 @@ English paragraph's ▶ still plays Merritt Horn's and marks the English; the
 bar's list of voices has the recording first under the translation, and a
 pick there goes on in it from the same paragraph; and Settings' choice of the
 browser's voice for the translation takes its ▶ from the recording, and its
-default gives it back.  Then with the columns off: the recording chosen in
+default gives it back.  Settings' voices are a menu against each text, the
+English first, its recording first in each and each of the browser's voices
+once, in a browser that lists voices and in one that has listed none.  Then with the columns off: the recording chosen in
 the bar marks the translation's line in the paragraph's fold, which Follow
 along opens.  And where the recording lacks a section, 19:0: its ▶ there is
 the browser's voice, and with Carry on into the next section on, a reading
@@ -167,8 +169,10 @@ def columns(b, whole: bool) -> None:
     opts = pg.evaluate("[...document.querySelector(\"%s\").options].filter(o => !o.hidden).map(o => [o.value, o.text])" % sel)
     ok(pg.is_visible(sel) and opts[0] == ["", "Grigory Voyner"] and pg.input_value(sel) == "",
        say + f"Settings offers the recording first, and it is the one chosen ({opts[:3]})")
-    ok(pg.evaluate("[...document.querySelectorAll('dialog.settings input[name=voice]')].map(i => i.value)") == ["mh", "browser"],
-       say + "and the English text's voices are Merritt Horn's and the browser's alone")
+    en = pg.evaluate("[...document.querySelector(\"dialog.settings label.set-bvoice[data-k=''] select\").options]"
+                     ".filter(o => !o.hidden).map(o => o.value)")
+    ok(en[0] == "mh" and "voyner" not in en and "" not in en,
+       say + f"and the English text's menu has Merritt Horn's first and not his ({en})")
     pg.keyboard.press("Escape")
 
     # Stop: the mark goes.
@@ -214,6 +218,89 @@ QUICK_SPEECH = """
   Object.defineProperty(window, 'speechSynthesis', { value: fake, configurable: true });
 })();
 """
+
+
+# A browser that lists voices, which headless Chrome does not: two English and
+# two Russian, one of each this device's own, and nothing spoken.
+VOICES = """
+(() => {
+  const V = [{ name: 'Google US English', lang: 'en-US', default: false, localService: false },
+             { name: 'English (America)', lang: 'en-US', default: true, localService: true },
+             { name: 'Google русский', lang: 'ru-RU', default: false, localService: false },
+             { name: 'Russian', lang: 'ru-RU', default: false, localService: true }];
+  const fake = { speaking: false, pending: false, paused: false, onvoiceschanged: null,
+    getVoices: () => V, pause() {}, resume() {}, addEventListener() {}, removeEventListener() {}, cancel() {}, speak() {} };
+  Object.defineProperty(window, 'speechSynthesis', { value: fake, configurable: true });
+})();
+"""
+# Settings' voices as a reader sees them: [the text's name, the menu's entries, the one chosen].
+MENUS = """() => [...document.querySelectorAll('dialog.settings .setvoices label[data-k]')].filter(l => !l.hidden).map(l => {
+  const c = l.cloneNode(true); c.querySelectorAll('x-ru, select').forEach(x => x.remove());
+  const s = l.querySelector('select');
+  return [c.textContent.trim(), [...s.options].filter(o => !o.hidden).map(o => o.text), s.options[s.selectedIndex].text]; })"""
+
+
+def menus(b) -> None:
+    """Settings' Listening tab (Tigran, 2026-11-13): a menu of voices against
+    each text, the English first, then the translations in the reader's
+    order; a text's recording first in its menu, then the browser's voices in
+    its language by name, each once, with no "Automatic" and no "Your
+    browser's voice" among them; and a pick kept as what it is."""
+    ctx, pg, _asked, errors = context(b, {"translations": "urantia-ru ud"})
+    ctx.add_init_script(VOICES)
+    print("\nSettings' voices, in a browser that lists some")
+    pg.goto(BASE + "/1:1")
+    pg.click(".gear")
+    pg.click("dialog.settings [role=tab]:has-text('Listening')")
+    got = pg.evaluate(MENUS)
+    ok(got == [["English text", ["Merritt Horn", "Google US English", "English (America)"], "Merritt Horn"],
+               ["USGNY", ["Grigory Voyner", "Google русский", "Russian"], "Grigory Voyner"],
+               ["Aivazian", ["Google русский", "Russian"], "Google русский"]],
+       f"a menu against each text, the English first, its recording first, each voice once ({got})")
+    heads = pg.evaluate("[...document.querySelectorAll('dialog.settings .panel.on .sub')].map(e => (" + EN + ")(e))")
+    ok(heads == ["Voices"], f"under one heading ({heads})")
+
+    def stored() -> dict:
+        return json.loads(pg.evaluate("localStorage.getItem('ub_settings')"))
+
+    def sel(k: str) -> str:
+        return f"dialog.settings .setvoices label[data-k='{k}'] select"
+
+    pg.select_option(sel(""), "English (America)")
+    ok((stored().get("voice"), stored().get("bvoice")) == ("browser", "English (America)"),
+       f"a browser's voice picked for the English is kept by its name ({stored()})")
+    pg.select_option(sel(""), "mh")
+    ok("voice" not in stored(), f"Merritt Horn picked again is the default, and nothing is kept for it ({stored()})")
+    pg.select_option(sel("urantia-ru"), "Russian")
+    ok(json.loads(stored()["trvoices"]) == {"urantia-ru": "Russian"}, "a browser's voice picked for USGNY is kept by its name")
+    pg.select_option(sel("urantia-ru"), "")
+    ok("trvoices" not in stored(), "and its recording picked again is the default")
+    pg.select_option(sel("ud"), "Russian")
+    pg.keyboard.press("Escape")
+    pg.click(".gear")
+    got = pg.evaluate(MENUS)
+    ok([g[2] for g in got] == ["Merritt Horn", "Grigory Voyner", "Russian"], f"opened again, each menu shows what reads its text ({[g[2] for g in got]})")
+    # What was kept before this day: the browser's own choice for a
+    # translation with a recording, "browser", is its best voice by name.
+    pg.evaluate("window.ubSettings.setTrVoice('urantia-ru', 'browser')")
+    pg.keyboard.press("Escape")
+    pg.click(".gear")
+    ok(pg.evaluate(MENUS)[1][2] == "Google русский", "a choice of the browser's voice kept before is shown as its best, by name")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+
+    ctx, pg, _asked, errors = context(b, {"translations": "urantia-ru ud"})
+    print("\nSettings' voices, in a browser that has listed none")
+    pg.goto(BASE + "/1:1")
+    pg.click(".gear")
+    pg.click("dialog.settings [role=tab]:has-text('Listening')")
+    got = pg.evaluate(MENUS)
+    ok(got == [["English text", ["Merritt Horn", "Your browser’s voice"], "Merritt Horn"],
+               ["USGNY", ["Grigory Voyner", "Your browser’s voice"], "Grigory Voyner"],
+               ["Aivazian", ["Your browser’s voice"], "Your browser’s voice"]],
+       f"one entry stands for the browser's voices until it lists them ({got})")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
 
 
 def lacking(b) -> None:
@@ -267,6 +354,7 @@ def run() -> int:
         columns(b, False)
         columns(b, True)
         fold(b)
+        menus(b)
         lacking(b)
         b.close()
     return 1 if fails else 0

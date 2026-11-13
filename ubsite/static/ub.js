@@ -169,49 +169,71 @@
   if (gear && dlg && dlg.showModal) {
     gear.hidden = false;
     var form = dlg.querySelector('form');
-    // A menu of the browser's voices for the English, and one for each
-    // translation in its language (settings.py trvoices), each shown while it
-    // is ticked (Tigran, 2026-10-27).
-    var bsel = form.querySelector('select[name="bvoice"]'), bopt = form.querySelector('.v-browser');
-    var trvs = form.querySelector('.trvoices');
-    // A browser that cannot speak is not offered its voice, nor a choice of them.
-    if (bopt && !synth) {
-      bopt.hidden = true;
-      if (bsel) bsel.closest('label').hidden = true;
-    }
-    // `rec`: the menu is a translation's that has a recording, its first
-    // option, and the browser's own choice its second, "browser"; a voice's
-    // name this device has not is then the browser's choice, not the recording.
-    var fillVoices = function (sel, all, want, rec) {
-      sel.length = rec ? 2 : 1;
-      if (!rec) sel.options[0].text = all.length ? T.text('Automatic: {v}', { v: all[0].name }) : T.text('Automatic');
-      all.forEach(function (v) { sel.add(new Option(v.name, v.name)); });
-      if (want !== undefined)
-        sel.value = all.some(function (v) { return v.name === want; }) ? want : rec && want ? 'browser' : '';
-    };
+    // The voices (settings.py `voice`, base.html .setvoices): a menu against
+    // each text, the English first, then each translation while it is ticked
+    // (Tigran, 2026-10-27 and 2026-11-13).  The page draws a menu with the
+    // recordings of its text (option[data-rec]); here the browser's voices in
+    // its language go in after them by name, the best first, each once.
+    // Until the browser has listed any voice, one entry stands for them all,
+    // "Your browser's voice" (option.any); a browser that cannot speak has
+    // the recordings alone, and no menu for a text that has none.
+    var vrows = form.querySelector('.setvoices');
     var listVoices = function () {
-      if (bsel) fillVoices(bsel, voices());
-      if (!trvs) return;
-      var ticked = String(load().translations || '').split(' '), m = trVoices(), any = false;
-      Array.prototype.forEach.call(trvs.querySelectorAll('label[data-k]'), function (l) {
-        // A browser that cannot speak still plays a recording: its menu
-        // stands, with the recording alone to choose.
-        var rec = !!l.dataset.rec, sel = l.querySelector('select');
-        l.hidden = ticked.indexOf(l.dataset.k) < 0 || (!synth && !rec);
-        any = any || !l.hidden;
-        fillVoices(sel, voices(l.dataset.lang), m[l.dataset.k] || '', rec);
-        if (rec) sel.options[1].hidden = sel.options[1].disabled = !synth;
+      if (!vrows) return;
+      var o = load(), ticked = String(o.translations || '').split(' '), m = trVoices();
+      var listed = synth ? synth.getVoices().length : 0, some = false;
+      Array.prototype.forEach.call(vrows.querySelectorAll('label[data-k]'), function (l) {
+        var k = l.dataset.k, sel = l.querySelector('select'), any = sel.querySelector('option.any');
+        var recs = sel.querySelectorAll('option[data-rec]'), all = voices(l.dataset.lang);
+        Array.prototype.slice.call(sel.querySelectorAll('option[data-v]')).forEach(function (x) { sel.removeChild(x); });
+        all.forEach(function (v) {
+          var x = new Option(v.name, v.name);
+          x.setAttribute('data-v', '');
+          sel.add(x);
+        });
+        any.hidden = any.disabled = !synth || listed > 0;
+        // The text's row: a translation's while it is ticked, and either
+        // while there is anything to choose.
+        l.hidden = (!!k && ticked.indexOf(k) < 0) || (!recs.length && (!synth || (listed && !all.length)));
+        some = some || !l.hidden;
+        // What reads it now: a recording, the first unless the English's is
+        // another; or the browser's voice named, else its best, the first
+        // (a name this device has not is the best too, never the recording).
+        var w = k ? m[k] || '' : o.voice === 'browser' ? o.bvoice || 'browser' : '';
+        var rec = k ? recs[0] : sel.querySelector('option[data-rec][value="' + o.voice + '"]') || recs[0];
+        if (synth && (w || !rec) && (all.length || !any.disabled))
+          sel.value = all.some(function (v) { return v.name === w; }) ? w : all.length ? all[0].name : any.value;
+        else if (rec) rec.selected = true;
       });
-      trvs.hidden = !any;
+      // The translations in the reader's order, as the columns and the
+      // player's list have them.
+      ticked.forEach(function (k) {
+        var l = k && vrows.querySelector('label[data-k="' + k + '"]');
+        if (l) vrows.appendChild(l);
+      });
+      vrows.hidden = !some;
     };
-    if (trvs) trvs.addEventListener('change', function (ev) {
+    // A pick is kept as what it is: a recording, the text's first being its
+    // default and so nothing stored, or a voice by its name.  The English
+    // text's is two settings, the voice and which of the browser's; only
+    // what changes is set, the player going on in the voice chosen at each.
+    if (vrows) vrows.addEventListener('change', function (ev) {
       var l = ev.target.closest('label[data-k]');
-      if (l) window.ubSettings.setTrVoice(l.dataset.k, ev.target.value);
+      if (!l) return;
+      var opt = ev.target.options[ev.target.selectedIndex], named = opt.hasAttribute('data-v'), o = load();
+      if (l.dataset.k) window.ubSettings.setTrVoice(l.dataset.k, opt.value);
+      else {
+        // The first recording is what '' means, where '' is the default.
+        var first = ev.target.querySelector('option[data-rec]');
+        var v = named ? 'browser' : opt === first && DEF.voice === '' ? '' : opt.value;
+        if (named && o.bvoice !== opt.value) window.ubSettings.set('bvoice', opt.value);
+        if (o.voice !== v) window.ubSettings.set('voice', v);
+      }
       resettable();
     });
     // Each control shows its setting's value; a radio group whose value has no
-    // button (the voice before one is chosen) shows its first, and a menu
-    // whose value is gone (a voice this device no longer has) its first.
+    // button shows its first, and a menu whose value is gone its first.  The
+    // voices' menus are filled and set above, having no setting's name.
     // The interface's language, a row only where the site draws both
     // (l10n.py BILINGUAL), as the flags are shown (below).
     var langRow = form.querySelector('.langrow');
