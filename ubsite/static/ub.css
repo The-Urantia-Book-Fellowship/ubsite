@@ -2313,8 +2313,10 @@ main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%,
 .cby a { color: inherit; }
 .ctools { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-left: auto; }
 .cfind { position: relative; flex: 1 1 13rem; width: 18rem; max-width: 100%; }
-.cq { width: 100%; font: inherit; font-size: .95rem; padding: .3rem .85rem; background: var(--field); color: inherit;
-      border: 1px solid var(--field-edge); border-radius: 999px; }
+/* Its words lowered by --lift, as a pill's are: UB Goudy stands high in its
+   line, and the box showed it (Tigran, 2026-11-13). */
+.cq { width: 100%; font: inherit; font-size: .95rem; padding: calc(.3rem + var(--lift)) .85rem calc(.3rem - var(--lift));
+      background: var(--field); color: inherit; border: 1px solid var(--field-edge); border-radius: 999px; }
 .cq::placeholder { color: var(--faint); opacity: 1; }
 .cq:focus { background: var(--paper); border-color: var(--link); outline: 0;
             box-shadow: 0 0 0 3px color-mix(in oklch, var(--link) 22%, transparent); }

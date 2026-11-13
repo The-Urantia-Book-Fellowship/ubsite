@@ -315,6 +315,17 @@ class Static(unittest.TestCase):
         # The ids go before the deferred scripts look, ub.js's arrive() among them.
         self.assertLess(tpl.index("e.removeAttribute('id')"), tpl.index("asset('cosmo.js') }}\" defer"))
 
+    def test_the_search_box_s_words_are_lowered_as_a_pill_s(self):
+        """UB Goudy stands high in its line, and a box round one line of it
+        shows it: the third control it was seen in (Tigran, 2026-11-13).  Its
+        padding carries --lift, as .pill's does, which the other typefaces
+        set to nothing."""
+        css = (STATIC / "ub.css").read_text(encoding="utf-8")
+        rule = css[css.index("\n.cq {"):]
+        rule = rule[:rule.index("}")]
+        self.assertIn("padding: calc(.3rem + var(--lift)) .85rem calc(.3rem - var(--lift));", rule)
+        self.assertIn(':root:is([data-face="serif"], [data-face="sans"]) { --lift: 0em; }', css)
+
     def test_the_offline_copy_keeps_it(self):
         from offline import pack
         self.assertIn("cosmo.js", pack.ASSETS)
