@@ -37,27 +37,29 @@ align-venv:
 	@UV_CACHE_DIR=$(ML)/uv-cache uv venv -q $(ML)/venv-align --python $$(cat .python-version)
 	@UV_CACHE_DIR=$(ML)/uv-cache uv pip install -q --python $(ML)/venv-align -r tools/align/requirements.in
 
-## align-transcribe  Whisper over Merritt Horn's reading on the 3090 -> var/align/mh/ (resumable)
+## align-transcribe  Whisper over a reading on the 3090 -> var/align/<key>/ (resumable); VOICE=voyner for the Russian, Merritt Horn's with none
 # The 3090 only.  The 2080 Ti drives the display: at batch 16 it ran out of
 # memory, and at 8 it sat at 88 C (its max operating temperature is 89) with
 # the fans flat out, throttled to 735 MHz -- adding a quarter to the speed.
 # The script still takes several GPUs at once if ever wanted (O_EXCL locks).
+# VOICE is a key of sources.toml's [audio.<key>] (tools/align/voice.py).
+VOICE ?= mh
 align-transcribe:
-	@$(ALIGN) -m tools.align.transcribe --clean-locks
-	@$(CUDA) CUDA_VISIBLE_DEVICES=1 $(ALIGN) -m tools.align.transcribe 2>&1 | tee var/align/gpu1.log
-	@ls var/align/mh/*.json | wc -l
+	@$(ALIGN) -m tools.align.transcribe --voice $(VOICE) --clean-locks
+	@$(CUDA) CUDA_VISIBLE_DEVICES=1 $(ALIGN) -m tools.align.transcribe --voice $(VOICE) 2>&1 | tee var/align/gpu1.log
+	@ls var/align/$(VOICE)/*.json | wc -l
 
-## align-repair  re-hear, unbatched, every unit the aligner found mostly unheard; then `make align`
+## align-repair  re-hear, unbatched, every unit the aligner found mostly unheard; then `make align` (VOICE=; SHORT=1 for the short ones and the headings too; NEAR="161:1.8 92:0.2" for the start of those alone)
 align-repair:
-	@$(CUDA) CUDA_VISIBLE_DEVICES=1 $(ALIGN) -m tools.align.transcribe --repair
+	@$(CUDA) CUDA_VISIBLE_DEVICES=1 $(ALIGN) -m tools.align.transcribe --voice $(VOICE) --repair $(if $(SHORT),--short) $(if $(NEAR),--near $(NEAR))
 
-## align         cut Merritt Horn's reading at the paragraph -> data/audio/mh.tsv (seconds)
+## align         cut a reading at the paragraph -> data/audio/<key>.tsv (seconds; VOICE=)
 align:
-	@$(PY) -m tools.align.align
+	@$(PY) -m tools.align.align --voice $(VOICE)
 
-## align-spotcheck  hear the first seconds of 300 random paragraphs: does each start where mh.tsv says?
+## align-spotcheck  hear the first seconds of 300 random paragraphs: does each start where <key>.tsv says? (VOICE=; N=20000 for all; LISTS=1 for every list paragraph; REFS="2:5.5" for those alone)
 align-spotcheck:
-	@$(CUDA) CUDA_VISIBLE_DEVICES=1 $(ALIGN) -m tools.align.spotcheck
+	@$(CUDA) CUDA_VISIBLE_DEVICES=1 $(ALIGN) -m tools.align.spotcheck --voice $(VOICE) $(if $(LISTS),--lists) $(N) $(if $(REFS),--refs $(REFS))
 
 ## tts-venv      create the synthetic voice's venv in $(ML) (Kokoro, torch)
 tts-venv:

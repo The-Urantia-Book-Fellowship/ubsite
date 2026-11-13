@@ -58,7 +58,8 @@
     <li>{{ t('home:citation') }}</li>
     <li>{{ t('home:contents', n=stats.papers) }}</li>
     {%- if stats.audio_mh_seconds %}
-    <li>{{ t('home:listening', n=(stats.audio_mh_seconds / 3600)|round|int) }}</li>
+    <li>{{ t('home:listening', n=(stats.audio_mh_seconds / 3600)|round|int) }}
+      {%- if stats.audio_voyner_seconds %} {{ t('home:listening:voyner', n=(stats.audio_voyner_seconds / 3600)|round|int) }}{% endif %}</li>
     {%- endif %}
     <li>{{ t('home:help') }}</li>
     <li>{{ t('home:api') }}</li>

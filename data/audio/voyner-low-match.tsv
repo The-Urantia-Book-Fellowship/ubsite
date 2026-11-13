@@ -1,0 +1,9 @@
+# Paragraphs where Григорий Войнер's reading and the text he read differ: the
+# translation as it stood when he read it (the config's `edition`: at urantia-ru
+# 94b54ca or 507a36b, whichever is nearer what was heard of a paragraph), not
+# today's.  Each would be read, with less than build/audio.py's LOW_MATCH of it
+# heard, even unbatched (make align-repair); check_audio requires exactly this set.
+# There is none, 2026-11-12, nor on 2026-11-13 with the edition named anew.  161:1.7 stood here for an afternoon, as breaking off
+# in the middle of a sentence: Whisper had lost the same ten seconds of it twice in
+# windows of a minute, and heard them in one of 26 s (make align-repair NEAR=).
+ref	why

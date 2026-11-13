@@ -1,10 +1,10 @@
 -- Listening.  Every voice reduces to one shape: for each paragraph, a stretch of
--- one file.  Both readings are a file per section with offsets inside it, but
+-- one file.  The readings are a file per section with offsets inside it, but
 -- the player plays a queue of segments and never needs to know how they are filed.
 
 CREATE TABLE audio_source (
   id INTEGER PRIMARY KEY,
-  key TEXT NOT NULL UNIQUE,                   -- 'mh', 'ai'
+  key TEXT NOT NULL UNIQUE,                   -- 'mh', 'ai', 'voyner'
   label TEXT NOT NULL,                        -- 'Merritt Horn'
   kind TEXT NOT NULL CHECK (kind IN ('human','synthetic')),
   -- The directory the files are served from.  The same path here and on pi5;
@@ -18,17 +18,32 @@ CREATE TABLE audio_source (
   -- for Higgs TTS 3 requires its acknowledgment "displayed prominently
   -- together with the content".  NULL for Merritt Horn.
   credit TEXT,
-  credit_url TEXT
+  credit_url TEXT,
+  -- The text it reads: a translation's key (010_translation.sql), or NULL,
+  -- the English.  A translation's reading is cut at our paragraphs like any
+  -- other, the translations being stored under our numbering; what differs is
+  -- whose ▶ plays it and whose lines it marks (Григорий Войнер's, of
+  -- urantia-ru, 2026-11-12).
+  translation TEXT REFERENCES translation(key)
 );
 
 CREATE TABLE audio_file (
   id INTEGER PRIMARY KEY,
   source_id INTEGER NOT NULL REFERENCES audio_source(id),
   name TEXT NOT NULL,                         -- under root: 'paper133/P133_02.mp3'
-  bytes INTEGER NOT NULL,
+  bytes INTEGER NOT NULL,                     -- the file's, as it lies on the disk
   duration_ms INTEGER NOT NULL,
   sha256 TEXT NOT NULL,
-  UNIQUE (source_id, name)
+  -- A file a player would take for shorter than it is (build/mp3.py) is sent
+  -- with an Info frame, `head`, put in at byte `head_at`, where its ID3v2
+  -- tag ends: what is sent is LENGTH(head) bytes longer than the file, and
+  -- `sent_sha256` is its digest, as `sha256` is the file's.  All three NULL
+  -- for a file sent as it is, which is every one of Merritt Horn's.
+  head_at INTEGER,
+  head BLOB,
+  sent_sha256 TEXT,
+  UNIQUE (source_id, name),
+  CHECK ((head IS NULL) = (head_at IS NULL) AND (head IS NULL) = (sent_sha256 IS NULL))
 );
 
 CREATE TABLE audio_segment (

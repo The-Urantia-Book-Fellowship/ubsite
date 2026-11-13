@@ -97,8 +97,9 @@
     }
     return all;
   }
-  // Each translation's browser voice, {key: name}, those not Automatic
-  // (settings.py trvoices, JSON in a string).
+  // Each translation's voice, {key: name}, those not its default (settings.py
+  // trvoices, JSON in a string): a browser voice's name, or "browser", the
+  // browser's own choice, where the default is a recording of it.
   function trVoices() {
     try { return JSON.parse(load().trvoices || '{}') || {}; } catch (e) { return {}; }
   }
@@ -113,7 +114,11 @@
       var all = usable(lang), want = tr ? trVoices()[tr] : load().bvoice;
       return all.filter(function (v) { return v.name === want; })[0] || all[0] || null;
     },
-    // Translation tr's voice, by its name; '' for Automatic.
+    // What the reader chose for translation tr: '' its default, which is a
+    // recording of it where there is one (listen.js trKey), a browser voice's
+    // name, or "browser".
+    trChoice: function (tr) { return trVoices()[tr] || ''; },
+    // Translation tr's voice, by its name; '' for its default.
     setTrVoice: function (tr, name) {
       var m = trVoices();
       if (name) m[tr] = name; else delete m[tr];
@@ -174,22 +179,30 @@
       bopt.hidden = true;
       if (bsel) bsel.closest('label').hidden = true;
     }
-    var fillVoices = function (sel, all, want) {
-      sel.length = 1;
-      sel.options[0].text = all.length ? T.text('Automatic: {v}', { v: all[0].name }) : T.text('Automatic');
+    // `rec`: the menu is a translation's that has a recording, its first
+    // option, and the browser's own choice its second, "browser"; a voice's
+    // name this device has not is then the browser's choice, not the recording.
+    var fillVoices = function (sel, all, want, rec) {
+      sel.length = rec ? 2 : 1;
+      if (!rec) sel.options[0].text = all.length ? T.text('Automatic: {v}', { v: all[0].name }) : T.text('Automatic');
       all.forEach(function (v) { sel.add(new Option(v.name, v.name)); });
-      if (want !== undefined) sel.value = all.some(function (v) { return v.name === want; }) ? want : '';
+      if (want !== undefined)
+        sel.value = all.some(function (v) { return v.name === want; }) ? want : rec && want ? 'browser' : '';
     };
     var listVoices = function () {
       if (bsel) fillVoices(bsel, voices());
       if (!trvs) return;
       var ticked = String(load().translations || '').split(' '), m = trVoices(), any = false;
       Array.prototype.forEach.call(trvs.querySelectorAll('label[data-k]'), function (l) {
-        l.hidden = ticked.indexOf(l.dataset.k) < 0;
+        // A browser that cannot speak still plays a recording: its menu
+        // stands, with the recording alone to choose.
+        var rec = !!l.dataset.rec, sel = l.querySelector('select');
+        l.hidden = ticked.indexOf(l.dataset.k) < 0 || (!synth && !rec);
         any = any || !l.hidden;
-        fillVoices(l.querySelector('select'), voices(l.dataset.lang), m[l.dataset.k] || '');
+        fillVoices(sel, voices(l.dataset.lang), m[l.dataset.k] || '', rec);
+        if (rec) sel.options[1].hidden = sel.options[1].disabled = !synth;
       });
-      trvs.hidden = !synth || !any;
+      trvs.hidden = !any;
     };
     if (trvs) trvs.addEventListener('change', function (ev) {
       var l = ev.target.closest('label[data-k]');

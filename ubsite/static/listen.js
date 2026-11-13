@@ -2,7 +2,7 @@
 //
 // Every voice arrives in one shape: a list of files and a list of segments,
 // [ref, file, start_ms, end_ms] in reading order, ref null for the spoken
-// heading.  Both readings have one file per section, its paragraphs stretches
+// heading.  The readings have one file per section, its paragraphs stretches
 // of it, but this plays a queue of segments and never needs to know how they
 // are filed: consecutive segments in one file play straight through, and the
 // next file is loaded when one ends.
@@ -21,6 +21,14 @@
 // setting: the English's ▶ reads the English.  Its line is marked in its
 // column, or with Follow along in the paragraph's fold, which opens for it
 // (ub.js ubTrRead).  Carrying on stops at a section it has none of.
+//
+// A translation may have a recording of its own (Григорий Войнер's of USGNY,
+// 2026-11-12): a voice of the section like any other, with `tr`, the
+// translation it reads, by which it is kept out of the English text's voices
+// (`choose`) and marks that translation's lines, as the browser's voice
+// reading it does.  It is what that translation's ▶ plays, and stands first
+// under it in the bar's list, unless Settings names a browser's voice for it
+// (`trKey`, ub.js trChoice).
 //
 // Playback stops at the end of the section, and "Next" offers the following
 // one -- unless Settings says to carry on, when it goes on by itself, across
@@ -48,9 +56,15 @@
   var P = JSON.parse(data.textContent);  // the section the page shows; null on any other page
   // The translations (base.html's #ub-translations): {key: {lang, label, language, ...}}.
   var TRS = {};
+  // The recordings of a translation, by their keys: the translation each
+  // reads (x.voices, app.py translations_json).
+  var RECS = {};
   try {
     JSON.parse((document.getElementById('ub-translations') || {}).textContent || '[]')
-      .forEach(function (x) { TRS[x.key] = x; });
+      .forEach(function (x) {
+        TRS[x.key] = x;
+        (x.voices || []).forEach(function (r) { RECS[r.key] = x.key; });
+      });
   } catch (e) {}
   var D = null;                          // the section being heard
   var RATES = [0.8, 0.9, 1, 1.1, 1.25, 1.5];
@@ -105,10 +119,22 @@
     });
     return out;
   }
-  // The translation a voice reads, "browser:ud", if the site has it; else null.
+  // The translation a voice reads, the browser's, "browser:ud", if the site
+  // has it, or a recording of one; else null.
   function trOf(kk) {
     var m = /^browser:(.+)$/.exec(kk || '');
-    return m && TRS[m[1]] ? m[1] : null;
+    return m ? (TRS[m[1]] ? m[1] : null) : RECS[kk] || null;
+  }
+  // The recordings of translation t that section d has.
+  function recsOf(d, t) {
+    return ((TRS[t] && TRS[t].voices) || []).filter(function (r) { return d.voices[r.key]; });
+  }
+  // The voice translation t is heard in, in section d: its recording, unless
+  // Settings names a browser's voice for it and the browser can speak; with
+  // no recording, the browser's.
+  function trKey(d, t) {
+    var r = recsOf(d, t)[0];
+    return r && (!synth || !S.trChoice(t)) ? r.key : 'browser:' + t;
   }
   function ticked() { return String(S.get().translations || '').split(' ').filter(function (kk) { return TRS[kk]; }); }
   function scan() {
@@ -130,13 +156,14 @@
   // The heading a spoken heading's ref names, if this page has it.
   function headOf(ref) { return (ref && heads[ref]) || (same(P, D) ? head : null); }
 
-  // The voice Settings asks for, else the first section d has.
+  // The English text's voice: the one Settings asks for, else the first
+  // section d has.  Never a translation's recording, which is its ▶'s.
   function choose(d) {
     var want = S.get().voice;
     if (S.get().listen === false) return null;
     if (want === 'browser' && synth) return want;
-    if (want && d.voices[want]) return want;
-    for (var v in d.voices) return v;
+    if (want && d.voices[want] && !d.voices[want].tr) return want;
+    for (var v in d.voices) if (!d.voices[v].tr) return v;
     return null;
   }
   // Offline a recording cannot be had: the voice Settings names is not changed
@@ -145,11 +172,12 @@
   var NEEDS_NET = T.k('The recordings need a connection. Offline, your browser\u2019s voice can read it.');
   var NOT_KEPT = T.k('This paper\u2019s recording is not kept offline: Settings, in its Offline tab, keeps it. Your browser\u2019s voice can read it.');
   // Section d's voice kk; the browser's is made from its paragraphs, d.ids,
-  // or a translation's, those it has.
+  // or a translation's, those it has.  A recording, the English's or a
+  // translation's, is the section's own.
   function voiceOf(d, kk) {
-    var t = trOf(kk);
+    var t = RECS[kk] ? null : trOf(kk);
     return kk === 'browser' ? spoken(d, d.ids) : t ? spoken(d, d.tr[t] || [], t)
-                            : kk ? d.voices[kk] : null;
+                            : kk ? d.voices[kk] || null : null;
   }
   // The page's address: a section's, or the whole paper's.
   function href(d) { return '/' + d.paper + (d.whole ? '' : ':' + d.section); }
@@ -162,11 +190,11 @@
   // What the bar and the lock screen call the voice, in each language: for
   // the browser's, the name of the one it speaks with, once the browser has
   // said, which is the same in both.
-  // A translation's is named by its short name too: "Aivazian · Google русский".
+  // A translation's is named by its short name too: "Aivazian · Google
+  // русский", "USGNY · Григорий Войнер".
   function vname() {
-    if (V.kind !== 'browser') return word(V.label);
-    var v = S.voice(V.lang, V.tr), x = V.tr && TRS[V.tr];
-    var name = v ? T.same(v.name) : T.tr('Your browser\u2019s voice');
+    var x = V.tr && TRS[V.tr], v = V.kind === 'browser' && S.voice(V.lang, V.tr);
+    var name = V.kind !== 'browser' ? word(V.label) : v ? T.same(v.name) : T.tr('Your browser\u2019s voice');
     return x ? T.tr('{a} · {b}', { a: T.html(x.label), b: name }) : name;
   }
   // A name from the database (a voice's, its credit): its words where ru.toml
@@ -237,19 +265,25 @@
   }
   // A translation's ▶ in Compare, in each of its cells (ub.js 'ub:cmp'): it
   // reads that translation from that paragraph, from the heading at the
-  // section's first, as the English's does.
+  // section's first, as the English's does: in its recording, where it has
+  // one, else in the browser's voice (`trKey`), and none where it has neither.
+  // A paragraph the voice does not read gives way to the next it does.
   function trPlay(root) {
-    if (!P || !P.tr || !synth) return;
+    if (!P || !P.tr) return;
     Array.prototype.forEach.call(root.querySelectorAll('.rc[data-k]'), function (rc) {
       var t = rc.dataset.k, line = rc.querySelector('p.rt[data-ref]'), x = TRS[t];
       if (!line || !x || !P.tr[t] || rc.querySelector(':scope > .playp')) return;
+      if (!synth && !recsOf(P, t).length) return;
       var ref = line.dataset.ref;
       var b = button('playp', T.tr('Listen to {l} from {r}', { l: T.html(x.label), r: ref }), 'play');
       b.addEventListener('click', function () {
-        var kk = 'browser:' + t, nv = voiceOf(P, kk), i = 0;
-        if (ref !== P.ids[0])
-          while (i < nv.segs.length && nv.segs[i][0] !== ref) i++;
-        if (i < nv.segs.length) start(i, nv, kk);
+        var kk = trKey(P, t), nv = voiceOf(P, kk), at = P.ids.indexOf(ref);
+        // A reading not yet cut at the paragraph starts its section.
+        var i = at > 0 && nv.by === 'paragraph' ? -1 : 0;
+        for (var j = at; i < 0 && j < P.ids.length; j++)
+          for (var q = 0; q < nv.segs.length; q++)
+            if (nv.segs[q][0] === P.ids[j]) { i = q; break; }
+        if (i >= 0) start(i, nv, kk);
       });
       rc.appendChild(b);                 // last: .who:first-child keeps its place (ub.css)
     });
@@ -474,34 +508,47 @@
   function voices() {
     var box = dropup('voicebox', 'voice', 'voices', T.k('Voice'), function () {
       var out = [];
+      // The English text's: the recordings of it, then the browser's voices.
       for (var kk in D.voices) (function (kk, v) {
+        if (v.tr) return;
         out.push({ html: T(word(v.label)), on: key === kk, pick: function () { S.set('voice', kk); hear(kk); },
                    note: v.credit ? T(word(v.credit)) : v.kind === 'synthetic' ? T('an AI voice') : '' });
       })(kk, D.voices[kk]);
-      if (!synth) return out;
-      var all = S.usable(), cur = key === 'browser' && S.voice();
+      var all = synth ? S.usable() : [], cur = key === 'browser' && S.voice();
       function browser() { S.set('voice', 'browser'); hear('browser'); }
-      if (!all.length)
+      if (synth && !all.length)
         out.push({ html: T('Your browser’s voice'), on: key === 'browser', pick: browser });
-      else {
+      else if (synth) {
         out.push({ group: T.k('Your browser’s voice') });
         all.forEach(function (v) {
           out.push({ html: T.esc(v.name), on: !!cur && cur.name === v.name,
                      pick: function () { S.set('bvoice', v.name); browser(); } });
         });
       }
-      // Each translation ticked that the section has, in Settings' order, over
-      // the browser's voices in its language; none, where the browser has
-      // listed voices and none of them in it.  Until it lists any, the
-      // translation alone.
-      var listed = synth.getVoices().length;
+      // Each translation ticked that the section has, in Settings' order: its
+      // recording first, where it has one, then the browser's voices in its
+      // language; none of those, where the browser has listed voices and none
+      // of them in it.  Until it lists any, the translation alone.  A browser
+      // that cannot speak has the recordings.
+      var listed = synth ? synth.getVoices().length : 0;
       ticked().forEach(function (t) {
-        var x = TRS[t], kk = 'browser:' + t, them = S.usable(x.lang), now = key === kk && S.voice(x.lang, t);
+        var x = TRS[t], kk = 'browser:' + t, them = synth ? S.usable(x.lang) : [];
+        var now = key === kk && S.voice(x.lang, t), recs = D.tr && D.tr[t] ? recsOf(D, t) : [];
         var name = T.tr('{a} · {b}', { a: T.html(x.label), b: x.language });
         function pick() { hear(kk); }
-        if (!D.tr || !D.tr[t] || (listed && !them.length)) return;
-        if (!them.length) return out.push({ html: T(name), on: key === kk, pick: pick });
+        if (!D.tr || !D.tr[t]) return;
+        if (!recs.length) {
+          if (!synth || (listed && !them.length)) return;
+          if (!them.length) return out.push({ html: T(name), on: key === kk, pick: pick });
+        }
         out.push({ group: name });
+        recs.forEach(function (r) {
+          out.push({ html: T(word(r.label)), on: key === r.key,
+                     pick: function () { S.setTrVoice(t, ''); hear(r.key); } });
+        });
+        if (recs.length && synth && !them.length && !listed)
+          out.push({ html: T('Your browser’s voice'), on: key === kk,
+                     pick: function () { S.setTrVoice(t, 'browser'); pick(); } });
         them.forEach(function (v) {
           out.push({ html: T.esc(v.name), on: !!now && now.name === v.name,
                      pick: function () { S.setTrVoice(t, v.name); pick(); } });
@@ -672,6 +719,9 @@
       // The new section's files are numbered from 0 again: forget the old one.
       file = -1;
       // A translation goes on where the next section has it; else the English.
+      // In the voice Settings asks for there (`trKey`): a recording lacks a
+      // section now and then (Войнер's has no 19:0), which the browser's
+      // voice then reads, and the recording goes on from the one after.
       var t = trOf(key), kk = null;
       if (same(P, D)) {
         // The page shows the section that has ended: the next one takes its place.
@@ -679,16 +729,19 @@
         swap(doc);
         scrollTo(0, 0);
         D = P;
-        kk = t && D.tr[t] ? key : null;
-        if (kk) V = voiceOf(D, kk); else { V = PV; key = pkey; }
+        kk = t && D.tr[t] ? trKey(D, t) : null;
+        if (kk) { key = kk; V = voiceOf(D, kk); } else { V = PV; key = pkey; }
       } else {
         // The reader is elsewhere: what is heard moves on, and the page stays.
         D = JSON.parse(json.textContent);
         D.ids = ids(doc);
         D.tr = trIds(doc);
-        key = t && D.tr[t] ? key : choose(D);
+        key = t && D.tr[t] ? trKey(D, t) : choose(D);
         V = voiceOf(D, key);
       }
+      // With no recording of the section and no voice of the browser's to
+      // read it, the next section is tried: nothing here can be heard.
+      if (V && V.kind === 'browser' && !synth) { D.next ? carryOn(tapped) : finish(); return; }
       if (V) go(0); else finish();
     }).catch(function () {
       // Offline, or the page changed shape: the link still works.
@@ -1146,7 +1199,11 @@
       if (said.on) speakFrom(said.n);             // the sentence again, at the new speed
       render();
     }
-    if (what === 'bvoice' || what === 'trvoices') { relabel(); if (said.on) speakFrom(said.n); }
+    // A translation's voice changed while it is heard, its recording for a
+    // browser's or back: it goes on in the one now chosen.
+    var mine = what === 'trvoices' && bar && trOf(key) ? trKey(D, trOf(key)) : null;
+    if (mine && mine !== key) { revoice(mine); relabel(); }
+    else if (what === 'bvoice' || what === 'trvoices') { relabel(); if (said.on) speakFrom(said.n); }
     // The English's voice: a translation being heard goes on in its own.
     if (what === 'voice') { if (trOf(key)) build(); else revoice(); }
     // Listening turned off stops whatever is heard, the English or a translation.

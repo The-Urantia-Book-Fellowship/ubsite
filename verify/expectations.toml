@@ -192,8 +192,31 @@ bf_chips_kept      = 131      # of 1,865: the rest repeat an A-Z chip of the sam
 # now, too few for a reading path.  One fewer again the same day, at index
 # c0db98c: one headword fewer, two gone and one new.  One more since
 # 2026-10-24: the page about the text API, kept with the address it is read at.
+# The recordings (build/checks/check_audio.py): each voice's files in use and
+# its length in whole hours; `pace`, the words a second, of the text it reads,
+# within which every paragraph of 15 words or more must be read (1.0 to 4.0
+# with none).  In code until 2026-11-12, when the second reading came.
+[audio.mh]
+measured_on = "2026-10-07"
+files = 1627                     # 1,629 on the disc: 1,626 sections, the Acknowledgment's
+                                 # own track (P000_13), and two second encodes left out by
+                                 # name in data/audio/mh-overrides.tsv
+hours = 121
+pace  = [1.0, 4.0]               # his median 2.4, 98% of paragraphs between 1.7 and 2.9
+
+[audio.voyner]
+measured_on = "2026-11-12"
+files = 1624                     # 1,627 in the directory: a file to a section but 19:0 and
+                                 # 50:0, which he did not record or which were lost, and three
+                                 # second copies left out by name in
+                                 # data/audio/voyner-overrides.tsv (7-07, 19-00, 50-00)
+hours = 154                      # 154.48, by the frames: 1,358 of the files say less of
+                                 # themselves (build/mp3.py)
+pace  = [0.8, 3.0]               # his median 1.63 words of the translation a second, 97% of
+                                 # paragraphs between 1.2 and 2.2, none outside 0.88-2.68
+
 [offline]
-measured_on = "2026-11-11"
+measured_on = "2026-11-12"
 pages       = 10612      # 1,626 sections, 4,736 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,879 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
@@ -207,7 +230,9 @@ paths       = 3879       # 2,057 headwords in book order, 1,822 of them by theme
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
                          # 1,821 until 2026-11-09: terrestrial escape cites a second chapter since its reading of Papers 49-52)
 spoken      = 1626       # one to a section
-chunks      = 420        # 419 until 2026-11-06, when the tour's script, help.js, joined the assets;
+chunks      = 421        # 420 until 2026-11-12, when the second recording's list of files by paper
+                         # came, audio-voyner, Григорий Войнер's reading of USGNY (a chunk to a voice);
+                         # 419 until 2026-11-06, when the tour's script, help.js, joined the assets;
                          # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
                          # reference stands in a .stk of its own (2026-10-20), 4 MB more of pages;
                          # 417 since the interface in Russian too (2026-10-25): the scripts'

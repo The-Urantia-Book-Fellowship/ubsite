@@ -96,7 +96,7 @@ ulib.sigmaai.au    ->  127.0.0.1:8000   urantia-library
 * **No `default_server`.** The VPS declares none: `sigmaai.au` is the default on 80 and 443 only because `sites-enabled/` is read in name order and it comes first. `ubsite-sigmaai.nginx` must never claim it.
 * **The name is an A record at GoDaddy**, which holds sigmaai.au's DNS (`ns43`/`ns44.domaincontrol.com`): `ubsite` → `187.77.167.246`. No AAAA: nginx there listens on IPv4 only.
 * **Port 80 is open** (a VPS has no router to forget it), and sigmaai.au's own certificate renews over HTTP-01 through it, as this one does.
-* Merritt Horn's recordings are at `/Audio/Urantia/Urantia-MH-Audio-DVD`, as on pi5.
+* Merritt Horn's recordings are at `/Audio/Urantia/Urantia-MH-Audio-DVD`, as on pi5, and Григорий Войнер's Russian reading at `/Audio/Urantia/Urantia-USGNY-RUS-Voyner` (since 2026-11-12; 4.5 GB), as on pi5 too. `deploy.sh` copies neither: it holds each host's files to the database's list, by name and size, and stops where one is missing. Both are served by the app (`/audio/<key>/<name>`), never by nginx from the directory: 1,356 of the Russian files go out with an Info frame the database holds, put in as each is sent (`build/mp3.py`), and without it a browser plays past the place it is asked for.
 * tigran has no sudo there beyond what step 4's drop-in grants, so the steps below that need root are run as root, without `sudo`.
 
 ### The four privileged steps on the VPS

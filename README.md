@@ -36,6 +36,8 @@ make sources       # the three repos and the commits a build would read
 
 Merritt Horn's recordings must be at `/Audio/Urantia/Urantia-MH-Audio-DVD`, here **and on both hosts**: the build lists them, and each host serves them from that path. They are the Uversa Press DVD's MP3s (128 kbps stereo), copied once with the folder names lowercased. `/Audio/Urantia/Urantia-MH-Audio` is a 32 kbps transcode of the same recordings and is not used. `sources.toml` names it under `[audio.mh]`. They are a master like the repos, and nothing writes to them.
 
+So must Григорий Войнер's, the Russian reading of the translation `urantia-ru` (USGNY), at `/Audio/Urantia/Urantia-USGNY-RUS-Voyner`, 4.5 GB, under `[audio.voyner]` (since 2026-11-12): a master too, in all three places, each copy held to `data/audio/voyner-files.tsv` by SHA-256. Most of its files are sent with an Info frame the database holds, the files themselves untouched, so a recording is served by the app and never straight from its directory.
+
 ### What this machine needs besides
 
 Two programs outside the tree are needed by every build, and so by every deploy:
@@ -232,15 +234,16 @@ From 2026-10-10 to 2026-10-19 `make epub` made the whole site one EPUB 3, privat
 
 ## Listening
 
-Every section can be heard in Merritt Horn's reading, and from any paragraph once his reading is aligned. The player and the Settings dialog are `ubsite/static/listen.js` and `ub.js`. The build turns the recordings into the tables `audio_source`, `audio_file` and `audio_segment`, through `build/audio.py`, from three checked-in files in `data/audio/`:
+Every section can be heard in Merritt Horn's reading, and from any paragraph once his reading is aligned. The player and the Settings dialog are `ubsite/static/listen.js` and `ub.js`. The build turns the recordings into the tables `audio_source`, `audio_file` and `audio_segment`, through `build/audio.py`, from checked-in files in `data/audio/`, the same five for each human reading under its key, `mh` here and `voyner` for Григорий Войнер's Russian reading of USGNY (`sources.toml` `[audio.<key>]`, which also says how its files are named, which translation it reads and between which commits of it its text lies):
 
 | file | what | made by |
 |---|---|---|
 | `mh-files.tsv` | every MP3, with its size, duration and SHA-256 | `.venv/bin/python -m tools.audio.manifest mh` |
-| `mh-overrides.tsv` | the three files that break the naming rule, and why | by hand |
-| `mh.tsv` | each paragraph's start and end in its file, and how much of it was heard | `make align` |
-| `mh-unread.tsv` | paragraphs the recording does not contain | by hand, from the review |
-| `mh-low-match.tsv` | paragraphs where the reading and today's text differ | by hand, from the review |
+| `mh-overrides.tsv` | the three files that break the naming rule, and why (`voyner-overrides.tsv`: three second copies under another section's name, none used) | by hand |
+| `mh.tsv` | each paragraph's start and end in its file, and how much of it was heard | `make align` (`make align VOICE=voyner` for `voyner.tsv`, and so each alignment target) |
+| `mh-unread.tsv` | paragraphs the recording does not contain (`voyner-unread.tsv`: all of 19:0 and 50:0, which no file reads) | by hand, from the review |
+| `mh-low-match.tsv` | paragraphs where the reading and today's text differ (`voyner-low-match.tsv`: none) | by hand, from the review |
+| `voyner-frames.tsv` | the 1,358 files a player would take for shorter than they are, each with what its Info frame is made from and the SHA-256 of the file as sent (`build/mp3.py`); Merritt Horn's has none | the same run of `tools.audio.manifest` |
 
 The alignment needs a GPU and runs on this machine only, in its own venv in `~/Software/ml` (never in `requirements.txt`):
 

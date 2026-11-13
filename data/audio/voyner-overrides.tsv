@@ -1,0 +1,8 @@
+# Григорий Войнер's files that do not follow the naming rule.  The rule: PP-SS.mp3, the
+# paper in two digits or three, is section PP:SS from its start, spoken heading first;
+# 139-09-10 is the combined 139:9.  Every other file must be named here, with the
+# paragraph it begins at or '-' for a file the site does not use, and why.  Measured 2026-11-12.
+file	starts_at	why
+7-07.mp3	-	a second encode of 75-07.mp3, misnamed: 75:7 again ("Глава седьмая. Адам и Ева становятся смертными."), 238.06 s against 237.72 s, the same date in its tag; 07-07.mp3 is 7:7
+19-00.mp3	-	a second encode of 192-00.mp3, misnamed: 192:0 again ("Текст 192. Явление в Галилее."), 158.60 s against 158.47 s, the same take to the hundredth of a second; no file reads 19:0 (voyner-unread.tsv)
+50-00.mp3	-	the first 176 s of 50-04.mp3 again, misnamed: 50:4 and 50:4.1-8 ("Глава четвертая. Планетарные центры и школы."), the same take; no file reads 50:0 (voyner-unread.tsv)

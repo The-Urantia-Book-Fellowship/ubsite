@@ -105,7 +105,7 @@ class Catalog(unittest.TestCase):
                 literals.add(re.sub(r"\\u([0-9a-fA-F]{4})", lambda e: chr(int(e[1], 16)),
                                     s.replace("\\'", "'").replace('\\"', '"')))
         tabs = {g["legend"] + "|tab" for g in settings.groups([])}
-        voices = {"Merritt Horn"}
+        voices = {"Merritt Horn", "Grigory Voyner"}
         for key in CATALOG:
             with self.subTest(key=key):
                 self.assertTrue(key in literals or key in tabs or key in voices or key.startswith("css:")

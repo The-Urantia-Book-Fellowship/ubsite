@@ -1,7 +1,11 @@
-"""Merritt Horn's reading, cut at the paragraph: data/audio/mh.tsv.
+"""A reading cut at the paragraph: data/audio/<key>.tsv.
 
     .venv/bin/python -m tools.align.align            # all files transcribed so far
     .venv/bin/python -m tools.align.align P001_01    # one, verbosely
+    .venv/bin/python -m tools.align.align --voice voyner [01-01]
+
+Merritt Horn's (mh) with no --voice; tools/align/voice.py says what a voice is,
+and in which language and against which text it is matched.
 
 The cheap half of the alignment; tools/align/transcribe.py is the expensive
 one.  For each recording:
@@ -24,9 +28,12 @@ one.  For each recording:
     marks where the reading and today's text differ -- a correction made since
     the recording, or a word Whisper could not make out.
 
+5.  In Russian a number is one token whatever its form, and nothing is
+    spelt out (tools/align/ru.py).
+
 Runs under the site's own venv: stdlib and ffmpeg.  Reads var/ub.db, the
-transcripts in var/align/mh/, and the recordings (through ffmpeg); writes
-data/audio/mh.tsv and the silence cache in var/align/silence/.
+transcripts in var/align/<key>/, and the recordings (through ffmpeg); writes
+data/audio/<key>.tsv and the silence cache in var/align/silence/.
 """
 
 from __future__ import annotations
@@ -42,9 +49,6 @@ import time
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
-WORDS = ROOT / "var" / "align" / "mh"
-SILENCE = ROOT / "var" / "align" / "silence"
-OUT = ROOT / "data" / "audio" / "mh.tsv"
 # A pause, to the ear: 0.15 s below -38 dB.  The recordings sit at about -21 dB
 # RMS; a breath between sentences is around 0.3 s, between paragraphs longer.
 NOISE, MIN_SIL = "-38dB", 0.15
@@ -52,7 +56,7 @@ SLACK = 0.35          # seconds either side of Whisper's times to look for the p
 LEAD = 0.4            # at most this much silence before a paragraph's first word
 TAIL = 3.0            # more than this after a file's last word is a tail, not the paragraph's
 # Where the reading and today's text differ: build/audio.py's LOW_WORDS and
-# LOW_MATCH, shared with the gate that holds the set to mh-low-match.tsv.
+# LOW_MATCH, shared with the gate that holds the set to <key>-low-match.tsv.
 
 RE_SPLIT = re.compile(r"[\s—–/]+")
 RE_STRIP = re.compile(r"[^a-z0-9']+")
@@ -69,7 +73,14 @@ def canon(t: str) -> str:
     return t.replace("ement", "ment").replace("'", "")
 
 
-def tokens(text: str) -> list[str]:
+def tokens(text: str, lang: str = "en") -> list[str]:
+    """The words of a text as both sides are compared: English ones under one
+    spelling (canon), Russian ones with each number as `#` (tools/align/ru.py)."""
+    if lang == "ru":
+        from tools.align import ru
+        return ru.tokens(text)
+    if lang != "en":
+        raise ValueError(f"no tokens for the language {lang!r}: tools/align/align.py")
     out = []
     for w in RE_SPLIT.split(text.lower().replace("’", "'").replace("‘", "'")):
         for part in w.split("-"):
@@ -79,12 +90,20 @@ def tokens(text: str) -> list[str]:
     return out
 
 
-def heard(words) -> tuple[list[str], list[tuple[float, float]]]:
-    """Whisper's words as tokens, each with its time.  A word Whisper begins
-    with a hyphen ('Super -Universes') continues the one before it; one with a
-    digit in it is spoken as the build speaks the text's numbers."""
-    from build.speech import speak
+def heard(words, lang: str = "en") -> tuple[list[str], list[tuple[float, float]]]:
+    """Whisper's words as tokens, each with its time.  In English a word
+    Whisper begins with a hyphen ('Super -Universes') continues the one before
+    it; one with a digit in it is spoken as the build speaks the text's
+    numbers.  In Russian every word is cut at its hyphens, as the text's are,
+    and a number is `#` in digits or in words."""
     toks, times = [], []
+    if lang != "en":
+        for start, end, word, _p in words:
+            for x in tokens(word, lang):
+                toks.append(x)
+                times.append((start, end))
+        return toks, times
+    from build.speech import speak
     for start, end, word, _p in words:
         if any(c.isdigit() for c in word):
             try:
@@ -106,8 +125,8 @@ def heard(words) -> tuple[list[str], list[tuple[float, float]]]:
     return toks, times
 
 
-def silences(path: pathlib.Path, stem: str) -> list[tuple[float, float]]:
-    cache = SILENCE / f"{stem}.json"
+def silences(path: pathlib.Path, stem: str, where: pathlib.Path) -> list[tuple[float, float]]:
+    cache = where / f"{stem}.json"
     if cache.exists():
         return [tuple(x) for x in json.loads(cache.read_text())]
     err = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-nostdin", "-i", str(path),
@@ -137,26 +156,20 @@ def merged(sil, gap: float = 0.08) -> list[tuple[float, float]]:
     return out
 
 
-def unit_text(con, ref: str) -> str:
-    """What is spoken for a unit: the build's spoken text (build/speech.py), the
-    same words a synthetic voice reads -- numbers in words, the heading as he
-    reads it, "Two. The Reality of God."  Whisper's own digits go through the
-    same speak(), so "1934" and "nineteen thirty-four" meet as equals."""
-    if "." in ref:
-        return con.execute("SELECT s.text FROM speech s JOIN paragraph p"
-                           " ON p.id = s.paragraph_id WHERE p.ref=?", (ref,)).fetchone()[0]
-    p, n = map(int, ref.split(":"))
-    return con.execute("SELECT s.text FROM speech s JOIN section x ON x.id = s.section_id"
-                       " WHERE s.paragraph_id IS NULL AND x.paper_n=? AND x.n=?",
-                       (p, n)).fetchone()[0]
-
-
-def align(con, name: str, units: list[str], words, duration: float, sil) -> list[tuple]:
-    """[(ref, start_s, end_s, match)] for one file."""
-    hyp, times = heard(words)
+def align(text: dict, name: str, units: list[str], words, duration: float, sil,
+          lang: str = "en") -> list[tuple]:
+    """[(ref, start_s, end_s, match)] for one file.  `text` is what is spoken
+    for each unit, by its ref (Voice.text): the build's spoken text, the same
+    words a synthetic voice reads -- in English numbers in words and the
+    heading as he reads it, "Two. The Reality of God.", Whisper's own digits
+    going through the same speak(), so "1934" and "nineteen thirty-four" meet
+    as equals; a translation's as the build speaks that (tr_speech).  A
+    heading the translation has no words for is a unit with none: its time is
+    what comes before the first paragraph."""
+    hyp, times = heard(words, lang)
     ref, owner = [], []
     for u, r in enumerate(units):
-        t = tokens(unit_text(con, r))
+        t = tokens(text.get(r, ""), lang)
         ref += t
         owner += [u] * len(t)
     # Whisper's spelling of a coined name -- "Supernophim", "Nevadon" -- is
@@ -279,53 +292,74 @@ def pause(sil, lo: float, hi: float, guess: float, floor: float,
 
 def main(argv: list[str]) -> int:
     sys.path.insert(0, str(ROOT))
-    from build import audio, config
+    from build import audio
     from build.audio import LOW_MATCH, LOW_WORDS
     from build.problems import Report
+    from tools.align.voice import take
+    voice, argv = take(argv)
+    key = voice.key
     con = sqlite3.connect(f"file:{ROOT / 'var' / 'ub.db'}?mode=ro", uri=True)
-    files = audio.mh_files()
+    files = audio.files(key)
     report = Report()
-    claims = audio.mh_claims(con, files, report)
-    units = audio.mh_units(con, claims)
+    claims = audio.claims(con, key, voice.src, files, report)
+    units = audio.units(con, claims, voice.translation)
     if report.problems:
         print(*report.problems, sep="\n")
         return 1
-    # Paragraphs the recording does not contain (data/audio/mh-unread.tsv): left
-    # out of what each file is expected to hold, so their silence is nobody's.
-    unread = {r for r, _ in (l.split("\t", 1) for l in
-              (ROOT / "data" / "audio" / "mh-unread.tsv").read_text().splitlines()
-              if l[:1].isdigit())}
+    # Paragraphs the recording does not contain (data/audio/<key>-unread.tsv):
+    # left out of what each file is expected to hold, so their silence is nobody's.
+    unread = set(audio.unread(key))
     units = {n: [r for r in u if r not in unread] for n, u in units.items()}
-    root = config.audio()["mh"]["path"]
+    # A reading of a text that has moved since is matched to its words as
+    # they were (tools/align/edition.py): at first each paragraph's at the
+    # first commit it names, whatever was heard.
+    text = voice.text(con, heard={})
+    root = voice.path
     only = set(argv)
     todo = [n for n in sorted(units)
-            if (WORDS / f"{pathlib.Path(n).stem}.json").exists()
+            if (voice.words / f"{pathlib.Path(n).stem}.json").exists()
             and (not only or pathlib.Path(n).stem in only)]
-    print(f"{len(todo)} of {len(units)} files transcribed")
-    SILENCE.mkdir(parents=True, exist_ok=True)
+    print(f"{key}: {len(todo)} of {len(units)} files transcribed")
+    voice.silence.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     with concurrent.futures.ThreadPoolExecutor(8) as ex:
-        sils = dict(zip(todo, ex.map(lambda n: silences(root / n, pathlib.Path(n).stem), todo)))
+        sils = dict(zip(todo, ex.map(
+            lambda n: silences(root / n, pathlib.Path(n).stem, voice.silence), todo)))
     print(f"silences in {time.time() - t0:.0f}s")
-    rows = []
-    for name in todo:
-        d = json.loads((WORDS / f"{pathlib.Path(name).stem}.json").read_text())
-        dur = files[name][1] / 1000                 # the manifest's duration, as the build has it
-        for ref, a, b, match in align(con, name, units[name], d["words"], dur, sils[name]):
-            rows.append((ref, name, round(a * 1000), round(b * 1000), match))
-        if only:
-            for r in rows[-len(units[name]):]:
-                print(f"  {r[0]:10} {r[2]/1000:8.2f} {r[3]/1000:8.2f}  {r[4]:.2f}")
+
+    def cut(text: dict) -> list:
+        rows = []
+        for name in todo:
+            d = json.loads((voice.words / f"{pathlib.Path(name).stem}.json").read_text())
+            dur = files[name][1] / 1000             # the manifest's duration, as the build has it
+            for ref, a, b, match in align(text, name, units[name], d["words"], dur, sils[name], voice.lang):
+                rows.append((ref, name, round(a * 1000), round(b * 1000), match))
+        return rows
+
+    rows = cut(text)
+    editions = voice.src.get("edition") or ()
+    if len(editions) > 1:
+        # Its text lies between several commits: now that each paragraph is
+        # cut, what was heard in it says which commit's words it reads, and it
+        # is cut again by those.  The cuts hardly move: of Григорий Войнер's
+        # 16,199, six, by a second at most, between one commit and the other.
+        rows = cut(voice.text(con, voice.heard(rows)))
     if only:
+        for r in rows:
+            print(f"  {r[0]:10} {r[2]/1000:8.2f} {r[3]/1000:8.2f}  {r[4]:.2f}")
         return 0
-    out = OUT
+    out = voice.tsv
     if len(todo) < len(units):
         # Not the record until every file is in: a partial alignment goes to
         # var/, where the listening test can use what there is.
-        out = ROOT / "var" / "align" / "mh-partial.tsv"
+        out = voice.partial
         print(f"{len(units) - len(todo)} files not yet transcribed: writing {out.relative_to(ROOT)}")
     with out.open("w", encoding="utf-8") as fh:
-        fh.write("# faster-whisper large-v3 word times, matched to the text by difflib;"
+        fh.write("# faster-whisper large-v3 word times, matched to the text"
+                 + (f" as it stood at {voice.translation} {editions[0]}, the edition read," if len(editions) == 1
+                    else f" as it stood at {voice.translation} {' or '.join(editions)}, whichever is nearer"
+                         " what was heard of a paragraph," if editions else "")
+                 + " by difflib;"
                  f" each cut at the middle of the longest pause ({NOISE}, >= {MIN_SIL}s)."
                  " tools/align/align.py\n")
         fh.write("ref\tfile\tstart_ms\tend_ms\tmatch\n")
@@ -335,9 +369,9 @@ def main(argv: list[str]) -> int:
     print(f"{out.relative_to(ROOT)}: {len(rows)} segments, {low} below 0.8 match,"
           f" in {time.time() - t0:.0f}s")
     # What a person should look at: the paragraphs the build's gate will
-    # hold to data/audio/mh-low-match.tsv and mh-unread.tsv.
-    wc = dict(con.execute("SELECT ref, word_count FROM paragraph"))
-    review = ROOT / "var" / "align" / "mh-review.tsv"
+    # hold to data/audio/<key>-low-match.tsv and <key>-unread.tsv.
+    wc = voice.word_counts(con)
+    review = voice.review
     with review.open("w", encoding="utf-8") as fh:
         for ref, name, a, b, m in rows:
             if "." in ref and wc[ref] >= LOW_WORDS and m < LOW_MATCH:

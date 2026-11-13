@@ -339,15 +339,23 @@ window.ubUnit = function (where) {
       {#- What a fold needs of each: its name in a tab, and who made it. #}
       <script type="application/json" id="ub-translations">{{ translations_json()|safe }}</script>
       {%- elif it.kind == 'trvoices' %}
-      {#- A menu of the browser's voices for each translation, which its ▶ in
-          Compare reads with, by its short name, as Compare names it: filled in
-          by ub.js, which shows those ticked and keeps them all in the hidden
-          input, the setting's value (settings.py trvoices). #}
+      {#- A menu of voices for each translation, which its ▶ in Compare reads
+          with, by its short name, as Compare names it: a recording of it
+          first, where there is one, which is what its ▶ plays until another
+          is chosen (data-rec, its key), then the browser's own choice, then
+          the browser's voices in its language, filled in by ub.js, which
+          shows those ticked and keeps them all in the hidden input, the
+          setting's value (settings.py trvoices). #}
       <div class="trvoices"{{ needs|safe }} hidden><input type="hidden" name="{{ it.key }}">
       <p class="sub">{{ t(it.label) }}</p>
       {%- for c in it.choices %}
-      <label class="row set-bvoice" data-k="{{ c.value }}" data-lang="{{ c.lang }}" hidden>{{ c.label }} <select>
-        <option value=""{{ ru('Automatic') }}>{{ tt('Automatic') }}</option></select></label>
+      <label class="row set-bvoice" data-k="{{ c.value }}" data-lang="{{ c.lang }}"{% if c.rec %} data-rec="{{ c.rec[0].key }}"{% endif %} hidden>{{ c.label }} <select>
+        {%- if c.rec %}
+        <option value=""{{ ru(c.rec[0].label) }}>{{ tt(c.rec[0].label) }}</option>
+        <option value="browser"{{ ru('Your browser’s voice') }}>{{ tt('Your browser’s voice') }}</option>
+        {%- else %}
+        <option value=""{{ ru('Automatic') }}>{{ tt('Automatic') }}</option>
+        {%- endif %}</select></label>
       {%- endfor %}
       </div>
       {%- elif it.kind == 'select' %}
@@ -413,7 +421,8 @@ window.ubUnit = function (where) {
           each folded to its papers, which offline.js draws from
           /offline/audio/<key>.json when it opens.  Boson's credit for the AI
           voice stands with its name, as its licence asks wherever it is
-          offered (sources.toml). #}
+          offered (sources.toml); a translation's reading has that
+          translation's short name after its reader's. #}
       <div class="offrec">
       <p class="sub">{{ t('Recordings') }}</p>
       <p class="recstate"></p>
@@ -421,7 +430,7 @@ window.ubUnit = function (where) {
       <div class="recs">
         {%- for v in voices() %}
         <details class="recvoice" data-key="{{ v.key }}"><summary><span class="rfold"></span>
-          <span class="w"><span class="rname">{{ t(v.label) }}</span>{% if v.credit %} <span class="rpt">· <a href="{{ v.credit_url }}">{{ t(v.credit) }}</a></span>{% endif %}<small class="rst"></small></span>
+          <span class="w"><span class="rname">{{ t(v.label) }}</span>{% if v.tr %} <span class="rpt">· {{ v.tr_label }}</span>{% endif %}{% if v.credit %} <span class="rpt">· <a href="{{ v.credit_url }}">{{ t(v.credit) }}</a></span>{% endif %}<small class="rst"></small></span>
           <span class="rmeta"></span><button type="button" class="keep" data-st="none" disabled></button></summary>
         <div class="parts"></div></details>
         {%- endfor %}

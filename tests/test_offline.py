@@ -205,6 +205,8 @@ class Pages(unittest.TestCase):
         # The recordings' block: a fold to each voice, its control a button
         # drawn by offline.js, never a checkbox or a setting (2026-11-04).
         self.assertIn('<details class="recvoice" data-key="mh"><summary>', fs.group(1))
+        # Each voice the database carries, Merritt Horn's first.
+        self.assertEqual(re.findall(r'<details class="recvoice" data-key="([^"]+)">', fs.group(1)), ["mh", "voyner"])
         self.assertIn('<button type="button" class="keep" data-st="none" disabled></button>', fs.group(1))
         self.assertIn('<p class="state" aria-live="polite"></p>', fs.group(1))
         self.assertEqual(fs.group(1).count('<li><label><input type="checkbox" value="'), 3)
@@ -250,6 +252,54 @@ class Pages(unittest.TestCase):
         self.assertEqual((status, h.get("content-encoding")), (200, "gzip"))
         self.assertEqual(gzip.decompress(gz), body)
         self.assertEqual(call("/offline/audio/mh.json")[2], body)
+
+    def test_a_translation_s_recording_is_listed_under_its_own_titles(self):
+        # Григорий Войнер's reading of USGNY (2026-11-12): the same list, its
+        # files flat, a file to a section, and its papers and parts under the
+        # translation's titles, which is what Settings' tree shows.
+        import sqlite3
+        status, _h, body = call("/offline/audio/voyner.json")
+        self.assertEqual(status, 200)
+        d = json.loads(body)
+        self.assertEqual(set(d), {"key", "label", "kind", "credit", "credit_url", "bytes", "seconds", "parts", "papers"})
+        self.assertEqual((d["key"], d["label"], d["kind"], d["credit"]), ("voyner", "Grigory Voyner", "human", None))
+        con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        # Each file as it is sent: 1,356 of them with an Info frame before
+        # the first frame (build/mp3.py), so longer than the file on the disk
+        # by that frame, and under the digest of what is sent, which is what
+        # the worker holds a kept file to.
+        files = {n: (b, sha) for n, b, sha in con.execute(
+            "SELECT f.name, f.bytes + COALESCE(LENGTH(f.head), 0), COALESCE(f.sent_sha256, f.sha256)"
+            " FROM audio_file f JOIN audio_source s ON s.id = f.source_id WHERE s.key = 'voyner'")}
+        self.assertEqual(con.execute(
+            "SELECT COUNT(*), MIN(LENGTH(f.head)), MAX(LENGTH(f.head)) FROM audio_file f JOIN audio_source s"
+            " ON s.id = f.source_id WHERE s.key = 'voyner' AND f.head IS NOT NULL").fetchone(), (1356, 208, 626))
+        self.assertEqual(con.execute("SELECT COUNT(*) FROM audio_file WHERE head IS NOT NULL AND source_id <>"
+                                     " (SELECT id FROM audio_source WHERE key = 'voyner')").fetchone()[0], 0)
+        sections = dict(con.execute("SELECT paper_n, COUNT(*) FROM section GROUP BY paper_n"))
+        # A file to a section, but 19:0 and 50:0, which the recording lacks.
+        self.assertEqual(len(files), 1624)
+        self.assertEqual([p["n"] for p in d["papers"]], list(range(197)))
+        for p in d["papers"]:
+            self.assertEqual(len(p["files"]), sections[p["n"]] - (p["n"] in (19, 50)), p["n"])
+            for name, b, h16 in p["files"]:
+                self.assertEqual((b, h16), (files[name][0], files[name][1][:16]))
+                self.assertTrue(name.startswith(f"{p['n']:02d}-"), name)
+        self.assertEqual(d["bytes"], sum(b for b, _ in files.values()))
+        self.assertEqual((d["papers"][0]["title"], d["papers"][1]["title"]), ("Предисловие", "Отец Всего Сущего"))
+        self.assertEqual([x["title"] for x in d["parts"]],
+                         [t for (t,) in con.execute("SELECT title FROM tr_part WHERE translation = 'urantia-ru' ORDER BY n")])
+        self.assertEqual([(x["n"], x["first"], x["last"], x["papers"], x["of"]) for x in d["parts"]],
+                         [(1, 0, 31, 32, 32), (2, 32, 56, 25, 25), (3, 57, 119, 63, 63), (4, 120, 196, 77, 77)])
+        # Merritt Horn's stays under the book's own.
+        self.assertEqual(json.loads(call("/offline/audio/mh.json")[2])["parts"][0]["title"],
+                         "The Central and Superuniverses")
+        # Its files are served by their names in the list, and no others: the
+        # second encode of 75:7 is in the directory and not in the list.
+        status, h, part = call("/audio/voyner/01-01.mp3", headers={"range": "bytes=0-99"})
+        self.assertEqual((status, len(part), h["content-type"]), (206, 100, "audio/mpeg"))
+        self.assertEqual(call("/audio/voyner/7-07.mp3")[0], 404)
+        self.assertEqual(call("/audio/mh/01-01.mp3")[0], 404)
 
     def test_every_kind_of_page_cuts_and_joins_again(self):
         from offline import pages, site

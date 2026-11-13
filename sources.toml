@@ -156,6 +156,15 @@ sha256 = "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99"
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
 # directory against that list.
+#
+# A human reading says how it is filed: `glob`, its MP3s under `path`, and
+# `name`, the rule by which a file's name says the section it reads, a pattern
+# with the groups `paper` and `section`, `with` for the second number of a
+# combined section (139's "9 and 10"), and `folder` where the files are in one
+# to a paper, which must then be the paper's.  A file the rule does not claim
+# needs a line in data/audio/<key>-overrides.tsv, or the build fails.
+# `translation`, where it reads one: the key of the text whose paragraphs it
+# is cut at and whose ▶ plays it.  With none, the English.
 [audio.mh]
 # Merritt Horn's reading of the whole book: one MP3 per section, 121 hours, as
 # published on the Uversa Press DVD (2006): 128 kbps joint stereo, 44.1 kHz.
@@ -167,6 +176,50 @@ sha256 = "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99"
 path  = "/Audio/Urantia/Urantia-MH-Audio-DVD"
 label = "Merritt Horn"
 kind  = "human"
+glob  = "paper*/*.mp3"
+name  = '^paper(?P<folder>\d{3})/P(?P<paper>\d{3})_(?P<section>\d{2})(?:-(?P<with>\d{2}))?\.mp3$'
+
+[audio.voyner]
+# Григорий Войнер's reading of the whole book in Russian: one MP3 per section,
+# 154 hours, recorded 2012-2014, of Lila Dogim's translation, `urantia-ru`
+# above (USGNY), which the Fellowship owns, and the rights to this with it
+# (Tigran, 2026-11-12).  NOT of the Foundation's translation: the directory
+# came named Urantia-UF-RUS-Voyner, and 39 sections heard by Whisper had 97%
+# of their words in urantia-ru and 51% in uf-ru, so it was renamed that day,
+# here and on both hosts.  It reads the translation as it stood then, not as
+# the repository's HEAD has it (`edition`, below).
+# Flat, PP-SS.mp3, the paper in two digits or three; 139-09-10.mp3 is 139's
+# "9 and 10".  Three files are second copies under another section's name,
+# which data/audio/voyner-overrides.tsv leaves out: 7-07.mp3 (75:7 again),
+# 19-00.mp3 (192:0 again) and 50-00.mp3 (the start of 50:4 again); and no file
+# reads 19:0 or 50:0, the introductions to those papers, which are on the
+# record as unread (voyner-unread.tsv).  1,627 files, 1,624 used.
+# Mostly 64 kbps mono, 44.1 kHz; Paper 144 is stereo at 128 kbps, 129:0-4 are
+# at 48 kHz.  No file has a Xing/Info frame, and in 1,358 the frames are never
+# padded, so that a player takes the file for shorter than it is and plays
+# past the place asked for: those are sent with an Info frame, the files
+# themselves untouched (build/mp3.py, data/audio/voyner-frames.tsv).
+# A MASTER -- read, never written.  Both hosts hold an identical copy at the
+# same path, which is what each serves.
+path  = "/Audio/Urantia/Urantia-USGNY-RUS-Voyner"
+label = "Grigory Voyner"
+kind  = "human"
+translation = "urantia-ru"
+# The commits of that translation's repository that the text he read lies
+# between, the nearer first; no commit is that text.  Heard against every
+# commit that touched the text, he is nearest the refresh of April 2017
+# (94b54ca: "Refresh the TeX files based on the latest exemplar sources"),
+# which has corrections he reads that the commits of 2012-2014 lack, and
+# from which the text hardly moves until the corrections of spring 2021 and
+# after, which he did not read; and in 118 paragraphs he is nearer the commit
+# of January 2014 (507a36b), the song at 122:9 above all, which that refresh
+# replaced.  The site shows HEAD; the aligner matches what was said in each
+# paragraph to its words at whichever of these is nearer what was heard
+# (tools/align/edition.py).  507a36b alone was named here on 2026-11-12, from
+# 1:1.4, which both have word for word.
+edition = ["94b54ca", "507a36b"]
+glob  = "*.mp3"
+name  = '^(?P<paper>\d{2,3})-(?P<section>\d{2})(?:-(?P<with>\d{2}))?\.mp3$'
 
 [audio.ai]
 # The AI voice: Higgs TTS 3 (Boson AI's Higgs Audio), cloned from a synthetic

@@ -235,8 +235,9 @@ LISTEN = [
     ("listen", "switch", "Listening controls", True, [],
      "the play buttons beside each paragraph, for the English text and the translations"),
     # How the English text is read (Tigran, 2026-10-27: "so it is clear that it
-    # refers to English text"): the database's voices (app.voices), then the
-    # browser's own; '' is the first voice the section has.
+    # refers to English text"): the database's voices of it (app.voices, those
+    # that read no translation), then the browser's own; '' is the first voice
+    # the section has.
     ("voice", "radio", "English text", "", [], ""),
     # Which of the browser's voices: its English ones, filled in by ub.js,
     # which also says which '' picks.  Always shown, and greyed unless that
@@ -244,11 +245,15 @@ LISTEN = [
     # jumped as the line came and went (Tigran).
     ("bvoice", "select", "Browser voice", "", [("", "Automatic", "", "")], ""),
     # And each translation's, which reads it aloud from its ▶ in Compare
-    # (Tigran, 2026-10-27): a menu for each, of the browser's voices in its
-    # language, filled in by ub.js, shown while it is ticked (groups()).  One
-    # value for them all, as `translations` is: {key: voice's name} as JSON,
-    # only those not Automatic, "" for none.
-    ("trvoices", "trvoices", "Browser voices for the translations", "", [], ""),
+    # (Tigran, 2026-10-27): a menu for each, shown while it is ticked
+    # (groups()): a recording of it first, where the database has one, which
+    # is then what its ▶ plays unless another is chosen (Григорий Войнер's of
+    # USGNY, 2026-11-12); then the browser's voices in its language, filled in
+    # by ub.js.  One value for them all, as `translations` is: {key: a
+    # browser voice's name} as JSON, "browser" for the browser's own choice
+    # where a recording is the default; only those not the default, "" for
+    # none.  "Browser voices for the translations" until there was a recording.
+    ("trvoices", "trvoices", "Voices for the translations", "", [], ""),
     ("rate", "select", "Speed", 1, [(r, f"{r}×", "", "") for r in SPEEDS], ""),
     ("follow", "switch", "Follow along", True, [], "keep the paragraph being read in view"),
     # Off, playing stops at the end of a section (Tigran, 2026-10-07); on, it
@@ -356,9 +361,11 @@ def groups(voices: list[dict], translations: list[dict] = ()) -> list[dict]:
             it["choices"] = [
                 {"value": v["key"], "label": v["label"], "cls": "",
                  "hint": v.get("credit") or ("an AI voice" if v["kind"] == "synthetic" else "")}
-                for v in voices] + [BROWSER]
+                for v in voices if not v.get("tr")] + [BROWSER]
         if it["kind"] == "trvoices":
-            it["choices"] = [{"value": x["key"], "label": x["label"], "lang": x["lang"]} for x in translations]
+            it["choices"] = [{"value": x["key"], "label": x["label"], "lang": x["lang"],
+                              "rec": [v for v in voices if v.get("tr") == x["key"]]}
+                             for x in translations]
     items = [it for it in items if it["kind"] != "trvoices" or it["choices"]]
     return [{"key": "reading", "legend": "Reading", "items": [_item(*s) for s in READING]},
             {"key": "show", "legend": "Show", "items": [_item(*s) for s in SHOW]},

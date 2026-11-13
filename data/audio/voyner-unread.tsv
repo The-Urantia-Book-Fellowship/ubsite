@@ -1,0 +1,18 @@
+# Paragraphs Григорий Войнер's recording does not contain.  Each has no segment; the
+# player runs past it, and check_audio requires exactly this set to be missing.
+# Found by tools/align, 2026-11-12: each looked for in the transcript of every one of
+# the 1,627 files, by its runs of five words, as the translation stood when he read it.
+# A section with every paragraph here has no file: its translation's ▶ there is the
+# browser's voice, and the reading goes on from the section after.
+ref	why
+19:0.1	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.2	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.3	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.4	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.5	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.6	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.7	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.8	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+19:0.9	Paper 19's introduction is not in the recording: 19-00.mp3 is 192:0 again (voyner-overrides.tsv), 18-07 ends with Paper 18's attribution and 19-01 begins "Глава первая"; its words are in no transcript of all 1,627 files
+50:0.1	Paper 50's introduction is not in the recording: 50-00.mp3 is the start of 50:4 again (voyner-overrides.tsv), and 50-01 begins with 50:1's heading; its words are in no transcript of all 1,627 files
+50:0.2	Paper 50's introduction is not in the recording: 50-00.mp3 is the start of 50:4 again (voyner-overrides.tsv), and 50-01 begins with 50:1's heading; its words are in no transcript of all 1,627 files

@@ -115,7 +115,9 @@ def _zip(key: str, cfg: dict) -> dict:
 
 
 def audio() -> dict:
-    """Return {key: {key, path, root, label, kind}} for each [audio.<key>] in sources.toml.
+    """Return {key: {key, path, root, label, kind, ...}} for each [audio.<key>]
+    in sources.toml, in the file's order, which is the order the voices are
+    loaded and listed in.
 
     A recording directory has no git and no revision: what pins it is the
     per-file list in data/audio/<key>-files.tsv.  A human reading's is a master
@@ -123,6 +125,14 @@ def audio() -> dict:
     here (tools/tts/book.py), under var/, so its path is relative to the
     project: `root` is the path as written, which the database records and the
     app resolves against its own tree, here or on pi5.
+
+    A human reading says how it is filed, `glob` and `name` (sources.toml), and
+    `translation` where it reads one, the key of that text; None, the English.
+    `edition`, where it read that translation as it stood before today: the
+    commits of its repository its text lies between, one or several, the
+    nearest first, as a tuple (none, an empty one).  The aligner matches each
+    paragraph to the text at whichever is nearer what was heard
+    (tools/align/edition.py); the site shows the text the build reads, as ever.
     """
     with open(ROOT / "sources.toml", "rb") as fh:
         raw = tomllib.load(fh).get("audio", {})
@@ -133,7 +143,10 @@ def audio() -> dict:
             path = ROOT / path
         out[key] = {"key": key, "path": path, "root": cfg["path"], "label": cfg["label"],
                     "kind": cfg["kind"], "credit": cfg.get("credit"),
-                    "credit_url": cfg.get("credit_url"), "present": path.is_dir()}
+                    "credit_url": cfg.get("credit_url"), "present": path.is_dir(),
+                    "translation": cfg.get("translation"),
+                    "edition": tuple([e] if isinstance(e := cfg.get("edition", []), str) else e),
+                    "glob": cfg.get("glob", "paper*/*.mp3"), "name": cfg.get("name")}
     return out
 
 

@@ -91,6 +91,8 @@ self.addEventListener('message', function (e) {
 """
 
 fails: list[str] = []
+# Merritt Horn's fold in Settings' Offline tab: each voice has one, drawn alike.
+MH = "dialog.settings .recvoice[data-key='mh'] "
 
 # Work offline's icon, and the line under the copy's tick in Settings' Offline
 # tab that says what the copy is.
@@ -665,12 +667,23 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         offline_tab(pg)
         pg.click("dialog.settings .recvoice[data-key='mh'] > summary .rname")
         pg.wait_for_selector("dialog.settings .recvoice[data-key='mh'] .recpart", timeout=15000)
-        ok(pg.locator("dialog.settings .recpart").count() == 4 and pg.locator("dialog.settings .recrow").count() == 197,
+        ok(pg.locator(MH + ".recpart").count() == 4 and pg.locator(MH + ".recrow").count() == 197,
            "Merritt Horn's reading opens to its four parts and 197 papers")
+        # Each voice has its fold (2026-11-12): Григорий Войнер's reading of
+        # USGNY under Merritt Horn's, its tree under that translation's titles.
+        VR = "dialog.settings .recvoice[data-key='voyner'] "
+        pg.wait_for_selector(VR + ".recpart", state="attached", timeout=15000)
+        ok(pg.locator("dialog.settings .recvoice").count() == 2
+           and en(pg, VR + "> summary .rname") == "Grigory Voyner" and en(pg, VR + "> summary .rpt") == "· USGNY"
+           and en(pg, VR + "> summary .rmeta") == "154 h · 4.48 GB",
+           f"the Russian reading has its fold, named with its translation ({en(pg, VR + '> summary .w')!r}, {en(pg, VR + '> summary .rmeta')!r})")
+        ok(pg.locator(VR + ".recpart").count() == 4 and pg.locator(VR + ".recrow").count() == 197
+           and "Отец Всего Сущего" in pg.evaluate(f"document.querySelector(\"{VR}.recrow[data-n='1'] .rname\").textContent"),
+           "with its four parts and 197 papers, under the translation's titles")
         ok(en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rmeta") == "121 h · 6.98 GB",
            "its row says its hours and size")
-        pg.click("dialog.settings .recpart[data-first='120'] > summary .rname")
-        row = "dialog.settings .recrow[data-n='161'] .keep"
+        pg.click("dialog.settings .recvoice[data-key='mh'] .recpart[data-first='120'] > summary .rname")
+        row = "dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161'] .keep"
         ok(pg.get_attribute(row, "data-st") == "none" and pg.get_attribute(row, "title") == "Keep Paper 161 offline (17 MB)",
            f"Paper 161's row offers to keep it ({pg.get_attribute(row, 'title')!r})")
         # Its third file not there: the download stops, and asks for it once,
@@ -692,7 +705,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         kept = pg.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.map(k => new URL(k.url).pathname).sort())")
         ok(kept == [f"/audio/mh/paper161/P161_0{i}.mp3" for i in range(4)], f"its four files are in the cache ({kept})")
         ok(pg.get_attribute(row, "title") == "Kept, 17 MB; tap to let go"
-           and en(pg, "dialog.settings .recpart[data-first='120'] > summary .rst") == "1 of 77 papers"
+           and en(pg, "dialog.settings .recvoice[data-key='mh'] .recpart[data-first='120'] > summary .rst") == "1 of 77 papers"
            and en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rst") == "1 of 197 papers kept, 17 MB",
            "the row, its part and the voice say so")
         ok(en(pg, "dialog.settings .recstate").startswith("17 MB kept in this browser; room for about"),
@@ -730,9 +743,13 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            f"offline, the kept paper plays ({pg.get_attribute('.player .toggle', 'aria-label')}, {pg.inner_text('.player .who')!r})")
         ok(pg.get_attribute(".player .keep", "data-st") == "kept" and pg.is_disabled(".player .keep"),
            "and the bar's ↓ shows it kept, a sign and no more")
+        # From wherever it has got to: the heading is 3.79 s long, and whether
+        # it is over after those four seconds is how soon the playing began
+        # (this asked for 161:1.1 until 2026-11-12, and failed when it began at once).
+        onto = "161:1.2" if pg.inner_text(".player .at") == "161:1.1" else "161:1.1"
         pg.click(".player .next")
         pg.wait_for_timeout(4000)
-        ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and pg.inner_text(".player .at") == "161:1.1"
+        ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and pg.inner_text(".player .at") == onto
            and not pg.inner_text(".player .who"),
            f"the next paragraph plays on, its seek answered from the cache ({pg.get_attribute('.player .toggle', 'aria-label')},"
            f" {pg.inner_text('.player .at')!r}, {pg.inner_text('.player .who')!r})")
@@ -926,15 +943,15 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         offline_tab(pg)
         pg.click("dialog.settings .recvoice[data-key='mh'] > summary .rname")
         pg.wait_for_selector("dialog.settings .recvoice[data-key='mh'] .recpart", timeout=15000)
-        pg.click("dialog.settings .recpart[data-first='120'] > summary .rname")
-        pg.wait_for_selector("dialog.settings .recrow[data-n='161']", timeout=15000)
-        ok(pg.get_attribute("dialog.settings .recrow[data-n='160'] .keep", "disabled") is not None
-           and pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "disabled") is None,
+        pg.click("dialog.settings .recvoice[data-key='mh'] .recpart[data-first='120'] > summary .rname")
+        pg.wait_for_selector("dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161']", timeout=15000)
+        ok(pg.get_attribute("dialog.settings .recvoice[data-key='mh'] .recrow[data-n='160'] .keep", "disabled") is not None
+           and pg.get_attribute("dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161'] .keep", "disabled") is None,
            "offline, a paper not kept cannot be asked for, and one kept can be let go")
-        pg.click("dialog.settings .recrow[data-n='161'] .keep")
+        pg.click("dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161'] .keep")
         until(pg, "() => caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", True, 10000)
         ok(asked and asked[-1].startswith("This deletes 1 paper of Merritt Horn from this browser, 17 MB.")
-           and pg.get_attribute("dialog.settings .recrow[data-n='161'] .keep", "data-st") == "none",
+           and pg.get_attribute("dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161'] .keep", "data-st") == "none",
            f"asked first, and let go, its cache goes with its last file ({(asked or [''])[-1][:60]!r})")
         pg.keyboard.press("Escape")
         ok(not errors, f"no script errors ({errors[:2]})")

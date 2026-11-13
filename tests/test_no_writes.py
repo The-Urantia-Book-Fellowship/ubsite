@@ -212,11 +212,12 @@ class NoWrites(unittest.TestCase):
         """No module may name a sibling repo path in a write context: an open()
         that writes, or anything else that writes, moves or deletes."""
         for rel, src in self._everything():
-            # The recordings are a master too: Merritt Horn's reading.
+            # The recordings are masters too: Merritt Horn's reading, and
+            # Григорий Войнер's.
             # And the translations: ud's name is too short to search for alone;
             # the Foundation's zips are inside the project, in data/uf/.
             for bad in ("urantia-uversa-press-claude", "../index",
-                        "urantia-study-edition", "Urantia-MH-Audio", "block-sources",
+                        "urantia-study-edition", "Urantia-MH-Audio", "RUS-Voyner", "block-sources",
                         "../ud", "urantia-ru", "data/uf"):
                 for m in [*WRITE_OPEN.finditer(src), *WRITERS.finditer(src)]:
                     seg = src[max(0, m.start() - 200):m.end() + 200]

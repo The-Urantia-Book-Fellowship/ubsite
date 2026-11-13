@@ -450,13 +450,17 @@ def sources() -> dict:
 def _voices(mtime_ns: int) -> list[dict]:
     try:
         return [dict(r) for r in db().execute(
-            "SELECT key, label, kind, granularity, credit, credit_url FROM audio_source ORDER BY id")]
+            "SELECT s.key, s.label, s.kind, s.granularity, s.credit, s.credit_url,"
+            "  s.translation AS tr, t.lang, t.label AS tr_label"
+            " FROM audio_source s LEFT JOIN translation t ON t.key = s.translation ORDER BY s.id")]
     except sqlite3.Error:
         return []                                  # a database from before 005_audio.sql
 
 
 def voices() -> list[dict]:
-    """The readings this database carries, in the order Settings lists them."""
+    """The readings this database carries, in the order Settings lists them.
+    `tr` is the translation one reads, with that text's language and short
+    name (`lang`, `tr_label`); None, the English text's own."""
     try:
         return _voices(DB.stat().st_mtime_ns)
     except OSError:
@@ -534,12 +538,15 @@ def translations_json() -> Markup:
     """What a fold needs of each translation (ub.js): its key, title and
     language, its short name, and who made it and its language's name in each
     language, as {en, ru}, which l10n.js's T() takes as words made (the player
-    names its voices so, listen.js); and the version of its contents,
-    which the left rail asks for under it (/rail/<key>).  HTML, escaped.  In
-    the dialog, so in the shell."""
+    names its voices so, listen.js); the version of its contents,
+    which the left rail asks for under it (/rail/<key>); and the recordings of
+    it, `voices`, each by its key and name, the first of which its ▶ plays
+    unless Settings names a browser's voice.  HTML, escaped.  In the dialog,
+    so in the shell."""
     out = [{"key": x["key"], "lang": x["lang"], "title": str(escape(x["title"])),
             "label": str(x["label"]), "by": dict(x["by"].by), "language": dict(x["language"].by),
-            "toc": (toc_of(x["key"]) or {}).get("v")}
+            "toc": (toc_of(x["key"]) or {}).get("v"),
+            "voices": [{"key": v["key"], "label": v["label"]} for v in voices() if v["tr"] == x["key"]]}
            for x in translations()]
     return Markup(json.dumps(out, ensure_ascii=False).replace("</", "<\\/"))
 
@@ -721,7 +728,7 @@ def robots():
 
 
 @app.get("/audio/{key}/{name:path}", include_in_schema=False)
-def audio_file(key: str, name: str):
+def audio_file(request: Request, key: str, name: str):
     """A recording, by the name the database lists -- and only such a name.
 
     Nothing is resolved from the URL alone: the file must be a row of
@@ -730,41 +737,136 @@ def audio_file(key: str, name: str):
     The names never change content (the MH files are pinned by SHA-256 in
     data/audio/mh-files.tsv, the synthetic ones carry their hash), so a browser
     may keep them for good.
+
+    A file a player would take for shorter than it is goes out with an Info
+    frame after its ID3v2 tag (build/mp3.py; 1,356 of Григорий Войнер's):
+    the file on the disk is the master, untouched, and `_with_head` sends it
+    with the frame the build stored put in, whole or by range.
     """
     try:
         row = db().execute(
-            "SELECT s.root FROM audio_file f JOIN audio_source s ON s.id=f.source_id"
-            " WHERE s.key=? AND f.name=?", (key, name)).fetchone()
+            "SELECT s.root, f.head_at, f.head, f.sent_sha256 FROM audio_file f"
+            " JOIN audio_source s ON s.id=f.source_id WHERE s.key=? AND f.name=?", (key, name)).fetchone()
     except sqlite3.Error:
         row = None
     if row is None:
         raise HTTPException(status_code=404)
     # A relative root is the project's own (the AI voice, under var/).
-    return FileResponse(ROOT / row["root"] / name, media_type="audio/mpeg",
-                        headers={"Cache-Control": "public, max-age=31536000, immutable"})
+    path = ROOT / row["root"] / name
+    headers = {"Cache-Control": "public, max-age=31536000, immutable"}
+    if row["head"] is None:
+        return FileResponse(path, media_type="audio/mpeg", headers=headers)
+    return _with_head(request, path, row["head_at"], bytes(row["head"]), row["sent_sha256"], headers)
+
+
+RE_BYTES = re.compile(r"bytes=(\d*)-(\d*)")     # a Range header's one range
+
+
+def _with_head(request: Request, path: pathlib.Path, at: int, head: bytes, sha: str, headers: dict) -> Response:
+    """The file at `path` with `head` put in at byte `at`: all of it, or the
+    one range asked for, as FileResponse answers for a file sent as it is.
+    Its ETag is its digest as sent, which never changes; a range asked for
+    under another (If-Range) gets the whole."""
+    try:
+        size = path.stat().st_size + len(head)
+    except OSError:
+        raise HTTPException(status_code=404)
+    etag = f'"{sha[:32]}"'
+    headers = {**headers, "Accept-Ranges": "bytes", "ETag": etag}
+    lo, hi, status = 0, size - 1, 200
+    asked = request.headers.get("range")
+    if asked and request.headers.get("if-range", etag) == etag:
+        m = RE_BYTES.fullmatch(asked.strip())
+        if m and (m[1] or m[2]):
+            if m[1]:
+                lo, hi = int(m[1]), min(int(m[2]) if m[2] else size - 1, size - 1)
+            else:
+                lo = max(0, size - int(m[2]))                 # the last so many bytes
+            if lo > hi or lo >= size:
+                return Response(status_code=416, headers={**headers, "Content-Range": f"bytes */{size}"})
+            status = 206
+            headers["Content-Range"] = f"bytes {lo}-{hi}/{size}"
+        # Several ranges at once, or another unit: the whole, which is allowed.
+    headers["Content-Length"] = str(hi - lo + 1)
+
+    def body():
+        # What is sent is three pieces: the file up to `at`, the frame, the rest.
+        with open(path, "rb") as fh:
+            pos = lo
+            while pos <= hi:
+                if pos < at:
+                    fh.seek(pos)
+                    piece = fh.read(min(1 << 16, at - pos, hi - pos + 1))
+                elif pos < at + len(head):
+                    piece = head[pos - at:hi - at + 1]
+                else:
+                    fh.seek(pos - len(head))
+                    piece = fh.read(min(1 << 16, hi - pos + 1))
+                if not piece:
+                    return                                   # shorter than listed: the build checks sizes
+                pos += len(piece)
+                yield piece
+
+    return _Pieces(body(), status_code=status, headers=headers, media_type="audio/mpeg")
+
+
+class _Pieces(Response):
+    """A body sent as its pieces come, each read off the event loop, as
+    FileResponse sends a file's.  Not Starlette's streaming response, which
+    listens for the client's leaving in a loop of its own beside the sending:
+    nothing here needs it, a piece that cannot be sent raising as a file's
+    does."""
+
+    def __init__(self, pieces, status_code: int, headers: dict, media_type: str):
+        self.pieces = pieces
+        self.status_code = status_code
+        self.media_type = media_type
+        self.background = None
+        self.body = b""
+        self.init_headers(headers)
+
+    async def __call__(self, scope, receive, send) -> None:
+        await send({"type": "http.response.start", "status": self.status_code, "headers": self.raw_headers})
+        try:
+            while True:
+                piece = await run_in_threadpool(next, self.pieces, None)
+                if piece is None:
+                    break
+                await send({"type": "http.response.body", "body": piece, "more_body": True})
+        finally:
+            await run_in_threadpool(self.pieces.close)       # the file, whatever became of the sending
+        await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
 def section_audio(con, section_id: int) -> dict:
     """Every voice's segments for one section, as listen.js wants them.
 
     {key: {label, kind, by, files: [url, ...], segs: [[ref, file, start, end], ...]}}
-    A segment's ref is its paragraph's, or null for the spoken heading.
+    A segment's ref is its paragraph's, or null for the spoken heading.  A
+    reading of a translation says so, `tr` its key and `lang` its language:
+    the player starts it from that translation's ▶ and marks that
+    translation's lines, never the English text's (listen.js).
     """
     out = {}
     try:
         rows = con.execute(
             "SELECT s.key, s.label, s.kind, s.granularity, s.credit, s.credit_url,"
-            "  f.name, g.start_ms, g.end_ms,"
+            "  s.translation AS tr, t.lang, f.name, g.start_ms, g.end_ms,"
             "  p.ref FROM audio_segment g JOIN audio_source s ON s.id=g.source_id"
             " JOIN audio_file f ON f.id=g.file_id"
+            " LEFT JOIN translation t ON t.key = s.translation"
             " LEFT JOIN paragraph p ON p.id=g.paragraph_id"
             " WHERE g.section_id=? ORDER BY s.id, g.ord", (section_id,)).fetchall()
     except sqlite3.Error:
         return {}
     for r in rows:
-        v = out.setdefault(r["key"], {"label": r["label"], "kind": r["kind"],
-                                      "by": r["granularity"], "credit": r["credit"],
-                                      "credit_url": r["credit_url"], "files": [], "segs": []})
+        v = out.get(r["key"])
+        if v is None:
+            v = out[r["key"]] = {"label": r["label"], "kind": r["kind"],
+                                 "by": r["granularity"], "credit": r["credit"],
+                                 "credit_url": r["credit_url"], "files": [], "segs": []}
+            if r["tr"]:
+                v["tr"], v["lang"] = r["tr"], r["lang"]
         url = f"/audio/{r['key']}/{r['name']}"
         if url not in v["files"]:
             v["files"].append(url)
@@ -904,13 +1006,15 @@ def _audio_list(key: str, mtime_ns: int) -> bytes | None:
     papers it has, and the parts that have any.  Made once per database, and
     the same bytes from the same rows (CLAUDE.md trap 29)."""
     con = db()
-    src = con.execute("SELECT id, key, label, kind, credit, credit_url FROM audio_source WHERE key = ?",
-                      (key,)).fetchone()
+    src = con.execute("SELECT id, key, label, kind, credit, credit_url, translation FROM audio_source"
+                      " WHERE key = ?", (key,)).fetchone()
     if src is None:
         return None
     by_paper: dict[int, list] = {}
     for r in con.execute(
-            "SELECT f.name, f.bytes, f.duration_ms, f.sha256, MIN(sec.paper_n) AS paper,"
+            # As sent: with its Info frame, where it has one (audio_file()).
+            "SELECT f.name, f.bytes + COALESCE(LENGTH(f.head), 0) AS bytes, f.duration_ms,"
+            " COALESCE(f.sent_sha256, f.sha256) AS sha256, MIN(sec.paper_n) AS paper,"
             " COUNT(DISTINCT sec.paper_n) AS papers"
             " FROM audio_file f JOIN audio_segment g ON g.file_id = f.id JOIN section sec ON sec.id = g.section_id"
             " WHERE f.source_id = ? GROUP BY f.id ORDER BY paper, f.name", (src["id"],)):
@@ -918,6 +1022,16 @@ def _audio_list(key: str, mtime_ns: int) -> bytes | None:
             raise RuntimeError(f"audio {key}: {r['name']} is heard in {r['papers']} papers")
         by_paper.setdefault(r["paper"], []).append(r)
     titles = {r["n"]: (r["title"], r["part_n"] or 1) for r in con.execute("SELECT n, title, part_n FROM paper")}
+    part_titles = {r["n"]: r["title"] for r in con.execute("SELECT n, title FROM part")}
+    # A translation's reading is listed under that translation's own titles,
+    # where it has them: who keeps a Russian reading reads Russian.
+    if src["translation"]:
+        for r in con.execute("SELECT paper_n, text FROM tr_heading WHERE translation = ? AND kind = 'title'"
+                             " AND section_n IS NULL", (src["translation"],)):
+            if r["paper_n"] in titles:
+                titles[r["paper_n"]] = (r["text"], titles[r["paper_n"]][1])
+        for r in con.execute("SELECT n, title FROM tr_part WHERE translation = ?", (src["translation"],)):
+            part_titles[r["n"]] = r["title"]
     papers = [{"n": n, "title": titles[n][0], "part": titles[n][1],
                "bytes": sum(f["bytes"] for f in fs), "seconds": round(sum(f["duration_ms"] for f in fs) / 1000),
                "files": [[f["name"], f["bytes"], f["sha256"][:16]] for f in fs]}
@@ -927,7 +1041,7 @@ def _audio_list(key: str, mtime_ns: int) -> bytes | None:
         first = 0 if p["n"] == 1 else p["first_paper"]       # the Foreword with Part I
         mine = [x for x in papers if first <= x["n"] <= p["last_paper"]]
         if mine:
-            parts.append({"n": p["n"], "title": p["title"], "first": first, "last": p["last_paper"],
+            parts.append({"n": p["n"], "title": part_titles[p["n"]], "first": first, "last": p["last_paper"],
                           "papers": len(mine), "of": p["last_paper"] - first + 1,
                           "bytes": sum(x["bytes"] for x in mine), "seconds": sum(x["seconds"] for x in mine)})
     data = {"key": key, "label": src["label"], "kind": src["kind"], "credit": src["credit"],
