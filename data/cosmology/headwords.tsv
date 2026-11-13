@@ -1,0 +1,38 @@
+# The index's headword for a unit or a personality of the chart whose name is
+# not a headword as written (build/cosmo.py heads(); data/cosmology/README.md).
+# Ours, and reviewed: `id` is his, `slug` the headword's address, /i/<slug>,
+# `why` what his name is and why this is its headword.  One with two headwords
+# has two lines.  A name that is a headword as written needs no line, and the
+# build refuses one; so it does a slug that is no headword's.
+# With no line and no headword by name: translated midwayers, the natives of
+# the Paradise spheres of the Spirit and of the Father, the Adjuster-fused
+# mortal citizens of Paradise, and the mortal and his Adjuster, which the
+# index has no headword for.
+id	slug	why
+mother	local-universe-mother-spirits	his name is Universe Mother Spirit; the index files her under the local universe
+melch	melchizedek-sons	Melchizedeks: the index's headword is Melchizedek Sons
+adam	material-sons-of-god	Material Sons: the index's headword is Material Sons of God
+cherub	cherubim-and-sanobim	Cherubim: the index has them with the sanobim
+tadj	thought-adjusters	Thought Adjuster, in the singular
+human	mortals	Mortal man
+morontia	morontia-progressors	Morontia mortals: the index's word for an ascender in the morontia life
+midway	midwayers	Midway creatures
+circspirits	seven-spirits-of-havona-circuits	Spirits of the Circuits: Appendix B's Seven Spirits of Havona Circuits
+fmelch	father-melchizedek	Father Melchizedeks, in the plural
+frandal	frandalanks	Frandalanks and Chronoldeks: two headwords
+frandal	chronoldeks	the second of the two
+calstaff	caligastia-one-hundred	his name goes on, the corporeal members of the Prince's staff
+havona	havona	his title goes on, central universe
+super	orvonton-superuniverse	Superuniverse Orvonton
+uversa	uversa	his title goes on, superuniverse capital
+major	splandon	Major sector Splandon
+umajor	umajor-the-fifth	his title goes on, major sector capital
+minor	ensa	Minor sector Ensa
+uminor	uminor-the-third	his title goes on, minor sector capital
+local	nebadon	Local universe Nebadon
+salv	salvington	his title goes on, local universe capital
+const	norlatiadek	Constellation Norlatiadek
+edentia	edentia	his title goes on, constellation capital
+system	satania	System Satania
+jerusem	jerusem	his title goes on, system capital
+urantia	urantia	his title goes on, inhabited planet

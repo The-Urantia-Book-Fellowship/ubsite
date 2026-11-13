@@ -58,6 +58,16 @@ def read_bytes_at_rev(repo: pathlib.Path, rel: str, rev: str) -> bytes:
     return out.stdout
 
 
+def list_at_rev(repo: pathlib.Path, rel: str, rev: str) -> list[str]:
+    """The files of a directory at a git revision, by name, sorted: what a
+    glob would find there, without touching the working tree."""
+    out = subprocess.run(["git", "-C", str(repo), "ls-tree", "--name-only", f"{rev}:{rel}"],
+                         capture_output=True, text=True, encoding="utf-8")
+    if out.returncode != 0:
+        raise SystemExit(f"_io: cannot list {rel} at {rev} in {repo}:\n{out.stderr}")
+    return sorted(out.stdout.split("\n")[:-1])
+
+
 def read_tex(texdir: pathlib.Path, name: str, rev: str = "worktree") -> str | None:
     """One file of a source's tex/ directory, at the revision config pins.
 

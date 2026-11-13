@@ -25,6 +25,7 @@ ALLOWED = {
     "tools/quiz/draft.py": "var/quiz/",            # a paper's quiz drafted for review
     "tools/quiz/apply.py": "data/quiz/questions.tsv",  # the quiz's ledger, by ruling
     "tools/quiz/doubt.py": "var/quiz/",            # the references in doubt, for ruling
+    "tools/cosmo/snapshot.py": "data/cosmology/chart.json",   # the chart's snapshot, of its author's repository
     "build/cli.py": "var/",                        # ub.db, built as ub.db.tmp and swapped in
     "build/db.py": "var/",                         # a database built afresh, the old one removed
     "build/oracle.py": "var/",                     # the oracles' sandboxes, their inputs linked in
@@ -88,8 +89,9 @@ class NoWrites(unittest.TestCase):
         # build/ reads the masters; offline/ only the database, and is held
         # to the same rule so that it never grows a reason to.
         # tools/study/ reads the study edition and Block's charts, tools/quiz/
-        # the edition's quiz.
-        for d in ("build", "offline", "tools/study", "tools/quiz"):
+        # the edition's quiz, tools/cosmo/ the repository of the chart of the
+        # personalities.
+        for d in ("build", "offline", "tools/study", "tools/quiz", "tools/cosmo"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 
@@ -201,6 +203,23 @@ class NoWrites(unittest.TestCase):
             else:
                 self.assertEqual(WRITE_OPEN.findall(src), [], f"{rel} must not write")
 
+    def test_the_chart_s_tool_writes_only_its_snapshot(self):
+        """tools/cosmo/snapshot.py reads its author's repository through _io,
+        at a commit, gives his page to Chrome from memory, and writes one
+        file, the snapshot config names, inside this project."""
+        src = (ROOT / "tools/cosmo/snapshot.py").read_text()
+        self.assertEqual(sorted(set(re.findall(WRITERS, src))), [".write_text("])
+        self.assertEqual(src.count(".write_text("), 1)
+        self.assertIn('out = src["snapshot"]', src)
+        self.assertIn("out.write_text(text", src)
+        self.assertEqual(WRITE_OPEN.findall(src), [])
+        self.assertNotIn("subprocess", src)
+        self.assertNotRegex(src, r"\bopen\(")
+        import tomllib
+        cfg = tomllib.loads((ROOT / "sources.toml").read_text())["cosmology"]
+        self.assertEqual(cfg["snapshot"], "data/cosmology/chart.json")
+        self.assertTrue(cfg["path"].startswith("../"))
+
     def _everything(self):
         # Every module of the project, the tools for the audio, the hyphens and
         # the rest among them, which name the recordings and the press too.
@@ -218,7 +237,7 @@ class NoWrites(unittest.TestCase):
             # the Foundation's zips are inside the project, in data/uf/.
             for bad in ("urantia-uversa-press-claude", "../index",
                         "urantia-study-edition", "Urantia-MH-Audio", "RUS-Voyner", "block-sources",
-                        "../ud", "urantia-ru", "data/uf"):
+                        "../ud", "urantia-ru", "data/uf", "UniverseGenealogy"):
                 for m in [*WRITE_OPEN.finditer(src), *WRITERS.finditer(src)]:
                     seg = src[max(0, m.start() - 200):m.end() + 200]
                     self.assertNotIn(bad, seg,

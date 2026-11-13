@@ -64,8 +64,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block"):
-            continue                                # not repositories: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block()
+        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology"):
+            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology()
         if "zip" in cfg:
             repos[key] = _zip(key, cfg)
             continue
@@ -160,6 +160,30 @@ def srt() -> dict:
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["srt"]
     return {"url": cfg["url"], "path": ROOT / cfg["path"]}
+
+
+def cosmology() -> dict:
+    """Return {key, path, rev, commit, date, url, commit_url, snapshot} for
+    Alexander Alyuev's chart of the personalities.
+
+    A repository, and a master, which the build never reads: `snapshot`, under
+    data/, is what it reads (build/cosmo.py), and only tools/cosmo/snapshot.py
+    writes it, from the repository at `commit`, what `rev` names now.  `path`
+    is None where the repository is not on this machine, a host's or a fresh
+    clone's: the snapshot is enough to build from.
+    """
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["cosmology"]
+    path = (ROOT / cfg["path"]).resolve()
+    url = cfg.get("url")
+    out = {"key": "cosmology", "path": None, "rev": cfg.get("rev", "HEAD"), "commit": None, "date": None,
+           "url": url, "commit_url": None, "snapshot": ROOT / cfg["snapshot"]}
+    if not path.is_dir():
+        return out
+    commit = _git(path, "rev-parse", f"{out['rev']}^{{commit}}")
+    return out | {"path": path, "commit": commit,
+                  "date": _git(path, "log", "-1", "--format=%cd", "--date=short", commit) if commit else None,
+                  "commit_url": f"{url.rstrip('/')}/commit/{commit}" if url and commit else None}
 
 
 def texlive() -> dict:

@@ -345,6 +345,18 @@ make data && make check                 # srt-undeclared / srt-declared-gone nam
 
 Then update `tests/known-srt-deltas.tsv` and the SRT counts in `check_db.py` and `verify/expectations.toml`, and commit them all together.
 
+## The chart of the personalities
+
+`/cosmology` is Alexander Alyuev's "Cosmology of Personalities in the Urantia Book", https://github.com/alyuev/UniverseGenealogy_UrantiaBook_2D, drawn by the site from his data: a card's sources are links into the text, its name a link into the index, and the page is in both languages and in the offline copy. His repository, cloned beside the others (`sources.toml` `[cosmology]`), is a master and is never read by the build. `data/cosmology/chart.json` is a snapshot of it at a commit, with what his data does not hold, where each line runs, read out of his own page in Chrome; `data/cosmology/README.md` says what is in it, what the build holds it to, and how to refresh it:
+
+```
+git -C ../UniverseGenealogy_UrantiaBook_2D pull
+make cosmo-snapshot                     # needs Chrome; writes data/cosmology/chart.json
+git diff data/cosmology/                # what he changed
+make data && make check
+.venv/bin/python tools/cosmo_e2e.py     # the page in Chrome
+```
+
 ## The text API
 
 Other sites keep their own copies of the English text, and **`/api/v1`** lets them keep those copies in step with this one. **`/api`** documents it for them, with a client in Python.

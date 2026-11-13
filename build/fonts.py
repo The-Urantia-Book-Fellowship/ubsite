@@ -113,6 +113,7 @@ def corpus_codepoints(con) -> set[str]:
               "SELECT text FROM footnote WHERE kind <> 'study'",
               "SELECT text FROM study_source",
               "SELECT text FROM changelog",             # /changelog
+              "SELECT text FROM cosmo_text",            # the chart of the personalities, his words
               # The translations beside the text, and their titles (build/translation.py).
               "SELECT text FROM tr_paragraph",
               "SELECT text FROM tr_heading",

@@ -1,0 +1,182 @@
+{% extends "base.html" %}{% set title = 'Cosmology of Personalities' %}
+{#- The chart of the personalities (app.py cosmology_page, queries.cosmo;
+    build/cosmo.py): Alexander Alyuev's chart, from the snapshot of his
+    repository, drawn here.  Three things, in this order:
+
+    the chart, on a canvas of his page's size, c.w by c.h, in a window that
+    scrolls both ways (.cview): one <svg> for the units' boxes and the lines,
+    each line twice, as it runs in English and in Russian, the titles being in
+    its way; over it the units' titles and the cards, each a link, so that
+    their words are the interface's own, in both languages, and wrap by
+    themselves.  A card's address is #c-<id>, or #g-<id> where the
+    personality is drawn again, where it serves;
+
+    the legend, a <details>, its chips the keys the cards are drawn by;
+
+    and an entry to every unit and personality (.ci, its address #<id>, which
+    a card and a title link to): what it is, what the lines say of it in
+    words, where the book speaks of it, its headwords in the index.  With
+    scripts off the entries are a list under the chart, which is then a
+    picture whose every card goes to its entry; cosmo.js shows one at a time
+    beside the chart, marks what a card is joined to, searches and zooms.
+
+    Everything on the canvas is sized in px, the canvas's own unit: the whole
+    is scaled as one (ub.css .cworld), and Settings' sizes are the text's. #}
+{%- macro sign(g, color, dots, disc) -%}
+<svg class="cg" viewBox="-17 -17 34 34" aria-hidden="true" focusable="false" style="--g:{{ color }}">
+{%- if g == 'deity' %}<circle class="gd" r="12.5" style="fill:{{ disc }}"/>
+{%- elif g == 'absolute' %}<circle class="ga" r="12.5"/>
+{%- elif g == 'trinity' %}<circle class="gt" cy="-4.4" r="6.4"/><circle class="gt" cx="-4.6" cy="3.5" r="6.4"/><circle class="gt" cx="4.6" cy="3.5" r="6.4"/>
+{%- elif g == 'ascender' %}<path class="gs up" d="M0,-14 L14,11 L-14,11z"/>
+{%- elif g == 'descending' %}<path class="gs down" d="M-14,-11 L14,-11 L0,14z"/>
+{%- elif g == 'angel' %}<path class="gs wing" d="M0,2 C-4,-12 -17,-12 -16,-1 C-15,7 -6,8 0,2z"/><path class="gs wing" d="M0,2 C4,-12 17,-12 16,-1 C15,7 6,8 0,2z"/><ellipse class="gs halo" cy="-12" rx="5" ry="1.8"/>
+{%- elif g == 'local' %}<path class="gs loc" d="M0,-14 L13,0 L0,14 L-13,0z"/>
+{%- else %}<circle class="gs rnd" r="13"/>
+{%- endif %}
+{%- for d in dots %}<circle class="gdot" cx="{{ d.x }}" cy="{{ d.y }}" r="{{ d.r }}" style="fill:{{ d.color }}"/>{% endfor -%}
+</svg>
+{%- endmacro %}
+{%- macro chip(kind, k) -%}
+<button type="button" class="cchip {{ kind }}" data-k="{{ kind }}:{{ k.key }}" style="--k:{{ k.color }}"><i></i>{{ t(k.name) }}{% if k.n is defined %} <small>{{ k.n }}</small>{% endif %}</button>
+{%- endmacro %}
+{%- macro ends(items) -%}
+{%- for x in items %}<a href="#{{ x.id }}">{{ t(x.name) }}</a>{% if not loop.last %}, {% endif %}{% endfor -%}
+{%- endmacro %}
+{% block head %}<script>(function (f) { document.documentElement.style.setProperty('--cz', f >= .62 ? Math.min(1, f) : .75); })((innerWidth - 16) / {{ c.w }});</script>
+{% endblock %}
+{% block body %}
+<main class="cosmo" data-src="{{ asset('cosmo.js') }}">
+  <header class="cbar">
+    <div class="chead">
+      <h1>{{ t('Cosmology of Personalities') }}</h1>
+      <p class="cby">{{ t('cosmo:by', url=c.meta.url, v=c.meta.version) }}</p>
+    </div>
+    <details class="clegend">
+      <summary>{{ t('Legend') }}</summary>
+      <div class="clbody">
+        <p class="chint">{{ t('cosmo:lede', p=c.counts.persons, u=c.counts.units) }}</p>
+        <h2>{{ t('Signs') }}</h2>
+        <ul class="csigns">
+          <li>{{ sign('deity', '#b71c1c', [], '#e53935') }} {{ t('Deity|sign') }}</li>
+          <li>{{ sign('trinity', '#1e6fd9', [], '') }} {{ t('Trinity origin|sign') }}</li>
+          <li>{{ sign('descending', '#00897b', [], '') }} {{ t('descending Son|sign') }}</li>
+          <li>{{ sign('angel', '#ec407a', [], '') }} {{ t('angel|sign') }}</li>
+          <li>{{ sign('spirit', '#ef6c00', [], '') }} {{ t('spirit|sign') }}</li>
+          <li>{{ sign('local', '#8d6e63', [], '') }} {{ t('local universe Son|sign') }}</li>
+          <li>{{ sign('ascender', '#2e7d32', [], '') }} {{ t('ascender|sign') }}</li>
+        </ul>
+        <p class="cdots">{{ t('The dots in a sign are its origin:') }}
+          {% for o in c.origins %}<span class="cdot" style="--k:{{ o.color }}"></span> {{ t(o.name) }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+        <h2>{{ t('Categories') }}</h2>
+        <p class="cchips">{% for k in c.legend.group %}{{ chip('group', k) }}{% endfor %}</p>
+        <h2>{{ t('Functions') }}</h2>
+        <p class="cchips">{% for k in c.legend.func %}{{ chip('func', k) }}{% endfor %}</p>
+        <h2>{{ t('Class of origin, a card’s tint') }}</h2>
+        <p class="cchips">{% for k in c.legend.class %}{{ chip('class', k) }}{% endfor %}</p>
+        <h2>{{ t('Lines') }}</h2>
+        <ul class="clines">
+          <li><svg class="cl origin" viewBox="0 0 30 8" aria-hidden="true" focusable="false"><path d="M0 4h30"/></svg> {{ t('origin|line') }}</li>
+          <li><svg class="cl service" viewBox="0 0 30 8" aria-hidden="true" focusable="false"><path d="M0 4h30"/></svg> {{ t('service or presence|line') }}</li>
+          <li><svg class="cl ascent" viewBox="0 0 30 8" aria-hidden="true" focusable="false"><path d="M2 4h28"/></svg> {{ t('ascent|line') }}</li>
+        </ul>
+        <label class="cfar" hidden><input type="checkbox" class="far"> {{ t('Far lines always shown') }}</label>
+      </div>
+    </details>
+    {#- What needs scripts is hidden until cosmo.js runs. #}
+    <div class="ctools" hidden>
+      <div class="cfind">
+        <input type="search" class="cq" autocomplete="off" {{ ta('aria-label', 'Search the chart') }} {{ ta('placeholder', 'a personality or a category') }}>
+        <ul class="cres" hidden></ul>
+      </div>
+      <div class="czoom">
+        <button type="button" class="zout" {{ ta('aria-label', 'Zoom out') }} {{ ta('title', 'Zoom out') }}><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 8h9"/></svg></button>
+        <input type="range" class="zr" min="0" max="100" step="1" {{ ta('aria-label', 'Zoom') }}>
+        <button type="button" class="zin" {{ ta('aria-label', 'Zoom in') }} {{ ta('title', 'Zoom in') }}><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 8h9M8 3.5v9"/></svg></button>
+        <button type="button" class="zfit pill">{{ t('Whole chart') }}</button>
+      </div>
+    </div>
+  </header>
+  <div class="cstage">
+  <div class="cview" tabindex="0" role="group" {{ ta('aria-label', 'Cosmology of Personalities') }}>
+    <div class="csize" style="--w:{{ c.w }};--h:{{ c.h }}">
+    <div class="cworld" style="width:{{ c.w }}px;height:{{ c.h }}px">
+      <svg class="cback" viewBox="0 0 {{ c.w }} {{ c.h }}" width="{{ c.w }}" height="{{ c.h }}" aria-hidden="true" focusable="false">
+        <defs>
+          {%- for m in ('origin', 'service', 'ascent', 'on') %}
+          <marker id="cm-{{ m }}" class="cm {{ m }}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9z"/></marker>
+          {%- endfor %}
+        </defs>
+        <g class="cunits">
+          {%- for u in c.units %}
+          <rect class="cu" data-u="{{ u.id }}" x="{{ u.x }}" y="{{ u.y }}" width="{{ u.w }}" height="{{ u.h }}" rx="14" style="--c:{{ u.color }}"/>
+          {%- endfor %}
+        </g>
+        <g class="cpairs">
+          {%- for p in c.pairs %}
+          <rect class="cpair{% if p.ghost %} ghost{% endif %}" x="{{ p.x }}" y="{{ p.y }}" width="{{ p.w }}" height="{{ p.h }}" rx="18"/>
+          {%- endfor %}
+        </g>
+        <g class="cedges">
+          {%- for l in c.links %}
+          <g class="ce {{ l.type }}{% if l.far %} far{% endif %}" data-a="{{ l.a }}" data-b="{{ l.b }}">
+            {%- for lang in ('en', 'ru') %}<g class="{{ lang }}"><path class="h" d="{{ l.d[lang] }}"/><path class="l" d="{{ l.d[lang] }}" marker-end="url(#cm-{{ l.type }})"/></g>{% endfor -%}
+          </g>
+          {%- endfor %}
+        </g>
+      </svg>
+      {%- for u in c.units %}
+      <a class="cut" id="u-{{ u.id }}" href="#{{ u.id }}" data-id="{{ u.id }}"{% if u.parent %} data-up="{{ u.parent }}"{% endif %} data-en="{{ u.title_en }}" data-ru="{{ u.title_ru }}" style="left:{{ u.x + 14 }}px;top:{{ u.y + 5 }}px;--c:{{ u.color }}">{{ t(u.name) }}</a>
+      {%- endfor %}
+      {%- for p in c.cards %}
+      <a class="cp{% if p.ghost %} ghost{% endif %}" id="{{ p.dom }}" href="#{{ p.id }}" data-id="{{ p.id }}" data-u="{{ p.unit }}" data-k="class:{{ p.class }}{% for g in p.groups %} group:{{ g.key }}{% endfor %}{% for g in p.funcs %} func:{{ g.key }}{% endfor %}" style="left:{{ p.x }}px;top:{{ p.y }}px;--c:{{ p.color }}">
+        <span class="cst">{% for g in p.groups %}<i style="background:{{ g.color }}"></i>{% endfor %}</span>
+        <span class="csg">{{ sign(p.glyph, p.glyph_color, p.dots, p.disc) }}</span>
+        <span class="cn">{{ t(p.name) }}</span>
+        {%- if p.ghost %}<span class="chere">{{ t('serves here') }}</span>{% endif %}
+      </a>
+      {%- endfor %}
+    </div>
+    </div>
+  </div>
+  <section class="cinfos" {{ ta('aria-label', 'The personalities and the units') }}>
+    {%- for e in c.entries %}
+    <article class="ci {{ e.kind }}" id="{{ e.id }}" data-s="{{ e.search|lower }}" style="--c:{{ e.color }}">
+      <h2>{{ t(e.name) }}</h2>
+      {%- if e.aka %}<p class="caka">{{ t(e.aka) }}</p>{% endif %}
+      {%- if e.desc %}<p class="cdesc">{{ t(e.desc) }}</p>{% endif %}
+      <dl>
+        {%- if e.kind == 'person' %}
+        {%- if e.serves %}<dt>{{ t('Serves') }}</dt><dd><a href="#{{ e.serves.unit.id }}">{{ t(e.serves.unit.name) }}</a>{% if e.serves.how %}: {{ t(e.serves.how) }}{% endif %}{% if e.serves.as %} ({{ t(e.serves.as) }}){% endif %}{% if e.pair %}; {{ t('together with') }} <a href="#{{ e.pair.id }}">{{ t(e.pair.name) }}</a>{% endif %}</dd>{% endif %}
+        <dt>{{ t('Class of origin') }}</dt><dd>{{ chip('class', {'key': e.class.key, 'color': e.class.color, 'name': e.class.name}) }}</dd>
+        {%- if e.groups %}<dt>{{ t('Categories') }}</dt><dd>{% for g in e.groups %}{{ chip('group', {'key': g.key, 'color': g.color, 'name': g.name}) }}{% endfor %}</dd>{% endif %}
+        {%- if e.funcs %}<dt>{{ t('Functions') }}</dt><dd>{% for g in e.funcs %}{{ chip('func', {'key': g.key, 'color': g.color, 'name': g.name}) }}{% endfor %}</dd>{% endif %}
+        {%- if e.origin %}<dt>{{ t('Origin') }}</dt><dd>{% for o in e.origin %}{% if o.color %}<span class="cdot" style="--k:{{ o.color }}"></span> {% endif %}{{ t(o.name) }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>{% endif %}
+        {%- endif %}
+        {%- if e.chain %}<dt>{{ t('Place|chart') }}</dt><dd class="cwhere">{% for u in e.chain %}<a href="#{{ u.id }}">{{ t(u.name) }}</a>{% if not loop.last %} › {% endif %}{% endfor %}</dd>{% endif %}
+        {%- if e.members %}<dt>{{ t('Here|chart') }}</dt><dd>{{ ends(e.members) }}</dd>{% endif %}
+        {%- if e.parents %}<dt>{{ t('Comes of') }}</dt><dd>{{ ends(e.parents) }}</dd>{% endif %}
+        {%- if e.children %}<dt>{{ t('Of it come') }}</dt><dd>{{ ends(e.children) }}</dd>{% endif %}
+        {%- if e.service %}<dt>{{ t('Service or presence') }}</dt><dd>{{ ends(e.service) }}</dd>{% endif %}
+        {%- set up = e.ascent|selectattr('arrow', 'equalto', 'from')|list %}{% set on = e.ascent|selectattr('arrow', 'equalto', 'to')|list %}
+        {%- if up %}<dt>{{ t('Ascent from') }}</dt><dd>{{ ends(up) }}</dd>{% endif %}
+        {%- if on %}<dt>{{ t('Ascent to') }}</dt><dd>{{ ends(on) }}</dd>{% endif %}
+        {%- if e.refs %}<dt>{{ t('In the book') }}</dt><dd>{% for r in e.refs %}<a class="cref" href="{{ r.href }}">{{ t(r.label) }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</dd>{% endif %}
+        {%- if e.heads %}<dt>{{ t('In the index') }}</dt><dd>{% for h in e.heads %}<a href="/i/{{ h.slug }}">{{ h.html|safe }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</dd>{% endif %}
+      </dl>
+      <p class="conchart"><a href="#{{ 'c-' ~ e.id if e.kind == 'person' else 'u-' ~ e.id }}" data-id="{{ e.id }}">{{ t('On the chart') }}</a></p>
+    </article>
+    {%- endfor %}
+  </section>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}
+{#- With scripts, an address here is cosmo.js's to act on, #michael, and
+    nothing's to scroll to: the browser, and ub.js's arrive(), would bring the
+    entry or a card to the top of the screen, and take the header and the bar
+    off it.  So no card, title or entry keeps its id, from before either looks:
+    this runs as the page is read, ahead of the deferred scripts; data-id says
+    what each is. #}
+<script>document.querySelectorAll('main.cosmo .ci, main.cosmo .cp, main.cosmo .cut').forEach(function (e) { e.dataset.id = e.dataset.id || e.id; e.removeAttribute('id'); });</script>
+<script src="{{ asset('cosmo.js') }}" defer></script>
+{% endblock %}

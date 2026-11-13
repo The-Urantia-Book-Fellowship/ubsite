@@ -21,7 +21,7 @@ STATIC = ROOT / "ubsite" / "static"
 HELP_JS = (STATIC / "help.js").read_text(encoding="utf-8")
 CHROME = (TEMPLATES / "_chrome.html").read_text(encoding="utf-8")
 CHAPTERS = ["text", "index", "moving", "search", "listening", "notes", "translations", "settings",
-            "offline", "quiz", "russian", "keys", "about"]
+            "offline", "quiz", "chart", "russian", "keys", "about"]
 
 
 class Static(unittest.TestCase):

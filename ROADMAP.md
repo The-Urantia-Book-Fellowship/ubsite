@@ -40,7 +40,7 @@ Built: `/appendix/A`, the list as printed, with a jump bar by period, and every 
 
 **5. Persons, beings and places.** `[partly built]`
 Appendices B–F: 308 types of celestial being, 86 named celestial individuals, 429 named mortals, 72 celestial places, **456 terrestrial places — real geography**. Person pages with every appearance. And F is geocodable, so Jesus's Mediterranean journey (Papers 129–134) can be drawn on an actual map.
-Built: `/appendix/B` … `/F` as printed. 1,332 of the 1,351 names are A–Z headwords, so the person pages already exist as concept pages, and each now says which appendix lists it. Still to do: the map.
+Built: `/appendix/B` … `/F` as printed. 1,332 of the 1,351 names are A–Z headwords, so the person pages already exist as concept pages, and each now says which appendix lists it. Still to do: the map. Since 2026-11-13 the types of being have a chart, `/cosmology`, Alexander Alyuev's "Cosmology of Personalities": 120 orders where each has its origin, from Paradise to Urantia, with what comes of what; a headword's page and Appendix B's rows link to their card (`ARCHITECTURE.md`, The chart of the personalities). The map of places is still to do.
 
 **6. What the index does not see.**
 **1,528 paragraphs (10.5%)** carry no citation naming them precisely; 10 are cited by nothing at all. Not a gimmick heatmap — a research page with the list. It is both a reader's guide to dense territory and an honest advertisement for the index's quality, and it feeds findings back into the index project.

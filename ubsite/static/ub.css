@@ -2002,6 +2002,10 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 .applist { list-style: none; padding: 0; columns: 2 24rem; column-gap: 2.5rem; }
 .applist li { break-inside: avoid; padding: .1rem 0 .1rem 1.2em; text-indent: -1.2em; }
 .applist a.hw, .events a.hw { text-decoration: none; }
+/* A row whose headword is on the chart of the personalities: a small link there. */
+.applist a.tochart { margin-left: .2em; font-size: .78em; letter-spacing: .03em; color: var(--faint);
+                     text-decoration: none; white-space: nowrap; }
+.applist a.tochart:hover { color: var(--link); text-decoration: underline; }
 .applist a.hw:hover, .events a.hw:hover { text-decoration: underline; }
 /* A: the date in a column of its own, its months and events beside it. */
 .bands { margin: 0 0 1.8rem; }
@@ -2286,3 +2290,218 @@ h2.chap + .rh { margin-top: 1rem; }
 .ways { list-style: none; padding: 0; }
 .ways li { padding: .3rem 0; }
 .ways code { font-family: inherit; font-style: italic; color: var(--faint); }
+
+/* ---- the chart of the personalities (cosmology.html, cosmo.js) -----------
+   Alexander Alyuev's chart, drawn here from his data (build/cosmo.py).  A
+   canvas of his page's size, in the canvas's own unit, the px, scaled whole
+   by --cz, which the page's head sets before first paint, on the root, and
+   cosmo.js after, on the window
+   (.csize is the canvas as large as it is drawn, for the window to scroll
+   over; .cworld the canvas itself, scaled from its corner).  His colours are
+   the data's, a class's, a group's or a unit's handed down as --c, --k and
+   --g, and mixed here with the theme's own, so that a card is the theme's
+   card tinted and a line the theme's ink.  The lines' and the highlight's
+   colours are the site's: a line the ink thinned, a chosen one the link's
+   blue, service the quiz's green, ascent a violet, dotted. */
+main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%, var(--paper));
+             --csvc: var(--right); --casc: oklch(0.55 0.16 300); }
+:root[data-theme="dark"] main.cosmo { --casc: oklch(0.74 0.12 300); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) main.cosmo { --casc: oklch(0.74 0.12 300); } }
+.cbar { position: relative; display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; align-items: center; }
+.chead h1 { font-size: 1.3rem; font-weight: 400; margin: 0; line-height: 1.2; }
+.cby { margin: 0; font-size: .8rem; color: var(--faint); }
+.cby a { color: inherit; }
+.ctools { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-left: auto; }
+.cfind { position: relative; flex: 1 1 13rem; width: 18rem; max-width: 100%; }
+.cq { width: 100%; font: inherit; font-size: .95rem; padding: .3rem .85rem; background: var(--field); color: inherit;
+      border: 1px solid var(--field-edge); border-radius: 999px; }
+.cq::placeholder { color: var(--faint); opacity: 1; }
+.cq:focus { background: var(--paper); border-color: var(--link); outline: 0;
+            box-shadow: 0 0 0 3px color-mix(in oklch, var(--link) 22%, transparent); }
+.cres { position: absolute; z-index: 16; top: calc(100% + .3rem); left: 0; right: 0; margin: 0; padding: .25rem 0;
+        list-style: none; background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+        border-radius: .5rem; box-shadow: 0 .4rem 1.2rem var(--shade); max-height: 60vh; overflow: auto; }
+.cres li { padding: .22rem .75rem; cursor: pointer; display: flex; gap: .5rem; align-items: baseline; font-size: .95rem;
+           line-height: 1.25; }
+.cres li.on { background: color-mix(in oklch, var(--link) 12%, transparent); }
+@media (hover: hover) { .cres li:hover { background: color-mix(in oklch, var(--link) 12%, transparent); } }
+.cres li i { flex: none; width: .6rem; height: .6rem; border-radius: 50%; background: var(--k, var(--faint));
+             align-self: center; }
+.cres li i.key { border-radius: 2px; }
+.cres li small { margin-left: auto; color: var(--faint); font-size: .8rem; text-align: right; }
+.cres li.none { cursor: default; color: var(--faint); }
+.czoom { display: flex; align-items: center; gap: .35rem; }
+.czoom button:not(.pill) { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; padding: 0;
+                           background: none; border: 1px solid var(--rule); border-radius: 50%; color: var(--ink);
+                           cursor: pointer; }
+.czoom button:not(.pill):hover { border-color: var(--link); color: var(--link); }
+.czoom button svg { width: .9rem; height: .9rem; display: block; }
+.czoom button path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+.czoom .zr { width: 7rem; accent-color: var(--link); }
+.czoom .pill { font-size: .85rem; padding: calc(.25em + var(--lift)) .8em calc(.25em - var(--lift));
+               white-space: nowrap; }
+/* The legend: a fold in the bar, which opens over the chart. */
+.clegend > summary { cursor: pointer; color: var(--link); font-size: .95rem; white-space: nowrap; }
+.clbody { position: absolute; z-index: 15; top: calc(100% + .4rem); left: 0; width: min(30rem, 100%);
+          max-height: min(70vh, 34rem); overflow: auto; padding: .7rem 1rem .9rem; background: var(--card);
+          border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent); border-radius: .5rem;
+          box-shadow: 0 .4rem 1.2rem var(--shade); font-size: .92rem; line-height: 1.35; }
+.clbody h2 { margin: .8rem 0 .25rem; font-size: .78rem; font-weight: 400; letter-spacing: .08em;
+             text-transform: uppercase; color: var(--faint); }
+.clbody p { margin: .3rem 0; }
+.clbody .chint { color: var(--ink); }
+.csigns, .clines { list-style: none; padding: 0; margin: .2rem 0; display: grid;
+                   grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr)); gap: .15rem .8rem; }
+.csigns .cg { width: 1.55rem; height: 1.55rem; display: inline-block; vertical-align: middle; margin-right: .2rem; }
+.cl { width: 30px; height: 8px; vertical-align: middle; margin-right: .3rem; }
+.cl path { fill: none; stroke-width: 2; }
+.cl.origin path { stroke: var(--cedge); }
+.cl.service path { stroke: var(--csvc); stroke-dasharray: 6 4; }
+.cl.ascent path { stroke: var(--casc); stroke-width: 2.5; stroke-dasharray: 1 4; stroke-linecap: round; }
+.cfar { display: block; margin-top: .4rem; }
+.cdot { display: inline-block; width: .62em; height: .62em; border-radius: 50%; background: var(--k); }
+/* A key the cards are drawn by: a chip, which cosmo.js makes a filter. */
+.cchip { display: inline-flex; align-items: center; gap: .38em; font: inherit; font-size: .86rem; line-height: 1.25;
+         padding: .1rem .6rem; margin: .12rem .2rem .12rem 0; border-radius: 999px; border: 1px solid var(--rule);
+         background: none; color: inherit; text-align: left; }
+.js .cchip { cursor: pointer; }
+.cchip i { flex: none; width: .62em; height: .62em; border-radius: 2px; background: var(--k);
+           box-shadow: 0 0 0 1px color-mix(in oklch, var(--ink) 22%, transparent); }
+.cchip.class i { border-radius: 50%; }
+.cchip small { color: var(--faint); }
+.cchip.on { border-color: var(--link); background: color-mix(in oklch, var(--link) 12%, transparent); }
+@media (hover: hover) { .js .cchip:hover { border-color: var(--link); } }
+
+/* The window on the chart, and what stands over it: the entry chosen. */
+.cstage { position: relative; margin: .5rem -1rem 0; }
+.cview { overflow: auto; height: calc(100vh - 9.5rem); height: calc(100dvh - 9.5rem); min-height: 16rem;
+         border-block: 1px solid var(--rule); outline-offset: -2px; }
+/* A finger moves the chart, the window's own scrolling; two scale it, which
+   cosmo.js does: the browser's own pinch would scale the whole page. */
+.js .cview { cursor: grab; touch-action: pan-x pan-y; }
+.js .cview.drag { cursor: grabbing; }
+.csize { width: calc(var(--w) * var(--cz, 1) * 1px); height: calc(var(--h) * var(--cz, 1) * 1px); margin: 0 auto;
+         overflow: hidden; }
+.cworld { position: relative; transform: scale(var(--cz, 1)); transform-origin: 0 0; font-size: 12.5px;
+          line-height: 14px; -webkit-user-select: none; user-select: none; }
+.cback { position: absolute; left: 0; top: 0; display: block; pointer-events: none; }
+.cu { fill: color-mix(in oklch, var(--c) 7%, transparent); stroke: color-mix(in oklch, var(--c) 60%, transparent);
+      stroke-width: 1.5; transition: fill .2s, stroke .2s; }
+.cu.on { fill: color-mix(in oklch, var(--c) 17%, transparent); stroke: var(--c); stroke-width: 2.4; }
+.cpair { fill: none; stroke: oklch(0.6 0.13 305 / .7); stroke-width: 1.6; }
+.cpair.ghost { stroke-dasharray: 6 5; stroke-opacity: .5; }
+.ce path { fill: none; stroke-linejoin: round; }
+.ce .h { stroke: var(--paper); stroke-width: 6; }
+.ce .l { stroke-width: 1.5; transition: stroke .2s; }
+.ce.origin .l { stroke: var(--cedge); }
+.ce.service .l { stroke: var(--csvc); stroke-dasharray: 6 4; }
+.ce.ascent .l { stroke: var(--casc); stroke-width: 2; stroke-dasharray: 1 4; stroke-linecap: round; }
+.cm path { fill: var(--cedge); }
+.cm.service path { fill: var(--csvc); }
+.cm.ascent path { fill: var(--casc); }
+/* By its id: cosmo.js takes the class "on" off whatever on the chart has it. */
+#cm-on path { fill: var(--link); }
+/* A line in the reader's language: the units' titles are in its way, and are
+   not as wide in the one as in the other (build/cosmo.py). */
+:root:not([data-lang="ru"]) .cedges .ru, :root[data-lang="ru"] .cedges .en { display: none; }
+/* A far line is in the way more than it tells: shown with one of its ends
+   chosen, or all of them by the legend's switch, as his page has it. */
+.ce.far { display: none; }
+.cworld.showfar .ce.far, .ce.far.on { display: inline; }
+.ce.on .l { stroke-width: 2.6; }
+.ce.origin.on .l { stroke: var(--link); marker-end: url(#cm-on); }
+/* A unit's title, over its box's corner: a link to its entry.  No wider than
+   his page drew it, in either language, since the lines were kept clear of
+   that much and no more (data-en, data-ru; tools/cosmo_e2e.py measures). */
+.cworld a { text-decoration: none; }
+.cut { position: absolute; z-index: 2; padding: 0 3px; margin-left: -3px; border-radius: 3px; font-size: 11.5px;
+       line-height: 20px; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap;
+       color: color-mix(in oklch, var(--c) 70%, var(--ink)); }
+.cut.on { background: color-mix(in oklch, var(--c) 22%, transparent); }
+@media (hover: hover) { .cut:hover { background: color-mix(in oklch, var(--c) 22%, transparent); } }
+/* A card: the sign in its left end, on the class's tint, the name beside it,
+   and a stripe to each of its groups along the top. */
+.cp { position: absolute; z-index: 3; display: flex; align-items: center; width: 170px; height: 50px;
+      border-radius: 10px; border: 1.2px solid color-mix(in oklch, var(--ink) 30%, transparent); color: var(--ink);
+      background: color-mix(in oklch, var(--c) 13%, var(--card)); transition: opacity .25s, box-shadow .2s; }
+.cp .csg { flex: none; align-self: stretch; display: grid; place-items: center; width: 44px;
+           border-right: 1px solid color-mix(in oklch, var(--ink) 20%, transparent); border-radius: 9px 0 0 9px;
+           background: color-mix(in oklch, var(--c) 15%, transparent); }
+.cp .cn { flex: 1; min-width: 0; padding: 0 5px 0 7px; overflow: hidden; overflow-wrap: break-word; hyphens: auto;
+          display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.cp .cst { position: absolute; left: 52px; right: 7px; top: -3px; height: 5px; display: flex; gap: 3px; }
+.cp .cst i { flex: 1; border-radius: 2.5px; }
+.cp.ghost { border-style: dashed; opacity: .62; }
+.cp .chere { position: absolute; left: 0; right: 0; top: 100%; text-align: center; font-size: 10px; line-height: 14px;
+             font-style: italic; color: var(--faint); }
+@media (hover: hover) { .cp:hover { border-color: var(--link); } }
+.cp.on { opacity: 1; border-color: var(--link); border-style: solid;
+         box-shadow: 0 0 0 2px var(--link), 0 0 12px color-mix(in oklch, var(--link) 55%, transparent); }
+.cp.rel { opacity: 1; border-color: var(--link); box-shadow: 0 0 0 1px var(--link); }
+/* With one chosen, the rest stand back. */
+.cworld.focus :is(.cp, .cut):not(.on, .rel) { opacity: .22; }
+.cworld.focus .ce:not(.on) { opacity: .08; }
+.cworld.focus .cpair { opacity: .3; }
+/* From afar a name is too small to read: the units' titles alone, larger. */
+.cview.far .cn, .cview.far .chere { visibility: hidden; }
+.cview.far .cut { font-size: 30px; line-height: 36px; }
+/* The signs.  The one for Trinity origin is the site's own, three rings
+   interlaced: his page draws three concentric azure circles, which are the
+   Foundation's mark and never drawn here (DECISIONS.md, The sites). */
+.cg { display: block; width: 34px; height: 34px; overflow: visible; }
+.cg .gd { stroke: #fff; stroke-width: 2; }
+.cg .ga { fill: #fff; stroke: #9aa1ad; stroke-width: 1.5; }
+.cg .gt { fill: none; stroke: #1e6fd9; stroke-width: 1.7; }
+.cg .gs { stroke: var(--g); stroke-width: 1.6; stroke-linejoin: round; }
+.cg .up { fill: #e8f5e9; }
+.cg .down { fill: #e6f4f2; }
+.cg .wing { fill: #fde4ee; }
+.cg .halo { fill: none; }
+.cg .loc { fill: #f3ece9; }
+.cg .rnd { fill: #fff3e0; }
+.cg .gdot { stroke: #fff; stroke-width: .8; }
+
+/* An entry: a unit's or a personality's.  With scripts off, a list under the
+   chart, each the place its card goes to; with them, the one chosen, over
+   the chart's corner, or along the bottom of a phone's screen. */
+.cinfos { max-width: 62ch; margin: 0 auto; padding: 0 1rem; font-size: 1rem; line-height: 1.4; }
+.ci { margin: 1.6rem 0; padding: .1rem 0 .1rem .9rem; border-left: 3px solid color-mix(in oklch, var(--c) 75%, var(--ink)); }
+.ci h2 { margin: 0; font-size: 1.25rem; font-weight: 400; line-height: 1.25; font-variant-caps: normal;
+         letter-spacing: 0; }
+.ci .caka { margin: 0; font-style: italic; color: var(--faint); }
+.ci .cdesc { margin: .4rem 0 .2rem; }
+/* A line's name over what it says, since the names are long in Russian and
+   the entry narrow. */
+.ci dl { margin: .2rem 0 .4rem; font-size: .95rem; line-height: 1.35; }
+.ci dt { margin-top: .55rem; font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
+.ci dd { margin: .05rem 0 0; }
+.ci .conchart { margin: .3rem 0 0; font-size: .95rem; }
+.ci:target { background: color-mix(in oklch, var(--link) 8%, transparent);
+             box-shadow: 0 0 0 .5rem color-mix(in oklch, var(--link) 8%, transparent); }
+.js main.cosmo .cinfos { max-width: none; padding: 0; font-size: .95rem; }
+.js main.cosmo .ci { display: none; }
+.js main.cosmo .ci.on { display: block; position: absolute; z-index: 14; top: .6rem; right: 1.4rem; margin: 0;
+                        width: min(23rem, calc(100% - 2rem)); max-height: calc(100% - 1.2rem); overflow: auto;
+                        overscroll-behavior: contain; padding: .7rem 1rem .8rem; background: var(--card);
+                        border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+                        border-left: 4px solid color-mix(in oklch, var(--c) 75%, var(--ink)); border-radius: .5rem;
+                        box-shadow: 0 .4rem 1.4rem var(--shade); }
+.js main.cosmo .ci.on h2 { padding-right: 1.6rem; }
+.js main.cosmo .ci .conchart { display: none; }
+.ci .x { position: absolute; top: .35rem; right: .4rem; width: 1.7rem; height: 1.7rem; padding: 0; display: grid;
+         place-items: center; background: none; border: 0; border-radius: 50%; color: var(--faint); cursor: pointer; }
+.ci .x svg { width: .85rem; height: .85rem; }
+.ci .x path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+@media (hover: hover) { .ci .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); } }
+@media (max-width: 44rem) {
+  main.cosmo { padding-top: .4rem; }
+  .chead h1 { font-size: 1.1rem; }
+  /* The bar in two rows: the name and the legend, then the search box and
+     the scale's buttons, without its slider. */
+  .chead { flex: 1 1 auto; }
+  .ctools { margin-left: 0; width: 100%; flex-wrap: nowrap; gap: .5rem; }
+  .cfind { flex: 1 1 auto; width: auto; min-width: 0; }
+  .czoom .zr { display: none; }
+  .js main.cosmo .ci.on { top: auto; bottom: .4rem; left: .5rem; right: .5rem; width: auto; max-height: 46%; }
+}
+@media print { .ctools, .clegend > summary { display: none; } .cview { height: auto; overflow: visible; } }

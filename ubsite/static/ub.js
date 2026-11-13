@@ -477,6 +477,9 @@
   // (#note15_3_4_0); what follows a second # is arriveTr's.
   function arrive() {
     var focus = null, m, el, i, whole = document.querySelector('article.whole');
+    // On the chart of the personalities an address names a card, which
+    // cosmo.js brings into its own window: never the page to it.
+    if (document.querySelector('main.cosmo')) return;
     // At the Contents' entry again, by Back or Forward (toContents, below),
     // the place is theirs; left by a section's link, it is forgotten.
     if (contentsAt && history.state && history.state.ub === 'contents') return;
@@ -2277,12 +2280,13 @@
   // is the tour's script, loaded here when the tour is due: never seen in this browser (localStorage
   // ub_tour), or a step kept for this tab (sessionStorage).  Not on /help,
   // which loads it itself, nor on the quiz's pages, whose keys 1-9 and Enter
-  // are their own, nor on the API's page, the stats or the board, nor where
+  // are their own, nor on the API's page, the stats or the board, nor on the
+  // chart of the personalities, which a reader sent there came to see, nor where
   // #listen starts the player as the page loads.  The script waits for
   // Settings or What's new to close, and for the page to be visible.
   var helpLink = document.querySelector('.top .help'), tourDue = false;
   try { tourDue = !!sessionStorage.getItem('ub_tour') || localStorage.getItem('ub_tour') !== 'seen'; } catch (e) {}
-  if (helpLink && helpLink.dataset.src && tourDue && !/^\/(help$|quiz|api$|stats$)/.test(location.pathname) &&
+  if (helpLink && helpLink.dataset.src && tourDue && !/^\/(help$|quiz|api$|stats$|cosmology$)/.test(location.pathname) &&
       location.hash !== '#listen') {
     var hs = document.createElement('script');
     hs.src = helpLink.dataset.src;
@@ -2406,6 +2410,18 @@
     ev.preventDefault();
     window.ubInstall = ev;
     document.dispatchEvent(new Event('ub:installable'));
+  });
+
+  // The chart of the personalities (cosmology.html), brought in by listen.js
+  // while it plays: its script, which a <main> swapped in leaves unrun, loaded
+  // here, or run again for the new <main> (static/cosmo.js).
+  document.addEventListener('ub:swap', function () {
+    var chart = document.querySelector('main.cosmo'), js;
+    if (!chart) return;
+    if (window.ubCosmo) return window.ubCosmo();
+    js = document.createElement('script');
+    js.src = chart.dataset.src;
+    document.head.appendChild(js);
   });
 
   // A reading path's fold, folded from the line below it (path.html): its

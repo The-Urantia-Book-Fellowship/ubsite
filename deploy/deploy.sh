@@ -125,6 +125,17 @@ if [ -n "$(git status --porcelain -- data/quiz)" ]; then
     exit 1
 fi
 
+# The chart of the personalities (build/cosmo.py): the snapshot of its author's
+# repository, and the reviewed table of its headwords.  A snapshot not
+# committed was not reviewed, and the commit of his it was made at is on no
+# record here; nor does his chart go live before it is on ours.
+if [ -n "$(git status --porcelain -- data/cosmology)" ]; then
+    echo "refusing: data/cosmology/ holds the chart's snapshot, or its headwords, not committed." >&2
+    echo "          Review the diff and commit it, then deploy." >&2
+    git status --short -- data/cosmology >&2
+    exit 1
+fi
+
 # What a host's tree keeps that no deploy sends, and so never deletes: the copy
 # to $NEXT leaves them out, and the swap from $NEXT into $DEST leaves them be.
 EXCLUDES=(--exclude '.git/' --exclude '.venv/' --exclude '__pycache__/' --exclude 'var/'

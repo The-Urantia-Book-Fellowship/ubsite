@@ -44,6 +44,10 @@
   <ul class="ways">
     <li class="ix">{{ t('home:index', e=stats.az_entries, h=stats.headwords) }}</li>
     <li class="ix">{{ t('home:appendices', e=stats.app_events, m=stats.app_names) }}</li>
+    {#- The chart of the personalities (cosmology.html), where the build has one. #}
+    {%- if stats.cosmo_persons %}
+    <li>{{ t('home:cosmology', p=stats.cosmo_persons, u=stats.cosmo_units) }}</li>
+    {%- endif %}
     {#- Each list is named only while the setting that shows what it lists is
         on (ub.css .n1955, .nst): with the 1955 readings off, the text has no
         rings, and a list of them sent the reader to rings that were not there

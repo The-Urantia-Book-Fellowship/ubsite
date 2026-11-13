@@ -216,8 +216,8 @@ pace  = [0.8, 3.0]               # his median 1.63 words of the translation a se
                                  # paragraphs between 1.2 and 2.2, none outside 0.88-2.68
 
 [offline]
-measured_on = "2026-11-12"
-pages       = 10612      # 1,626 sections, 4,736 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,879 reading paths,
+measured_on = "2026-11-13"
+pages       = 10613      # 1,626 sections, 4,736 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,879 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
                          # 197 more the same day: the whole paper's page, /N, joined from its
@@ -225,12 +225,15 @@ pages       = 10612      # 1,626 sections, 4,736 headwords, 27 index letters, 21
                          # since 2026-11-01, at index 682e07d: vale of tears, read by theme too;
                          # and one since 2026-11-09, at index 9483c80: terrestrial escape;
                          # and one since 2026-11-11, at index 1a29371: a headword more, war in
-                         # heaven, which sends to Lucifer rebellion
+                         # heaven, which sends to Lucifer rebellion;
+                         # and one since 2026-11-13: the chart of the personalities, /cosmology
 paths       = 3879       # 2,057 headwords in book order, 1,822 of them by theme too (1,820 until
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
                          # 1,821 until 2026-11-09: terrestrial escape cites a second chapter since its reading of Papers 49-52)
 spoken      = 1626       # one to a section
-chunks      = 421        # 420 until 2026-11-12, when the second recording's list of files by paper
+chunks      = 423        # 421 until 2026-11-13, when the chart of the personalities came: its page
+                         # in a chunk of its own, cosmo, and its script, cosmo.js, among the assets;
+                         # 420 until 2026-11-12, when the second recording's list of files by paper
                          # came, audio-voyner, Григорий Войнер's reading of USGNY (a chunk to a voice);
                          # 419 until 2026-11-06, when the tour's script, help.js, joined the assets;
                          # 396 with the SBL fonts (2026-10-19); 400 since every paragraph's
@@ -247,6 +250,28 @@ chunks      = 421        # 420 until 2026-11-12, when the second recording's lis
                          # keeping it offline (one chunk to a voice)
 download_mb = [36.0, 52.0]   # gzipped, and so kept in the browser: 45.0 at measurement; 48.3 on 2026-10-30; 47.9 on 2026-10-31 and 2026-11-01
 raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25); 224.9 on 2026-10-30; 223.4 on 2026-10-31; 223.1 on 2026-11-01
+
+# The chart of the personalities (build/cosmo.py), from the snapshot of
+# Alexander Alyuev's repository in data/cosmology/chart.json.  Reported, as the
+# index's counts are: his chart is days old and moves with every commit of
+# his.  What holds hard is its structure, in the build: every id what it says
+# it is, every card in its unit, every line from the edge of one card to the
+# edge of another through no third, every reference a paper or a section of
+# the book, every name in the text, the English in the press's and the
+# Russian in the Foundation's translation, with no exception so far
+# (tests/known-cosmo-terms.tsv is absent), and every headword named for one
+# a headword of the index.
+[cosmology]
+source_commit = "dffe509"       # his 1.2.3
+measured_on   = "2026-11-13"
+persons       = 120
+units         = 25         # nested 8 deep, Paradise to the mortal and his Adjuster
+places        = 132        # 12 personalities drawn again where they serve
+links         = 153        # 131 of origin, 10 of service, 12 of ascent
+references    = 136        # 23 to a paper, 113 to a section
+persons_with_headword = 116     # 104 by a name of theirs as written, 12 by data/cosmology/headwords.tsv
+units_with_headword   = 24      # 10 by name, 14 by the table; the mortal and his Adjuster has none
+canvas        = [1900, 6680]
 
 # The translations, each a download of its own that a reader chooses in Settings'
 # Offline tab, and none of the above (offline/pack.py): a chunk to every twenty

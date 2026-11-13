@@ -51,6 +51,11 @@ def main(argv: list[str]) -> int:
         trees += [a["path"] for a in config.audio().values() if a["present"]]
         if config.block()["charts"] is not None:
             trees.append(config.block()["path"])
+        # And the chart of the personalities' repository, which the build
+        # never reads, where it is on this machine: the more reason it must
+        # be as it was.
+        if config.cosmology()["path"] is not None:
+            trees.append(config.cosmology()["path"])
 
         def fingerprint():
             out = {}
@@ -67,7 +72,8 @@ def main(argv: list[str]) -> int:
 
         before = fingerprint()
         print(f"fingerprinted {len(before):,} files in {len(trees)} source trees"
-              " (the repos, the Foundation's zip, the recordings and Block's charts)")
+              " (the repos, the Foundation's zip, the recordings, Block's charts and the chart of the"
+              " personalities' repository)")
         rc = main(["data"])
         after = fingerprint()
         changed = [k for k in before if k in after and before[k] != after[k]]
@@ -174,6 +180,17 @@ def main(argv: list[str]) -> int:
                          if h in table])
         con.execute("CREATE INDEX index_entry_slug ON index_entry(slug)")
 
+        # The chart of the personalities (build/cosmo.py), from its snapshot:
+        # after the text, the translations and the index's slugs, which it
+        # is held to.
+        from . import cosmo
+        cosmo_src = config.cosmology()
+        cosmo_stats = cosmo.load(con, cosmo_src, report)
+        if cosmo_stats["cosmo_persons"]:
+            print(f"the chart of the personalities: {cosmo_stats['cosmo_persons']} in"
+                  f" {cosmo_stats['cosmo_units']} units, {cosmo_stats['cosmo_links']} lines,"
+                  f" {cosmo_stats['cosmo_headwords']} of them headwords of the index")
+
         print("deriving ...")
         derive.reverse_map(con)
         derive.density(con)
@@ -249,6 +266,9 @@ def main(argv: list[str]) -> int:
             con.execute("INSERT INTO build_source VALUES ('srt', ?, 0, 'snapshot', ?, ?)",
                         (hashlib.sha256(srt_src["path"].read_bytes()).hexdigest(),
                          srt_stats["srt_fetched"][:10], srt_src["url"]))
+        # And the chart's, the commit of his repository it was made at.
+        if cosmo.source_row(cosmo_src):
+            con.execute("INSERT INTO build_source VALUES (?,?,?,?,?,?)", cosmo.source_row(cosmo_src))
         for k in ("press", "index"):
             if repos[k]["commit_url"] and not repos[k]["pushed"]:
                 report.warn("source-not-pushed", f"{k} {repos[k]['commit'][:7]}",
@@ -298,6 +318,7 @@ def main(argv: list[str]) -> int:
             con.execute("INSERT INTO stat VALUES (?,?)",
                         (k, con.execute(q).fetchone()[0]))
         con.executemany("INSERT INTO stat VALUES (?,?)", sorted(audio_stats.items()))
+        con.executemany("INSERT INTO stat VALUES (?,?)", sorted(cosmo_stats.items()))
         con.execute("INSERT INTO stat VALUES ('text_version', ?)", (text_version,))
         con.commit()
         con.execute("VACUUM")
@@ -367,6 +388,9 @@ def main(argv: list[str]) -> int:
         from .checks.check_quiz import run as quiz_run
         dbf = root / "var" / "ub.db"
         rc |= quiz_run(dbf) if dbf.exists() else absent("var/ub.db (make data)")
+        print("\n== the chart of the personalities ==")
+        from .checks.check_cosmo import run as cosmo_run
+        rc |= cosmo_run(dbf) if dbf.exists() else absent("var/ub.db (make data)")
         print("\n== italic spans vs press artifacts ==")
         from .checks.check_spans import load_press_italics, run as span_run
         if ital and ital.is_dir():

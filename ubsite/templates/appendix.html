@@ -7,6 +7,8 @@
 {% if initials %}<nav class="jump" {{ ta('aria-label', 'Initials') }}>
   {%- for c, a in initials %}<a href="#{{ a }}">{{ c }}</a>{% endfor %}</nav>{% endif %}
 <ul class="applist">
-{% for r in rows %}  <li id="{{ r.anchor }}">{{ r.text_html|safe }}</li>
+{#- A row whose headword is on the chart of the personalities ends in a
+    small link to it there. #}
+{% for r in rows %}  <li id="{{ r.anchor }}">{{ r.text_html|safe }}{% for m in chart.get(r.head_slug, []) %} <a class="tochart" href="/cosmology#{{ m.id }}" {{ ta('title', 'On the chart, Cosmology of Personalities') }}>{{ t('chart|mark') }}</a>{% endfor %}</li>
 {% endfor %}</ul>
 </main>{% endblock %}

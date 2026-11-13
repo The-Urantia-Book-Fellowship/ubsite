@@ -93,6 +93,23 @@ text_id = "UF-RUS-001-1997-1.5"     # as its cover page names it
 url  = "https://members.urantiabook.org/text-standardization-Urantia-Book"
 path = "data/srt/considerations.html"
 
+# Alexander Alyuev's chart, "Cosmology of Personalities in the Urantia Book":
+# the orders of personalities, each where it has its origin, in the units of
+# the universe from Paradise to Urantia, and what makes, serves and becomes
+# what (Tigran, 2026-11-13).  A repository, his and worked on, and a MASTER:
+# read at a commit, never written.  The build never reads it.  `make
+# cosmo-snapshot` (tools/cosmo/snapshot.py) does, at `rev`: its three YAML
+# files, and its own built page, dist/cosmology.html, opened unmodified in
+# Chrome for what the data does not hold, where each line of the chart runs,
+# which his engine finds in the reader's browser.  What it reads it writes as
+# `snapshot`, here, which the build reads (build/cosmo.py) and nothing else
+# writes; refreshing it is a reviewed diff, as the SRT Committee's page is.
+[cosmology]
+path = "../UniverseGenealogy_UrantiaBook_2D"
+rev  = "HEAD"
+url  = "https://github.com/alyuev/UniverseGenealogy_UrantiaBook_2D"
+snapshot = "data/cosmology/chart.json"
+
 # Matthew Block's parallel charts of the human sources, one PDF per paper, as
 # urantiabooksources.com publishes them, kept by ../explore-tools/block_fetch.py
 # with a MANIFEST.tsv naming each chart's address, which is its version.  Not a

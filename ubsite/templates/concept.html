@@ -3,6 +3,9 @@
 <h1>{{ root.headword_html|safe }}</h1>
 {#- What kind of thing this is, when an appendix lists it: a being, a person, a place. #}
 {% if listed %}<p class="listed">{{ t('Listed in') }} {% for l in listed %}<a href="{{ appendix_href(l.scope, l.anchor) }}">{{ t('Appendix {x}, {title}|in', x=l.scope, title=l.title) }}</a>{% if not loop.last %} {{ t('and') }} {% endif %}{% endfor %}</p>{% endif %}
+{#- And on the chart of the personalities (queries.cosmo_marks).  The comment takes the line's end with it, so that
+    a headword the chart has none of is the page it was, to the byte, and its letter's chunk of the offline copy with it. -#}
+{% if chart %}<p class="listed">{{ t('On the chart, <a href="/cosmology">Cosmology of Personalities</a>:') }} {% for m in chart %}<a href="/cosmology#{{ m.id }}">{{ t(m.name) }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
 {% set n = tree|length - 1 %}{% if n %}<p class="hint">{{ t('{n} subentries', n=n) }}</p>{% endif %}
 {#- Its reading path: every paragraph it cites, read as one text (path.html). #}
 {% if path %}<p class="readpath"><a href="/i/{{ root.slug }}/read">{{ t('Read it through') }}</a> —

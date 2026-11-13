@@ -91,7 +91,7 @@ T.env.globals["asset"] = asset
 # place of __CATALOG__.  Made again when any of them changes, as the dev
 # server runs; named by a hash of what it sends, so a build that changes
 # nothing moves nothing (CLAUDE.md trap 29).
-L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js", "help.js")
+L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js", "help.js", "cosmo.js")
 L10N_JS = ROOT / "ubsite" / "l10n.js"
 
 
@@ -1467,7 +1467,9 @@ def concept(request: Request, slug: str):
     root = con.execute("SELECT * FROM index_entry WHERE slug=?", (slug,)).fetchone()
     if root is None:
         return missing(request, "No headword in the index has this address.")
-    return page(request, "concept.html", root=root, **queries.concept(con, root["id"]))
+    # And where it stands on the chart of the personalities, if it does.
+    return page(request, "concept.html", root=root, chart=queries.cosmo_marks(con, [slug]).get(slug, []),
+                **queries.concept(con, root["id"]))
 
 
 # A headword's reading path: every paragraph it cites, read as one text, in the
@@ -1521,8 +1523,11 @@ def appendix(request: Request, letter: str):
             c = c if c.isalpha() else "#"
             if not initials or initials[-1][0] != c:
                 initials.append((c, r["anchor"]))
+        # A row whose headword is on the chart of the personalities says so
+        # (queries.cosmo_marks): Appendix B's, the types of celestial being.
+        chart = queries.cosmo_marks(con, sorted({r["head_slug"] for r in rows if r["head_slug"]}))
         return page(request, "appendix.html", app=app_, apps=queries.appendices(con),
-                    rows=rows, initials=initials if len(rows) > 150 else [])
+                    rows=rows, chart=chart, initials=initials if len(rows) > 150 else [])
     years, bands = queries.chronology(con)
     return page(request, "chronology.html", app=app_, apps=queries.appendices(con),
                 years=years, bands=bands)
@@ -1770,6 +1775,26 @@ def rail_toc(key: str, v: str = ""):
         return Response("No such translation.\n", status_code=404, media_type="text/plain")
     cache = "public, max-age=31536000, immutable" if v == got["v"] else "no-cache"
     return Response(got["body"], media_type="application/json", headers={"Cache-Control": cache})
+
+
+@functools.lru_cache(maxsize=2)
+def _cosmo(mtime_ns: int, bilingual: bool) -> dict | None:
+    return queries.cosmo(db())
+
+
+@app.get("/cosmology", response_class=HTMLResponse)
+def cosmology_page(request: Request):
+    """The chart of the personalities (build/cosmo.py, queries.cosmo;
+    templates/cosmology.html): Alexander Alyuev's "Cosmology of Personalities
+    in the Urantia Book", from the snapshot of his repository, drawn by the
+    site (Tigran, 2026-11-13).  One page, the same for every reader: the
+    chart, its legend and an entry to every unit and personality, which
+    static/cosmo.js shows one at a time.  Made once for a database, since it
+    is some two hundred rows read and joined."""
+    chart = _cosmo(DB.stat().st_mtime_ns, l10n.BILINGUAL)
+    if chart is None:
+        return missing(request, "There is no page at this address.")
+    return page(request, "cosmology.html", c=chart)
 
 
 @app.get("/quiz", response_class=HTMLResponse)

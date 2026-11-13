@@ -660,9 +660,12 @@ def appendices(con: sqlite3.Connection) -> list:
 
 
 def appendix_rows(con: sqlite3.Connection, letter: str) -> list:
-    """An Appendix B-F's rows, in the print's order."""
+    """An Appendix B-F's rows, in the print's order, each with the address of
+    its headword in the A-Z, where it has one: what the chart of the
+    personalities is found by (cosmo_marks)."""
     return con.execute(
-        "SELECT e.anchor, e.headword, e.text_html FROM index_entry e"
+        "SELECT e.anchor, e.headword, e.text_html, a.slug AS head_slug FROM index_entry e"
+        " LEFT JOIN appendix_head h ON h.entry_id = e.id LEFT JOIN index_entry a ON a.id = h.head_entry_id"
         " WHERE e.scope=? ORDER BY e.ord", (letter,)).fetchall()
 
 
@@ -790,3 +793,231 @@ def quiz_count(con: sqlite3.Connection, paper: int) -> int:
     except sqlite3.Error:
         return 0
     return r[0] if r else 0
+
+
+# ---- the chart of the personalities (build/cosmo.py) -------------------------
+
+# A dot to each Deity a personality comes of, as his engine colours them, and
+# the evolutionary; and what each letter of `origin` is called, in the chart's
+# own words: the personality, the unit or the class of that id (his engine
+# knows `father`, `son`, `spirit` and `trinity` by name too).
+COSMO_ORIGIN = {"F": ("#e53935", ("person", "father")), "S": ("#1e63d6", ("person", "son")),
+                "D": ("#f2b705", ("person", "spirit")), "E": ("#43a047", ("class", "E")),
+                "A": (None, ("class", "A")), "T": (None, ("unit", "trinity"))}
+# Where a sign's dots stand, from its middle: lower in a triangle that points
+# up, higher in one that points down, as his engine sets them.
+COSMO_DOTS_AT = {"ascender": (3, 1.0), "descending": (-3, 1.0), "angel": (3, 0.9), "spirit": (0, 1.0),
+                 "local": (0, 1.0)}
+
+
+def _cosmo_dots(glyph: str, origin: str) -> list[dict]:
+    """The dots in a card's sign: one to each Deity of its origin, the three
+    for the Trinity's.  None in a Deity's own sign, an Absolute's, or the
+    Trinity's."""
+    if glyph not in COSMO_DOTS_AT:
+        return []
+    dy, s = COSMO_DOTS_AT[glyph]
+    ks = [k for k in ("FSD" if origin == "T" else origin) if COSMO_ORIGIN.get(k, (None,))[0]]
+    r, d = (4.2 if len(ks) == 1 else 2.8) * s, 3.6 * s
+    at = {1: [(0, 0)], 2: [(-d, 0), (d, 0)], 3: [(0, -d), (-d, d * .8), (d, d * .8)]}.get(len(ks), [])
+    return [{"x": round(x, 2), "y": round(y + dy, 2), "r": round(r, 2), "color": COSMO_ORIGIN[k][0]}
+            for k, (x, y) in zip(ks, at)]
+
+
+def cosmo(con: sqlite3.Connection) -> dict | None:
+    """The chart of the personalities, as its page draws it (cosmology.html):
+    the canvas, the units' boxes, the cards, the lines in each language, the
+    legend's keys, and an entry to every unit and personality, with what the
+    lines say of it in words, where the book speaks of it and its headwords in
+    the index.  None where the database has no chart."""
+    try:
+        meta = dict(con.execute("SELECT key, value FROM cosmo_meta").fetchall())
+    except sqlite3.Error:
+        return None
+    if not meta:
+        return None
+    words: dict[tuple, dict[str, list[str]]] = {}
+    for kind, key, field, lang, text in con.execute(
+            "SELECT kind, key, field, lang, text FROM cosmo_text ORDER BY kind, key, field, lang, ord"):
+        words.setdefault((kind, key, field), {}).setdefault(lang, []).append(text)
+
+    def say(kind, key, field, sep=None) -> l10n.L | None:
+        """A text in each language; where one has none, the English."""
+        w = words.get((kind, key, field))
+        if not w:
+            return None
+        en = w.get("en") or next(iter(w.values()))
+        by = {lang: (w.get(lang) or en) for lang in l10n.LANGS}
+        return l10n.L({lang: escape(v[0] if sep is None else sep.join(v)) for lang, v in by.items()})
+
+    keys = {}
+    for kind in ("class", "group", "func"):
+        keys[kind] = {r["key"]: {"key": r["key"], "color": r["color"], "name": say(kind, r["key"], "name"), "n": 0}
+                      for r in con.execute("SELECT * FROM cosmo_key WHERE kind=? ORDER BY ord", (kind,))}
+    units = {r["id"]: dict(r) for r in con.execute("SELECT * FROM cosmo_unit ORDER BY ord")}
+    for r in con.execute("SELECT unit, lang, w FROM cosmo_title"):
+        units[r["unit"]]["title_" + r["lang"]] = r["w"]
+    persons = {r["id"]: dict(r) | {"groups": [], "funcs": [], "fuse": []}
+               for r in con.execute("SELECT * FROM cosmo_person ORDER BY ord")}
+    for r in con.execute("SELECT person, kind, key FROM cosmo_tag ORDER BY person, kind, ord"):
+        p = persons[r["person"]]
+        if r["kind"] == "fuse":
+            p["fuse"].append(r["key"])
+        else:
+            which = "group" if r["kind"] == "group" else "func"
+            p["groups" if which == "group" else "funcs"].append(keys[which][r["key"]])
+            keys[which][r["key"]]["n"] += 1
+    for p in persons.values():
+        keys["class"][p["class"]]["n"] += 1
+    refs: dict[tuple, list[dict]] = {}
+    for r in con.execute("SELECT * FROM cosmo_ref ORDER BY kind, key, ord"):
+        s = r["section_n"]
+        refs.setdefault((r["kind"], r["key"]), []).append(
+            {"href": f"/{r['paper_n']}" + (f":{s}" if s is not None else ""),
+             "label": l10n.L.same(f"{r['paper_n']}:{s}") if s is not None
+             else l10n.tr("Paper {n}", n=r["paper_n"])})
+    heads: dict[tuple, list[dict]] = {}
+    for r in con.execute("SELECT h.kind, h.key, h.slug, e.headword_html FROM cosmo_head h"
+                         " JOIN index_entry e ON e.slug = h.slug AND e.scope='az' AND e.level=1"
+                         " ORDER BY h.kind, h.key, h.ord"):
+        heads.setdefault((r["kind"], r["key"]), []).append({"slug": r["slug"], "html": r["headword_html"]})
+
+    places = [dict(r) for r in con.execute("SELECT * FROM cosmo_place ORDER BY y, x")]
+    at = {pl["id"]: pl for pl in places}
+    cw, ch = int(meta["card_w"]), int(meta["card_h"])
+
+    def name_of(end: str) -> l10n.L:
+        return say("unit", end, "name") if end in units else say("person", end.lstrip("~"), "name")
+
+    def anchor(end: str) -> str:
+        return end.lstrip("~")
+
+    def chain(unit: str) -> list[dict]:
+        out = []
+        while unit:
+            out.append({"id": unit, "name": say("unit", unit, "name")})
+            unit = units[unit]["parent"]
+        return out[::-1]
+
+    cards = []
+    for pl in places:
+        p = persons[pl["person"]]
+        there = say("person", p["id"], "there") if pl["ghost"] else None
+        cards.append({
+            "dom": ("g-" if pl["ghost"] else "c-") + p["id"], "id": p["id"], "ghost": pl["ghost"],
+            "unit": pl["unit"], "x": pl["x"], "y": pl["y"], "name": there or say("person", p["id"], "name"),
+            "class": p["class"], "color": keys["class"][p["class"]]["color"],
+            "groups": p["groups"], "funcs": p["funcs"], "glyph": p["glyph"],
+            "glyph_color": keys["group"][p["glyph_group"]]["color"],
+            # A Deity's disc is the colour of its dot in the others' signs, or
+            # where it has none (the Supreme Being), of its class.
+            "disc": COSMO_ORIGIN.get(p["origin"], (None,))[0] or keys["class"][p["class"]]["color"],
+            "dots": _cosmo_dots(p["glyph"], p["origin"])})
+
+    links = []
+    routes: dict[int, dict[str, str]] = {}
+    for r in con.execute("SELECT link_id, lang, d FROM cosmo_route"):
+        routes.setdefault(r["link_id"], {})[r["lang"]] = r["d"]
+    for r in con.execute("SELECT * FROM cosmo_link ORDER BY id"):
+        links.append(dict(r) | {"d": routes[r["id"]]})
+
+    # A pair is drawn in one frame, where both stand, and again where both serve.
+    pairs = []
+    for p in persons.values():
+        if not p["pair"] or p["id"] > p["pair"]:
+            continue
+        for pre in ("", "~"):
+            both = [at.get(pre + i) for i in (p["id"], p["pair"])]
+            if not all(both):
+                continue
+            x0, y0 = min(b["x"] for b in both) - 12, min(b["y"] for b in both) - 12
+            x1, y1 = max(b["x"] for b in both) + cw + 12, max(b["y"] for b in both) + ch + (24 if pre else 12)
+            pairs.append({"x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0, "ghost": bool(pre)})
+
+    def relations(me: str) -> dict:
+        """What the lines say of a unit or a personality, in words: what it
+        comes of and what comes of it, what serves it or it serves, and the
+        way up through it."""
+        mine = {me, "~" + me}
+        out = {"parents": [], "children": [], "service": [], "ascent": []}
+
+        def add(to, end, arrow=None):
+            item = {"id": anchor(end), "name": name_of(end), "arrow": arrow}
+            if (item["id"], arrow) not in [(x["id"], x["arrow"]) for x in out[to]]:
+                out[to].append(item)
+
+        for l in links:
+            if l["a"] not in mine and l["b"] not in mine:
+                continue
+            other, mine_is_b = (l["a"], True) if l["b"] in mine else (l["b"], False)
+            if l["type"] == "origin":
+                add("parents" if mine_is_b else "children", other)
+            elif l["type"] == "service":
+                add("service", other)
+            else:
+                add("ascent", other, "from" if mine_is_b else "to")
+        return out
+
+    entries = []
+    by_unit: dict[str, list[str]] = {}
+    for pl in sorted((x for x in places if not x["ghost"]), key=lambda x: (x["row"], x["col"])):
+        by_unit.setdefault(pl["unit"], []).append(pl["person"])
+    for u in units.values():
+        u["name"] = say("unit", u["id"], "name")
+        entries.append({
+            "kind": "unit", "id": u["id"], "name": u["name"], "desc": say("unit", u["id"], "desc"),
+            "color": u["color"], "chain": chain(u["parent"]) if u["parent"] else [],
+            "members": [{"id": i, "name": say("person", i, "name")} for i in by_unit.get(u["id"], [])],
+            "refs": refs.get(("unit", u["id"]), []), "heads": heads.get(("unit", u["id"]), []),
+            "search": " ".join(x for lang in l10n.LANGS for x in words[("unit", u["id"], "name")].get(lang, [])),
+            **relations(u["id"])})
+        for pid in by_unit.get(u["id"], []):
+            p = persons[pid]
+            ghost = at.get("~" + pid)
+            origin = [{"color": COSMO_ORIGIN[k][0], "name": say(*COSMO_ORIGIN[k][1], "name")}
+                      for k in p["origin"] if k in COSMO_ORIGIN and say(*COSMO_ORIGIN[k][1], "name")]
+            entries.append({
+                "kind": "person", "id": pid, "name": say("person", pid, "name"),
+                "aka": say("person", pid, "aka", ", "), "desc": say("person", pid, "desc"),
+                "color": keys["class"][p["class"]]["color"],
+                "class": keys["class"][p["class"]], "groups": p["groups"], "funcs": p["funcs"], "origin": origin,
+                "chain": chain(u["id"]),
+                "serves": {"unit": {"id": ghost["unit"], "name": say("unit", ghost["unit"], "name")},
+                           "how": say("person", pid, "serves"),
+                           "as": say("person", pid, "there")} if ghost else None,
+                "pair": {"id": p["pair"], "name": say("person", p["pair"], "name")} if p["pair"] else None,
+                "fuse": [{"id": i, "name": say("person", i, "name")} for i in p["fuse"]],
+                "refs": refs.get(("person", pid), []), "heads": heads.get(("person", pid), []),
+                "search": " ".join(x for f in ("name", "aka") for lang in l10n.LANGS
+                                   for x in words.get(("person", pid, f), {}).get(lang, [])),
+                **relations(pid)})
+
+    return {"meta": meta, "w": int(meta["w"]), "h": int(meta["h"]), "card": (cw, ch),
+            "units": list(units.values()), "cards": cards, "links": links, "pairs": pairs,
+            "legend": {k: list(v.values()) for k, v in keys.items()}, "entries": entries,
+            # The legend's key to the dots: each Deity, and the evolutionary.
+            "origins": [{"color": COSMO_ORIGIN[k][0], "name": say(*COSMO_ORIGIN[k][1], "name")}
+                        for k in "FSDE" if say(*COSMO_ORIGIN[k][1], "name")],
+            "counts": {"persons": len(persons), "units": len(units), "links": len(links)}}
+
+
+def cosmo_marks(con: sqlite3.Connection, slugs: list[str]) -> dict[str, list[dict]]:
+    """{slug: [{id, name}]}: what on the chart of the personalities has a
+    headword for its own, so that the headword's page can show it there."""
+    if not slugs:
+        return {}
+    try:
+        rows = con.execute(
+            "SELECT h.slug, h.key, h.kind FROM cosmo_head h WHERE h.slug IN (%s) ORDER BY h.kind, h.key"
+            % ",".join("?" * len(slugs)), slugs).fetchall()
+    except sqlite3.Error:
+        return {}
+    out: dict[str, list[dict]] = {}
+    for r in rows:
+        w = {lang: [t for (t,) in con.execute(
+            "SELECT text FROM cosmo_text WHERE kind=? AND key=? AND field='name' AND lang=? ORDER BY ord",
+            (r["kind"], r["key"], lang))] for lang in l10n.LANGS}
+        en = w["en"] or w["ru"]
+        out.setdefault(r["slug"], []).append(
+            {"id": r["key"], "name": l10n.L({lang: escape((w[lang] or en)[0]) for lang in l10n.LANGS})})
+    return out

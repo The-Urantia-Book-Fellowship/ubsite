@@ -652,3 +652,61 @@
 "tour:help:title" = { en = "Help", ru = "Справка" }
 "tour:help" = { en = "All of this, with every key and every setting, is in Help, the first thing under this mark, and the tour can be taken again from there; What’s new? under it lists the site’s latest changes. Enjoy the book.", ru = "Всё это, со всеми клавишами и настройками, есть в Справке — первый пункт под этим знаком; оттуда же можно повторить экскурсию. Пункт «Что нового?» под ней перечисляет последние изменения сайта. Приятного чтения." }
 "The Help page is read online." = "Страница Справки читается онлайн."
+
+
+# --- The chart of the personalities (cosmology.html, static/cosmo.js): Alexander
+# Alyuev's, whose own words for a sign, a line and a card's lines these follow
+# where he has them (his engine's UI, src/engine.html).  For review.
+
+"Cosmology of Personalities" = "Космология личностей"
+"cosmo:by" = { en = 'By <a href="{url}">Alexander Alyuev</a>, version {v}.', ru = 'Автор — <a href="{url}">Александр Алюев</a>, версия {v}.' }
+"cosmo:lede" = { en = "The orders of personalities, {p} of them, each where it has its origin, in the {u} units of the universe from Paradise to Urantia; a line joins what comes of what, what serves where, and the way of ascent. Choose a card for what it is, where the book speaks of it and its place in the index; a title, for its unit.", ru = "Категории личностей, всего {p}, каждая там, где её происхождение, в {u} единицах вселенной от Рая до Урантии; линии соединяют порождающее с порождённым, служащих с местом служения, и показывают путь восхождения. Выберите карточку, чтобы узнать, что это за личность, где о ней говорит книга и где она в указателе; название — чтобы увидеть её единицу." }
+"Search the chart" = "Поиск по схеме"
+"a personality or a category" = "личность или категория"
+"Zoom out" = "Уменьшить"
+"Zoom in" = "Увеличить"
+"Zoom" = "Масштаб"
+"Whole chart" = "Вся схема"
+"Legend" = "Легенда"
+"Signs" = "Пиктограммы"
+"Deity|sign" = "Божество"
+"Trinity origin|sign" = "происхождение от Троицы"
+"descending Son|sign" = "нисходящий Сын"
+"angel|sign" = "ангел"
+"spirit|sign" = "дух"
+"local universe Son|sign" = "сын локальной вселенной"
+"ascender|sign" = "восходящий"
+"The dots in a sign are its origin:" = "Точки внутри пиктограммы — происхождение:"
+"Categories" = "Категории"
+"Functions" = "Функции"
+"Class of origin, a card’s tint" = "Класс по происхождению, заливка карточки"
+"Class of origin" = "Класс по происхождению"
+"Lines" = "Связи"
+"origin|line" = "происхождение"
+"service or presence|line" = "служение или пребывание"
+"ascent|line" = "восхождение"
+"Far lines always shown" = "Дальние связи всегда"
+"serves here" = "служит здесь"
+"The personalities and the units" = "Личности и единицы"
+"Serves" = "Служит"
+"together with" = "вместе с"
+"Origin" = "Происхождение"
+"Place|chart" = "Место"
+"Here|chart" = "Здесь"
+"Comes of" = "Происходит от"
+"Of it come" = "От неё происходят"
+"Service or presence" = "Служение или пребывание"
+"Ascent from" = "Восхождение от"
+"Ascent to" = "Восхождение к"
+"In the book" = "В книге"
+"On the chart" = "На схеме"
+"Nothing found" = "Ничего не найдено"
+"category|chart" = "категория"
+"function|chart" = "функция"
+"class of origin|chart" = "класс по происхождению"
+"home:cosmology" = { en = '<a href="/cosmology">Cosmology of Personalities</a> — a chart of {p} orders of personalities in the {u} units of the universe, from Paradise to Urantia: what comes of what, and what serves where. By Alexander Alyuev.', ru = '<a href="/cosmology">Космология личностей</a> — схема {p} категорий личностей в {u} единицах вселенной, от Рая до Урантии: что от чего происходит и что где служит. Автор — Александр Алюев.' }
+"On the chart, <a href=\"/cosmology\">Cosmology of Personalities</a>:" = "На схеме «<a href=\"/cosmology\">Космология личностей</a>»:"
+"On the chart, Cosmology of Personalities" = "На схеме «Космология личностей»"
+"chart|mark" = "схема"
+"The chart of personalities|help" = "Схема личностей"
+"help:chart:1" = { en = '<a href="/cosmology">Cosmology of Personalities</a> is a chart by Alexander Alyuev: the orders of personalities, each a card where it has its origin, in the units of the universe from Paradise to Urantia, with a line from what a personality comes of, to where it serves, and along the way of ascent. Choose a card, or a unit’s title, and what it is joined to stays lit while the rest stands back; beside the chart its entry says what it is, where the book speaks of it, each a link into the text, and its headword in the index. The same card again, or <kbd>Esc</kbd>, lets go. <b>Legend</b> names the signs and the lines, and each of its chips lights every card of that kind. The search box finds a personality by any of its names. The chart is moved as a page is, by scrolling or by a mouse’s drag, and scaled with the slider, with <kbd>Ctrl</kbd> and the wheel, or with two fingers. A headword’s page in the index, and a row of Appendix B, link to their card.', ru = '<a href="/cosmology">Космология личностей</a> — схема Александра Алюева: категории личностей, каждая — карточка там, где её происхождение, в единицах вселенной от Рая до Урантии, с линиями от того, от кого личность происходит, туда, где она служит, и по пути восхождения. Выберите карточку или название единицы — и то, с чем она соединена, останется ярким, а остальное отступит; рядом со схемой её описание говорит, что это, где о ней говорит книга (каждое место — ссылка в текст) и её заглавное слово в указателе. Та же карточка ещё раз или <kbd>Esc</kbd> — отпустить. <b>Легенда</b> называет пиктограммы и связи, а каждая её метка высвечивает все карточки этого рода. Строка поиска находит личность по любому из её имён. Схема передвигается, как страница, прокруткой или мышью, а масштаб меняется бегунком, колесом с <kbd>Ctrl</kbd> или двумя пальцами. Страница заглавного слова в указателе и строка Приложения B ведут к своей карточке.' }

@@ -208,8 +208,10 @@ def universe(con: sqlite3.Connection) -> dict:
             + [f"/part/{r[0]}" for r in con.execute("SELECT n FROM part ORDER BY n")])
     # The papers the quiz has questions on (build/quiz.py), each a page /quiz/N.
     quiz = [n for (n,) in con.execute("SELECT paper_n FROM quiz_paper ORDER BY paper_n")]
+    # The chart of the personalities (build/cosmo.py), where the build has one.
+    cosmo = bool(con.execute("SELECT 1 FROM cosmo_meta LIMIT 1").fetchone())
     return {"papers": papers, "letters": letters, "slugs": slugs, "paths": paths,
-            "lasts": lasts, "misc": misc, "quiz": quiz}
+            "lasts": lasts, "misc": misc, "quiz": quiz, "cosmo": cosmo}
 
 
 def _request(path: str) -> Request:
@@ -410,6 +412,11 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     qpaths = ["/quiz"] + [f"/quiz/{n}" for n in u["quiz"]]
     chunks["quiz"] = {"pages": {path: own(path, pg)
                                 for path, pg in zip(qpaths, site.get_many([(m, "") for m in qpaths]))}}
+    # The chart of the personalities (app.py cosmology_page): one page, with
+    # every entry in it, a chunk of its own, which moves only when his chart
+    # does, or its words here.
+    if u["cosmo"]:
+        chunks["cosmo"] = {"pages": {"/cosmology": own("/cosmology", site.get("/cosmology"))}}
     # /api, asked again at API_HOST: the page at HOST but for its address, or the
     # address is not all of it that depends on the host.  The gate holds what
     # the worker makes of it to the page at HOST.
@@ -451,7 +458,7 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         "search": {"h": srch["h"], "s": srch["s"]},
         "papers": {str(p): secs for p, secs in u["papers"].items()},
         "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
-        "misc": u["misc"], "quiz": u["quiz"],
+        "misc": u["misc"], "quiz": u["quiz"], "cosmo": u["cosmo"],
         # The voices whose lists the copy holds (audio-<key>), in Settings' order.
         "audio": voices,
         # What /tr/ is made of offline: the fragment's two ends, and each

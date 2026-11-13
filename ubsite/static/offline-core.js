@@ -183,6 +183,17 @@
     if (path === '/help') return { res: away(sh, T('The Help page is read online.')) };
     if (path === '/stats') return { res: away(sh, T('This page is read online.')) };
     if (path === '/quiz/board') return { res: away(sh, T('The quiz board is read online.')) };
+    // The chart of the personalities (app.py cosmology_page), a chunk of its
+    // own.  A copy made before 2026-11-13 has none, and the network's failure
+    // stands; one made of a build with no chart says so, and the address is
+    // no page's, as on the server.
+    // With a slash after it the server sends on to it, by its whole address
+    // (Starlette's own redirect, which no route of app.py makes).
+    if (path === '/cosmology/') return { res: redirect(origin + '/cosmology', 307) };
+    if (path === '/cosmology' && sh.cosmo !== false) {
+      if (!sh.cosmo) return null;
+      return { chunk: 'cosmo', make: function (d) { return html(200, stored(sh, d.pages[path])); } };
+    }
     if ((m = /^\/quiz(?:\/(.*))?$/.exec(path))) {
       // The quiz (app.py quiz_page, quiz_paper_page), a chunk of its own: /quiz,
       // and each paper's questions by its number, as the server reads it, 01
