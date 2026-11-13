@@ -1013,8 +1013,10 @@
       if (!tf.classList.contains('open')) return;
       var want = tab || load().trtab, h = '', notes = '',
           cur = want === 'all' && ks.length > 1 ? 'all' : ks.indexOf(want) >= 0 ? want : ks[0];
+      // A line that names one translation says so, `data-play`: listen.js
+      // puts that translation's ▶ at its start ('ub:trfold', below).
       if (ks.length > 1) {
-        h += '<div class="trtabs" role="group">' + ks.map(function (k) {
+        h += '<div class="trtabs" role="group"' + (cur === 'all' ? '' : ' data-play="' + cur + '"') + '>' + ks.map(function (k) {
           return '<button type="button" data-tab="' + k + '" aria-pressed="' + (cur === k) + '">' +
                  trBy[k].label + '</button>';
         }).join('') + '<button type="button" data-tab="all" aria-pressed="' + (cur === 'all') + '">' +
@@ -1025,7 +1027,7 @@
       // 2026-10-26).
       (cur === 'all' ? ks : [cur]).forEach(function (k) {
         var x = trBy[k];
-        if (cur === 'all' || ks.length === 1) h += '<p class="who">' + x.label + '</p>';
+        if (cur === 'all' || ks.length === 1) h += '<p class="who" data-play="' + k + '">' + x.label + '</p>';
         // Every one the fold counts is in the fragment the server sends, so one
         // missing is offline, and not kept in the copy.
         if (!got.t[k]) return (h += '<p class="gap">' + T('tr:notkept') + '</p>');
@@ -1035,6 +1037,7 @@
       });
       if (card && panel.contains(card.mark)) shut(false);
       panel.innerHTML = h + (notes && '<div class="tnotes" hidden>' + notes + '</div>');
+      document.dispatchEvent(new CustomEvent('ub:trfold', { detail: panel }));   // listen.js: its ▶
     }, function () {
       if (tf.classList.contains('open')) panel.innerHTML = '<p class="gap">' + T('tr:unreachable') + '</p>';
     });
@@ -1080,7 +1083,7 @@
     });
   }
   document.addEventListener('click', function (ev) {
-    var b = ev.target.closest && ev.target.closest('.trfold, .trtabs button'), tf = b && b.closest('.tf');
+    var b = ev.target.closest && ev.target.closest('.trfold, .trtabs button[data-tab]'), tf = b && b.closest('.tf');
     if (!tf) return;
     if (b.classList.contains('trfold')) {
       if (tf.classList.contains('open')) return trShut(tf);

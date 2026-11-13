@@ -198,9 +198,28 @@ class Pages(unittest.TestCase):
         self.assertIn("!d.voices[want].tr", choose)
         self.assertIn("if (!d.voices[v].tr) return v;", choose)
         # Its ▶ plays the voice Settings asks for, the recording by default.
-        play = js[js.index("function trPlay(root)"):js.index("document.addEventListener('ub:cmp'")]
+        play = js[js.index("function trButton(t, line)"):js.index("document.addEventListener('ub:cmp'")]
         self.assertIn("trKey(P, t)", play)
         self.assertNotIn("'browser:' + t", play)
+
+    def test_its_play_button_stands_in_the_fold_as_in_the_columns(self):
+        # Tigran, 2026-11-13: "On the phone there is no play triangle at all,
+        # except against English text": a phone shows a translation in the
+        # fold under its paragraph, and the columns alone had a ▶.  ub.js says
+        # which line names one translation and that the fold is drawn; listen.js
+        # makes the same button for both.
+        js = (ROOT / "ubsite" / "static" / "listen.js").read_text()
+        ub = (ROOT / "ubsite" / "static" / "ub.js").read_text()
+        draw = ub[ub.index("function trDraw(tf, ks, tab)"):ub.index("function arriveTr()")]
+        self.assertIn("(cur === 'all' ? '' : ' data-play=\"' + cur + '\"')", draw)
+        self.assertIn("'<p class=\"who\" data-play=\"' + k + '\">'", draw)
+        self.assertIn("new CustomEvent('ub:trfold', { detail: panel })", draw)
+        # A tab is a button that names one: the ▶ in their row is not a tab.
+        self.assertIn("closest('.trfold, .trtabs button[data-tab]')", ub)
+        fold = js[js.index("function foldPlay(panel)"):js.index("// ---- the bar")]
+        self.assertIn("trButton(t, panel.querySelector('p.rt[data-k=\"' + t + '\"][data-ref]'))", fold)
+        self.assertIn("document.addEventListener('ub:trfold', function (ev) { foldPlay(ev.detail); });", fold)
+        self.assertEqual(js.count("function trButton("), 1)
 
 
 class Russian(unittest.TestCase):

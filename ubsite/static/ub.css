@@ -967,10 +967,10 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .tf .tr { border-left: 2px solid var(--rule); padding: .1rem 0 .1rem .8rem; margin: .3rem 0 .4rem; }
 .tf .tr[hidden] { display: none; }
 .tf .trtabs { display: flex; flex-wrap: wrap; gap: .2rem 1rem; margin: 0 0 .35rem; font-size: .95rem; }
-.tf .trtabs button { font: inherit; background: none; border: 0; padding: 0 0 .1rem; cursor: pointer;
+.tf .trtabs button[data-tab] { font: inherit; background: none; border: 0; padding: 0 0 .1rem; cursor: pointer;
   color: var(--faint); border-bottom: 1.5px solid transparent; }
 .tf .trtabs button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--link); }
-@media (hover: hover) { .tf .trtabs button:hover { color: var(--ink); } }
+@media (hover: hover) { .tf .trtabs button[data-tab]:hover { color: var(--ink); } }
 .tf .who, .cmp .who { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint);
   margin: .5rem 0 .15rem; }
 .tf .who:first-child { margin-top: .1rem; }
@@ -1244,6 +1244,15 @@ article.cmp .rc { position: relative; }
 article.cmp .rc > .playp { position: absolute; margin: 0; left: -1.6rem;
   top: calc((var(--size) * var(--lead) - 1.15rem) / 2); }
 article.cmp .rc:has(.rt.now) > .playp { opacity: 1; }
+/* And in the fold under a paragraph (listen.js foldPlay; Tigran, 2026-11-13,
+   of a phone, where the fold is how a translation is read and there was no ▶
+   but the English text's): at the start of the line that names the
+   translation shown, the tabs' row, or its own name where all are shown or
+   one alone is ticked. */
+.tf [data-play] > .playp { margin: 0 .3rem 0 -.4rem; }
+.tf .trtabs > .playp { align-self: center; margin-right: -.55rem; }
+.tf .who > .playp { display: inline-grid; vertical-align: -.3em; }
+.tf .tr:has(.rt.now) .playp { opacity: 1; }
 :root[data-listen="off"] :is(.voicecredit, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
    playing starts, so only one thing on the page is marked. */

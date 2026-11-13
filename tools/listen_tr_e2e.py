@@ -11,9 +11,14 @@ pick there goes on in it from the same paragraph; and Settings' choice of the
 browser's voice for the translation takes its ▶ from the recording, and its
 default gives it back.  Settings' voices are a menu against each text, the
 English first, its recording first in each and each of the browser's voices
-once, in a browser that lists voices and in one that has listed none.  Then with the columns off: the recording chosen in
-the bar marks the translation's line in the paragraph's fold, which Follow
-along opens.  And where the recording lacks a section, 19:0: its ▶ there is
+once, in a browser that lists voices and in one that has listed none.  The bar's list has each text's recording and the browser's voices as one
+list under it, the English first, and with no translation shown the English
+text's alone.  Then with the columns off, on a phone's screen, Whole paper
+off and on: the fold under a paragraph, opened, has the translation's ▶ at
+the start of the line that names it, which plays the recording from there
+and marks the translation's line; with three translations in tabs it is the
+one shown's and no tab, and with All each has its own; and the recording
+chosen in the bar marks the translation's line in the fold.  And where the recording lacks a section, 19:0: its ▶ there is
 the browser's voice, and with Carry on into the next section on, a reading
 that comes to it from 18:7 goes on in the browser's voice and is the
 recording's again at 19:1 (the browser's speech a stand-in that is done at
@@ -54,6 +59,10 @@ EN = """el => { if (!el) return ''; const c = el.cloneNode(true);
 NOW = """() => { const l = document.querySelector('p.rt.now'), p = document.querySelector('p.t.now');
     return { line: l ? l.dataset.ref : null, of: l ? l.dataset.k : null, para: p ? p.id : null }; }"""
 VOICE = "() => (" + EN + ")(document.querySelector('.player .voicebox .voice'))"
+# The bar's list of voices as it reads, a heading marked "# ".
+BAR = """() => [...document.querySelectorAll('.player .voices > *, .player .voices [role=group] > *')]
+    .map(e => (e.getAttribute('role') === 'group' ? null : (e.className === 'group' ? '# ' : '') + (%s)(e)))
+    .filter(x => x !== null)""" % EN
 
 
 def ok(cond, what):
@@ -84,8 +93,9 @@ def asks(pg, asked: list, path: str, timeout: float = 10.0) -> bool:
     return False
 
 
-def context(b, settings: dict):
-    ctx = b.new_context(viewport={"width": 1400, "height": 900})
+def context(b, settings: dict, phone: bool = False):
+    ctx = (b.new_context(viewport={"width": 412, "height": 900}, has_touch=True, is_mobile=True)
+           if phone else b.new_context(viewport={"width": 1400, "height": 900}))
     # A fresh context is a first visit, which the tour would meet (help.js).
     ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_settings', %s); } catch (e) {}"
                         % json.dumps(json.dumps(settings)))
@@ -132,15 +142,12 @@ def columns(b, whole: bool) -> None:
        and pg.evaluate(VOICE) == "Merritt Horn" and pg.evaluate(NOW)["line"] is None,
        say + f"in Merritt Horn's reading, and the translation's mark is gone ({asked}, {pg.evaluate(VOICE)!r})")
 
-    # The bar's list: the recording first under its translation.
+    # The bar's list: under each text its recording first, the English first.
     pg.click(".player .voicebox .voice")
-    menu = pg.evaluate("""() => [...document.querySelectorAll('.player .voices > *, .player .voices [role=group] > *')]
-        .map(e => (e.getAttribute('role') === 'group' ? null : (e.className === 'group' ? '# ' : '') + (%s)(e)))
-        .filter(x => x !== null)""" % EN)
-    ok(menu[0] == "Merritt Horn" and "# USGNY · Russian" in menu
-       and menu[menu.index("# USGNY · Russian") + 1] == "Grigory Voyner"
-       and menu.count("Grigory Voyner") == 1,
-       say + f"the voices list the recording first under its translation, and nowhere else ({menu})")
+    menu = pg.evaluate(BAR)
+    ok(menu == ["# English text", "Merritt Horn", "Your browser’s voice",
+                "# USGNY · Russian", "Grigory Voyner", "Your browser’s voice"],
+       say + f"the voices list each text's recording first under it, and nowhere else ({menu})")
     del asked[:]
     pg.click(".player .voices [role=menuitemradio]:has-text('Grigory Voyner')")
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.ref === '1:1.4'"),
@@ -183,21 +190,82 @@ def columns(b, whole: bool) -> None:
     ctx.close()
 
 
-def fold(b) -> None:
-    ctx, pg, asked, errors = context(b, {"translations": "urantia-ru"})
-    print("\nIn the fold under the paragraph, the columns off")
-    pg.goto(BASE + "/1:1")
+def fold(b, whole: bool) -> None:
+    """The translation in the fold under its paragraph, which is how a phone
+    shows it (Tigran, 2026-11-13: "On the phone there is no play triangle at
+    all, except against English text"): its ▶ at the start of the line that
+    names it.  On a phone's screen, Whole paper off and on (trap 44)."""
+    settings = {"translations": "urantia-ru"}
+    if whole:
+        settings["whole"] = True
+    ctx, pg, asked, errors = context(b, settings, phone=True)
+    say = "Whole paper on: " if whole else "Whole paper off: "
+    print("\nIn the fold under the paragraph, the columns off, on a phone, " + say.rstrip(": "))
+    pg.goto(BASE + ("/1" if whole else "/1:1"))
     pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
-    ok(pg.locator(".rc > .playp").count() == 0, "no ▶ of the translation's own stands in a fold")
+    ok(pg.locator(".rc > .playp, .tf .playp").count() == 0, say + "a fold that is shut has no ▶")
+    row = ".row:has([id='1:1.2']) "
+    pg.click(row + ".trfold")
+    play = row + ".tf.open .who[data-play='urantia-ru'] > .playp"
+    pg.wait_for_selector(play, timeout=15000)
+    box = pg.evaluate("(q => { const r = document.querySelector(q).getBoundingClientRect(); return [r.left >= 0, r.right <= innerWidth, r.width > 0]; })(%s)"
+                      % json.dumps(play))
+    ok(pg.get_attribute(play, "aria-label") == "Listen to USGNY from 1:1.2" and box == [True, True, True]
+       and pg.evaluate("(q => document.querySelector(q).parentNode.firstChild === document.querySelector(q))(%s)" % json.dumps(play)),
+       say + f"opened, the fold has the translation's ▶, before its name and on the screen ({box})")
+    pg.click(play)
+    ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.ref === '1:1.2'"),
+       say + "its ▶ starts a reading there, the translation's line marked")
+    now = pg.evaluate(NOW)
+    ok(now["of"] == "urantia-ru" and now["para"] is None and asks(pg, asked, "/audio/voyner/01-01.mp3")
+       and not any(a.startswith("/speech/") for a in asked) and pg.evaluate(VOICE) == "USGNY · Grigory Voyner",
+       say + f"in the recording, the English paragraph unmarked ({now}, {sorted(set(asked))}, {pg.evaluate(VOICE)!r})")
+    pg.click(".player .close")
+    del asked[:]
     pg.click("[id='1:1.2'] .playp")
-    ok(until(pg, "(document.querySelector('p.t.now') || {}).id === '1:1.2'"), "the English ▶ plays the English")
+    ok(until(pg, "(document.querySelector('p.t.now') || {}).id === '1:1.2'")
+       and asks(pg, asked, "/audio/mh/paper001/P001_01.mp3"), say + "the English ▶ plays the English")
     pg.click(".player .voicebox .voice")
     pg.click(".player .voices [role=menuitemradio]:has-text('Grigory Voyner')")
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.ref === '1:1.2'"),
-       "the recording, picked in the bar, marks the translation's line in the fold Follow along opens")
+       say + "the recording, picked in the bar, marks the translation's line in the fold")
     now = pg.evaluate(NOW)
     ok(now["of"] == "urantia-ru" and now["para"] is None and asks(pg, asked, "/audio/voyner/01-01.mp3"),
-       f"and it is the recording that plays ({now}, {sorted(set(asked))})")
+       say + f"and it is the recording that plays ({now}, {sorted(set(asked))})")
+    ok(not errors, say + "no script error: " + "; ".join(errors))
+    ctx.close()
+
+
+def tabs(b) -> None:
+    """Three translations in the fold: in tabs, the ▶ is the one shown's, at
+    the start of the tabs' row, and no tab; with All, each has its own."""
+    ctx, pg, asked, errors = context(b, {"translations": "ud urantia-ru uf-ru", "trtab": "urantia-ru"}, phone=True)
+    print("\nIn the fold, three translations in tabs")
+    pg.goto(BASE + "/1:1")
+    row = ".row:has([id='1:1.2']) "
+    pg.wait_for_selector(row + ".trfold", timeout=15000)
+    pg.click(row + ".trfold")
+    pg.wait_for_selector(row + ".tf.open .trtabs > .playp", timeout=15000)
+    labels = "[...document.querySelectorAll(%s)].map(e => e.getAttribute('aria-label'))" % json.dumps(row + ".tf.open .playp")
+    first = "(q => (document.querySelector(q).firstChild.className))(%s)" % json.dumps(row + ".tf.open .trtabs")
+    ok(pg.evaluate(labels) == ["Listen to USGNY from 1:1.2"] and pg.evaluate(first) == "playp",
+       f"the tabs' row begins with the ▶ of the translation shown ({pg.evaluate(labels)})")
+    pg.click(row + ".tf.open .trtabs > .playp")
+    ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.k === 'urantia-ru'")
+       and asks(pg, asked, "/audio/voyner/01-01.mp3"), f"which plays it ({sorted(set(asked))})")
+    stored = json.loads(pg.evaluate("localStorage.getItem('ub_settings')"))
+    ok(stored.get("trtab") == "urantia-ru" and pg.locator(row + ".tf.open .trtabs button[aria-pressed='true']").count() == 1,
+       f"and is no tab: the tab chosen is as it was ({stored.get('trtab')!r})")
+    pg.click(".player .close")
+    pg.click(row + ".tf.open .trtabs button[data-tab='uf-ru']")
+    ok(until(pg, labels + "[0] === 'Listen to UF-RUS from 1:1.2'") and len(pg.evaluate(labels)) == 1,
+       f"another tab chosen, the ▶ is that translation's ({pg.evaluate(labels)})")
+    pg.click(row + ".tf.open .trtabs button[data-tab='all']")
+    ok(until(pg, labels + ".length === 3")
+       and pg.evaluate(labels) == [f"Listen to {n} from 1:1.2" for n in ("Aivazian", "USGNY", "UF-RUS")]
+       and pg.locator(row + ".tf.open .trtabs > .playp").count() == 0
+       and pg.locator(row + ".tf.open .who[data-play] > .playp").count() == 3,
+       f"with All, each translation has its own before its name, and the tabs' row none ({pg.evaluate(labels)})")
     ok(not errors, "no script error: " + "; ".join(errors))
     ctx.close()
 
@@ -303,6 +371,57 @@ def menus(b) -> None:
     ctx.close()
 
 
+def bar(b) -> None:
+    """The bar's list of voices (Tigran, 2026-11-13: "it separates Merritt
+    Horn from the browser's voices"): under each text its recording and then
+    the browser's voices by name, as Settings' menus have them; with no
+    translation, the English text's alone, under no heading."""
+    ctx, pg, _asked, errors = context(b, {"translations": "urantia-ru ud"})
+    ctx.add_init_script(VOICES)
+    # Chrome's own utterance takes none but a voice of its own making.
+    ctx.add_init_script("window.SpeechSynthesisUtterance = class extends EventTarget { constructor(t) { super(); this.text = t; } };")
+    print("\nThe bar's voices, in a browser that lists some")
+    pg.goto(BASE + "/1:1")
+    pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
+    pg.click("[id='1:1.2'] .playp")
+    pg.click(".player .voicebox .voice")
+    menu = pg.evaluate(BAR)
+    ok(menu == ["# English text", "Merritt Horn", "Google US English", "English (America)",
+                "# USGNY · Russian", "Grigory Voyner", "Google русский", "Russian",
+                "# Aivazian · Russian", "Google русский", "Russian"],
+       f"each text's recording and the browser's voices are one list under it, the English first ({menu})")
+    checked = "[...document.querySelectorAll('.player .voices [aria-checked=true]')].map(%s)" % EN
+    ok(pg.evaluate(checked) == ["Merritt Horn"], f"the voice heard is the one checked ({pg.evaluate(checked)})")
+
+    def stored() -> dict:
+        return json.loads(pg.evaluate("localStorage.getItem('ub_settings')"))
+
+    pg.click(".player .voices [role=group]:first-child [role=menuitemradio]:has-text('English (America)')")
+    ok((stored().get("voice"), stored().get("bvoice")) == ("browser", "English (America)")
+       and until(pg, "(%s)() === 'English (America)'" % VOICE),
+       f"a browser's voice picked for the English is kept by its name, and the bar names it ({stored()}, {pg.evaluate(VOICE)!r})")
+    pg.click(".player .voicebox .voice")
+    ok(pg.evaluate(checked) == ["English (America)"], f"and is the one checked ({pg.evaluate(checked)})")
+    pg.click(".player .voices [role=menuitemradio]:has-text('Merritt Horn')")
+    ok(until(pg, "(%s)() === 'Merritt Horn'" % VOICE) and stored().get("voice") in (None, "mh"),
+       f"Merritt Horn picked again is heard again ({stored()})")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+
+    ctx, pg, _asked, errors = context(b, {})
+    ctx.add_init_script(VOICES)
+    print("\nThe bar's voices, with no translation shown")
+    pg.goto(BASE + "/1:1")
+    pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
+    pg.click("[id='1:1.2'] .playp")
+    pg.click(".player .voicebox .voice")
+    menu = pg.evaluate(BAR)
+    ok(menu == ["Merritt Horn", "Google US English", "English (America)"],
+       f"the English text's voices are the list, under no heading ({menu})")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+
+
 def lacking(b) -> None:
     """A section the recording lacks: no file reads 19:0 (voyner-unread.tsv).
     Its ▶ there is the browser's voice; and with Carry on into the next
@@ -353,8 +472,11 @@ def run() -> int:
                               args=["--autoplay-policy=no-user-gesture-required"])
         columns(b, False)
         columns(b, True)
-        fold(b)
+        fold(b, False)
+        fold(b, True)
+        tabs(b)
         menus(b)
+        bar(b)
         lacking(b)
         b.close()
     return 1 if fails else 0

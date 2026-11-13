@@ -263,32 +263,54 @@
     unmark();
     go(i);
   }
-  // A translation's ▶ in Compare, in each of its cells (ub.js 'ub:cmp'): it
-  // reads that translation from that paragraph, from the heading at the
-  // section's first, as the English's does: in its recording, where it has
-  // one, else in the browser's voice (`trKey`), and none where it has neither.
-  // A paragraph the voice does not read gives way to the next it does.
+  // A translation's ▶, wherever the translation stands on the page: it reads
+  // that translation from that paragraph, from the heading at the section's
+  // first, as the English's does: in its recording, where it has one, else
+  // in the browser's voice (`trKey`), and none where it has neither.  A
+  // paragraph the voice does not read gives way to the next it does.
+  // `line` is the translation's first line there; null where there is no ▶.
+  function trButton(t, line) {
+    var x = TRS[t];
+    if (!P || !P.tr || !line || !x || !P.tr[t]) return null;
+    if (!synth && !recsOf(P, t).length) return null;
+    var ref = line.dataset.ref;
+    var b = button('playp', T.tr('Listen to {l} from {r}', { l: T.html(x.label), r: ref }), 'play');
+    b.addEventListener('click', function () {
+      var kk = trKey(P, t), nv = voiceOf(P, kk), at = P.ids.indexOf(ref);
+      // A reading not yet cut at the paragraph starts its section.
+      var i = at > 0 && nv.by === 'paragraph' ? -1 : 0;
+      for (var j = at; i < 0 && j < P.ids.length; j++)
+        for (var q = 0; q < nv.segs.length; q++)
+          if (nv.segs[q][0] === P.ids[j]) { i = q; break; }
+      if (i >= 0) start(i, nv, kk);
+    });
+    return b;
+  }
+  // In Compare, in each of its cells (ub.js 'ub:cmp').
   function trPlay(root) {
-    if (!P || !P.tr) return;
     Array.prototype.forEach.call(root.querySelectorAll('.rc[data-k]'), function (rc) {
-      var t = rc.dataset.k, line = rc.querySelector('p.rt[data-ref]'), x = TRS[t];
-      if (!line || !x || !P.tr[t] || rc.querySelector(':scope > .playp')) return;
-      if (!synth && !recsOf(P, t).length) return;
-      var ref = line.dataset.ref;
-      var b = button('playp', T.tr('Listen to {l} from {r}', { l: T.html(x.label), r: ref }), 'play');
-      b.addEventListener('click', function () {
-        var kk = trKey(P, t), nv = voiceOf(P, kk), at = P.ids.indexOf(ref);
-        // A reading not yet cut at the paragraph starts its section.
-        var i = at > 0 && nv.by === 'paragraph' ? -1 : 0;
-        for (var j = at; i < 0 && j < P.ids.length; j++)
-          for (var q = 0; q < nv.segs.length; q++)
-            if (nv.segs[q][0] === P.ids[j]) { i = q; break; }
-        if (i >= 0) start(i, nv, kk);
-      });
-      rc.appendChild(b);                 // last: .who:first-child keeps its place (ub.css)
+      var b = !rc.querySelector(':scope > .playp') && trButton(rc.dataset.k, rc.querySelector('p.rt[data-ref]'));
+      if (b) rc.appendChild(b);          // last: .who:first-child keeps its place (ub.css)
     });
   }
   document.addEventListener('ub:cmp', function (ev) { trPlay(ev.detail); });
+  // And in the fold under a paragraph, each time it is drawn (ub.js trDraw,
+  // 'ub:trfold'; Tigran, 2026-11-13: "On the phone there is no play triangle
+  // at all, except against English text", the fold being how a phone shows a
+  // translation, and the columns alone having had one): at the start of each
+  // line that names one translation (`data-play`), its tabs' row, or its own
+  // name where all are shown or one alone is ticked.  A fold open before this
+  // script ran, a search's hit's, has its own now.
+  function foldPlay(panel) {
+    Array.prototype.forEach.call(panel.querySelectorAll('[data-play]'), function (at) {
+      var t = at.dataset.play;
+      var b = !at.querySelector(':scope > .playp') &&
+              trButton(t, panel.querySelector('p.rt[data-k="' + t + '"][data-ref]'));
+      if (b) at.insertBefore(b, at.firstChild);
+    });
+  }
+  document.addEventListener('ub:trfold', function (ev) { foldPlay(ev.detail); });
+  Array.prototype.forEach.call(document.querySelectorAll('.tf .tr'), foldPlay);
 
   // ---- the bar ---------------------------------------------------------------
   var voiceMenu = null;
@@ -502,59 +524,58 @@
       });
     });
   }
-  // The voices the section being heard can be read in, as Settings lists them,
-  // and each of the browser's under its own (Tigran, 2026-10-18).  Its
-  // "Automatic" stays in Settings: here the voice it speaks with is checked.
+  // The voices the section being heard can be read in, as Settings lists
+  // them: under each text, the English first, its recording and then each of
+  // the browser's voices in its language by name, the one it speaks with
+  // checked (Tigran, 2026-10-18, each of the browser's under its own).  Until
+  // 2026-11-13 the English text's recordings stood alone at the top and the
+  // browser's English voices under a heading, "Your browser's voice", where
+  // a translation's recording stood with its voices (Tigran: "it separates
+  // Merritt Horn from the browser's voices"); they are one list now, under
+  // "English text" where a translation's follows, and under nothing where the
+  // English is all there is.  "Your browser's voice" is an entry only until
+  // the browser has listed any voice, for them all, as in Settings.
   function voices() {
     var box = dropup('voicebox', 'voice', 'voices', T.k('Voice'), function () {
-      var out = [];
-      // The English text's: the recordings of it, then the browser's voices.
+      var en = [], tr = [];
       for (var kk in D.voices) (function (kk, v) {
         if (v.tr) return;
-        out.push({ html: T(word(v.label)), on: key === kk, pick: function () { S.set('voice', kk); hear(kk); },
-                   note: v.credit ? T(word(v.credit)) : v.kind === 'synthetic' ? T('an AI voice') : '' });
+        en.push({ html: T(word(v.label)), on: key === kk, pick: function () { S.set('voice', kk); hear(kk); },
+                  note: v.credit ? T(word(v.credit)) : v.kind === 'synthetic' ? T('an AI voice') : '' });
       })(kk, D.voices[kk]);
       var all = synth ? S.usable() : [], cur = key === 'browser' && S.voice();
       function browser() { S.set('voice', 'browser'); hear('browser'); }
       if (synth && !all.length)
-        out.push({ html: T('Your browser’s voice'), on: key === 'browser', pick: browser });
-      else if (synth) {
-        out.push({ group: T.k('Your browser’s voice') });
-        all.forEach(function (v) {
-          out.push({ html: T.esc(v.name), on: !!cur && cur.name === v.name,
-                     pick: function () { S.set('bvoice', v.name); browser(); } });
-        });
-      }
+        en.push({ html: T('Your browser’s voice'), on: key === 'browser', pick: browser });
+      all.forEach(function (v) {
+        en.push({ html: T.esc(v.name), on: !!cur && cur.name === v.name,
+                  pick: function () { S.set('bvoice', v.name); browser(); } });
+      });
       // Each translation ticked that the section has, in Settings' order: its
       // recording first, where it has one, then the browser's voices in its
       // language; none of those, where the browser has listed voices and none
-      // of them in it.  Until it lists any, the translation alone.  A browser
-      // that cannot speak has the recordings.
+      // of them in it.  A browser that cannot speak has the recordings.
       var listed = synth ? synth.getVoices().length : 0;
       ticked().forEach(function (t) {
         var x = TRS[t], kk = 'browser:' + t, them = synth ? S.usable(x.lang) : [];
         var now = key === kk && S.voice(x.lang, t), recs = D.tr && D.tr[t] ? recsOf(D, t) : [];
-        var name = T.tr('{a} · {b}', { a: T.html(x.label), b: x.language });
         function pick() { hear(kk); }
         if (!D.tr || !D.tr[t]) return;
-        if (!recs.length) {
-          if (!synth || (listed && !them.length)) return;
-          if (!them.length) return out.push({ html: T(name), on: key === kk, pick: pick });
-        }
-        out.push({ group: name });
+        if (!recs.length && (!synth || (listed && !them.length))) return;
+        tr.push({ group: T.tr('{a} · {b}', { a: T.html(x.label), b: x.language }) });
         recs.forEach(function (r) {
-          out.push({ html: T(word(r.label)), on: key === r.key,
-                     pick: function () { S.setTrVoice(t, ''); hear(r.key); } });
+          tr.push({ html: T(word(r.label)), on: key === r.key,
+                    pick: function () { S.setTrVoice(t, ''); hear(r.key); } });
         });
-        if (recs.length && synth && !them.length && !listed)
-          out.push({ html: T('Your browser’s voice'), on: key === kk,
-                     pick: function () { S.setTrVoice(t, 'browser'); pick(); } });
+        if (synth && !them.length && !listed)
+          tr.push({ html: T('Your browser’s voice'), on: key === kk,
+                    pick: function () { if (recs.length) S.setTrVoice(t, 'browser'); pick(); } });
         them.forEach(function (v) {
-          out.push({ html: T.esc(v.name), on: !!now && now.name === v.name,
-                     pick: function () { S.setTrVoice(t, v.name); pick(); } });
+          tr.push({ html: T.esc(v.name), on: !!now && now.name === v.name,
+                    pick: function () { S.setTrVoice(t, v.name); pick(); } });
         });
       });
-      return out;
+      return (tr.length ? [{ group: T.k('English text') }] : []).concat(en, tr);
     });
     // The name in a span of its own, which a long one runs out of (ub.css).
     box.firstChild.appendChild(document.createElement('span'));
