@@ -315,6 +315,56 @@ class Static(unittest.TestCase):
         # The ids go before the deferred scripts look, ub.js's arrive() among them.
         self.assertLess(tpl.index("e.removeAttribute('id')"), tpl.index("asset('cosmo.js') }}\" defer"))
 
+    def test_the_credit_is_the_data_s(self):
+        """Tigran, 2026-11-14: "Data source by Alexander Alyuev" and not
+        "Author": "The Author of any part of ubsite is you and I"."""
+        import tomllib
+        cat = tomllib.loads((STATIC.parent / "ru.toml").read_text(encoding="utf-8"))
+        for key in ("cosmo:by", "home:cosmology"):
+            self.assertIn("Data source by", cat[key]["en"], key)
+            self.assertIn("Источник данных — ", cat[key]["ru"], key)
+            self.assertNotIn("Автор", cat[key]["ru"], key)
+            self.assertNotRegex(cat[key]["en"], r"(^|\. )By ", key)
+        self.assertIn("a chart drawn from Alexander Alyuev’s data", cat["help:chart:1"]["en"])
+        self.assertIn("построенная по данным Александра Алюева", cat["help:chart:1"]["ru"])
+        for lang in ("en", "ru"):
+            self.assertNotRegex(cat["help:chart:1"][lang], "chart by Alexander|схема Александра")
+
+    def test_the_page_itself_scrolls_and_one_line_stays(self):
+        """Tigran, 2026-11-14: the header goes up as on a page of the text and
+        one line stays; minus, plus, Whole chart and four arrows in it, and no
+        slider; the wheel anywhere on the page, the entry's card included,
+        over which it once did nothing.  tools/cosmo_e2e.py tries it."""
+        tpl = (TEMPLATES / "cosmology.html").read_text(encoding="utf-8")
+        head = tpl[tpl.index("{% block head %}"):tpl.index("{% endblock %}", tpl.index("{% block head %}"))]
+        # The viewport's least scale before the class and before any width is read (CLAUDE.md trap 56).
+        self.assertLess(head.index("minimum-scale=1"), head.index("r.classList.add('cchart')"))
+        self.assertLess(head.index("r.classList.add('cchart')"), head.index("r.clientWidth"))
+        self.assertNotIn('type="range"', tpl)
+        for cls in ("cqb", "cqx", "zout", "zin", "zfit", "pl", "pr", "pu", "pd"):
+            self.assertEqual(tpl.count("btn('%s'," % cls), 1, cls)
+        self.assertLess(tpl.index('class="chead"'), tpl.index('class="cbar"'))
+        self.assertLess(tpl.index('class="ctools"'), tpl.index('class="clegend"'))
+        css = (STATIC / "ub.css").read_text(encoding="utf-8")
+        chart = css[css.index("/* ---- the chart of the personalities"):]
+        self.assertIn(":root.cchart body { width: max-content; min-width: 100%; overflow-anchor: none; }", chart)
+        self.assertIn(":root.cchart :is(.top, .chead, .cbar, footer) { position: sticky; left: 0; width: var(--cvw, 100vw); }", chart)
+        self.assertIn(":root.cchart .cbar { top: 0;", chart)
+        # What took the wheel and gave it to nothing; and what made a focus() on the search box move the page.
+        self.assertNotIn("overscroll-behavior", chart)
+        self.assertNotIn("scroll-padding", chart.replace("not as the page's scroll-padding", ""))
+        js = (STATIC / "cosmo.js").read_text(encoding="utf-8")
+        self.assertIn("main.addEventListener('wheel'", js)
+        self.assertNotIn("view.addEventListener('wheel'", js)
+        self.assertIn("if (!(ev.buttons & 1)) return endPan(ev);", js)      # a drag ends with the button
+        self.assertIn("box.focus({ preventScroll: true })", js)
+        self.assertIn("if (ev.pointerType !== 'mouse' || st.pan || st.sel || st.key) return;", js)   # the chosen stays lit
+        # The scale and the place are this entry of the history's, and the browser's storage has neither.
+        self.assertIn("history.replaceState(Object.assign({}, history.state, {", js)
+        self.assertNotIn("sessionStorage", js)
+        # Left for a page of the text while listening, the page is put back.
+        self.assertIn("if (!document.querySelector('main.cosmo') && root.classList.contains('cchart')) chartMode(false);", js)
+
     def test_the_search_box_s_words_are_lowered_as_a_pill_s(self):
         """UB Goudy stands high in its line, and a box round one line of it
         shows it: the third control it was seen in (Tigran, 2026-11-13).  Its

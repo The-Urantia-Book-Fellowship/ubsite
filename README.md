@@ -347,7 +347,7 @@ Then update `tests/known-srt-deltas.tsv` and the SRT counts in `check_db.py` and
 
 ## The chart of the personalities
 
-`/cosmology` is Alexander Alyuev's "Cosmology of Personalities in the Urantia Book", https://github.com/alyuev/UniverseGenealogy_UrantiaBook_2D, drawn by the site from his data: a card's sources are links into the text, its name a link into the index, and the page is in both languages and in the offline copy. His repository, cloned beside the others (`sources.toml` `[cosmology]`), is a master and is never read by the build. `data/cosmology/chart.json` is a snapshot of it at a commit, with what his data does not hold, where each line runs, read out of his own page in Chrome; `data/cosmology/README.md` says what is in it, what the build holds it to, and how to refresh it:
+`/cosmology` is drawn by the site from the data of Alexander Alyuev's "Cosmology of Personalities in the Urantia Book", https://github.com/alyuev/UniverseGenealogy_UrantiaBook_2D, for which it credits him, "Data source by Alexander Alyuev": a card's sources are links into the text, its name a link into the index, and the page is in both languages and in the offline copy. His repository, cloned beside the others (`sources.toml` `[cosmology]`), is a master and is never read by the build. `data/cosmology/chart.json` is a snapshot of it at a commit, with what his data does not hold, where each line runs, read out of his own page in Chrome; `data/cosmology/README.md` says what is in it, what the build holds it to, and how to refresh it:
 
 ```
 git -C ../UniverseGenealogy_UrantiaBook_2D pull

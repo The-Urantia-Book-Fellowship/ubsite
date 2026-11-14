@@ -1,24 +1,36 @@
 {% extends "base.html" %}{% set title = 'Cosmology of Personalities' %}
 {#- The chart of the personalities (app.py cosmology_page, queries.cosmo;
-    build/cosmo.py): Alexander Alyuev's chart, from the snapshot of his
-    repository, drawn here.  Three things, in this order:
+    build/cosmo.py), drawn here from the snapshot of Alexander Alyuev's data.
+    Four things, in this order:
 
-    the chart, on a canvas of his page's size, c.w by c.h, in a window that
-    scrolls both ways (.cview): one <svg> for the units' boxes and the lines,
-    each line twice, as it runs in English and in Russian, the titles being in
-    its way; over it the units' titles and the cards, each a link, so that
-    their words are the interface's own, in both languages, and wrap by
-    themselves.  A card's address is #c-<id>, or #g-<id> where the
-    personality is drawn again, where it serves;
+    its name and the credit, "Data source by" (Tigran, 2026-11-14: "The Author
+    of any part of ubsite is you and I"), which go up with the site's header
+    as the page is moved down;
 
-    the legend, a <details>, its chips the keys the cards are drawn by;
+    the line (.cbar), which stays at the top of the screen (Tigran, the same
+    day: "the behaviour should be the same as when reading the text, where
+    only the minimal header remains when we scroll down"): the search box, a
+    magnifier on a phone; the scale's two buttons and Whole chart; four
+    arrows, a phone having no keys; and the legend, a <details>, its chips
+    the keys the cards are drawn by.  One line on every screen, 320 px too;
+
+    the chart, on a canvas of his page's size, c.w by c.h: one <svg> for the
+    units' boxes and the lines, each line twice, as it runs in English and in
+    Russian, the titles being in its way; over it the units' titles and the
+    cards, each a link, so that their words are the interface's own, in both
+    languages, and wrap by themselves.  A card's address is #c-<id>, or
+    #g-<id> where the personality is drawn again, where it serves.  With
+    scripts the page itself is as wide and as tall as the chart is drawn, and
+    the browser scrolls it (the class `cchart` on <html>, ub.css); with them
+    off the chart is in a window that scrolls both ways (.cview);
 
     and an entry to every unit and personality (.ci, its address #<id>, which
     a card and a title link to): what it is, what the lines say of it in
     words, where the book speaks of it, its headwords in the index.  With
     scripts off the entries are a list under the chart, which is then a
     picture whose every card goes to its entry; cosmo.js shows one at a time
-    beside the chart, marks what a card is joined to, searches and zooms.
+    under the line's end, marks what a card is joined to, searches, scales
+    and moves.
 
     Everything on the canvas is sized in px, the canvas's own unit: the whole
     is scaled as one (ub.css .cworld), and Settings' sizes are the text's. #}
@@ -36,23 +48,67 @@
 {%- for d in dots %}<circle class="gdot" cx="{{ d.x }}" cy="{{ d.y }}" r="{{ d.r }}" style="fill:{{ d.color }}"/>{% endfor -%}
 </svg>
 {%- endmacro %}
+{#- A round button of the line: its drawing, 16 by 16, and its name. #}
+{%- macro btn(cls, name, d, more='') -%}
+<button type="button" class="cbtn {{ cls }}" {{ ta('aria-label', name) }} {{ ta('title', name) }}{{ more|safe }}><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">{{ d|safe }}</svg></button>
+{%- endmacro %}
 {%- macro chip(kind, k) -%}
 <button type="button" class="cchip {{ kind }}" data-k="{{ kind }}:{{ k.key }}" style="--k:{{ k.color }}"><i></i>{{ t(k.name) }}{% if k.n is defined %} <small>{{ k.n }}</small>{% endif %}</button>
 {%- endmacro %}
 {%- macro ends(items) -%}
 {%- for x in items %}<a href="#{{ x.id }}">{{ t(x.name) }}</a>{% if not loop.last %}, {% endif %}{% endfor -%}
 {%- endmacro %}
-{% block head %}<script>(function (f) { document.documentElement.style.setProperty('--cz', f >= .62 ? Math.min(1, f) : .75); })((innerWidth - 16) / {{ c.w }});</script>
+{#- Before first paint, and with scripts alone.  The page itself is to scroll
+    both ways (ub.css :root.cchart), so that the header goes up as on a page of
+    the text.  A phone's Chrome, given a page wider than its window, says the
+    page's width for innerWidth and lets the whole page be pinched smaller,
+    unless the viewport has a least scale (CLAUDE.md, trap 56): so that first.
+    The window's width without its scrollbar, which the class brings at once,
+    is --cvw, what the header and the line are as wide as; and the scale, the
+    chart's whole width where that leaves a name legible, else three quarters
+    of its size, or the scale this entry of the history was left at
+    (cosmo.js keep).  cosmo.js does as much for a chart that listen.js brings
+    in while it plays, and undoes it on leaving. #}
+{% block head %}<script>(function (d, r) {
+  var m = d.querySelector('meta[name="viewport"]'), w, f, k = null;
+  if (m && m.content.indexOf('minimum-scale') < 0) m.content += ', minimum-scale=1';
+  r.classList.add('cchart');
+  w = r.clientWidth || innerWidth;
+  f = w / {{ c.w }};
+  try { k = history.state && history.state.cosmo; } catch (e) {}
+  r.style.setProperty('--cvw', w + 'px');
+  r.style.setProperty('--cz', k && k.z > 0 ? k.z : f >= .62 ? Math.min(1, f) : .75);
+})(document, document.documentElement);</script>
 {% endblock %}
 {% block body %}
 <main class="cosmo" data-src="{{ asset('cosmo.js') }}">
-  <header class="cbar">
-    <div class="chead">
-      <h1>{{ t('Cosmology of Personalities') }}</h1>
-      <p class="cby">{{ t('cosmo:by', url=c.meta.url, v=c.meta.version) }}</p>
+  <div class="chead">
+    <h1>{{ t('Cosmology of Personalities') }}</h1>
+    <p class="cby">{{ t('cosmo:by', url=c.meta.url, v=c.meta.version) }}</p>
+  </div>
+  <div class="cbar">
+    {#- What needs scripts is hidden until cosmo.js runs. #}
+    <div class="ctools" hidden>
+      <div class="cfind">
+        {{ btn('cqb', 'Search the chart', '<circle cx="7" cy="7" r="4.2"/><path d="M10.2 10.2l3.3 3.3"/>') }}
+        <input type="search" class="cq" autocomplete="off" {{ ta('aria-label', 'Search the chart') }} {{ ta('placeholder', 'a personality or a category') }}>
+        {{ btn('cqx', 'Close', '<path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/>') }}
+        <ul class="cres" hidden></ul>
+      </div>
+      <div class="czoom">
+        {{ btn('zout', 'Zoom out', '<path d="M3.5 8h9"/>') }}
+        {{ btn('zin', 'Zoom in', '<path d="M3.5 8h9M8 3.5v9"/>') }}
+        {{ btn('zfit', 'Whole chart', '<path d="M2.8 6.2V2.8h3.4M9.8 2.8h3.4v3.4M13.2 9.8v3.4H9.8M6.2 13.2H2.8V9.8"/>') }}
+      </div>
+      <div class="cpan">
+        {{ btn('pl', 'Move left|chart', '<path d="M12.5 8h-9M7 4.5L3.5 8 7 11.5"/>', ' data-x="-1"') }}
+        {{ btn('pr', 'Move right|chart', '<path d="M3.5 8h9M9 4.5L12.5 8 9 11.5"/>', ' data-x="1"') }}
+        {{ btn('pu', 'Move up|chart', '<path d="M8 12.5v-9M4.5 7L8 3.5 11.5 7"/>', ' data-y="-1"') }}
+        {{ btn('pd', 'Move down|chart', '<path d="M8 3.5v9M4.5 9L8 12.5 11.5 9"/>', ' data-y="1"') }}
+      </div>
     </div>
     <details class="clegend">
-      <summary>{{ t('Legend') }}</summary>
+      <summary {{ ta('title', 'Legend') }}><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle class="dot" cx="3.4" cy="4" r="1.4"/><circle class="dot" cx="3.4" cy="8" r="1.4"/><circle class="dot" cx="3.4" cy="12" r="1.4"/><path d="M7.2 4h5.8M7.2 8h5.8M7.2 12h5.8"/></svg><span>{{ t('Legend') }}</span></summary>
       <div class="clbody">
         <p class="chint">{{ t('cosmo:lede', p=c.counts.persons, u=c.counts.units) }}</p>
         <h2>{{ t('Signs') }}</h2>
@@ -82,20 +138,7 @@
         <label class="cfar" hidden><input type="checkbox" class="far"> {{ t('Far lines always shown') }}</label>
       </div>
     </details>
-    {#- What needs scripts is hidden until cosmo.js runs. #}
-    <div class="ctools" hidden>
-      <div class="cfind">
-        <input type="search" class="cq" autocomplete="off" {{ ta('aria-label', 'Search the chart') }} {{ ta('placeholder', 'a personality or a category') }}>
-        <ul class="cres" hidden></ul>
-      </div>
-      <div class="czoom">
-        <button type="button" class="zout" {{ ta('aria-label', 'Zoom out') }} {{ ta('title', 'Zoom out') }}><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 8h9"/></svg></button>
-        <input type="range" class="zr" min="0" max="100" step="1" {{ ta('aria-label', 'Zoom') }}>
-        <button type="button" class="zin" {{ ta('aria-label', 'Zoom in') }} {{ ta('title', 'Zoom in') }}><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 8h9M8 3.5v9"/></svg></button>
-        <button type="button" class="zfit pill">{{ t('Whole chart') }}</button>
-      </div>
-    </div>
-  </header>
+  </div>
   <div class="cstage">
   <div class="cview" tabindex="0" role="group" {{ ta('aria-label', 'Cosmology of Personalities') }}>
     <div class="csize" style="--w:{{ c.w }};--h:{{ c.h }}">
@@ -173,8 +216,10 @@
 {% block scripts %}
 {#- With scripts, an address here is cosmo.js's to act on, #michael, and
     nothing's to scroll to: the browser, and ub.js's arrive(), would bring the
-    entry or a card to the top of the screen, and take the header and the bar
-    off it.  So no card, title or entry keeps its id, from before either looks:
+    entry or a card to the top of the screen, under the line, where cosmo.js
+    brings a card to the middle of what the entry leaves of the window, and
+    not at all one already in view.  So no card, title or entry keeps its id,
+    from before either looks:
     this runs as the page is read, ahead of the deferred scripts; data-id says
     what each is. #}
 <script>document.querySelectorAll('main.cosmo .ci, main.cosmo .cp, main.cosmo .cut').forEach(function (e) { e.dataset.id = e.dataset.id || e.id; e.removeAttribute('id'); });</script>

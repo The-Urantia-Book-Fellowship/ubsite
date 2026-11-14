@@ -2292,27 +2292,45 @@ h2.chap + .rh { margin-top: 1rem; }
 .ways code { font-family: inherit; font-style: italic; color: var(--faint); }
 
 /* ---- the chart of the personalities (cosmology.html, cosmo.js) -----------
-   Alexander Alyuev's chart, drawn here from his data (build/cosmo.py).  A
-   canvas of his page's size, in the canvas's own unit, the px, scaled whole
-   by --cz, which the page's head sets before first paint, on the root, and
-   cosmo.js after, on the window
-   (.csize is the canvas as large as it is drawn, for the window to scroll
-   over; .cworld the canvas itself, scaled from its corner).  His colours are
-   the data's, a class's, a group's or a unit's handed down as --c, --k and
-   --g, and mixed here with the theme's own, so that a card is the theme's
-   card tinted and a line the theme's ink.  The lines' and the highlight's
-   colours are the site's: a line the ink thinned, a chosen one the link's
-   blue, service the quiz's green, ascent a violet, dotted. */
-main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%, var(--paper));
+   Drawn here from Alexander Alyuev's data (build/cosmo.py).  A canvas of his
+   page's size, in the canvas's own unit, the px, scaled whole by --cz, which
+   the page's head sets before first paint, on the root, and cosmo.js after,
+   on the chart (.csize is the canvas as large as it is drawn; .cworld the
+   canvas itself, scaled from its corner).  His colours are the data's, a
+   class's, a group's or a unit's handed down as --c, --k and --g, and mixed
+   here with the theme's own, so that a card is the theme's card tinted and a
+   line the theme's ink.  The lines' and the highlight's colours are the
+   site's: a line the ink thinned, a chosen one the link's blue, service the
+   quiz's green, ascent a violet, dotted.
+
+   With scripts the page itself scrolls, both ways, as a page of the text
+   does (Tigran, 2026-11-14): <html> has the class `cchart` (the page's head
+   script, cosmo.js for a chart brought in while listening), the body is as
+   wide as the chart, and what stands above the chart is as wide as the
+   window, --cvw, and stays at its left edge: the site's header, the chart's
+   name and the line (.cbar), which stays at the window's top too once the
+   rest has gone up.  With them off the chart is in a window of its own
+   (.cview), which scrolls both ways under the page's head. */
+main.cosmo { padding: .6rem 0 0; --cedge: color-mix(in oklch, var(--ink) 42%, var(--paper));
              --csvc: var(--right); --casc: oklch(0.55 0.16 300); }
 :root[data-theme="dark"] main.cosmo { --casc: oklch(0.74 0.12 300); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) main.cosmo { --casc: oklch(0.74 0.12 300); } }
-.cbar { position: relative; display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; align-items: center; }
+/* The vertical scrollbar from the first, so that --cvw is right from the
+   first; under Settings the dialog's own rule, the more specific, has it. */
+:root.cchart { overflow-y: scroll; }
+:root.cchart body { width: max-content; min-width: 100%; overflow-anchor: none; }
+:root.cchart :is(.top, .chead, .cbar, footer) { position: sticky; left: 0; width: var(--cvw, 100vw); }
+.chead { display: flex; flex-wrap: wrap; gap: 0 1rem; align-items: baseline; padding: 0 1rem; }
 .chead h1 { font-size: 1.3rem; font-weight: 400; margin: 0; line-height: 1.2; }
 .cby { margin: 0; font-size: .8rem; color: var(--faint); }
 .cby a { color: inherit; }
-.ctools { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-left: auto; }
-.cfind { position: relative; flex: 1 1 13rem; width: 18rem; max-width: 100%; }
+/* The line: the search box, the scale, the arrows, the legend.  What the
+   legend and an entry open hangs from it (.clbody, .cinfos). */
+.cbar { position: relative; z-index: 13; display: flex; gap: .5rem 1.1rem; align-items: center;
+        padding: .4rem 1rem; background: var(--paper); }
+:root.cchart .cbar { top: 0; border-bottom: 1px solid var(--rule); }
+.ctools { display: flex; gap: .5rem 1.1rem; align-items: center; flex: 1 1 auto; min-width: 0; }
+.cfind { position: relative; flex: 0 1 18rem; min-width: 0; }
 /* Its words lowered by --lift, as a pill's are: UB Goudy stands high in its
    line, and the box showed it (Tigran, 2026-11-13). */
 .cq { width: 100%; font: inherit; font-size: .95rem; padding: calc(.3rem + var(--lift)) .85rem calc(.3rem - var(--lift));
@@ -2320,6 +2338,8 @@ main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%,
 .cq::placeholder { color: var(--faint); opacity: 1; }
 .cq:focus { background: var(--paper); border-color: var(--link); outline: 0;
             box-shadow: 0 0 0 3px color-mix(in oklch, var(--link) 22%, transparent); }
+/* The magnifier and its ×: a phone's (below). */
+.cfind .cqb, .cfind .cqx { display: none; }
 .cres { position: absolute; z-index: 16; top: calc(100% + .3rem); left: 0; right: 0; margin: 0; padding: .25rem 0;
         list-style: none; background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
         border-radius: .5rem; box-shadow: 0 .4rem 1.2rem var(--shade); max-height: 60vh; overflow: auto; }
@@ -2332,22 +2352,27 @@ main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%,
 .cres li i.key { border-radius: 2px; }
 .cres li small { margin-left: auto; color: var(--faint); font-size: .8rem; text-align: right; }
 .cres li.none { cursor: default; color: var(--faint); }
-.czoom { display: flex; align-items: center; gap: .35rem; }
-.czoom button:not(.pill) { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; padding: 0;
-                           background: none; border: 1px solid var(--rule); border-radius: 50%; color: var(--ink);
-                           cursor: pointer; }
-.czoom button:not(.pill):hover { border-color: var(--link); color: var(--link); }
-.czoom button svg { width: .9rem; height: .9rem; display: block; }
-.czoom button path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
-.czoom .zr { width: 7rem; accent-color: var(--link); }
-.czoom .pill { font-size: .85rem; padding: calc(.25em + var(--lift)) .8em calc(.25em - var(--lift));
-               white-space: nowrap; }
-/* The legend: a fold in the bar, which opens over the chart. */
+.czoom, .cpan { display: flex; align-items: center; gap: .3rem; flex: none; }
+/* A round button of the line: a drawing alone, so it needs no --lift. */
+.cbtn { flex: none; display: grid; place-items: center; width: 1.8rem; height: 1.8rem; padding: 0; background: none;
+        border: 1px solid var(--rule); border-radius: 50%; color: var(--ink); cursor: pointer;
+        touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;
+        -webkit-user-select: none; user-select: none; }
+@media (hover: hover) { .cbtn:hover { border-color: var(--link); color: var(--link); } }
+.cbtn:active { background: color-mix(in oklch, var(--link) 16%, transparent); }
+:is(.cbtn, .clegend > summary) svg { width: .95rem; height: .95rem; display: block; }
+:is(.cbtn, .clegend > summary) :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.5;
+                                                    stroke-linecap: round; stroke-linejoin: round; }
+:is(.cbtn, .clegend > summary) .dot { fill: currentColor; stroke: none; }
+/* The legend: a fold at the line's end, which opens over the chart; its
+   word on a wide screen, its sign on a phone. */
+.clegend { margin-left: auto; flex: none; }
 .clegend > summary { cursor: pointer; color: var(--link); font-size: .95rem; white-space: nowrap; }
-.clbody { position: absolute; z-index: 15; top: calc(100% + .4rem); left: 0; width: min(30rem, 100%);
-          max-height: min(70vh, 34rem); overflow: auto; padding: .7rem 1rem .9rem; background: var(--card);
-          border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent); border-radius: .5rem;
-          box-shadow: 0 .4rem 1.2rem var(--shade); font-size: .92rem; line-height: 1.35; }
+.clegend > summary svg { display: none; }
+.clbody { position: absolute; z-index: 15; top: calc(100% + .3rem); right: .6rem; width: min(30rem, calc(100% - 1.2rem));
+          max-height: min(calc(var(--croom, 70vh) - 1rem), 34rem); overflow: auto; padding: .7rem 1rem .9rem;
+          background: var(--card); border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
+          border-radius: .5rem; box-shadow: 0 .4rem 1.2rem var(--shade); font-size: .92rem; line-height: 1.35; }
 .clbody h2 { margin: .8rem 0 .25rem; font-size: .78rem; font-weight: 400; letter-spacing: .08em;
              text-transform: uppercase; color: var(--faint); }
 .clbody p { margin: .3rem 0; }
@@ -2374,14 +2399,17 @@ main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%,
 .cchip.on { border-color: var(--link); background: color-mix(in oklch, var(--link) 12%, transparent); }
 @media (hover: hover) { .js .cchip:hover { border-color: var(--link); } }
 
-/* The window on the chart, and what stands over it: the entry chosen. */
-.cstage { position: relative; margin: .5rem -1rem 0; }
+/* The chart.  With scripts off, in a window of its own under the page's
+   head; with them the page's own, which the browser scrolls. */
+.cstage { position: relative; margin: .5rem 0 0; }
 .cview { overflow: auto; height: calc(100vh - 9.5rem); height: calc(100dvh - 9.5rem); min-height: 16rem;
          border-block: 1px solid var(--rule); outline-offset: -2px; }
-/* A finger moves the chart, the window's own scrolling; two scale it, which
-   cosmo.js does: the browser's own pinch would scale the whole page. */
-.js .cview { cursor: grab; touch-action: pan-x pan-y; }
-.js .cview.drag { cursor: grabbing; }
+:root.cchart .cstage { margin: 0; }
+/* A finger moves the page, the browser's own scrolling; two scale the chart,
+   which cosmo.js does: the browser's own pinch would scale the whole page. */
+:root.cchart .cview { overflow: visible; height: auto; min-height: 0; border: 0; cursor: grab;
+                     touch-action: pan-x pan-y; }
+:root.cchart .cview.drag { cursor: grabbing; }
 .csize { width: calc(var(--w) * var(--cz, 1) * 1px); height: calc(var(--h) * var(--cz, 1) * 1px); margin: 0 auto;
          overflow: hidden; }
 .cworld { position: relative; transform: scale(var(--cz, 1)); transform-origin: 0 0; font-size: 12.5px;
@@ -2412,6 +2440,12 @@ main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%,
 .cworld.showfar .ce.far, .ce.far.on { display: inline; }
 .ce.on .l { stroke-width: 2.6; }
 .ce.origin.on .l { stroke: var(--link); marker-end: url(#cm-on); }
+/* A card or a title come to by the keys is brought out from under the line.
+   On them, and not as the page's scroll-padding: with that the browser took
+   the line's own buttons, which stand in what would be the padding, for out
+   of view, and at a focus() on the search box moved the page up to bring
+   them "into" it. */
+:root.cchart :is(.cp, .cut) { scroll-margin: 5rem 1rem 1rem; }
 /* A unit's title, over its box's corner: a link to its entry.  No wider than
    his page drew it, in either language, since the lines were kept clear of
    that much and no more (data-en, data-ru; tools/cosmo_e2e.py measures). */
@@ -2481,29 +2515,90 @@ main.cosmo { padding: .6rem 1rem 0; --cedge: color-mix(in oklch, var(--ink) 42%,
 .ci:target { background: color-mix(in oklch, var(--link) 8%, transparent);
              box-shadow: 0 0 0 .5rem color-mix(in oklch, var(--link) 8%, transparent); }
 .js main.cosmo .cinfos { max-width: none; padding: 0; font-size: .95rem; }
+/* cosmo.js hangs the entries from the line, so that the one chosen follows
+   it as the page moves, and the wheel over it goes on to the page: over the
+   old window, and not in it, it took the wheel and gave it to nothing
+   (Tigran, 2026-11-14). */
+.cbar > .cinfos { position: absolute; top: 100%; left: 0; right: 0; height: 0; margin: 0; }
 .js main.cosmo .ci { display: none; }
 .js main.cosmo .ci.on { display: block; position: absolute; z-index: 14; top: .6rem; right: 1.4rem; margin: 0;
-                        width: min(23rem, calc(100% - 2rem)); max-height: calc(100% - 1.2rem); overflow: auto;
-                        overscroll-behavior: contain; padding: .7rem 1rem .8rem; background: var(--card);
+                        width: min(23rem, calc(100% - 2rem)); max-height: calc(var(--croom, 70vh) - 1.2rem);
+                        overflow: auto; padding: .7rem 1rem .8rem; background: var(--card);
                         border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent);
                         border-left: 4px solid color-mix(in oklch, var(--c) 75%, var(--ink)); border-radius: .5rem;
                         box-shadow: 0 .4rem 1.4rem var(--shade); }
 .js main.cosmo .ci.on h2 { padding-right: 1.6rem; }
 .js main.cosmo .ci .conchart { display: none; }
-.ci .x { position: absolute; top: .35rem; right: .4rem; width: 1.7rem; height: 1.7rem; padding: 0; display: grid;
-         place-items: center; background: none; border: 0; border-radius: 50%; color: var(--faint); cursor: pointer; }
-.ci .x svg { width: .85rem; height: .85rem; }
-.ci .x path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
-@media (hover: hover) { .ci .x:hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); } }
+.ci :is(.x, .cmore) { position: absolute; top: .35rem; right: .4rem; width: 1.7rem; height: 1.7rem; padding: 0;
+                     display: grid; place-items: center; background: none; border: 0; border-radius: 50%;
+                     color: var(--faint); cursor: pointer; }
+/* A phone's: the entry opened whole, or folded to a strip (below). */
+.ci .cmore { display: none; right: 2.2rem; }
+.ci :is(.x, .cmore) svg { width: .85rem; height: .85rem; }
+.ci :is(.x, .cmore) path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+@media (hover: hover) { .ci :is(.x, .cmore):hover { background: color-mix(in oklch, var(--faint) 15%, transparent); color: var(--ink); } }
+/* A small map of the whole chart at the window's lower left, on a wide
+   screen (cosmo.js draws it from the units' boxes): where the window stands
+   on the chart, and a dot at what is chosen; a click or a drag in it goes
+   there.  For the pointer alone. */
+.cmap { display: none; }
+@media (min-width: 62rem) {
+  :root.cchart .cmap { display: block; position: fixed; z-index: 12; left: .8rem; bottom: .8rem; height: min(267px, 38vh);
+                      width: auto; background: color-mix(in oklch, var(--paper) 90%, transparent);
+                      border: 1px solid color-mix(in oklch, var(--ink) 22%, transparent); border-radius: 4px;
+                      box-shadow: 0 .2rem .7rem var(--shade); cursor: pointer; touch-action: none; }
+}
+.cmap .cmu { fill: color-mix(in oklch, var(--c) 26%, var(--paper)); stroke: color-mix(in oklch, var(--c) 70%, var(--ink));
+           stroke-width: .6px; vector-effect: non-scaling-stroke; }
+.cmap .cmu.on { stroke: var(--link); stroke-width: 1.6px; }
+.cmap .cmw { fill: color-mix(in oklch, var(--link) 16%, transparent); stroke: var(--link); stroke-width: 1.2px;
+             vector-effect: non-scaling-stroke; }
+.cmap .cma { fill: var(--link); stroke: var(--paper); stroke-width: 1px; vector-effect: non-scaling-stroke; }
 @media (max-width: 44rem) {
   main.cosmo { padding-top: .4rem; }
+  .chead { display: block; }
   .chead h1 { font-size: 1.1rem; }
-  /* The bar in two rows: the name and the legend, then the search box and
-     the scale's buttons, without its slider. */
-  .chead { flex: 1 1 auto; }
-  .ctools { margin-left: 0; width: 100%; flex-wrap: nowrap; gap: .5rem; }
-  .cfind { flex: 1 1 auto; width: auto; min-width: 0; }
-  .czoom .zr { display: none; }
-  .js main.cosmo .ci.on { top: auto; bottom: .4rem; left: .5rem; right: .5rem; width: auto; max-height: 46%; }
+  /* The line is one line, 320 px wide too (Tigran, 2026-11-14: "Can we fit
+     all that on a single line?"): nine round buttons, which give way
+     together where there is not room for them at their size; the search box
+     a magnifier, and the legend its sign. */
+  .cbar { padding: .3rem .5rem; gap: .2rem; }
+  .ctools, .cfind, .czoom, .cpan { display: contents; }
+  .cbar .cbtn, .clegend { flex: 1 1 2rem; max-width: 2rem; min-width: 0; }
+  .cbar .cbtn { width: auto; height: auto; aspect-ratio: 1; }
+  .cbar :is(.zout, .pl) { margin-left: .3rem; }
+  .cfind .cqb { display: grid; }
+  .cq { display: none; }
+  /* Its own × is the box's here, at its end (.cqx). */
+  .cq::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+  .clegend > summary { list-style: none; display: grid; place-items: center; width: 100%; aspect-ratio: 1;
+                       border: 1px solid var(--rule); border-radius: 50%; color: var(--ink);
+                       -webkit-tap-highlight-color: transparent; }
+  .clegend > summary::-webkit-details-marker { display: none; }
+  .clegend > summary svg { display: block; }
+  .clegend > summary span { display: none; }
+  .clegend[open] > summary { border-color: var(--link); color: var(--link); }
+  .clbody { left: .5rem; right: .5rem; width: auto; }
+  /* The box opened (cosmo.js, .open): across the line in the buttons' place,
+     its × at its end. */
+  .cfind.open .cq { display: block; position: absolute; z-index: 2; left: .5rem; top: 50%; transform: translateY(-50%);
+                    width: calc(100% - 1rem); padding-right: 2.4rem; }
+  .cbar .cfind.open .cqx { display: grid; position: absolute; z-index: 3; right: .7rem; top: 50%;
+                           transform: translateY(-50%); width: 1.8rem; height: 1.8rem; max-width: none; border: 0;
+                           color: var(--faint); }
+  .cbar:has(.cfind.open) :is(.cqb, .czoom .cbtn, .cpan .cbtn, .clegend) { visibility: hidden; }
+  .cres { left: .5rem; right: .5rem; top: 100%; }
+  /* The entry chosen: a strip along the window's foot, its name and what it
+     is, which a tap opens whole and its sign folds again (Tigran, 2026-11-14:
+     opened whole at once it covered nearly half the screen). */
+  .js main.cosmo .ci.on { position: fixed; top: auto; bottom: .4rem; left: .5rem; right: .5rem; width: auto;
+                          max-height: 22vh; max-height: 22dvh; overflow: hidden; padding: .5rem .8rem .55rem; }
+  .js main.cosmo .ci.on.tall { max-height: 70vh; max-height: 70dvh; overflow: auto; }
+  .js main.cosmo .ci.on h2 { font-size: 1.1rem; padding-right: 3.6rem; }
+  .js main.cosmo .ci.on:not(.tall) .cdesc { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+                                            overflow: hidden; margin-bottom: 0; }
+  .js main.cosmo .ci.on:not(.tall) dl { display: none; }
+  .ci .cmore { display: grid; }
+  .ci.tall .cmore svg { transform: rotate(180deg); }
 }
-@media print { .ctools, .clegend > summary { display: none; } .cview { height: auto; overflow: visible; } }
+@media print { .ctools, .clegend > summary, .cmap { display: none; } .cview { height: auto; overflow: visible; } }

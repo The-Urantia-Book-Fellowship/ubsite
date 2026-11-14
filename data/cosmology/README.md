@@ -4,7 +4,7 @@ Alexander Alyuev's "Cosmology of Personalities in the Urantia Book" (https://git
 
 ## His, and on what terms
 
-The chart, its structure, its words in both languages and its engine are Alexander Alyuev's. He suggested joining it to this site; his repository has no licence file as of the commit below, and Tigran asked him on 2026-11-13 under what terms it may be used and how he is to be credited. This section is to say both when he answers; until then it is shown as his, with his name, his version and a link to his repository (`DECISIONS.md`, The chart of the personalities).
+The chart in his repository, its structure, its words in both languages and its engine are Alexander Alyuev's; the page at `/cosmology` is the site's, drawn from his data. He suggested joining it to this site; his repository has no licence file as of the commit below, and Tigran asked him on 2026-11-13 under what terms it may be used and how he is to be credited. This section is to say the terms when he answers. The site credits him for the data, "Data source by Alexander Alyuev", with his version and his name the link to his repository (Tigran, 2026-11-14: the page that draws it is the site's, and what is his is the data; `DECISIONS.md`, The chart of the personalities); how he himself would be named, if otherwise, is still his to say.
 
 ## `chart.json`, the snapshot
 
