@@ -263,9 +263,20 @@ a:hover { text-decoration-thickness: 2px; }
                                         stroke: var(--paper); stroke-width: 1.2; }
 .eg .offline { display: block; color: var(--faint); }
 
-footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.2rem 1rem;
-  font-size: .88rem; color: var(--faint); }
-footer p { margin: .2rem 0; }
+/* The footer: which edition this is, its licence, and that the site is not
+   the Foundation's.  Shown on the home page, Help and the API's page alone
+   (Tigran, 2026-11-14: "On the actual data pages it is wasting a lot of
+   valuable screen space and this is especially noticeable on the mobile").
+   It is in every page's markup all the same, and the stylesheet shows it or
+   not, by the <main> before it: no stored page of the offline copy moves.
+   Elsewhere it is a little room at the page's foot, and the one line that
+   says a page is from the offline copy, where one is (footer[data-copy],
+   below; sw.js). */
+footer { min-height: 2rem; font-size: .88rem; color: var(--faint); }
+footer p { display: none; margin: .2rem 0; }
+main:is(.front, .helppage, .api) ~ footer, footer[data-copy] { border-top: 1px solid var(--rule); margin-top: 4rem;
+                                                                padding: 1.2rem 1rem; }
+main:is(.front, .helppage, .api) ~ footer p { display: block; }
 
 /* ---- the reader -------------------------------------------------------- */
 /* The gap between the rail and the text.  It was the gutter the paragraph

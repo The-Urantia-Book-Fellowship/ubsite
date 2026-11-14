@@ -7,7 +7,8 @@ move it; a control the page lacks is stepped over; Help's "Take the tour"
 and "Show me" start it; the lit gear opens Settings over the dim; a note's
 card opens clear of it; on a phone the folded index's line and the
 contents' line are lit, and a tap on the lit contents keeps the tour; and in
-Russian the cards are Russian.
+Russian the cards are Russian.  And the footer, which Help is one of three
+pages to show: on those three, and on no other.
 
     .venv/bin/python tools/help_e2e.py        (after make data)
 
@@ -276,6 +277,29 @@ def run() -> int:
         ok(ru, "the card is Russian")
         ok(title(pg) == "Welcome", "and carries the English too")
         pg.close()
+
+        # The footer, the edition's licence and the site's disclaimer, is shown on
+        # the home page, Help and the API's page, and nowhere else (Tigran,
+        # 2026-11-14); it is in every page's markup all the same.
+        print("The footer")
+        ctx = b.new_context(viewport={"width": 1380, "height": 860})
+        ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
+        pg = ctx.new_page()
+        pg.on("pageerror", lambda e: errors.append(str(e)))
+        foot = """(() => { const f = document.querySelector('footer'), p = [...f.querySelectorAll('p')];
+            return [p.length, p.filter(x => getComputedStyle(x).display !== 'none').length,
+                    Math.round(f.getBoundingClientRect().height), getComputedStyle(f).borderTopWidth]; })()"""
+        for path in ("/", "/help", "/api"):
+            pg.goto(BASE + path)
+            f = pg.evaluate(foot)
+            ok(f[0] == 2 and f[1] == 2 and f[3] == "1px" and "CC" in pg.inner_text("footer"),
+               f"{path} has the footer, its licence and its disclaimer")
+        for path in ("/1:1", "/1", "/read", "/index", "/i/god", "/appendix/B", "/lists", "/quiz", "/changelog", "/cosmology"):
+            pg.goto(BASE + path)
+            f = pg.evaluate(foot)
+            ok(f[0] == 2 and f[1] == 0 and f[2] <= 40 and f[3] == "0px" and pg.inner_text("footer").strip() == "",
+               f"{path} carries it and shows none of it, a little room at its foot ({f[2]} px)")
+        ctx.close()
 
         ok(not errors, f"no script errors: {errors[:3]}")
         b.close()
