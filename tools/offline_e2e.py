@@ -746,10 +746,14 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         # From wherever it has got to: the heading is 3.79 s long, and whether
         # it is over after those four seconds is how soon the playing began
         # (this asked for 161:1.1 until 2026-11-12, and failed when it began at once).
-        onto = "161:1.2" if pg.inner_text(".player .at") == "161:1.1" else "161:1.1"
+        # And the heading may end between the place being read here and the
+        # click: read as still the heading's, the place was then 161:1.1's,
+        # and Next went on to 161:1.2, which failed twice running on
+        # 2026-11-15 with the reading sound.  From the heading either is on.
+        onto = ("161:1.2",) if pg.inner_text(".player .at") == "161:1.1" else ("161:1.1", "161:1.2")
         pg.click(".player .next")
         pg.wait_for_timeout(4000)
-        ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and pg.inner_text(".player .at") == onto
+        ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and pg.inner_text(".player .at") in onto
            and not pg.inner_text(".player .who"),
            f"the next paragraph plays on, its seek answered from the cache ({pg.get_attribute('.player .toggle', 'aria-label')},"
            f" {pg.inner_text('.player .at')!r}, {pg.inner_text('.player .who')!r})")
@@ -899,8 +903,11 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.evaluate("ubSettings.set('compare', true)")
         pg.goto(BASE + "/1")
         pg.wait_for_selector("article.cmp .cmphd")
-        ok(pg.locator("article.cmp .cmphd").count() == 8 and pg.locator("article.cmp .cmpnames").count() == 8,
-           "Compare sets every section of the whole of Paper 1 in columns")
+        # Each section's heads, and the columns' names once, over them all
+        # (Tigran, 2026-11-15; tools/compare_e2e.py looks at where they stand).
+        ok(pg.locator("article.cmp .cmphd").count() == 8 and pg.locator("article.cmp > .cmpnames").count() == 1
+           and pg.locator("article.cmp section .cmpnames").count() == 0,
+           "Compare sets every section of the whole of Paper 1 in columns, the names of the columns once over them all")
         ok(pg.locator("article.cmp .cmphd .gap").count() == 8, "each section's head says the translation is not kept")
         pg.evaluate("ubSettings.set('compare', false)")
         pg.wait_for_function("!document.querySelector('article.cmp')")

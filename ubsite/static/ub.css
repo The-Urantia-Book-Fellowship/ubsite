@@ -1019,13 +1019,21 @@ article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark
    paragraph at the window's top, which a fold shown at once would move. */
 :root.compare .grid > .row > .tf, article.cmp > .papertop, article.cmp > section > .papertop { display: none; }
 /* Over the columns, a line naming each, which stays at the window's top, level
-   with the Contents' and the Index's buttons, while the columns are in view,
-   on the paper, which hides the text passing under it.  Under it each column's
-   paper and section titles, as its TeX sets them, centred over it. */
+   with the Contents' and the Index's buttons, on the paper, which hides the
+   text passing under it.  One to the page, the article's own child and not a
+   row of a section's grid, so that it stays down the whole paper, where a
+   section's own row stayed only while that section was in view and the next
+   one's came up the page under it (Tigran, 2026-11-15).  It is a .grid itself
+   (ub.js cmpDraw), for the text's own tracks under every setting, the rules
+   for article.cmp .grid below; and so its small type is its cells', never
+   its own: the tracks are measured in ch and in the measure, at the grid's
+   own size, and at .8rem the names stood 67 px left of their columns.  Under
+   it, in each section's grid, each column's paper and section titles, as its
+   TeX sets them, centred over it. */
 article.cmp .cmpnames { position: sticky; top: 0; z-index: 2; background: var(--paper);
-  padding: 1rem 0 .3rem; margin-top: -1rem; border-bottom: 1px solid var(--rule);
-  font-size: .8rem; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
-article.cmp .cmpnames .cn { margin: 0; }
+  padding: 1rem 0 .3rem; margin-top: -1rem; border-bottom: 1px solid var(--rule); }
+article.cmp .cmpnames .cn { margin: 0; font-size: .8rem; line-height: 1.3; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--faint); }
 /* A translation's ×, at its name's top right corner, stops showing it, as
    the × in Settings' Translations does (Tigran, 2026-11-10; ub.js cmpDraw).
    Not the English's, which is always shown. */
@@ -1054,14 +1062,73 @@ article.cmp .stars > .rs { grid-column: var(--c); text-align: center; line-heigh
 article.cmp .stars > .rs::before { content: attr(data-stars); content: attr(data-stars) / ""; }
 article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; }
 @media (min-width: 62.01rem) {
-  article.cmp .grid { grid-template-columns: repeat(var(--cols), minmax(0, var(--measure))) minmax(0, 26ch); }
-  :root[data-width="full"] article.cmp .grid { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)) minmax(0, 26ch); }
-  :root:is([data-margin="off"], [data-index="off"]) article.cmp .grid {
+  /* The tracks, the names' (.cmpnames, a .grid) and each section's, which on
+     a screen is the grid its rows are laid on (below). */
+  article.cmp :is(.grid, section[id]) { grid-template-columns: repeat(var(--cols), minmax(0, var(--measure))) minmax(0, 26ch); }
+  :root[data-width="full"] article.cmp :is(.grid, section[id]) {
+         grid-template-columns: repeat(var(--cols), minmax(0, 1fr)) minmax(0, 26ch); }
+  :root:is([data-margin="off"], [data-index="off"]) article.cmp :is(.grid, section[id]) {
          grid-template-columns: repeat(var(--cols), minmax(0, var(--measure))); }
-  :root[data-width="full"]:is([data-margin="off"], [data-index="off"]) article.cmp .grid {
+  :root[data-width="full"]:is([data-margin="off"], [data-index="off"]) article.cmp :is(.grid, section[id]) {
          grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
-  article.cmp .grid > .row > :is(.rc, .cn, .ch) { grid-column: var(--c); grid-row: 1; }
+  article.cmp .grid > .row > :is(.rc, .ch), article.cmp .cmpnames > .cn { grid-column: var(--c); grid-row: 1; }
   article.cmp .grid > .row > .a { grid-column: -2; }
+  /* On the whole paper's page a section's title in columns has the room it
+     has without them (article.whole > section > .papertop), 2.6rem above and
+     1.2rem below: the names of the columns no longer stand between two
+     sections to part them.  The room above is the section's and not the
+     title's, which the box beside the title shares (below); and the title's
+     own margins are none, a cell's not collapsing with its heading's as the
+     plain head's do. */
+  article.cmp.whole > section[id] ~ section[id] { margin-top: 2.6rem; }
+  article.cmp.whole > section[id] ~ section[id] .cmphd > .papertop { margin: 0 0 1.2rem; }
+  article.cmp.whole > section[id] ~ section[id] .cmphd h2 { margin: 0; }
+}
+/* The box of what the whole paper or section cites, in columns: in the
+   margin, level with the section's title (Tigran, 2026-11-15: "'Cited across
+   this whole section' should go to the right margin, level with the title of
+   the section"), where it stood over the columns, as wide as the first, and
+   so over the titles, the heads being a row of the grid and the box before
+   the grid.  By the stylesheet alone, the page's markup as it was: the
+   section is the grid, its .grid no box of its own, so that the rows are laid
+   on the section's tracks, and the box, the section's child, takes the
+   margin's track in the row of the heads, which is as tall as the taller of
+   the two.  Its list is one column there.  On a screen: in print the rows
+   are blocks (below), and a phone has no margin, the box standing first as
+   it did.  Folded with the margin and gone with the index, as it was. */
+@media screen and (min-width: 62.01rem) {
+  article.cmp > section[id] { display: grid; gap: 0 2rem; }
+  article.cmp > section[id] > .grid { display: contents; }
+  article.cmp > section[id] > .grid > .cmphd { grid-row: 1; }
+  /* Over the row of the heads, which spans every track, the margin's too,
+     and comes after the box in the page: under it the box's entries were
+     words and no links, the pointer meeting the row (Tigran, 2026-11-15,
+     within the hour).  Under the names, which pass over it (z-index 2). */
+  article.cmp > section[id] > .blanket { grid-column: -2; grid-row: 1; align-self: start; z-index: 1;
+         max-width: none; margin: 1.2rem 0 1.6rem; }
+  article.cmp > section[id] > .blanket ul { columns: 1; }
+  /* Level with the title: on the whole paper's page a later section's heads
+     are its title alone, with no room above (above); on a section's page the
+     title is the last line of the paper's head, and the box stands at the
+     head's foot.  A paper's first section has no title, and its box, what
+     the whole paper cites, stands at the head of the paper's. */
+  article.cmp.whole > section[id] ~ section[id] > .blanket { margin: 0 0 1.2rem; }
+  article.cmp:not(.whole) > section[id]:not([id$=":0"]) > .blanket { align-self: end; }
+  /* A box of five lines or more (ub.js cmpDraw, .cmpfold) is folded to its
+     own line, how many entries it holds, which opens it for this page, as a
+     phone's every box is (.afold, .shown): the heads' row is as tall as the
+     taller of the head and the box, and in the margin's one column a long
+     box put the text far under its title, 193's 27 entries a screen under
+     the paper's head (Tigran, 2026-11-15: "let's turn them all into a fold,
+     i.e. where 5 or more lines are present", "folded by default, of
+     course"). */
+  article.cmp > section[id] > .blanket.cmpfold > .afold { display: flex; width: 100%; font-size: .9rem; }
+  article.cmp > section[id] > .blanket.cmpfold:not(.shown) { padding-block: .35rem; }
+  article.cmp > section[id] > .blanket.cmpfold:not(.shown) > :not(.afold) { display: none; }
+  article.cmp > section[id] > .blanket.cmpfold:not(.shown) > .afold::before { transform: rotate(-45deg); }
+  article.cmp > section[id] > .blanket.cmpfold.shown > .afold { margin-bottom: .5rem; }
+}
+@media (min-width: 62.01rem) {
   /* Each column's first line level with the English's (Tigran, 2026-10-26):
      at a paper's opening, below the line its reference and ▶ stand in, where
      the English has one (p.t.opening, above); at a block of verse, below the

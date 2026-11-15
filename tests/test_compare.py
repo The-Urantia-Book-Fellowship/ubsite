@@ -95,6 +95,131 @@ class Setting(unittest.TestCase):
         self.assertIn("document.documentElement.classList.toggle('compare', on);", js)
 
 
+class Names(unittest.TestCase):
+    """The line that names the columns: one to the page, the article's own
+    child, so that it stays at the window's top down the whole paper (Tigran,
+    2026-11-15).  A row of each section's grid until then, which stayed only
+    while its section was in view, and on the whole paper's page the next
+    section's came up the page under it.  Each column by its short name, and
+    no title of the book (the same day).  And the box of what a whole paper
+    or section cites, in the margin, level with the section's title (the same
+    day), by the stylesheet alone.  tools/compare_e2e.py looks at them in
+    Chrome; these hold the parts."""
+
+    JS = (ROOT / "ubsite/static/ub.js").read_text()
+    CSS = (ROOT / "ubsite/static/ub.css").read_text()
+
+    def test_made_once_before_the_sections_are_gone_through(self):
+        js = self.JS
+        start = js.index("    var draw = function (gots) {")
+        loop = js.index("      Array.prototype.forEach.call(secs, function (sec, j) {", start)
+        end = js.index("      cmpHit();\n", loop)
+        self.assertEqual(js.count('class="grid cmpnames"'), 1)
+        self.assertIn('class="grid cmpnames"', js[start:loop])
+        self.assertIn("art.querySelector(':scope > section').insertAdjacentHTML('beforebegin', names);", js[start:loop])
+        # A section's grid takes its heads alone.
+        self.assertNotIn("cmpnames", js[loop:end])
+        self.assertIn("grid.insertAdjacentHTML('afterbegin', heads + '</div>');", js[loop:end])
+
+    def test_each_column_by_its_short_name(self):
+        js = self.JS
+        self.assertIn('<p class="cn" style="--c:1"><b lang="en">Uversa Press</b></p>', js)
+        self.assertIn("""'"><b lang="en">' + trBy[k].label + '</b>'""", js)
+        # No title of the book over a column: the English's, nor a translation's.
+        self.assertNotIn("<b>The Urantia Book</b> (Uversa Press)", js)
+        start = js.index("    var draw = function (gots) {")
+        self.assertNotIn(".title", js[start:js.index("      Array.prototype.forEach.call(secs, function (sec, j) {", start)])
+        # The short names are the three the data gives.
+        import tomllib
+        data = tomllib.loads((ROOT / "data/translations.toml").read_text())
+        self.assertEqual({k: x["label"] for k, x in data.items() if isinstance(x, dict) and "label" in x},
+                         {"ud": "Aivazian", "urantia-ru": "USGNY", "uf-ru": "UF-RUS"})
+
+    def test_taken_away_with_the_columns(self):
+        js = self.JS
+        start = js.index("function cmpUndraw(art) {")
+        self.assertIn("art.querySelectorAll('.cmpnames, .cmphd, .rc, .stars > .rs')", js[start:start + 900])
+
+    def test_its_tracks_are_the_texts_and_its_small_type_its_cells(self):
+        css = self.CSS
+        # A .grid itself, so article.cmp .grid's four rules give it the
+        # text's tracks; they are in ch and in the measure, at the grid's own
+        # size, so a font size on the row itself would move its columns.
+        rule = re.search(r"\narticle\.cmp \.cmpnames \{([^}]*)\}", css).group(1)
+        self.assertIn("position: sticky; top: 0;", rule)
+        self.assertNotIn("font-size", rule)
+        self.assertIn("article.cmp .cmpnames .cn { margin: 0; font-size: .8rem;", css)
+        self.assertIn("article.cmp .grid > .row > :is(.rc, .ch), article.cmp .cmpnames > .cn { grid-column: var(--c); grid-row: 1; }", css)
+
+    def test_not_shown_on_a_phone_nor_in_print(self):
+        css = self.CSS
+        phone = css.index("@media (max-width: 62rem)")
+        self.assertIn("  article.cmp .cmpnames, article.cmp .stars > .rs { display: none; }", css[phone:])
+        # In print .grid is a block, and the names' rule comes after it.
+        block = css.index("  .reader, .grid, .grid > .row { display: block; }")
+        self.assertGreater(css.index("  .trfold, .cmpnames { display: none; }"), block)
+
+    def test_a_sections_title_has_the_plain_pages_room_on_a_desktop(self):
+        css = self.CSS
+        self.assertIn("article.whole > section > .papertop { margin: 2.6rem 0 1.2rem; }", css)
+        desk = css.index("  article.cmp :is(.grid, section[id]) { grid-template-columns:"
+                         " repeat(var(--cols), minmax(0, var(--measure))) minmax(0, 26ch); }")
+        end = css.index("\n}\n", desk)
+        for rule in ("  article.cmp.whole > section[id] ~ section[id] { margin-top: 2.6rem; }",
+                     "  article.cmp.whole > section[id] ~ section[id] .cmphd > .papertop { margin: 0 0 1.2rem; }",
+                     "  article.cmp.whole > section[id] ~ section[id] .cmphd h2 { margin: 0; }"):
+            self.assertIn(rule, css[desk:end], rule)
+
+    def test_a_box_of_five_lines_or_more_is_folded_to_its_line(self):
+        # Tigran, 2026-11-15: "let's turn them all into a fold, i.e. where 5
+        # or more lines are present", "folded by default, of course".  The
+        # script marks the box, counting the lines the page shows; the
+        # stylesheet folds it, on a desktop's screen in columns alone, with
+        # the button every box carries for a phone.
+        js, css = self.JS, self.CSS
+        self.assertIn("if (box) box.classList.toggle('cmpfold', box.querySelectorAll(':scope > ul > li').length >= 5);", js)
+        start = js.index("function cmpUndraw(art) {")
+        self.assertIn("art.querySelectorAll('.blanket.cmpfold'), function (el) { el.classList.remove('cmpfold'); }", js[start:start + 1300])
+        self.assertIn("var box = x.parentNode, folds = box.classList.contains('cmpfold') && !phone.matches;", js)
+        self.assertIn("x.setAttribute('aria-expanded', String((on && !folds) || box.classList.contains('shown')));", js)
+        start = css.index("@media screen and (min-width: 62.01rem) {\n  article.cmp > section[id] { display: grid; gap: 0 2rem; }")
+        block = css[start:css.index("\n}\n", start)]
+        for rule in ("  article.cmp > section[id] > .blanket.cmpfold > .afold { display: flex; width: 100%; font-size: .9rem; }",
+                     "  article.cmp > section[id] > .blanket.cmpfold:not(.shown) > :not(.afold) { display: none; }",
+                     "  article.cmp > section[id] > .blanket.cmpfold:not(.shown) > .afold::before { transform: rotate(-45deg); }"):
+            self.assertIn(rule, block, rule)
+        # Every rule of the fold's is a desktop screen's: a phone folds its
+        # boxes by the index's own button, and print shows them whole.
+        self.assertEqual(css.count(".cmpfold"), block.count(".cmpfold"))
+        # The button is in every box, as the page is sent.
+        tpl = (ROOT / "ubsite/templates/_text.html").read_text()
+        self.assertIn('<aside class="blanket">\n  {{ afold(nwhole,', tpl)
+
+    def test_the_box_in_the_margin_beside_the_heads_on_a_screen(self):
+        css = self.CSS
+        # The section is the grid and its .grid no box, so that the box, the
+        # section's child, takes the margin's track in the row of the heads:
+        # no markup moves, and the rules are a screen's and a desktop's, a
+        # phone and print as they were.
+        start = css.index("@media screen and (min-width: 62.01rem) {\n  article.cmp > section[id] { display: grid; gap: 0 2rem; }")
+        block = css[start:css.index("\n}\n", start)]
+        for rule in ("  article.cmp > section[id] > .grid { display: contents; }",
+                     "  article.cmp > section[id] > .grid > .cmphd { grid-row: 1; }",
+                     # Over the heads' row, which spans the margin's track too
+                     # and would take the pointer from the box's links.
+                     "  article.cmp > section[id] > .blanket { grid-column: -2; grid-row: 1; align-self: start; z-index: 1;",
+                     "  article.cmp > section[id] > .blanket ul { columns: 1; }",
+                     "  article.cmp.whole > section[id] ~ section[id] > .blanket { margin: 0 0 1.2rem; }",
+                     '  article.cmp:not(.whole) > section[id]:not([id$=":0"]) > .blanket { align-self: end; }'):
+            self.assertIn(rule, block, rule)
+        # Every set of tracks is the section's too.
+        self.assertEqual(css.count("article.cmp :is(.grid, section[id]) {"), 4)
+        self.assertNotIn("article.cmp .grid { grid-template-columns", css)
+        # The text's markup is as it was: the box before the grid, in the section.
+        tpl = (ROOT / "ubsite/templates/_text.html").read_text()
+        self.assertIn("{{ blanket(d.paperwide, d.blanket, d.nwhole) }}\n{{ grid(d.rows, d.citers, d.nciters, d.tr_has, focus, last) }}\n</section>", tpl)
+
+
 class SearchHit(unittest.TestCase):
     """A search's hit in a translation, /0:0.1#tr-ud, in columns: that
     translation's paragraph is marked, never the English beside it (Tigran,

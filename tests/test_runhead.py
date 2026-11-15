@@ -37,6 +37,18 @@ class RunningHead(unittest.TestCase):
         self.assertIn("head.querySelector('.ref').textContent = p.id || p.dataset.ref;", JS)
         self.assertIn("toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)));", JS)
 
+    def test_a_tap_on_a_title_names_its_own_sections_first_paragraph(self):
+        # Never the first on the screen, which above a title is a paragraph
+        # of the section before (Tigran, 2026-11-15); under a translation's
+        # title in columns, that translation's.  tools/compare_e2e.py clicks.
+        js = (ROOT / "ubsite/static/ub.js").read_text()
+        self.assertIn("((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || paraUnder(t, y);", js)
+        self.assertIn("if (r.height && r.bottom > y) return ps[i];", js)
+        self.assertIn("""own = sec && sec.querySelector('.rc[data-k="' + ch.dataset.k + '"] p.rt')""", js)
+        self.assertIn("      p = paraOf(t, ev.clientY);\n", js)
+        self.assertIn("showHead(tap ? firstOnScreen() : paraOf(t, ev.clientY) || firstOnScreen());", js)
+        self.assertNotIn("paraOf(t)", js)
+
     def test_a_double_click_is_never_a_tap(self):
         # A mouse's click shows the head after DBL, which the second press
         # cancels; Ctrl+X takes the head away, or it covers the box at the

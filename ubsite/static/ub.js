@@ -823,8 +823,11 @@
       T.attr(b, 'title', w);
       T.attr(b, 'aria-label', w);
     }
+    // In columns on a wide screen a box of many lines is folded to its line
+    // though the index is shown (cmpDraw, .cmpfold).
     Array.prototype.forEach.call(document.querySelectorAll('.afold'), function (x) {
-      x.setAttribute('aria-expanded', String(on || x.parentNode.classList.contains('shown')));
+      var box = x.parentNode, folds = box.classList.contains('cmpfold') && !phone.matches;
+      x.setAttribute('aria-expanded', String((on && !folds) || box.classList.contains('shown')));
     });
   }
   document.addEventListener('click', function (ev) {
@@ -836,6 +839,7 @@
     indexSync();
   });
   indexSync();
+  if (phone.addEventListener) phone.addEventListener('change', indexSync);
   // A row's translations, folded under it (ROADMAP item 15, step 2; templates/
   // _fold.html trfold).  Its line says how many of those ticked in Settings it
   // has; opened, it shows them, in the reader's order, one at a time in tabs or
@@ -1209,8 +1213,10 @@
     Array.prototype.forEach.call(art.querySelectorAll('.cmpnames, .cmphd, .rc, .stars > .rs'), function (el) {
       el.remove();
     });
+    Array.prototype.forEach.call(art.querySelectorAll('.blanket.cmpfold'), function (el) { el.classList.remove('cmpfold'); });
     art.classList.remove('cmp');
     art.style.removeProperty('--cols');
+    indexSync();
   }
   // Draws what Settings say; its promise is kept once drawn.
   function cmpDraw() {
@@ -1223,11 +1229,10 @@
     var ks = on ? cmpKeys(art) : [], secs = art.querySelectorAll('section[data-trv]');
     if (!ks.length || !secs.length) { cmpUndraw(art); return Promise.resolve(); }
     // Each section of the page in columns: the one of a section's page, or
-    // every one of the whole paper's (paper.html), each with the names of
-    // the columns over it, which stay at the window's top while it is in
-    // view, and its own heads: the paper's over the first, and each
-    // section's title over its own.  `got` is a section's /tr/ fragment, or
-    // null where it could not be had.
+    // every one of the whole paper's (paper.html), each with its own heads:
+    // the paper's over the first, and each section's title over its own.
+    // The names of the columns stand once, over them all (below).  `got` is
+    // a section's /tr/ fragment, or null where it could not be had.
     var draw = function (gots) {
       if (n !== cmpN || !art.isConnected) return;
       cmpUndraw(art);
@@ -1236,20 +1241,34 @@
       Array.prototype.forEach.call(art.querySelectorAll('.tf .tr'), function (el) { el.remove(); });
       art.classList.add('cmp');
       art.style.setProperty('--cols', ks.length + 1);
+      // A column's name: a translation's short name, and over the English the
+      // press's, as the rail's list of contents has them (tocSync), and no
+      // longer the work's title before it, «Урантийские документы
+      // (Aivazian)» (Tigran, 2026-11-15: "no need for the name of the book
+      // as it is obvious", and what a translation calls itself is in
+      // Settings' Translations); and a translation's ×, which stops showing
+      // it (Tigran, 2026-11-10; below).
+      // One row to the page, the article's own child, as the Index's button
+      // is (.marginhead), so that it stays at the window's top down the whole
+      // paper: a row in each section's grid stayed only while that section
+      // was in view, and the next section's came up the page under it
+      // (Tigran, 2026-11-15: "we keep the header showing what each column is,
+      // so there is no need to print it at the end of each section").  A grid
+      // of its own, with the text's tracks (ub.css article.cmp .grid).
+      var names = '<div class="grid cmpnames"><p class="cn" style="--c:1"><b lang="en">Uversa Press</b></p>' +
+          ks.map(function (k, i) {
+            return '<p class="cn" style="--c:' + (i + 2) + '"><b lang="en">' + trBy[k].label + '</b>' +
+                   '<button type="button" class="cnx" data-k="' + k + '" ' +
+                   T.a('aria-label', 'Hide this translation') + ' ' + T.a('title', 'Hide this translation') + '>×</button></p>';
+          }).join('') + '</div>';
+      art.querySelector(':scope > section').insertAdjacentHTML('beforebegin', names);
       Array.prototype.forEach.call(secs, function (sec, j) {
         var failed = !gots[j], got = gots[j] || { t: {}, n: {}, h: {} }, grid = sec.querySelector('.grid'),
             top = sec.querySelector(':scope > .papertop') || art.querySelector(':scope > .papertop');
         if (!grid || !top) return;
-        // A column's name, as Settings names a translation, and over the English
-        // the book's own title, which no language translates.
-        var names = '<div class="row cmpnames"><p class="cn" style="--c:1" lang="en"><b>The Urantia Book</b> (Uversa Press)</p>',
-            heads = '<div class="row cmphd">';
+        var heads = '<div class="row cmphd">';
         ks.forEach(function (k, i) {
           var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 2) + '"', paper = j === 0;
-          // And its ×, which stops showing it (Tigran, 2026-11-10; below).
-          names += '<p class="cn"' + c + '><b lang="' + x.lang + '">' + x.title + '</b> <span class="nobreak">(' + x.label + ')</span>' +
-                   '<button type="button" class="cnx" data-k="' + k + '" ' + T.a('aria-label', 'Hide this translation') + ' ' +
-                   T.a('title', 'Hide this translation') + '>×</button></p>';
           heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
                    (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
                    (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +
@@ -1257,7 +1276,16 @@
                    // missing is offline, and not kept in the copy.
                    (got.t[k] ? '' : '<p class="gap">' + T(failed ? 'tr:unreachable' : 'tr:notkept') + '</p>') + '</header>';
         });
-        grid.insertAdjacentHTML('afterbegin', names + '</div>' + heads + '</div>');
+        grid.insertAdjacentHTML('afterbegin', heads + '</div>');
+        // The section's box of what the whole paper or section cites stands
+        // in the margin beside these heads (ub.css), where one of many lines
+        // would put the text far under its title, 193's 27 a screen under
+        // it: of five lines or more it is folded to its own line, how many
+        // entries it holds, which opens it, as every box is on a phone
+        // (Tigran, 2026-11-15: "let's turn them all into a fold, i.e. where
+        // 5 or more lines are present", "folded by default, of course").
+        var box = sec.querySelector(':scope > .blanket');
+        if (box) box.classList.toggle('cmpfold', box.querySelectorAll(':scope > ul > li').length >= 5);
         var en = top.cloneNode(true);
         en.classList.add('ch');
         en.style.setProperty('--c', 1);
@@ -1280,6 +1308,7 @@
           }).join(''));
         });
       });
+      indexSync();
       cmpHit();
       // listen.js puts each translation's ▶ in its cells.
       document.dispatchEvent(new CustomEvent('ub:cmp', { detail: art }));
@@ -1888,13 +1917,32 @@
   // The paragraph tapped.  In columns a translation's own (p.rt), tinted
   // alone, never the English beside it (Tigran, 2026-11-08), and its cell's
   // first where the tap was in the cell but on none, on its name; the English
-  // one of the row where it was on neither.
-  function paraOf(t) {
+  // one of the row where it was on neither.  And where the tap was on no
+  // paragraph's row, on a section's title or in the room about it, the next
+  // paragraph down the page from where it fell (`y`, the tap's height in the
+  // window), which under a title is its section's first, and under a
+  // translation's title in columns that translation's: never the first on
+  // the screen, which above a title is a paragraph of the section before
+  // (Tigran, 2026-11-15: "clicking on the section title highlights one of
+  // the paragraphs of the previous section").
+  function paraOf(t, y) {
     var cell, row;
     if (!t.closest) return null;
     return t.closest('p.t[id], .rc p.rt') ||
            ((cell = t.closest('.rc')) && cell.querySelector('p.rt')) ||
-           ((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || null;
+           ((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || paraUnder(t, y);
+  }
+  function paraUnder(t, y) {
+    var ch = t.closest('.cmphd > .ch[data-k]'), sec = ch && ch.closest('section'),
+        own = sec && sec.querySelector('.rc[data-k="' + ch.dataset.k + '"] p.rt'), ps, i, r;
+    if (own) return own;
+    if (!(y >= 0)) return null;
+    ps = document.querySelectorAll('main p.t[id]');
+    for (i = 0; i < ps.length; i++) {
+      r = ps[i].getBoundingClientRect();
+      if (r.height && r.bottom > y) return ps[i];
+    }
+    return null;
   }
   // The first paragraph on the screen: a verso's running head.
   function firstOnScreen() {
@@ -2034,7 +2082,7 @@
         !document.querySelector('main p.t[id]')) return false;
     if (!touch && (!head || head.hidden)) {
       clearTimeout(headSoon);
-      p = paraOf(t);
+      p = paraOf(t, ev.clientY);
       headSoon = setTimeout(function () {
         headSoon = 0;
         if (!getSelection().isCollapsed) return;
@@ -2055,7 +2103,7 @@
     band = ev.clientY < BAND * parseFloat(getComputedStyle(document.documentElement).fontSize);
     if (head && !head.hidden) { hideHead(); return !tap || band; }
     if (tap && !band) return false;
-    showHead(tap ? firstOnScreen() : paraOf(t) || firstOnScreen());
+    showHead(tap ? firstOnScreen() : paraOf(t, ev.clientY) || firstOnScreen());
     return true;
   }
   // The second press of a mouse's double-click, or the third of a triple
