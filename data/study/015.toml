@@ -109,9 +109,11 @@ key = "Sadler2003"
 origin = "none"
 tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
 
-# The edition's p015Swann1.  Checked in Tigran's scan (LIBRARY.tsv), which has
-# no text layer, read in the page images: pp. 232, 233, 240; book p. N = djvu
-# page N+12.
+# The edition's p015Swann1.  Checked in Tigran's scan (LIBRARY.tsv), read in
+# the page images: pp. 232, 233, 240.  The file was replaced on 2026-11-16 by
+# the scan as he cleaned it up, with a text layer, and the three pages were
+# read in it again: book p. N = djvu page N+8 there (N+12 in the file of
+# 2026-11-15, which had no text layer).
 [[source]]
 key = "Swann"
 origin = "a32ac74d6ab2fce4"
@@ -324,8 +326,8 @@ after = "different returning routes"
 origin = "none"
 tex = '''An arm, on this account, is not a fixed body of stars but the place where stars travelling in company are seen together: they pass through it and out of it. One may compare the theory by which astronomy has since come to explain the lasting arms of spiral galaxies, as waves of crowding through which the stars move in and out again, the arm remaining while its stars change (Lin and Shu, 1964, after Bertil Lindblad). The likeness goes no further than that one idea: the paper's suns leave the arm ``in close formation'' and ``return by diverse routes'', which is no part of the astronomers' theory.'''
 
-# F21, added: Block's finding, Swann p. 232 (djvu page 244, read in the page
-# image)
+# F21, added: Block's finding, Swann p. 232 (djvu page 240, read in the page
+# image; page 244 of the file first read)
 [[note]]
 at = "15:4.7"
 after = "visible to the naked eye"
