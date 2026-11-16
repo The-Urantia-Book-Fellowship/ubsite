@@ -216,8 +216,8 @@ pace  = [0.8, 3.0]               # his median 1.63 words of the translation a se
                                  # paragraphs between 1.2 and 2.2, none outside 0.88-2.68
 
 [offline]
-measured_on = "2026-11-15"
-pages       = 10613      # 1,626 sections, 4,736 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,879 reading paths,
+measured_on = "2026-11-16"
+pages       = 10610      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,877 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
                          # 197 more the same day: the whole paper's page, /N, joined from its
@@ -226,14 +226,22 @@ pages       = 10613      # 1,626 sections, 4,736 headwords, 27 index letters, 21
                          # and one since 2026-11-09, at index 9483c80: terrestrial escape;
                          # and one since 2026-11-11, at index 1a29371: a headword more, war in
                          # heaven, which sends to Lucifer rebellion;
-                         # and one since 2026-11-13: the chart of the personalities, /cosmology
-paths       = 3879       # 2,057 headwords in book order, 1,822 of them by theme too (1,820 until
+                         # and one since 2026-11-13: the chart of the personalities, /cosmology;
+                         # three fewer since 2026-11-16, at index bc83adc, its reading of Paper 57:
+                         # the headword Uranus is withdrawn, a planet the book never names, and
+                         # Venus (planet), left with fewer than three paragraphs, has no reading
+                         # path, in book order or by theme (10,613 before)
+paths       = 3877       # 2,056 headwords in book order, 1,821 of them by theme too (2,057 and 1,822
+                         # until 2026-11-16: Venus (planet) has no path since the index's reading of
+                         # Paper 57 withdrew the entry that had it a planet of Angona's; 1,820 by theme until
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
                          # 1,821 until 2026-11-09: terrestrial escape cites a second chapter since its reading of Papers 49-52)
 spoken      = 1626       # one to a section
-chunks      = 424        # 423 until 2026-11-15, at index 54775e2, its readings of Papers 54 to 56:
-                         # the reading paths under L take a chunk more, read-L-6, light and life
-                         # having grown by the entries of Papers 55 and 56;
+chunks      = 423        # 424 for an evening, 2026-11-15, at index 54775e2, never deployed: the
+                         # reading paths under L take a chunk more, read-L-6, light and life
+                         # having grown by the entries of Papers 55 and 56; and 423 again on
+                         # 2026-11-16, at bc83adc: those under V need one fewer, read-V-1,
+                         # Venus (planet) having no path;
                          # 421 until 2026-11-13, when the chart of the personalities came: its page
                          # in a chunk of its own, cosmo, and its script, cosmo.js, among the assets;
                          # 420 until 2026-11-12, when the second recording's list of files by paper
