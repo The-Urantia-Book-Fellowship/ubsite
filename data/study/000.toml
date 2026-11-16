@@ -97,19 +97,30 @@ why = "F10, ruled: an etymology with no authority, and wrong as written: 'mother
 # Berdyaev (Slavery and Freedom) and Block's Knudson, The Doctrine of God,
 # pp. 169-70, which Block's chart for Paper 103 (September 2022) sets beside
 # 103:8.6.  tools/study/draft.py 103 lists this note as pointing there.
+# 2026-11-15: a note points only to a note that is on the site (Tigran,
+# ruling on Paper 15), so the notes at 103:8.6 were written that day, ahead
+# of Paper 103's review (data/study/103.toml), two of them, Block's Knudson
+# and the edition's Berdyaev; "source ... note" here became "sources ...
+# notes" with them.
 [[note]]
 at = "0:5.11"
 after = "changing creature experience"
 origin = "204ed3b06822d2cb"
-tex = '''For the human source of this definition see the note at \bibref[103:8.6]{p103 8:6}.'''
+tex = '''For the human sources of this definition see the notes at \bibref[103:8.6]{p103 8:6}.'''
 
 # F12, ruled: kept as it is, the editor's experience his own (Tigran).  Its
 # link opens 112:3.2, which has no note until Paper 112 is reviewed.
+# 2026-11-15: the note at 112:3.2 was written that day, ahead of Paper 112's
+# review (data/study/112.toml), for the same reason as 103:8.6's above.
+# "the proof of this connection is given in the footnote to" became "the
+# evidence for this connection is in the note at" at his word the same
+# evening ("relax the wording at 0:5.12 to say 'the evidence for this
+# connection'"): the note there calls it a likeness, on an assumption.
 [[note]]
 at = "0:5.12"
 after = "warp of morontia"
 origin = "35c66cbd89b85cb7"
-tex = '''The word ``morontia'' is composed of ``matter'' plus ``moral''. In addition to the present Editor's personal experience, the proof of this connection is given in the footnote to \bibref[112:3.2]{p112 3:2}. The link with the Greek word \textgreek{μάρανσις} ``causing to die away'', ``dying or fading away'' is also important here. And the medical term \textgreek{μαρασμός}, whence the English ``marasmus'' and ``marasmic'' come, is synonymous with \textgreek{μάρανσις}. It was used by the great \bibemph{Galen} in the II century A.D.'''
+tex = '''The word ``morontia'' is composed of ``matter'' plus ``moral''. In addition to the present Editor's personal experience, the evidence for this connection is in the note at \bibref[112:3.2]{p112 3:2}. The link with the Greek word \textgreek{μάρανσις} ``causing to die away'', ``dying or fading away'' is also important here. And the medical term \textgreek{μαρασμός}, whence the English ``marasmus'' and ``marasmic'' come, is synonymous with \textgreek{μάρανσις}. It was used by the great \bibemph{Galen} in the II century A.D.'''
 
 # F13, ruled: kept as it is.  The reading it confirms is F5's, which stays; and
 # 0:12.11 names Part I's subjects, under the superuniverse rulers' mandate.

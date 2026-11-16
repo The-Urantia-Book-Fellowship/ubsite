@@ -1,0 +1,60 @@
+# Paper 112, Personality Survival: TWO NOTES WRITTEN AHEAD OF THE PAPER'S
+# REVIEW (ahead = true), which is still to come in the order of the book.
+# Why now is said at the head of data/study/103.toml: the Foreword's note at
+# 0:5.12 has pointed to "the footnote to 112:3.2" since 2026-10-19, and a
+# note points only to a note that is on the site (Tigran, 2026-11-15).  The
+# edition has three notes in the paper at d6c3206 and no source: 112:3.2's,
+# carried; 112:0.1's, a pointer to 103:8.6, carried with it, since the notes
+# at 103:8.6 are written the same day and speak of this paragraph; and
+# 112:1.7's, on a 1955 reading, which waits for the review (where it is
+# dropped without a ruling, as every such note is).  Block's chart of March 4,
+# 2020 covers 112:1-2 only and has nothing beside either paragraph; it is not
+# named, no note here resting on it, and waits for the review too, which
+# takes `ahead` out.  Checked in the page image: Sadler's title page, his
+# Preface, p. ix, the head of ch. XXIV, p. 152, and pp. 156-157, in Tigran's
+# scan of Harvard's copy (LIBRARY.tsv; book p. N = djvu page N+13); every
+# quotation of the book in the press text.  The review is
+# var/study/review-ahead-103-112.md.  RULED by Tigran on 2026-11-15: B1 and
+# B2 Yes in its table.
+
+paper = 112
+chart = "none"
+ahead = true
+
+# Added: the edition names the book in its note and has no entry for it.  In
+# the form of Sadler1912's entry, by the title page.
+[[source]]
+key = "Sadler1918"
+origin = "none"
+tex = '''William S. Sadler, \emph{Long Heads and Round Heads, or What's the Matter with Germany} (Chicago: A.~C. McClurg \& Co., 1918).'''
+
+# ---- 112:0.1
+
+# B1, carried: the edition's "For the human source see the note on 103:8.6",
+# with "notes", there being two there
+[[note]]
+at = "112:0.1"
+after = "presence of change"
+origin = "33393b779354d1ea"
+tex = '''For the human sources of this definition see the notes at \bibref[103:8.6]{p103 8:6}.'''
+
+# ---- 112:3.2
+
+# B2, carried: the edition's note, which called the book "a propaganda leaflet
+# to be read by the soldiers", the sentence "the 25th indictment of Germany"
+# and its page 156.  The book is of 157 pages, "this little volume", prepared
+# from his public addresses (Preface, pp. vii-viii, dated Jan. 1, 1918), and
+# what it says of soldiers is the wish quoted here; the chapter is "The
+# Indictment of Germany, or Twenty-five Reasons Why We Must Win the War", of
+# which this is the twenty-fifth; and the sentence runs over to p. 157, the
+# scan's last page.  The edition's inference is kept as the Editor's, on the
+# assumption it names itself ("Assuming that there was no ``Sleeping
+# Subject'' and that Dr Sadler himself was the direct and sole recipient of
+# the Fifth Epochal Revelation"), with what the two sentences share said
+# before it: not the two words only, but the court that pronounces on an
+# insolvent.
+[[note]]
+at = "112:3.2"
+after = "insolvent, morontially bankrupt"
+origin = "059a33c8b52dea6d"
+tex = '''The two words, and the figure of a court that winds up an insolvent, are in a book of Dr~William S. Sadler's of 1918, prepared from his public addresses on the war, which he hoped its readers would ``put it in the hands of our boys at the front'' (\cite{Sadler1918}, p.~ix). Its chapter XXIV is ``The Indictment of Germany, or Twenty-five Reasons Why We Must Win the War'', and the twenty-fifth reads: ``Because Germany has gone into moral bankruptcy---because she is spiritually insolvent---and the time has come for the civilized nations of the earth to sit as a solemn court of judgment to appoint a receiver either to reorganize or wind up the career of this brutal Germanic military establishment'' (pp.~156--157). Here the mortal is ``pronounced spiritually insolvent, morontially bankrupt'', and the finding is recorded and verified before the rulers of Orvonton act; \bibemph{morontially} stands where Sadler wrote \bibemph{moral}. On the present Editor's assumption that there was no ``Sleeping Subject'', the unnamed man through whom, by the usual account, the papers came, and that Dr~Sadler was himself the direct and sole recipient of the revelation, the new term would have been shaped from the English word already in his mind: see the note at \bibref[0:5.12]{p000 5:12}. The likeness of the two sentences stands whatever is assumed.'''

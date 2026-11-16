@@ -166,6 +166,21 @@ def main(argv: list[str]) -> int:
     toml.append("")
     md = [f"# Paper {n}: the study edition's notes, for review", "",
           f"The edition at `{repo['at'][:7]}`; Block's chart: {chart}.", ""]
+    held = study.DATA / f"{n:03d}.toml"
+    if held.exists():
+        with open(held, "rb") as fh:
+            doc = tomllib.load(fh)
+        if doc.get("ahead"):
+            lines = [f"{nt['at']} after {nt['after']!r} (origin {nt['origin']})"
+                     for nt in doc.get("note", [])]
+            toml += [comment(f"data/study/{held.name} already holds {len(lines)} note(s) written ahead of"
+                             " this review (ahead = true), ruled and on the site:\n"
+                             + "\n".join(lines)
+                             + "\nCarry each as it stands there, with its sources, and take `ahead` out."), ""]
+            md += ["## Notes written ahead of this review", "",
+                   f"`data/study/{held.name}` holds them, ruled and on the site; carry each as it"
+                   " stands there, with its sources, and take `ahead` out.", ""]
+            md += [f"- {line}" for line in lines] + [""]
     pointing = pointing_in(n)
     if pointing:
         toml += [comment("Reviewed notes that link here, with the comment above each in its file:\n"

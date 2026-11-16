@@ -86,7 +86,8 @@ class Study(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def toml(self, notes=None, chart=CHART, sources=None, dropped=None, dated="2019-12-04"):
+    def toml(self, notes=None, chart=CHART, sources=None, dropped=None, dated="2019-12-04",
+             ahead=None):
         o = self.orig
         if notes is None:
             notes = [("0:0.1", "mortals of Urantia", o.notes[0].origin,
@@ -95,7 +96,8 @@ class Study(unittest.TestCase):
             dropped = [("at", "0:0.1", o.notes[1].origin, "the edition's own reading")]
         if sources is None:
             sources = [("Hart", o.sources[0].origin, r"Charles Hartshorne, \emph{Man's Vision of God} (1941).")]
-        out = ["paper = 0", f'chart = "{chart}"'] + ([f"chart_date = {dated}"] if dated else []) + [""]
+        out = ["paper = 0", f'chart = "{chart}"'] + ([f"chart_date = {dated}"] if dated else []) \
+            + ([f"ahead = {ahead}"] if ahead is not None else []) + [""]
         for key, origin, tex in sources:
             out += ["[[source]]", f'key = "{key}"', f'origin = "{origin}"', f"tex = '''{tex}'''", ""]
         for at, after, origin, tex, credit, *corrects in notes:
@@ -195,6 +197,49 @@ class Study(unittest.TestCase):
             with self.subTest(code=code):
                 self.toml(**kw)
                 self.assertIn(code, codes(self.attach()[2]))
+
+    def test_notes_written_ahead_of_a_papers_review(self):
+        """A note points only to a note that is on the site, so the note pointed
+        to is written in its own paper ahead of that paper's turn (Tigran,
+        2026-11-15: 103:8.6 and 112:3.2, which the Foreword's notes point to).
+        `ahead = true`: the edition's other notes and sources there wait for
+        the review, neither carried nor dropped, and so does Block's chart;
+        what is carried is held to its original as in any paper."""
+        o = self.orig
+        one = [("0:0.1", "mortals of Urantia", o.notes[0].origin, "The editor's note, reviewed.", None)]
+        # one note of two, no source, no chart named though Block has one
+        self.toml(notes=one, sources=[], dropped=[], chart="none", dated=None, ahead="true")
+        _, built, report = self.attach()
+        self.assertEqual(report.problems, [])
+        self.assertEqual((built.papers[0]["ahead"], built.papers[0]["n_notes"],
+                          built.papers[0]["block_url"]), (1, 1, None))
+        # the same file without the key is a reviewed paper, and fails twice over
+        self.toml(notes=one, sources=[], dropped=[], chart="none", dated=None)
+        got = codes(self.attach()[2])
+        self.assertIn("study-unaccounted", got)
+        self.assertIn("block-chart-new", got)
+        self.assertEqual(self.attach()[1].papers[0]["ahead"], 0)
+        # ahead or not, an origin the edition has not is refused, and so is one claimed twice
+        for notes, dropped in [([("0:0.1", "mortals of Urantia", "0" * 16, "Changed upstream.", None)], []),
+                               (one, [("at", "0:0.1", o.notes[0].origin, "twice")])]:
+            self.toml(notes=notes, sources=[], dropped=dropped, chart="none", dated=None, ahead="true")
+            self.assertIn("study-origin-unknown", codes(self.attach()[2]))
+        # a note credited to Block needs his chart named, ahead too; named, it is held to the manifest
+        blocks = [("0:0.1", "mortals of Urantia", "none", "Block's finding.", "block")]
+        self.toml(notes=blocks, sources=[], dropped=[], chart="none", dated=None, ahead="true")
+        self.assertIn("study-credit", codes(self.attach()[2]))
+        self.toml(notes=blocks, sources=[], dropped=[], ahead="true")
+        _, built, report = self.attach()
+        self.assertEqual(report.problems, [])
+        self.assertEqual(built.papers[0]["block_date"], "2019-12-04")
+        self.toml(notes=blocks, sources=[], dropped=[], chart=CHART.replace("2019/12", "2020/01"),
+                  ahead="true")
+        self.assertIn("block-chart-revised", codes(self.attach()[2]))
+        # and the key is true or false
+        self.toml(notes=one, sources=[], dropped=[], chart="none", dated=None, ahead='"yes"')
+        report = Report()
+        study.load_curated(report, self.data)
+        self.assertIn("study-ahead", codes(report))
 
     def test_a_note_the_review_adds(self):
         """A note the edition lacks, origin "none", as at 2:1.1, where Block's

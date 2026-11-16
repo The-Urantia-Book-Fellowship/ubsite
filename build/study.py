@@ -19,6 +19,18 @@ a machine can:
     at 2:1.1 the note on "touching" is Tigran's, and Block's finding that the
     paragraph's verses are Nave's a note of its own, credited to Block
     (Tigran, 2026-10-19).
+  * A paper not yet reviewed may hold notes written ahead of its turn,
+    `ahead = true` (Tigran, 2026-11-15): a note points only to a note that is
+    on the site, so where a pointer is worth having, the note it points to is
+    written in its own paper, reviewed and ruled on like any other, though the
+    paper's review is months away (103:8.6 and 112:3.2, which the Foreword's
+    notes had pointed to since 2026-10-19).  Such a copy
+    carries what it carries: the edition's other notes and sources there are
+    neither carried nor dropped and wait for the review, and so does Block's
+    chart, which the copy names only if a note of it is credited to him.
+    Everything else holds, an origin unknown or claimed twice above all, so
+    that a note the editor changes upstream still fails the build.  The
+    review of the paper takes the key out.
   * The copy names the chart of Matthew Block's it was checked against, the
     address `../block-sources/MANIFEST.tsv` gives the paper's chart, or "none".
     A chart revised since, or a chart where there was none, fails the build:
@@ -120,7 +132,7 @@ def glued(text: str) -> list[tuple[int, int]]:
 RE_BIBREF = re.compile(r"\\bibref\s*(?:\[[^\]]*\])?\s*\{[^}]*\}")
 RE_BARE_REF = re.compile(r"(?<![\w\[.])\d{1,3}:\d{1,2}\.\d{1,3}(?![\w])")
 
-KEYS = {"paper", "chart", "chart_date", "study", "reviewed", "source", "note", "dropped"}
+KEYS = {"paper", "chart", "chart_date", "ahead", "study", "reviewed", "source", "note", "dropped"}
 SOURCE_KEYS = {"key", "origin", "tex"}
 NOTE_KEYS = {"at", "after", "origin", "tex", "credit", "corrects"}
 DROPPED_KEYS = {"at", "key", "origin", "why"}
@@ -134,6 +146,7 @@ class Curated:
     sha256: str
     chart: str
     chart_date: datetime.date | None
+    ahead: bool                      # notes written ahead of the paper's review
     sources: list[dict]
     notes: list[dict]
     dropped: list[dict]
@@ -192,9 +205,13 @@ def load_curated(report, root: pathlib.Path = DATA) -> dict[int, Curated]:
         if dated is not None and type(dated) is not datetime.date:
             report.hard("study-chart-date", where, f"chart_date = {dated!r} is not a date")
             continue
+        ahead = doc.get("ahead", False)
+        if type(ahead) is not bool:
+            report.hard("study-ahead", where, f"ahead = {ahead!r} is neither true nor false")
+            continue
         out[doc["paper"]] = Curated(doc["paper"], f, hashlib.sha256(raw).hexdigest(),
-                                    doc["chart"], dated, doc.get("source", []), doc.get("note", []),
-                                    doc.get("dropped", []))
+                                    doc["chart"], dated, ahead, doc.get("source", []),
+                                    doc.get("note", []), doc.get("dropped", []))
     return out
 
 
@@ -226,7 +243,8 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
         built.papers.append({"paper_n": n, "file_sha256": cur.sha256, "study_commit": repo["at"],
                              "block_url": None if cur.chart == "none" else cur.chart,
                              "block_date": dated, "n_notes": len(notes),
-                             "n_dropped": sum(1 for d in cur.dropped if "at" in d)})
+                             "n_dropped": sum(1 for d in cur.dropped if "at" in d),
+                             "ahead": int(cur.ahead)})
         built.sources.extend(sources.values())
         built.notes.extend(notes)
     one_work_one_key(built.sources, report)
@@ -251,7 +269,10 @@ def one_work_one_key(sources: list[dict], report) -> None:
 
 
 def _account(cur: Curated, orig, where: str, report) -> None:
-    """Each original carried or dropped exactly once, and nothing else claimed."""
+    """Each original carried or dropped exactly once, and nothing else claimed.
+
+    A paper whose notes are ahead of its review (`ahead`) carries or drops no
+    original twice either, but leaves the rest for the review."""
     have_n = collections.Counter(x.origin for x in orig.notes)
     have_s = collections.Counter(x.origin for x in orig.sources)
     ref_of = {x.origin: x.ref for x in orig.notes}
@@ -260,14 +281,14 @@ def _account(cur: Curated, orig, where: str, report) -> None:
                                 + [x["origin"] for x in cur.dropped if "at" in x])
     got_s = collections.Counter([x["origin"] for x in cur.sources if x["origin"] != ADDED]
                                 + [x["origin"] for x in cur.dropped if "key" in x])
-    for o in sorted(have_n - got_n):
+    for o in sorted(have_n - got_n) if not cur.ahead else ():
         report.hard("study-unaccounted", where,
                     f"the edition's note {o} at {ref_of[o]} is neither carried nor dropped")
     for o in sorted(got_n - have_n):
         report.hard("study-origin-unknown", where,
                     f"no note of the edition is {o}: changed upstream since it was reviewed,"
                     " or claimed twice")
-    for o in sorted(have_s - got_s):
+    for o in sorted(have_s - got_s) if not cur.ahead else ():
         report.hard("study-unaccounted", where,
                     f"the edition's source {key_of[o]} ({o}) is neither carried nor dropped")
     for o in sorted(got_s - have_s):
@@ -292,7 +313,7 @@ def _chart(cur: Curated, block: dict, where: str, report) -> str | None:
         return None
     row = block["charts"].get(cur.paper)
     if cur.chart == "none":
-        if row:
+        if row and not cur.ahead:        # ahead of its review, the chart waits for it
             report.hard("block-chart-new", where,
                         f"Block has charted Paper {cur.paper} since it was reviewed"
                         f" ({row['url']}): review its notes against the chart")
@@ -606,7 +627,7 @@ def store(con, built: Built) -> None:
     """The study_* rows, once load_text has made each note its footnote."""
     con.executemany(
         "INSERT INTO study_paper VALUES (:paper_n, :file_sha256, :study_commit, :block_url,"
-        " :block_date, :n_notes, :n_dropped)", built.papers)
+        " :block_date, :n_notes, :n_dropped, :ahead)", built.papers)
     source_id = {}
     for i, s in enumerate(built.sources, 1):
         con.execute("INSERT INTO study_source VALUES (?,?,?,?,?,?,?)",

@@ -69,10 +69,13 @@ def run(repo: dict, block: dict, report) -> int:
           f" {len(unset)} expressions outside the math set")
 
     curated = study.load_curated(report)
-    done = sorted(curated)
-    left = [n for n in with_notes if n not in curated]
-    print(f"  on the site: {len(done)} papers ({', '.join(map(str, done)) or 'none yet'});"
+    done = sorted(n for n, c in curated.items() if not c.ahead)
+    ahead = sorted(n for n, c in curated.items() if c.ahead)
+    left = [n for n in with_notes if n not in done]
+    print(f"  on the site: {len(done)} papers reviewed ({', '.join(map(str, done)) or 'none yet'});"
           f" {len(left)} with notes still to review")
+    if ahead:
+        print(f"  with notes written ahead of their review: {', '.join(map(str, ahead))}")
     if block["charts"] is None:
         print("  Block's charts: no MANIFEST.tsv")
     else:

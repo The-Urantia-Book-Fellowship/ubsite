@@ -11,7 +11,9 @@ CREATE TABLE study_paper (
     block_url    TEXT,                 -- Block's chart, as reviewed; NULL: the paper has none
     block_date   TEXT,                 -- 'YYYY-MM-DD': the chart's date, as Block gives it
     n_notes      INTEGER NOT NULL,
-    n_dropped    INTEGER NOT NULL      -- the edition's notes not carried, each with its reason
+    n_dropped    INTEGER NOT NULL,     -- the edition's notes not carried, each with its reason
+    ahead        INTEGER NOT NULL      -- 1: its notes were written ahead of the paper's review,
+                                       -- which is still to come; the edition's other notes wait
 );
 
 -- A source the paper's notes cite: a \bibitem of the edition, as reviewed, or
