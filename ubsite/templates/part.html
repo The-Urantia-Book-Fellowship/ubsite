@@ -7,8 +7,8 @@
 
     And each translation's divider (tr_part; Tigran, 2026-11-07), every one,
     hidden until Settings ticks it (base.html ubTr): under the English in the
-    reader's order, or with Settings' Translations in parallel columns, a
-    column each on a wide screen (ub.css .dividers).  Each is named as Compare names its column;
+    reader's order, or where the window has room for columns, a column each
+    (ub.css .dividers, ub.js cmpFits).  Each is named as Compare names its column;
     the English's name shows only beside them, so that with none ticked the
     page is as it was. #}
 {% set title = tr('Part {r} — {title}', r=roman, title=part.title) %}

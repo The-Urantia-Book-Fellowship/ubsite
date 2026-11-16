@@ -1,12 +1,13 @@
 """Compare, the text and the translations a reader has ticked side by side.
 
 ROADMAP item 15, step 2 (Tigran, 2026-10-26), drawn by ub.js in columns from
-/tr/.  A setting since 2026-11-08, Translations in parallel columns
-(settings.py `compare`), in the Translations tab: until then a toggle at the
-head of the text, at an address of its own, the section's with /compare after
-it, which the tab kept as one moved about.  Those addresses go to the page's
-own now, which the reader's settings show; one that is no page of the book is
-the 404 it was.  A paper's number is the whole paper, in Compare too, every
+/tr/.  Wherever the window has room for the columns, and in folds where it
+has not, since 2026-11-16 (ub.js cmpFits, ub.css --mincol and .cprobe); a
+setting from 2026-11-08, Translations in parallel columns (`compare`), and
+until then a toggle at the head of the text, at an address of its own, the
+section's with /compare after it, which the tab kept as one moved about.
+Those addresses go to the page's own, as they did; one that is no page of
+the book is the 404 it was.  A paper's number is the whole paper, in Compare too, every
 section in columns (test_whole).  Rendered through the app as ASGI, as
 test_appendix_pages does; skipped when var/ub.db has not been built.
 """
@@ -16,7 +17,7 @@ import re
 import unittest
 
 from test_appendix_pages import DB, ROOT, get
-from ubsite.settings import NEEDS, TRANSLATIONS
+from ubsite.settings import NEEDS, TRANSLATIONS, defaults
 from ubsite.stats import page_kind
 
 
@@ -55,21 +56,24 @@ class Address(unittest.TestCase):
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
-class Setting(unittest.TestCase):
-    def test_a_switch_under_the_list_greyed_while_none_is_ticked(self):
-        self.assertEqual([s[0] for s in TRANSLATIONS], ["translations", "compare"])
-        key, kind, label, default, _, hint = TRANSLATIONS[1]
-        self.assertEqual((kind, label, default), ("switch", "Translations in parallel columns", False))
-        self.assertIn("narrow screen", hint)
-        self.assertEqual(NEEDS["compare"], "translations")
+class Room(unittest.TestCase):
+    """No setting (Tigran, 2026-11-16): the columns wherever each would be
+    wide enough, and the folds where not.  The rule is the page's, measured
+    in Chrome by tools/compare_e2e.py; here, its parts in place."""
+
+    def test_no_setting_and_nothing_that_needs_one(self):
+        self.assertEqual([s[0] for s in TRANSLATIONS], ["translations"])
+        self.assertNotIn("compare", NEEDS)
+        self.assertNotIn("compare", defaults())
         body = get("/1:1", raw=True)[2]
         panel = body[body.index('id="set-p-translations"'):body.index('id="set-p-listening"')]
-        self.assertLess(panel.index('class="trlist trshown"'), panel.index('name="compare"'))
-        self.assertIn('<label data-needs="translations"><input type="checkbox" name="compare"> '
-                      '<x-en>Translations in parallel columns</x-en>'
-                      '<x-ru lang="ru">Переводы в параллельных колонках</x-ru>', panel)
+        self.assertIn('class="trlist trshown"', panel)
+        self.assertNotIn('name="compare"', panel)
+        self.assertNotIn("parallel columns", panel)
+        ru = (ROOT / "ubsite/ru.toml").read_text()
+        self.assertNotIn('"Translations in parallel columns" =', ru)
 
-    def test_a_list_none_ticked_greys_what_needs_it(self):
+    def test_an_empty_list_still_greys_what_needs_it(self):
         js = (ROOT / "ubsite/static/ub.js").read_text()
         self.assertIn("v === 'off' || v === false || v === ''", js)
 
@@ -81,18 +85,64 @@ class Setting(unittest.TestCase):
             self.assertNotIn("ubCompare", body, url)
             self.assertNotIn("/compare", body, url)
 
-    def test_the_head_script_sets_its_class_from_the_setting(self):
-        # The class, which ub.js cmpDraw keeps, never data-compare, which
-        # changes before Compare has measured the paragraph to keep in place.
+    def test_the_head_script_guesses_from_the_last_page(self):
+        # The class, which ub.js cmpDraw keeps: before there is a page to
+        # measure, set where a translation is ticked and the window is as
+        # wide as the one the last page read was in columns in.
         body = get("/1:1", raw=True)[2]
-        self.assertIn("if (('compare' in s ? s.compare : D.compare) === true) r.classList.add('compare');", body)
+        self.assertIn("var cw = +localStorage.getItem('ub_cols');", body)
+        self.assertIn("if (cw && innerWidth >= cw && ('translations' in s ? s.translations : D.translations)) r.classList.add('compare');", body)
+        self.assertNotIn("s.compare", body)
         self.assertIn(':root[data-margin="off"]:not(.compare, [data-index="off"])', body)
-        self.assertIn(':root.compare .partpage .dividers', body)
+        # A part's page in columns by the class alone, at any width.
+        self.assertIn("':root.compare .partpage .dividers>:is(' + d + '){display:grid}'", body)
+        self.assertNotIn("@media (min-width:62.01rem){:root.compare", body)
         css = (ROOT / "ubsite/static/ub.css").read_text()
         self.assertNotIn("[data-compare", css)
         self.assertIn(':root.compare .grid > .row > .tf', css)
         js = (ROOT / "ubsite/static/ub.js").read_text()
         self.assertIn("document.documentElement.classList.toggle('compare', on);", js)
+        self.assertNotIn("load().compare", js)
+        self.assertIn("if (on) localStorage.setItem('ub_cols', innerWidth); else localStorage.removeItem('ub_cols');", js)
+
+    def test_the_least_column_is_the_stylesheets_and_so_is_what_is_needed(self):
+        css = (ROOT / "ubsite/static/ub.css").read_text()
+        js = (ROOT / "ubsite/static/ub.js").read_text()
+        self.assertIn("  --mincol: calc(var(--measure) * 35 / 70);", css)
+        self.assertIn(".cprobe { position: absolute; visibility: hidden; pointer-events: none; height: 0;\n"
+                      "          width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem); }", css)
+        # The margin's track and its gap, on a wide screen with the index shown.
+        self.assertIn('  :root:not([data-margin="off"], [data-index="off"]) article:not(.partpage) > .cprobe {\n'
+                      "         width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem + 26ch + 2rem); }", css)
+        # No length of the stylesheet's is written again in the script.
+        fits = js[js.index("function cmpFits(art, n) {"):js.index("function cmpDecide() {")]
+        self.assertIn("probe.className = 'cprobe';", fits)
+        self.assertIn("probe.style.setProperty('--n', n);", fits)
+        self.assertNotRegex(fits, r"\d+(rem|ch|px)\b")
+        # All the columns or none: one more than the translations the page has.
+        self.assertIn("return (cmpIs = ks.length > 0 && cmpFits(art, ks.length + 1));", js)
+
+    def test_the_frame_grows_to_hold_a_measure_to_a_column(self):
+        css = (ROOT / "ubsite/static/ub.css").read_text()
+        js = (ROOT / "ubsite/static/ub.js").read_text()
+        self.assertIn(":root.compare main.reader:has(> article:is(.cmp, .partpage)) {\n"
+                      "  --textw: calc(var(--cols) * var(--measure) + (var(--cols) - 1) * 2rem); }", css)
+        self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 4)
+        self.assertNotRegex(css, r"\.reader[^{]*\{[^}]*max-width: calc\(var\(--measure\)")
+        self.assertIn("if (on) art.parentNode.style.setProperty('--cols', ks.length + 1);", js)
+        self.assertNotIn("art.style.setProperty('--cols'", js)
+
+    def test_decided_again_as_the_room_changes(self):
+        js = (ROOT / "ubsite/static/ub.js").read_text()
+        self.assertIn("CMP_ROOM = { rail: 1, margin: 1, index: 1, size: 1, uisize: 1, width: 1, face: 1 };", js)
+        for k in ("rail", "margin", "index", "size", "uisize", "width", "face"):
+            self.assertIn(k, defaults(), k)
+        self.assertIn("if (innerWidth === cmpW || cmpTick) return;", js)
+        self.assertIn("if (cmpDecide() !== was) cmpGo(kept);", js)
+        # A fold's button hands on the place it took before it changed
+        # anything, so that the page turned into columns keeps the same line.
+        self.assertIn("placeKept = pl;\n    try { change(); } finally { placeKept = null; }", js)
+        self.assertIn("var pl = kept || placeNow(),", js)
 
 
 class Names(unittest.TestCase):
@@ -151,24 +201,37 @@ class Names(unittest.TestCase):
         self.assertIn("article.cmp .cmpnames .cn { margin: 0; font-size: .8rem;", css)
         self.assertIn("article.cmp .grid > .row > :is(.rc, .ch), article.cmp .cmpnames > .cn { grid-column: var(--c); grid-row: 1; }", css)
 
-    def test_not_shown_on_a_phone_nor_in_print(self):
+    def test_shown_wherever_there_are_columns_and_not_in_print(self):
         css = self.CSS
-        phone = css.index("@media (max-width: 62rem)")
-        self.assertIn("  article.cmp .cmpnames, article.cmp .stars > .rs { display: none; }", css[phone:])
+        # Under 62rem too, since 2026-11-16: article.cmp is columns there,
+        # and the phone's rules no longer hide the names nor stack the cells.
+        phone = css[css.index("/* ---- phone "):css.index("/* ---- print ")]
+        self.assertNotIn("cmpnames", phone)
+        self.assertNotIn("article.cmp .rc", phone)
+        # Full is the window's width under 62rem whatever the index: the
+        # text's one track with it folded or off, the measure, outranked the
+        # phone's, and Full left a margin at the right (Tigran, 2026-11-16).
+        self.assertIn('  :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr); }', phone)
+        self.assertLess(css.index(':root:is([data-margin="off"], [data-index="off"]) .grid {'), css.index("/* ---- phone "))
+        # Its tracks a column each and no margin, outranking the one track
+        # the text has with the index folded or off, under which the columns
+        # lay one over another (seen at 800 px, 2026-11-16).
+        self.assertIn("  :root article.cmp .grid { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }", phone)
+        self.assertIn(':root:is([data-margin="off"], [data-index="off"]) .grid { grid-template-columns: minmax(0, var(--measure)); }', css)
+        self.assertIn("  article.cmp .grid > .row { display: grid; }", phone)
+        self.assertIn("  article.cmp .grid > .row > .a { grid-column: 1 / -1; grid-row: 2; }", phone)
         # In print .grid is a block, and the names' rule comes after it.
         block = css.index("  .reader, .grid, .grid > .row { display: block; }")
         self.assertGreater(css.index("  .trfold, .cmpnames { display: none; }"), block)
 
-    def test_a_sections_title_has_the_plain_pages_room_on_a_desktop(self):
+    def test_a_sections_title_has_the_plain_pages_room_in_columns(self):
         css = self.CSS
         self.assertIn("article.whole > section > .papertop { margin: 2.6rem 0 1.2rem; }", css)
-        desk = css.index("  article.cmp :is(.grid, section[id]) { grid-template-columns:"
-                         " repeat(var(--cols), minmax(0, var(--measure))) minmax(0, 26ch); }")
-        end = css.index("\n}\n", desk)
-        for rule in ("  article.cmp.whole > section[id] ~ section[id] { margin-top: 2.6rem; }",
-                     "  article.cmp.whole > section[id] ~ section[id] .cmphd > .papertop { margin: 0 0 1.2rem; }",
-                     "  article.cmp.whole > section[id] ~ section[id] .cmphd h2 { margin: 0; }"):
-            self.assertIn(rule, css[desk:end], rule)
+        # At any width, the columns being no longer a desktop's alone.
+        for rule in ("\narticle.cmp.whole > section[id] ~ section[id] { margin-top: 2.6rem; }",
+                     "\narticle.cmp.whole > section[id] ~ section[id] .cmphd > .papertop { margin: 0 0 1.2rem; }",
+                     "\narticle.cmp.whole > section[id] ~ section[id] .cmphd h2 { margin: 0; }"):
+            self.assertIn(rule, css, rule)
 
     def test_a_box_of_five_lines_or_more_is_folded_to_its_line(self):
         # Tigran, 2026-11-15: "let's turn them all into a fold, i.e. where 5
@@ -212,9 +275,14 @@ class Names(unittest.TestCase):
                      "  article.cmp.whole > section[id] ~ section[id] > .blanket { margin: 0 0 1.2rem; }",
                      '  article.cmp:not(.whole) > section[id]:not([id$=":0"]) > .blanket { align-self: end; }'):
             self.assertIn(rule, block, rule)
-        # Every set of tracks is the section's too.
+        # Every set of tracks is the section's too, the four of a wide
+        # screen, with the margin or without, Measured or Full.
         self.assertEqual(css.count("article.cmp :is(.grid, section[id]) {"), 4)
-        self.assertNotIn("article.cmp .grid { grid-template-columns", css)
+        # But for the phone's, under 62rem, where the section is no grid
+        # and the .grid is its own (test_shown_wherever_there_are_columns).
+        phone = css[css.index("/* ---- phone "):css.index("/* ---- print ")]
+        self.assertEqual(css.count("article.cmp .grid { grid-template-columns"), 1)
+        self.assertEqual(phone.count("article.cmp .grid { grid-template-columns"), 1)
         # The text's markup is as it was: the box before the grid, in the section.
         tpl = (ROOT / "ubsite/templates/_text.html").read_text()
         self.assertIn("{{ blanket(d.paperwide, d.blanket, d.nwhole) }}\n{{ grid(d.rows, d.citers, d.nciters, d.tr_has, focus, last) }}\n</section>", tpl)

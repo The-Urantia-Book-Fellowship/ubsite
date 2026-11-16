@@ -50,7 +50,7 @@ window.ubLang = function (r, v) {
 // Until 2026-10-31 the rule, which outranks ub.css's, showed the entries' fold
 // on that line with the index off, and printed it.  Among the
 // search results, each one's list, in the reader's order (ub.css .trhits).  In
-// Compare (settings.py `compare`, .compare below) the row's entries keep their own line.  And
+// columns (.compare, below) the row's entries keep their own line.  And
 // on a part's page each one's divider, under the English or a column each
 // (part.html, 2026-11-07).
 // One rule, since the keys are the reader's own list; ub.js says it again on
@@ -71,10 +71,11 @@ window.ubTr = function (v) {
     '.trhits:has(' + s.join() + '){display:flex}' +
     s.map(function (x, i) { return '.trhits' + x + '{display:block;order:' + i + '}'; }).join('') +
     // A part's page (part.html): each ticked translation's divider, in the
-    // reader's order after the English's, and in Compare on a wide screen a
-    // column each (ub.css .dividers, keyed on data-translations).
+    // reader's order after the English's, and where the window has room for
+    // columns (.compare, below) a column each (ub.css .dividers, keyed on
+    // data-translations).
     ks.map(function (k, i) { return '.partpage .dividers>.divider[data-k="' + k + '"]{display:block;order:' + (i + 1) + '}'; }).join('') +
-    '@media (min-width:62.01rem){:root.compare .partpage .dividers>:is(' + d + '){display:grid}}' : '';
+    ':root.compare .partpage .dividers>:is(' + d + '){display:grid}' : '';
 };
 window.ubTitle = function () {
   var t = document.querySelector('title');
@@ -142,11 +143,19 @@ window.ubUnit = function (where) {
   }
   window.ubLang(r, 'lang' in s ? s.lang : D.lang);
   window.ubTr('translations' in s ? s.translations : D.translations);
-  // Compare (settings.py `compare`): the folds give way at once to the columns
-  // ub.js draws.  A class, not the setting's data-compare, since it is what is
-  // drawn: ub.js cmpDraw keeps it, after measuring the paragraph at the
-  // window's top, which a change of the setting must not move first.
-  if (('compare' in s ? s.compare : D.compare) === true) r.classList.add('compare');
+  // The translations in columns beside the text, where the window has room
+  // for them, which ub.js finds from the page as it is laid out (cmpFits;
+  // Tigran, 2026-11-16: a setting until then, `compare`).  Here, before
+  // there is a page to measure, the guess that it will be as the last page
+  // read was: in columns if a translation is ticked and the window is at
+  // least as wide as the one that page was in columns in, which ub.js keeps
+  // as ub_cols, a key of its own and no setting.  The class hides the folds
+  // (ub.css), so that they do not show for a moment before the columns; a
+  // wrong guess ub.js puts right as it runs.
+  try {
+    var cw = +localStorage.getItem('ub_cols');
+    if (cw && innerWidth >= cw && ('translations' in s ? s.translations : D.translations)) r.classList.add('compare');
+  } catch (e) {}
   // This address in the reader's unit (ubUnit, above), or the page is left for
   // it before it is drawn, with no entry in the history, as the server's
   // redirect left none.  Not the same step twice in three seconds: a worker

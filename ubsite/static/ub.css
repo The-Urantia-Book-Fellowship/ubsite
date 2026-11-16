@@ -60,8 +60,8 @@ math { font-family: "Garamond Math", math; }
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
      modern face and wanted browser zoom to be comfortable.  The reading
-     text's size, whatever the interface's: in rems of the root at its
-     Standard, --r0, times Settings' Text size, --tx (below, "Two sizes"). */
+     text's size, whatever the interface's: in rems of the root at 112.5%,
+     --r0, 18px, times Settings' Text size, --tx (below, "Two sizes"). */
   --r0: calc(1rem / var(--ui));
   --size: calc(var(--tx) * clamp(calc(1.3 * var(--r0)), calc(1.1 * var(--r0) + 0.6vw), calc(1.55 * var(--r0))));
   /* A rem of the reading text: what the book's heads are set in (.papertop,
@@ -83,9 +83,17 @@ math { font-family: "Garamond Math", math; }
      width of "0", which is narrow in Goudy, so 58ch sets about 70 characters
      to a full line, counted over 240 of them in four papers, the soft hyphens
      not counted (Tigran, 2026-11-10: "let's make it about 70").  It was 60ch,
-     which the frame's 90rem held to 826px at Standard, about 67 characters,
+     which the frame's 90rem held to 826px at 112.5%, about 67 characters,
      and fewer beside the Contents and the index on a narrower window. */
   --measure: 58ch;
+  /* The least a column may be where the translations stand in columns beside
+     the English: 35 of the measure's 70 characters, whatever the typeface
+     (Tigran, 2026-11-16: 36 at first, of about 36, 40 and 45, and 35 the
+     same day, so that his phone lying down, 836 px wide, has two columns at
+     Larger text, 35.2 characters each).  Narrower than that, the
+     page is not in columns, and each paragraph's translations are in a fold
+     under it (ub.js cmpFits, .cprobe below). */
+  --mincol: calc(var(--measure) * 35 / 70);
   /* UB Goudy keeps 0.438em under the baseline for its long descenders (hhea
      960/438), so the middle of its line box stands 0.261em above the baseline,
      and its capitals' middle 0.356em: a word centred in a box sits 0.095em high.
@@ -291,7 +299,16 @@ main:is(.front, .helppage, .api) ~ footer p { display: block; }
    text had a size of its own.  Each part folded away gives up its room
    (below), so the page stays centred. */
 .reader { display: grid; grid-template-columns: 16rem minmax(0,1fr); gap: 2.4rem;
-          padding: 2rem 1.2rem 0; max-width: calc(var(--measure) + 26ch + 22.8rem); margin: 0 auto; }
+          padding: 2rem 1.2rem 0; max-width: calc(var(--textw, var(--measure)) + 26ch + 22.8rem); margin: 0 auto; }
+/* In columns the text is as many measures as there are columns, and the gaps
+   between them, so that Measured gives each column up to the measure where
+   the window has room, and the page stays centred (Tigran, 2026-11-16).
+   Until then the columns shared the frame made for one: two were 28ch each,
+   some 34 characters to the line, and three 18 to 20ch, in a window of any
+   width.  --cols is ub.js's (cmpDraw), on this frame; before it is set, and
+   on any other page, --textw is nothing and the measure stands. */
+:root.compare main.reader:has(> article:is(.cmp, .partpage)) {
+  --textw: calc(var(--cols) * var(--measure) + (var(--cols) - 1) * 2rem); }
 /* The left rail is the whole book (templates/_rail.html), everything closed but
    the paper being read.  Each level stands in by the chevron's width, so a
    title lines up under its parent's and a wrapped one hangs. */
@@ -410,13 +427,15 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
    in the page, hidden until the head script's rule shows those ticked
    (base.html ubTr), under the English in the reader's order, each under its
    name as Compare's line of names gives it; the English's own name only
-   beside a column.  With Compare on (settings.py `compare`), above the
-   phone's width, a column each, as Compare lays its columns: the dividers a
-   grid, each a subgrid of its four rows, the name, the part, the title and
-   the note, level across the columns.  ub.js draws nothing here: the
-   columns' rules are keyed on .compare, which the head script sets from the
-   setting and ub.js keeps, and on data-translations too, the list's own
-   attribute, so that with none ticked the page is as it was. */
+   beside a column.  Where the window has room for them, as it has for the
+   text's (ub.js cmpFits, --mincol; Tigran, 2026-11-16), a column each, as
+   Compare lays its columns: the dividers a grid, each a subgrid of its four
+   rows, the name, the part, the title and the note, level across the
+   columns.  ub.js draws nothing here: the columns' rules are keyed on
+   .compare, which it sets, the head script before it where the last page
+   read was in columns, and on data-translations too, the list's own
+   attribute, so that with none ticked the page is as it was.  Until then
+   the class was a setting's, and the columns above 62rem only. */
 .partpage .dividers { display: flex; flex-direction: column; }
 .partpage .divider[data-k], .partpage .en > .who { display: none; }
 .partpage .divider[data-k] { margin-top: 2.6rem; padding-top: 1.8rem; border-top: 1px solid var(--rule); }
@@ -424,28 +443,26 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage .who { font-size: .82rem; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase;
                  color: var(--faint); margin: 0 0 .8rem; }
 .partpage .who b { font-weight: inherit; color: var(--ink); }
-@media (min-width: 62.01rem) {
-  :root.compare[data-translations] .partpage { max-width: none; }
-  :root.compare[data-translations] .partpage .dividers { display: grid; grid-auto-flow: column;
-      grid-auto-columns: minmax(0, 1fr); grid-template-rows: repeat(4, auto); gap: 0 2rem; align-items: start; }
-  :root.compare[data-translations] .partpage .en { display: grid; }
-  :root.compare[data-translations] .partpage .en > .who { display: block; }
-  :root.compare[data-translations] .partpage .divider { grid-template-rows: subgrid; grid-row: span 4;
-      margin-top: 0; padding-top: 0; border-top: 0; }
-  /* Four columns beside the rail are narrow: a word too long for its column
-     breaks at the edge rather than run over the next.  An item's own least
-     width is its longest word, which break-word does not change, so it must
-     be allowed to size to its track first. */
-  :root.compare[data-translations] .partpage .divider, :root.compare[data-translations] .partpage .divider > * {
-      min-width: 0; overflow-wrap: break-word; }
-  /* The note fills its column: centred by auto margins it would take its own
-     width, its longest word's, and run over the next column. */
-  :root.compare[data-translations] .partpage .divider .sponsor { margin: 0; max-width: none; }
-  :root.compare[data-translations] .partpage .divider h1 { font-size: calc(1.6rem * var(--tk)); margin: .4rem 0 1rem; }
-  :root.compare[data-translations] .partpage .divider .papernum { font-size: calc(1rem * var(--tk)); }
-  :root.compare[data-translations] .partpage .who { border-bottom: 1px solid var(--rule); padding-bottom: .35rem;
-      margin-bottom: 1.2rem; }
-}
+:root.compare[data-translations] .partpage { max-width: none; }
+:root.compare[data-translations] .partpage .dividers { display: grid; grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr); grid-template-rows: repeat(4, auto); gap: 0 2rem; align-items: start; }
+:root.compare[data-translations] .partpage .en { display: grid; }
+:root.compare[data-translations] .partpage .en > .who { display: block; }
+:root.compare[data-translations] .partpage .divider { grid-template-rows: subgrid; grid-row: span 4;
+    margin-top: 0; padding-top: 0; border-top: 0; }
+/* Four columns beside the rail are narrow: a word too long for its column
+   breaks at the edge rather than run over the next.  An item's own least
+   width is its longest word, which break-word does not change, so it must
+   be allowed to size to its track first. */
+:root.compare[data-translations] .partpage .divider, :root.compare[data-translations] .partpage .divider > * {
+    min-width: 0; overflow-wrap: break-word; }
+/* The note fills its column: centred by auto margins it would take its own
+   width, its longest word's, and run over the next column. */
+:root.compare[data-translations] .partpage .divider .sponsor { margin: 0; max-width: none; }
+:root.compare[data-translations] .partpage .divider h1 { font-size: calc(1.6rem * var(--tk)); margin: .4rem 0 1rem; }
+:root.compare[data-translations] .partpage .divider .papernum { font-size: calc(1rem * var(--tk)); }
+:root.compare[data-translations] .partpage .who { border-bottom: 1px solid var(--rule); padding-bottom: .35rem;
+    margin-bottom: 1.2rem; }
 /* A paper's head is centred over the text column, as the book sets it: the
    paper's number, title and author, and the section's title.  It is as wide as
    the column: the measure here, and on a wide screen what the margin leaves, if
@@ -764,17 +781,27 @@ x-ru { font-synthesis: small-caps; }
 :root:is([data-margin="off"], [data-index="off"]) .grid { grid-template-columns: minmax(0, var(--measure)); }
 /* Two sizes (Tigran, 2026-11-10).  Interface text size (settings.py uisize)
    scales the root, so everything set in rem follows, as with the browser's
-   zoom; --ui is its step against Standard, 112.5%.  Text size (size) is the
-   reading text's step, --tx, by which --size is set, in rems of the root at
-   Standard (:root, above): so the reading text follows Text size alone, and
-   the interface Interface text size alone.  Until then Text size was the
-   root's, as Interface text size is now.  "largest" was the step above
-   "larger" until 2026-10-14, and is its size still. */
-:root { font-size: 112.5%; --ui: 1; --tx: 1; }
-:root[data-uisize="smaller"] { font-size: 100%; --ui: calc(100 / 112.5); }
-:root[data-uisize="larger"] { font-size: 125%; --ui: calc(125 / 112.5); }
-:root[data-size="smaller"] { --tx: calc(100 / 112.5); }
-:root:is([data-size="larger"], [data-size="largest"]) { --tx: calc(125 / 112.5); }
+   zoom; --ui is its step against 112.5%.  Text size (size) is the reading
+   text's step, --tx, by which --size is set, in rems of the root at 112.5%
+   (:root, above, --r0): so the reading text follows Text size alone, and the
+   interface Interface text size alone.  Until then Text size was the root's,
+   as Interface text size is now.
+   Four steps each, 90, 100, 112.5 and 125%, Smaller to Largest, and Standard
+   100% (Tigran, 2026-11-16); a choice is kept as its size.  Both steps are
+   still counted against 112.5%, which was Standard until that day and is
+   Larger since: every length made from them, the text's size, the measure,
+   Full's margins, is to the pixel what it was at each of the three sizes
+   there were, and the lines break at the same words.  The names kept before
+   then are read as what they meant: `smaller`, 100%, matches no rule here,
+   which is right, and `larger`, 125%, and Text size's `largest` of before
+   2026-10-14, the same, are named with "125". */
+:root { font-size: 100%; --ui: calc(100 / 112.5); --tx: calc(100 / 112.5); }
+:root[data-uisize="90"] { font-size: 90%; --ui: calc(90 / 112.5); }
+:root[data-uisize="112.5"] { font-size: 112.5%; --ui: 1; }
+:root:is([data-uisize="125"], [data-uisize="larger"]) { font-size: 125%; --ui: calc(125 / 112.5); }
+:root[data-size="90"] { --tx: calc(90 / 112.5); }
+:root[data-size="112.5"] { --tx: 1; }
+:root:is([data-size="125"], [data-size="larger"], [data-size="largest"]) { --tx: calc(125 / 112.5); }
 /* Line spacing: the book's text (p.t) and a 1955 reading's card and endnote,
    which are read as the text is, wherever they open; never the site around
    them, the lists, search or the margin (Tigran, 2026-10-12: "only to the text,
@@ -831,7 +858,7 @@ x-ru { font-synthesis: small-caps; }
    After Full's columns, so as to win over them. */
 @media (min-width: 62.01rem) {
   :root[data-rail="folded"] .reader { grid-template-columns: 0 minmax(0, 1fr);
-                                      max-width: calc(var(--measure) + 26ch + 6.8rem); }
+                                      max-width: calc(var(--textw, var(--measure)) + 26ch + 6.8rem); }
   :root[data-rail="folded"][data-width="full"] .reader { max-width: none;
          column-gap: calc(2.25 * var(--r0) - 1.2rem); }
   :root[data-rail="folded"] .rail { overflow: visible; }
@@ -858,17 +885,17 @@ x-ru { font-synthesis: small-caps; }
   :root:is([data-margin="off"], [data-index="off"]) .reader > article:has(> .marginhead) {
          padding-right: 2rem; }
   :root:is([data-margin="off"], [data-index="off"]):not([data-width="full"]) .reader:has(> article > .marginhead) {
-         max-width: calc(var(--measure) + 22.8rem); }
+         max-width: calc(var(--textw, var(--measure)) + 22.8rem); }
   :root:is([data-margin="off"], [data-index="off"])[data-rail="folded"]:not([data-width="full"])
-       .reader:has(> article > .marginhead) { max-width: calc(var(--measure) + 6.8rem); }
+       .reader:has(> article > .marginhead) { max-width: calc(var(--textw, var(--measure)) + 6.8rem); }
   :root[data-margin="off"] .path { max-width: calc(var(--measure) + 2rem + 2.4rem);
                                    padding-right: 3.2rem; }
   :root[data-margin="off"][data-width="full"] .path { max-width: none; padding-right: calc(2 * var(--r0)); }
   /* Full, the margins left beside the text where the rail and the index fold
      away are a fixed width, whatever the interface's size or the text's,
-     2.25 and 2 rems of the root at Standard, 40.5px and 36px (Tigran,
-     2026-11-10: "too wide, even at the Smaller Interface text size", which
-     made them 58px and 51px, and 72px and 64px at Larger; 30% under the
+     2.25 and 2 rems of the root at 112.5%, 40.5px and 36px (Tigran,
+     2026-11-10: "too wide, even at the Smaller Interface text size", then
+     100%, which made them 58px and 51px, and 72px and 64px at 125%; 30% under the
      first).  Each chevron stays where it was, level with the header's mark
      and its last icon, in what is left of the gap. */
   :root[data-width="full"]:is([data-margin="off"], [data-index="off"]) .reader > article:has(> .marginhead) {
@@ -1006,17 +1033,34 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .row:not(:has(> .verse)) > .tf .rt:not(.opening, .head),
 article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark)) { text-indent: 1em; }
 
-/* Compare (ROADMAP item 15, step 2; settings.py `compare`, ub.js cmpDraw):
-   the English and each translation ticked, a column each, a row to a
-   paragraph, laid on the grid's columns as a paragraph and its entries are,
-   the margin's last.  A setting since 2026-11-08 (Tigran): until then a
-   toggle at the head of the text, a pill with two columns drawn in it,
-   between the Contents' button and the Index's (.cmphead, .cmpbtn). */
-/* In Compare the folds give way to the columns, from first paint, and the
-   paper's head to the heads of the columns.  Keyed on the class, which the
-   head script sets from the setting and ub.js cmpDraw keeps, never on
-   data-compare: the setting changes before Compare has measured the
-   paragraph at the window's top, which a fold shown at once would move. */
+/* Compare (ROADMAP item 15, step 2; ub.js cmpDraw): the English and each
+   translation ticked, a column each, a row to a paragraph, laid on the
+   grid's columns as a paragraph and its entries are, the margin's last.
+   Wherever each column would be at least --mincol wide, and nowhere else
+   (Tigran, 2026-11-16; ub.js cmpFits): so article.cmp is columns at any
+   width of the window, a tablet's or a phone's lying down too, and none of
+   these rules asks the window's width but those that place the margin,
+   which a window under 62rem has not.  Until then a setting, Translations in
+   parallel columns (2026-11-08), which under 62rem stood each translation
+   under its paragraph; and before that a toggle at the head of the text, a
+   pill with two columns drawn in it (.cmphead, .cmpbtn). */
+/* What the columns need, which ub.js asks of a probe it puts in the article
+   for the asking, its --n the number of columns: each its least, the gaps
+   between them, and on a wide screen the margin's track and its gap where
+   the index is shown.  Here, so that no length is written twice; what there
+   is, ub.js takes from the frame's boxes. */
+.cprobe { position: absolute; visibility: hidden; pointer-events: none; height: 0;
+          width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem); }
+@media (min-width: 62.01rem) {
+  :root:not([data-margin="off"], [data-index="off"]) article:not(.partpage) > .cprobe {
+         width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem + 26ch + 2rem); }
+}
+/* In columns the folds give way to them, from first paint, and the paper's
+   head to the heads of the columns.  Keyed on the class, which the head
+   script sets where the page was last in columns in a window as wide
+   (base.html) and ub.js cmpDraw keeps: it is what is drawn, and it changes
+   only once cmpGo has measured the paragraph at the window's top, which a
+   fold shown at once would move. */
 :root.compare .grid > .row > .tf, article.cmp > .papertop, article.cmp > section > .papertop { display: none; }
 /* Over the columns, a line naming each, which stays at the window's top, level
    with the Contents' and the Index's buttons, on the paper, which hides the
@@ -1061,6 +1105,20 @@ article.cmp .rc { min-width: 0; }
 article.cmp .stars > .rs { grid-column: var(--c); text-align: center; line-height: var(--lead); }
 article.cmp .stars > .rs::before { content: attr(data-stars); content: attr(data-stars) / ""; }
 article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; }
+/* Each cell in its column, at any width.  The tracks are a wide screen's
+   here, the margin's last, and under 62rem the phone's, with no margin
+   (below, with the phone's rules). */
+article.cmp .grid > .row > :is(.rc, .ch), article.cmp .cmpnames > .cn { grid-column: var(--c); grid-row: 1; }
+/* On the whole paper's page a section's title in columns has the room it
+   has without them (article.whole > section > .papertop), 2.6rem above and
+   1.2rem below: the names of the columns no longer stand between two
+   sections to part them.  The room above is the section's and not the
+   title's, which the box beside the title shares (below); and the title's
+   own margins are none, a cell's not collapsing with its heading's as the
+   plain head's do. */
+article.cmp.whole > section[id] ~ section[id] { margin-top: 2.6rem; }
+article.cmp.whole > section[id] ~ section[id] .cmphd > .papertop { margin: 0 0 1.2rem; }
+article.cmp.whole > section[id] ~ section[id] .cmphd h2 { margin: 0; }
 @media (min-width: 62.01rem) {
   /* The tracks, the names' (.cmpnames, a .grid) and each section's, which on
      a screen is the grid its rows are laid on (below). */
@@ -1071,18 +1129,7 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
          grid-template-columns: repeat(var(--cols), minmax(0, var(--measure))); }
   :root[data-width="full"]:is([data-margin="off"], [data-index="off"]) article.cmp :is(.grid, section[id]) {
          grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
-  article.cmp .grid > .row > :is(.rc, .ch), article.cmp .cmpnames > .cn { grid-column: var(--c); grid-row: 1; }
   article.cmp .grid > .row > .a { grid-column: -2; }
-  /* On the whole paper's page a section's title in columns has the room it
-     has without them (article.whole > section > .papertop), 2.6rem above and
-     1.2rem below: the names of the columns no longer stand between two
-     sections to part them.  The room above is the section's and not the
-     title's, which the box beside the title shares (below); and the title's
-     own margins are none, a cell's not collapsing with its heading's as the
-     plain head's do. */
-  article.cmp.whole > section[id] ~ section[id] { margin-top: 2.6rem; }
-  article.cmp.whole > section[id] ~ section[id] .cmphd > .papertop { margin: 0 0 1.2rem; }
-  article.cmp.whole > section[id] ~ section[id] .cmphd h2 { margin: 0; }
 }
 /* The box of what the whole paper or section cites, in columns: in the
    margin, level with the section's title (Tigran, 2026-11-15: "'Cited across
@@ -1128,18 +1175,23 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
   article.cmp > section[id] > .blanket.cmpfold:not(.shown) > .afold::before { transform: rotate(-45deg); }
   article.cmp > section[id] > .blanket.cmpfold.shown > .afold { margin-bottom: .5rem; }
 }
+/* Each column's first line level with the English's (Tigran, 2026-10-26):
+   at a paper's opening, below the line its reference and ▶ stand in, where
+   the English has one (p.t.opening, above); at a block of verse, below the
+   block's own space and, with the references on, that line (.verse).  The
+   entries keep their own places beside them on a wide screen, which their
+   rules give them as the paragraph's next sibling, as the cells now are;
+   under 62rem they stand under the row, and take no such room. */
+article.cmp .row:has(> p.t.opening) > .rc { margin-top: 1.5rem; }
+:root[data-paranum="off"][data-listen="off"]:not([data-pages="true"]) article.cmp .row:has(> p.t.opening) > .rc {
+       margin-top: 0; }
+article.cmp .row:has(> .verse) > .rc { margin-top: .6rem; }
+:root:not([data-paranum="off"]) article.cmp .row:has(> .verse) > .rc { margin-top: 2.1rem; }
 @media (min-width: 62.01rem) {
-  /* Each column's first line level with the English's (Tigran, 2026-10-26):
-     at a paper's opening, below the line its reference and ▶ stand in, where
-     the English has one (p.t.opening, above); at a block of verse, below the
-     block's own space and, with the references on, that line (.verse).  The
-     entries keep their own places beside them, which their rules give them
-     as the paragraph's next sibling, as the cells now are. */
-  article.cmp .row:has(> p.t.opening) > :is(.rc, .a) { margin-top: 1.5rem; }
-  :root[data-paranum="off"][data-listen="off"]:not([data-pages="true"]) article.cmp .row:has(> p.t.opening) > :is(.rc, .a) {
+  article.cmp .row:has(> p.t.opening) > .a { margin-top: 1.5rem; }
+  :root[data-paranum="off"][data-listen="off"]:not([data-pages="true"]) article.cmp .row:has(> p.t.opening) > .a {
          margin-top: 0; }
-  article.cmp .row:has(> .verse) > :is(.rc, .a) { margin-top: .6rem; }
-  :root:not([data-paranum="off"]) article.cmp .row:has(> .verse) > .rc { margin-top: 2.1rem; }
+  article.cmp .row:has(> .verse) > .a { margin-top: .6rem; }
 }
 .chips { list-style: none; margin: .25rem 0 0; padding: 0; }
 .chips li { margin: 0 0 .3rem; }
@@ -1572,7 +1624,7 @@ dialog.settings .row { display: flex; align-items: center; justify-content: spac
 /* A row of pills: its label takes what the pills leave, on two lines if it must,
    as it always has; where even its longest word does not fit beside them, the
    pills go under it, at the right.  Until 2026-10-15 they ran past the dialog's
-   edge instead: at Larger on any phone, and at Standard on one 360px wide. */
+   edge instead: at 125% on any phone, and at 112.5% on one 360px wide. */
 dialog.settings div.row { flex-wrap: wrap; row-gap: .3rem; }
 dialog.settings div.row > span { flex: 1 1 0; }
 dialog.settings div.row > .seg { margin-left: auto; }
@@ -1718,7 +1770,7 @@ dialog.settings .seg label { display: grid; place-items: center; min-width: 2.4r
 .seg label:has(input:checked) { color: var(--paper); background: var(--link); }
 .seg label:has(input:focus-visible) { outline: 2px solid var(--link); outline-offset: -3px; }
 .seg span { position: relative; top: var(--lift); }      /* in its own size: the A's differ */
-.seg .a2 span { font-size: .92rem; }
+.seg .a1 span { font-size: .78rem; } .seg .a2 span { font-size: .92rem; }
 .seg .a3 span { font-size: 1.08rem; } .seg .a4 span { font-size: 1.25rem; }
 /* Line spacing: three bars as far apart as the choice's lines, the gaps drawn
    wider than the leadings differ, or the four would look alike.  A drawing, so
@@ -2145,6 +2197,13 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
      grows to its widest item's least width, and one long dot-leader row once
      pushed all of 15:2 off the side. */
   .grid { grid-template-columns: minmax(0, 1fr); }
+  /* Full is the window's width here too, whatever the index: with it folded
+     or off the text's one track is the measure (:root[data-margin] .grid,
+     above), which outranked the track above, and on a phone lying down, 836
+     px wide, Full left the text 761 px and 56 px at its right for 19 at its
+     left (Tigran, 2026-11-16: "I switched from Measured to Full and the
+     margin is still there"). */
+  :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr); }
   /* A column, whose parts keep their margins and their boxes as they did
      while each stood on the grid: none collapses into the next, a list's
      margins stay inside its box of entries, and a paragraph's reference,
@@ -2172,20 +2231,23 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   .grid > .row .tr { order: 4; }
   .verse + .a:not(:empty) { margin-top: -.4rem; }
   .blanket ul { columns: 1; }
-  /* Compare: each paragraph with its translations under it, each named,
-     boxed as a fold is, then its entries.  The English's head alone, as in
-     the mockup: three would fill the screen before the text.  A
-     translation's only where it says it is not at hand, named. */
-  article.cmp .cmpnames, article.cmp .stars > .rs { display: none; }
-  article.cmp .grid > .cmphd > .papertop { margin: 0 0 1.2rem; }
-  article.cmp .cmphd > .ch + .ch:not(:has(> .gap)), article.cmp .cmphd > .ch + .ch > :not(.who, .gap) { display: none; }
-  article.cmp .cmphd .who, article.cmp .rc .who { display: block; }
-  article.cmp .cmphd .who { margin-top: 0; text-align: left; }
-  article.cmp .rc { margin: -.45rem 0 .9rem 1rem; border-left: 2px solid var(--rule); padding-left: .7rem;
-                    font-size: .9rem; }
-  article.cmp .rc:empty { display: none; }
-  article.cmp .rc .who:first-child { margin-top: .1rem; }
-  article.cmp .rc > .playp { left: calc(-1.05rem - 2px); top: .05rem; width: 1rem; height: 1rem; padding: .1rem; }
+  /* In columns (article.cmp, above), which a tablet has room for, and a
+     phone lying down: a row is laid on the grid's columns again, the
+     English and each translation a column, and under them, across them all,
+     the row's entries, in their box or folded to their line, as they stand
+     under a paragraph here.  Until 2026-11-16 Compare under 62rem was no
+     columns: each paragraph with its translations under it, each named and
+     boxed as a fold is, which the setting gave a phone; the folds are what a
+     window too narrow for columns shows now (Tigran). */
+  /* The tracks: a column each, and no margin.  With :root, to outrank the
+     one track the text has with the index folded or off (:root[data-margin]
+     .grid, above), under which the columns lay one over another. */
+  :root article.cmp .grid { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+  article.cmp .grid > .row { display: grid; }
+  article.cmp .grid > .row > .a { grid-column: 1 / -1; grid-row: 2; }
+  /* The section's box of what it cites stands first, as on a phone, and as
+     wide as the columns under it. */
+  article.cmp > section[id] > .blanket { max-width: none; }
 }
 
 /* ---- print ------------------------------------------------------------- */

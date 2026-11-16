@@ -47,25 +47,36 @@ READING = [
     # follows, the header, the Contents, the margin, Settings, the player, as
     # with the browser's zoom.  It was Text size until 2026-11-10, when Tigran
     # asked for a size of the interface beside the text's: Text size below
-    # sets the reading text, which this leaves as it is (ub.css --ui).  Until
-    # 2026-10-14 the steps were 90%, 100% (Standard), 112.5% and 125%
-    # (Largest); Tigran found 90% too small, and moved every name up a step,
-    # so Standard is 112.5%.
-    ("uisize", "segmented", "Interface text size", "standard",
-     [("smaller", "A", "Smaller", "a2"),
-      ("standard", "A", "Standard", "a3"),
-      ("larger", "A", "Larger", "a4")], ""),
+    # sets the reading text, which this leaves as it is (ub.css --ui).
+    #
+    # Four steps, 90%, 100% (Standard), 112.5% and 125% (Tigran, 2026-11-16:
+    # "The current 'Smaller' size of both text and interface size make
+    # 'Standard' and add one degree smaller as 'Smaller'. And the current
+    # 'Standard' => 'Larger', 'Larger' => 'Largest'").  They were these four
+    # until 2026-10-14, when he found 90% too small and every name moved up a
+    # step, Standard 112.5% and no 90%; so the names have moved twice, and a
+    # choice is now kept as its size, "90" to "125", which no later move of
+    # the names can change.  The names kept before are read as what they
+    # meant, `smaller` 100% and `larger` 125% (ub.css, ub.js stored()): a
+    # reader who chose a size keeps it, and one who never chose has Standard,
+    # a step smaller than it was.
+    ("uisize", "segmented", "Interface text size", "100",
+     [("90", "A", "Smaller", "a1"),
+      ("100", "A", "Standard", "a2"),
+      ("112.5", "A", "Larger", "a3"),
+      ("125", "A", "Largest", "a4")], ""),
     # The reading text, in the same steps: whatever is sized from ub.css
     # --size, the book's paragraphs and verse, the translations, a note's or a
     # 1955 reading's card, the running text of Help or the home page, and the
     # paper's and the sections' heads with it, whatever the interface's size
     # (ub.css --tx).  The root's size until 2026-11-10 (above), so a reader
-    # who chose Larger then keeps a larger text, the interface Standard.  A
-    # stored 'largest' is read as 'larger' (ub.js stored(), ub.css).
-    ("size", "segmented", "Text size", "standard",
-     [("smaller", "A", "Smaller", "a2"),
-      ("standard", "A", "Standard", "a3"),
-      ("larger", "A", "Larger", "a4")], ""),
+    # who chose a larger size then keeps a larger text, the interface
+    # Standard.  A `largest` kept from before 2026-10-14 is 125% too.
+    ("size", "segmented", "Text size", "100",
+     [("90", "A", "Smaller", "a1"),
+      ("100", "A", "Standard", "a2"),
+      ("112.5", "A", "Larger", "a3"),
+      ("125", "A", "Largest", "a4")], ""),
     # The leading: 1.05, 1.1 (the printed book's), 1.25 and 1.45 (ub.css).  It
     # was 1.55 for everyone, which Tigran found too open, worst on a phone; he
     # chose these steps and 1.25 for the default (2026-10-12).  A 1955 reading's
@@ -210,22 +221,22 @@ SHOW = [
 # translations()), and ub.js keeps it.
 TRANSLATIONS = [
     ("translations", "translations", "Translations", "", [], ""),
-    # Compare: the English and each translation ticked side by side, a column
-    # each, a row to a paragraph (ub.js cmpDraw); below 62rem each translation
-    # stands under its paragraph.  A setting since 2026-11-08 (Tigran: "this
-    # option is now persistent across many scenarios, so its natural place is
-    # in Settings, not as a UI element on every text page"): until then a pill
-    # at the head of the text, "Compare translations", at an address of its
-    # own, /1:1/compare, which the tab kept as one moved about (2026-11-06).
-    # Those addresses go to the page's own now (app.py read_compare).  Here,
-    # under the list, which it means nothing without, and greyed while none
-    # is ticked (NEEDS).  ub.js draws the columns, and again in place when it
-    # changes; the folds and a part's dividers are keyed on the class
-    # .compare, which the head script sets from it before first paint and
-    # ub.js keeps (base.html), never on data-compare (ub.css).
-    ("compare", "switch", "Translations in parallel columns", False, [],
-     "a column each beside the English; on a narrow screen, each under its paragraph"),
 ]
+# Until 2026-11-16 a switch stood under the list, `compare`, "Translations in
+# parallel columns": the English and each translation ticked side by side, a
+# column each (ub.js cmpDraw), and with it off a fold under each paragraph.
+# Tigran: "Let's get rid of the option ... on the wide enough screen
+# translations should be shown in parallel columns anyway and on the narrow
+# screens they should be shown sequentially", and not as a phone against a
+# desktop: a tablet may have room for two columns, and a wide screen none
+# with the Contents and the index open.  So the page is in columns wherever
+# each column would be wide enough, and in folds where it would not (ub.js
+# cmpFits, ub.css --mincol).  A `compare` kept in a browser is left where it
+# is and read by no one: it is no key of these lists.  Its history: a setting
+# since 2026-11-08, and until then a pill at the head of the text, "Compare
+# translations", at an address of its own, /1:1/compare, which the tab kept
+# as one moved about (2026-11-06); those addresses go to the page's own
+# (app.py read_compare).
 SPEEDS = (0.8, 0.9, 1, 1.1, 1.25, 1.5)
 LISTEN = [
     # Every listening control, the English text's and each translation's, on
@@ -341,12 +352,12 @@ SITE_DEFAULTS: dict[str, dict] = {}
 # only while another has that value: none since 2026-11-13, when the menu of
 # the browser's voices, which meant something while the browser's voice was
 # chosen, went into the English text's own.  A setting whose own needs are
-# not met greys those that need it too.  And the translations in columns
-# while none is ticked, `translations` being '' then.
+# not met greys those that need it too.  An empty list is unmet too
+# (`translations` being '' with none ticked), which the switch for the
+# translations in columns needed until 2026-11-16, and nothing does now.
 NEEDS = {"voice": "listen", "rate": "listen",
          "follow": "listen", "onward": "listen", "notesearch": "notes",
-         "indexsearch": "index", "studysearch": "studynotes", "quizboard": "quiz",
-         "compare": "translations"}
+         "indexsearch": "index", "studysearch": "studynotes", "quizboard": "quiz"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:

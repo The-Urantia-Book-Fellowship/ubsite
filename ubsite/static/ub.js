@@ -18,8 +18,13 @@
       s = JSON.parse(localStorage.getItem(KEY) || '{}') || {};
       // The theme was once kept on its own.
       if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
-      // The text size's steps moved up one (settings.py): Largest is Larger.
-      if (s.size === 'largest') s.size = 'larger';
+      // A size is kept as itself since 2026-11-16 (settings.py), and the
+      // names kept before read as what they meant: Smaller 100%, which is
+      // Standard now, Standard 112.5%, and Larger, with the Largest of
+      // before 2026-10-14, 125%.  The head script leaves them as they are,
+      // and ub.css reads them the same.
+      var was = { smaller: '100', standard: '112.5', larger: '125', largest: '125' };
+      ['size', 'uisize'].forEach(function (k) { if (was.hasOwnProperty(s[k])) s[k] = was[s[k]]; });
       // Off was once a voice, the English's; it is Listening controls now
       // (settings.py `listen`, 2026-10-27).
       if (s.voice === 'off') { delete s.voice; s.listen = false; }
@@ -766,9 +771,15 @@
     if (y === null) y = pl.el.getBoundingClientRect().top;
     if (Math.abs(y - pl.y) >= 1) scrollBy({ top: y - pl.y, behavior: 'instant' });
   }
+  // `placeKept` is the place while the change is made, for what the change
+  // sets off to keep the same one: a fold that turns the page into columns,
+  // or out of them (cmpGo), which taking the place again, after the fold,
+  // would keep by another letter of the line, a line off as often as not.
+  var placeKept = null;
   function keepPlace(change) {
     var pl = placeNow();
-    change();
+    placeKept = pl;
+    try { change(); } finally { placeKept = null; }
     if (!pl) return;
     placeBack(pl);
     // Again a frame on, when what the change set off has been drawn.
@@ -1167,39 +1178,84 @@
     else location.reload();
   });
 
-  // Compare (ROADMAP item 15, step 2; settings.py `compare`, Translations in
-  // parallel columns): the page drawn again, the English and each translation
-  // ticked side by side, a column each in the reader's order, a row to a
-  // paragraph, which the grid aligns as it aligns a paragraph and its entries
-  // (ub.css article.cmp); below 62rem each translation stands under its
-  // paragraph.  A translation with no paragraph in the section has no column.
-  // Over the columns a line naming each, which stays at the window's top while
-  // they are in view, and under it each one's own paper and section titles, as
-  // its TeX sets them (/tr/'s data-head).  Drawn from the fragment the folds
-  // fetch, and again whenever what it shows changes.
+  // Compare (ROADMAP item 15, step 2), the translations in parallel columns:
+  // the page drawn again, the English and each translation ticked side by
+  // side, a column each in the reader's order, a row to a paragraph, which
+  // the grid aligns as it aligns a paragraph and its entries (ub.css
+  // article.cmp).  A translation with no paragraph in the section has no
+  // column.  Over the columns a line naming each, which stays at the window's
+  // top while they are in view, and under it each one's own paper and section
+  // titles, as its TeX sets them (/tr/'s data-head).  Drawn from the fragment
+  // the folds fetch, and again whenever what it shows changes.
   //
-  // A setting since 2026-11-08 (Tigran), kept as every setting is, so that
-  // every page of the book opens in it while it is on, and drawn in place,
-  // the paragraph at the window's top kept there, as it is turned on or off.
-  // Until then a toggle at the head of the text, at an address of its own,
+  // Wherever the window has room for the columns, and nowhere else (Tigran,
+  // 2026-11-16: "on the wide enough screen translations should be shown in
+  // parallel columns anyway and on the narrow screens they should be shown
+  // sequentially", and not a phone against a desktop: a tablet at a smaller
+  // text may fit two, and a wide screen with the Contents and the index open
+  // none).  Room is every column at least --mincol wide (cmpFits, below);
+  // all of them or none; and without room the folds, as they were with the
+  // setting off.  Decided again as the window, a fold of the Contents or the
+  // index, a size or the typeface changes, and the page drawn in place, the
+  // paragraph at the window's top kept there (cmpCheck, cmpGo).
+  //
+  // Until then a setting, Translations in parallel columns (`compare`,
+  // 2026-11-08), under 62rem each translation under its paragraph; and before
+  // it a toggle at the head of the text, at an address of its own,
   // /1:1/compare, which the tab kept as one moved about (2026-11-06); those
-  // addresses go to the page's own now (app.py read_compare).  The head
-  // script's class .compare hides the folds before first paint (ub.css).  In a
-  // section none of the ticked translations has, the page reads as usual.  A
-  // part's page draws nothing here: every translation's divider is in the
-  // page, and the setting alone lays them in columns (part.html, ub.css
-  // .dividers).
-  var cmpN = 0;
-  function cmpOn() { return load().compare === true; }
+  // addresses go to the page's own (app.py read_compare).  The class .compare
+  // hides the folds (ub.css): the head script sets it before first paint
+  // where the last page read was in columns, in a window as wide (ub_cols,
+  // cmpDraw), and here it is put right.  In a section none of the ticked
+  // translations has, the page reads as usual.  A part's page draws nothing
+  // here: every translation's divider is in the page, and the class alone
+  // lays them in columns (part.html, ub.css .dividers).
+  var cmpN = 0, cmpIs = null, cmpW = innerWidth;
   function cmpArt() { return document.querySelector('main.reader > article'); }
-  // The ticked translations that have any paragraph here, in the reader's order.
+  // The ticked translations that have any paragraph here, in the reader's
+  // order; on a part's page, those whose divider it has.
   function cmpKeys(art) {
     var has = {};
     Array.prototype.forEach.call(art.querySelectorAll('.tf[data-has]'), function (tf) {
       tf.dataset.has.split(' ').forEach(function (k) { has[k] = true; });
     });
+    Array.prototype.forEach.call(art.querySelectorAll(':scope > .dividers > .divider[data-k]'), function (d) {
+      has[d.dataset.k] = true;
+    });
     return String(load().translations || '').split(' ').filter(function (k) { return trBy[k] && has[k]; });
   }
+  // Whether n columns have room on this page.  What they need is the
+  // stylesheet's own sum, asked of a probe put in the article for the asking
+  // (ub.css .cprobe): each column its least, the gaps, and on a wide screen
+  // the margin beside them where the index is shown.  What there is, is taken
+  // from boxes that are the same in columns and out of them, so that the
+  // answer cannot turn on itself: the window, less the frame's padding, its
+  // first track and gap where it has two, which is the Contents (16rem, as
+  // wide as Full makes it, or nothing folded), and the article's own padding,
+  // where a folded index keeps its chevron.  Not the article's width, which
+  // Measured holds to the text's.
+  function cmpFits(art, n) {
+    var frame = art.parentNode, fs = getComputedStyle(frame), as = getComputedStyle(art),
+        tracks = fs.gridTemplateColumns.split(' '), probe = document.createElement('div'), need,
+        px = function (v) { return parseFloat(v) || 0; };
+    probe.className = 'cprobe';
+    probe.style.setProperty('--n', n);
+    art.appendChild(probe);
+    need = probe.getBoundingClientRect().width;
+    probe.remove();
+    return frame.parentNode.clientWidth - px(fs.paddingLeft) - px(fs.paddingRight) -
+           (tracks.length > 1 ? px(tracks[0]) + px(fs.columnGap) : 0) -
+           px(as.paddingLeft) - px(as.paddingRight) >= need - .5;
+  }
+  // Decided from the page as it now is, and kept: asked before the first
+  // drawing too (arriveTr, above, which runs before these lines do, so that
+  // nothing is yet null).
+  function cmpDecide() {
+    var art = cmpArt(), ks = art ? cmpKeys(art) : [];
+    cmpW = innerWidth;
+    return (cmpIs = ks.length > 0 && cmpFits(art, ks.length + 1));
+  }
+  function cmpOn() { return cmpIs == null ? cmpDecide() : cmpIs; }
   function cmpUndraw(art) {
     if (!art.classList.contains('cmp')) return;
     if (card && card.mark.closest('.rc')) shut(false);
@@ -1215,18 +1271,29 @@
     });
     Array.prototype.forEach.call(art.querySelectorAll('.blanket.cmpfold'), function (el) { el.classList.remove('cmpfold'); });
     art.classList.remove('cmp');
-    art.style.removeProperty('--cols');
     indexSync();
   }
-  // Draws what Settings say; its promise is kept once drawn.
+  // Draws what the page has room for; its promise is kept once drawn.
   function cmpDraw() {
-    var art = cmpArt(), on = cmpOn(), n = ++cmpN;
+    var art = cmpArt(), on = cmpDecide(), n = ++cmpN;
     // The folds give way, or come back (ub.css :root.compare): the head
-    // script set it before first paint, and here it follows the setting, once
-    // cmpGo has measured the paragraph to keep.
+    // script guessed it before first paint, and here it follows the page,
+    // once cmpGo has measured the paragraph to keep.
     document.documentElement.classList.toggle('compare', on);
     if (!art) return Promise.resolve();
     var ks = on ? cmpKeys(art) : [], secs = art.querySelectorAll('section[data-trv]');
+    // The frame is told how many, which Measured makes it wide enough for
+    // (ub.css --textw), once the columns are drawn, or on a part's page at
+    // once.
+    if (on) art.parentNode.style.setProperty('--cols', ks.length + 1);
+    else art.parentNode.style.removeProperty('--cols');
+    // And the next page's first paint, how wide a window this one was in
+    // columns in (base.html): a page of the text that has a translation,
+    // which is what was asked about; a part's page has more room, having no
+    // margin, and says nothing of the next.
+    if (secs.length && cmpKeys(art).length) try {
+      if (on) localStorage.setItem('ub_cols', innerWidth); else localStorage.removeItem('ub_cols');
+    } catch (e) {}
     if (!ks.length || !secs.length) { cmpUndraw(art); return Promise.resolve(); }
     // Each section of the page in columns: the one of a section's page, or
     // every one of the whole paper's (paper.html), each with its own heads:
@@ -1240,7 +1307,6 @@
       Array.prototype.forEach.call(art.querySelectorAll('.tf.open'), trShut);
       Array.prototype.forEach.call(art.querySelectorAll('.tf .tr'), function (el) { el.remove(); });
       art.classList.add('cmp');
-      art.style.setProperty('--cols', ks.length + 1);
       // A column's name: a translation's short name, and over the English the
       // press's, as the rail's list of contents has them (tocSync), and no
       // longer the work's title before it, «Урантийские документы
@@ -1335,18 +1401,44 @@
     });
     return art.querySelector('.rc p.rt.hit');
   }
-  // The paragraph at the window's top, kept there as the page is drawn again,
-  // from its start, below the columns' names; at the page's head, the head.  A
-  // paragraph is its row, with its translations under it on a phone.
-  function cmpGo() {
-    var at = null, rows = document.querySelectorAll('main .grid > .row:has(p.t[id])'), i, r;
-    if (scrollY > 0)
-      for (i = 0; i < rows.length; i++)
-        if ((r = rows[i].getBoundingClientRect()).bottom > 40) { at = { el: rows[i].querySelector('p.t[id]'), top: r.top }; break; }
+  // The place being read, kept as the page is drawn again, in columns or out
+  // of them: the line at the window's top, by the letter there, or a
+  // paragraph marked on the screen, as a fold of the Contents or the index
+  // keeps it (placeNow, placeBack), since it is such a fold, or the window
+  // made wider, that now turns the page into columns, in the middle of a
+  // paragraph as often as not (2026-11-16); `kept` is the place such a fold
+  // took before it changed anything (keepPlace).  Until then the paragraph
+  // at the window's top was put there from its start, which was enough for
+  // a switch in Settings.  A line that stood where the columns' names now
+  // stand is brought out from under them; a mark in a translation's column,
+  // which goes with the column, is kept by the English beside it; and at
+  // the page's top the page stays there.
+  function cmpGo(kept) {
+    var pl = kept || placeNow(), row = pl && pl.el.closest('.rc') && pl.el.closest('.row'), en = row && row.querySelector('p.t[id]');
+    if (en) pl = { el: en, y: en.getBoundingClientRect().top };
     return cmpDraw().then(function () {
-      var row = at && at.el.isConnected && at.el.closest('.row'), names = document.querySelector('article.cmp .cmpnames'),
-          floor = names && names.offsetHeight;
-      if (row) scrollBy({ top: row.getBoundingClientRect().top - Math.max(floor || 0, Math.min(at.top, 120)), behavior: 'instant' });
+      var names = document.querySelector('article.cmp .cmpnames'), floor = names ? names.offsetHeight + 2 : 0, t = Date.now();
+      if (!pl) return;
+      if (pl.y < floor) pl.y = floor;
+      placeBack(pl);
+      // Held there while the page settles, frame by frame: the columns laid
+      // out ask for a typeface not yet here, the Cyrillic of a translation
+      // first shown, and as it comes in the lines break again, the
+      // English's too, and the browser moves the page to keep what it takes
+      // for the place, which is another line.  For a third of a second, and
+      // as long after a typeface was last on its way, two and a half
+      // seconds at the most; and let go as soon as the reader moves the
+      // page, or the page is taken elsewhere (arrive): by what is done
+      // (arriveTouched), not by where the page is, which the browser has
+      // just changed.
+      var busy = t;
+      requestAnimationFrame(function hold() {
+        var now = Date.now();
+        if (arriveTouched > t) return;
+        placeBack(pl);
+        if (document.fonts && document.fonts.status === 'loading') busy = now;
+        if (now - busy < 300 && now - t < 2500) requestAnimationFrame(hold);
+      });
     });
   }
   // Opened with it on: drawn, then the paragraph cited brought into view
@@ -1355,9 +1447,11 @@
   // the whole paper's columns take a while); and a translator's note's card
   // opened from its column.
   function cmpArrive() {
-    if (!cmpOn()) return;
     var t = Date.now();
     cmpDraw().then(function () {
+      // Not in columns, the class the head script guessed is gone, and the
+      // page is where arrive() put it.
+      if (!cmpIs) return;
       if (arriveTouched <= t) arrive();
       var m = /^#note(tn_[a-z0-9-]+_\d+_\d+_\d+_\d+)$/.exec(location.hash),
           mark = m && document.getElementById('fnref' + m[1]);
@@ -1389,15 +1483,47 @@
       return k && k !== b.dataset.k;
     }).join(' '));
   });
-  // Once for both settings, where ↺ announces every setting in turn: a second
-  // cmpGo measured the page the first had just undrawn, and undid the place
-  // it kept (review of 2026-11-09).
-  var cmpSoon = false;
+  // Asked again when what the room rests on has changed, and the page drawn
+  // again only where the answer has: in place, the paragraph at the window's
+  // top kept (cmpGo).
+  function cmpCheck(kept) {
+    var was = cmpIs;
+    if (cmpDecide() !== was) cmpGo(kept);
+  }
+  // Once for all the settings, where ↺ announces every setting in turn: a
+  // second cmpGo measured the page the first had just undrawn, and undid the
+  // place it kept (review of 2026-11-09).  The list of translations draws
+  // the page again whatever the answer, its columns being other columns; a
+  // setting the room rests on, the folds of the Contents and the index, the
+  // index itself, the two sizes, the width and the typeface, only where the
+  // answer changes.
+  var cmpSoon = false, cmpMust = false,
+      CMP_ROOM = { rail: 1, margin: 1, index: 1, size: 1, uisize: 1, width: 1, face: 1 };
   document.addEventListener('ub:settings', function (ev) {
-    if (ev.detail.key !== 'translations' && ev.detail.key !== 'compare' || cmpSoon) return;
+    if (ev.detail.key === 'translations') cmpMust = true;
+    else if (!CMP_ROOM.hasOwnProperty(ev.detail.key)) return;
+    if (cmpSoon) return;
     cmpSoon = true;
-    Promise.resolve().then(function () { cmpSoon = false; cmpGo(); });
+    // The place a fold's button took before it changed the setting.
+    var kept = placeKept;
+    Promise.resolve().then(function () {
+      var must = cmpMust;
+      cmpSoon = cmpMust = false;
+      if (must) cmpGo(kept); else cmpCheck(kept);
+    });
   });
+  // The window: as it is made wider or narrower, or a tablet turned, once a
+  // frame; not as it grows taller, which is all a phone's address bar going
+  // away is.  The typeface come in, in whose characters a column's least is
+  // counted.  And a page come back to from the history, in a window that may
+  // have changed since.
+  var cmpTick = 0;
+  addEventListener('resize', function () {
+    if (innerWidth === cmpW || cmpTick) return;
+    cmpTick = requestAnimationFrame(function () { cmpTick = 0; cmpCheck(null); });
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (cmpIs != null) cmpCheck(null); });
+  addEventListener('pageshow', function (ev) { if (ev.persisted) cmpCheck(null); });
   // Part I is open in the Foreword's rail for the Foreword's sake (templates/
   // _rail.html), and its line of script shuts it where Settings puts the
   // Foreword before the parts; a rail swapped in runs no script.

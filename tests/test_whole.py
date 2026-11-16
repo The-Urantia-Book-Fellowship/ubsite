@@ -2,7 +2,7 @@
 
 A paper's address is the whole paper: every section's text, as its own page
 sets it, under one head, the paper's notes at its end, and a transport bar of
-the two paper buttons alone, every section in columns with Settings' Translations in parallel columns.  Whether a reader sees it or the paper's first
+the two paper buttons alone, every section in columns where the translations are in parallel columns.  Whether a reader sees it or the paper's first
 section is the setting, decided in the browser by base.html's ubUnit, which
 these hold to its cases in Node, as test_l10n holds l10n.js.  Each section's
 piece of the text is byte for byte the piece in its own page, which is what

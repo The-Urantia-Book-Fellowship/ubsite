@@ -1922,8 +1922,8 @@ def part_page(request: Request, n: int):
     The rail's part titles link here, so a part opens on its title page rather
     than only unfolding in the rail.  Each translation's divider is in the
     page too, shown for those ticked (part.html, base.html ubTr), under the
-    English or, with Settings' Translations in parallel columns, a column each
-    (Tigran, 2026-11-07).
+    English or, where the window has room for columns, a column each
+    (Tigran, 2026-11-07; ub.js cmpFits, 2026-11-16).
     """
     con = db()
     part = con.execute("SELECT * FROM part WHERE n=?", (n,)).fetchone() if n < SQL_INT else None
@@ -2045,9 +2045,10 @@ def whole_audio(texts: list[dict]) -> dict:
 # Compare, the text and the translations a reader has ticked side by side
 # (ROADMAP item 15, step 2), had an address of its own from 2026-10-26,
 # /1:1/compare, the same page as /1:1, byte for byte, and the whole paper's,
-# /1/compare, and a part's, /part/1/compare.  Since 2026-11-08 it is a setting,
-# Translations in parallel columns (settings.py `compare`; Tigran), and an
-# address kept from before goes to the page's own for good, which the reader's
+# /1/compare, and a part's, /part/1/compare.  From 2026-11-08 it was a setting,
+# Translations in parallel columns (Tigran), and since 2026-11-16 the columns
+# come wherever the window has room for them (ub.js cmpFits); an address kept
+# from before goes to the page's own for good, which the reader's window and
 # settings show: a link never changes them.  The hash goes with it, the
 # browser's.  An address that is no page of the book is the 404 it was,
 # naming itself (read).  offline-core.js resolve() answers the same.

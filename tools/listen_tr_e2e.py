@@ -1,8 +1,9 @@
 """A translation's own recording, end to end, in Chrome: Григорий Войнер's
 reading of USGNY (urantia-ru), 2026-11-12.
 
-With Whole paper off and on (CLAUDE.md trap 44), USGNY ticked and in parallel
-columns: the ▶ in the translation's cell plays the recording from that
+With Whole paper off and on (CLAUDE.md trap 44), USGNY ticked, in a window
+with room for it in a column beside the English (ub.js cmpFits; a setting
+until 2026-11-16): the ▶ in the translation's cell plays the recording from that
 paragraph, /audio/voyner/..., the bar names it "USGNY · Grigory Voyner", and
 the line marked is the translation's, never the English paragraph; the
 English paragraph's ▶ still plays Merritt Horn's and marks the English; the
@@ -13,7 +14,7 @@ default gives it back.  Settings' voices are a menu against each text, the
 English first, its recording first in each and each of the browser's voices
 once, in a browser that lists voices and in one that has listed none.  The bar's list has each text's recording and the browser's voices as one
 list under it, the English first, and with no translation shown the English
-text's alone.  Then with the columns off, on a phone's screen, Whole paper
+text's alone.  Then on a phone's screen, which has no room for columns, Whole paper
 off and on: the fold under a paragraph, opened, has the translation's ▶ at
 the start of the line that names it, which plays the recording from there
 and marks the translation's line; with three translations in tabs it is the
@@ -93,9 +94,14 @@ def asks(pg, asked: list, path: str, timeout: float = 10.0) -> bool:
     return False
 
 
-def context(b, settings: dict, phone: bool = False):
+def context(b, settings: dict, phone: bool = False, wide: bool = False):
+    # The translations stand in columns where the window has room for them,
+    # and in folds where it has not (ub.js cmpFits, since 2026-11-16; a
+    # setting, `compare`, until then): `wide` is a desk's window with room
+    # for two columns beside the Contents and the index, and the usual one,
+    # 1400 px, has none, as a phone has none.
     ctx = (b.new_context(viewport={"width": 412, "height": 900}, has_touch=True, is_mobile=True)
-           if phone else b.new_context(viewport={"width": 1400, "height": 900}))
+           if phone else b.new_context(viewport={"width": 1920 if wide else 1400, "height": 900}))
     # A fresh context is a first visit, which the tour would meet (help.js).
     ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_settings', %s); } catch (e) {}"
                         % json.dumps(json.dumps(settings)))
@@ -109,10 +115,10 @@ def context(b, settings: dict, phone: bool = False):
 
 
 def columns(b, whole: bool) -> None:
-    settings = {"translations": "urantia-ru", "compare": True}
+    settings = {"translations": "urantia-ru"}
     if whole:
         settings["whole"] = True
-    ctx, pg, asked, errors = context(b, settings)
+    ctx, pg, asked, errors = context(b, settings, wide=True)
     say = "Whole paper on: " if whole else "Whole paper off: "
     print("\nIn parallel columns, " + say.rstrip(": "))
     pg.goto(BASE + ("/1" if whole else "/1:1"))
@@ -200,7 +206,7 @@ def fold(b, whole: bool) -> None:
         settings["whole"] = True
     ctx, pg, asked, errors = context(b, settings, phone=True)
     say = "Whole paper on: " if whole else "Whole paper off: "
-    print("\nIn the fold under the paragraph, the columns off, on a phone, " + say.rstrip(": "))
+    print("\nIn the fold under the paragraph, with no room for columns, on a phone, " + say.rstrip(": "))
     pg.goto(BASE + ("/1" if whole else "/1:1"))
     pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
     ok(pg.locator(".rc > .playp, .tf .playp").count() == 0, say + "a fold that is shut has no ▶")
@@ -427,7 +433,7 @@ def lacking(b) -> None:
     Its ▶ there is the browser's voice; and with Carry on into the next
     section on, a reading that comes to it from 18:7 goes on in the browser's
     voice, and is the recording's again at 19:1."""
-    ctx, pg, asked, errors = context(b, {"translations": "urantia-ru", "compare": True, "onward": True})
+    ctx, pg, asked, errors = context(b, {"translations": "urantia-ru", "onward": True}, wide=True)
     ctx.add_init_script(QUICK_SPEECH)
     print("\nA section the recording lacks, 19:0, read a section at a time")
     pg.goto(BASE + "/19:0")

@@ -345,6 +345,13 @@ def main() -> int:
             srv.stop()
 
 
+# The window: Playwright's own, 1280 by 720, in which the translations are in
+# folds, the Contents and the index being open; and one wide enough for the
+# English and two translations in columns beside them (ub.js cmpFits).
+USUAL = {"width": 1280, "height": 720}
+WIDE = {"width": 2560, "height": 1000}
+
+
 def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True,
@@ -534,19 +541,25 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.locator(".tf .trfold").first.inner_text() == "1 translation",
            "a section one of them lacks counts the other alone")
 
-        print("Compare")                                          # a setting since 2026-11-08
+        # A setting from 2026-11-08 to 2026-11-16; since then the columns
+        # come where the window has room for them (ub.js cmpFits; Tigran).
+        # This window, 1280 px with the Contents and the index open, has
+        # none for three, and WIDE has.
+        print("Compare")
         pg.goto(BASE + "/1:1")
         ok(pg.locator(".cmphead, .cmpbtn").count() == 0, "no button at the head of the text")
         pg.click(".gear")
         pg.click("#set-t-translations")
-        ok(pg.is_enabled("dialog.settings input[name=compare]"),
-           "Translations in parallel columns, under the list, can be ticked while one is")
-        pg.check("dialog.settings input[name=compare]")
-        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.locator("dialog.settings input[name=compare]").count() == 0 and "parallel columns" not in pg.inner_text("#set-p-translations"),
+           "and no switch for the columns in Settings' Translations")
         pg.keyboard.press("Escape")
+        ok(pg.locator("article.cmp").count() == 0 and pg.locator(".tf").first.is_visible(),
+           "in a window with no room for three columns, the folds")
+        pg.set_viewport_size(WIDE)
+        pg.wait_for_selector("article.cmp .rc .rt")
         cols = pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
         ok(pg.url.endswith("/1:1") and cols == ["en", "urantia-ru", "ud"],
-           f"ticked, the page is drawn again in place, the English and each one ticked a column each, in the reader's order ({cols})")
+           f"the window made wide, the page is drawn again in place, the English and each one ticked a column each, in the reader's order ({cols})")
         ok(pg.locator(".tf").first.is_hidden(), "and the folds give way to the columns")
         pg.locator('.rc[data-k=ud] a.fn[data-k="tn"]').first.click()
         pg.wait_for_selector(".pop.tn")
@@ -560,7 +573,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
            == ["en", "urantia-ru"], "a translation without the section has no column")
 
-        print("Compare kept as one moves about")                  # Tigran, 2026-11-06; a setting since 2026-11-08
+        print("Compare kept as one moves about")                  # Tigran, 2026-11-06; the window's since 2026-11-16
         pg.goto(BASE + "/1:1")
         pg.wait_for_selector("article.cmp .rc .rt")
         pg.fill("form.find input", "Father")
@@ -606,29 +619,27 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.url.endswith("/1") and top == "1:0.1",
            f"and Back returns to where the page stood, the mark gone (Tigran, 2026-11-06; {pg.url}, {top})")
         pg.evaluate("ubSettings.set('whole', false)")
+        # In place, by a fold of the Contents: at 1800 px three columns have
+        # room with the Contents folded, and none with them shown.
+        pg.set_viewport_size({"width": 1800, "height": 1000})
         pg.goto(BASE + "/1:4")
-        pg.wait_for_selector("article.cmp .rc .rt")
-        pg.click(".gear")                     # scrolled to by the click: the page's place is set after
-        pg.click("#set-t-translations")
-        pg.evaluate("scrollTo(0, document.getElementById('1:4.3').closest('.row').getBoundingClientRect().top + scrollY - 10)")
-        pg.uncheck("dialog.settings input[name=compare]")             # off: the pages after expect it so
+        pg.wait_for_selector("main.reader .tf .trfold")
         pg.wait_for_function("!document.querySelector('article.cmp')")
-        pg.keyboard.press("Escape")
+        ok(pg.locator(".tf").first.is_visible(), "at 1800 px, the Contents and the index open, three columns have no room: the folds")
+        pg.click(".railfold")
+        pg.wait_for_selector("article.cmp .rc .rt")
+        ok(pg.locator(".tf").first.is_hidden(), "the Contents folded, the page is in columns")
+        pg.evaluate("scrollTo(0, document.getElementById('1:4.3').closest('.row').getBoundingClientRect().top + scrollY - 10)")
+        pg.click(".railfold")
+        pg.wait_for_function("!document.querySelector('article.cmp')")
         top = pg.evaluate("(() => { const r = [...document.querySelectorAll('main p.t[id]')]"
                           ".find(p => p.getBoundingClientRect().bottom > 40); return r ? r.id : null; })()")
         ok(pg.locator(".tf").first.is_visible() and top == "1:4.3",
-           f"unticked, the folds are back and the paragraph at the top stays there ({top})")
+           f"shown again, the folds are back and the paragraph at the top stays there ({top})")
         pg.reload()
-        pg.wait_for_selector("main.reader")
-        ok(pg.locator("article.cmp").count() == 0, "and a reload leaves it off")
-        pg.evaluate("ubSettings.set('translations', '')")
-        pg.click(".gear")
-        pg.click("#set-t-translations")
-        ok(pg.is_disabled("dialog.settings input[name=compare]"),
-           f"with none ticked its switch is greyed ({pg.url}, {pg.evaluate('ubSettings.get().translations')!r},"
-           f" {pg.get_attribute('dialog.settings label:has(input[name=compare])', 'class')!r})")
-        pg.keyboard.press("Escape")
-        pg.evaluate("ubSettings.set('translations', 'urantia-ru ud')")
+        pg.wait_for_selector("main.reader .tf .trfold")
+        ok(pg.locator("article.cmp").count() == 0, "and a reload leaves it so")
+        pg.set_viewport_size(USUAL)           # no room: the pages after expect the folds
 
         print("The contents in a translation")
         pg.goto(BASE + "/1:1")
@@ -828,7 +839,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_selector(":root.tocready")
         ok("The Universal Father" in pg.evaluate(RAIL1), "and one not kept leaves the rail in English")
         pg.evaluate("ubSettings.set('toc', '')")
-        pg.evaluate("ubSettings.set('compare', true)")
+        pg.set_viewport_size(WIDE)                                # room for the columns
         pg.goto(BASE + "/1:2")
         pg.wait_for_selector("article.cmp .rc[data-k=ud] .rt")
         ok("not in the offline copy" in pg.inner_text("article.cmp .cmphd > .ch[data-k=urantia-ru] .gap")
@@ -837,7 +848,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/1:3/compare")
         pg.wait_for_selector("article.cmp .rc[data-k=ud] .rt")
         ok(pg.url.endswith("/1:3"), f"offline too an old Compare address goes to the page's own, the worker answering it ({pg.url})")
-        pg.evaluate("ubSettings.set('compare', false)")           # off: the folds below
+        pg.set_viewport_size(USUAL)                               # no room: the folds below
         pg.wait_for_function("!document.querySelector('article.cmp')")
         pg.goto(BASE + "/1:1")
         pg.locator(".tf .trfold").first.click()
@@ -900,7 +911,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         # ticked and not kept saying so in each section's head: Paper 1, which
         # Aivazian's has (it ends at Paper 43), let go above.
         pg.evaluate("ubSettings.set('translations', 'ud')")
-        pg.evaluate("ubSettings.set('compare', true)")
+        pg.set_viewport_size(WIDE)                                # room for the columns
         pg.goto(BASE + "/1")
         pg.wait_for_selector("article.cmp .cmphd")
         # Each section's heads, and the columns' names once, over them all
@@ -909,7 +920,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            and pg.locator("article.cmp section .cmpnames").count() == 0,
            "Compare sets every section of the whole of Paper 1 in columns, the names of the columns once over them all")
         ok(pg.locator("article.cmp .cmphd .gap").count() == 8, "each section's head says the translation is not kept")
-        pg.evaluate("ubSettings.set('compare', false)")
+        pg.set_viewport_size(USUAL)
         pg.wait_for_function("!document.querySelector('article.cmp')")
         pg.evaluate("ubSettings.set('translations', '')")
         pg.evaluate("ubSettings.set('whole', false)")
