@@ -216,7 +216,7 @@ pace  = [0.8, 3.0]               # his median 1.63 words of the translation a se
                                  # paragraphs between 1.2 and 2.2, none outside 0.88-2.68
 
 [offline]
-measured_on = "2026-11-13"
+measured_on = "2026-11-15"
 pages       = 10613      # 1,626 sections, 4,736 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,879 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
@@ -231,7 +231,10 @@ paths       = 3879       # 2,057 headwords in book order, 1,822 of them by theme
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
                          # 1,821 until 2026-11-09: terrestrial escape cites a second chapter since its reading of Papers 49-52)
 spoken      = 1626       # one to a section
-chunks      = 423        # 421 until 2026-11-13, when the chart of the personalities came: its page
+chunks      = 424        # 423 until 2026-11-15, at index 54775e2, its readings of Papers 54 to 56:
+                         # the reading paths under L take a chunk more, read-L-6, light and life
+                         # having grown by the entries of Papers 55 and 56;
+                         # 421 until 2026-11-13, when the chart of the personalities came: its page
                          # in a chunk of its own, cosmo, and its script, cosmo.js, among the assets;
                          # 420 until 2026-11-12, when the second recording's list of files by paper
                          # came, audio-voyner, Григорий Войнер's reading of USGNY (a chunk to a voice);
