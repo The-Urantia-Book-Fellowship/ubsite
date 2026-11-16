@@ -54,7 +54,41 @@ FENCES = set("()[]{}|")
 # it is then set close to its number, (−1), = −2.  MathML takes a sign in the
 # middle of a row for binary, and set ( − 1 ).
 SIGNS = set("+−±")
-_NOTHING_BEFORE = set("+−±×⋅∗" "=<>:≈≠⊂→⩾⩽∈⇒" "([{" ",;")
+BINARY = set("+−±×⋅∗")
+RELATIONS = set("=<>:≈≠⊂→⩾⩽∈⇒")
+_NOTHING_BEFORE = BINARY | RELATIONS | set("([{" ",;")
+# Where a line may break in a formula (Tigran, 2026-11-15: "let it break a
+# formula after a relation or a binary operator").  To a browser a <math> is a
+# box, which never breaks, and a card has no sideways scroll: on a phone the
+# sum at 15:7.12 ran 332 px past its card, its result out of reach.  The rule
+# is TeX's for a formula in a line of text (The TeXbook, chapter 18, given
+# here in my words, the book not being at hand): a formula is broken only
+# after a relation, = or < or →, or after a binary operation, + or − or ×,
+# standing at its outer level, that is, in no braced group, script, root or
+# fraction; a bracket written plainly is no level of its own, so a line may
+# break inside one.  And Appendix G's, for which of them count: a
+# binary operation with nothing before it to operate on, or with a relation, a
+# closing bracket or a comma after it, is none, and of two relations together
+# the break is after the second.
+#
+# TeX weighs such a break against the line's spacing (\relpenalty 500,
+# \binoppenalty 700) and a browser cannot: it takes every break it is given
+# as it takes a space.  So two are not given: after an operator that begins
+# the formula, "≈ 10" being better moved whole; and at the × of a number
+# written 1.77 × 10¹⁴, which is one number as 10,000 is (_tokens).
+_CLOSES = set(")]},;!")
+# The forms each operator of the set has an entry for in MathML Core's
+# operator dictionary.  A browser takes an operator's form from its place,
+# prefix where it is first of several in its row, postfix where last, infix
+# otherwise, and falls back to another form, in the order infix, postfix,
+# prefix, where the dictionary has none for that one; the form gives the
+# spaces round it.  A formula cut in pieces puts operators first and last
+# that stood in the middle, so each is told the form it had (_pieces).
+_FORMS = {**{c: ("infix", "prefix") for c in "+−±"},
+          **{c: ("infix",) for c in "×⋅∗" "=<>:≈≠⊂→⩾⩽∈⇒" "/,;.…"},
+          **{c: ("prefix",) for c in "([{∑∫"},
+          **{c: ("postfix",) for c in ")]}!"},
+          "|": ("prefix", "infix", "postfix")}
 
 
 def _mo(ch: str, unary: bool = False) -> str:
@@ -174,7 +208,14 @@ class _Parser:
 
     def seq(self, closing: bool) -> str:
         """Nodes up to the group's end; a \\over splits them into a fraction."""
+        return "".join(self.row(closing)[0])
+
+    def row(self, closing: bool) -> tuple[list[str], list[str | None]]:
+        """The same nodes one by one, and beside each the relation or binary
+        operation it is, where it is one and nothing more: no sign of a
+        number, which is set as a prefix, and nothing with a script."""
         nodes: list[str] = []
+        ops: list[str | None] = []
         over: list[str] | None = None
         while True:
             t = self.peek()
@@ -191,12 +232,15 @@ class _Parser:
                 if over is not None:
                     raise MathError("two \\over in one group")
                 self.i += 1
-                over, nodes = nodes, []
+                over, nodes, ops = nodes, [], []
                 continue
-            nodes.append(self.scripted())
+            node = self.scripted()
+            ch = t[1] if t[0] == "op" else OPERATORS.get(t[1]) if t[0] == "cmd" else None
+            nodes.append(node)
+            ops.append(ch if ch in BINARY | RELATIONS and node == _mo(ch) else None)
         if over is not None:
-            return f"<mfrac>{_row(over)}{_row(nodes)}</mfrac>"
-        return "".join(nodes)
+            return [f"<mfrac>{_row(over)}{_row(nodes)}</mfrac>"], [None]
+        return nodes, ops
 
     def scripted(self) -> str:
         base, limits = self.atom()
@@ -364,9 +408,126 @@ def drawn(mathml: str) -> set[str]:
     return out
 
 
-def convert(tex: str) -> str:
-    """`2^3 - 1 = 7` -> its <math>, inline.  MathError if outside the set."""
-    body = _Parser(tex).seq(False)
-    if not body:
+RE_MO = re.compile(r"<mo( [^>]*)?>([^<]*)</mo>")
+RE_POWER_OF_TEN = re.compile(r"<msup><mn>10</mn>")
+
+
+def _elements(s: str) -> list[str]:
+    """The elements standing side by side in s, one by one."""
+    out, depth, i, start = [], 0, 0, 0
+    while i < len(s):
+        if s.startswith("</", i):
+            depth -= 1
+            i = s.index(">", i) + 1
+            if depth == 0:
+                out.append(s[start:i])
+                start = i
+        elif s.startswith("<", i):
+            j = s.index(">", i)
+            if s[j - 1] != "/":
+                depth += 1
+            elif depth == 0:
+                out.append(s[start:j + 1])
+                start = j + 1
+            i = j + 1
+        else:
+            i += 1
+    if depth or start != len(s):
+        raise MathError(f"{s!r} is not elements side by side")
+    return out
+
+
+def _is_space(node: str) -> bool:
+    return node.startswith("<mspace") and node.endswith("/>") and node.count("<") == 1
+
+
+def _char(node: str) -> str | None:
+    """The character of a node that is one operator and nothing more."""
+    m = RE_MO.fullmatch(node)
+    return html.unescape(m[2]) if m else None
+
+
+def _cuts(nodes: list[str], ops: list[str | None]) -> list[int]:
+    """After how many of the nodes a line may break (BINARY, above)."""
+    out = []
+    for i, op in enumerate(ops):
+        if op is None or i == 0:
+            continue
+        # A space typed after it stays with it, as TeX's glue does, which is
+        # dropped at a break.
+        j = i + 1
+        while j < len(nodes) and _is_space(nodes[j]):
+            j += 1
+        if j == len(nodes):
+            continue                            # nothing after it
+        k = i - 1
+        while k > 0 and _is_space(nodes[k]):
+            k -= 1
+        if op in RELATIONS:
+            if ops[j] in RELATIONS:
+                continue                        # := and the like: after the second
+        else:
+            if _char(nodes[k]) in _NOTHING_BEFORE:
+                continue                        # nothing before it to operate on
+            if ops[j] in RELATIONS or _char(nodes[j]) in _CLOSES:
+                continue
+            if (op in "×⋅" and nodes[k].startswith("<mn>")
+                    and RE_POWER_OF_TEN.match(nodes[j])):
+                continue                        # 1.77 × 10¹⁴ is one number
+        out.append(j)
+    return out
+
+
+def _placed(i: int, n: int) -> str:
+    """The form a browser gives the i-th of a row's n elements by its place."""
+    return "infix" if n == 1 or 0 < i < n - 1 else "prefix" if i == 0 else "postfix"
+
+
+def _form(ch: str, placed: str) -> str | None:
+    """The form the dictionary answers for, asked for an operator so placed."""
+    if ch not in _FORMS:
+        raise MathError(f"{ch!r} at a break: its forms are not on record (_FORMS)")
+    has = _FORMS[ch]
+    return placed if placed in has else next((f for f in ("infix", "postfix", "prefix") if f in has), None)
+
+
+def _pieces(nodes: list[str], cuts: list[int]) -> list[str]:
+    """The formula's row cut after cuts[0], cuts[1]... of its nodes, each piece
+    a row of its own, in which every operator keeps the form it had."""
+    counts = [len(_elements(node)) for node in nodes]
+    row = [el for node in nodes for el in _elements(node)]
+    ends = [sum(counts[:c]) for c in cuts] + [len(row)]
+    out, a = [], 0
+    for b in ends:
+        piece = row[a:b]
+        for at in {0, len(piece) - 1}:
+            el = piece[at]
+            m = RE_MO.fullmatch(el)
+            was, now = _placed(a + at, len(row)), _placed(at, len(piece))
+            if not m or was == now or "form=" in (m[1] or ""):
+                continue
+            had = _form(html.unescape(m[2]), was)
+            if had and had != now:
+                piece[at] = f'<mo{m[1] or ""} form="{had}">{m[2]}</mo>'
+        out.append("".join(piece))
+        a = b
+    return out
+
+
+def convert(tex: str, breaks: bool = False) -> str:
+    """`2^3 - 1 = 7` -> its <math>, inline.  MathError if outside the set.
+
+    With `breaks`, a formula a line may break in (BINARY, above) is as many
+    <math> as the places make of it, a <wbr/> between them: with nothing
+    between, the pieces stand exactly as the one formula did, each operator's
+    spaces inside its piece, and a line may end after any piece.  The <wbr/>
+    is for a formula kept with the punctuation typed against it, in a span
+    that does not wrap (study.glued): a browser breaks there all the same.
+    A formula with no such place is the one <math> it was, to the byte.
+    """
+    nodes, ops = _Parser(tex).row(False)
+    if not nodes:
         raise MathError("empty")
-    return f'<math xmlns="{NS}">{body}</math>'
+    cuts = _cuts(nodes, ops) if breaks else []
+    return "<wbr/>".join(f'<math xmlns="{NS}">{piece}</math>'
+                        for piece in (_pieces(nodes, cuts) if cuts else ["".join(nodes)]))

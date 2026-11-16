@@ -589,7 +589,10 @@ def expand(tex: str, paras, sources: dict, where: str, report,
     html = render(ex.text, ex.spans, shy=hyphenator.points(ex.text, ex.spans) if hyphenator else ())
     for i, m in enumerate(maths):
         try:
-            html = html.replace(chr(SENTINEL + i), texmath.convert(m))
+            # In the text a line may break in a formula, after a relation or a
+            # binary operation (texmath.BINARY); a figure's label, above, is
+            # one box in a place drawn for it.
+            html = html.replace(chr(SENTINEL + i), texmath.convert(m, breaks=True))
         except texmath.MathError as e:
             report.hard("study-math", where, f"${m}$: {e}")
     for i, svg in enumerate(figs):

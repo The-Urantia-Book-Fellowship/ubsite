@@ -134,7 +134,10 @@ class Notes(unittest.TestCase):
 
     def test_its_math_is_mathml(self):
         html = note("$\\{\\int x^n\\,d\\mu (x)|n\\in \\mathbb {N}\\}$")[1]
-        self.assertTrue(html.startswith("<math") and "<mo>∫</mo>" in html and "<mo>∈</mo>" in html, html)
+        # And a line may break in it after a relation, as in a study note's
+        # (texmath.BINARY): the set is two <math>, the ∈ told the form it had.
+        self.assertTrue(html.startswith("<math") and "<mo>∫</mo>" in html
+                        and '<mo form="infix">∈</mo></math><wbr/><math' in html, html)
 
     def test_its_citations_are_numbered(self):
         self.assertEqual(note("по \\cite {Jeans1} и \\cite {Jeans1}")[:3:2], ("по [1] и [1]", ["Jeans1"]))
@@ -455,7 +458,7 @@ class Database(unittest.TestCase):
     def test_a_note_s_math_is_mathml(self):
         html = self.notes("19:5.7")[0][4]
         self.assertIn("<mo>∫</mo>", html)
-        self.assertIn("<mo>∈</mo>", html)
+        self.assertIn('<mo form="infix">∈</mo></math><wbr/><math', html)
 
     def test_a_note_s_sources_are_its_paper_s_in_the_order_it_cites_them(self):
         got = self.con.execute(

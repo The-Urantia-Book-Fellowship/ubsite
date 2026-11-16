@@ -52,7 +52,7 @@ def run(repo: dict, block: dict, report) -> int:
             unknown[m].append(n.ref)
         for m in maths:
             try:
-                texmath.convert(m)
+                texmath.convert(m, breaks=True)
             except texmath.MathError as e:
                 unset.append(f"{n.ref} ${m}$: {e}")
     for s in sources:

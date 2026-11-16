@@ -9,6 +9,7 @@ tests/fixtures/tr-math.tsv every one of ud's translator's notes
 """
 
 import pathlib
+import re
 import sys
 import unittest
 import xml.etree.ElementTree as ET
@@ -145,6 +146,119 @@ class Forms(unittest.TestCase):
         # so the subset is told to keep it (11:2.2's eccentricity lost it).
         self.assertIn("√", texmath.drawn(texmath.convert("\\sqrt{1-(6/7)^2}")))
         self.assertNotIn("√", texmath.drawn(texmath.convert("(6/7)^2")))
+
+
+def cut(tex: str) -> list[str]:
+    """The bodies of the <math> a formula is, where a line may break in it."""
+    out = texmath.convert(tex, breaks=True)
+    head = f'<math xmlns="{texmath.NS}">'
+    assert out.startswith(head) and out.endswith("</math>")
+    return out[len(head):-len("</math>")].split(f"</math><wbr/>{head}")
+
+
+class Breaks(unittest.TestCase):
+    """A line may break in a formula after a relation or a binary operation at
+    its outer level, TeX's rule (Tigran, 2026-11-15, of 15:7.12's sum, which ran
+    off its card on a phone: "let it break a formula after a relation or a
+    binary operator")."""
+
+    INF = '<mo form="infix">{}</mo>'
+
+    def test_after_a_relation_or_a_binary_operation(self):
+        self.assertEqual(cut("2^3 - 1 = 7"),
+                         ["<msup><mn>2</mn><mn>3</mn></msup>" + self.INF.format("−"),
+                          "<mn>1</mn>" + self.INF.format("="), "<mn>7</mn>"])
+        self.assertEqual(cut("10\\times100\\times100=1,000,000"),
+                         ["<mn>10</mn>" + self.INF.format("×"), "<mn>100</mn>" + self.INF.format("×"),
+                          "<mn>100</mn>" + self.INF.format("="), "<mn>1,000,000</mn>"])
+        self.assertEqual(cut("n<1"), ["<mi>n</mi>" + self.INF.format("&lt;"), "<mn>1</mn>"])
+
+    def test_a_plain_bracket_is_no_level_of_its_own(self):
+        self.assertEqual(cut("7\\times(1+70)"),
+                         ["<mn>7</mn>" + self.INF.format("×"),
+                          '<mo stretchy="false">(</mo><mn>1</mn>' + self.INF.format("+"),
+                          '<mn>70</mn><mo stretchy="false">)</mo>'])
+
+    def test_not_in_a_group_a_script_a_root_or_a_fraction(self):
+        for tex in ("{a+b}", "x_{k+1}", "10^{-5}", "N_{k-1}", "\\sqrt{a+b}", "{a+b \\over c-d}",
+                    "a+b \\over c", "\\mathbf{a+b}", "\\overline{a+b}"):
+            with self.subTest(tex=tex):
+                self.assertEqual(cut(tex), [body(tex)])
+
+    def test_a_sign_of_a_number_is_no_place(self):
+        # It has nothing before it to operate on, and is set as a prefix.
+        self.assertEqual(cut("-1"), [body("-1")])
+        self.assertEqual(cut("a=-1"), ["<mi>a</mi>" + self.INF.format("="), '<mo form="prefix">−</mo><mn>1</mn>'])
+        self.assertEqual(cut("(-1)^k"), [body("(-1)^k")])
+        self.assertEqual(cut("a\\times -b"),
+                         ["<mi>a</mi>" + self.INF.format("×"), '<mo form="prefix">−</mo><mi>b</mi>'])
+
+    def test_the_operator_that_counts_by_tex(self):
+        # Of two relations together the break is after the second; a binary
+        # operation before a closing bracket, a comma or a relation is none.
+        self.assertEqual(cut("x:=y"), ["<mi>x</mi><mo>:</mo>" + self.INF.format("="), "<mi>y</mi>"])
+        for tex in ("(a+)", "a+,b", "a\\times=b"):
+            with self.subTest(tex=tex):
+                self.assertNotIn(self.INF.format("+"), "".join(cut(tex)))
+                self.assertNotIn(self.INF.format("×"), "".join(cut(tex)))
+
+    def test_no_break_after_an_operator_that_begins_the_formula(self):
+        # A browser weighs nothing, as TeX does with its penalties: it would
+        # leave "≈" at a line's end as readily as a word.
+        self.assertEqual(cut("\\approx 10^{12}"), [body("\\approx 10^{12}")])
+        self.assertEqual(cut("=5"), [body("=5")])
+
+    def test_a_number_times_a_power_of_ten_is_one_number(self):
+        for tex in ("1.77\\times 10^{14}", "2.209\\times10^9", "6\\cdot 10^{-5}"):
+            with self.subTest(tex=tex):
+                self.assertEqual(cut(tex), [body(tex)])
+        self.assertEqual(len(cut("7^6\\times10^{33}\\approx1.2\\times10^{38}")), 3)
+        self.assertEqual(cut("7^6\\times10^{33}\\approx1.2\\times10^{38}")[2], body("1.2\\times10^{38}"))
+        # Powers of ten multiplied are no one number.
+        self.assertEqual(len(cut("10^3\\times10^5\\times10^7=10^{15}")), 4)
+
+    def test_a_space_typed_after_the_operator_stays_with_it(self):
+        self.assertEqual(cut("a=\\,b"), ['<mi>a</mi><mo>=</mo><mspace width="0.1667em"/>', "<mi>b</mi>"])
+        self.assertEqual(cut("a=\\,"), [body("a=\\,")])
+
+    def test_every_operator_keeps_the_form_it_had(self):
+        # A browser takes the form from the place: first of several in its row
+        # a prefix, last a postfix.  Cut, the operator before a break is last
+        # in its piece, and what follows may be first: | has all three forms in
+        # the dictionary, and would have lost the spaces it was given.
+        self.assertEqual(cut("a=|x|+1"),
+                         ["<mi>a</mi>" + self.INF.format("="),
+                          '<mo stretchy="false" form="infix">|</mo><mi>x</mi><mo stretchy="false">|</mo>'
+                          + self.INF.format("+"), "<mn>1</mn>"])
+        # A bracket has one form, whatever its place: nothing to say.
+        self.assertTrue(cut("a+(b)")[1].startswith('<mo stretchy="false">(</mo>'))
+
+    def test_every_operator_of_the_set_has_its_forms_on_record(self):
+        ops = set(texmath.OPERATORS.values()) | {texmath.CHARS.get(c, c) for c in texmath.OPCHARS} | {"∑", "∫"}
+        self.assertEqual(ops - set(texmath._FORMS), set())
+        self.assertLessEqual(texmath.BINARY | texmath.RELATIONS,
+                             {c for c, forms in texmath._FORMS.items() if "infix" in forms})
+
+    def test_the_corpus_cut_is_the_corpus_whole(self):
+        form = re.compile(' form="(?:prefix|infix|postfix)"')
+        n = broken = 0
+        for name in ("study-math.tsv", "tr-math.tsv"):
+            for line in (ROOT / "tests" / "fixtures" / name).read_text(encoding="utf-8").splitlines():
+                if not line or line.startswith("#"):
+                    continue
+                ref, tex = line.split("\t", 1)
+                with self.subTest(ref=ref, tex=tex):
+                    whole, pieces = body(tex), cut(tex)
+                    n += 1
+                    broken += len(pieces) > 1
+                    # Without a break asked for, never one: a figure's label.
+                    self.assertNotIn("<wbr", texmath.convert(tex))
+                    self.assertEqual(form.sub("", "".join(pieces)), form.sub("", whole))
+                    for piece in pieces:
+                        ET.fromstring(f'<math xmlns="{texmath.NS}">{piece}</math>')
+                    if len(pieces) == 1:
+                        self.assertEqual(pieces[0], whole)
+        self.assertEqual((n, broken), (159, 68))
 
 
 class Refused(unittest.TestCase):
