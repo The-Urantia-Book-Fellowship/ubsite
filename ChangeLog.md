@@ -76,6 +76,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The index is revised from its readings of Papers 58 and 59, with nine entries more, among them the dust we tread upon that was once alive, the life of Urantia planned on the planet, and plants crawling onto land 400 million years ago; twelve entries are reworded or have a citation put right, space energy now sends to ultimata, and amoeba is spelled ameba, as the book spells it.
 - The translations you have ticked stand in parallel columns beside the English wherever the window has room for them, each column at least about half a full line wide, and in a fold under each paragraph where it has not, on a tablet and a phone as on a desk; folding the Contents or the index away, a smaller Text size or a wider window makes room. All of them or none.
 - In Width Measured each of the parallel columns may be as wide as a full line of the text where the window has room; until now they shared the width of one line.
 - Text size and Interface text size have four steps, Smaller, Standard, Larger and Largest: Standard is the size that was Smaller, and the new Smaller is a step below it. A size you chose stays as it was; if you never chose one, the site is now a step smaller.

@@ -217,7 +217,7 @@ pace  = [0.8, 3.0]               # his median 1.63 words of the translation a se
 
 [offline]
 measured_on = "2026-11-16"
-pages       = 10610      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,877 reading paths,
+pages       = 10614      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,881 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
                          # 197 more the same day: the whole paper's page, /N, joined from its
@@ -230,8 +230,11 @@ pages       = 10610      # 1,626 sections, 4,735 headwords, 27 index letters, 21
                          # three fewer since 2026-11-16, at index bc83adc, its reading of Paper 57:
                          # the headword Uranus is withdrawn, a planet the book never names, and
                          # Venus (planet), left with fewer than three paragraphs, has no reading
-                         # path, in book order or by theme (10,613 before)
-paths       = 3877       # 2,056 headwords in book order, 1,821 of them by theme too (2,057 and 1,822
+                         # path, in book order or by theme (10,613 before);
+                         # four more the same evening, at index 194519e, its readings of Papers 58
+                         # and 59: dust and Wales have reading paths, in book order and by theme
+paths       = 3881       # 2,058 headwords in book order, 1,823 of them by theme too, since dust and Wales
+                         # have paths at index 194519e (2026-11-16); 2,056 and 1,821 before; (2,057 and 1,822
                          # until 2026-11-16: Venus (planet) has no path since the index's reading of
                          # Paper 57 withdrew the entry that had it a planet of Angona's; 1,820 by theme until
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
