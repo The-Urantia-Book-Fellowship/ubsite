@@ -1,0 +1,60 @@
+# Paper 54, Problems of the Lucifer Rebellion: the British Study Edition has
+# no note and no source in it (d6c3206), and Block has no chart for it
+# (../block-sources/MANIFEST.tsv).  One note, with no credit line, written at
+# Tigran's asking on 2026-11-15, out of the order of the book: the index's
+# reading of Paper 54 had just taken out `superuniverses, the seven >
+# derivation of age of s. (54:5.13)', an inference the paragraph does not
+# make, and he asked for the derivation as a study note at the paragraph
+# instead.  First drafted that day in the index's session (../index
+# journal.md; kept as var/study/054.index-session.toml) and revised in review
+# here: the principle the working rests on is given in the book's own words
+# (65:8.3), the yardstick at Uversa is read as the Ancients of Days' (53:1.2,
+# 18:3.4, 15:0.2), and Lucifer's three billion years, which the first draft
+# gave without remark, are set beside what the book says of his order
+# (35:8.3, 35:8.7, 57:3.10), by which he would be far older.  THE PAPER HAS
+# NOT HAD ITS FULL PASS: nothing else of it was read for notes, and its turn
+# comes in the order of the book.  Checked: every quotation in the press
+# text; that 987,000,000,000 is the largest count of years ago in the book
+# (every figure of twelve digits before "years", and "billion" and "trillion"
+# beside "years"); Psalms 90:10 in the edition's KJV (Psa.tex); the
+# arithmetic recomputed, below.  The review is var/study/review-054.md.
+# RULED by Tigran on 2026-11-16, in the session, the review's table left
+# as it was: "54:5.13 seems fine to me", after he had asked on 2026-11-15
+# for its last sentence to be made clear (below); so Lucifer's caution, the
+# yardstick read as the Ancients of Days' and the Psalm's seventy years
+# stand as proposed.  `ahead`: the paper's review is still to come.
+
+paper = 54
+chart = "none"
+ahead = true                     # written ahead of the paper's review (README)
+
+# F1.  The arithmetic: 70 x 365.25 = 25,567.5 days = 2,209,032,000 seconds;
+# / 2.5 = 883,612,800, said as 883.6 million; x 200,000 = 1.7672e14 years, 177
+# trillion (the book's
+# trillion, 10^12: 15:2.8's 1,000,000,000,000 worlds are "approximately one
+# trillion" at 15:7.11); with sixty years 1.5148e14, with eighty 2.0197e14;
+# 1.7672e14 / 9.87e11 = 179.  Lucifer: 25,567.5 / 2.5 = 10,227; x 300,000 =
+# 3.068e9 years (2.56e9 with three days, 3.84e9 with two).  The arithmetic is
+# in words and two short formulas because a formula does not break: the long
+# one first written, 200,000 x 70 x 365.25 x 86,400 / 2.5, ran past the card's
+# edge on a phone.  The caution: Nebadon began
+# with all twelve million Lanonandeks (35:8.3), whose number is stationary
+# (35:8.7), and who are its System Sovereigns and Planetary Princes (35:8.1);
+# its oldest inhabited planets date from 200,000,000,000 years ago (57:3.10),
+# the staff of Michael having arrived 300,000,000,000 years ago (57:3.9).  A
+# life of 2e11 years: 300,000 / 2e11 = 1.5e-6 of it, and 1.5e-6 of seventy
+# years (613,620 hours) is 0.92 hours, 55 minutes; of 3e11, 37 minutes.
+# Psalms 90:10 has both spans: "threescore years and ten; and if by reason of
+# strength they be fourscore years".  What the 177 trillion is the age of is
+# a reading, and the note says so.  The last two sentences were one, "The two
+# and a half seconds may be as free, and the 177 trillion years a scale rather
+# than a date", which Tigran asked to have made clear (2026-11-15): "as free"
+# had nothing before it to be as free as, and "a scale" did not say of what.
+# Trillions holds either way: a sixtieth of the figure is 2.9e12, and the
+# book's earliest date already has the Ancients of Days at Uversa 9.87e11
+# years ago.
+[[note]]
+at = "54:5.13"
+after = "seconds of its commission."
+origin = "none"
+tex = '''The comparison can be worked, on a principle the book states elsewhere: ``The individual's yardstick for time measurement is the length of his life'' (\bibref[65:8.3]{p065 8:3}). The manifesto was issued ``about two hundred thousand years ago'' (\bibref[53:4.1]{p053 4:1}), and the first hearing was held ``during the time of effecting this revelation'' (\bibref[54:4.8]{p054 4:8}): 200,000 years from the crime to the trial. Take the mortal's life as seventy years, the ``threescore years and ten'' of Psalms~90:10, which the book recalls at \bibref[77:2.11]{p077 2:11}. With 365.25 days to the year and 86,400 seconds to the day, seventy years are $2.209\times 10^9$ seconds, 883.6 million times two and a half seconds. If 200,000 years are to the life by which Uversa measures as two and a half seconds are to the mortal's seventy years, that life is 883.6 million times 200,000 years: $1.77\times 10^{14}$ years, about 177 trillion. A mortal life of sixty years would give 151 trillion, and the Psalm's ``fourscore'' 202 trillion. Whose life it is the paragraph does not say. ``Judgment in such matters belongs to the Ancients of Days'' (\bibref[53:1.2]{p053 1:2}), who ``were all trinitized at the same time'' and ``represent the beginning of the personality records of the universe of universes'' (\bibref[18:3.4]{p018 3:4}). If the yardstick is theirs, the figure is the time since that beginning, and puts a number to the ``near eternity'' from which their administration has existed (\bibref[15:0.2]{p015 0:2}). This is a reading of the comparison, not a statement of the text. The book's own dates do not reach so far: the earliest is 987,000,000,000 years ago, when an inspector, ``traveling out from Uversa, reported to the Ancients of Days'' (\bibref[57:1.3]{p057 1:3}), and the figure is some 180 times that. The first comparison counsels caution, however. Seventy years are 25,567.5 days, 10,227 times two and a half days; so if the 300,000 years from the crime to the end of the trial are to Lucifer's life as ``two or three days'' are to the mortal's, his life is 10,227 times 300,000 years: $3.1\times 10^9$ years, about three billion. Yet Nebadon ``began its existence with exactly twelve million Lanonandeks'' (\bibref[35:8.3]{p035 8:3}), the order which rules its systems and its inhabited worlds, and its oldest inhabited planets date from 200,000,000,000 years ago (\bibref[57:3.10]{p057 3:10}). If Lucifer is as old as that, 300,000 years are to him less than an hour of the mortal's seventy years, not two or three days; and the paragraph claims no more for these than that they ``would be nearer a comparison''. The two and a half seconds may be meant as loosely as the two or three days. If so, the 177 trillion years do not date the beginning of the Ancients of Days; they show only that the yardstick of Uversa is counted in trillions of years, as the mortal's is in tens.'''
