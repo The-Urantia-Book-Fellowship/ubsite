@@ -1,0 +1,270 @@
+# Paper 17, The Seven Supreme Spirit Groups: the British Study Edition has no
+# note on it at d6c3206 and no source; Block has no chart; the press has no
+# 1955 reading in the paper.  Tigran's Russian translation has two notes, both
+# on the Russian wording (17:2.1, an alternative rendering of "are of divine
+# Trinity origin"; 17:5.1, that "whose" means the Master Spirits), and neither
+# is carried.  Sadler's Analytic Study of Part I, pp. 379-383 on this paper,
+# was read whole: it has no Bible reference and no remark of his own here but
+# the list of Majeston's four makers on p. 380.  So all 29 notes were found in
+# review, with no credit line.  No human source was found for the paper, and
+# none is claimed.  The notes set a paragraph beside the book's own fuller
+# words elsewhere, several of them answering notes of earlier papers that
+# already point into this one, and, as Tigran asked of every paper from 15 on,
+# they take up the places that are interesting or hard: why there are "fifty"
+# Reflective Spirits and forty-nine (17:2.1), with the Bible's own forty-nine
+# and one, the jubilee; a reaction of Deity that "was not foreknown" beside
+# "God is never subjected to surprise" (17:2.5); creatures with powers their
+# creators do not show (17:3.3); "seemingly personal beings ... devoid of
+# will" and how many of the seven groups are persons (17:4.3); Circuit
+# Spirits "coexistent with" the Master Spirits whose offspring they are
+# (17:5.3); the stage our own Mother Spirit has reached (17:6.8); and the
+# order of the five points on God the Sevenfold (17:8.3).  The review,
+# numbered F1-F29 in the order of the text, is var/study/review-017.md.
+# RULED by Tigran on 2026-11-16, all 29 as proposed ("all is accepted, please
+# apply everything, commit, push and deploy"), with the questions taken as
+# recommended.  F21 and F28 point to the note at 16:4.1 and F29 to the note at
+# 16:3.19, ruled the same day.
+
+paper = 17
+chart = "none"
+
+# Added, as in earlier papers: p. 380 (PDF page 398) and, from his study of
+# Paper 16, p. 369 (PDF page 387).
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# F1, added: the same seven in the register of Uversa (30:2.14-21), the three
+# of triune origin (30:1.3-6), and where each group is told at length
+[[note]]
+at = "17:0.1"
+after = "children of the Paradise Trinity"
+origin = "none"
+tex = '''The seven stand in this order in the register of Uversa, under ``The Supreme Spirits'' (\bibref[30:2.14--21]{p030 2:14}), and the first three open the Paradise list of triune-origin beings (\bibref[30:1.3--6]{p030 1:3}). Several are told at length in other places: the Master Spirits in Paper~16, the Reflective Spirits again in their offspring, the seconaphim (Paper~28), the Spirits of the Circuits at \bibref[26:2.6]{p026 2:6}, the Creative Spirits in Paper~34, and the adjutants at \bibref[36:5.1--17]{p036 5:1}.'''
+
+# F2, added: why the Mother Spirit can discharge the Master Spirit's function
+# (34:1.3, 16:5.3), and 16:6.2
+[[note]]
+at = "17:0.12"
+after = "courts of the Ancients of Days"
+origin = "none"
+tex = '''So Paper~16: ``On a world like Urantia we do not encounter the direct influence of the Seven Master Spirits in the affairs of the human races. You live under the immediate influence of the Creative Spirit of Nebadon'' (\bibref[16:6.2]{p016 6:2}). She can discharge his function because she bears his likeness: at her personalization ``The local universe Mother Spirit thus acquires a personal nature tinged by that of the Master Spirit of the superuniverse of astronomic jurisdiction'' (\bibref[34:1.3]{p034 1:3}), and ours is ``in nature and character, quite like the Master Spirit of Orvonton'' (\bibref[16:5.3]{p016 5:3}).'''
+
+# F3, added: the seven executive spheres (13:4.1-2), one of the Master
+# Spirits' three addresses (the note at 13:1.9)
+[[note]]
+at = "17:1.1"
+after = "innermost Havona circuit"
+origin = "none"
+tex = '''These are ``the seven orbs of the Infinite Spirit'' of \bibref[13:4.1]{p013 4:1}. The Master Spirits ``maintain their personal stations, their power focuses, on the periphery of Paradise, but all operations concerned with their management and direction of the grand universe are conducted on and from these seven special executive spheres'' (\bibref[13:4.2]{p013 4:2}); on their three Paradise addresses see the note at \bibref[13:1.9]{p013 1:9}. From the same spheres the standard time of Paradise and Havona is sent out (\bibref[14:1.12]{p014 1:12}).'''
+
+# F4, added: two ways of presiding, in consecutive papers (16:3.15)
+[[note]]
+at = "17:1.2"
+after = "preside over that joint council"
+origin = "none"
+tex = '''The Master Spirits, whom they serve, are otherwise ordered: the seventh of them ``inherently becomes the presiding head of the Paradise council of the Seven Master Spirits'', by what he is (\bibref[16:3.15]{p016 3:15}). Among seven who are ``uniformly and divinely perfect'' no one, it seems, is head by nature, and the chair is filled by choice at each meeting.'''
+
+# F5, added: how they "see all": reflectivity (9:7.1), and 17:1.10
+[[note]]
+at = "17:1.3"
+after = "even know all"
+origin = "none"
+tex = '''The words recall the account of reflectivity in Paper~9, ``that unique and inexplicable power to see, hear, sense, and know all things as they transpire throughout a superuniverse'' (\bibref[9:7.1]{p009 7:1}, with its notes); and it is ``through the unique functioning of universal reflectivity'' that the seven address the whole grand universe at once (\bibref[17:1.10]{p017 1:10}).'''
+
+# F6, added, of the interesting kind: Orvonton is first the name of a world;
+# the other six names are not given (looked for: no other superuniverse is
+# named in the book)
+[[note]]
+at = "17:1.5"
+after = "named after them"
+origin = "none"
+tex = '''Orvonton, then, is the name of a world of Paradise before it is the name of a superuniverse, and our superuniverse is called after the sphere from which it is managed. Of the other six the book gives neither name: no superuniverse but ours is named in it, and the six are spoken of by number, as their Master Spirits are (\bibref[16:3.1]{p016 3:1}).'''
+
+# F7, added: why these two are excepted (19:5.2-3, 107:6.4)
+[[note]]
+at = "17:1.6"
+after = "Inspired Trinity Spirits and Thought Adjusters"
+origin = "none"
+tex = '''Both go by ways of their own. The Inspired Trinity Spirits ``seem to operate over all known circuits and appear to act well-nigh independently of time and space''; they ``are a secret of the Paradise Trinity'' (\bibref[19:5.2--3]{p019 5:2}). The Adjusters ``traverse space over the instantaneous and universal gravity circuits of the Paradise Isle'' (\bibref[107:6.4]{p107 6:4}), and their comings and goings center on Divinington (see the note at \bibref[13:1.4]{p013 1:4}).'''
+
+# F8, added, of the interesting kind: who this chief is (31:10.9, 7:5.8,
+# 24:6.8); that the two councils are one is given as likely
+[[note]]
+at = "17:1.7"
+after = "Paradise Corps of the Finality"
+origin = "none"
+tex = '''The chief, it seems, is Grandfanda. The seven finaliter corps have each a presiding head, ``and the seven constitute the Supreme Council of Destiny on Paradise; and during the present universe age Grandfanda is the chief of this supreme body'' (\bibref[31:10.9]{p031 10:9}). He is ``the first of all mortals to attain Havona'' (\bibref[7:5.8]{p007 5:8}), a native of ``planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one'' (\bibref[24:6.8]{p024 6:8}).'''
+
+# F9, added: the cabinets are chosen from below and only advise; the notes at
+# 14:3.1 and 15:12.1 on government
+[[note]]
+at = "17:1.8"
+after = "two advisory cabinets"
+origin = "none"
+tex = '''Both are chosen from below: the first by ``The children of the Infinite Spirit on the headquarters of each superuniverse'', from their own ranks and for a term; the second by ``the perfecting and ascending beings who transiently dwell on the seven superuniverse headquarters''. And both advise only. So the pilgrims of time have a voice, through their own representatives, at the executive center of their superuniverse. On government among the perfect and the imperfect see the notes at \bibref[14:3.1]{p014 3:1} and \bibref[15:12.1]{p015 12:1}.'''
+
+# F10, added: the term is used only here and its length is not given; the
+# Paradise-Havona day (14:1.12 and its notes)
+[[note]]
+at = "17:1.10"
+after = "Paradise millennium"
+origin = "none"
+tex = '''The term is used only here, and its length is not given. The book defines a day of Paradise and Havona, ``just seven minutes, three and one-eighth seconds less than one thousand years of the present Urantia leap-year calendar'' (\bibref[14:1.12]{p014 1:12}, with its notes), and no Paradise year. If a thousand such days are meant, the conclave falls once in about a million of our years.'''
+
+# F11, added, of the hard kind: fifty and forty-nine; seven times seven and
+# one; the Bible's two forty-nines and one (Leviticus 25:8-10, 23:15-16; Acts
+# 2:1), the first of which the paper's own word recalls (17:3.11; 33:3.5,
+# 27:7.8).  Whether the echo is meant is not claimed
+[[note]]
+at = "17:2.1"
+after = "fifty of these"
+origin = "none"
+tex = '''Fifty, though the next sentences make forty-nine: seven created at a time, in seven episodes, one with each Master Spirit, $7\times 7=49$. The fiftieth is Majeston, who came when the forty-ninth had personalized, and not as they came (\bibref[17:2.2]{p017 2:2}). Seven sevens and one more is a reckoning of the Bible's too, twice over. The jubilee: ``seven times seven years \ldots\ forty and nine years. \ldots\ And ye shall hallow the fiftieth year, and proclaim liberty throughout \bibemph{all} the land'' (Leviticus~25:8--10). And Pentecost, whose Greek name means fiftieth: ``Even unto the morrow after the seventh sabbath shall ye number fifty days'' (Leviticus~23:16; Acts~2:1). Whether the paper means the likeness it does not say; but jubilee is its own word for one of the occasions on which all seven groups act in unison under Majeston (\bibref[17:3.11]{p017 3:11}), and for the day of a Creator Son's enthronement, ``the jubilee of jubilees'' (\bibref[33:3.5]{p033 3:5}).'''
+
+# F12, added: who the Supreme Creators are (56:5.3), and that their union
+# with the Trinity is the source of the Supreme (0:7.9)
+[[note]]
+at = "17:2.2"
+after = "Supreme Creator Personalities"
+origin = "none"
+tex = '''They are named at \bibref[56:5.3]{p056 5:3}: ``the Supreme Creators---the local universe Creator Sons and Spirits, the superuniverse Ancients of Days, and the Seven Master Spirits of Paradise. These beings constitute the first three levels of God the Sevenfold''. The sentence that follows here is the Foreword's, told as an event: the Supreme Being is ``the Deity correlator and synthesizer of time-space divinity, of triune Paradise Deity in experiential association with the Supreme Creators of time and space'' (\bibref[0:7.9]{p000 7:9}). This paper tells when that association first bore fruit: when the Master Spirits created with the Trinity.'''
+
+# F13, added: what else the book says of Majeston (0:7.9, 0:3.14, 116:4.3,
+# 106:8.20); Sadler's four makers, p. 380; the note at 14:6.36
+[[note]]
+at = "17:2.2"
+after = "universe of universes"
+origin = "none"
+tex = '''Of Majeston the book says more elsewhere. ``\bibemph{The Supreme Being} is not a direct creator, except that he is the father of Majeston'' (\bibref[0:7.9]{p000 7:9}). In him is ``the factualizing mind of the Supreme as a time-space experience'' (\bibref[0:3.14]{p000 3:14}): ``Majeston appeared and ever since has focalized the cosmic presence of the Supreme Mind, while the Master Spirits continue as source-centers for the far-flung ministry of the cosmic mind'' (\bibref[116:4.3]{p116 4:3}). And Paper~106 adds a participant not named here: he ``was actualized \ldots\ by the Deity Absolute, acting through the Ultimate and in response to the initial creative mandate of the Supreme Being'' (\bibref[106:8.20]{p106 8:20}). Sadler counts four makers from this paragraph, the Seven Master Spirits, the Paradise Trinity, the Supreme Being and the Deity Absolute (\cite{Sadler2003}, p.~380). See also the note at \bibref[14:6.36]{p014 6:36}.'''
+
+# F14, added: he is in the list of the unclassified (30:1.109-112), which
+# bears the Counselor out
+[[note]]
+at = "17:2.4"
+after = "catalogue of Paradise personalities"
+origin = "none"
+tex = '''He is found accordingly among the few set after it, ``Majeston of Paradise'' and ``The Unnamed Reflectivator Liaisons of Majeston'', of whom the compiler says: ``none of them appear in the Paradise classification as revealed herein. These are the unclassified few; you have yet to learn of the unrevealed many'' (\bibref[30:1.109--112]{p030 1:109}).'''
+
+# F15, added, of the hard kind: "not foreknown" beside 3:3.4 and 28:6.11; by
+# whom it was not foreknown is read from the paragraph's own last sentence
+[[note]]
+at = "17:2.5"
+after = "was not foreknown"
+origin = "none"
+tex = '''Not foreknown by whom? The book has said: ``One thing is certain: God is never subjected to surprise'' (\bibref[3:3.4]{p003 3:4}), and ``The Gods foresee, hence foreknow'' (\bibref[28:6.11]{p028 6:11}). The paragraph's last sentence answers: the response ``was vastly beyond their purposeful intent and greatly in excess of their conceptual forecasts'', \bibemph{their} being ``the Supreme Being and his associates''. It was the Supreme Being and his associates whose forecasts were surpassed; of the Paradise Deities nothing of the kind is said.'''
+
+# F16, added: where the Ancients of Days abide (18:3.6), so that the two
+# places differ; Urantia has such a point too (189:3.2)
+[[note]]
+at = "17:3.1"
+after = "point of spiritual polarity"
+origin = "none"
+tex = '''The point of spiritual polarity is where the rulers are: ``The personal abodes of each trio of the Ancients of Days are located at the point of spiritual polarity on their headquarters sphere'' (\bibref[18:3.6]{p018 3:6}). So the Reflective Spirits do not sit with the Ancients of Days, and reach them through the Image Aids, ``their personal voices to the courts of the Ancients of Days'' (\bibref[17:3.4]{p017 3:4}). A planet has such a point too: at the resurrection roll call on Urantia ``Gabriel and the archangel hosts moved to the place of the spiritual polarity of the planet'' (\bibref[189:3.2]{p189 3:2}).'''
+
+# F17, added: the secret sphere is Spiritington (13:1.10 and its note); named
+# and unnamed, like the Master Spirits (16:3.1)
+[[note]]
+at = "17:3.2"
+after = "secret spheres of Paradise"
+origin = "none"
+tex = '''The sphere is Spiritington: ``\bibemph{The secrets of Spiritington} involve the impenetrable mysteries of reflectivity. \ldots\ Reflectivity is a secret of God the Spirit'' (\bibref[13:1.10]{p013 1:10}, with its note). Like the Master Spirits, who ``have names, but we elect to introduce them by number'' (\bibref[16:3.1]{p016 3:1}), the Reflective Spirits are named and their names withheld.'''
+
+# F18, added, of the interesting kind: creatures with powers their creators do
+# not show; Gabriel (33:4.3); the same of every group (10:5.2) and of the
+# Trinity (104:2.4); the notes at 9:3.2 and 12:9.3
+[[note]]
+at = "17:3.3"
+after = "not discernible in the Creator"
+origin = "none"
+tex = '''The book says the same in other places, and of the highest things. Of Gabriel, the first-born of a local universe: ``a unique personality possessing many wonderful traits not visibly present in either ancestor'' (\bibref[33:4.3]{p033 4:3}). Of every association: ``The group potential is always far in excess of the simple sum of the attributes of the component individuals'' (\bibref[10:5.2]{p010 5:2}). Of the Trinity itself: its functions are ``something unique, original, and not wholly predictable from an analysis of the attributes of Father, Son, and Spirit'' (\bibref[104:2.4]{p104 2:4}). One may compare what the philosophy of those years called emergence, a whole with properties not to be found in its parts (see the notes at \bibref[12:9.3]{p012 9:3}); the book finds the like in heredity, even divine. Sadler has the sentence nearly word for word in his study of Paper~9: see the note at \bibref[9:3.2]{p009 3:2}.'''
+
+# F19, added: the two kinds of record from Urantia to Paradise (25:5.1-2),
+# and one living record that concerns every mortal (28:6.5)
+[[note]]
+at = "17:3.6"
+after = "dead records of the universe"
+origin = "none"
+tex = '''The two kinds run from our world to Paradise: ``in a local universe, more of the written records and less of the living; on Paradise, more of the living and less of the formal; on Uversa, both are equally available'' (\bibref[25:5.2]{p025 5:2}). On Paradise the formal archives ``stand in contrast to the living records of registry in the minds of the custodians of knowledge'' (\bibref[25:5.1]{p025 5:1}). One of the living records of Uversa is every mortal's concern, the seconaphim called the Memory of Mercy: ``the actual, full and replete, living records of the mercy which has been extended to individuals and races'' (\bibref[28:6.5]{p028 6:5}).'''
+
+# F20, added: borne out at 108:1.2
+[[note]]
+at = "17:3.9"
+after = "avail themselves of their content"
+origin = "none"
+tex = '''Paper~108 bears the belief out. Before an Adjuster volunteers, the data of the candidate ``are transmitted via Paradise to the reserve corps of Adjusters on Divinington by the reflectivity technique extending inward from the capitals of the local universes to the headquarters of the superuniverses'' (\bibref[108:1.2]{p108 1:2}).'''
+
+# F21, added: what the Aids are called elsewhere (15:10.20), the note at 9:7.2
+# on the mirror's name, and Sadler's guess that John saw them (p. 369; the
+# note at 16:4.1, of Paper 16, not yet ruled)
+[[note]]
+at = "17:4.1"
+after = "true to their name"
+origin = "none"
+tex = '''A mirror and its image: the Reflective Spirit has the mirror's power, and the Aids are what a mirror would show of the Spirits themselves, ``virtual duplications minus the attribute of reflectivity''. Paper~15 calls the seven of Uversa ``the spokesmen of the seven Reflective Spirits and through them representatives of the Seven Master Spirits of Paradise'' (\bibref[15:10.20]{p015 10:20}); on the names see the note at \bibref[9:7.2]{p009 7:2}. Sadler guessed that these are the seven whom John saw before the throne (Revelation~1:4): ``This passage probably refers to the seven Image Aids on Uversa'' (\cite{Sadler2003}, p.~369; see the note at \bibref[16:4.1]{p016 4:1}).'''
+
+# F22, added, of the hard kind: "seemingly personal ... devoid of will" beside
+# the book's mark of personality (16:8.5); and how many of the seven Supreme
+# Spirit groups are persons (17:5.1, 36:5.4)
+[[note]]
+at = "17:4.3"
+after = "power of choice"
+origin = "none"
+tex = '''The Counselor's ``seemingly'' is exact. Personality in the book is marked by ``self-consciousness and associated relative free will'' (\bibref[16:8.5]{p016 8:5}); by that mark beings ``devoid of will'' are not persons, whatever they seem. Nor are they alone in this among the seven Supreme Spirit groups. The Spirits of the Circuits are an ``impersonal representation'' (\bibref[17:5.1]{p017 5:1}), and the adjutants ``should not be regarded as entities; they are more like circuits'' (\bibref[36:5.4]{p036 5:4}). Of the seven groups four are persons, the Master Spirits, the Supreme Executives, the Reflective Spirits and the Creative Spirits, and the last of these only from the fourth stage of her career (\bibref[17:6.7]{p017 6:7}). ``Spirit'' in the paper's title covers persons, an image, a presence and a level of mind.'''
+
+# F23, added, of the hard kind: coexistent is not coeval (17:5.1, 26:2.6,
+# 23:1.1; the note at 14:1.9); and who Grandfanda is (7:5.8)
+[[note]]
+at = "17:5.3"
+after = "coexistent with the Seven Master Spirits"
+origin = "none"
+tex = '''Coexistent, not coeval. They are the Master Spirits' ``collective offspring'' (\bibref[17:5.1]{p017 5:1}), and Paper~26 gives their place in the order of things: they ``were not a part of the original pattern universe. They were in function after the original (eternal) creation but long before the times of Grandfanda'', and ``were discovered in function upon the organization of the grand universe'' (\bibref[26:2.6]{p026 2:6}; see the notes at \bibref[14:1.9]{p014 1:9}). The Solitary Messengers, who followed them ``Immediately'', have served ``from near eternity'' (\bibref[23:1.1]{p023 1:1}). The paragraph's point is the long interval between their appearing and their chief work: Grandfanda is ``the first of all mortals to attain Havona'' (\bibref[7:5.8]{p007 5:8}).'''
+
+# F24, added: "impersonal" here, "prepersonal" elsewhere (1:7.1, 103:1.6), and
+# the difference the paragraph itself draws
+[[note]]
+at = "17:5.5"
+after = "permanent part of Havona personalities"
+origin = "none"
+tex = '''The book has two words for what an Adjuster is. Here and at \bibref[1:7.1]{p001 7:1} it is impersonal, ``just such an impersonal entity as the Thought Adjuster'': that is, not a person. Elsewhere it is prepersonal: ``The spirit of God that dwells in man is not personal---the Adjuster is prepersonal'' (\bibref[103:1.6]{p103 1:6}), which says more, that personality lies ahead of it. The paragraph's last sentence marks where the likeness ends: an Adjuster is given to become one with the mortal for ever, and a Circuit Spirit is not.'''
+
+# F25, added: the same event from the local universe's side (34:1.1, 34:1.3-4)
+[[note]]
+at = "17:6.7"
+after = "the primary eruption"
+origin = "none"
+tex = '''Paper~34 tells the same hour as it is seen from a local universe. On Paradise the supervising Master Spirit disappears ``in the spiritual shining of the Deities'', and when he emerges ``there occurs what is known as a `primary eruption.' This is a tremendous spiritual flash, a phenomenon clearly discernible as far away as the headquarters of the superuniverse concerned'' (\bibref[34:1.1]{p034 1:1}). In the local universe ``there immediately personalizes, in the very presence of the Creator Son, a new personal representation of the Infinite Spirit'', who takes ``the personal likeness of that Master Spirit'' (\bibref[34:1.3]{p034 1:3}) and is known thenceforth in Satania as the Divine Minister: ``And she is so recognized and regarded by the Creator Son'' (\bibref[34:1.4]{p034 1:4}). The four names in quotation marks in this section (``supreme reaction of complement'', ``prayer of identification'', ``personalization ceremonies'', ``the primary eruption'') are given as names already in use; of the four only the last is described elsewhere.'''
+
+# F26, added, of the interesting kind: the two acts of that day and when it
+# came in Nebadon (33:3.5-6): our Mother Spirit is in her fifth stage
+[[note]]
+at = "17:6.8"
+after = "acknowledges the Spirit consort as his equal"
+origin = "none"
+tex = '''Paper~33 gives the day two acts. First the Spirit ``makes public and universal acknowledgment of subordination to the Son, pledging fidelity and obedience''; then the Son constitutes her ``coruler of his universe domains'', and ``there issued and went forth the final `Proclamation of Equality'\,'' (\bibref[33:3.5--6]{p033 3:5}). And it gives the date for our universe: ``This event occurred in Nebadon at the time of Michael's return to Salvington after the Urantian bestowal.'' The Divine Minister of Nebadon is therefore in the fifth of these stages, and has been since the first century of our era. Of the equality then proclaimed the same paragraph says: ``This is, in deed and in truth, the high ideal of the family and the human institution of voluntary marriage.'''''
+
+# F27, added: what the seventh career may be (21:6.3), and the finaliters'
+# parallel (31:3.3; the note at 14:6.38)
+[[note]]
+at = "17:6.10"
+after = "seventh phase of personal experience"
+origin = "none"
+tex = '''Paper~21 ventures what it may be: ``sometime in the far-distant future, in the now mobilizing universes of outer space, we believe that the liaison between a sevenfold Master Son and a seventh-stage Creative Spirit may attain to absonite levels of service attended by the appearance of new things, meanings, and values on transcendental levels of ultimate universe significance'' (\bibref[21:6.3]{p021 6:3}). The finaliters, with whom the Counselor compares her, ``are of record as only sixth-stage spirits. There undoubtedly remains one more step'' (\bibref[31:3.3]{p031 3:3}); see the note at \bibref[14:6.38]{p014 6:38}.'''
+
+# F28, added: what the adjutants are (36:5.4), their names (36:5.6-12), and
+# the notes that touch them (14:5.11; 16:4.1 of Paper 16, not yet ruled)
+[[note]]
+at = "17:7.1"
+after = "sevenfold mind bestowal"
+origin = "none"
+tex = '''The story is told at \bibref[36:5.1--17]{p036 5:1}, where the seven are named, from the spirit of intuition to the spirit of wisdom, and where it is said what they are: ``they should not be regarded as entities; they are more like circuits. \ldots\ they are in fact a level of consciousness of the Divine Minister'' (\bibref[36:5.4]{p036 5:4}). So the seventh of the Supreme Spirit groups is not a company of beings at all (see the note at \bibref[17:4.3]{p017 4:3}). The bestowal ``becomes possible at the time of the Spirit's elevation to the status of personality prerogatives'', which is the fourth stage of the section before (\bibref[17:6.7]{p017 6:7}): a Creative Spirit bestows mind only when she has become a person. On the fourth adjutant see the note at \bibref[14:5.11]{p014 5:11}; on the seven lamps of the Revelation, which the book reads as these seven, the note at \bibref[16:4.1]{p016 4:1}.'''
+
+# F29, added, of the interesting kind: the five points go down the levels of
+# God the Sevenfold in order (0:8.2-8), the Master Spirits themselves the
+# level left out; "the last level" is the first in the Foreword's count
+[[note]]
+at = "17:8.3"
+after = "God the Sevenfold"
+origin = "none"
+tex = '''The five points that follow go down the seven levels of God the Sevenfold in order. The Foreword counts them from the creature upward: the Creator Sons, the Ancients of Days, the Seven Master Spirits, the Supreme Being, God the Spirit, God the Son, God the Father (\bibref[0:8.2--8]{p000 8:2}). Here the Master Spirits are related first to the three Paradise Deities, as Trinity (\bibref[17:8.4]{p017 8:4}) and as three persons (\bibref[17:8.5]{p017 8:5}); then to the Supreme Being (\bibref[17:8.6]{p017 8:6}); then to the Ancients of Days (\bibref[17:8.7]{p017 8:7}); and last to the Creator Sons with their Creative Spirits (\bibref[17:8.8]{p017 8:8}), ``the last level of God the Sevenfold'', which is the first in the Foreword's count. The level between, the third, is their own. On the third point compare \bibref[116:4.2]{p116 4:2}: ``Master Spirit Number Seven, who speaks for the Supreme. This Master Spirit knows---is in personal contact with---the Supreme''; and see the note at \bibref[16:3.19]{p016 3:19}.'''

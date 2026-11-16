@@ -1,0 +1,574 @@
+# Paper 16, The Seven Master Spirits: the British Study Edition has no note on
+# it at d6c3206, and two sources, Griffiths and Schoen, both carried.  The press
+# has no 1955 reading in the paper, and Tigran's Russian translation no note,
+# so nothing is dropped and nothing carried from either.  Block's chart of
+# March 4, 2020 covers sections 6, 7 and 9, from Griffiths's God in Idea and
+# Experience and Max Schoen's article of March 1939, with two bracketed
+# comparisons from Sadler's Mind at Mischief: his parallels are added as
+# sixteen notes of their own, credited to him, each checked in the original
+# (Schoen in the Internet Archive's scan of the issue, read in the page images;
+# Sadler in Tigran's facsimile; Griffiths, which the Archive only lends,
+# through its full-text search, six words at a time, as for Paper 5).  The
+# rest was found in review, with no credit line.  Sources: Hocking's Meaning of
+# God in Human Experience, which Griffiths is expounding, behind 16:9.4 and
+# 16:9.14; Plato's Protagoras in Jowett's version, which Schoen quotes, behind
+# "the art of measurement"; the Stoic definition of virtue, from Diogenes
+# Laertius; Kant, Troeltsch and Otto behind the three a priori; St Paul, whom
+# Griffiths himself quotes, behind "known as it knows".  The Bible where the
+# paper quotes or echoes it (Revelation 5:6, Colossians 1:15, Hebrews 1:1-2
+# and 11:6, Romans 8:21, the second commandment).  And, as Tigran asked of
+# every paper from 15 on, the places that are interesting or hard: the three
+# persons acting together "but not as the Trinity" (16:1.2); the Master Spirit
+# who advises the chief of the Adjusters and yet has "nothing whatever to do"
+# with them (16:4.16); the stamp of a superuniverse seen in who fails at the
+# Deity adventure (16:5.5, from 26:8.4); the three insights followed through
+# the paper (16:6.10) until they become four (16:9.13); the one-sentence
+# description of the Urantia type of personality taken a phrase at a time
+# (16:8.15); "dualize" (16:9.2); what is kept of a nonsurvivor (16:9.3).
+# Sadler's Analytic Study of Part I, pp. 366-378 on this paper, was read whole.
+# The review, numbered F1-F53 in the order of the text, is
+# var/study/review-016.md.  RULED by Tigran on 2026-11-16, all 53 as proposed
+# ("all is accepted, please apply everything, commit, push and deploy"), with
+# the questions taken as recommended, and as he read: F40's 2,134th with its
+# superscript ("you forgot the superscript in '2,134th'"), and F42 enlarged at
+# his questions, his reading of 49:6.12 in the first person at his word.
+
+paper = 16
+chart = "https://urantiabooksources.com/wp-content/uploads/2020/03/016.pdf"
+chart_date = 2020-03-04          # as Block dates it on its first page
+
+# The works the notes quote, each under the key and words earlier papers gave
+# it where it has one.
+
+# Added: the Loeb volume, checked in the Internet Archive's scan of the
+# University of Toronto's copy (originals/), p. 195 (PDF page 207), VII.87-88,
+# read in the page image.
+[[source]]
+key = "DiogenesLaertius"
+origin = "none"
+tex = '''Diogenes Laertius, \emph{Lives of Eminent Philosophers}, with an English translation by R.~D. Hicks, vol.~II (London: William Heinemann; New York: G.~P. Putnam's Sons, 1925).'''
+
+# The edition's p016Griffiths1, carried under Paper 5's key and words.  The
+# Internet Archive lends it only (godinideaexperie0000rees): every quotation
+# was checked through its full-text search, six words at a time; pp. 195 and
+# 196 begin where the running heads fall inside a hit, the other pages rest on
+# Block's chart.
+[[source]]
+key = "Griffiths"
+origin = "1c848018ded51ac1"
+tex = '''Rees Griffiths, \emph{God in Idea and Experience, or, The A~Priori Elements of the Religious Consciousness} (Edinburgh: T.~\& T.~Clark, 1931).'''
+
+# Added, under Paper 4's key and words: pp. 249, 295 and 297-298 (djvu pages
+# 287, 333, 335-336), read in the page images of Tigran's copy (LIBRARY.tsv).
+[[source]]
+key = "Hocking"
+origin = "none"
+tex = '''William Ernest Hocking, \emph{The Meaning of God in Human Experience: A Philosophic Study of Religion} (New Haven: Yale University Press, 1912).'''
+
+# Added: Jowett's first volume, checked in the Internet Archive's scan
+# (originals/), pp. 151 and 181 (PDF pages 197 and 227), read in the page
+# images.  The Republic and the Timaeus, in his third volume, have keys of
+# their own from Papers 12 and 14.
+[[source]]
+key = "PlatoProtagoras"
+origin = "none"
+tex = '''Plato, \emph{Protagoras}, in \emph{The Dialogues of Plato}, translated into English with analyses and introductions by Benjamin Jowett, third edition, vol.~I (Oxford: at the Clarendon Press, 1892).'''
+
+# Added: Block compares it at 16:6.3 and 16:6.4.  Checked in Tigran's
+# facsimile (LIBRARY.tsv), the second printing, October 1929: pp. 229 and 270
+# (djvu pages 243 and 284; book p. N = djvu page N+14).
+[[source]]
+key = "Sadler1929"
+origin = "none"
+tex = '''William S. Sadler, \emph{The Mind at Mischief: Tricks and Deceptions of the Subconscious and How to Cope with Them} (New York and London: Funk \& Wagnalls Company, 1929).'''
+
+# Added, as in earlier papers: p. 369 (PDF page 387).
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# The edition's p016Schoen1.  Checked in the Internet Archive's scan of the
+# issue (originals/), pp. 246-252 (PDF pages 54-60; journal p. N = PDF page
+# N-192), each quotation read in the page image: the scan's text layer loses
+# the ends of the lines.
+[[source]]
+key = "Schoen"
+origin = "e1172820409fd1dc"
+tex = '''Max Schoen, ``A Scientific Basis for Moral Action'', \emph{The Scientific Monthly}, vol.~48, no.~3 (March 1939), pp.~246--252.'''
+
+# F1, added: the count, and where the same seven recur (the notes at 13:1.3
+# and 15:0.2 point here)
+[[note]]
+at = "16:0.1"
+after = "three persons of Deity"
+origin = "none"
+tex = '''Three persons taken singly, by twos and all together are $3+3+1=7$, which is $2^3-1$: every way of choosing among three, except choosing none. The list that follows (\bibref[16:0.3--9]{p016 0:3}) runs in that order, and the same seven, in the same order, give the sacred worlds of the Father their titles (see the note at \bibref[13:1.3]{p013 1:3}) and the superuniverses their presiding Spirits (the notes at \bibref[15:0.2]{p015 0:2}, with Sadler's remark on the sevens of the Bible). What might be looked for as an eighth, the three acting as one, is no association of persons but the Trinity, which no one of the seven represents: see the note at \bibref[16:1.2]{p016 1:2}.'''
+
+# F2, added: the register of Paradise agrees (30:1.2-4)
+[[note]]
+at = "16:0.10"
+after = "participated in their origin"
+origin = "none"
+tex = '''The register of Paradise agrees: the Seven Master Spirits stand first among the triune-origin beings, ``Beings created by all three Paradise Deities, either as such or as the Trinity'' (\bibref[30:1.2--4]{p030 1:2}); and \bibref[16:4.1]{p016 4:1} asks the reader not to forget ``that they have their origin in the creative acts of the Paradise Deities''.'''
+
+# F3, added: who marks the headquarters (29:1.3, 11:4.2), with the notes at
+# 13:1.9 and 15:0.1, which point here
+[[note]]
+at = "16:0.12"
+after = "segmental energy distribution"
+origin = "none"
+tex = '''The place is marked: ``The Seven Supreme Power Directors are stationed on peripheral Paradise, where their slowly circulating presences indicate the whereabouts of the force-focal headquarters of the Master Spirits'' (\bibref[29:1.3]{p029 1:3}), which \bibref[11:4.2]{p011 4:2} calls ``the seven flash stations for certain Paradise energies going forth to the seven superuniverses''. These headquarters are one of the three Paradise addresses of the Master Spirits (see the note at \bibref[13:1.9]{p013 1:9}), and with the boundary lines that converge on them they are the hub and spokes of the wheel described in the notes at \bibref[15:0.1]{p015 0:1}.'''
+
+# F4, added: the third inevitability (115:7.5), with 0:12.4 and the note at
+# 10:0.3, which points here
+[[note]]
+at = "16:1.1"
+after = "subabsolute inevitability"
+origin = "none"
+tex = '''A third is named at \bibref[115:7.5]{p115 7:5}: ``The Paradise Trinity is considered to be the absolute inevitability; the Seven Master Spirits are apparently Trinity inevitabilities; the power-mind-spirit-personality actualization of the Supreme must be the evolutionary inevitability.'' So the chain runs from the three persons to the seven Spirits to the Supreme Being, whose attitude the seventh of them depicts (\bibref[16:3.15]{p016 3:15}); and God the Supreme, God the Ultimate and God the Absolute are called together ``divine inevitabilities'' (\bibref[0:12.4]{p000 12:4}). On the word and its history see the note at \bibref[10:0.3]{p010 0:3}. The universe itself, by contrast, ``was not inevitable'' (\bibref[3:6.2]{p003 6:2}).'''
+
+# F5, added, a hard place: the three persons together are not the Trinity
+# (10:4.3-4, 104:3.14-15, 17:8.4, 10:5.4); the last sentence's "why" is given
+# as a reading
+[[note]]
+at = "16:1.2"
+after = "but not as the Trinity"
+origin = "none"
+tex = '''A hard saying: the three persons acting together are not the Trinity. Paper~10 has prepared it: ``The Trinity is an association of infinite persons functioning in a nonpersonal capacity'', as ``a father, son, and grandson could form a corporate entity which would be nonpersonal but nonetheless subject to their personal wills'' (\bibref[10:4.3]{p010 4:3}); and ``As persons they can collaborate as they choose, but that is not the Trinity'' (\bibref[10:4.4]{p010 4:4}). Paper~104 gives the two things their names: when the three, ``\bibemph{as persons,} conjoin for united function, they thereby constitute a triunity of functional unity, not a trinity'', whereas ``The Paradise Trinity is not a triunity; it is not a functional unanimity; rather is it undivided and indivisible Deity'' (\bibref[104:3.14--15]{p104 3:14}). The seventh Master Spirit, then, answers to the three persons in concert, the last of the seven associations. The Trinity is no eighth association but Deity undivided; no one of the seven represents it, and the seven assembled do (\bibref[16:1.3]{p016 1:3}), when they ``near-equivalate to the divinity level of the Trinity'' (\bibref[17:8.4]{p017 8:4}). The paragraph's last sentence may be read in the same light: the seventh Spirit portrays persons, and ``The Trinity is not a person'' (\bibref[10:5.4]{p010 5:4}); the Supreme Being is becoming one, and for him a person can act \bibemph{personally}.'''
+
+# F6, added: the Infinite Spirit is the first Deity found, from the fifth
+# circuit (26:7.1, 14:5.4, 26:8.4), and the Master Spirit is known before, on
+# the seventh
+[[note]]
+at = "16:2.1"
+after = "differentiated presence"
+origin = "none"
+tex = '''The Infinite Spirit is nonetheless the first of the three Deities whom the ascenders find. From the fifth circuit of Havona they attempt ``the personality recognition of the Infinite Spirit'' (\bibref[26:7.1]{p026 7:1}), then from the fourth the Eternal Son and from the third the Universal Father (\bibref[14:5.4]{p014 5:4}); and ``Nearly all attain the Infinite Spirit, though occasionally a pilgrim from superuniverse number one does not succeed on the first attempt'' (\bibref[26:8.4]{p026 8:4}; on that exception see the note at \bibref[16:5.5]{p016 5:5}). What comes before any of this, the same paragraph of Paper~14 tells: on the seventh and outermost circuit the new arrivals ``attain identity comprehension of their superuniverse Master Spirit''.'''
+
+# F7, added: Hebrews 1:1-2 and John 1:18 (KJV, its supplied words in italics),
+# with 10:3.3
+[[note]]
+at = "16:2.2"
+after = "only through his Son"
+origin = "none"
+tex = '''Hebrews~1:1--2: ``God, who at sundry times and in divers manners spake in time past unto the fathers by the prophets, hath in these last days spoken unto us by \bibemph{his} Son''; and John~1:18: ``No man hath seen God at any time; the only begotten Son, which is in the bosom of the Father, he hath declared \bibemph{him}.'' Paper~10 has said it in one sentence: ``God speaks through the Son and, with the Son, acts through the Infinite Spirit'' (\bibref[10:3.3]{p010 3:3}, where the divine Sons are the ``Word of God''; see the note there). As the Father speaks by one, the Spirit speaks by seven.'''
+
+# F8, added: Colossians 1:15 in the Revised Version's words (the ASV's too),
+# and 6:0.2 on the language of "first"
+[[note]]
+at = "16:3.4"
+after = "first-born of all creation"
+origin = "none"
+tex = '''Colossians~1:15, in the words of the Revised Version (1881) and of the American Standard Version (1901): ``the firstborn of all creation''. The King James Version reads ``the firstborn of every creature''. The title is not to be pressed into a date. The book speaks of ``an impossible time origin of the Eternal Son for the purpose of gaining access to the thought channels of the human intellect'', and says outright: ``nor could the Eternal Son ever have had a beginning'' (\bibref[6:0.2]{p006 0:2}).'''
+
+# F9, added: these are the pilgrims of the fourth circuit (26:8.1, 14:5.4)
+[[note]]
+at = "16:3.8"
+after = "seeing the Son and the Father"
+origin = "none"
+tex = '''These are the pilgrims of the fourth circuit of Havona, the circuit of the Sons (\bibref[26:8.1]{p026 8:1}), to which the ascenders are transferred ``after attaining the Infinite Spirit'' (\bibref[14:5.4]{p014 5:4}). There the ascender, who has found the Spirit, prepares to find the Son and then the Father; and the Master Spirit who directs him is the one of the Father and the Son together.'''
+
+# F10, added: the name's history (Revelation's seven Spirits, Isaiah 11:2, the
+# ordination hymn of the Book of Common Prayer), and what the paper makes of it
+[[note]]
+at = "16:3.16"
+after = "Sevenfold Spirit"
+origin = "none"
+tex = '''The name stands in quotation marks because it is an old one. Christian usage has long called the Holy Spirit sevenfold, from the seven Spirits before the throne in the Revelation (see the note at \bibref[16:4.1]{p016 4:1}) and from Isaiah~11:2; so the ordination hymn of the Book of Common Prayer (1662), \bibemph{Veni, Creator Spiritus}: ``Thou the anointing Spirit art, Who dost thy sevenfold gifts impart.'' The paper gives the name a bearer: the Seven Master Spirits united, and that ``in a deity sense---not in a personal sense''.'''
+
+# F11, added: the sixth circuit (26:6.3) and the age to come (117:7.16-17),
+# with the notes at 14:6.38 and 15:14.3, which point here
+[[note]]
+at = "16:3.19"
+after = "matter of personal relationships"
+origin = "none"
+tex = '''The place is the sixth circuit of Havona: ``No personalized presence of Supremacy is perceptible to the ascenders. In certain respects, new relationships with the Seventh Master Spirit compensate this noncontactability of the Supreme Being'' (\bibref[26:6.3]{p026 6:3}; see the note at \bibref[14:6.38]{p014 6:38}). All this is said of ``the present universe age''. Of the perfected grand universe to come (\bibref[117:7.17]{p117 7:17}): ``Certainly, though, the personality of the Supreme Being will be definitely contactable at some specific locality'', possibly Uversa, ``but this is really only a conjecture'' (\bibref[117:7.16]{p117 7:16}). On that conjecture see the notes at \bibref[15:14.3]{p015 14:3}.'''
+
+# F12, added: Revelation 5:6 with "earth" made "universe"; Sadler p. 369
+# (twice); the book's other reading of the seven Spirits (34:4.11) and its
+# estimate of the Revelation (139:4.14)
+[[note]]
+at = "16:4.1"
+after = "sent forth to all the universe"
+origin = "none"
+tex = '''Revelation~5:6, with one word changed: the Lamb has ``seven eyes, which are the seven Spirits of God sent forth into all the earth''. Sadler: ``This seems to be Rev 5:6'' (\cite{Sadler2003}, p.~369). John names the seven Spirits four times (1:4, 3:1, 4:5, 5:6), and the book reads them in two ways. Here the seven sent forth are the Master Spirits, and the earth has become the universe. The ``seven lamps of fire burning before the throne, which are the seven Spirits of God'' (4:5) are at \bibref[34:4.11]{p034 4:11} the seven adjutant mind-spirits of the local universe, in a record which ``represents the confusion of two presentations''; for the book holds the Revelation as we have it to be ``the surviving fragments of a great revelation'' (\bibref[139:4.14]{p139 4:14}). Sadler's own guess for ``the seven Spirits which are before his throne'' (1:4) is a third: ``This passage probably refers to the seven Image Aids on Uversa'' (p.~369).'''
+
+# F13, added: 29:1.1 on their creation, 16:4.2's "material ... spiritual",
+# 103:7.12
+[[note]]
+at = "16:4.3"
+after = "physical energies of the grand universe"
+origin = "none"
+tex = '''Paper~29 marks the event: ``Their creation by the Seven Master Spirits is the first recorded instance of the derivation of semimaterial progeny from true spirit ancestry. When the Seven Master Spirits create individually, they bring forth highly spiritual personalities on the angelic order; when they create collectively, they sometimes produce these high types of semimaterial beings'' (\bibref[29:1.1]{p029 1:1}). This is one sense in which their work is ``so exceptionally material and at the same time so exquisitely spiritual'' (\bibref[16:4.2]{p016 4:2}); and \bibref[103:7.12]{p103 7:12} draws the consequence: ``The maximum harmonization of the energy-spirit divergence is in the encircuitment of the Seven Master Spirits''.'''
+
+# F14, added: what Paper 48 says of these beings (48:2.2, 48:1.5) beside
+# 16:5.3; the note at 0:5.12 on the word
+[[note]]
+at = "16:4.5"
+after = "morontia substance and morontia mind"
+origin = "none"
+tex = '''What Paper~48 says of these beings fits the Censor's inference. The Morontia Power Supervisors ``are the offspring of a local universe Mother Spirit'' (\bibref[48:2.2]{p048 2:2}), and ours is ``in nature and character, quite like the Master Spirit of Orvonton'' (\bibref[16:5.3]{p016 5:3}); and their work is the combining spoken of here: they ``are able to effect a union of material and of spiritual energies, thereby organizing a morontia form of materialization which is receptive to the superimposition of a controlling spirit'' (\bibref[48:1.5]{p048 1:5}). On the word \bibemph{morontia} see the note at \bibref[0:5.12]{p000 5:12}.'''
+
+# F15, added: 36:6.7 on the first of the seven, and the Censor's three degrees
+# of assurance in this paper
+[[note]]
+at = "16:4.9"
+after = "Life Carriers"
+origin = "none"
+tex = '''Paper~36 says as much, and with the same reserve: ``We know that life flows from the Father through the Son and \bibemph{by} the Spirit. It is more than possible that the Master Spirits are the sevenfold channel of the river of life which is poured out upon all creation. But we do not comprehend the technique whereby the supervising Master Spirit participates in the initial episode of life bestowal on a new planet'' (\bibref[36:6.7]{p036 6:7}). The list that begins here is offered as ``highly probable, though we cannot offer definite proof'' (\bibref[16:4.8]{p016 4:8}). The Censor marks what he was told, what he infers and what he is sure of: ``we have been definitely instructed'' (\bibref[16:0.10]{p016 0:10}), ``we are confident'' (\bibref[16:4.16]{p016 4:16}).'''
+
+# F16, added, a hard place: 16:3.2 and 108:2.1 beside "nothing whatever to
+# do"; 10:3.15 for whose the Adjusters are.  The resolution is given as a
+# reading
+[[note]]
+at = "16:4.16"
+after = "Thought Adjusters"
+origin = "none"
+tex = '''Two things said elsewhere may seem to touch this. Master Spirit Number One is ``the close associate and supernal adviser of the chief of Mystery Monitors, that being who presides over the College of Personalized Adjusters on Divinington'' (\bibref[16:3.2]{p016 3:2}); and a child's first moral choice ``registers instantly, by way of the local universe Creative Spirit, over the universal mind-gravity circuit of the Conjoint Actor in the presence of the Master Spirit of superuniverse jurisdiction, who forthwith dispatches this intelligence to Divinington'' (\bibref[108:2.1]{p108 2:1}). In the first the Master Spirit advises one who presides over Adjusters already personalized, on their own sphere; in the second he forwards a report. Neither, it seems, is what the paragraph excludes, the bestowal of an Adjuster and its ministry in a human mind. Those are the Father's alone: ``As a person, he acts \bibemph{directly} throughout creation by his exclusive fragments---in mortal man by the Thought Adjusters'' (\bibref[10:3.15]{p010 3:15}).'''
+
+# F17, added: Orvonton's character (15:14.2, 16:3.20) read as its Master
+# Spirit's touch; the notes at 15:14.3
+[[note]]
+at = "16:5.1"
+after = "touch and tinge of only one"
+origin = "none"
+tex = '''Something of Orvonton's touch and tinge may be read in what Paper~15 says of it: the seventh superuniverse ``is known chiefly because of its tremendous and lavish bestowal of merciful ministry to the mortals of the realms. It is renowned for the manner in which justice prevails as tempered by mercy and power rules as conditioned by patience'' (\bibref[15:14.2]{p015 14:2}). Its Master Spirit's administration ``discloses the marvelous symmetry of the co-ordinate blending of the divine natures of Father, Son, and Spirit'' (\bibref[16:3.20]{p016 3:20}). On the purposes of the seven superuniverses, each after its Spirit, see the notes at \bibref[15:14.3]{p015 14:3}.'''
+
+# F18, added, of the interesting kind: 26:8.4's failures in the Deity
+# adventure set beside the seven likenesses of 16:3; all six cases fit, the
+# rule does not run the other way, and the reading is given as one; 26:8.5 for
+# the remedy
+[[note]]
+at = "16:5.5"
+after = "superuniverse of nativity"
+origin = "none"
+tex = '''The stamp shows in Havona, at the three attempts to find the Deities. ``Nearly all attain the Infinite Spirit, though occasionally a pilgrim from superuniverse number one does not succeed on the first attempt. The pilgrims who attain the Spirit seldom fail in finding the Son; of those who do fail on the first adventure, almost all hail from superuniverses three and five. The great majority of those who fail on the first adventure to attain the Father, after finding both the Spirit and the Son, hail from superuniverse number six, though a few from numbers two and three are likewise unsuccessful'' (\bibref[26:8.4]{p026 8:4}). No reason is given there, only that there is ``some good and sufficient reason for these apparent failures''. Set beside \bibref[16:3.2--14]{p016 3:2} the lists suggest one. The first superuniverse bears the Father's likeness alone, and its natives may miss the Spirit; the third and the fifth bear the Spirit's, and the Father's and the Spirit's, and theirs miss the Son; the sixth, the second and the third bear those of the Son and the Spirit, of the Son, and of the Spirit, and theirs miss the Father. In each case named, the pilgrim fails at the Deity whose likeness his own Master Spirit does not bear; and of the seventh superuniverse, which bears all three, no failure is told. The rule does not run the other way: the second and the fourth lack the Spirit's likeness too, and nothing is said of them at the first adventure. The remedy agrees with the reading: such pilgrims ``never return to the superuniverse of their nativity, always to that supercreation most propitious for their retraining'' (\bibref[26:8.5]{p026 8:5}).'''
+
+# F19, added: where else the cosmic mind is defined (42:10.6, 9:4.3, 9:5.4)
+# and what it is not (8:2.2; the note at 9:7.4); the note at 15:9.3 points here
+[[note]]
+at = "16:6.1"
+after = "intellectual potential of the grand universe"
+origin = "none"
+tex = '''The cosmic mind is defined again at \bibref[42:10.6]{p042 10:6}: ``the sevenfold diversified mind of time and space, one phase of which is ministered by each of the Seven Master Spirits to one of the seven superuniverses''. Ours is ``the Nebadon variant of the Orvonton type of cosmic mind'' (\bibref[9:4.3]{p009 4:3}), and ``the mind of man is an individualized circuit, an impersonal portion, of that cosmic mind as it is bestowed in a local universe by a Creative Daughter of the Third Source and Center'' (\bibref[9:5.4]{p009 5:4}). It is not the Infinite Spirit himself, who on Urantia ``is sometimes confused with the cosmic mind'' (\bibref[8:2.2]{p008 2:2}), nor the ``cosmic consciousness'' of the psychologists (see the note at \bibref[9:7.4]{p009 7:4}). The rest of the section treats it as it is met in a creature: an endowment of ``all will creatures'' (\bibref[16:6.9]{p016 6:9}) which answers to reality in three ways.'''
+
+# F20, added: Block's bracketed comparison, Sadler p. 270 (djvu page 284, read
+# in the page image)
+[[note]]
+at = "16:6.3"
+after = "inexplicable agreement"
+origin = "none"
+credit = "block"
+tex = '''Compare Sadler~\cite{Sadler1929}, p.~270, who in 1929 explained by heredity what was taken for telepathy: ``two or more individuals, apparently not closely related by blood relationship, may be born with certain basic human endowments and tendencies which are very similar''; ``May not two such individuals, even tho they are not related by family ties, be, after all, psychic or philosophic twins?''; ``is it not possible that individuals may be found who run so closely toward a certain type that they can almost read one another's thoughts''. The paper keeps the observation and gives another cause: minds agree because they draw on one cosmic mind.'''
+
+# F21, added: Block's bracketed comparison, Sadler p. 229 (djvu page 243, read
+# in the page image), with what Sadler's "reality feeling" is, the opposite of
+# the paper's, and the paper's other two uses of "reality sensitivity"
+[[note]]
+at = "16:6.4"
+after = "reality response"
+origin = "none"
+credit = "block"
+tex = '''Compare Sadler~\cite{Sadler1929}, p.~229, the opening of his chapter ``The Reality Feeling---Transference and Projection'': ``There is something in the human consciousness which may very appropriately be defined as the reality feeling. Whatever it is, no matter what its component factors may be, it serves the purpose of causing one's ego to be aware of the presence of reality.'' But Sadler's reality feeling is what goes astray: association with it ``is a passport to the recognition of any sensation as real'', however ``foolish and fictitious'' the grounds, and his chapter is about its misplacing. The paper's reality response is the contrary, an endowment that keeps the creature from being deceived. Its other name, reality sensitivity, is used twice more in the book: of mota, ``a supermaterial reality sensitivity'' (\bibref[103:6.7]{p103 6:7}), and of ``the constitutive reality sensitivity of the mind endowment of man'' (\bibref[103:7.11]{p103 7:11}).'''
+
+# F22, added: Block's finding, Griffiths p. 173 (full-text search; the page
+# rests on his chart); the notes at 5:5.1 and after are from the same chapter
+[[note]]
+at = "16:6.4"
+after = "science, philosophy, and religion"
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~173: ``The scientific imperative, which compels the scientist to interpret the physical world in terms of causation, and the moral imperative which decrees that all rational beings should act under a sense of duty, both originate in a priori qualities of the mind---qualities which are not derived from experience but rather enter themselves into all experience and determine its character. That there are a priori elements involved in scientific and moral experience is not to-day seriously questioned.'' Causation and duty are the first two of the three levels that follow (\bibref[16:6.6--7]{p016 6:6}). The chapter is ``The Religious Imperative'', on which Paper~5 has drawn already: see the notes at \bibref[5:5.1]{p005 5:1} and after.'''
+
+# F23, added: Block's finding, Griffiths p. 175, two sentences (full-text
+# search; the page rests on his chart): what Griffiths asks, the paper affirms
+[[note]]
+at = "16:6.5"
+after = "three levels of universe reality"
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~175, sets the three side by side: ``If the objective validity of science rests on a priori grounds, on the unprovable principles of the uniformity of nature and of causation, and if morality is based on a sense of duty which seems to be innate, why not suspect that all the edifice of religious thought and life may also rest on equally sure foundations?'' And on the same page: ``if science and morality are both based on a priori elements derived from the constitution of self-consciousness---that is, from the mind itself \ldots\ why should it be difficult to believe that our religious judgments and values also have an a priori origin?'' What Griffiths asks, the paper affirms; and his ``constitution of self-consciousness'' is its ``constitutive in the self-consciousness of reflective thinking'' (\bibref[16:6.9]{p016 6:9}).'''
+
+# F24, added, of the hard kind: whose the three are (Kant's two, and the
+# religious a priori of Troeltsch and Otto, as Griffiths tells it), and what
+# the paper changes
+[[note]]
+at = "16:6.8"
+after = "religious experience"
+origin = "none"
+tex = '''The first two of the three are Kant's. In the \bibemph{Critique of Pure Reason} (1781) causality is among the forms which the mind brings to experience and does not learn from it; in the \bibemph{Critique of Practical Reason} (1788) duty is the categorical imperative, whose ``source was in self-consciousness'', as Griffiths has it (see the note at \bibref[5:5.1]{p005 5:1}). The third was sought after him: ``the religious a priori'', asserted by Ernst Troeltsch and given substance by Rudolf Otto in \bibemph{Das Heilige} (1917) as ``the category of the Holy'', is the subject of Griffiths's book~\cite{Griffiths}, as its subtitle says. The paper takes the three together and alters their standing. In Kant they are forms of the knowing mind; here they are the responses of a mind that is cosmic, and what they answer to is real, so real that ``It would be still more correct to say that these supermaterial realities so respond to the mind of the cosmos'' (\bibref[16:6.4]{p016 6:4}).'''
+
+# F25, added: Romans 8:21, Galatians 4:7, John 15:15 (KJV), with Jesus' words
+# in Part IV (140:1.6, 145:5.7)
+[[note]]
+at = "16:6.8"
+after = "sons of God"
+origin = "none"
+tex = '''Paul's words, and Jesus': ``the glorious liberty of the children of God'' (Romans~8:21); ``Wherefore thou art no more a servant, but a son'' (Galatians~4:7); ``Henceforth I call you not servants \ldots\ but I have called you friends'' (John~15:15). In Part~IV Jesus says it before the ordination of the twelve, ``you are no longer servants but sons, sons of the living God'' (\bibref[140:1.6]{p140 1:6}), and bids Andrew tell the people ``to rejoice in the liberty of the sons of God'' (\bibref[145:5.7]{p145 5:7}).'''
+
+# F26, added: Block's finding, Griffiths p. 175 (full-text search; the page
+# rests on his chart): what he hopes for, the paper has
+[[note]]
+at = "16:6.10"
+after = "objective validity"
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~175, hopes for this: ``Should the discovery of the a priori be made, it might give us the ground we need for the objective validity of religious judgments.'' In the paper the discovery is not awaited: the three intuitions are given, and it is they ``that give objective validity, reality, to man's experience''.'''
+
+# F27, added, of the interesting kind: the three followed through the paper
+# under their changing names; the notes at 9:4.5 (which points here) and
+# 16:9.13
+[[note]]
+at = "16:6.10"
+after = "things, meanings, and values"
+origin = "none"
+tex = '''The three run through the rest of the paper under changing names: causation, duty and worship (\bibref[16:6.6--8]{p016 6:6}); here science, philosophy and religion, or matter-energy, mind-reason and spirit-faith; moral intuition with scientific curiosity and spiritual insight (\bibref[16:7.1]{p016 7:1}); material acumen, moral discrimination and spiritual insight (\bibref[16:7.5]{p016 7:5}); physical causation, moral conduct and the worship of Deity (\bibref[16:8.16--18]{p016 8:16}); energy reality, mind reality and spirit reality, by which the creature discerns ``the fact, the law, and the love of God'' (\bibref[16:9.1]{p016 9:1}); science, morality and religion (\bibref[16:9.4--5]{p016 9:4}); and the quests for knowledge, for moral values and for spiritual values, to which a fourth is added (see the note at \bibref[16:9.13]{p016 9:13}). They answer to the things, meanings and values with which the book opens: see the note at \bibref[9:4.5]{p009 4:5}.'''
+
+# F28, added: Block's finding, Schoen p. 248 (PDF page 56, read in the page
+# image): the thesis the section's first sentence denies, and what the paper
+# puts in its place
+[[note]]
+at = "16:7.1"
+after = "explain the moral nature"
+origin = "none"
+credit = "block"
+tex = '''This section follows, and in its first sentence contradicts, an article by Max Schoen, professor of psychology and education at the Carnegie Institute of Technology, in \bibemph{The Scientific Monthly} for March 1939 \cite{Schoen}. His thesis, p.~248: ``it is the moral action that distinguishes man from infra-human organisms, and moral action is synonymous with action that is indicative of the operation of human intelligence. To define morality scientifically, therefore, all that is needed is a definition of human intelligence.'' The paper takes over his account of looking and leaping, of means and ends (see the notes that follow), and denies its conclusion. Where he writes of man's intelligence it writes, from \bibref[16:7.3]{p016 7:3} on, of personality; and it adds the spiritual insight which is no part of his account (\bibref[16:7.2]{p016 7:2}, \bibref[16:7.5]{p016 7:5}, \bibref[16:7.8]{p016 7:8}).'''
+
+# F29, added: Block's finding, Schoen p. 248 (PDF page 56, read in the page
+# image), and whose apes they are.  His chart has "The selective behavior of
+# an animal" in the sentence before, where the article has "of the animal":
+# not quoted here, and recorded in the review
+[[note]]
+at = "16:7.2"
+after = "motor trial and error"
+origin = "none"
+credit = "block"
+tex = '''Schoen~\cite{Schoen}, p.~248: ``Even the alleged learning by insight of some of K\"ohler's apes was on a motor level, in that the insight took place only, if it took place at all, after the motor trial and error had failed. Man is capable of dispensing entirely with motor exploration and to engage only in selective activity that is the fruit of mental exploration, or thinking proper.'' The ``higher animals'' are thus the chimpanzees of Wolfgang K\"ohler's \bibemph{The Mentality of Apes} (in English, 1925), which reached their fruit with sticks and boxes; and ``supposed'' is Schoen's ``alleged''.'''
+
+# F30, added: Block's finding, Schoen p. 248 (PDF page 56, read in the page
+# image): man becomes "a personality"
+[[note]]
+at = "16:7.3"
+after = "as well as from leaping"
+origin = "none"
+credit = "block"
+tex = '''Schoen~\cite{Schoen}, p.~248: ``this ability for what we may call delayed behavior by thought lifts man to the pinnacle of selective behavior, namely, knowing what he is doing, because he can deliberately proceed to know before he does. This ability of man to look before he leaps, and thereby learn by looking rather than by leaping, assumes two forms.'' The turn on the proverb is Schoen's; the subject is changed. What he says of man the paper says of personality, and so draws the line between man and animal at personality and not at intelligence.'''
+
+# F31, added: Block's finding, Schoen pp. 248-249 (PDF pages 56-57, read in
+# the page images)
+[[note]]
+at = "16:7.4"
+after = "how he will get there"
+origin = "none"
+credit = "block"
+tex = '''Schoen~\cite{Schoen}, pp.~248--249: the problem before a person ``may be only that of determining the most expedient way of accomplishing a goal that appears desirable, or it may consist of an examination of the desirability of the goal itself''; ``Moral action can not consist in the pursuit of indiscriminate ends by discriminate means''; and ``To be moral is to know what you are doing, and to be responsible for what you are doing, because you know where you are going, why you are going there and how you are to get there.'' Of the animal he says that the fruit of its learning ``is always the selection of means, never of ends, and consequently, a human being acting in that manner is living on the level of animal and not of human intelligence'': the ``animal level of existence'' of \bibref[16:7.5]{p016 7:5}.'''
+
+# F32, added: the Stoic definition, Diogenes Laertius VII.87-88 in Hicks's
+# version, p. 195 (PDF page 207, read in the page image), compared; and how
+# the section completes the sentence (16:7.10)
+[[note]]
+at = "16:7.6"
+after = "conformity with the cosmos"
+origin = "none"
+tex = '''Compare the Stoic definition, as Diogenes Laertius reports it (VII.87--88): ``Zeno was the first (in his treatise \bibemph{On the Nature of Man}) to designate as the end `life in agreement with nature' (or living agreeably to nature), which is the same as a virtuous life, virtue being the goal towards which nature guides us''; and ``the end may be defined as life in accordance with nature, or, in other words, in accordance with our own human nature as well as that of the universe'' (\cite{DiogenesLaertius}, p.~195). The paper's sentence is completed at the section's end, where conformity with the cosmos is shown to be conformity with a will: ``Supreme virtue, then, is wholeheartedly to choose to do the will of the Father in heaven'' (\bibref[16:7.10]{p016 7:10}).'''
+
+# F33, added: Block's finding, Schoen pp. 246 and 247 (PDF pages 54 and 55,
+# read in the page images): the first step kept, the second refused
+[[note]]
+at = "16:7.6"
+after = "not to define them"
+origin = "none"
+credit = "block"
+tex = '''Schoen~\cite{Schoen}, p.~246, summarizing Plato's \bibemph{Protagoras}: ``if virtue is like the parts of the face the virtues can only be named, and enumeration is not a definition or knowledge''; and, p.~247, ``virtue must be defined as we would define gold rather than a face''. Schoen, with Socrates, wants virtue defined, and so made a knowledge that can be taught. The paper keeps the first step and refuses the second: to name virtues is not to define them, but neither is virtue ``mere knowledge nor yet wisdom''. It is known by being lived.'''
+
+# F34, added: Block's finding, Schoen p. 247 (PDF page 55, read in the page
+# image)
+[[note]]
+at = "16:7.7"
+after = "comparative measurement"
+origin = "none"
+credit = "block"
+tex = '''Schoen~\cite{Schoen}, p.~247: a man's knowledge of his own act is defective in that ``he can mistake the lesser for the greater, the immediate for the remote''; such action ``leads to evil, since a person is acting under a delusion''; and ``The inferiority of a man to himself arises out of ignorance, while the knowledge that spells virtue is the knowledge of magnitudes, of lesser and greater, and the art of virtue is therefore the art of measurement, of discrimination.'' The paragraph's ignorance and delusion, its lesser and greater, and its ``art of relative estimation or comparative measurement'' are here.'''
+
+# F35, added: the phrase is Socrates', Protagoras 356d-e in Jowett, p. 181
+# (PDF page 227), which Schoen quotes on his p. 247; and the parts of a face
+# and of gold, 329d, p. 151 (PDF page 197); both read in the page images.
+# What the paper adds to the art of measurement
+[[note]]
+at = "16:7.8"
+after = "the art of measurement"
+origin = "none"
+tex = '''The phrase is Socrates'. In the \bibemph{Protagoras} (356d--e), in Jowett's version, which Schoen quotes at length: ``Would not the art of measuring be the saving principle; or would the power of appearance? Is not the latter that deceiving art which makes us wander up and down and take the things at one time of which we repent at another, both in our actions and in our choice of things great and small? But the art of measurement would do away with the effect of appearances, and, showing the truth, would fain teach the soul at last to find rest in the truth, and would thus save our life'' (\cite{PlatoProtagoras}, p.~181). The figure behind \bibref[16:7.6]{p016 7:6} is from the same dialogue (329d): are the virtues parts of virtue ``in the same sense in which mouth, nose, and eyes, and ears, are the parts of a face; or are they like the parts of gold, which differ from the whole and from one another only in being larger or smaller?'' (p.~151). For Socrates, as Schoen reads him, the art of measurement is virtue. The paper makes it necessary and not sufficient: ``Likewise would moral choosing be futile without that cosmic insight which yields the consciousness of spiritual values.'''''
+
+# F36, added: Block's finding, Schoen pp. 251 and 252 (PDF pages 59 and 60,
+# read in the page images): agreed about force, not about the remedy
+[[note]]
+at = "16:7.9"
+after = "by law or by force"
+origin = "none"
+credit = "block"
+tex = '''Schoen~\cite{Schoen}, p.~251: ``The fact, then, that a moral principle has to be defended, in other words, rationalized, is an indication that it is a false principle, and that is the reason why it calls for force to be put in operation''; and p.~252: ``what human beings need in order to be virtuous is instruction rather than compulsion''. The paper agrees about force and differs about the remedy: not instruction but contagion, ``the contact of morally fragrant persons''.'''
+
+# F37, added: 2 Corinthians 2:14-15 (KJV) compared, and what the book says of
+# contagion elsewhere (100:4.6, 188:5.2)
+[[note]]
+at = "16:7.9"
+after = "morally fragrant persons"
+origin = "none"
+tex = '''The figure recalls Paul's: ``For we are unto God a sweet savour of Christ, in them that are saved, and in them that perish'' (2~Corinthians~2:15), God making manifest ``the savour of his knowledge by us in every place'' (2:14). That goodness spreads by contact and not by decree is said of love elsewhere in the book: ``Love is infectious \ldots\ But only genuine and unselfish love is truly contagious'' (\bibref[100:4.6]{p100 4:6}); ``Love is truly contagious and eternally creative'' (\bibref[188:5.2]{p188 5:2}).'''
+
+# F38, added: Block's finding, Schoen p. 249 (PDF page 57, read in the page
+# image); and, found in review on p. 252 (PDF page 60), where the article ends
+[[note]]
+at = "16:7.10"
+after = "the will of the Father in heaven"
+origin = "none"
+credit = "block"
+tex = '''Schoen~\cite{Schoen}, p.~249: ``A moral act, then, for a human being, is an act in which human intelligence is operating in its complete form, an act for which the person assumes full responsibility, an act performed in full knowledge of what it is all about, and such an act is realized only when the chosen means are prompted by chosen ends.'' So far the paragraph goes with him. Its last sentence is its own. Schoen's article ends in nature, p.~252: ``A virtuous human being is one who lives as a human being can live because that is his nature. From this standpoint a good man is no different from a good potato.'' The section ends with the will of a Father.'''
+
+# F39, added: the book's other accounts of personality (112:0.2-16, 0:5.11)
+# and how this one is laid out; the notes at 5:6.2, which point here
+[[note]]
+at = "16:8.2"
+after = "define personality"
+origin = "none"
+tex = '''So Paper~112: ``it would be presumptuous to attempt the definition of personality'', followed by fourteen things ``which are known about personality'' (\bibref[112:0.2--16]{p112 0:2}); and the Foreword's account is at \bibref[0:5.11]{p000 5:11}. Here the account is given from the side of the human being: the mechanism in which personality functions (\bibref[16:8.3]{p016 8:3}, \bibref[16:8.15]{p016 8:15}), the marks by which it is known (\bibref[16:8.4--6]{p016 8:4}), and what its free will is for (\bibref[16:8.7--14]{p016 8:7}). On the components which psychiatry counted in those years see the notes at \bibref[5:6.2]{p005 6:2}.'''
+
+# F40, added: the order shown in the timing of the Adjuster's coming
+# (108:2.1), and in what the Adjusters are identical (108:1.1)
+[[note]]
+at = "16:8.3"
+after = "bestowal of the Thought Adjuster"
+origin = "none"
+tex = '''The order shows in the timing. Adjusters ``are not actually assigned until the human subjects make their first moral personality decision'', and ``reach their human subjects on Urantia, on the average, just prior to the sixth birthday. In the present generation it is running five years, ten months, and four days; that is, on the 2,134\ts{th} day of terrestrial life'' (\bibref[108:2.1]{p108 2:1}): the personality is there to make the decision. And the Adjusters' sameness is of nature, not of history: ``they are identical in the endowment of existential divinity, but they vary in experiential qualities proportional to previous contact in and with evolutionary creatures'' (\bibref[108:1.1]{p108 1:1}).'''
+
+# F41, added: personality as what another knows one by (0:5.11, 112:0.9),
+# shown at 193:2.3 and promised at 112:5.22; the notes at 103:8.6
+[[note]]
+at = "16:8.4"
+after = "form, mind, or spirit status"
+origin = "none"
+tex = '''This is personality as ``the one changeless reality in an otherwise ever-changing creature experience'' (\bibref[0:5.11]{p000 5:11}), ``changeless in the presence of change'' (\bibref[112:0.9]{p112 0:9}), seen from outside: it is what another person knows one by. The book shows it at work after the resurrection of Jesus, whose friends ``could not readily recognize his morontia form when made visible'', yet ``were never slow to identify his personality when he spoke to them'' (\bibref[193:2.3]{p193 2:3}); and it is promised to the survivor: ``On the mansion worlds you will know and be known'' (\bibref[112:5.22]{p112 5:22}). On the philosophers' form of the thought, permanence in the presence of change, see the notes at \bibref[103:8.6]{p103 8:6}.'''
+
+# F42, added, of the hard kind: the sentence taken a phrase at a time, each
+# with the paragraph that explains it; the last phrase is found nowhere else
+# and the reading of it is a guess, said so.  Its reading enlarged at Tigran's
+# question (2026-11-16: could it relate to the dependence of a child's mind on
+# the parents', as the morontia mind depends on the Universe Mother Spirit, and
+# to the dependence of a child's survival on a parent's?): the frame of 34:4.9,
+# mind and reproduction the Mother Spirit's two gifts (36:6.3), mind by brain
+# capacity (58:6.7), "of hereditary endowment" (120:3.9); the pattern ending
+# with mortal life (47:2.2, 45:6.7) and the morontia mind's direct contact
+# instead (112:6.6); survival attached to the parents till an Adjuster comes
+# (49:6.12).  What the book does not say, that a child's mind is part of its
+# parents' minds, is not said: it gives the child an individualized circuit
+# of the cosmic mind bestowed by the Mother Spirit (9:5.4), a personality before
+# the Adjuster (16:8.3) and its own first moral choice (108:2.1).  The
+# Foundation's Russian reads the phrase as mind "for creatures reproducing by
+# two sexes" (25:1.2's "reproductions of the dual order ... down to sex
+# procreation"): put to Tigran, not in the note.
+# The sentence on the manner of attachment, in the first person, at Tigran's
+# word (2026-11-16, "attached in what way, pray tell, except through the
+# mind?", then "Yes, amend it the way you described, with the 'I'"): his
+# reading, which the book neither states nor contradicts.
+[[note]]
+at = "16:8.15"
+after = "parental reproductive pattern"
+origin = "none"
+tex = '''A sentence to be taken a phrase at a time. \bibemph{Planetary modification}: Urantia is ``a decimal planet, a life-experiment world'' (\bibref[36:2.15]{p036 2:15}), on which the Life Carriers ``worked out and have satisfactorily demonstrated not less than twenty-eight features of life modification'', in their sixtieth attempt to improve ``the Satania adaptation of the Nebadon life designs'' (\bibref[65:4.1]{p065 4:1}), which is \bibemph{the Nebadon type of organism}. \bibemph{The electrochemical order of life activation}: the body is ``The living electrochemical mechanism of animal nature and origin'' (\bibref[0:5.7]{p000 5:7}), and Paper~36 tells ``the electrochemical formulas of the Life Carriers'', which are understood, from the ``\bibemph{life-activation spark}'', which is not (\bibref[36:6.7]{p036 6:7}). \bibemph{The Nebadon order of the Orvonton series of the cosmic mind}: ``your local universe is pervaded by the Nebadon variant of the Orvonton type of cosmic mind'' (\bibref[9:4.3]{p009 4:3}). The last phrase, \bibemph{of parental reproductive pattern}, is found nowhere else in the book and is not explained. Its frame is that of \bibref[34:4.9]{p034 4:9}: ``The superevolutionary orders of personality in a local universe are endowed with the local universe type of the superuniverse pattern of mind. The human and the subhuman orders of evolutionary life are endowed with the adjutant spirit types of mind ministration.'' Read with it, the phrase may name the pattern in which the evolutionary orders receive mind: by descent from parents. Mind and the power to reproduce are the two gifts of the Mother Spirit which the Life Carriers' own living forms lack (\bibref[36:6.3]{p036 6:3}); mind is bestowed ``in accordance with innate brain capacity'' (\bibref[58:6.7]{p058 6:7}), so that the book can speak of ``your expanding human mind of hereditary endowment'' (\bibref[120:3.9]{p120 3:9}). The pattern belongs to the mortal life alone. Children who die young are repersonalized ``except for reproductive potential'' (\bibref[47:2.2]{p047 2:2}), for ``There is no reproduction of mortal kind after the life experience on the inhabited worlds'' (\bibref[45:6.7]{p045 6:7}); and then ``The morontia mind must evolve by direct contact with cosmic mind, as this cosmic mind has been modified and translated by the creative source of local universe intellect---the Divine Minister'' (\bibref[112:6.6]{p112 6:6}). Until an Adjuster comes, a child's very survival is reckoned with its parents': ``A child acquires physical entity at mortal birth, but in the matter of survival all Adjusterless children are reckoned as still attached to their parents'' (\bibref[49:6.12]{p049 6:12}). In what way attached the book does not say; it names a custody, the cherubim's of ``the child's potential identity'', which it calls ``this undeveloped soul'' (\bibref[47:2.1]{p047 2:1}). I take the attachment to be through the mind, which in a child is as yet of its parents' pattern. Upon all this, and distinct from all of it, comes ``the divine gift of personality''.'''
+
+# F43, added: the verb (here only) and its noun (105:6.5), the Foreword's
+# figure of parentage (0:5.10), and the note at 9:5.6 on "tabernacle"
+[[note]]
+at = "16:9.2"
+after = "dualize the immortal soul"
+origin = "none"
+tex = '''\bibemph{Dualize} is the book's own verb, on the pattern of its \bibemph{trinitize}: the soul is brought into being by two, the moral mind and the indwelling spirit. The verb is used only here; its noun once more, where ``the material mind of the mortal creature thus becomes partner with the divine Adjuster in the dualization of the immortal soul'' (\bibref[105:6.5]{p105 6:5}). The Foreword says the same by a figure of parentage: ``the indwelling spirit becomes the father of a \bibemph{new reality} in human experience. The mortal and material mind is the mother of this same emerging reality'' (\bibref[0:5.10]{p000 5:10}). On ``tabernacle'' for the body see the note at \bibref[9:5.6]{p009 5:6}.'''
+
+# F44, added: both halves said again (109:6.1, 47:3.4, 196:3.35; 117:4.2)
+[[note]]
+at = "16:9.3"
+after = "actualizing Supreme Being"
+origin = "none"
+tex = '''Both halves are said again. Of the Adjuster: ``nothing worth surviving is ever lost \ldots\ a mortal creature may reject survival; still the life experience is not wasted; the eternal Adjuster carries the worth-while features of such an apparent life of failure over into some other world'' (\bibref[109:6.1]{p109 6:1}; so \bibref[47:3.4]{p047 3:4}, and \bibref[196:3.35]{p196 3:35}, ``then does the surviving Adjuster conserve those realities born of love and nurtured in service''). Of the Supreme: ``as for the personality of the nonsurvivor, it is absorbed into the oversoul of creation, becoming a part of the Deity of the Supreme'' (\bibref[117:4.2]{p117 4:2}). What ceases is identity; what was of value in the life is kept, in the Adjuster and in the Supreme.'''
+
+# F45, added: Block's finding, Griffiths p. 187 (full-text search; the page
+# rests on his chart); and, found in review elsewhere in his book (its page
+# could not be had: the Archive lends the book only), the text of St Paul
+# which Griffiths himself gives for it (1 Corinthians 13:12)
+[[note]]
+at = "16:9.4"
+after = "known as it knows"
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~187, formulating what he calls ``a fundamental epistemological principle of religion'': ``Self-consciousness is only possible in so far as I am able to find in the object not only a reality other than myself, but a reality expressive of Another Mind which knows me through my awareness of the object''; ``more simply put---In knowing I am always known.'' Elsewhere in the book he names his text: ``Being known is the only perfect way of knowing, as St.~Paul discovered. `Then shall I know even as also I am known'\,'' (1~Corinthians~13:12). Griffiths's Other Mind is God; the paper applies the principle first to human selves, ``in man's social life'', and then sets the human case below the divine.'''
+
+# F46, added: Hocking, whom Griffiths is expounding there: p. 297 (djvu page
+# 335) and p. 249 (djvu page 287), read in the page images; where the paper
+# differs from him
+[[note]]
+at = "16:9.4"
+after = "lives within you"
+origin = "none"
+tex = '''Griffiths is here expounding Hocking, and the paragraph's comparison is Hocking's conclusion. \cite{Hocking}, p.~297: ``God then is immediately known, and permanently known, as the Other Mind which in creating Nature is also creating me. Of this knowledge nothing can despoil us; this knowledge has never been wanting to the self-knowing mind of man. \ldots\ But how do I find my fellow men at all? I have God; them I have not.'' Of one another, he had argued, we have signs and inferences: ``We can still speak only of `the source of our \bibemph{belief} in the reality of our fellow men,' not of an experience of that reality itself'' (p.~249). The paper's ``not inalienable like the God-consciousness'' is his ``nothing can despoil us''. It differs in where God is met: Hocking's Other Mind is found in Nature, as its knower; the paper's certainty is of ``the presence of God that lives within you''.'''
+
+# F47, added: the other half of the revelation, told in Part IV (120:2.8,
+# 184:4.6, 186:2.11, 186:5.6)
+[[note]]
+at = "16:9.6"
+after = "to other men"
+origin = "none"
+tex = '''Part~IV tells of a third revelation, made in the same life. Immanuel charged Michael, with revealing God, ``to make a new revelation of man to God'' (\bibref[120:2.8]{p120 2:8}); in the last hours ``Jesus is now engaged in making a new and unprecedented revelation of man to God'' (\bibref[184:4.6]{p184 4:6}; so \bibref[186:2.11]{p186 2:11}), ``to the Gods and to the celestial intelligences of the universe of universes'' (\bibref[186:5.6]{p186 5:6}). Here it is man revealed to himself and to other men.'''
+
+# F48, added: Block's finding, Griffiths p. 181 (full-text search; the page
+# rests on his chart): the two adjectives are his
+[[note]]
+at = "16:9.6"
+after = "constitutive in all men"
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~181: ``If we take up seriously the position that religion is a primitive and fundamental interest of man, and the idea of God an inalienable feature of self-conscious mind, we must be prepared to allow to religion a thoroughly a priori character. By this we mean that the idea of God is a constitutive element of human experience as we know it.'' The two adjectives are his. What for Griffiths is ``the idea of God'' is in the paper ``the realization (recognition) of God''.'''
+
+# F49, added: the second great commandment after the first (Leviticus 19:18,
+# Matthew 22:37-39, KJV); the reason for the order is given as a reading
+[[note]]
+at = "16:9.8"
+after = "as he loves himself"
+origin = "none"
+tex = '''The second great commandment, ``Thou shalt love thy neighbour as thyself'' (Leviticus~19:18; Matthew~22:39), which Jesus sets after the first, ``Thou shalt love the Lord thy God'' (22:37--38). The sentence may be read as the reason for that order: the second cannot be kept without the first.'''
+
+# F50, added: Block's finding, Griffiths p. 196 (full-text search; the page
+# begins with the first sentence, by the running head)
+[[note]]
+at = "16:9.9"
+after = "communal consciousness"
+origin = "none"
+credit = "block"
+tex = '''Griffiths~\cite{Griffiths}, p.~196: ``Our social consciousness is essentially a religious consciousness, an awareness of God as the meaning of the world, the universal Knower implied in every act of knowing''; and ``Self-consciousness is essentially a communal consciousness. It arises on the basis of an intuitive apprehension of God in relation to all objects of experience.'' The first is the paper's sentence at \bibref[16:9.8]{p016 9:8}, with ``Unselfish'' and the condition ``if it is objective'' added. The second is this one, to which the paper adds who the community are: ``God and man, Father and son, Creator and creature.'''''
+
+# F51, added, of the interesting kind: the three become four; the paper's
+# closing question names the four with their sources (16:9.15), which answer
+# to the four gravity circuits (12:3.2-5; the note at 15:9.1)
+[[note]]
+at = "16:9.13"
+after = "fellow personalities"
+origin = "none"
+tex = '''The three have become four. Through three sections the paper has counted three insights, of fact, of duty and of worship (see the note at \bibref[16:6.10]{p016 6:10}). Here personality is added to them, and the paper's closing question names all four as realities, each with its source: the mind's ``own source, the infinite mind of the Infinite Spirit'', ``the physical reality of the far-flung universes, the spiritual reality of the Eternal Son, and the personality reality of the Universal Father'' (\bibref[16:9.15]{p016 9:15}). They answer to the four absolute-gravity circuits: ``The Personality Gravity of the Universal Father'', ``The Spirit Gravity of the Eternal Son'', ``The Mind Gravity of the Conjoint Actor'' and ``The Cosmic Gravity of the Isle of Paradise'' (\bibref[12:3.2--5]{p012 3:2}; see the note at \bibref[15:9.1]{p015 9:1}).'''
+
+# F52, added: Hocking's conclusion in his italics, pp. 297-298 (djvu pages
+# 335-336, read in the page images), behind this sentence and the next
+[[note]]
+at = "16:9.14"
+after = "Creator Father"
+origin = "none"
+tex = '''Hocking's conclusion, in his italics: ``\bibemph{It is through the knowledge of God that I am able to know men; not first through the knowledge of men that I am able to know or imagine God}'' (\cite{Hocking}, pp.~297--298; see the notes at \bibref[16:9.4]{p016 9:4}). The next sentence states the same order in the book's own terms: ``Fatherhood is the relationship out of which we reason ourselves into the recognition of brotherhood.'' The way runs from God to man, not from man to God.'''
+
+# F53, added: the three steps and their texts (Hebrews 11:6, 1 John 4:13,
+# Acts 17:28, KJV); the second and third read in the paper's own terms, as a
+# reading
+[[note]]
+at = "16:9.14"
+after = "we are in him"
+origin = "none"
+tex = '''Three steps, each with its text. \bibemph{He is}: ``he that cometh to God must believe that he is'' (Hebrews~11:6). \bibemph{He is in us}, and \bibemph{we are in him}: ``Hereby know we that we dwell in him, and he in us, because he hath given us of his Spirit'' (1~John~4:13); ``For in him we live, and move, and have our being'' (Acts~17:28). In the paper's own terms the second may be read as the Adjuster, ``the presence of God that lives within you'' (\bibref[16:9.4]{p016 9:4}), and the third as what the sentence before has just said, that the Father ``has encircuited them within the grasp of the universal personality circuit''.'''
