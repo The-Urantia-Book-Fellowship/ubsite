@@ -83,7 +83,7 @@ tex = '''Hendrix~\cite{Hendrix}, pp.~251--252, in his chapter ``Spiritual Gravit
 at = "7:1.6"
 after = "of like tastes and longings."
 origin = "none"
-tex = '''Hendrix~\cite{Hendrix}, pp.~255--256: ``Fallen natures are drawn together in all worlds where they are found. The power of spiritual gravitation brings together kindred spirits, and in all worlds, who love the Lord Jesus Christ in sincerity.'' Here spirit gravity acts between ``spiritually minded persons of like tastes and longings'', and ``The term kindred spirits is not wholly a figure of speech.'''''
+tex = '''Hendrix~\cite{Hendrix}, pp.~255--256: ``Fallen natures are drawn together in all worlds where they are found. The power of spiritual gravitation brings together kindred spirits, and in all worlds, who love the Lord Jesus Christ in sincerity.'' Here spirit gravity acts between ``spiritually minded persons of like tastes and longings'', and ``The term \bibemph{kindred spirits} is not wholly a figure of speech.'''''
 
 # F3: checked in Tigran's copy of Jones, pp. 100-102, in the page image.
 [[note]]

@@ -1,0 +1,32 @@
+<svg class="sfig" viewBox="0 0 320 340" role="img" aria-label="The path of the seven superuniverses about Paradise, north at the top: an ellipse longer north and south than east and west, travelled counterclockwise. Number one is on the east side, abreast of Paradise; two in the northeast; three at the north; four and five on the west side, above and below the point abreast of Paradise; six at the south; and seven, Orvonton, in the southeast, between six and one" xmlns="http://www.w3.org/2000/svg">
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+<ellipse cx="160" cy="170" rx="92" ry="135" stroke-width="1.2"/>
+<path d="M68 170H146M174 170H252" stroke-width="1" stroke-dasharray="4 3"/>
+</g>
+<g fill="currentColor" stroke="none">
+<ellipse cx="160" cy="170" rx="7" ry="8.2"/>
+<circle cx="252" cy="170" r="5"/>
+<circle cx="217.4" cy="64.5" r="5"/>
+<circle cx="139.5" cy="38.4" r="5"/>
+<circle cx="77.1" cy="111.4" r="5"/>
+<circle cx="77.1" cy="228.6" r="5"/>
+<circle cx="139.5" cy="301.6" r="5"/>
+<circle cx="217.4" cy="275.5" r="5"/>
+<polygon points="245.2,221.4 245.5,232 238.9,229.8"/>
+<polygon points="175,36.6 185.6,36.5 183.4,43.1"/>
+<polygon points="68,146 64.5,136 71.5,136"/>
+<polygon points="186.4,299.6 178,306.1 175.8,299.5"/>
+</g>
+<foreignObject x="262" y="161" width="16" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">$1$</div></foreignObject>
+<foreignObject x="222" y="45" width="16" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">$2$</div></foreignObject>
+<foreignObject x="126" y="13" width="16" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">$3$</div></foreignObject>
+<foreignObject x="53" y="97" width="16" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">$4$</div></foreignObject>
+<foreignObject x="53" y="225" width="16" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">$5$</div></foreignObject>
+<foreignObject x="126" y="309" width="16" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">$6$</div></foreignObject>
+<foreignObject x="222" y="278" width="16" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">$7$</div></foreignObject>
+<foreignObject x="120" y="183" width="80" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">Paradise</div></foreignObject>
+<foreignObject x="140" y="52" width="40" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">north</div></foreignObject>
+<foreignObject x="140" y="268" width="40" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">south</div></foreignObject>
+<foreignObject x="204" y="150" width="40" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">east</div></foreignObject>
+<foreignObject x="76" y="150" width="40" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="lab" style="text-align:center">west</div></foreignObject>
+</svg>

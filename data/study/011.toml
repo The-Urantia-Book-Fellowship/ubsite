@@ -255,7 +255,7 @@ tex = '''A mass has no plane, but a mass with a shape has an axis, and the book 
 at = "11:9.5"
 after = "the absolute of patterns"
 origin = "none"
-tex = '''The definitions are the Foreword's: ``Pattern is a master design from which copies are made. Eternal Paradise is the absolute of patterns; the Eternal Son is the pattern personality'' (\bibref[0:6.13]{p000 6:13}), and ``pattern is pattern and remains pattern; only copies are multiplied'' (\bibref[0:6.10]{p000 6:10}). Copies, not reflections: Havona is ``an exhibit of these potentials in actuality.'''''
+tex = '''The definitions are the Foreword's: ``Pattern is a master design from which copies are made. Eternal Paradise is the absolute of patterns; the Eternal Son is the pattern personality'' (\bibref[0:6.13]{p000 6:13}), and ``pattern is pattern and remains pattern; only \bibemph{copies} are multiplied'' (\bibref[0:6.10]{p000 6:10}). Copies, not reflections: Havona is ``an exhibit of these potentials in actuality.'''''
 
 # F25, the edition's second note at 11:8.9, Kepler's ellipses and the shape of
 # Paradise: folded into the note above (Tigran, 2026-11-06).

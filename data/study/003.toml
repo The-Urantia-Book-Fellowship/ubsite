@@ -116,7 +116,7 @@ at = "3:1.2"
 after = "God is all and in all."
 origin = "764835d27f0ff93e"
 credit = "block"
-tex = '''Compare Eddy~\cite{Eddy}, p.~10: ``God is All, and in all: that finishes the question of a good and a bad side to existence.'' For Eddy the words deny that evil is real; here they say where God is, and the next sentence goes beyond them: ``But even that is not all of God.'''''
+tex = '''Compare Eddy~\cite{Eddy}, p.~10: ``God is All, and in all: that finishes the question of a good and a bad side to existence.'' For Eddy the words deny that evil is real; here they say where God is, and the next sentence goes beyond them: ``But even that is not \bibemph{all} of God.'''''
 
 # F4, ruled as proposed: kept; "(noticed by M. Block)" is the credit line now (his
 # endnote 6).

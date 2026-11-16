@@ -349,7 +349,7 @@ tex = '''That is, carried within a transport supernaphim, as one is carried with
 at = "14:5.11"
 after = "a part of the inborn and divine endowment"
 origin = "none"
-tex = '''It is the fourth of the seven adjutant mind-spirits: ``The spirit of knowledge---the curiosity-mother of adventure and discovery, the scientific spirit'' (\bibref[36:5.9]{p036 5:9}); and ``scientific curiosity'' is one of the three ``inalienables of human nature'', with moral intuition and spiritual insight (\bibref[16:7.1]{p016 7:1}).'''
+tex = '''It is the fourth of the seven adjutant mind-spirits: ``\bibemph{The spirit of knowledge---}the curiosity-mother of adventure and discovery, the scientific spirit'' (\bibref[36:5.9]{p036 5:9}); and ``scientific curiosity'' is one of the three ``inalienables of human nature'', with moral intuition and spiritual insight (\bibref[16:7.1]{p016 7:1}).'''
 
 # ---- 14:6.6
 
@@ -396,7 +396,7 @@ tex = '''That is, with Havona itself: ``The Infinite Spirit eternalizes concurre
 at = "14:6.23"
 after = "the spiritual reality of the Supreme Being"
 origin = "none"
-tex = '''The Foreword: ``God the Supreme in Havona is the personal spirit reflection of the triune Paradise Deity'' (\bibref[0:7.7]{p000 7:7}). His other phase, the power of the Almighty, is evolving in the superuniverses, and the two are one: ``The Almighty Supreme, evolving on the value-level of nonpersonal activities, and the spirit person of God the Supreme are one reality---the Supreme Being'' (\bibref[0:8.10]{p000 8:10}).'''
+tex = '''The Foreword: ``\bibemph{God the Supreme} in Havona is the personal spirit reflection of the triune Paradise Deity'' (\bibref[0:7.7]{p000 7:7}). His other phase, the power of the Almighty, is evolving in the superuniverses, and the two are one: ``The Almighty Supreme, evolving on the value-level of nonpersonal activities, and the spirit person of God the Supreme are \bibemph{one reality---}the Supreme Being'' (\bibref[0:8.10]{p000 8:10}).'''
 
 # ---- 14:6.32
 

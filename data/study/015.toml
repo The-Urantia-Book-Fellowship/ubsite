@@ -1,0 +1,784 @@
+# Paper 15, The Seven Superuniverses: the British Study Edition has eight notes
+# on it at d6c3206, all Tigran's own, and four sources.  The press has no 1955
+# reading in the paper, so nothing is dropped.  All eight are carried, each
+# checked and most enlarged with the source's own words: 15:4.6 as it stands;
+# 15:4.7 with Eddington's sentence from Stars and Atoms, which the edition
+# named without quoting, Hubble's dates and today's distance; 15:6.10 with the
+# ocean's measured volume and the comparison's source, Swann, p. 232; 15:6.13
+# with Eddington's chapter "Weighing Light", which the note follows; 15:6.15
+# with Eddington's sentence, Barnes's pages and the book's own 49:2.13;
+# 15:7.12 with its terms said in words and the 647,591 summed; 15:8.3 in the
+# hedged form of his Russian note, with two sentences of plain relativity;
+# 15:14.8 with his question answered from 49:0.3 and his conjecture kept as
+# one.  Block's chart of November 6, 2017 covers sections 3 and 4 only, from
+# Barnes, Baker and Swann: his parallels are added as ten notes of their
+# own, credited to him, each checked in the original (Baker in
+# ../block-sources/originals/, Barnes and Swann in Tigran's copies).  The
+# rest was found in review, with no credit line: Swann's "glasses of water"
+# on the page Block cites for Andromeda; Eddington's Nature of the Physical
+# World behind the long life of the suns, the dead suns that collide and the
+# universes that "do not run down"; Barnes on the rival theories of the solar
+# system's origin; The Federalist, No. 47, beside the courts with no
+# "separate personnel"; the path of the seven superuniverses drawn from
+# 15:1.4-5 (figures/superuniverse-path.svg); arithmetic of the Uversa day and
+# year, the assembly's term and the registry number; Daniel, the Psalm and
+# Isaiah, Paul's third heaven and the Comforter; and the book's own fuller
+# words elsewhere.  Nine of Tigran's Russian notes in ud are carried into
+# English (15:2.9, 15:3.12 at 15:3.11, 15:5.5, 15:5.14, 15:6.10, 15:7.5,
+# 15:7.9-10 at 15:7.8, 15:8.6, 15:14.8), each checked and hedged where it is a
+# reading.  Sadler's Analytic Study of Part I, pp. 356-365 on this paper, was
+# read whole.  The review, numbered F1-F59 in the order of the text, is
+# var/study/review-015.md.  RULED by Tigran on 2026-11-15, all 59 Yes in the
+# review's table, and in the session, as he read: F10 with the pocket watch
+# and Jeans, F44 with "a fifth dimension" and without its pointer to 23:3.2,
+# F47, F48, F55, F56 and F59 reworded where he or the search after him found
+# a slip, and a sixtieth note, F56a on "supercreation" at 15:14.3, which he
+# asked about and accepted ("all accepted, including F56a, which was not in
+# the table").  Each change has its reason in the comment above its note.
+
+paper = 15
+chart = "https://urantiabooksources.com/wp-content/uploads/2017/11/015.pdf"
+chart_date = 2017-11-06          # as Block dates it on its first page
+
+# The works the notes quote, each under the key and words earlier papers gave
+# it where it has one.
+
+# The edition's p015Baker1, carried under Paper 12's key and words.  Checked in
+# the Internet Archive's PDF of its lending copy (originals/): pp. 18, 32,
+# 101-103, 105-108, 113-116, 118, 130-131.
+[[source]]
+key = "Baker1932"
+origin = "126fb8476874ad00"
+tex = '''Robert H. Baker, \emph{The Universe Unfolding: The Story of Man's Increasing Comprehension of the Universe Around Him} (Baltimore: The Williams \& Wilkins Company, 1932).'''
+
+# The edition's p015Barnes1.  Checked in Tigran's scan (LIBRARY.tsv, not
+# public: Barnes died in 1953): pp. 318-319, 324-327, 340; book p. N = djvu
+# page N+23.
+[[source]]
+key = "Barnes"
+origin = "227e098493107732"
+tex = '''Ernest William Barnes, \emph{Scientific Theory and Religion: The World Described by Science and Its Spiritual Interpretation} (Cambridge: at the University Press, 1933).'''
+
+# Carried from Paper 12's key and words: F35 and F44 quote it, pp. 110-111 and
+# 113 (Tigran's copy of the 1953 reprint, LIBRARY.tsv).
+[[source]]
+key = "Eddington1920"
+origin = "none"
+tex = '''Arthur Eddington, \emph{Space, Time and Gravitation: An Outline of the General Relativity Theory} (Cambridge: at the University Press, 1920).'''
+
+# Added: F22 quotes it, p. 93 (djvu page 98), the book the edition's note at
+# 15:4.7 names as the figure's source; Tigran's copy, the American issue, whose
+# title page gives the imprint (LIBRARY.tsv).
+[[source]]
+key = "Eddington1927"
+origin = "none"
+tex = '''Arthur Eddington, \emph{Stars and Atoms} (New Haven: Yale University Press; London: Humphrey Milford, Oxford University Press, 1927).'''
+
+# The edition's p015Eddington1.  Tigran's copy is the American issue in its
+# printing of October 1929, the pages of 1928 (LIBRARY.tsv): pp. 83, 85, 86,
+# 168-170, 176; book p. N = djvu page N+20.
+[[source]]
+key = "Eddington1928"
+origin = "9de3f95386573c37"
+tex = '''Arthur Eddington, \emph{The Nature of the Physical World} (New York: The Macmillan Company; Cambridge: at the University Press, 1928).'''
+
+# Added at Tigran's word (2026-11-15): F10 quotes it, p. 14 (PDF page 29;
+# book p. N = PDF page N+15).  His copy (LIBRARY.tsv, not public) is the
+# SECOND EDITION, 1929, in the Press's digital reprint: the file is named
+# Astronomy-and-Cosmogony-1928.pdf and the reprint's own cover page says
+# "This edition first published 1928", but the title page it reproduces reads
+# 1929 and its verso "First edition 1928, Second edition 1929".  The first
+# edition was not seen, so the Bibliography names the one read.
+[[source]]
+key = "Jeans1929"
+origin = "none"
+tex = '''James Jeans, \emph{Astronomy and Cosmogony}, 2nd~ed. (Cambridge: at the University Press, 1929).'''
+
+# Added: F54 quotes it, vol. II, pp. 92-94 (PDF pages 338-340), in Number
+# XLVII; the volume Paper 14 quotes Number LI from, whose key names that
+# essay, so this one has its own.
+[[source]]
+key = "MadisonXLVII"
+origin = "none"
+tex = '''Publius [James Madison], \emph{The Federalist: A Collection of Essays, Written in Favour of the New Constitution}, No.~XLVII, vol.~II (New-York: J.~and A.~M'Lean, 1788).'''
+
+# Carried from Paper 3's key and words: F1, F3 and F10 quote it, pp. 356, 358
+# and 363-365 (PDF pages 374, 376 and 381-383).
+[[source]]
+key = "Sadler2003"
+origin = "none"
+tex = '''William S. Sadler, ``Analytic Study of Part I of The Urantia Book'', in \emph{The Urantia Book Workbooks}, vol.~I, \emph{Foreword and Part I} (Chicago: Urantia Foundation, 2003).'''
+
+# The edition's p015Swann1.  Checked in Tigran's scan (LIBRARY.tsv), which has
+# no text layer, read in the page images: pp. 232, 233, 240; book p. N = djvu
+# page N+12.
+[[source]]
+key = "Swann"
+origin = "a32ac74d6ab2fce4"
+tex = '''W. F. G. Swann, \emph{The Architecture of the Universe} (New York: The Macmillan Company, 1934).'''
+
+# ---- 15:0.1
+
+# F1, added: the three standpoints, with the book's words for the first and
+# the third, and Sadler's fourth line
+[[note]]
+at = "15:0.1"
+after = "virtually nonexistent"
+origin = "none"
+tex = '''Three sentences follow, each from where a Deity stands. The Father's regard is for the person: ``The love of the Father absolutely individualizes each personality as a unique child of the Universal Father, a child without duplicate in infinity'' (\bibref[12:7.9]{p012 7:9}). The Trinity's is for the whole: ``the Paradise Trinity, like the Supreme Being, is concerned only with the total'' (\bibref[10:7.2]{p010 7:2}). Between them stand the Creator Sons and the Creative Spirits, to each pair a local universe of its own. The universes are not denied; they are only not what a father looks at. Sadler adds a fourth line to the three: ``A Master Spirit is concerned with a single superuniverse'' (\cite{Sadler2003}, p.~356).'''
+
+# F2, added: the wheel's spokes at 16:0.12, and that it turns
+[[note]]
+at = "15:0.1"
+after = "one gigantic wheel"
+origin = "none"
+tex = '''The spokes are drawn again at \bibref[16:0.12]{p016 0:12}: each Master Spirit keeps a ``force-focal headquarters, which slowly circulates around the periphery of Paradise, always maintaining a position opposite the superuniverse of immediate supervision'', and ``The radial boundary lines of any one of the superuniverses do actually converge at the Paradise headquarters of the supervising Master Spirit.'' So the wheel turns: the seven superuniverses go round Paradise counterclockwise (\bibref[15:3.14]{p015 3:14}), and the seven spokes go round with them.'''
+
+# ---- 15:0.2
+
+# F3, added: why seven (16:0.1); Sadler's thirty-three sevens and his remark on
+# chemistry, pp. 363-365; the book's own remark, 42:9.2-3
+[[note]]
+at = "15:0.2"
+after = "sevenfold scheme"
+origin = "none"
+tex = '''Why seven is said at \bibref[16:0.1]{p016 0:1}: in the Seven Master Spirits the Infinite Spirit ``exhausted the associative possibilities mathematically inherent in the factual existence of the three persons of Deity'', and ``there are just seven associative possibilities, and only seven, inherent in three Deities. And this explains why the universe is operated in seven grand divisions''. Three taken singly, three in pairs and the three together are $2^3-1=7$. Sadler ends his study of this paper with thirty-three sevens of the Bible, from the week of Genesis to the seven thunders of Revelation, and a remark of his own: ``All of this seven business could hardly be derived from the seven-day week. You should also recall how the number seven appears in the periodic arrangement of chemistry'' (\cite{Sadler2003}, pp.~363--365). The book says the same of the elements at \bibref[42:9.2--3]{p042 9:2}.'''
+
+# F4, added: Daniel 7:9-10, 13, 22; 96:1.9; 18:3.4
+[[note]]
+at = "15:0.2"
+after = "Ancients of Days"
+origin = "none"
+tex = '''The name is Daniel's: ``I beheld till the thrones were cast down, and the Ancient of days did sit \ldots\ thousand thousands ministered unto him, and ten thousand times ten thousand stood before him: the judgment was set, and the books were opened'' (Daniel~7:9--10; again at 7:13 and 7:22). He sits as a judge, as the Ancients of Days do here (\bibref[15:12.1]{p015 12:1}). Daniel's is one, and the book has ``The Ancient of Days'' among the names the Hebrews gave their God (\bibref[96:1.9]{p096 1:9}); the paper has three to a superuniverse, and calls the name right for the reason given at \bibref[18:3.4]{p018 3:4}: ``They represent the beginning of the personality records of the universe of universes, hence their name''.'''
+
+# ---- 15:1.5
+
+# F5, added: the seven placed on their path, from the words of 15:1.4-5, with
+# a figure; 11:2.2-3 on Paradise's own shape and directions
+[[note]]
+at = "15:1.5"
+after = "almost direct northerly course"
+origin = "none"
+tex = '''The seven are placed by compass points, ``as direction is regarded on Urantia'' (\bibref[15:1.4]{p015 1:4}), and the two paragraphs together give this picture. \figure{superuniverse-path} The path is ``a great ellipse'' (\bibref[15:1.2]{p015 1:2}), and its length lies north and south, since the positions east and west of Paradise are ``the nearest physical approach of the spheres of time to the eternal Isle''. The motion is counterclockwise: northward on the east side, westward round the north, southward on the west, eastward round the south. Number one is on the east side, abreast of Paradise; two is making for the northern bend and three is in it; four and five are on the long run south, one above and one below the point abreast of Paradise; six fills the southern bend; and Orvonton, the seventh, ``between superuniverses one and six'', has rounded the southeastern turn and begun the long run north. The figure shows no more than the words say: the paper gives no distances, and how far apart the seven stand is not told. Paradise is itself longer north and south than east and west, by a sixth (\bibref[11:2.2]{p011 2:2}), and has an absolute direction of its own (\bibref[11:2.3]{p011 2:3}); whether Urantia's north is Paradise's north the paper does not say.'''
+
+# ---- 15:1.6
+
+# F6, added: the same said at 32:2.11 and 41:10.5
+[[note]]
+at = "15:1.6"
+after = "periphery of Orvonton"
+origin = "none"
+tex = '''So also \bibref[32:2.11]{p032 2:11}, with the distances: ``Satania is on the periphery of the local universe, and Nebadon is now well out towards the edge of Orvonton''; and \bibref[41:10.5]{p041 10:5}, which carries it down to the planet: ``your solar system, with one exception, being the farthest removed from Jerusem, while Satania itself is next to the outermost system of Norlatiadek, and this constellation is now traversing the outer fringe of Nebadon''. The edge of an edge of an edge; what that does not mean is said in the paper's last sentence (\bibref[15:14.9]{p015 14:9}).'''
+
+# ---- 15:2.1
+
+# F7, added: Psalms 147:4 and Isaiah 40:26, and where the book quotes each
+[[note]]
+at = "15:2.1"
+after = "name and number"
+origin = "none"
+tex = '''Psalms~147:4: ``He telleth the number of the stars; he calleth them all by their names''; Isaiah~40:26: ``Lift up your eyes on high, and behold who hath created these things, that bringeth out their host by number: he calleth them all by names''. The book quotes the Psalm of the Father's knowledge at \bibref[3:3.1]{p003 3:1}, and the Prophet at \bibref[1:5.3]{p001 5:3}, with ``worlds'' for his ``host''. Here the stars have become inhabited worlds, and the names a name and a number; Urantia's number is given at \bibref[15:14.8]{p015 14:8}.'''
+
+# ---- 15:2.9
+
+# F8, carried from Tigran's Russian note in ud at 15:2.9: the architectural
+# spheres counted, and their ratio to the inhabitable worlds
+[[note]]
+at = "15:2.9"
+after = "plus the architectural spheres"
+origin = "none"
+tex = '''The architectural spheres are counted at \bibref[15:7.12]{p015 7:12}: when all are built, some 453 billion in the seven superuniverses, 647,591 of them to each local universe (\bibref[37:10.1]{p037 10:1}). Seven trillion inhabitable worlds to 453 billion made to order are about fifteen evolved worlds to each architectural one.'''
+
+# ---- 15:3.1
+
+# F9, added: Block's finding, Barnes p. 340 (djvu page 363)
+[[note]]
+at = "15:3.1"
+after = "naked eye on Urantia"
+origin = "none"
+credit = "block"
+tex = '''Barnes~\cite{Barnes}, p.~340: ``The outcome of recent research is to shew that the stars which we can see with the naked eye are but a small fraction of the number revealed by a telescope \ldots\ But practically all belong to a vast universe of stars which has the Milky Way for a sort of rim: for this reason it is called the galactic universe.'' Where the astronomer has ``the galactic universe'', the paper has the superuniverse of Orvonton.'''
+
+# F10, added: Block's finding, Baker p. 32 (PDF page 48), and his endnote 1,
+# Moulton's "watch-shaped", which rests on his chart; Sadler p. 358
+# The pocket watch is Tigran's, ruling on the paper (2026-11-15): "In F10 maybe
+# it is worth mentioning that in those days most gentlemen's watches were
+# pocket watches?"  "Commonly", not "most": Moulton wrote in 1926, when it was
+# so; wristwatches outsold pocket watches from about 1930 in Britain and later
+# in America (secondary accounts only, no trade figure found), so by 1934 the
+# pocket watch was the one men had, no longer the one most were buying.  Not
+# Jeans is a second witness for "the astronomers' usual figure", found in the
+# text cache and added at his word (2026-11-15: "Yes, please add Jeans"):
+# Astronomy and Cosmogony, ch. I, section 13, p. 14 (PDF page 29), read in the
+# page image as well as the text layer, which is OCR ("Sir Johnf" for the
+# dagger after John).  The sentence whole: "The method of 'star-gauges,' or
+# counts of stars of different brightnesses in different areas of the sky,
+# instituted by Sir William Herschel and extended to the southern hemisphere
+# by his son, Sir John, first established that the system of stars
+# surrounding the sun is of a symmetrical flattened shape like a watch or a
+# ship's biscuit."
+[[note]]
+at = "15:3.1"
+after = "watchlike"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~32: ``Our galactic system is a flattened aggregation of many tens of thousands of millions of stars. Approximately circular in outline, its diameter is 200,000 light years, and its thickness is about one tenth as great.'' A watch was the astronomers' usual figure for that shape; Block's chart gives Forest Ray Moulton's, ``a disklike, or watch-shaped, figure in space'' (in \emph{The Nature of the World and of Man}, 1926, p.~24), and Jeans~\cite{Jeans1929}, p.~14, says of the Herschels' counts of the stars that they ``first established that the system of stars surrounding the sun is of a symmetrical flattened shape like a watch or a ship's biscuit''. Sadler read it so: ``Dimensions of the Milky Way like a watch'' (\cite{Sadler2003}, p.~358). The watch meant is a pocket watch, round and flat, as a man's watch then commonly was. Baker's system is round; the paper's is ``elongated-circular'', and the next paragraph gives it three unequal measures, thickness, breadth and length.'''
+
+# ---- 15:3.4
+
+# F11, added: Block's finding, Baker pp. 113-116 (PDF pages 137-140), and
+# 41:3.10, which his chart sets beside the paragraph
+[[note]]
+at = "15:3.4"
+after = "seventh galaxy"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, pp.~113--116, takes the same journey: ``Let us imagine ourselves suddenly transferred from the earth in the direction of the constellation Carina to a point a million light years away'', where one photograph would decide between the three theories of the Milky Way then current; on Shapley's, ``instead of an edgewise spiral we shall see a group of more or less isolated star clouds''. The paper's ten major sectors stand where Shapley's star clouds do (see the note at \bibref[15:4.9]{p015 4:9}), and this is the one place in the book where a superuniverse is called a galaxy. Of the eight, \bibref[41:3.10]{p041 3:10} says: ``you will at least recognize eight of these immense sectors as enormous and fairly symmetrical star clusters.'''''
+
+# ---- 15:3.5
+
+# F12, added: Block's finding, Baker p. 102 (PDF page 126)
+[[note]]
+at = "15:3.5"
+after = "star cloud of Sagittarius"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~102: ``Recent surveys at the Harvard Observatory place the center of the great Sagittarius star clouds at the distance of 50,000 light years, thereby identifying them with the massive nucleus of the galactic system, around which the other star clouds are arranged in a much flattened structure \ldots\ From opposite sides of its nucleus formed by the Sagittarius clouds two streams of star clouds emerge and coil around in the same sense.'' The words are kept and the rank is changed. What is for Baker the nucleus of the whole galactic system is for the paper the center of one minor sector, a ``subgalactic system'', and Orvonton has a thousand minor sectors (\bibref[15:2.6--8]{p015 2:6}) and a center of its own, Uversa (\bibref[15:3.7]{p015 3:7}).'''
+
+# ---- 15:3.6
+
+# F13, added: Block's finding, Baker p. 102, the next sentence
+[[note]]
+at = "15:3.6"
+after = "edge of the star stream"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~102, in the sentence after the one quoted at \bibref[15:3.5]{p015 3:5}: ``Our local star cloud, in which the sun has a fairly central position, is situated in one of the arms of the spiral, about halfway from the center toward the edge.'' Again the words are kept and the scale is changed. Baker's spiral is the whole galactic system, 200,000 light-years across, and his sentence places the local star cloud in it; the paper's spiral is the remnant of one nebula, Andronover, and the sentence places the solar system. Andronover's history is told from \bibref[57:1.6]{p057 1:6} on.'''
+
+# ---- 15:3.7
+
+# F14, added: Block's finding, Baker p. 18 (PDF page 34), Lambert's hierarchy
+[[note]]
+at = "15:3.7"
+after = "multiple revolutionary movements"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~18, quotes J.~H. Lambert, the contemporary of Kant, on ``the hierarchy of systems---systems upon systems, continuing to the limit of the imagination'': ``Thus everything revolves---the earth round the sun; the sun round the center of his system; this system round a center common to it with other systems; this group, this assemblage of systems, round a center which is common to it with other groups of the same kind; and where shall we have done?'' The first four of the paper's seven motions are Lambert's four, in his order. And the paper answers his question: at the seventh, the motion round Paradise, which alone is at rest (\bibref[11:2.3]{p011 2:3}).'''
+
+# ---- 15:3.11
+
+# F15, added, with Tigran's Russian note in ud at 15:3.12: the motion astronomy
+# found in 1927 (Baker pp. 105-107, PDF pages 129-131), and the center as now
+# measured (GRAVITY Collaboration, A&A 625, L10, 2019: 8,178 parsecs)
+[[note]]
+at = "15:3.11"
+after = "Sagittarius center of their minor sector"
+origin = "none"
+tex = '''This fourth motion is the one astronomers found in 1927, when Oort showed that the stars about us move as they would ``if the galactic system is rotating''; the evidence, Baker writes, ``has been generally taken to mean that the galactic system is rotating around the center of the Sagittarius cloud. As its share in the rotation the sun is taking us along at the rate of two hundred miles a second in the direction of Cepheus'' (\cite{Baker1932}, pp.~105--107). It is the center toward which we look in the constellation of Sagittarius. It is now measured at some 26,700 light-years (GRAVITY Collaboration, 2019), about half of Baker's figure, and the sun goes round it once in some 220 million years. So what astronomy knows as the rotation of the Galaxy is, by the paper's count, the swing of Nebadon within one minor sector, Ensa (\bibref[15:14.6]{p015 14:6}); and the three motions beyond it, about the major sector, about Uversa and about Paradise, are motions astronomy does not know.'''
+
+# ---- 15:3.13
+
+# F16, added: the astronomers' name; Baker p. 105 for its explanation
+[[note]]
+at = "15:3.13"
+after = "so-called star drifts"
+origin = "none"
+tex = '''The name is the astronomers'. In 1904 Kapteyn found that the stars about the sun do not move at random but in two great streams, which Eddington called the two star-drifts; for twenty years they were the leading fact of the motions of the stars, until Lindblad and Oort showed, in 1926 and 1927, that they are an effect of the rotation of the galactic system (see the note at \bibref[15:3.11]{p015 3:11}). The paper keeps the name and gives it to the ten major sectors of Orvonton. The ``two-way procession of the suns'' which Andronover is said to keep (\bibref[15:3.6]{p015 3:6}) may be those two streams, as they are seen from here.'''
+
+# ---- 15:4.2
+
+# F17, added: the steps named in Paper 42, the force organizers in Paper 29,
+# nether Paradise in Paper 11, and Andronover as the worked case
+[[note]]
+at = "15:4.2"
+after = "space potency into primordial force"
+origin = "none"
+tex = '''The steps are set out in Paper~42: space potency, ``the unquestioned free space presence of the Unqualified Absolute'' (\bibref[42:2.3]{p042 2:3}); primordial force, ``the first basic change in space potency'' (\bibref[42:2.7]{p042 2:7}); the two emergent energies, puissant energy and gravity energy, which are this paragraph's ``primary and secondary energy manifestations'' (\bibref[42:2.10--12]{p042 2:10}); and universe power, energy ``ripened to that point where it can be directed into channels of power'', where the power directors take it up (\bibref[42:2.14]{p042 2:14}). The force organizers are described at \bibref[29:5.5]{p029 5:5}: ``they are nebulae creators. They are the living instigators of the energy cyclones of space''. The circuit ``in and out of the nether Paradise center'', of the paragraph before, is at \bibref[11:5.5]{p011 5:5}, where ``The mother force of space seems to flow in at the south and out at the north''. And one nebula is followed from its permit to its suns at \bibref[57:1.3--6]{p057 1:3}: Andronover, ``number 876,926'', begun 875 billion years ago.'''
+
+# ---- 15:4.4
+
+# F18, added: Block's finding, Baker pp. 130-131 (PDF pages 158 and 161)
+[[note]]
+at = "15:4.4"
+after = "ten different forms of nebulae"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, pp.~130--131, of the galaxies beyond our own: ``There is an interesting sequence in the forms of all these galaxies, which Hubble and others have taken as the basis for their descriptive classification \ldots\ Whether this sequence represents successive stages in a vast scheme of evolution is neither established nor disproved.'' Baker adds that ``Jeans has found reasons for attaching such significance to it''. The paper counts the forms, ten, and settles the question Baker leaves open, on Jeans's side: they are ``phases of primary universe evolution''. On \bibemph{nebula} as the name of what are now called galaxies see the note at \bibref[12:1.12]{p012 1:12}.'''
+
+# ---- 15:4.6
+
+# F19, carried as the edition has it: the mirror of the note at 32:1.4
+[[note]]
+at = "15:4.6"
+after = "universe embraces exactly"
+origin = "f506e172dd8d7030"
+tex = '''In \bibref[32:1.4]{p032 1:4} we are told this is \bibemph{approximately} so, not \bibemph{exactly}. The only apparent difference is that there it refers to the \bibemph{force endowment}, whereas here to the \bibemph{energy charge} of a superuniverse.'''
+
+# ---- 15:4.7
+
+# F20, added: the arm as a place stars pass through; the density-wave theory
+# (Lin and Shu, ApJ 140, 646, 1964) compared, and the limit of the likeness
+[[note]]
+at = "15:4.7"
+after = "different returning routes"
+origin = "none"
+tex = '''An arm, on this account, is not a fixed body of stars but the place where stars travelling in company are seen together: they pass through it and out of it. One may compare the theory by which astronomy has since come to explain the lasting arms of spiral galaxies, as waves of crowding through which the stars move in and out again, the arm remaining while its stars change (Lin and Shu, 1964, after Bertil Lindblad). The likeness goes no further than that one idea: the paper's suns leave the arm ``in close formation'' and ``return by diverse routes'', which is no part of the astronomers' theory.'''
+
+# F21, added: Block's finding, Swann p. 232 (djvu page 244, read in the page
+# image)
+[[note]]
+at = "15:4.7"
+after = "visible to the naked eye"
+origin = "none"
+credit = "block"
+tex = '''Swann~\cite{Swann}, p.~232, at the opening of his chapter ``The Fate of the Universe'': ``Silhouetted against the sky in the constellation Andromeda is a tiny patch of light, hardly visible to the eye. It is the great nebula of Andromeda \ldots\ so far away that this light takes nearly a million years to reach us, so that we see that nebula not as it is today, but as it was a million years ago.'' The next sentences of Swann's page are behind \bibref[15:6.10]{p015 6:10}.'''
+
+# F22, carried: the edition's note, with Eddington's own sentence (p. 93,
+# djvu page 98, which the note named and did not quote), Hubble's dates put
+# right (the first Cepheid October 1923, announced January 1, 1925; the note
+# had "in 1925", Eddington's page "In 1924"), and the distance as now
+# measured (Li and others, ApJ 920, 84, 2021: 761 +/- 11 kpc) for the note's
+# "(2003) 2.54 +/- 0.06"; it agrees with Paper 12's notes at 12:1.14 and 12:4.14
+[[note]]
+at = "15:4.7"
+after = "one million years ago"
+origin = "0bcc7feafcd6d214"
+tex = '''The figure, and the turn of the sentence, are those of Sir~Arthur Eddington's \emph{Stars and Atoms}, published in 1927: ``With the naked eye you can see the Andromeda nebula as a faint patch of light. When you look at it you are looking back 900,000 years into the past'' (\cite{Eddington1927}, p.~93). Edwin Hubble was the first to identify Cepheid variable stars in the nebula, the first of them in October 1923, and his result, announced on January~1, 1925, settled the debate about the object being extragalactic. The modern estimate of the distance to the Andromeda galaxy (M31) is $2.48 \pm 0.04$ million light-years (Li and others, 2021, from Cepheids measured with the Hubble Space Telescope); the distances of the 1920s were more than doubled by Baade's revision of 1952 (see the note at \bibref[12:4.14]{p012 4:14}).'''
+
+# ---- 15:4.8
+
+# F23, added: Block's findings, Baker p. 118 (PDF page 142) and p. 103 (PDF
+# page 127); p. 101 for the clusters as the outline of the system
+[[note]]
+at = "15:4.8"
+after = "outer margins of Orvonton"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, p.~118, of the Magellanic Clouds: ``they are plainly visible to the unaided eye on a clear moonless night as luminous patches comparable with the brighter parts of the Milky Way''; and p.~103, of this last sentence: ``The globular clusters appear in the outskirts of the galactic system.'' In the theory Baker is describing, the system of globular clusters is what ``outlines its form and sets an upper limit to the size that can be assigned to it'' (p.~101): the paper's ``outer margins of Orvonton'' are where that galactic system ends.'''
+
+# ---- 15:4.9
+
+# F24, added: Block's finding, Baker pp. 107-108 (PDF pages 131-132), with
+# what it shows of sections 3 and 4 together, and what became of the theory
+[[note]]
+at = "15:4.9"
+after = "external to the Milky Way galaxy"
+origin = "none"
+credit = "block"
+tex = '''Baker~\cite{Baker1932}, pp.~107--108, of the theory Harlow Shapley proposed in 1930: ``the assemblage of star clouds becomes a supergalaxy, or perhaps a part of one \ldots\ From the new point of view the star clouds of the galactic system are to be regarded as individual galaxies, and to be compared with the separate external systems.'' Baker sets out three theories of the Milky Way and will not choose between them (p.~113). The paper's sections~3 and~4 take from the first of them the two streams coiling out of Sagittarius, and from the second, Shapley's, this: its ten major sectors, eight of which astronomers are said to have ``roughly identified'' (\bibref[15:3.4]{p015 3:4}), stand where his separate star clouds do. His word may be heard in the paper's own, a \emph{super}universe of local universes as his was a supergalaxy of galaxies. The theory did not last: within twenty years the Milky Way was known for a single spiral galaxy, its star clouds parts of its arms, about 100,000 light-years across.'''
+
+# ---- 15:5.2
+
+# F25, added: several of the ten were rival theories of the solar system's
+# origin; Barnes pp. 318-319 (djvu pages 341-342)
+[[note]]
+at = "15:5.2"
+after = "following ten groups"
+origin = "none"
+tex = '''Several of the ten were, in the astronomy of the day, rival accounts of one thing, the origin of the solar system. Barnes~\cite{Barnes}, pp.~318--319, takes them in turn. Laplace's: a rotating nebula whose matter ``was flung off into space in a series of rings'' which became the planets, the paper's first group, and by its cause, rotation, the fourth. The objection to Laplace, that such a mass ``would normally separate into two approximately equal masses and would, in fact, form a system of two stars'': the fifth. And ``the modern theory'', the passing star: the third (see the note at \bibref[15:5.5]{p015 5:5}). Where the astronomers had to choose, the paper keeps them all, each as one of the ways in which some suns and planets do arise, and says which of them was the origin of our own.'''
+
+# ---- 15:5.5
+
+# F26, carried from Tigran's Russian note in ud at 15:5.5, corrected: the
+# theory is Chamberlin's and Moulton's before it is Jeans's (Barnes p. 318),
+# and the objections are given as Russell (1935) and Spitzer (1939) made
+# them; Eddington pp. 176-177; 57:5.4-9
+[[note]]
+at = "15:5.5"
+after = "just such an origin"
+origin = "none"
+tex = '''This is the tidal theory, which held the field when the papers were written: ``The hypothesis was originally propounded by Chamberlin and Moulton. It was modified by Jeans, who in his most recent work has accepted certain arguments of Jeffreys. All agree that `an accident', the chance close approach of another sun to our own, gave birth to the solar system'' (Barnes~\cite{Barnes}, p.~318). Chamberlin and Moulton published it in 1905, Jeans his form of it from 1916. The book tells the event at \bibref[57:5.4--9]{p057 5:4}, with its date, 4,500,000,000 years ago, and the visitor's name, Angona, whose center was ``a dark giant of space''. Astronomers gave the theory up soon after: Russell showed in 1935 that a passing star could not have given the planets their motion, for with little more than a thousandth of the sun's mass they carry nearly all the angular momentum of the system; and Spitzer in 1939 that gas torn hot from the sun would scatter before it could gather into planets. Planets are now held to form with their star, from the disc of gas and dust about it (see the note at \bibref[15:5.14]{p015 5:14}). For Eddington the theory made our system ``a freak'' and inhabited worlds very rare (\cite{Eddington1928}, p.~176); the paper, which has other ways of making planets besides, counts seven trillion.'''
+
+# ---- 15:5.8
+
+# F27, added: Jupiter's mass against a star's, and the book's wider "sun"
+# (57:5.10)
+[[note]]
+at = "15:5.8"
+after = "two adjacent but unequal suns"
+origin = "none"
+tex = '''A \bibemph{sun} here is wider than the astronomer's star. Saturn, Uranus and Neptune together have two-fifths of Jupiter's mass, and a body shines as a star, by the fusion of hydrogen, only above some eighty times Jupiter's mass; so by present reckoning Jupiter enlarged with ``the remaining worlds'' would still be a planet. But the book calls a body a sun when it shines by its own heat: Jupiter and Saturn, newly formed, ``shone with a brilliant light and emitted enormous volumes of heat; they were in reality secondary suns for a short period after their formation as separate space bodies'' (\bibref[57:5.10]{p057 5:10}).'''
+
+# ---- 15:5.9
+
+# F28, added: accretion as one way among several; 15:6.14; Urantia's double
+# origin, 57:5.11 and 41:10.4
+[[note]]
+at = "15:5.9"
+after = "meteoric accretion"
+origin = "none"
+tex = '''This slow gathering of small cold bodies is how the solid planets are now held to have been made. The paper gives it as one way among several, and thinks well of what it makes: ``The cold worlds which have been built up by the assemblage of floating space material \ldots\ are the more ideal planets to harbor intelligent inhabitants'' (\bibref[15:6.14]{p015 6:14}). Urantia it makes a case of both this way and the third: ``The worlds of the solar system thus had a double origin: nucleuses of gas condensation later on augmented by the capture of enormous quantities of meteors'' (\bibref[57:5.11]{p057 5:11}; ``Planets having a dual origin like Urantia'', \bibref[41:10.4]{p041 10:4}).'''
+
+# ---- 15:5.11
+
+# F29, added: Eddington p. 85 on dead stars colliding, and p. 168 on dead
+# stars as an abandoned speculation
+[[note]]
+at = "15:5.11"
+after = "revivifying cosmic happening"
+origin = "none"
+tex = '''Eddington knew this hope, and gave it the Phoenix for a mascot: ``Stars grow cold and die out. May not two dead stars collide, and be turned by the energy of the shock into fiery vapour from which a new sun---with planets and with life---is born? This theory very prevalent in the last century is no longer contemplated seriously by astronomers'' (\cite{Eddington1928}, p.~85). The paper contemplates it: here, in the collisional spheres of the next paragraph, and at \bibref[15:8.6]{p015 8:6}, where ``a collision among the dead giants of space'' sets the balance of energy and matter right. And it keeps the dead suns themselves, the dark islands of space, of which Eddington wrote: ``Another abandoned speculation is that lucid stars may be the exception, and that there may exist thousands of dead stars for every one that is seen shining'' (p.~168). See the notes at \bibref[15:6.11]{p015 6:11} and \bibref[15:8.10]{p015 8:10}.'''
+
+# ---- 15:5.14
+
+# F30, carried from Tigran's Russian note in ud at 15:5.14, brought up to
+# date: NASA Exoplanet Archive, counted on 2026-11-15 (pscomppars: 6,470
+# planets, 4,862 host stars, 1,083 of them with more than one); his count was
+# of May 9, 2021; the doubling time is not carried, the counts no longer
+# bearing it out
+[[note]]
+at = "15:5.14"
+after = "which serve as inhabited planets"
+origin = "none"
+tex = '''Until the 1990s no planet was known beyond the solar system. The first sign of one came in 1988 (about the star Gamma Cephei, confirmed in 2003); the first confirmed were found in 1992 about a pulsar and in 1995 about a star like the sun, 51~Pegasi. On November~15, 2026 NASA's Exoplanet Archive listed 6,470 confirmed planets in 4,862 planetary systems, 1,083 of which have more than one. Evidence of their formation has come as well, and seldom, as the paper says: discs of gas and dust about young stars have been seen since the 1990s, and since 2018 a planet or two has been caught forming within one, about the star PDS~70.'''
+
+# ---- 15:6.9
+
+# F31, added: the long time-scale of 1925-1935 (Eddington p. 169, Swann
+# p. 240) and the annihilation of matter behind it; 41:9.5 for our own sun
+[[note]]
+at = "15:6.9"
+after = "trillions upon trillions of years"
+origin = "none"
+tex = '''This is the long time-scale of the astronomy of those years. Eddington thought that the sun ``may continue as a star of increasing feebleness for 50 or 500 billion years'', his billion being the English one, a million million (\cite{Eddington1928}, p.~169), and Swann wrote that ``the stars must have ages of the order of a million-million years at least'' (\cite{Swann}, p.~240). It rested on the belief which the paragraph goes on to state, that in the suns the energy of matter ``becomes almost wholly available as light'': the whole mass turned into radiation. Swann sets the two possible sources side by side on that page: the building of the elements, which ``would keep the sun burning for 10,000 million years or so'', and, if more is wanted, ``the last appeal'', ``the mutual annihilation of protons and electrons''. The stars are now known to live by the first, the building of helium out of hydrogen, which frees less than a hundredth part of the mass, and a star like the sun to shine so for some ten billion years, Swann's figure; only the smallest and faintest stars last trillions. For our own sun the book has a figure of the shorter kind: it is in its ``six billionth year'' and ``will shine on as of present efficiency for more than twenty-five billion years'' (\bibref[41:9.5]{p041 9:5}).'''
+
+# ---- 15:6.10
+
+# F32, carried: the edition's note, its ocean volume put right (NOAA's of
+# 2010, 1,335,000,000 cubic kilometres, for the note's 1.5 x 10^18 m^3, so
+# 5.3 for its 6 x 10^21), with the comparison's source, Swann p. 232, found
+# on the page Block cites for 15:4.7, and the galaxies of Tigran's Russian
+# note in ud at the same place
+[[note]]
+at = "15:6.10"
+after = "of your world"
+origin = "d8761cc3bfb68455"
+tex = '''The comparison is Swann's, on the page that gave \bibref[15:4.7]{p015 4:7} its Andromeda: ``The number of stars in the grander universe is, possibly, about 10,000 million-million-million. In other words, there are about as many stars in the grander universe as there are glasses of water in all of the oceans of the world'' (\cite{Swann}, p.~232). It holds. The oceans, together with their seas, have a volume of $1.335\times 10^{18}$ cubic metres (NOAA, 2010); with a standard glass of 250~ml we obtain the required total number of stars, $5.3\times 10^{21}$, and Swann's $10^{22}$ with a glass half as large. Our Galaxy has some $10^{11}$ stars, so the master universe has the stars of some fifty or a hundred billion such galaxies; and Orvonton's ``more than ten trillion'' are the stars of a hundred of them.'''
+
+# ---- 15:6.11
+
+# F33, added: how astronomy finds what it cannot see (Bessel 1844, Sirius B
+# 1862, Swann p. 233; Sagittarius A*, Nobel Prize in Physics 2020)
+[[note]]
+at = "15:6.11"
+after = "location of the dark islands of space"
+origin = "none"
+tex = '''This is how astronomy finds a body it cannot see. In 1844 Bessel inferred dark companions of Sirius and of Procyon from the wavering of their paths across the sky; the companion of Sirius was seen in 1862, and proved to be a sun so shrunken that ``the stuff of which the companion of Sirius is made weighs about a ton per cubic inch'' (Swann~\cite{Swann}, p.~233). By the same method, the orbits of stars about a point where nothing shines, the body at the center of our Galaxy, in Sagittarius, has been weighed at four million suns (Genzel and Ghez, Nobel Prize in Physics, 2020). Whether the paper's dark islands are today's white dwarfs, neutron stars and black holes it does not say: they are ``dead suns and other large aggregations of matter devoid of light and heat'', of a density ``well-nigh unbelievable''. Eddington in 1928 saw little room for such bodies (see the note at \bibref[15:5.11]{p015 5:11}); on unseen mass at large see the note at \bibref[14:1.14]{p014 1:14}.'''
+
+# ---- 15:6.13
+
+# F34, added: the two causes and the comet's two tails (Lebedev, Annalen der
+# Physik 6, 433, 1901; Biermann 1951; Mariner 2, 1962)
+[[note]]
+at = "15:6.13"
+after = "emanating from the sun"
+origin = "none"
+tex = '''Two causes are named, and a comet has two tails. The curved tail of dust is driven by the pressure of sunlight, which Lebedev in Moscow measured in the laboratory and published in 1901. The straight tail is of gas, electrically charged, and is driven by ``other energies emanating from the sun'': the stream of charged particles now called the solar wind, which Biermann inferred from such tails in 1951 and the spacecraft Mariner~2 met in 1962.'''
+
+# F35, carried: the edition's note, with the chapter of Eddington it follows
+# (Space, Time and Gravitation, ch. VII, "Weighing Light", pp. 110-111 and
+# 113: djvu pages 117-120), the second expedition named, and 42:5.14-16 for
+# the paragraph's last sentence
+[[note]]
+at = "15:6.13"
+after = "light has weight"
+origin = "a4556caf88e5fcc9"
+tex = '''More correctly, this proves only that light has \bibemph{momentum}. Eddington, in the chapter he called ``Weighing Light'', keeps the two apart: ``It was already known that light possesses mass or inertia like other forms of electromagnetic energy. This is manifested in the phenomena of radiation-pressure \ldots\ Possibly the tails of comets are a witness to the power of the momentum of sunlight''; but ``it is still more difficult to understand what is meant by its having weight'' (\cite{Eddington1920}, pp.~110--111). It is also true that light has \bibemph{weight}, and this was demonstrated on May~29, 1919, when the deflection of light rays passing near the sun was measured during the eclipse, by Eddington and Cottingham on the island of Pr\'incipe and by Crommelin and Davidson at Sobral in Brazil. This day of the year is the most favourable, because on it the sun passes through the midst of an exceptionally bright patch of stars, part of the cluster of the Hyades, in the constellation of Taurus; and in 1919, ``by strange good fortune'' (p.~113), a solar eclipse happened to occur on this day. Since whatever has inertia has weight in proportion to it, the paper's conclusion is true, though the comet's tail alone does not prove it. On the paragraph's last sentence, the ``hypothetical ether'', see \bibref[42:5.14--16]{p042 5:14}.'''
+
+# ---- 15:6.15
+
+# F36, carried: the edition's note, with Eddington's sentence (p. 170, djvu
+# page 190: the page the note gave), Barnes pp. 324 and 327 (djvu pages 347
+# and 350), the book's own naming of the two planets at 49:2.13, and what
+# spacecraft have since found
+[[note]]
+at = "15:6.15"
+after = "only three planets"
+origin = "dfe0cc70026045f5"
+tex = '''The other two being Mars and Venus, as the astronomy of the day had it: ``We survey first the planets of the solar system; of these only Venus and Mars seem at all eligible'' (Eddington~\cite{Eddington1928}, p.~170). Barnes~\cite{Barnes} weighs ``the two planets adjacent to ourselves'' (p.~324) and thinks it ``highly probable that at any rate lower forms of life will be found on Mars'' (p.~327). The book names the same two where it classes mortals by the air they breathe: on a planet ``with an atmosphere similar to that of your near neighbor, Venus, they would belong to the superbreather group'', and on one with air ``as thin as that of your outer neighbor, Mars'', to the subbreathers (\bibref[49:2.13]{p049 2:13}); and it says of the nonbreathers that ``such a race of beings inhabits a sphere in close proximity to Urantia'' (\bibref[49:3.6]{p049 3:6}). Spacecraft have since found the surface of Venus at some 460 degrees Celsius under ninety times the earth's pressure of air, and the air of Mars at less than a hundredth of the earth's. The paper says ``suited to harbor life'', not that life is there.'''
+
+# ---- 15:7.2
+
+# F37, added: the arithmetic of the Uversa day and year
+[[note]]
+at = "15:7.2"
+after = "eight and one fifth of your years"
+origin = "none"
+tex = '''Three thousand days less twenty-two minutes are 2,999 days, 23 hours and 38 minutes. A hundredth part of that, the standard day of Uversa, is 29 days, 23 hours, 59 minutes and 46.8 seconds: thirteen seconds short of thirty days. In years of 365.2425 days the Uversa year is 8.2137, ``about eight and one fifth''. The other standard days the book gives are gathered in the note at \bibref[14:1.12]{p014 1:12}.'''
+
+# ---- 15:7.5
+
+# F38, carried from Tigran's Russian note in ud at 15:7.5, with the book's
+# own words for it: 45:7.1, 30:4.16, 47:3.6
+[[note]]
+at = "15:7.5"
+after = "morontia detention"
+origin = "none"
+tex = '''\bibemph{Detention} is a holding in custody, and the book means the word: the mansion worlds ``are the detention planets, where those mortals who fail to achieve fusion with their indwelling Adjusters during the life in the flesh are rehabilitated in transient form to receive further help'' (\bibref[45:7.1]{p045 7:1}), by a ``plan of initial mortal detention on seven worlds of progressive training'' (\bibref[30:4.16]{p030 4:16}). The survivor is kept there until what the life in the flesh left undone has been made good. But the keeping is a schooling: ``the mansion worlds are actual training spheres, not merely detention planets'' (\bibref[47:3.6]{p047 3:6}).'''
+
+# F39, added: 2 Corinthians 12:2 and the book's reading of it, 48:6.23, with
+# its second reckoning of seven heavens; the note at 11:3.3 on "mansions"
+[[note]]
+at = "15:7.5"
+after = "so on to the seventh"
+origin = "none"
+tex = '''So Paul: ``I knew a man in Christ above fourteen years ago \ldots\ such an one caught up to the third heaven'' (2~Corinthians~12:2), which the book reads in this sense: ``he referred to that experience in which his Adjuster was detached during sleep and in this unusual state made a projection to the third of the seven mansion worlds'' (\bibref[48:6.23]{p048 6:23}). The same paragraph has a second and greater reckoning of seven, ``the heaven of heavens'', in which the seven mansion worlds together are only the first, and the others are Jerusem, Edentia, Salvington, Uversa, Havona and Paradise: the headquarters worlds of this section, less those of the two sectors. On the word \bibemph{mansion} see the note at \bibref[11:3.3]{p011 3:3}.'''
+
+# ---- 15:7.8
+
+# F40, added: the capitals are named by their sectors' numbers (15:14.7);
+# with the conjecture of Tigran's Russian notes in ud at 15:7.9 and 15:7.10,
+# hedged, its Latin put right (versa is "turned"; his versamus is "we keep
+# turning", not "we return")
+[[note]]
+at = "15:7.8"
+after = "Uminor the third"
+origin = "none"
+tex = '''\bibemph{The third} is the sector's number: Ensa ``is number three in the major sector of Splandon'', and Splandon ``is the fifth major sector of the superuniverse of Orvonton'' (\bibref[15:14.7]{p015 14:7}), whence ``Umajor the fifth'' in the next paragraph. So the capitals of the sectors seem to have one name for each rank, Uminor and Umajor, and to be told apart by number. Their U is perhaps Uversa's. And Uversa itself may be a word made for the English text: \emph{versa} is the Latin for ``turned'', as in \emph{universe}, the whole turned into one, and U is the twenty-first letter of the alphabet, the last of its seventh three.'''
+
+# ---- 15:7.10
+
+# F41, added: the schools come in the same numbers twice, 7, 70 and 490
+[[note]]
+at = "15:7.10"
+after = "seventy specialized worlds"
+origin = "none"
+tex = '''The schools of the ascent come in the same numbers twice. In the local universe there are seven worlds about Jerusem, seventy about Edentia and four hundred and ninety about Salvington, ten clusters of forty-nine (\bibref[15:7.5--7]{p015 7:5}). In the superuniverse there are seven about Uminor, seventy about Umajor, and about Uversa seven clusters of seventy, four hundred and ninety again. The second three have each a subject, and the subjects rise in order: ``the higher physical studies'' on the seven, ``the advancing intellectual training'' on the seventy, ``advanced spiritual training'' on the four hundred and ninety (\bibref[15:7.8--10]{p015 7:8}); so also \bibref[15:13.3]{p015 13:3} and \bibref[15:13.5]{p015 13:5}.'''
+
+# ---- 15:7.12
+
+# F42, carried: the edition's note, its five terms said in words and the
+# 647,591 summed from 15:7.7, 43:0.2 and 45:0.3
+[[note]]
+at = "15:7.12"
+after = "five hundred billion"
+origin = "60744f30ed9ba26e"
+tex = '''The exact number is: $7\times(1 + 7\times 70 + 10\times(70+1) + 1000\times(7+1) + 100000\times 647591) = 453,313,764,407$. The terms are, for each superuniverse: its capital; the capital's seven clusters of seventy worlds; ten major sector capitals with seventy worlds each; a thousand minor sector capitals with seven each; and a hundred thousand local universes of 647,591 architectural spheres (\bibref[37:10.1]{p037 10:1}). That last number is a sum of the same kind: Salvington with its 490 worlds (\bibref[15:7.7]{p015 7:7}), a hundred constellation capitals in clusters of 771 (\bibref[43:0.2]{p043 0:2}) and ten thousand system capitals in clusters of 57 (\bibref[45:0.3]{p045 0:3}), $491 + 100\times 771 + 10000\times 57 = 647,591$.'''
+
+# ---- 15:8.2
+
+# F43, added: gravita, and the three statements of the directors' hold on the
+# thirty energies
+[[note]]
+at = "15:8.2"
+after = "gravita domain"
+origin = "none"
+tex = '''\bibemph{Gravita} is Uversa's name for ``the realm of universe power'' (\bibref[42:2.15]{p042 2:15}), the energy and matter that answer to the gravity of mass for mass (\bibref[11:8.7]{p011 8:7}; on the family of names see the note at \bibref[11:8.5]{p011 8:5}). The hold of the living controllers on its thirty energies is stated three times and three ways: ``direction and partial control of the thirty energy systems'' here; ``the more or less complete control of twenty-one of the thirty phases of energy'' at \bibref[42:2.14]{p042 2:14}; and of the energy transmitters, that they are ``living superconductors for more than half of the thirty forms of physical energy'' (\bibref[29:4.28]{p029 4:28}).'''
+
+# ---- 15:8.3
+
+# F44, carried: the edition's note, in the hedged form of Tigran's Russian
+# note in ud at the same place ("this otherwise meaningless statement becomes
+# almost understandable") for the edition's "Indeed, this is clear", with the
+# plain formula of special relativity before it, and after it the
+# counterpart of "retardation by mass encountered in transit" in general
+# relativity (Eddington p. 111; Shapiro, Phys. Rev. Lett. 13, 789, 1964, and
+# 20, 1265, 1968).  It had "cf. the note on 23:3.2" after "almost clear",
+# the edition's pointer to its second note there (Kaluza's fifth dimension
+# read as proper time, and travel faster than light), which is not on the
+# site and is not to be pointed to (Tigran, 2026-11-15, at F59); taken out,
+# the note standing without it.  WHEN PAPER 23 IS REVIEWED its note at
+# 23:3.2 is to point here, and this note back.  "a fifth dimension" is Tigran's word (2026-11-15, in
+# review): it was "a fifth direction"; "carries in that direction" after it
+# stays, at his word too
+[[note]]
+at = "15:8.3"
+after = "velocity in energy"
+origin = "ab1efad1b299225a"
+tex = '''In the physics we have this is true of a body's own mass: with a given energy $E$, a body of mass $m$ moves at the velocity $v = c\sqrt{1-(mc^2/E)^2}$ and so the slower, the more of its energy is mass; only what has no mass moves at the velocity of light. Geometrically, the proper mass is the momentum $p_5 = m$ conjugate to the proper time $x^5 = \tau$, a fifth dimension; what a body carries in that direction it does not have for its motion through space. Read so, a statement otherwise hard to make sense of becomes almost clear. The ``retardation by mass encountered in transit'' has its counterpart too: in general relativity light itself goes more slowly near a mass, which is what bends it, ``the variation of velocity of the waves'' (Eddington~\cite{Eddington1920}, p.~111), and what delays a radar echo that passes the sun on its way to a planet and back by some two hundred millionths of a second (Shapiro, 1964; measured in 1968).'''
+
+# ---- 15:8.6
+
+# F45, carried from Tigran's Russian note in ud at 15:8.6, said as the
+# paper's own account, with the first such collision observed (LIGO and
+# Virgo, Phys. Rev. Lett. 116, 061102, 2016) and where the likeness ends
+[[note]]
+at = "15:8.6"
+after = "the rarest form of energy"
+origin = "none"
+tex = '''On this account matter does not go on gathering without limit: either the physical controllers step in, or the dead giants collide and their mass is spent. Since 2015 such collisions have been observed. In the first, recorded on September~14, 2015, two dark bodies of 36 and 29 times the mass of the sun, some 1.3 billion light-years away, fell together into one of 62; the mass of three suns went out in a fifth of a second as gravitational waves, which of all the forms of energy act the most faintly on matter, at a rate greater than the light of all the stars of the visible universe together (LIGO and Virgo Collaborations, 2016). The likeness is in the sudden turning of enormous mass into the rarest energy. It ends there: those bodies were black holes, and what remained was a larger one, where the paper's collision dissipates ``the cumulative collections of gravity''.'''
+
+# ---- 15:8.10
+
+# F46, added: the debate of those years, Eddington pp. 83, 85 and 86 (his
+# chapter IV, "The Running-Down of the Universe")
+[[note]]
+at = "15:8.10"
+after = "the universes do not run down"
+origin = "none"
+tex = '''\bibemph{Running down} and \bibemph{winding up} are the words of a debate of those years. By the second law of thermodynamics all energy sinks at last to an even warmth in which nothing more can happen; Eddington gave a chapter of his Gifford Lectures of 1927 the title ``The Running-Down of the Universe'', and wrote: ``if our views are right, somewhere between the beginning of time and the present day we must place the winding up of the universe'' (\cite{Eddington1928}, p.~83). Against this stood those whom he calls worshippers of the Phoenix, who hoped that matter is somewhere made anew: ``Is there no counter-process by which radiation collects in space, evolves into electrons and protons, and begins star-building all over again?'' (p.~85). Eddington would not join them: ``Whoever wishes for a universe which can continue indefinitely in activity must lead a crusade against the second law of thermodynamics'' (p.~86). The paper grants the law its part, Orvonton ``is apparently now running down'', and for the whole it stands with the Phoenix: matter ``originates in open space'' (\bibref[15:5.1]{p015 5:1}), there is an ``everlasting making and unmaking of the lesser material units'' (\bibref[15:8.4]{p015 8:4}), and the reason given is no law of physics but persons, ``The living power directors and force organizers''.'''
+
+# ---- 15:9.1
+
+# F47, added: where the four gravity circuits are described.  It said "each
+# has a section of its own", untrue of the Father's personality circuit,
+# which has three paragraphs of 5:6, The God of Personality; found after
+# his ruling and changed at his word (2026-11-15)
+[[note]]
+at = "15:9.1"
+after = "material gravity of the eternal Isle"
+origin = "none"
+tex = '''The four are named together at \bibref[12:3.1--5]{p012 3:1}, and each is described in its own place: the Father's personality circuit at \bibref[5:6.10--12]{p005 6:10}, the spirit gravity of the Son at \bibref[7:1.1]{p007 1:1}, the mind gravity of the Conjoint Actor at \bibref[9:6.1]{p009 6:1}, and the gravity of Paradise at \bibref[11:8.2]{p011 8:2}.'''
+
+# ---- 15:9.3
+
+# F48, added: where six of the seven superuniverse circuits are described,
+# the fifth being named nowhere else ("flash presence" is at 15:9.8 alone).
+# It began "Each of the seven is treated in a later paper", which Tigran
+# caught in review (2026-11-15) as untrue twice: the fourth is in an earlier
+# paper, and the fifth nowhere, as the note's own last sentence said.  With
+# it, mine: the fourth was cited at 7:6.1, the section's first paragraph,
+# which is of the Sons' conclaves; the circuit is 7:6.7, in its words
+[[note]]
+at = "15:9.3"
+after = "Superuniverse Circuits"
+origin = "none"
+tex = '''Six of the seven are treated elsewhere in the book: the cosmic mind of a Master Spirit at \bibref[16:6.1]{p016 6:1}; the Reflective Spirits, seven to a superuniverse, at \bibref[17:3.1]{p017 3:1}; Divinington, the home of the Mystery Monitors, at \bibref[107:3.1]{p107 3:1}; the ``intersonship circuit'' of the Eternal Son and his Paradise Sons at \bibref[7:6.7]{p007 6:7}; the broadcasts and their ``space reports of glory'', first sent when the first mortal reached Havona, at \bibref[24:6.8]{p024 6:8}; and the power centers and physical controllers in Paper~29. The fifth, ``the flash presence of the Infinite Spirit'', is named nowhere else in the book.'''
+
+# ---- 15:9.12
+
+# F49, added: the same three at 34:4.1-4; the Comforter of John 14:16, 26 and
+# 16:7
+[[note]]
+at = "15:9.12"
+after = "Comforter of the bestowal worlds"
+origin = "none"
+tex = '''The same three are listed again, for Nebadon, at \bibref[34:4.1--4]{p034 4:1}. \bibemph{Comforter} is the King James word of John~14:16, ``he shall give you another Comforter, that he may abide with you for ever'', and of 14:26 and 16:7: ``if I go not away, the Comforter will not come unto you; but if I depart, I will send him unto you''. The Spirit of Truth is described at \bibref[34:4.5]{p034 4:5}, and its coming to Urantia in Paper~194.'''
+
+# ---- 15:10.11
+
+# F50, added: the whole numbers of the three orders (19:2.1, 19:3.1,
+# 19:4.1-2), how they work together (19:3.3), and that the author is one
+[[note]]
+at = "15:10.11"
+after = "attached to each superuniverse administration"
+origin = "none"
+tex = '''These are each superuniverse's share of the whole: there are seven billion Perfectors of Wisdom (\bibref[19:2.1]{p019 2:1}), twenty-one billion Divine Counselors (\bibref[19:3.1]{p019 3:1}) and eight billion Universal Censors, the eighth billion being stationed one on each world of Havona (\bibref[19:4.1--2]{p019 4:1}). They work together: ``always there are associated together a Perfector of Wisdom, a Universal Censor, and from one to seven Divine Counselors'' (\bibref[19:3.3]{p019 3:3}). The author of this paper is one of the Censors (\bibref[15:14.10]{p015 14:10}), of whom it is said, ``Even the Ancients of Days do not sit in judgment except in association with the Universal Censors'' (\bibref[19:4.1]{p019 4:1}).'''
+
+# ---- 15:10.12
+
+# F51, added: who Grandfanda is (7:5.8, 24:6.8, 31:10.9), and what "dual
+# origin" means (30:1.29, 22:1.10)
+[[note]]
+at = "15:10.12"
+after = "in the days of Grandfanda"
+origin = "none"
+tex = '''Grandfanda is ``the first of all mortals to attain Havona'' (\bibref[7:5.8]{p007 5:8}). His arrival is told at \bibref[24:6.6--8]{p024 6:6}: he ``hailed from planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one''; and he is now chief of the Supreme Council of Destiny on Paradise (\bibref[31:10.9]{p031 10:9}). \bibemph{Dual origin}, two lines on, is a term of the book's classing of beings by their source: ``Those of origin in any two of the Paradise Deities or otherwise created by any two beings of direct or indirect descent from the Paradise Deities'' (\bibref[30:1.29]{p030 1:29}), as mortals are of a Creator Son and a Creative Spirit. These three orders are such mortals, ``all Adjuster-fused ascendant mortals who have attained Paradise and the Corps of the Finality'' (\bibref[22:1.10]{p022 1:10}), whom the Trinity has since embraced; each is described in Paper~22 (\bibref[22:2.1]{p022 2:1}, \bibref[22:3.1]{p022 3:1}, \bibref[22:4.1]{p022 4:1}).'''
+
+# ---- 15:10.21
+
+# F52, added: what the book says elsewhere of the five groups named
+[[note]]
+at = "15:10.21"
+after = "superpersonal spirit representatives of the Eternal Son"
+origin = "none"
+tex = '''Of these five groups the book says little, and says that it says little. The Unqualified Supervisors of the Supreme ``have long functioned as advisers and counselors in advanced evolutionary units of creation'', and it is believed that in a superuniverse settled in light and life they ``would become the high administrative body on the headquarters world'' (\bibref[55:12.3]{p055 12:3}). Of the Qualified Vicegerents of the Ultimate: ``you have not been informed of their present whereabouts or function'' (\bibref[106:4.3]{p106 4:3}). How either can exist before the Supreme and the Ultimate whom they represent is asked at \bibref[117:7.3--4]{p117 7:3}. Majeston is the chief of reflectivity (\bibref[17:2.1]{p017 2:1} and after); and of the Son's representatives, \bibref[7:2.3]{p007 2:3}: ``In the superuniverses the Son is not personally present or resident; in these creations he maintains only a superpersonal representation.'''''
+
+# ---- 15:11.2
+
+# F53, added: the term in years of Urantia, and that Nebadon elects no one
+# (15:9.18)
+[[note]]
+at = "15:11.2"
+after = "superuniverse standard time"
+origin = "none"
+tex = '''A hundred Uversa years of three thousand days less twenty-two minutes (\bibref[15:7.2]{p015 7:2}) are a little over 821 years of Urantia. Nebadon elects no one to the seven houses: only a local universe ``admitted to the superuniverse councils'' is represented, and ``Nebadon does not yet have representation on Uversa'' (\bibref[15:9.18]{p015 9:18}).'''
+
+# ---- 15:12.1
+
+# F54, added: a comparison, as Madison's at 14:3.1; The Federalist, No. 47,
+# vol. II, pp. 92-94 (PDF pages 338-340)
+[[note]]
+at = "15:12.1"
+after = "separate personnel"
+origin = "none"
+tex = '''Among men that is the thing most to be avoided. Madison, writing as Publius in \emph{The Federalist}, No.~47: ``The accumulation of all powers legislative, executive and judiciary in the same hands, whether of one, a few or many, and whether hereditary, self appointed, or elective, may justly be pronounced the very definition of tyranny''; and he quotes Montesquieu, that ``there can be no liberty \ldots\ if the power of judging be not separated from the legislative and executive powers'' (\cite{MadisonXLVII}, pp.~92--94). On Uversa those who judge are those who govern: an Ancient of Days presides, and the Censors, the Mighty Messengers and Those High in Authority, all of the executive branch (\bibref[15:10.4--10]{p015 10:4}), make up the court. The paper's reason comes two paragraphs on: ``We are here dealing with the councils of perfection'' (\bibref[15:12.3]{p015 12:3}). It is the reason Madison gave why angels would need no government at all (see the note at \bibref[14:3.1]{p014 3:1}).'''
+
+# ---- 15:12.2
+
+# F55, added: the same said at 18:3.7 and 2:3.3; the one case the book
+# follows, 53:9.3.  The book sets "vs." in italics there, as in the four
+# other places it names the case, and the quotation had it roman until
+# Tigran asked (2026-11-15) whether "vs." is not by custom italic: the
+# quotations had been checked against the paragraphs' plain text, which
+# carries no italics
+[[note]]
+at = "15:12.2"
+after = "eternal life and death"
+origin = "none"
+tex = '''So \bibref[18:3.7]{p018 3:7}: ``In all the vast universe of universes they alone are invested with the high powers of final executive judgment concerning the eternal extinction of will creatures. And all three Ancients of Days must participate in the final decrees''. The course of such a case is given at \bibref[2:3.3]{p002 3:3}: ``The mandate of dissolution originates in the higher courts of the superuniverse following an unbroken confirmation of the indictment originating on the sphere of the wrongdoer's residence''. The one case the book follows is ``Gabriel \bibemph{vs.} Lucifer, placed on the records of the Uversa supreme court almost two hundred thousand years ago'' (\bibref[53:9.3]{p053 9:3}).'''
+
+# ---- 15:13.6
+
+# F56, added: the six orders of Days and their numbers, from Paper 18.  It
+# began "the Supreme Trinity Personalities of Paper 18, each order named for
+# its days", and went on "The first three orders rule": untrue of the
+# family, whose first order at 18:0.2 is the Trinitized Secrets of Supremacy,
+# and "the first three" could be read as Paper 18's.  Found on 2026-11-15,
+# before Tigran had ruled the note, in a search of every "each" and "all" in
+# the paper's notes after he caught the same slip in F48
+[[note]]
+at = "15:13.6"
+after = "Trinity regime extends"
+origin = "none"
+tex = '''The regime is one family, the Supreme Trinity Personalities of Paper~18. Six of its seven orders are named for their days: three Ancients of Days to a superuniverse, twenty-one in all (\bibref[18:3.4]{p018 3:4}); three Perfections of Days to a major sector, 210 (\bibref[18:4.1]{p018 4:1}); three Recents of Days to a minor sector, 21,000 (\bibref[18:5.1]{p018 5:1}); one Union of Days to a local universe, 700,000 (\bibref[18:6.2]{p018 6:2}); one Faithful of Days to a constellation, 70,000,000 (\bibref[18:7.1]{p018 7:1}); and in Havona one Eternal of Days to each of its billion worlds (\bibref[15:2.9]{p015 2:9}). The other, the Trinitized Secrets of Supremacy, direct the seven worlds of the Father (\bibref[18:1.1]{p018 1:1}). In a superuniverse the Ancients, the Perfections and the Recents of Days rule. The Unions and the Faithfuls advise (\bibref[15:10.16--17]{p015 10:16}); and below the constellation there is none.'''
+
+# ---- 15:14.3
+
+# F56a, added on 2026-11-15, Tigran asking of 15:14.3 in review: "did you
+# not find the use of the term 'supercreation' interesting?  Why not simply
+# 'creation'?  Is it because it is the work of the multiple pairs of Creator
+# Sons and Creative Spirits rather than just one pair?"  Counted in the press
+# text: supercreation(s) 16 times in 15 paragraphs (15:9.15, 15:14.3 twice,
+# 15:14.4, 23:2.17, 25:2.2-4, 26:8.5, 28:0.1, 29:2.14-15, 29:4.3, 31:0.10,
+# 31:10.18, 116:4.6), every one of them one or more of the seven
+# superuniverses; "central creation" 27 times, of Havona; "local creation(s)"
+# 54 times, of a local universe; "supercreational" once, 22:7.14.  The papers
+# that have the noun are 15, 23, 25, 26, 28, 29, 31 and 116, presented by a
+# Universal Censor, a Divine Counselor, One High in Authority, a Perfector of
+# Wisdom, a Mighty Messenger (28 and 116), a Universal Censor, and a Divine
+# Counselor with One without Name and Number: six of the seven groups of
+# 15:10.4-10.  100 x 100 x 10 local universes to a superuniverse, 15:2.6-8.
+# Not in review-015.md, which he was ruling in; accepted in the session
+[[note]]
+at = "15:14.3"
+after = "in this supercreation"
+origin = "none"
+tex = '''\bibemph{Supercreation} is the book's other word for a superuniverse. It is used sixteen times, first at \bibref[15:9.15]{p015 9:15}, and always of one or more of the seven: ``the six associated supercreations'' here, and ``Each of the seven supercreations is actually pervaded by that one of the Master Spirits who presides over its destinies'' (\bibref[25:2.4]{p025 2:4}). It is formed as \bibemph{superuniverse} is, \bibemph{creation} being the book's word for a universe as a thing made: Havona is ``the central creation'' (\bibref[14:2.5]{p014 2:5}) and Nebadon our ``local creation'' (\bibref[12:4.12]{p012 4:12}), each local creation having its own Creator Son and Creative Spirit (\bibref[16:5.3]{p016 5:3}). \bibemph{Creation} alone would be taken for Nebadon, or for all that is made; the prefix names the level, a hundred thousand local creations under one government (\bibref[15:2.6--8]{p015 2:6}). Every paper that has the word is from one of the orders of that government (\bibref[15:10.4--10]{p015 10:4}). The adjective, used once, has another sense, of what lies beyond the creation: certain trinitized sons ``are supercreational; they represent actualities of Supreme-Ultimate Deity which have not been otherwise experientially attained'' (\bibref[22:7.14]{p022 7:14}).'''
+
+# F57, added: the seven purposes and the seven Master Spirits (16:3.2-15);
+# the conjecture reported again at 55:12.5
+[[note]]
+at = "15:14.3"
+after = "meaning-of-the-whole"
+origin = "none"
+tex = '''The seven purposes go with the Seven Master Spirits, each of whom presides over one superuniverse and gives it his own nature (\bibref[16:3.2--15]{p016 3:2}): the first three are of the Father, the Son and the Spirit singly, the next three of the three pairs, and the seventh, Orvonton's, ``is a uniquely equal portrayal of the Universal Father, the Eternal Son, and the Infinite Spirit'' (\bibref[16:3.14]{p016 3:14}). A whole made of all the others is what Orvonton's purpose is said to be here. And since the union of the three is ``the source of the personal and spiritual nature of God the Supreme'' (\bibref[16:3.15]{p016 3:15}), the Censor's conjecture follows, that the Supreme will one day rule from Uversa. It is reported again, as what some hold, at \bibref[55:12.5]{p055 12:5}, which ends: ``But we really do not know.'''''
+
+# ---- 15:14.7
+
+# F58, added: the address in one line, and Grandfanda's beside it
+[[note]]
+at = "15:14.7"
+after = "universe of universes"
+origin = "none"
+tex = '''In one line: Urantia is world 606 of system 24, Satania; of constellation 70, Norlatiadek; of local universe 84, Nebadon; of minor sector 3, Ensa; of major sector 5, Splandon; of superuniverse 7, Orvonton. Compare Grandfanda's address, ``planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one'' (\bibref[24:6.8]{p024 6:8}), where the local universe has a number within its superuniverse, which has a hundred thousand of them, and the two sectors are passed over.'''
+
+# ---- 15:14.8
+
+# F59, carried: the edition's note, its question answered from 49:0.3 (the
+# number is not the place-value number of the seven coordinates, which is
+# worked out; it is serial), with the inference of Tigran's Russian note in
+# ud at the same place, that more than five of the seven trillion worlds are
+# inhabited; his conjecture on the final digits kept, as a conjecture.  It
+# ended "see the note on 58:1.1", the edition's pointer to its own note there
+# (606 + 60 = 666, the number of the Beast, Revelation 13:18, and John's
+# vision at 47:10.2), which is not on the site: Tigran, 2026-11-15, "you
+# can't refer to them, only to our own", and "if you believe the reference
+# is beneficial, then you must also write that note in the corresponding
+# paper".  The sum is said here now, from 58:1.1's own words; the pointer
+# comes back with the note at 58:1.1
+[[note]]
+at = "15:14.8"
+after = "482,337,666"
+origin = "ee122cddcfe8fb13"
+tex = '''How are the seven celestial coordinates of our planet just given (7, 5, 3, 84, 70, 24, 606) encoded in the registry number? They do not seem to be. To count every place the plan provides before Urantia's, six superuniverses, four major sectors, two minor sectors, 83 local universes, 69 constellations, 23 systems and 605 worlds, gives another and a larger number, $6,402,836,923,606$. The plainer reading is that the number is serial, as a world's number in its system is: inhabited worlds ``are numbered serially in accordance with their registration as inhabited worlds'' (\bibref[49:0.3]{p049 0:3}), and Urantia was so registered a million years ago (\bibref[61:6.2]{p061 6:2}). If so, some 5.3 trillion of the seven trillion worlds provided for, three in every four, had become inhabited before ours: compare Satania's 619 of a thousand (\bibref[15:14.5]{p015 14:5}), and Nebadon's 38\% (see the note at \bibref[32:2.9]{p032 2:9}). It is possible, however, that the \bibemph{decimal} status is included as well and, together with the planet's number 606, is represented in the final digits 666: Urantia was the Life Carriers' ``sixtieth opportunity to make changes and institute modifications in the basic and standard life designs of the local universe'' (\bibref[58:1.1]{p058 1:1}), and 606 and 60 make 666.'''
