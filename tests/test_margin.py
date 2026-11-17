@@ -134,7 +134,7 @@ class Margin(unittest.TestCase):
         js = (ROOT / "ubsite/static/ub.js").read_text()
         self.assertIn("return keepPlace(function () { window.ubSettings.set('margin', load().margin === false); });", js)
         self.assertIn("else keepPlace(function () { window.ubSettings.set('rail', shut ? 'open' : 'folded'); });", js)
-        self.assertIn("var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .rt.now)';", js)
+        self.assertIn("var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, .rt.now)';", js)
         self.assertIn("if (scrollY <= 0) return null;", js)
         self.assertIn("requestAnimationFrame(function () { placeBack(pl); });", js)
 

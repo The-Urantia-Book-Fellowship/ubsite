@@ -48,8 +48,9 @@
 .helppage .eg .icons { display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: center; }
 .helppage .eg .icons > span { display: inline-flex; flex-direction: column; align-items: center; gap: .3rem;
   font-size: .8rem; color: var(--faint); text-align: center; }
-.helppage .playp { opacity: 1; cursor: default; }
-.helppage .playp.inline { display: inline-grid; vertical-align: -.2em; margin: 0 .1em; }
+.helppage .playp { cursor: default; }
+.helppage .playp svg { opacity: 1; }
+.helppage .playp.inline { display: inline-grid; vertical-align: -.2em; margin: -.125rem calc(.1em - .125rem); }
 .helppage .eg .player button { cursor: default; }
 .helppage .eg .egart { position: relative; }
 .helppage kbd { font: .85em/1 var(--sans); color: var(--ink); border: 1px solid var(--rule);
@@ -64,6 +65,7 @@
 {#- One row of the text as a section's page sets it: the paragraph, with the
     entries beside it (_text.html grid()), and ▶ under its reference where
     listen.js would place it (after the reference, before the 1955 page),
+    with the time the paragraph takes to hear (app.py play_times),
     drawn here since listen.js does not run on this page.  No anchor, no
     dropped letter: an example, not the place.  The paragraph's stack is
     _para.html's, written out so that the ▶ can stand in it. #}
@@ -71,7 +73,7 @@
 <div class="grid">
   <div class="row">
   <p class="t{% if r.p.gap_before %} pc{% endif %}"><span class="stk"><span class="num">{{ r.p.ref }}</span>
-         {%- if play %}{{ playp() }}{% endif %}
+         {%- if play %}{{ playp(t=playtimes.get(r.p.ref)) }}{% endif %}
          {%- if r.p.page_1955 %}<span class="pg" data-pg="{{ r.p.page_1955 }}"></span>{% endif %}</span>
          {%- if r.p.gap_before %}<span class="pcm" title="a new group begins here, as in the 1955 printing"></span>{% endif %}{{ r.p.html_hy|safe }}</p>
   <div class="a">
@@ -159,7 +161,7 @@
     <p>{{ t('help:moving:4') }}</p>
     <p>{{ t('help:moving:5') }}</p>
     <div class="eg">
-      <div class="runhead" role="region" {{ ta('aria-label', 'Running head') }}><span class="ref">{{ eg_text.p.ref }}</span><div class="mid"><p class="pn">{{ t('Paper {n}', n=eg.section.paper_n) }}<span class="tt">{{ paper.title }}</span></p><p class="au">{{ paper.author }}</p></div><span class="ctl"><a class="home" href="/" {{ ta('aria-label', 'Home') }}>{{ mark }}</a><span class="set">{{ gear_svg() }}</span></span></div>
+      <div class="runhead" role="region" {{ ta('aria-label', 'Running head') }}><span class="ref">{{ eg_text.p.ref }}</span><div class="mid"><p class="pn">{{ t('Paper {n}', n=eg.section.paper_n) }}<span class="tt">{{ paper.title }}</span></p><p class="au">{{ paper.author }}</p></div><span class="ctl"><span class="set">{{ gear_svg() }}</span><a class="home" href="/" {{ ta('aria-label', 'Home') }}>{{ mark }}</a></span></div>
       <p class="cap">{{ t('help:moving:cap') }}</p>
     </div>
     {{ showme('runhead') }}

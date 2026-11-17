@@ -54,7 +54,8 @@
 
 {#- ▶ as it stands under a paragraph's reference, drawn here for the Help page
     alone: on the text's pages listen.js places it (place()), and in prose the
-    icon stands in for the word (help:text:1, {play}). -#}
-{% macro playp(inline=False) -%}
-<span class="playp{% if inline %} inline{% endif %}" aria-hidden="true">{{ player_svg('play') }}</span>
+    icon stands in for the word (help:text:1, {play}).  `t`: the time the
+    paragraph takes to hear, which the stylesheet draws beside it. -#}
+{% macro playp(inline=False, t=None) -%}
+<span class="playp{% if inline %} inline{% endif %}" aria-hidden="true"{% if t %} data-t="{{ t }}"{% endif %}>{{ player_svg('play') }}</span>
 {%- endmacro %}

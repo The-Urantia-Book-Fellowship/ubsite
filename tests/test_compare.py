@@ -314,7 +314,7 @@ class SearchHit(unittest.TestCase):
         self.assertNotIn("querySelectorAll('p.t.hit'), function (p) { p.classList.remove('hit'); }", js)
         self.assertIn("querySelectorAll('p.t.hit, .rc p.rt.hit')", (ROOT / "ubsite/static/listen.js").read_text())
         css = (ROOT / "ubsite/static/ub.css").read_text()
-        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named {", css)
+        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named {", css)
 
     def test_placed_under_the_columns_names(self):
         self.assertIn("if (floor) scrollBy({ top: focus.getBoundingClientRect().top - floor - 12, behavior: 'instant' });", self.JS)

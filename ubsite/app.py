@@ -874,6 +874,24 @@ def section_audio(con, section_id: int) -> dict:
     return out
 
 
+def play_times(audio: dict) -> dict:
+    """Each paragraph's time beside its ▶, {ref: "m:ss"}, as listen.js draws it
+    (place(), clock()): in the English text's first reading cut at the
+    paragraph, from where the ▶ starts, a section's first paragraph with its
+    spoken heading.  For Help's example, where listen.js does not run."""
+    v = next((v for v in audio.values() if not v.get("tr") and v["by"] == "paragraph"), None)
+    out, segs = {}, v["segs"] if v else []
+    for i, (ref, _file, start, end) in enumerate(segs):
+        if ref is None:
+            continue
+        ms = end - start
+        if i and segs[i - 1][0] is None:
+            ms += segs[i - 1][3] - segs[i - 1][2]
+        n = max(1, int(ms / 1000 + .5))
+        out[ref] = f"{n // 60}:{n % 60:02d}"
+    return out
+
+
 @app.get("/speech/{ref}", include_in_schema=False)
 def speech(ref: str):
     """A section's text as a voice reads it (build/speech.py), for the
@@ -1683,7 +1701,8 @@ def help_page(request: Request):
     eg_text = min(rows, key=lambda r: len(r["p"]["text"]))
     eg_notes = next(r for r in rows if r["p"]["ref"] == HELP_NOTES_PARA)
     return page(request, "help.html", paper=p, eg=d, eg_text=eg_text, eg_index=eg_index, eg_notes=eg_notes,
-                go=transport(con, paper, sec), nquiz=queries.quiz_count(con, paper))
+                go=transport(con, paper, sec), nquiz=queries.quiz_count(con, paper),
+                playtimes=play_times(section_audio(con, s["id"])))
 
 
 # The passage /api shows a reply for: across a section's end, so that the reply

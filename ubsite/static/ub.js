@@ -665,35 +665,99 @@
   // followed from the Contents leaves it for a new address (popstate, below,
   // and arrive() by history.state).  A fresh load of the entry, Back from
   // another page without the page cache, opens them again from history.state.
+  // From a translation's paragraph they open as that translation gives its
+  // contents (`k`, its key; Tigran, 2026-11-17: "it would be nice to switch
+  // automatically to that translation's variant of Contents.  Currently it
+  // goes to the English (UVERSA PRESS) always"), as the list at their head
+  // would draw them, which shows it: for this opening, `tocOver` (below), the
+  // reader's own choice there, `toc`, being left as it is, so that from an
+  // English paragraph they open as chosen, the book's unless another was.  It
+  // is in the entry's state, for Forward to it, and Back lets go of it.  The
+  // paper is placed again once the translation's titles are in, a title of
+  // more lines having moved it.
   var contentsAt = null;
-  function toContents(p) {
-    var b = document.querySelector('.railfold'), rail = b && b.closest('.rail'), here, shut, state;
+  function toContents(p, k) {
+    var b = document.querySelector('.railfold'), rail = b && b.closest('.rail'), shut, state, drawn, t;
     if (!rail) return false;
     shut = railShut(rail);
+    k = k && tocTicked().indexOf(k) >= 0 ? k : null;
     if (phone.matches && p) {
       // Measured before the Contents open above it, as it will stand after
       // they fold again.
-      state = { ub: 'contents', p: p.id, top: p.getBoundingClientRect().top, shown: !shut, href: location.href };
+      state = { ub: 'contents', p: p.id, top: p.getBoundingClientRect().top, shown: !shut, href: location.href, k: k || '' };
       if (contentsAt) history.replaceState(state, ''); else history.pushState(state, '');
       contentsAt = state;
     }
-    if (shut) b.click(); else railView();
-    if (phone.matches && (here = railHere(rail))) {
+    if (tocOver !== k) { tocOver = k; drawn = tocApply(); }
+    var place = function () {
+      var here = phone.matches && railHere(rail);
+      if (!here) return;
       scrollTo({ top: scrollY + here.getBoundingClientRect().top - innerHeight / 6, behavior: 'instant' });
       arriveTouched = Date.now();
-    }
+    };
+    if (shut) b.click(); else railView();
+    place();
+    t = arriveTouched;
+    // Unless the reader has moved the page meanwhile.
+    if (drawn) drawn.then(function () { if (arriveTouched === t && rail.isConnected) { railView(); place(); } });
     return true;
   }
+  // The place the address names, gone to as a link to it goes: on the whole
+  // paper's page a section's or a paragraph's, which arrive() finds; with
+  // none, a section's own page or the paper's from its top, the page's top
+  // with the Contents folded, as a phone's page opens.
+  function toPlace() {
+    var rail = document.querySelector('.rail');
+    if (!location.hash) {
+      if (rail && phone.matches && rail.classList.contains('shown')) { rail.classList.remove('shown'); railSync(); }
+      scrollTo({ top: 0, behavior: 'instant' });
+    }
+    arrive();
+  }
+  // The section being read, tapped in the Contents the reference opened
+  // (Tigran, 2026-11-17: "I stay where I was, but I expected to jump to the
+  // start of this section, as it would if I tap on some other section").  Its
+  // link is the address the entry already has, /101#101:4 on the whole
+  // paper's page reached by that link, so the browser only replaces the
+  // entry: it fires popstate with no state and no hashchange, at the same
+  // address, which below is Back, and the paragraph was put back where it
+  // stood; and a section's own page, /101:4, is loaded again with the entry's
+  // state kept, and opened the Contents again from it.  So such a link is
+  // made a step of its own here, as a link to another section is one: the
+  // place gone to, Back the Contents again and Back again the paragraph.  Its
+  // state says so, for Forward to it from the Contents, which is a popstate
+  // at the same address too.  Only the Contents' own links, and only at their
+  // entry: anywhere else the browser's own way is right.  Capturing, so
+  // before listen.js, which follows a link itself while it plays.
+  document.addEventListener('click', function (ev) {
+    var a = contentsAt && ev.target.closest && ev.target.closest('.rail a[href]'), to;
+    if (!a || ev.defaultPrevented || ev.button || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey ||
+        a.target || a.hasAttribute('download') || a.origin !== location.origin) return;
+    // In the reader's unit, whichever form the link has by now (the Whole
+    // paper handler, above, rewrites it as it is clicked).
+    to = a.pathname + a.hash;
+    if (window.ubUnit) to = window.ubUnit(to);
+    if (to !== location.pathname + location.hash || a.search !== location.search) return;
+    ev.preventDefault();
+    try { history.pushState({ ub: 'place' }, '', location.href); } catch (e) {}
+    contentsAt = null;
+    toPlace();
+  }, true);
   addEventListener('popstate', function (ev) {
     var s = ev.state, was = contentsAt, rail = document.querySelector('.rail'), p;
-    if (s && s.ub === 'contents') { contentsAt = s; toContents(null); return; }
+    if (s && s.ub === 'contents') { contentsAt = s; toContents(null, s.k); return; }
     if (!was) return;
     contentsAt = null;
+    // Forward from the Contents to the step a link to their own address made
+    // (above): the place, not Back.
+    if (s && s.ub === 'place') { toPlace(); return; }
     // A section's link followed from the Contents fires popstate too, in
     // Chrome, for its fragment: a new address, and the place is the link's.
     // Back to the entry before is the entry's own address, which the jump
     // kept.
     if (location.href !== was.href) return;
+    // Back: the Contents are the reader's own choice again (toContents).
+    if (tocOver) { tocOver = null; tocApply(); }
     if (rail && !was.shown && rail.classList.contains('shown')) { rail.classList.remove('shown'); railSync(); }
     p = document.getElementById(was.p);
     if (!p) return;
@@ -718,7 +782,7 @@
   // top; or else the line at the window's top, by the letter there, so that a
   // paragraph begun above the window is kept at the line being read.  At the
   // page's top the page stays at its top.  Columns keep their own (cmpGo).
-  var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .rt.now)';
+  var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, .rt.now)';
   function placeNow() {
     var ms = document.querySelectorAll(MARKED), ps, i, r, p = null, c, n, at, q, rs, top = 0, over;
     if (scrollY <= 0) return null;
@@ -810,16 +874,29 @@
     rail = b.closest('.rail');
     shut = railShut(rail);
     // On a phone the Contents open above the text, where the button is.
-    if (phone.matches) rail.classList.toggle('shown', shut);
-    else keepPlace(function () { window.ubSettings.set('rail', shut ? 'open' : 'folded'); });
+    if (phone.matches) {
+      // Open from the running head's reference (toContents, above), their
+      // line is the way back to the paragraph left, as Back is, which was
+      // the only way: a tap on the section being read goes to its start now,
+      // and the line only folded them, leaving the page wherever that put
+      // it (Tigran, 2026-11-17: "simply tapping on the \"CONTENTS\" line
+      // should bring me back"; a little cross at their corner was his first
+      // thought).  The line stays at the window's top while they are open
+      // (ub.css), so it is always at hand.
+      if (!shut && contentsAt) { history.back(); return; }
+      rail.classList.toggle('shown', shut);
+      // Folded from within them, the line itself stays in view, the text
+      // under it: the page is as long as they were shorter.
+      if (!shut && rail.getBoundingClientRect().top < 0) {
+        scrollBy({ top: rail.getBoundingClientRect().top, behavior: 'instant' });
+        arriveTouched = Date.now();
+      }
+    } else keepPlace(function () { window.ubSettings.set('rail', shut ? 'open' : 'folded'); });
     railSync();
     if (shut) railView();
   });
   railSync();
   if (phone.addEventListener) phone.addEventListener('change', railSync);
-  // A fresh load of the Contents' entry (toContents, above): here, once
-  // `phone` is, which toContents asks.
-  if (history.state && history.state.ub === 'contents') { contentsAt = history.state; toContents(null); }
 
   // The index folds (templates/_fold.html, ub.css .indexfold): its button,
   // kept as the setting 'margin' (settings.py KEPT), folds the margin to the
@@ -879,13 +956,18 @@
   // data-toc before first paint, which keeps the tree unseen until it is drawn
   // (ub.css), and .tocready shows it, drawn or not: offline, a translation not
   // kept leaves the rail in English.
-  var tocGot = {}, tocEn = new WeakMap(), ROMAN = ['', 'I', 'II', 'III', 'IV'];
+  // `tocOver` is a translation's key while the Contents stand as the running
+  // head's reference opened them from that translation's paragraph
+  // (toContents, above): drawn in it and named so in the list, with `toc`
+  // not changed; a choice in the list, another opening, Back or a new page
+  // ends it.
+  var tocGot = {}, tocEn = new WeakMap(), ROMAN = ['', 'I', 'II', 'III', 'IV'], tocOver = null;
   var RE_RAILA = /^\/(?:part\/([0-9]+)|([0-9]+)(?::([0-9]+))?)$/;
   function tocTicked() {
     return String(load().translations || '').split(' ').filter(function (k) { return trBy[k]; });
   }
   function tocKey() {
-    var k = load().toc || '';
+    var k = tocOver || load().toc || '';
     return tocTicked().indexOf(k) >= 0 ? k : '';
   }
   function tocSync() {
@@ -944,21 +1026,32 @@
       r.classList.add('tocready');
     };
     tocSync();
-    if (!rail || !k) return done(null);
-    if (tocGot[k]) return done(tocGot[k]);
-    fetch('/rail/' + k + '?v=' + encodeURIComponent(trBy[k].toc || ''))
+    // A promise, kept once they are drawn, for what places the rail after.
+    if (!rail || !k) { done(null); return Promise.resolve(); }
+    if (tocGot[k]) { done(tocGot[k]); return Promise.resolve(); }
+    return fetch('/rail/' + k + '?v=' + encodeURIComponent(trBy[k].toc || ''))
       .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
       .then(function (d) { tocGot[k] = d; done(d); })
       .catch(function () { done(null); });
   }
   document.addEventListener('change', function (ev) {
-    if (ev.target.closest && ev.target.closest('.railtr')) window.ubSettings.set('toc', ev.target.value);
+    if (!ev.target.closest || !ev.target.closest('.railtr')) return;
+    // The reader's choice, which ends what a reference opened them in; drawn
+    // here too, the choice being no change where it is what was kept.
+    tocOver = null;
+    window.ubSettings.set('toc', ev.target.value);
+    tocApply();
   });
   document.addEventListener('ub:settings', function (ev) {
     if (ev.detail.key === 'toc' || ev.detail.key === 'translations') tocApply();
   });
-  document.addEventListener('ub:swap', tocApply);    // listen.js's <main>, the rail with it
+  // listen.js's <main>, the rail with it: a new page, as the reader chose.
+  document.addEventListener('ub:swap', function () { tocOver = null; tocApply(); });
   tocApply();
+  // A fresh load of the Contents' entry (toContents, above): here, once
+  // `phone` is, which toContents asks, and the translations and their
+  // contents, which it may open in.
+  if (history.state && history.state.ub === 'contents') { contentsAt = history.state; toContents(null, history.state.k); }
   function trKeys(tf) {
     var has = (tf.dataset.has || '').split(' ');
     return String(load().translations || '').split(' ').filter(function (k) {
@@ -1054,6 +1147,8 @@
         notes += w.notes;
       });
       if (card && panel.contains(card.mark)) shut(false);
+      // The running head of a paragraph here goes with it (tapHead, below).
+      if (headP && panel.contains(headP)) hideHead();
       panel.innerHTML = h + (notes && '<div class="tnotes" hidden>' + notes + '</div>');
       document.dispatchEvent(new CustomEvent('ub:trfold', { detail: panel }));   // listen.js: its ▶
     }, function () {
@@ -1086,6 +1181,7 @@
   }
   function trShut(tf) {
     if (card && tf.contains(card.mark)) shut(false);
+    if (headP && tf.contains(headP)) hideHead();
     tf.classList.remove('open');
     var b = tf.querySelector('.trfold'), panel = tf.querySelector('.tr');
     if (b) b.setAttribute('aria-expanded', 'false');
@@ -2004,11 +2100,15 @@
     touch = ev.pointerType !== 'mouse';
     selDown = !getSelection().isCollapsed;
   }, { passive: true });
+  // In a translations' fold, and not on a paragraph of a translation there:
+  // on its tabs, a name, a note's card or the room about them, where a tap is
+  // no tap on the text.
+  function inFold(t) { return !!t.closest('.tf') && !t.closest('.tf p.rt'); }
   function tapTurn(ev) {
     var t = ev.target;
     if (document.documentElement.dataset.tappage !== 'true' || !touch || ev.button ||
-        !t.closest || !t.closest('main') || !getSelection().isCollapsed ||
-        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .blanket, .marginhead, .player')) return;
+        !t.closest || !t.closest('main') || !getSelection().isCollapsed || inFold(t) ||
+        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .blanket, .marginhead, .player')) return;
     if (turn(ev.clientY < innerHeight / 2 ? -1 : 1)) ev.preventDefault();
   }
 
@@ -2043,7 +2143,12 @@
   // The paragraph tapped.  In columns a translation's own (p.rt), tinted
   // alone, never the English beside it (Tigran, 2026-11-08), and its cell's
   // first where the tap was in the cell but on none, on its name; the English
-  // one of the row where it was on neither.  And where the tap was on no
+  // one of the row where it was on neither.  And a translation's own in the
+  // fold under a paragraph, which is how a phone shows one (Tigran,
+  // 2026-11-17: "on the phone tapping a translation's paragraph does
+  // nothing, but on the desktop it highlights it and displays the page
+  // header menu, just like for English"): the fold was no place for a tap at
+  // all, its tabs and names being controls (inFold, above).  And where the tap was on no
   // paragraph's row, on a section's title or in the room about it, the next
   // paragraph down the page from where it fell (`y`, the tap's height in the
   // window), which under a title is its section's first, and under a
@@ -2054,7 +2159,7 @@
   function paraOf(t, y) {
     var cell, row;
     if (!t.closest) return null;
-    return t.closest('p.t[id], .rc p.rt') ||
+    return t.closest('p.t[id], .rc p.rt, .tf p.rt') ||
            ((cell = t.closest('.rc')) && cell.querySelector('p.rt')) ||
            ((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || paraUnder(t, y);
   }
@@ -2115,20 +2220,17 @@
     ref.addEventListener('click', function () {
       var p = headP;
       hideHead();
-      toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)));
+      toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)), p && !p.id ? p.dataset.k : '');
     });
     head.insertBefore(ref, head.firstChild);
-    // Home and the gear together at the right: the site's mark, the header's
-    // own drawing, as a link to the home page; and the gear.
+    // The gear and Home together at the right: the gear first, as it is the
+    // first of the header's controls (Tigran, 2026-11-17: "normally the
+    // Settings icon is the leftmost in the top panel, but when I tap on the
+    // paragraph it is displayed rightmost.  Let's make it leftmost at all
+    // times"; the mark stood before it until then); and the site's mark, the
+    // header's own drawing, as a link to the home page.
     ctl = document.createElement('span');
     ctl.className = 'ctl';
-    home = document.createElement('a');
-    home.className = 'home';
-    home.href = '/';
-    T.attr(home, 'title', 'Home');
-    T.attr(home, 'aria-label', 'Home');
-    if (logo) home.appendChild(logo.cloneNode(true));
-    ctl.appendChild(home);
     btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'set';
@@ -2136,6 +2238,13 @@
     T.attr(btn, 'title', 'Settings');
     if (gear && gear.querySelector('svg')) btn.appendChild(gear.querySelector('svg').cloneNode(true));
     ctl.appendChild(btn);
+    home = document.createElement('a');
+    home.className = 'home';
+    home.href = '/';
+    T.attr(home, 'title', 'Home');
+    T.attr(home, 'aria-label', 'Home');
+    if (logo) home.appendChild(logo.cloneNode(true));
+    ctl.appendChild(home);
     head.appendChild(ctl);
     // The header's gear opens the dialog, and its click hides the head (below);
     // never focused first, or the dialog would give the focus back to the
@@ -2144,18 +2253,47 @@
     head.addEventListener('click', function (ev) { if (!ev.target.closest('a, button')) hideHead(); });
     document.body.appendChild(head);
   }
+  // The head's words: the paper's number, as HTML, its title and its author,
+  // in `lang` where they are a translation's.
+  function headSay(h, lang) {
+    var mid = head.querySelector('.mid');
+    if (lang) mid.lang = lang; else mid.removeAttribute('lang');
+    head.querySelector('.pn').innerHTML = h.num + '<span class="tt"></span>';
+    head.querySelector('.tt').textContent = h.title;
+    head.querySelector('.au').textContent = h.author;
+  }
+  // A translation's paragraph has the paper's head as that translation has
+  // it, ТЕКСТ 101 – ПОДЛИННАЯ СУЩНОСТЬ РЕЛИГИИ and its author, never the
+  // English (Tigran, 2026-11-17: "the page header is from English even on the
+  // Russian text -- that is a bug too"): from the section's /tr/ fragment,
+  // which the paragraph itself was drawn from (trFetch, its promise kept, so
+  // the words are there before the head is painted); what the translation
+  // has not, a number over its Foreword or the Foundation's author, is not
+  // put in from the English.  Empty until then, and the English only where
+  // the fragment cannot be had.
+  function headTr(p) {
+    var k = p.dataset.k, sec = p.closest('section[data-trv]'), en = headOf(p);
+    var text = function (html) { var d = document.createElement('div'); d.innerHTML = html || ''; return d.textContent; };
+    headSay({ num: '', title: '', author: '' }, trBy[k] && trBy[k].lang);
+    trFetch(sec, p.dataset.ref.split('.')[0]).then(function (got) {
+      var g = got.h[k];
+      if (headP !== p) return;
+      if (!g) return headSay(en);
+      // The number in an element of its own, as the English's is (x-en,
+      // x-ru): the dash before the title is drawn where one comes before it
+      // (ub.css .runhead .tt).
+      headSay({ num: g.paper ? '<b>' + g.paper + '</b>' : '', title: text(g.title), author: text(g.author) },
+              trBy[k] && trBy[k].lang);
+    }, function () { if (headP === p) headSay(en); });
+  }
   function showHead(p) {
-    var h;
     if (!p) return;
     if (!head) buildHead();
-    h = headOf(p);
     if (headP) headP.classList.remove('named');
     headP = p;
     p.classList.add('named');
     head.querySelector('.ref').textContent = p.id || p.dataset.ref;
-    head.querySelector('.pn').innerHTML = h.num + '<span class="tt"></span>';
-    head.querySelector('.tt').textContent = h.title;
-    head.querySelector('.au').textContent = h.author;
+    if (!p.id && p.dataset.k && p.dataset.ref) headTr(p); else headSay(headOf(p));
     head.hidden = false;
     headAt = clampY();
     headSlack = 2 * (parseFloat(getComputedStyle(p).lineHeight) || 28);
@@ -2203,8 +2341,8 @@
   var headSoon = 0, headBy = 0, DBL = 350;
   function tapHead(ev) {
     var t = ev.target, tap, band, p;
-    if (ev.button || (ev.detail > 1 && !touch) || selDown || !t.closest || !t.closest('main') || !getSelection().isCollapsed ||
-        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .tf, .cites, .blanket, .marginhead, .player, .pop, dialog') ||
+    if (ev.button || (ev.detail > 1 && !touch) || selDown || !t.closest || !t.closest('main') || !getSelection().isCollapsed || inFold(t) ||
+        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .cites, .blanket, .marginhead, .player, .pop, dialog') ||
         !document.querySelector('main p.t[id]')) return false;
     if (!touch && (!head || head.hidden)) {
       clearTimeout(headSoon);

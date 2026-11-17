@@ -223,11 +223,19 @@
       head.parentNode.appendChild(row);
       controls.push(row);
     }
-    function place(p, i, label) {
+    // `to`: the segment of the paragraph itself, where the reading is cut
+    // at the paragraph, for the time it takes to hear.
+    function place(p, i, label, to) {
       // Outside the stored text, and with no text of its own: copying the
       // paragraph still returns its words exactly (CLAUDE.md §6).
       var pb = button('playp', label, 'play');
       pb.addEventListener('click', function () { start(i); });
+      // The time from where the button starts to the paragraph's end, its
+      // heading's with it at a section's first: drawn by the stylesheet from
+      // the attribute (ub.css .playp[data-t]), never text.  A recording's
+      // alone, the browser's voice having no times.
+      for (var ms = 0, j = i; to >= i && j <= to; j++) ms += (PV.segs[j][3] - PV.segs[j][2]) || 0;
+      if (ms > 0) { pb.dataset.ms = ms; pb.dataset.t = clock(ms); }
       // Under the reference, in the stack at the paragraph's start (_para.html).
       var num = p.querySelector('.num'), stk = p.querySelector('.stk') || p;
       stk.insertBefore(pb, num ? num.nextSibling : stk.firstChild);
@@ -245,9 +253,14 @@
     PV.segs.forEach(function (s, i) {
       var p = s[0] && paras[s[0]];
       if (!p) return;
-      if (i > 0 && isHead(PV.segs[i - 1][0])) place(p, i - 1, T.k('Listen to this section, from its heading'));
-      else place(p, i, T.tr('Listen from {r}', { r: s[0] }));
+      if (i > 0 && isHead(PV.segs[i - 1][0])) place(p, i - 1, T.k('Listen to this section, from its heading'), i);
+      else place(p, i, T.tr('Listen from {r}', { r: s[0] }), i);
     });
+  }
+  // A paragraph's time, m:ss, at the speed chosen: what it takes to hear.
+  function clock(ms) {
+    var n = Math.max(1, Math.round(ms / rate() / 1000));
+    return Math.floor(n / 60) + ':' + ('0' + n % 60).slice(-2);
   }
   // A press on the page's own controls: what is heard becomes what the page
   // shows, in the page's voice, or with a translation's ▶ in that one, nv
@@ -1219,6 +1232,8 @@
       audio.playbackRate = audio.defaultPlaybackRate = rate();
       if (said.on) speakFrom(said.n);             // the sentence again, at the new speed
       render();
+      // And each paragraph's time beside its ▶.
+      controls.forEach(function (c) { if (c.dataset.ms) c.dataset.t = clock(+c.dataset.ms); });
     }
     // A translation's voice changed while it is heard, its recording for a
     // browser's or back: it goes on in the one now chosen.

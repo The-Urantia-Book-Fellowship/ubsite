@@ -162,6 +162,77 @@ def run() -> int:
         settle(pg)
         ok("/101:4" in pg.url and not pg.evaluate(SHOWN), "and Back again folds them")
 
+        # The section being read, tapped in the Contents (Tigran, 2026-11-17:
+        # "I stay where I was, but I expected to jump to the start of this
+        # section, as it would if I tap on some other section").  Its link is
+        # the address the page has, which the browser loaded again in place of
+        # the Contents' entry, with the entry's state, and the page opened the
+        # Contents again.
+        print("The section being read, from the Contents")
+        HERE = ".rail li.here li.here a"
+        AT_PAPER = "Math.abs(document.querySelector('.rail li.here').getBoundingClientRect().top - 844 / 6) < 40"
+        pg.tap("[id='101:4.4']")
+        settle(pg)
+        top0 = pg.evaluate("document.getElementById('101:4.4').getBoundingClientRect().top")
+        pg.tap(".runhead .ref")
+        settle(pg)
+        pg.evaluate("window.ubSame = 1")
+        pg.tap(HERE)
+        settle(pg)
+        ok(pg.url.endswith("/101:4") and pg.evaluate("scrollY") == 0 and not pg.evaluate(SHOWN),
+           "a tap on it is its page from the top, the Contents folded as a page opens")
+        ok(pg.evaluate("window.ubSame") == 1, "with no page loaded")
+        pg.go_back()
+        settle(pg)
+        ok(pg.evaluate(SHOWN) and pg.evaluate(AT_PAPER), "Back from it is the Contents again, at the paper, as from another section")
+        pg.go_back()
+        settle(pg)
+        top1 = pg.evaluate("document.getElementById('101:4.4').getBoundingClientRect().top")
+        ok(not pg.evaluate(SHOWN) and abs(top1 - top0) < 3,
+           "and Back again the paragraph where it stood: %.0f px for %.0f" % (top1, top0))
+        pg.go_forward()
+        settle(pg)
+        pg.go_forward()
+        settle(pg)
+        ok(pg.evaluate("scrollY") == 0 and not pg.evaluate(SHOWN), "Forward twice is the section's top again, not the paragraph")
+        pg.go_back()
+        settle(pg)
+        pg.go_back()
+        settle(pg)
+        ok(not pg.evaluate(SHOWN) and abs(pg.evaluate("document.getElementById('101:4.4').getBoundingClientRect().top") - top0) < 3,
+           "and back at the paragraph")
+
+        # The Contents' own line is the way back from them (Tigran, 2026-11-17:
+        # "simply tapping on the CONTENTS line should bring me back"), and
+        # stays at the window's top while they are open.
+        print("The Contents' line, the way back")
+        LINE = "document.querySelector('.rail .railhead').getBoundingClientRect().top"
+        pg.tap("[id='101:4.4']")
+        settle(pg)
+        pg.tap(".runhead .ref")
+        settle(pg)
+        ok(pg.evaluate(SHOWN) and abs(pg.evaluate(LINE)) < 1 and pg.evaluate("scrollY") > 500,
+           "open from the reference, their line stands at the window's top, the list under it")
+        ok(pg.evaluate("(() => { const e = document.elementFromPoint(60, 14); return !!e && !!e.closest('.railfold'); })()"),
+           "and is what a finger finds there")
+        pg.touchscreen.tap(60, 14)
+        settle(pg)
+        top1 = pg.evaluate("document.getElementById('101:4.4').getBoundingClientRect().top")
+        ok(not pg.evaluate(SHOWN) and abs(top1 - top0) < 3 and pg.evaluate("(history.state || {}).ub || ''") == "",
+           "a tap on it is Back: the Contents folded, the paragraph where it stood: %.0f px for %.0f" % (top1, top0))
+        pg.evaluate("scrollTo(0, 0)")
+        settle(pg)
+        pg.tap(".railfold")
+        settle(pg)
+        pg.evaluate("scrollBy(0, 1000)")
+        settle(pg)
+        ok(pg.evaluate(SHOWN) and abs(pg.evaluate(LINE)) < 1, "opened by the line itself, it stays at the top as they scroll")
+        pg.touchscreen.tap(60, 14)
+        settle(pg)
+        ok(not pg.evaluate(SHOWN) and abs(pg.evaluate(LINE)) < 1, "and a tap folds them, the line still at the top, the text under it")
+        pg.evaluate("document.getElementById('101:4.4').scrollIntoView({block: 'center'})")
+        settle(pg)
+
         pg.evaluate("getSelection().selectAllChildren(document.getElementById('101:4.5'))")
         pg.tap("[id='101:4.4']")
         settle(pg)
@@ -245,6 +316,40 @@ def run() -> int:
         settle(pg)
         ok(not pg.evaluate(SHOWN) and abs(pg.evaluate("document.getElementById('101:4.2').getBoundingClientRect().top") - top0) < 3,
            "and Back again the paragraph where it stood")
+        # The section being read, from the Contents, on the whole paper's
+        # page: its link is the place the address already names, so the
+        # browser fired popstate with no hashchange, at the same address,
+        # which the page took for Back and put the paragraph back.
+        pg.evaluate("document.getElementById('101:4.5').scrollIntoView({block: 'center'})")
+        settle(pg)
+        ok(pg.evaluate("document.getElementById('101:4').getBoundingClientRect().top") < -500, "(deep in section 4, its start far above)")
+        pg.tap("[id='101:4.5']")
+        settle(pg)
+        top5 = pg.evaluate("document.getElementById('101:4.5').getBoundingClientRect().top")
+        pg.tap(".runhead .ref")
+        settle(pg)
+        ok(pg.evaluate("[...document.querySelectorAll('.rail li.here li.here a')].map(a => a.getAttribute('href'))") == ["/101:4"],
+           "the Contents mark section 4, the one being read")
+        pg.evaluate("window.ubSame = 1")
+        pg.tap(HERE)
+        settle(pg)
+        sec = pg.evaluate("document.getElementById('101:4').getBoundingClientRect().top")
+        ok(pg.evaluate("location.hash") == "#101:4" and -5 < sec < 80 and pg.evaluate("window.ubSame") == 1,
+           "a tap on it goes to the section's start, as a tap on another does: %.0f px" % sec)
+        pg.go_back()
+        settle(pg)
+        ok(pg.evaluate(SHOWN) and pg.evaluate(AT_PAPER), "Back from it is the Contents again, at the paper")
+        pg.go_back()
+        settle(pg)
+        top6 = pg.evaluate("document.getElementById('101:4.5').getBoundingClientRect().top")
+        ok(not pg.evaluate(SHOWN) and abs(top6 - top5) < 3,
+           "and Back again the paragraph where it stood: %.0f px for %.0f" % (top6, top5))
+        pg.go_forward()
+        settle(pg)
+        pg.go_forward()
+        settle(pg)
+        sec = pg.evaluate("document.getElementById('101:4').getBoundingClientRect().top")
+        ok(-5 < sec < 80, "Forward twice is the section's start again, not the paragraph: %.0f px" % sec)
         pg.evaluate("ubSettings.set('whole', false)")
 
         print("A reading path")
@@ -276,6 +381,99 @@ def run() -> int:
         settle(pg)
         ok(not pg.evaluate("!!document.querySelector('.pop')") and not shown(pg),
            "the tap that closes the card does not bring the head")
+
+        # A translation's paragraph in the fold under the English, which is
+        # how a phone shows one (Tigran, 2026-11-17: "on the phone tapping a
+        # translation's paragraph does nothing"; and of the head it had in
+        # columns, "the page header is from English even on the Russian
+        # text"): named alone, the head the translation's own.
+        print("A translation's paragraph in the fold")
+        HEAD = """() => { const h = document.querySelector('.runhead');
+            return { ref: h.querySelector('.ref').textContent, pn: h.querySelector('.pn').textContent,
+                     dash: getComputedStyle(h.querySelector('.tt'), '::before').content, au: h.querySelector('.au').textContent,
+                     lang: h.querySelector('.mid').lang, ctl: [...h.querySelector('.ctl').children].map(e => e.className),
+                     named: [...document.querySelectorAll('main .named')].map(p => (p.dataset.k || 'en') + ' ' + (p.id || p.dataset.ref)) }; }"""
+        FOLD = "[id='101:4.3'] ~ .tf"
+        pg.evaluate("ubSettings.set('translations', 'urantia-ru uf-ru'); ubSettings.set('trtab', 'urantia-ru')")
+        pg.goto(BASE + "/101:4")
+        pg.wait_for_selector(FOLD + " .trfold")
+        pg.tap(FOLD + " .trfold")
+        pg.wait_for_selector(FOLD + ".open p.rt")
+        settle(pg)
+        pg.tap(FOLD + " p.rt")
+        settle(pg)
+        h = pg.evaluate(HEAD) if shown(pg) else {}
+        ok(h.get("named") == ["urantia-ru 101:4.3"] and h.get("ref") == "101:4.3", "a tap on it names it alone: %s" % h.get("named"))
+        ok(h.get("pn") == "ТЕКСТ 101Подлинная сущность религии" and h.get("dash") == '" – "' and h.get("au") == "Мелхиседек"
+           and h.get("lang") == "ru", "the head is the translation's own, its paper's number, title and author: %s, %s" % (h.get("pn"), h.get("au")))
+        ok(h.get("ctl") == ["set", "home"], "the gear first, then the site's mark")
+        pg.tap(FOLD + " .trtabs button[data-tab='uf-ru']")
+        pg.wait_for_selector(FOLD + " p.rt[data-k='uf-ru']")
+        settle(pg)
+        ok(not shown(pg) and named(pg) == [], "another translation chosen in the fold takes the head with the paragraph")
+        pg.tap(FOLD + " p.rt")
+        settle(pg)
+        h = pg.evaluate(HEAD) if shown(pg) else {}
+        ok(h.get("named") == ["uf-ru 101:4.3"] and h.get("pn") == "Документ 101Действительная природа религии" and h.get("au") == "",
+           "the Foundation's has its own, and no author, its text giving none: %s" % h.get("pn"))
+        # Its reference opens the Contents as that translation gives them
+        # (Tigran, 2026-11-17: "it would be nice to switch automatically to
+        # that translation's variant of Contents.  Currently it goes to the
+        # English (UVERSA PRESS) always"), for that opening.
+        TOC = """() => { const r = document.querySelector('.rail'), a = r.querySelector('li.here > details > summary a');
+            return { list: r.querySelector('.railtr select').value, paper: a.textContent.trim(),
+                     kept: JSON.parse(localStorage.getItem('ub_settings') || '{}').toc || '' }; }"""
+        pg.tap(".runhead .ref")
+        pg.wait_for_timeout(600)
+        c = pg.evaluate(TOC)
+        ok(pg.evaluate(SHOWN) and c["list"] == "uf-ru" and c["paper"] == "101. Действительная природа религии" and pg.evaluate(AT_PAPER),
+           "its reference opens the Contents in that translation, at the paper: %s, %s" % (c["list"], c["paper"]))
+        ok(c["kept"] == "", "the reader's own choice of Contents is not changed by it")
+        pg.go_back()
+        settle(pg)
+        c = pg.evaluate(TOC)
+        ok(not pg.evaluate(SHOWN) and c["list"] == "" and c["paper"] == "101. The Real Nature of Religion", "Back folds them, the book's own again")
+        pg.go_forward()
+        pg.wait_for_timeout(600)
+        c = pg.evaluate(TOC)
+        ok(pg.evaluate(SHOWN) and c["list"] == "uf-ru" and c["paper"] == "101. Действительная природа религии", "Forward opens them in the translation again")
+        pg.go_back()
+        settle(pg)
+        pg.tap("[id='101:4.3']")
+        settle(pg)
+        pg.tap(".runhead .ref")
+        pg.wait_for_timeout(600)
+        c = pg.evaluate(TOC)
+        ok(pg.evaluate(SHOWN) and c["list"] == "" and c["paper"] == "101. The Real Nature of Religion",
+           "from the English paragraph they open as the reader chose, the book's")
+        pg.go_back()
+        settle(pg)
+        pg.tap(FOLD + " p.rt")
+        settle(pg)
+        pg.tap(FOLD + " p.rt")
+        settle(pg)
+        ok(not shown(pg) and named(pg) == [], "a second tap hides it")
+        pg.tap("[id='101:4.3']")
+        settle(pg)
+        h = pg.evaluate(HEAD) if shown(pg) else {}
+        ok(h.get("named") == ["en 101:4.3"] and h.get("au") == "Melchizedek" and h.get("lang") == "",
+           "the English paragraph above it has the English head again")
+        pg.tap("[id='101:4.3']")
+        settle(pg)
+        pg.evaluate("ubSettings.set('trtab', 'all')")
+        pg.wait_for_selector(FOLD + " p.who")
+        settle(pg)
+        pg.tap(FOLD + " p.who >> nth=0")
+        settle(pg)
+        ok(not shown(pg) and named(pg) == [], "a tap on a translation's name in the fold is no tap on the text")
+        pg.evaluate("ubSettings.set('tappage', true)")
+        pg.evaluate("(s) => document.querySelector(s).scrollIntoView({block: 'end'})", FOLD + " p.rt")
+        settle(pg)
+        y1 = pg.evaluate("scrollY")
+        pg.tap(FOLD + " p.rt")
+        pg.wait_for_timeout(650)
+        ok(pg.evaluate("scrollY") > y1 + 200 and not shown(pg), "with Tap to turn the page on, a tap on it low on the screen turns the page")
+        pg.evaluate("ubSettings.set('tappage', false); ubSettings.set('translations', ''); ubSettings.set('trtab', '')")
 
         print("A wide screen, the Contents folded away")
         ctx2 = b.new_context(viewport={"width": 1280, "height": 900})
@@ -319,6 +517,23 @@ def run() -> int:
         ok(pg2.evaluate("document.querySelector('.railfold').getAttribute('aria-expanded')") == "true", "the fold button says so")
         pg2.evaluate("ubSettings.set('rail', 'open')")
         ctx2.close()
+
+        print("A translation's paragraph in its column")
+        ctx3 = b.new_context(viewport={"width": 1920, "height": 900})
+        ctx3.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
+        pg3 = ctx3.new_page()
+        pg3.on("pageerror", lambda e: errors.append(str(e)))
+        pg3.goto(BASE + "/0:1")
+        pg3.evaluate("ubSettings.set('translations', 'ud')")
+        pg3.goto(BASE + "/0:1")
+        pg3.wait_for_selector(".rc p.rt[data-ref='0:1.2']")
+        pg3.click(".rc p.rt[data-ref='0:1.2']", position={"x": 150, "y": 12})
+        pg3.wait_for_timeout(550)
+        h = pg3.evaluate(HEAD) if shown(pg3) else {}
+        ok(h.get("named") == ["ud 0:1.2"] and h.get("pn") == "Предисловие" and h.get("au") == "Божественный Советник",
+           "the head is the translation's there too, the Foreword's with no number: %s, %s" % (h.get("pn"), h.get("au")))
+        pg3.evaluate("ubSettings.set('translations', '')")
+        ctx3.close()
 
         ok(not errors, "no script error: " + "; ".join(errors))
         b.close()

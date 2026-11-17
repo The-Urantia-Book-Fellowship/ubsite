@@ -322,6 +322,16 @@ main:is(.front, .helppage, .api) ~ footer p { display: block; }
 .rail li { margin: .18rem 0; }
 .rail a { color: var(--faint); text-decoration: none; }
 .rail .here > a, .rail .here > details > summary a, .rail a:hover { color: var(--ink); }
+/* The section being read, on a pale blue band, as a paragraph named or found
+   is tinted (p.t.named, below; Tigran, 2026-11-17: ink against grey was "not
+   bold enough", and UB Goudy has no bold).  The section's link alone, a
+   paper's and a part's being in their summaries; a block as wide as its
+   title, so that a title on two lines is one band, and a shadow about it,
+   not a margin, which would give the rail a sideways scroll, with room kept
+   for the shadow at the rail's edge, which would cut it. */
+.rail li.here > a { display: block; width: fit-content; max-width: calc(100% - .3rem);
+  background: color-mix(in oklch, var(--link) 12%, transparent);
+  border-radius: 3px; box-shadow: 0 0 0 .3rem color-mix(in oklch, var(--link) 12%, transparent); }
 .rail summary { list-style: none; cursor: pointer;
                 padding-left: var(--chev); text-indent: calc(-1 * var(--chev)); }
 .rail summary::-webkit-details-marker { display: none; }
@@ -628,7 +638,7 @@ p.t.head { text-align: center; }
        min-width: 0; padding-right: 0; text-align: left; }
 :root:not([data-paranum="off"]) .verse p.t:first-child .num { top: -1.25rem; left: var(--vin); }
 :root:not([data-paranum="off"]) .verse p.t:first-child .playp {
-       top: -1.45rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch); }
+       top: -1.575rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch - .125rem); }
 :root:not([data-paranum="off"])[data-pages="true"] .verse p.t:first-child .pg {
        top: -1.25rem; left: calc(var(--vin) + (var(--refw, 9) + 1) * 1ch + 1.6rem); }
 /* A range of lines in a block, /144:3.9-10.  A paragraph's tint reaches past it
@@ -649,7 +659,7 @@ p.t.head { text-align: center; }
 .a .at a:hover { color: var(--ink); }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
 p.t.hit, p.t.now, .rt.hit, .rt.now, .tree li:target { scroll-margin-top: 3rem; }
-p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named { background: color-mix(in oklch, var(--link) 12%, transparent);
+p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 /* The paragraph's full reference, so the reader always knows which one this is;
    Settings can turn it off.  Text, not a link, since 2026-10-31 (Tigran): a
@@ -696,7 +706,7 @@ p.t { --ref: calc(var(--dl) * (var(--size) - .78rem) / 2); --lh: calc(var(--line
        white-space: nowrap; font-size: .78rem; color: var(--faint); }
 .stk > .pg { float: right; }
 :root:not([data-listen="off"]) .stk > .playp + .pg { clear: none; }
-:root[data-pages="true"]:not([data-listen="off"]) .playp:has(+ .pg) { margin-right: .35rem; }
+:root[data-pages="true"]:not([data-listen="off"]) .playp:has(+ .pg) { margin-right: .225rem; }
 /* A paper's opening paragraph gives its corner to the dropped letter: the
    stack floated there would take the first two lines' start, and the second
    line would run into the letter.  So its reference, play button and 1955
@@ -707,10 +717,10 @@ p.t.opening .stk { float: none; }
 p.t.opening :is(.num, .playp, .pg) { position: absolute; margin: 0; width: auto; right: auto;
        min-width: 0; padding-right: 0; text-align: left; }
 p.t.opening .num { top: -1.25rem; left: 0; }
-p.t.opening .playp { top: -1.45rem; left: calc((var(--refw, 9) + 1) * 1ch); }
+p.t.opening .playp { top: -1.575rem; left: calc((var(--refw, 9) + 1) * 1ch - .125rem); }
 :root[data-pages="true"] p.t.opening .pg { top: -1.25rem;
        left: calc((var(--refw, 9) + 1) * 1ch + 1.6rem); }
-:root[data-paranum="off"] p.t.opening .playp { left: -.25rem; }
+:root[data-paranum="off"] p.t.opening .playp { left: -.375rem; }
 :root[data-paranum="off"][data-pages="true"] p.t.opening .pg { left: 1.6rem; }
 :root[data-paranum="off"][data-listen="off"][data-pages="true"] p.t.opening .pg { left: 0; }
 /* Its entries beside it stand level with its text, not with that line
@@ -1359,30 +1369,67 @@ button svg .stroke { fill: none; stroke: currentColor; stroke-width: 1.7; stroke
    that the text stands at one indent; without the reference it keeps .8rem
    from the text. */
 p.t { position: relative; }
-.playp { display: grid; place-items: center; width: 1.15rem; height: 1.15rem;
-  margin: calc((var(--lh) - 1.15rem) / 2) calc(var(--refw, 9) * 1ch + .4rem - .9rem)
-          calc((var(--lh) - 1.15rem) / 2) -.25rem;
-  padding: .22rem; border: 0; border-radius: 50%; background: none; color: var(--link);
-  font-family: inherit; font-size: .78rem; cursor: pointer; opacity: .45; transition: opacity .15s; }
-.playp svg { width: .83rem; height: .83rem; }
-:root[data-paranum="off"] .playp { margin-right: .8rem; }
-.playp:focus-visible, p.t.now .playp { opacity: 1; }
+/* A third larger since 2026-11-17 (Tigran: "the button itself is quite
+   small"), its triangle 1.1rem where it was .83rem, about the same centre: the
+   line it stands on has the height.  The triangle is what is faint, not the
+   button, which holds the time too (below). */
+.playp { display: grid; place-items: center; width: 1.4rem; height: 1.4rem;
+  margin: calc((var(--lh) - 1.4rem) / 2) calc(var(--refw, 9) * 1ch + .4rem - 1.025rem)
+          calc((var(--lh) - 1.4rem) / 2) -.375rem;
+  padding: .15rem; border: 0; border-radius: 50%; background: none; color: var(--link);
+  font-family: inherit; font-size: .78rem; cursor: pointer; }
+.playp svg { width: 1.1rem; height: 1.1rem; opacity: .45; transition: opacity .15s; }
+:root[data-paranum="off"] .playp { margin-right: .675rem; }
+.playp:focus-visible svg, p.t.now .playp svg { opacity: 1; }
+/* Under the reference it is the stack's whole second line (Tigran, the same
+   day, of the room beside it: "maybe you can think of something to utilise
+   that bit of space to the right of the button"): the triangle at the line's
+   start, where it stood, and at its end, under the reference's right edge,
+   the time the paragraph takes to hear in the voice the page plays, at the
+   speed chosen (listen.js, data-t), so that a finger has the line's width to
+   press, 59 px by 26 on a phone where it had 18 by 18.  The time is drawn
+   from the attribute, as the 1955 page is, in the reference's type and grey
+   and on the line's baseline as the page stands on it: a copy never takes it,
+   and the button has no text; in the book's lining figures, which a button
+   does not take from the page.  Not with the 1955 pages shown, which have that
+   room, nor without the references, where there is none to use; and in the
+   line above a paper's opening or a block of verse it follows the triangle. */
+.stk > .playp { display: flex; align-items: center; justify-content: center; gap: .2rem; }
+:root:not([data-paranum="off"], [data-pages="true"]) .stk > .playp[data-t]::after { content: attr(data-t);
+  color: var(--faint); white-space: nowrap; line-height: var(--line);
+  font-variant-numeric: lining-nums tabular-nums; }
+:root:not([data-paranum="off"], [data-pages="true"]) p.t:not(.opening, .verse) .stk > .playp {
+  justify-content: space-between; width: calc(100% + .375rem); height: var(--lh); margin: 0 0 0 -.375rem;
+  padding: 0 .4rem 0 .15rem; border-radius: .7rem; }
+:root:not([data-paranum="off"], [data-pages="true"]) p.t:not(.opening, .verse) .stk > .playp::after {
+  align-self: flex-start; position: relative; top: calc(.2rem + var(--ref)); }
+/* In the line above, level with the reference there, whose line begins
+   1.25rem above the paragraph where the button's middle is .875rem above. */
+:root:not([data-paranum="off"], [data-pages="true"]) p.t:is(.opening, .verse) .stk > .playp::after {
+  position: relative; top: calc(.39rem * var(--line) - .375rem); }
+/* Room for it under the shortest references, five characters in 53 sections
+   of Papers 0 to 9: every stack of a page that shows a time is wide enough
+   for the triangle and the time, so that the text stands at one indent.  Not
+   the line above an opening or a block of verse, where the reference is as
+   wide as its figures. */
+:root:not([data-pages="true"]) main:has(.playp[data-t]) p.t:not(.opening, .verse) .num {
+  min-width: max(calc(var(--refw, 9) * 1ch + .4rem), 2.9rem); }
 /* A translation's ▶ in Compare (listen.js trPlay), which reads it from there:
    in the gap before its column, level with the cell's first line; on a phone,
    in the margin before the rule, level with the translation's name. */
 article.cmp .rc { position: relative; }
-article.cmp .rc > .playp { position: absolute; margin: 0; left: -1.6rem;
-  top: calc((var(--size) * var(--lead) - 1.15rem) / 2); }
-article.cmp .rc:has(.rt.now) > .playp { opacity: 1; }
+article.cmp .rc > .playp { position: absolute; margin: 0; left: -1.725rem;
+  top: calc((var(--size) * var(--lead) - 1.4rem) / 2); }
+article.cmp .rc:has(.rt.now) > .playp svg { opacity: 1; }
 /* And in the fold under a paragraph (listen.js foldPlay; Tigran, 2026-11-13,
    of a phone, where the fold is how a translation is read and there was no ▶
    but the English text's): at the start of the line that names the
    translation shown, the tabs' row, or its own name where all are shown or
    one alone is ticked. */
-.tf [data-play] > .playp { margin: 0 .3rem 0 -.4rem; }
-.tf .trtabs > .playp { align-self: center; margin-right: -.55rem; }
+.tf [data-play] > .playp { margin: -.125rem .175rem -.125rem -.525rem; }
+.tf .trtabs > .playp { align-self: center; margin-right: -.675rem; }
 .tf .who > .playp { display: inline-grid; vertical-align: -.3em; }
-.tf .tr:has(.rt.now) .playp { opacity: 1; }
+.tf .tr:has(.rt.now) .playp svg { opacity: 1; }
 :root[data-listen="off"] :is(.voicecredit, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
    playing starts, so only one thing on the page is marked. */
@@ -1416,6 +1463,7 @@ p.t.now, .papertop :is(h1, h2).now, .rt.now, header.ch.now { background: color-m
 .runhead .mid p { margin: 0; }
 .runhead .pn { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); text-wrap: balance; }
 .runhead .tt:not(:first-child)::before { content: " – "; }
+.runhead .pn b { font-weight: inherit; }      /* a translation's number (ub.js headTr) */
 .runhead .tt:empty { display: none; }
 .runhead .au { font-size: .86rem; font-style: italic; color: var(--faint); margin-top: .05rem; }
 .runhead .au:empty { display: none; }
@@ -1538,7 +1586,7 @@ main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
    lit after a tap on Android.  Hover is drawn only where there is a pointer that
    hovers; a tap shows by :active instead. */
 @media (hover: hover) {
-  p.t:hover .playp { opacity: 1; }
+  p.t:hover .playp svg { opacity: 1; }
   .playp:hover { background: color-mix(in oklch, var(--link) 14%, transparent); }
   .player button:hover { background: color-mix(in oklch, var(--link) 12%, transparent); }
   .player .toggle:hover { background: color-mix(in oklch, var(--link) 85%, var(--ink)); }
@@ -2176,6 +2224,14 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   /* Folded on every page, to its one line, a tap's height: opened, for that
      page only (ub.js .shown), its chevron points down, as an open summary's. */
   .railhead { position: relative; }      /* in the page's flow, holding the list's place */
+  /* Open, their line stays at the window's top as the list goes up under it,
+     as it stays at the rail's top beside the text on a wide screen: it folds
+     them from wherever in them the reader is, and, where the running head's
+     reference opened them, goes back to the paragraph left (ub.js; Tigran,
+     2026-11-17).  The rail itself must not clip, or the line would stick to
+     it and not to the window. */
+  .rail.shown { overflow: visible; }
+  .rail.shown .railhead { position: sticky; top: 0; }
   .railfold { padding: .35rem 0; }
   .railtr { top: .25rem; right: 0; }
   :root.js .rail:not(.shown) > ol { display: none; }
