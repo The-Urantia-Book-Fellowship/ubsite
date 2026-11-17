@@ -492,19 +492,41 @@ window.ubUnit = function (where) {
     the place is put in by the line of script after it, as the page is read
     and before anything is drawn, and again by ub.js when it changes
     (window.ubBar).  With scripts off it is Begin reading.  data-tv is the
-    text's version, kept with the place. #}
+    text's version, kept with the place.
+
+    And the bookmarks (the same day: "Continue reading" with "a button ...
+    that suggests there is a list here"), set by hand, localStorage ub_marks,
+    which ub.js keeps (bmPut): the list's button at the bar's right end, a
+    ribbon, their number and a chevron, shown where there is one, and the
+    list it opens, whose rows ub.js makes.  On a page of the text the bar
+    comes with the running head, at a tap on a paragraph (ub.js showHead,
+    .fbar.fup), with Bookmark this paragraph in Continue reading's place,
+    pressed and reading Bookmarked where the paragraph has one.  Both
+    buttons are hidden until a script shows them. #}
 <nav class="fbar" {{ ta('aria-label', 'Your place in the book') }} data-tv="{{ text_version() }}">
   <a class="fgo" href="/0">{{ chrome.player_svg('play') }}<span class="fl fbegin">{{ t('Begin reading') }}</span><span class="fl fcont">{{ t('Continue reading') }}</span><span class="fat"><span class="fref"></span><span class="fttl">{{ t('Foreword') }}</span></span></a>
+  <button type="button" class="fmark" aria-pressed="false" hidden>{{ chrome.ribbon_svg() }}<span class="fmset">{{ t('Bookmark this paragraph') }}</span><span class="fmis">{{ t('Bookmarked') }}</span></button>
+  <button type="button" class="flist" aria-expanded="false" aria-controls="fsheet" {{ ta('aria-label', 'Bookmarks') }} {{ ta('title', 'Bookmarks') }} hidden>{{ chrome.ribbon_svg() }}<span class="fcount"></span></button>
+  <div class="fsheet" id="fsheet" hidden>
+    <p class="fsh">{{ t('Bookmarks') }}</p>
+    <ul></ul>
+  </div>
 </nav>
 <script>
 (window.ubBar = function () {
-  var b = document.querySelector('.fbar'), p = null;
+  var b = document.querySelector('.fbar'), p = null, m = null, n = 0, REF = /^\d+:\d+\.\d+$/;
+  if (!b) return;
   try { p = JSON.parse(localStorage.getItem('ub_place') || 'null'); } catch (e) {}
-  if (!b || !p || !/^\d+:\d+\.\d+$/.test(p.ref)) return;
-  b.querySelector('.fgo').setAttribute('href', '/' + p.ref);
-  b.querySelector('.fref').textContent = p.ref;
-  b.querySelector('.fttl').textContent = p.title || '';
-  b.classList.add('fhas');
+  try { m = JSON.parse(localStorage.getItem('ub_marks') || 'null'); } catch (e) {}
+  if (p && REF.test(p.ref)) {
+    b.querySelector('.fgo').setAttribute('href', '/' + p.ref);
+    b.querySelector('.fref').textContent = p.ref;
+    b.querySelector('.fttl').textContent = p.title || '';
+    b.classList.add('fhas');
+  }
+  if (Array.isArray(m)) n = m.filter(function (x) { return x && REF.test(x.ref); }).length;
+  b.querySelector('.flist').hidden = !n;
+  b.querySelector('.fcount').textContent = n || '';
 })();
 </script>
 <script src="{{ l10n_url() }}" defer></script>

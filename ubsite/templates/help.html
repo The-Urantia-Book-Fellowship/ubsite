@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% set title = 'Help' %}
-{% from "_chrome.html" import gear_svg, help_svg, glass_svg, player_svg, keep_svg, playp %}
+{% from "_chrome.html" import gear_svg, help_svg, glass_svg, player_svg, keep_svg, playp, ribbon_svg %}
 {% from "_para.html" import para %}
 {% from "_fold.html" import afold %}
 {% from "_text.html" import chip, blanket, endnotes, quizcall %}
@@ -167,6 +167,13 @@
     </div>
     {{ showme('runhead') }}
     <p>{{ t('help:moving:6') }}</p>
+    <p>{{ t('help:moving:7') }}</p>
+    {#- The bar's two controls on a page of the text, as base.html draws them
+        (.fmark, .flist), in a box of the example's own: not the bar, which
+        the page has at its foot, and not buttons, having nothing to press. #}
+    <div class="eg">
+      <div class="fbareg" aria-hidden="true"><span class="fmark" aria-pressed="false">{{ ribbon_svg() }}<span class="fmset">{{ t('Bookmark this paragraph') }}</span></span><span class="flist">{{ ribbon_svg() }}<span class="fcount">2</span></span></div>
+    </div>
   </section>
 
   <section id="search">

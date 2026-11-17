@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Bookmarks: tap a paragraph and the bar at the foot offers Bookmark this paragraph; a ribbon then marks it in the margin, and the ribbon at the bar's right end, on every page, opens your bookmarks in the book's order, each a link to its place, with a cross to remove it and Undo. Kept in this browser only.
 - Continue reading: a bar along the foot of the home page, and of every page but the text's own and the chart, takes you back to the paragraph you were last reading, which this browser remembers by itself; before you have read anything it says Begin reading and opens the Foreword.
 - Paper 17, The Seven Supreme Spirit Groups, has 29 study notes: why there are fifty Reflective Spirits and forty-nine, a reaction of Deity that "was not foreknown", which of the seven groups are persons, and the stage of her career the Mother Spirit of Nebadon has reached.
 - Paper 16, The Seven Master Spirits, has 53 study notes: Matthew Block's parallels from Max Schoen (1939) and Rees Griffiths, Hocking and Plato behind them, the Bible, and notes on the paper's hard places, such as the three persons acting together "but not as the Trinity".

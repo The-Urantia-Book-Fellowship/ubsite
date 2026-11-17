@@ -1864,7 +1864,8 @@
   });
   document.addEventListener('keydown', function (ev) {
     if (ev.key !== 'Escape') return;
-    if (card) shut(true); else hideHead();
+    // A card, else the list of bookmarks, else the running head and its bar.
+    if (card) shut(true); else if (bmSheet && !bmSheet.hidden) bmShut(true); else hideHead();
   });
   window.addEventListener('resize', place);
   document.addEventListener('ub:swap', function () { card = null; });
@@ -1893,7 +1894,14 @@
   function pvOn() { return document.documentElement.dataset.preview === 'true'; }
   function pvLink(t) {
     var a = t && t.closest && t.closest('a[href]'), m, c;
-    if (!a || a.closest('.pop.pv')) return null;
+    // Not the bar at the foot's (base.html .fbar): Continue reading and a
+    // bookmark's row are ways to a place, not references in a text, and a
+    // card for one, drawn in the page under the window's foot, made the page
+    // taller, so that a scrollbar came and went as the pointer crossed the
+    // bar and the page jumped sideways (Tigran, 2026-11-17, with Paragraph
+    // previews on); and on a phone a tap there would have shown the card
+    // and gone nowhere.
+    if (!a || a.closest('.pop.pv, .fbar')) return null;
     m = PV.exec(a.getAttribute('href') || '');
     if (!m) return null;
     // In a translator's note's card, or a translation's cell: that translation's
@@ -2311,6 +2319,8 @@
     headSlack = 2 * (parseFloat(getComputedStyle(p).lineHeight) || 28);
     // A tap is a touch of the page: arrive()'s late scroll must not undo it.
     arriveTouched = Date.now();
+    // And the bar at the foot, with Bookmark this paragraph (barUp, below).
+    barUp();
   }
   function hideHead() {
     clearTimeout(headSoon);
@@ -2318,6 +2328,7 @@
     if (headP) headP.classList.remove('named');
     headP = null;
     if (head) head.hidden = true;
+    barDown();
   }
   // The tour's (help.js): the head shown for a paragraph at once, as a tap
   // shows it, and hidden.  Not by a click the tour makes, which a mouse's DBL
@@ -2405,17 +2416,34 @@
   // entry cites, and Back, moves nothing.  From then the place follows the
   // page as it scrolls, and is put down once more as the page is left.  While
   // something is heard it is the paragraph being heard (p.t.now, which
-  // listen.js marks, and which is not asked anything: trap 51).  On a
-  // section's page and the whole paper's; not on a reading path, which is
-  // another order than the book's, nor on a part's title page.
-  var RP = 'ub_place', RP_DWELL = 5000, rpOn = false, rpSaid = '', rpTimer = 0, rpWait = 0;
+  // listen.js marks, and which is not asked anything: trap 51), a
+  // translation's too, by the paragraph it translates; and that paragraph
+  // stays the place once the player is shut, for as long as any of it is on
+  // the screen (Tigran, 2026-11-17: "if I was listening and paused (but also
+  // got rid of the audio player at the bottom for some reason), then I would
+  // want to resume from that paragraph and not from the one that happens to
+  // be at the top of the view").  On a section's page and the whole paper's;
+  // not on a reading path, which is another order than the book's, nor on a
+  // part's title page.
+  var RP = 'ub_place', RP_DWELL = 5000, rpOn = false, rpSaid = '', rpTimer = 0, rpWait = 0, rpLast = null, rpAsk = 0;
   function rpText() { return !!document.querySelector('main.reader article:not(.partpage) p.t[id]'); }
-  // The first paragraph with a line of its own showing under what stands over
-  // the text, the columns' names; at the page's very top, the first.
+  // The paragraph being heard: the one listen.js marks, or, where it marks a
+  // translation's line, in its fold or its column, the paragraph that is of.
+  function rpNow() {
+    var el = document.body.classList.contains('listening') && document.querySelector('main.reader :is(p.t.now[id], p.rt.now)');
+    return !el ? null : el.id ? el : document.getElementById(el.dataset.ref || '');
+  }
+  // The paragraph heard, or the one last heard while it is on the screen;
+  // else the first paragraph with a line of its own showing under what stands
+  // over the text, the columns' names; at the page's very top, the first.
   function rpPara() {
-    var now = document.body.classList.contains('listening') && document.querySelector('main.reader p.t.now[id]'),
-        ps, i, r, top = 0, names;
-    if (now) return now;
+    var now = rpNow(), ps, i, r, top = 0, names;
+    if (now) return (rpLast = now);
+    if (rpLast) {
+      r = rpLast.isConnected && rpLast.getBoundingClientRect();
+      if (r && r.height && r.bottom > 0 && r.top < innerHeight) return rpLast;
+      rpLast = null;
+    }
     names = document.querySelector('main article.cmp .cmpnames');
     if (names && (r = names.getBoundingClientRect()).height && r.top <= 1) top = r.bottom;
     ps = document.querySelectorAll('main.reader article:not(.partpage) p.t[id]');
@@ -2444,6 +2472,7 @@
     clearTimeout(rpTimer);
     rpSaid = '';
     rpOn = false;
+    rpLast = null;
     if (!rpText()) return;
     if (document.body.classList.contains('listening')) return rpEngage();
     rpTimer = setTimeout(function tick() {
@@ -2470,14 +2499,232 @@
   addEventListener('storage', function (ev) { if (ev.key === RP && window.ubBar) window.ubBar(); });
   document.addEventListener('ub:swap', function () { rpBegin(); if (window.ubBar) window.ubBar(); });
   // Heard, the page need not move, Follow along being off, or the paragraph
-  // long: asked as the player opens (body.listening, listen.js's own mark,
-  // watched here), and now and then while it is open.
+  // long: asked as the player opens and as its mark moves on (body.listening
+  // and .now, listen.js's own marks, watched here, every class the page
+  // changes, once to a turn), and now and then while it is open.
   function rpHeard() { if (document.body.classList.contains('listening')) { rpEngage(); rpSave(); } }
   if (window.MutationObserver)
-    new MutationObserver(function () { setTimeout(rpHeard, 0); })
-      .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(function () { if (!rpAsk) rpAsk = setTimeout(function () { rpAsk = 0; rpHeard(); }, 0); })
+      .observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
   setInterval(rpHeard, 3000);
   rpBegin();
+
+  // Bookmarks (Tigran, 2026-11-17; DECISIONS.md, The home page): paragraphs
+  // the reader marks by hand, kept in localStorage `ub_marks`, each with its
+  // paper's title, its opening words, the time and the text's version; no
+  // setting, as the reading place is none.  One construct with Continue
+  // reading: the bar at the foot (base.html .fbar) has the list's button at
+  // its right end, a ribbon and their number, where there is one, and on a
+  // page of the text it comes with the running head, at a tap on a paragraph
+  // (showHead, above), with Bookmark this paragraph in Continue reading's
+  // place.  A bookmarked paragraph has a ribbon in the margin, a class here
+  // and a drawing in ub.css (p.t.bmk), so no page's markup knows of it.
+  // The list is in the book's order; a row goes to its paragraph, and its ×
+  // removes it at once, the row staying, pale, with Undo, until the list is
+  // shut (his rulings, the same day).  A translation's paragraph named marks
+  // the paragraph it translates: a bookmark is a place in the book.  What
+  // the browser keeps is followed only where it is a paragraph's reference.
+  var BM = 'ub_marks', RE_REF = /^(\d+):(\d+)\.(\d+)$/, fbar = document.querySelector('.fbar'),
+      bmMark = fbar && fbar.querySelector('.fmark'), bmList = fbar && fbar.querySelector('.flist'),
+      bmSheet = fbar && fbar.querySelector('.fsheet'), bmGone = [],
+      BM_X = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>';
+  function bmOrder(a, b) {
+    var x = RE_REF.exec(a.ref), y = RE_REF.exec(b.ref);
+    return x[1] - y[1] || x[2] - y[2] || x[3] - y[3];
+  }
+  function bmAll() {
+    var m = null;
+    try { m = JSON.parse(localStorage.getItem(BM) || 'null'); } catch (e) {}
+    if (!Array.isArray(m)) return [];
+    return m.filter(function (x) { return x && typeof x.ref === 'string' && RE_REF.test(x.ref); }).sort(bmOrder);
+  }
+  function bmPut(m) {
+    try {
+      if (m.length) localStorage.setItem(BM, JSON.stringify(m.sort(bmOrder))); else localStorage.removeItem(BM);
+    } catch (e) { return; }
+    bmSync();
+  }
+  function bmAt(m, ref) {
+    for (var i = 0; i < m.length; i++) if (m[i].ref === ref) return i;
+    return -1;
+  }
+  // The reference of a paragraph, the text's or a translation's.
+  function bmRef(p) {
+    var r = p && (p.id || p.dataset.ref) || '';
+    return RE_REF.test(r) ? r : '';
+  }
+  // Its paper's title: the page's head, or on a reading path the line that
+  // names the paper before it, "Paper 101 · The Real Nature of Religion".
+  function bmTitle(p) {
+    var t = headOf(p).title, rhs, rh = null, i, a;
+    if (t) return t;
+    rhs = document.querySelectorAll('main .rh-paper');
+    for (i = 0; i < rhs.length; i++)
+      if (rhs[i].compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING) rh = rhs[i];
+    a = rh && rh.querySelector('a');
+    return a && a.lastChild && a.lastChild.nodeType === 3 ? a.lastChild.data.replace(/^[\s\u00b7]+/, '').trim() : '';
+  }
+  // Its opening words, twelve, as Ctrl+X takes a selection's (clean, below):
+  // without the reference, the play button and a card open in it.
+  function bmWords(p) {
+    var w = document.createTreeWalker(p, NodeFilter.SHOW_TEXT), n, out = '', words;
+    for (n = w.nextNode(); n && out.length < 600; n = w.nextNode())
+      if (!n.parentNode.closest('.stk, button, .pop')) out += n.data;
+    words = clean(out).split(' ');
+    return words.length > 12 ? words.slice(0, 12).join(' ').replace(/[\s,;:.\u2014\u2013-]+$/, '') + '\u2026' : words.join(' ');
+  }
+  // The ribbons: every bookmarked paragraph the page has, and no other.
+  function bmPaint() {
+    var has = {}, ps = document.querySelectorAll('main p.t[id]'), i;
+    bmAll().forEach(function (x) { has[x.ref] = true; });
+    for (i = 0; i < ps.length; i++) ps[i].classList.toggle('bmk', has[ps[i].id] === true);
+  }
+  // The button that sets one, as the paragraph the head names stands.
+  function bmPress() {
+    var ref = bmRef(headP);
+    if (bmMark) bmMark.setAttribute('aria-pressed', ref && bmAt(bmAll(), ref) >= 0 ? 'true' : 'false');
+  }
+  // The rows, the kept and those removed since the list was opened, together
+  // in the book's order.  Made of what the browser keeps, as text.
+  function bmRows() {
+    var ul = bmSheet.querySelector('ul'), rib = bmList.querySelector('svg');
+    ul.textContent = '';
+    bmAll().concat(bmGone).sort(bmOrder).forEach(function (x) {
+      var gone = bmGone.indexOf(x) >= 0, li = document.createElement('li'), a = document.createElement('a'),
+          row = document.createElement('span'), r = document.createElement('span'), t = document.createElement('span'),
+          q = document.createElement('span'), b = document.createElement('button');
+      a.className = 'fgoto';
+      a.href = '/' + x.ref;
+      row.className = 'frow';
+      r.className = 'fr';
+      t.className = 'ft';
+      q.className = 'fq';
+      r.textContent = x.ref;
+      t.textContent = typeof x.title === 'string' ? x.title : '';
+      if (rib) row.appendChild(rib.cloneNode(true));
+      row.appendChild(r);
+      row.appendChild(t);
+      a.appendChild(row);
+      if (gone) q.innerHTML = T('Removed'); else q.textContent = typeof x.q === 'string' ? x.q : '';
+      a.appendChild(q);
+      li.appendChild(a);
+      b.type = 'button';
+      b.dataset.ref = x.ref;
+      if (gone) {
+        li.className = 'fgone';
+        a.tabIndex = -1;
+        a.setAttribute('aria-disabled', 'true');
+        b.className = 'fundo';
+        b.innerHTML = T('Undo');
+      } else {
+        b.className = 'fx';
+        T.attr(b, 'aria-label', 'Remove this bookmark');
+        b.innerHTML = BM_X;
+      }
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+    // Its button stays while the list is open, the last one removed too.
+    bmList.hidden = false;
+  }
+  function bmOpen() {
+    bmGone = [];
+    bmRows();
+    bmSheet.hidden = false;
+    bmList.setAttribute('aria-expanded', 'true');
+  }
+  // `back`: the focus to the list's button, where it was in the list (Escape).
+  function bmShut(back) {
+    if (!bmSheet || bmSheet.hidden) return;
+    if (back && bmSheet.contains(document.activeElement)) bmList.focus({ preventScroll: true });
+    bmSheet.hidden = true;
+    bmList.setAttribute('aria-expanded', 'false');
+    bmGone = [];
+    if (window.ubBar) window.ubBar();
+  }
+  // Everything that shows the bookmarks, as they now are.
+  function bmSync() {
+    if (window.ubBar) window.ubBar();
+    bmPaint();
+    bmPress();
+    if (bmSheet && !bmSheet.hidden) bmRows();
+  }
+  // The bar on a page of the text: up with the running head, for the
+  // paragraph it names, and down with it, the list too.
+  var barAt = 0, BAR_SOON = 400;
+  function barUp() {
+    if (!bmMark) return;
+    if (!fbar.classList.contains('fup')) barAt = Date.now();
+    bmMark.hidden = false;
+    fbar.classList.add('fup');
+    bmPress();
+  }
+  function barDown() {
+    if (!bmMark || !fbar.classList.contains('fup')) return;
+    bmShut();
+    fbar.classList.remove('fup');
+    bmMark.hidden = true;
+  }
+  if (bmMark && bmList && bmSheet) {
+    // The bar comes up under the finger where the paragraph tapped was low on
+    // the screen, and the next tap, meant for the text, to take the bars
+    // away, would land on it: on its ground that is what it does, as a tap on
+    // the running head's does; and in the moment after the bar rose, on its
+    // buttons too, the second of a quick pair of taps, which never meant
+    // them (found by tools/runhead_e2e.py, 2026-11-17, whose second tap low
+    // on the screen set a bookmark).  First of the bar's handlers, so that
+    // no button hears such a tap.
+    fbar.addEventListener('click', function (ev) {
+      if (!fbar.classList.contains('fup')) return;
+      if (Date.now() - barAt >= BAR_SOON && ev.target.closest('a, button, .fsheet')) return;
+      ev.stopPropagation();
+      ev.preventDefault();
+      hideHead();
+    }, true);
+    bmMark.addEventListener('click', function () {
+      var p = headP, ref = bmRef(p), m, i;
+      if (!ref) return;
+      m = bmAll();
+      i = bmAt(m, ref);
+      if (i >= 0) m.splice(i, 1);
+      else m.push({ ref: ref, title: bmTitle(p), q: bmWords(p), at: Date.now(), v: fbar.dataset.tv || '' });
+      bmPut(m);
+    });
+    bmList.addEventListener('click', function () { if (bmSheet.hidden) bmOpen(); else bmShut(); });
+    bmSheet.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button[data-ref]'), m, i;
+      // A row followed: the list goes, and the head and the bar with it where
+      // the place is on this page.  The link is the paragraph's own address,
+      // which the Whole paper handler has put in the reader's unit by now.
+      if (!b) { if (ev.target.closest('a.fgoto')) { bmShut(); hideHead(); } return; }
+      m = bmAll();
+      if (b.classList.contains('fundo')) {
+        for (i = 0; i < bmGone.length; i++) if (bmGone[i].ref === b.dataset.ref) break;
+        if (i === bmGone.length) return;
+        if (bmAt(m, b.dataset.ref) < 0) m.push(bmGone[i]);
+        bmGone.splice(i, 1);
+      } else {
+        i = bmAt(m, b.dataset.ref);
+        if (i < 0) return;
+        bmGone.push(m.splice(i, 1)[0]);
+      }
+      bmPut(m);
+      // The button pressed is gone with its row: the focus to the one in its place.
+      b = bmSheet.querySelector('button[data-ref="' + b.dataset.ref + '"]');
+      if (b) b.focus({ preventScroll: true });
+    });
+    // A click anywhere else shuts the list; by the path the click took, the
+    // row's own button being out of the page by now.
+    document.addEventListener('click', function (ev) {
+      if (bmSheet.hidden) return;
+      var path = ev.composedPath ? ev.composedPath() : null;
+      if (path ? path.indexOf(fbar) < 0 : !fbar.contains(ev.target)) bmShut();
+    });
+    addEventListener('storage', function (ev) { if (ev.key === BM) bmSync(); });
+    addEventListener('pageshow', function (ev) { if (ev.persisted) bmSync(); });
+    document.addEventListener('ub:swap', bmPaint);
+    bmPaint();
+  }
   if (gear) gear.addEventListener('click', hideHead);
 
   // A search hit among the 1955 readings opens /93:5.8#note93_5_8_0, and

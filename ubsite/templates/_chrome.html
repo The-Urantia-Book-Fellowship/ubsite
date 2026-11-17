@@ -36,6 +36,14 @@
 <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">{{ way_shapes[name]|safe }}</svg>
 {%- endmacro %}
 
+{#- A bookmark's ribbon (base.html .fbar, help.html; Tigran, 2026-11-17): on the
+    bar at the foot, in the list of bookmarks, and, drawn by the stylesheet
+    alone, in the margin of a bookmarked paragraph (ub.css, the same shape).
+    ub.js clones the bar's for a row of the list. -#}
+{% macro ribbon_svg() -%}
+<svg class="frib" viewBox="3.5 1.5 9 13.5" aria-hidden="true" focusable="false"><path d="M4.5 2.5h7v11.2l-3.5-2.6-3.5 2.6z"/></svg>
+{%- endmacro %}
+
 {#- The player's icons (listen.js ICON, the same paths), and ↓ for keeping a
     recording (listen.js KEEP_ICONS.none). -#}
 {% set player_paths = {'play': 'M4.5 2.5v11l9-5.5z',

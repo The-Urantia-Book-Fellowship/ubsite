@@ -275,36 +275,110 @@ main:is(.front, .helppage, .api) ~ footer p { display: block; }
 
 /* ---- the bar at the foot ----------------------------------------------- */
 /* Continue reading, to the place this browser keeps, or Begin reading where
-   it has none (Tigran, 2026-11-17; base.html .fbar, ub.js placeKeep): fixed
-   to the window's foot on every page but a page of the text, where reading
-   has the whole screen, and the chart, which has a strip of its own there.
-   It is in every page's markup, as the footer is, and shown by the <main>
-   before it: a part's title page has no text, so it is shown there.  The
-   footer gives it room, so that it covers the end of no page, and the player
-   stands over it while something is heard.  Its words are lowered by --lift,
-   as a pill's are. */
+   it has none, and the bookmarks (Tigran, 2026-11-17; base.html .fbar, ub.js
+   rpSave, bmPut): fixed to the window's foot on every page but a page of
+   the text, where reading has the whole screen, and the chart, which has a
+   strip of its own there.  It is in every page's markup, as the footer is,
+   and shown by the <main> before it: a part's title page has no text, so it
+   is shown there.  The footer gives it room, so that it covers the end of
+   no page, and the player stands over it while something is heard.  On a
+   page of the text, and a reading path, it comes with the running head, at
+   a tap on a paragraph (.fup, ub.js showHead), over the text's foot as the
+   head is over its top, with Bookmark this paragraph in Continue reading's
+   place.  Its words are lowered by --lift, as a pill's are. */
 .fbar { position: fixed; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; align-items: stretch;
   padding-bottom: env(safe-area-inset-bottom); background: var(--card); border-top: 1px solid var(--rule);
   box-shadow: 0 -6px 20px var(--shade); font-size: .92rem; line-height: 1.2; }
-main:is(.path, .cosmo) ~ .fbar, main.reader:not(:has(> .partpage)) ~ .fbar { display: none; }
+main.cosmo ~ .fbar, main.path ~ .fbar:not(.fup), main.reader:not(:has(> .partpage)) ~ .fbar:not(.fup) { display: none; }
 main:not(.path, .cosmo, .reader) ~ footer, main.reader:has(> .partpage) ~ footer {
   padding-bottom: calc(3.1rem + 1.2rem + env(safe-area-inset-bottom)); }
 body.listening main:not(.path, .cosmo, .reader) ~ footer, body.listening main.reader:has(> .partpage) ~ footer {
   padding-bottom: calc(3.1rem + 5.5rem + env(safe-area-inset-bottom)); }
-main:not(.path, .cosmo, .reader) ~ .player, main.reader:has(> .partpage) ~ .player {
+main:not(.path, .cosmo, .reader) ~ .player, main.reader:has(> .partpage) ~ .player, .fbar.fup ~ .player {
   bottom: calc(3.1rem + .6rem + env(safe-area-inset-bottom)); }
 html:has(dialog.settings[open]) .fbar { right: var(--sbw, 0px); }
+/* The list open, it is over the player; and in the tour's step on the running
+   head (help.js), the bar is over the tour's shields, lit as the head is. */
+.fbar:has(> .fsheet:not([hidden])) { z-index: 11; }
+body:has(> .tour-ring) .fbar.fup { z-index: 9; }
 .fgo { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; gap: .6rem;
   min-height: 3.1rem; padding: var(--lift) .9rem 0; color: var(--ink); text-decoration: none;
   -webkit-tap-highlight-color: transparent; }
+.fbar.fup .fgo { display: none; }
 .fgo svg { flex: none; width: .85rem; height: .85rem; fill: var(--link); }
 .fgo .fl { white-space: nowrap; }
 .fbar:not(.fhas) .fcont, .fbar.fhas .fbegin { display: none; }
 .fat { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faint); }
 .fbar.fhas .fttl:not(:empty)::before { content: "\00a0\00b7\00a0"; }
-@media (hover: hover) { .fgo:hover .fl { color: var(--link); } }
+@media (hover: hover) { :is(.fgo:hover .fl, .fmark:hover, .fgoto:hover .fr, .fundo:hover) { color: var(--link); } }
 /* A phone: the reference alone after the words, and with no place the words alone. */
 @media (max-width: 40rem) { .fttl { display: none; } }
+
+/* The bookmarks: the button that sets one, for the paragraph the running head
+   names, its ribbon filled and its word Bookmarked where the paragraph has
+   one; and the list's button, a ribbon, their number and a chevron, which
+   points up while the list is shut, the way it opens. */
+.fmark, .flist { display: flex; align-items: center; justify-content: center; min-height: 3.1rem;
+  padding: var(--lift) .8rem 0; font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; }
+/* As wide as its words, in the middle: the bar's ground about it is no button,
+   and a tap there takes the bars away, as one on the running head's does. */
+.fmark { flex: 0 1 auto; min-width: 0; margin: 0 auto; padding-left: 1.1rem; padding-right: 1.1rem; gap: .6rem; white-space: nowrap; }
+.flist { flex: none; gap: .4rem; min-width: 4rem; border-left: 1px solid var(--rule); }
+.frib { flex: none; width: .62rem; height: .93rem; position: relative; top: calc(-1 * var(--lift) / 2); }
+.frib path { fill: var(--link); stroke: var(--link); stroke-width: 1.2; stroke-linejoin: round; }
+.fmark[aria-pressed="false"] .frib path { fill: none; }
+.fmark[aria-pressed="false"] .fmis, .fmark[aria-pressed="true"] .fmset { display: none; }
+.flist::after { content: ""; width: .4em; height: .4em; margin: .25em 0 0 .15em; border: solid var(--faint);
+  border-width: 1.5px 0 0 1.5px; transform: rotate(45deg); position: relative; top: calc(-1 * var(--lift) / 2); }
+.flist[aria-expanded="true"]::after { margin-top: -.2em; transform: rotate(225deg); }
+/* The list: a card over the bar's right end, and on a phone a sheet across
+   the window; long, it scrolls in itself, and its end takes the page with it
+   nowhere.  A row is the reference and the paper's title, and under them the
+   paragraph's opening words; in the book's order.  One removed stays, pale,
+   with Undo in its cross's place, until the list is shut. */
+.fsheet { position: absolute; right: .5rem; bottom: calc(100% + .5rem); width: min(27.5rem, calc(100vw - 1rem));
+  max-height: min(70vh, 32rem); overflow: auto; overscroll-behavior: contain; background: var(--card);
+  border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 -8px 28px var(--shade); }
+.fsh { margin: 0; padding: calc(.75rem + var(--lift)) 1rem .45rem; font-size: .75rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--faint); }
+.fsheet ul { list-style: none; margin: 0; padding: 0 .25rem .25rem .75rem; }
+.fsheet li { display: flex; align-items: center; border-top: 1px solid var(--rule); }
+.fgoto { flex: 1 1 auto; min-width: 0; display: block; padding: calc(.55rem + var(--lift)) .25rem .5rem;
+  color: var(--ink); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.frow { display: flex; align-items: baseline; gap: .5rem; font-size: 1.02rem; }
+.frow .frib { align-self: center; }
+.fr { flex: none; white-space: nowrap; }
+.ft { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ft:not(:empty)::before { content: "\00b7\00a0\00a0"; color: var(--faint); }
+.fq { display: block; margin: .1rem 0 0 1.22rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: .88rem; color: var(--faint); }
+.fx { flex: none; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 0;
+  background: none; color: var(--faint); cursor: pointer; }
+.fx svg { width: .8rem; height: .8rem; }
+.fx path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+.fgone .fgoto { opacity: .5; pointer-events: none; }
+.fundo { flex: none; padding: calc(.5rem + var(--lift)) .8rem .5rem; font: inherit; font-size: .88rem; color: var(--ink);
+  background: none; border: 0; cursor: pointer; text-decoration: underline; text-underline-offset: .15em; }
+@media (hover: hover) { .fx:hover { color: var(--ink); } }
+/* Help's drawing of the two (help.html): theirs, in a box, with nothing to press. */
+.fbareg { display: flex; align-items: stretch; max-width: 24rem; background: var(--card); border: 1px solid var(--rule);
+  border-radius: 8px; font-size: .92rem; line-height: 1.2; }
+.fbareg :is(.fmark, .flist) { cursor: default; }
+.fbareg .fmark { flex: 1 1 auto; }
+@media (max-width: 40rem) {
+  .fsheet { left: 0; right: 0; bottom: 100%; width: auto; border-width: 1px 0 0; border-radius: 14px 14px 0 0; }
+}
+/* A bookmarked paragraph: a ribbon in the margin, level with its reference,
+   drawn here on a class ub.js gives it (bmPaint), so that no page's markup
+   knows of it; the shape is the drawing's (_chrome.html ribbon_svg).  An
+   opening paragraph's reference stands on a line above it, and so its
+   ribbon, while references are shown. */
+p.t.bmk::after { content: ""; position: absolute; left: -.92rem;
+  top: calc(.2rem + var(--ref, 0px) + (var(--line, 1.4) * .78rem - .8rem) / 2);
+  width: .5rem; height: .8rem; background: var(--link);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 77%, 0 100%); }
+:root:not([data-paranum="off"]) p.t.opening.bmk::after { top: calc(-1.25rem + (var(--line, 1.4) * .78rem - .8rem) / 2); }
 
 /* ---- the reader -------------------------------------------------------- */
 /* The gap between the rail and the text.  It was the gutter the paragraph
@@ -2333,6 +2407,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 @media print {
   @page { margin: 22mm 20mm; }
   .top, footer, .fbar, .rail, .pager, .transport, .voicecredit, .playp, .player, .runhead, dialog { display: none; }
+  p.t.bmk::after { display: none; }
   .tour-shield, .tour-ring, .tour-card { display: none; }
   .changelog .ctabs { display: none; }
   .changelog .parts.tabbed .part, .changelog .parts.tabbed .part > h3 { display: block; }
