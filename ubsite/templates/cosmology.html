@@ -67,12 +67,15 @@
     is --cvw, what the header and the line are as wide as; and the scale, the
     chart's whole width where that leaves a name legible, else three quarters
     of its size, or the scale this entry of the history was left at
-    (cosmo.js keep).  cosmo.js does as much for a chart that listen.js brings
-    in while it plays, and undoes it on leaving. #}
+    (cosmo.js keep); and the far lines all shown, where the legend's switch
+    was left on (ub_cosmo_far, which cosmo.js keeps).  cosmo.js does as much
+    for a chart that listen.js brings in while it plays, and undoes it on
+    leaving. #}
 {% block head %}<script>(function (d, r) {
   var m = d.querySelector('meta[name="viewport"]'), w, f, k = null;
   if (m && m.content.indexOf('minimum-scale') < 0) m.content += ', minimum-scale=1';
   r.classList.add('cchart');
+  try { if (localStorage.getItem('ub_cosmo_far') === '1') r.classList.add('cfarall'); } catch (e) {}
   w = r.clientWidth || innerWidth;
   f = w / {{ c.w }};
   try { k = history.state && history.state.cosmo; } catch (e) {}

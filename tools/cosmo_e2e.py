@@ -18,7 +18,8 @@ languages; and with scripts off:
   and Back returns to the chart at the scale and the place it was left at;
 
   a unit's title, a chip of the legend, the legend shut by a click elsewhere
-  and by Escape, the search box in both alphabets, the far lines' switch;
+  and by Escape, the search box in both alphabets, the far lines' switch,
+  and that the browser keeps it (kept);
 
   moving and scaling, the page itself scrolling: the wheel over the chart and
   over the entry's card, where it once did nothing (Tigran, 2026-11-14);
@@ -669,6 +670,45 @@ def plain(b) -> None:
     ctx.close()
 
 
+def kept(b) -> None:
+    """The legend's switch for the far lines is the browser's to keep: it was
+    the page's alone, and off again on every return (Tigran, 2026-11-17)."""
+    say = "[far lines kept] "
+    shown = "[...document.querySelectorAll('.ce.far')].filter(g => getComputedStyle(g).display !== 'none').length"
+    ticked = "document.querySelector('.cfar input').checked"
+    ctx, pg, errors = fresh(b, {})
+    pg.goto(BASE + "/cosmology", wait_until="load")
+    until(pg, "!document.querySelector('.cfar').hidden")
+    ok(pg.evaluate(shown) == 0 and not pg.evaluate(ticked), say + "off on a first visit")
+    hit(pg, ".clegend summary")
+    hit(pg, ".cfar input")
+    on = pg.evaluate(shown)
+    ok(on > 10 and pg.evaluate("localStorage.getItem('ub_cosmo_far')") == "1", say + f"ticked, all of them are shown ({on})")
+    # Away to another page and back, as he did, and a page loaded afresh.
+    pg.goto(BASE + "/help", wait_until="load")
+    pg.goto(BASE + "/cosmology", wait_until="load")
+    until(pg, "!document.querySelector('.cfar').hidden")
+    ok(pg.evaluate(shown) == on and pg.evaluate(ticked), say + f"and still on a return to the chart ({pg.evaluate(shown)})")
+    ok(not pg.evaluate("document.documentElement.classList.contains('cfarall')")
+       and pg.evaluate("document.querySelector('.cworld').classList.contains('showfar')"),
+       say + "the head script's class handed over to the chart's own")
+    # Before the chart's script has run: the page's head script alone.
+    pg2 = ctx.new_page()
+    pg2.route("**/static/cosmo.js*", lambda r: r.abort())
+    pg2.goto(BASE + "/cosmology", wait_until="load")
+    ok(pg2.evaluate(shown) == on, say + f"shown before the chart's script runs ({pg2.evaluate(shown)})")
+    pg2.close()
+    hit(pg, ".clegend summary")
+    hit(pg, ".cfar input")
+    ok(pg.evaluate(shown) == 0 and pg.evaluate("localStorage.getItem('ub_cosmo_far')") is None,
+       say + "unticked, none, and nothing kept")
+    pg.reload(wait_until="load")
+    until(pg, "!document.querySelector('.cfar').hidden")
+    ok(pg.evaluate(shown) == 0 and not pg.evaluate(ticked), say + "and off after a reload")
+    ok(not errors, say + f"no error on the way ({errors[:2]})")
+    ctx.close()
+
+
 def run() -> int:
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True)
@@ -676,6 +716,7 @@ def run() -> int:
             desktop(b, lang, whole)
         phone(b)
         line(b)
+        kept(b)
         plain(b)
         b.close()
     return 1 if fails else 0

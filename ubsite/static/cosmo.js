@@ -50,6 +50,7 @@
     } else {
       if (m) m.content = m.content.replace(/,\s*minimum-scale=1/, '');
       root.classList.remove('cchart');
+      root.classList.remove('cfarall');
       root.style.removeProperty('--cvw');
       root.style.removeProperty('--cz');
     }
@@ -496,8 +497,22 @@
     press(main.querySelector('.zin'), function () { st.zoomBy(1.25); }, function (dt) { st.zoomBy(Math.exp(1.1 * dt)); });
     press(main.querySelector('.zout'), function () { st.zoomBy(0.8); }, function (dt) { st.zoomBy(Math.exp(-1.1 * dt)); });
     main.querySelector('.zfit').addEventListener('click', st.fit);
+    // The legend's switch for the far lines, kept for this browser under a key
+    // of its own and no setting, as ub_cols is: until 2026-11-17 it was the
+    // page's alone, and off again on every return (Tigran).  The page's head
+    // script shows them before first paint where it was left on
+    // (:root.cfarall); from here on the class is the world's.
     var far = main.querySelector('.cfar input');
-    far.addEventListener('change', function () { world.classList.toggle('showfar', far.checked); });
+    try { far.checked = localStorage.getItem('ub_cosmo_far') === '1'; } catch (e) {}
+    world.classList.toggle('showfar', far.checked);
+    root.classList.remove('cfarall');
+    far.addEventListener('change', function () {
+      world.classList.toggle('showfar', far.checked);
+      try {
+        if (far.checked) localStorage.setItem('ub_cosmo_far', '1');
+        else localStorage.removeItem('ub_cosmo_far');
+      } catch (e) {}
+    });
     far.closest('.cfar').hidden = false;
 
     // ---- the search box -----------------------------------------------------------

@@ -167,6 +167,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- On the chart, Cosmology of Personalities, the Legend's Far lines always shown stays as you left it: this browser now keeps it, where it went back to off each time you left the page.
 - A tap on a translation's paragraph in the fold under the English names it and brings the running head, as a tap on the English does; it did nothing. And the running head over a translation's paragraph, in the fold or in its column, gives the paper's number, title and author as that translation has them, not the English.
 - On a phone, with the Contents opened from the running head's reference, a tap on the section you are in goes to its start, as a tap on any other section does; the page went back to the paragraph you had left.
 - The study note at 6:1.1 writes the 611,121st with its ordinal raised, as the book does.

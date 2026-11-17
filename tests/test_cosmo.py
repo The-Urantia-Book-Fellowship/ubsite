@@ -309,7 +309,9 @@ class Static(unittest.TestCase):
         self.assertIn("if (window.ubCosmo) return window.ubCosmo();", ub)
         js = (STATIC / "cosmo.js").read_text(encoding="utf-8")
         self.assertIn("window.ubCosmo = init;", js)
-        self.assertNotIn("localStorage", js)            # it keeps nothing
+        # It keeps the legend's switch for the far lines (Tigran, 2026-11-17), and nothing else.
+        self.assertEqual(set(re.findall(r"localStorage\.\w+\('([^']+)'", js)), {"ub_cosmo_far"})
+        self.assertEqual(js.count("localStorage"), 3)
         self.assertNotIn("fetch(", js)                  # and asks for nothing
         tpl = (TEMPLATES / "cosmology.html").read_text(encoding="utf-8")
         # The ids go before the deferred scripts look, ub.js's arrive() among them.

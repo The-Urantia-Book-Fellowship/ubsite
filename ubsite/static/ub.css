@@ -2618,9 +2618,11 @@ main.cosmo { padding: .6rem 0 0; --cedge: color-mix(in oklch, var(--ink) 42%, va
    not as wide in the one as in the other (build/cosmo.py). */
 :root:not([data-lang="ru"]) .cedges .ru, :root[data-lang="ru"] .cedges .en { display: none; }
 /* A far line is in the way more than it tells: shown with one of its ends
-   chosen, or all of them by the legend's switch, as his page has it. */
+   chosen, or all of them by the legend's switch, as his page has it.  The
+   switch is kept for the browser (cosmo.js): :root.cfarall is the page's head
+   script saying so before first paint. */
 .ce.far { display: none; }
-.cworld.showfar .ce.far, .ce.far.on { display: inline; }
+.cworld.showfar .ce.far, :root.cfarall .ce.far, .ce.far.on { display: inline; }
 .ce.on .l { stroke-width: 2.6; }
 .ce.origin.on .l { stroke: var(--link); marker-end: url(#cm-on); }
 /* A card or a title come to by the keys is brought out from under the line.
