@@ -281,7 +281,8 @@ class Pages(unittest.TestCase):
 
     def test_the_ways_in(self):
         home = self.get("/")[2]
-        self.assertIn('<a href="/cosmology">Cosmology of Personalities</a>', home)
+        # Its tile among the home page's Other ways in: the drawing, then the name.
+        self.assertRegex(home, r'<li><a href="/cosmology"><svg [^>]*>.*?</svg><span class="lbl">(?:<x-en>)?Cosmology of Personalities')
         slug = self.con.execute("SELECT slug FROM cosmo_head WHERE kind='person' AND key='michael'").fetchone()[0]
         concept = self.get(f"/i/{slug}")[2]
         self.assertIn('<a href="/cosmology#michael">', concept)

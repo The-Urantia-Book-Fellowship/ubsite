@@ -13,7 +13,10 @@
 #                         2026-10-25; but where the interface describes, not
 #                         lists, it is «Предисловие»: the home page's
 #                         «Предисловие и документы 1–31», Settings, the
-#                         tooltips, the quiz, Tigran, 2026-11-06)
+#                         tooltips, the quiz, Tigran, 2026-11-06; and the
+#                         home page's cards name the parts, and the
+#                         Foreword, in the interface's language, Tigran,
+#                         2026-11-17)
 #   Paper / section       документ / раздел;  paragraph  абзац
 #   index entry           рубрика указателя;  subentry  подрубрика;
 #                         headword  заглавное слово
@@ -311,23 +314,30 @@
 # --- The home page (home.html)
 
 "home:lead" = { en = "The Uversa Press text, read together with the Uversa Press index. Every paragraph carries in its margin the index entries that cite it, so the index works in both directions at once: from a concept into the text, and from any passage back to everything the index has to say about it.", ru = "Текст Uversa Press, который читается вместе с указателем Uversa Press. На полях каждого абзаца стоят рубрики указателя, которые на него ссылаются, так что указатель работает сразу в обе стороны: от понятия к тексту и от любого места текста ко всему, что говорит о нём указатель." }
+# The cards' names are the interface's (Tigran, 2026-11-17: "let's consider the
+# Part titles printed in the cards part of the UI, so if we switch to Russian
+# they should be in Russian also"): each part's title, keyed by its English as
+# the database has it (home.html t(part.title)), in the words his own
+# translation and USGNY's give it, and the Foreword's on its own card.
+"The Central and Superuniverses" = "Центральная вселенная и сверхвселенные"
+"The Local Universe" = "Локальная вселенная"
+"The History of Urantia" = "История Урантии"
+"The Life and Teachings of Jesus" = "Жизнь и учения Иисуса"
+"Foreword" = "Предисловие"
 "Definitions and terminology" = "Определения и терминология"
 "Papers {a}&ndash;{b}" = "Документы {a}&ndash;{b}"
 "Foreword and Papers {a}&ndash;{b}" = "Предисловие и документы {a}&ndash;{b}"
 "Other ways in" = "Другие пути в книгу"
-"home:index" = { en = '<a href="/index">The index</a> — {e:,} entries under {h:,} headwords, each opening onto the passages it cites.', ru = '<a href="/index">Указатель</a> — рубрик: {e:,}, заглавных слов: {h:,}; каждая рубрика открывает места текста, на которые ссылается.' }
-"home:appendices" = { en = '<a href="/appendix">The appendices</a> — a chronology of {e:,} dated events, and the {m:,} beings, persons and places the book names.', ru = '<a href="/appendix">Приложения</a> — хронология датированных событий ({e:,}) и названные в книге существа, лица и места ({m:,}).' }
-'<a href="/lists">Lists</a> — ' = '<a href="/lists">Списки</a> — '
-"home:lists-1955" = { en = "of the <a href=\"/lists/1955\">1955 readings</a>, the {n} places where the text departs from the first printing, with the SRT Committee's reasons", ru = "<a href=\"/lists/1955\">разночтений 1955 года</a> — мест, где текст отличается от первого издания ({n}), с доводами Комитета SRT" }
-", and |lists" = { en = ", and ", ru = " и " }
-"home:lists-notes" = { en = "of the <a href=\"/lists/notes\">study notes</a> of The British Study Edition, {n} so far", ru = "<a href=\"/lists/notes\">примечаний</a> из The British Study Edition (пока их {n})" }
-"home:lists-bib" = { en = [", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} work they cite", ", with a <a href=\"/lists/bibliography\">bibliography</a> of {n} works they cite"], ru = [", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})", ", с <a href=\"/lists/bibliography\">библиографией</a> цитируемых в них трудов ({n})"] }
-"home:quiz" = { en = '<a href="/quiz">The quiz</a> — {q:,} questions on {p} papers, from The British Study Edition of the Urantia Papers: a paper’s questions at its end, or ten at random.', ru = '<a href="/quiz">Викторина</a> — вопросов: {q:,}, документов: {p}; из The British Study Edition of the Urantia Papers: вопросы к документу в его конце или десять наугад.' }
-"home:citation" = { en = '<a href="/search?q=1%3A4.2">A citation</a> — type any reference such as <code>1:4.2</code>, <code>12:4.2-3</code>, <code>Paper 12</code> or <code>12:4sec</code> into the search box and it opens there.', ru = '<a href="/search?q=1%3A4.2">Ссылка</a> — введите в поле поиска любую ссылку, например <code>1:4.2</code>, <code>12:4.2-3</code>, <code>Paper 12</code> или <code>12:4sec</code>, и она откроется.' }
-"home:contents" = { en = '<a href="/read">The contents</a> — all {n} papers with their authors.', ru = '<a href="/read">Содержание</a> — все документы ({n}) и их авторы.' }
-"home:listening" = { en = ["<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hour, timed to the paragraph: start from any paragraph, and the page follows the voice.", "<a href=\"/0:0\">Listening</a> — Merritt Horn's reading of the whole book, {n} hours, timed to the paragraph: start from any paragraph, and the page follows the voice."], ru = ["<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} час, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часа, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом.", "<a href=\"/0:0\">Слушать</a> — вся книга в чтении Мерритта Хорна, {n} часов, с точностью до абзаца: начните с любого абзаца, и страница пойдёт за голосом."] }
-"home:listening:voyner" = { en = ["In Russian, Grigory Voyner reads <i>Книга Урантии</i> (USGNY), {n} hour, from that translation’s play button.", "In Russian, Grigory Voyner reads <i>Книга Урантии</i> (USGNY), {n} hours, from that translation’s play button."], ru = ["По-русски <i>Книгу Урантии</i> (USGNY) читает Григорий Войнер, {n} час: кнопка воспроизведения — у этого перевода.", "По-русски <i>Книгу Урантии</i> (USGNY) читает Григорий Войнер, {n} часа: кнопка воспроизведения — у этого перевода.", "По-русски <i>Книгу Урантии</i> (USGNY) читает Григорий Войнер, {n} часов: кнопка воспроизведения — у этого перевода."] }
-"home:api" = { en = '<a href="/api">The text API</a> — for other sites and AI: keep your own copy of the text in step with the most up to date SRT text, used for the Uversa Press edition.', ru = '<a href="/api">API текста</a> — для других сайтов и ИИ: держите свою копию текста в соответствии с самым свежим текстом SRT, по которому сделано издание Uversa Press.' }
+# The tiles: a name as its page titles itself, and a line of what is there.
+"home:t:contents" = { en = "all {n} papers with their authors", ru = "все документы ({n}) и их авторы" }
+"home:t:index" = { en = "{e:,} entries under {h:,} headwords, and the appendices", ru = "рубрик: {e:,}, заглавных слов: {h:,}; и приложения" }
+"home:t:quiz" = { en = "{q:,} questions on {p} papers", ru = "вопросов: {q:,}, документов: {p}" }
+"Study notes and bibliography" = "Примечания и библиография"
+"home:t:notes" = { en = "{n:,} notes citing {m} works", ru = "примечаний: {n:,}, цитируемых трудов: {m}" }
+"home:t:notes-only" = { en = "{n:,} notes", ru = "примечаний: {n:,}" }
+"home:t:and-1955" = { en = ", and the {n} readings of 1955", ru = " и разночтений 1955 года: {n}" }
+"home:t:1955" = { en = "the {n} places where the text departs from the first printing", ru = "мест, где текст отличается от первого издания: {n}" }
+"Text API" = "API текста"
 "About this edition" = "Об этом издании"
 "home:edition" = { en = "The text is the Uversa Press edition of <i>The Urantia Book</i>, published by the Urantia Book Fellowship: {p} papers in {s:,} sections and {g:,} paragraphs, each with a reference of its own. This site shows the words of Jesus in red, in {r:,} paragraphs; the printed book does not. The edition's textual apparatus notes every place where the text differs from the first printing of 1955, {v} in all, and gives the 1955 reading beneath each.", ru = "Текст — издание <i>The Urantia Book</i> от Uversa Press, выпущенное Urantia Book Fellowship: документов — {p}, разделов — {s:,}, абзацев — {g:,}, и у каждого своя ссылка. Этот сайт выделяет слова Иисуса красным (абзацев с ними: {r:,}); в печатной книге этого нет. Текстологический аппарат издания отмечает каждое место, где текст отличается от первого издания 1955 года (всего их {v}), и под каждым даёт чтение 1955 года." }
 "home:the-index" = { en = "The index is the Uversa Press index, revised with numerous corrections for the third edition, 2026, where it is bound together with the text in a single volume. Its {c:,} references, reaching {x:,} places in the text, compiled and checked over many years, are what make the margins of this reader possible. The printed volume remains the book; this is an additional way to move through it.", ru = "Указатель — это указатель Uversa Press, выверенный с многочисленными исправлениями для третьего издания 2026 года, где он переплетён вместе с текстом в одном томе. Его ссылки ({c:,}), ведущие к местам текста ({x:,}), собранные и проверенные за многие годы, — вот что делает возможными поля этой читалки. Книгой остаётся печатный том; это ещё один способ двигаться по ней." }
@@ -605,7 +615,6 @@
 "Play, pause, the paragraph before or after, stop" = "Воспроизведение, пауза, предыдущий и следующий абзац, стоп"
 "help:about:1" = { en = "The text is the Uversa Press edition of <i>The Urantia Book</i>, with the Index and Appendices as revised for the third edition, in which the index is bound with the text. The text of the book is in the public domain; the edition as a whole, with its index, is licensed CC BY-NC-SA 4.0. The site is not affiliated with Urantia Foundation, whose translations are its copyright and used by permission.", ru = "Текст — издание <i>Книги Урантии</i> от Uversa Press, с Указателем и Приложениями в редакции третьего издания, где указатель переплетён вместе с текстом. Текст книги является общественным достоянием; издание в целом, с указателем, распространяется по лицензии CC BY-NC-SA 4.0. Сайт не связан с Фондом Урантия; переводы Фонда защищены его авторским правом и используются с его разрешения." }
 "help:about:2" = { en = "What changed on the site, and when, is in the <a href=\"/changelog\">Changelog</a>. Other sites can take the text through the <a href=\"/api\">text API</a>.", ru = "Что и когда менялось на сайте — в <a href=\"/changelog\">Истории изменений</a>. Другие сайты могут брать текст через <a href=\"/api\">API текста</a>." }
-"home:help" = { en = "<a href=\"/help\">Help</a> — what each part of the page does, with a short tour of it on the page itself.", ru = "<a href=\"/help\">Справка</a> — что делает каждая часть страницы, с короткой экскурсией по самой странице." }
 
 # The tour's cards (static/help.js).
 "Welcome|tour" = "Добро пожаловать"
@@ -701,7 +710,7 @@
 "category|chart" = "категория"
 "function|chart" = "функция"
 "class of origin|chart" = "класс по происхождению"
-"home:cosmology" = { en = '<a href="/cosmology">Cosmology of Personalities</a> — a chart of {p} orders of personalities in the {u} units of the universe, from Paradise to Urantia: what comes of what, and what serves where. Data source by Alexander Alyuev.', ru = '<a href="/cosmology">Космология личностей</a> — схема {p} категорий личностей в {u} единицах вселенной, от Рая до Урантии: что от чего происходит и что где служит. Источник данных — Александр Алюев.' }
+"home:cosmology" = { en = "{p} orders of personalities in the {u} units of the universe. Data source by Alexander Alyuev.", ru = "{p} категорий личностей в {u} единицах вселенной. Источник данных — Александр Алюев." }
 "On the chart, <a href=\"/cosmology\">Cosmology of Personalities</a>:" = "На схеме «<a href=\"/cosmology\">Космология личностей</a>»:"
 "On the chart, Cosmology of Personalities" = "На схеме «Космология личностей»"
 "chart|mark" = "схема"

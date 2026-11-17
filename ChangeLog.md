@@ -76,6 +76,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The home page has a new look: the name under the site's mark, the four parts as cards, each opening its part's title page, the other ways in as six tiles (Contents, Index, Cosmology of Personalities, Quiz, Study notes and bibliography, Help and the text API), and About this edition opening from its heading.
 - On a phone, and in any narrow window, the flags for English and Russian are back beside the gear wherever they fit beside the site's name; where they do not, Settings' Interface language still does what they do.
 - On a phone the Contents' heading stays at the top of the screen while they are open, and where the running head's reference opened them, a tap on it takes you back to the paragraph you came from, as Back does.
 - The reference in the running head over a translation's paragraph opens the Contents as that translation gives them, for that opening; from an English paragraph they open as you chose them in the list at their head.

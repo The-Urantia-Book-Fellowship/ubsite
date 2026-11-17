@@ -1,77 +1,100 @@
 {% extends "base.html" %}
 {% block body %}
-<main class="prose front">
+<main class="front">
 
-  <header class="masthead">
+  {#- The mark above the name, both in the middle (Tigran, 2026-11-17, to his
+      design mock-up, design.jpeg; DECISIONS.md, The home page).  The mock-up
+      has three gold rings under the name, the Foundation's concentric circles,
+      never drawn here; the flame alone under it, tried on the design canvas,
+      read to him as a logo with its book gone. #}
+  <header class="fhead">
     {{ mark }}
-    <div>
-      <h1>{{ t('The Urantia Book') }}</h1>
-
-      <p class="lead ix">{{ t('home:lead') }}</p>
-    </div>
+    <h1>{{ t('The Urantia Book') }}</h1>
   </header>
 
   {# Reading begins here.  The parts ARE the entry points -- a separate "start
      reading" button sat apart from them and made the page read as two halves.
+     Each is a card, two to a row, one on a phone, its picture to come, and
+     goes to its part's title page (/part/N; Tigran, 2026-11-17: "the part
+     cards should go to that part's title page, shown in multiple columns with
+     translations, if any are enabled"), which has the translations' dividers
+     beside the English and one way on, to the part's first paper.
      The Foreword is Part I's first paper (settings.py `foreword`, on by
-     default), so Part I opens on it and its range names it; with the switch
-     off it is a row of its own before the parts.  Both are sent, and the CSS
-     shows one (ub.css .fwin, .fwout). #}
+     default), so Part I's range names it, and its title page goes on to it;
+     with the switch off it is a row of its own before the parts.  Both ranges
+     are sent, and the row, and the CSS shows which (ub.css .fwin, .fwout).
+     A card's name is the interface's, in English and in Russian (Tigran,
+     2026-11-17): ru.toml has each part's title, keyed by the database's
+     English, and a title it has not fails the page, and so the tests. #}
   <ol class="front-toc">
     {% for p in papers if p.n == 0 %}
     <li class="foreword fwout">
-      <a href="/0"><span class="lbl">Foreword</span>
+      <a href="/0"><span class="lbl">{{ t('Foreword') }}</span>
         <span class="range">{{ t('Definitions and terminology') }}</span></a>
     </li>
     {% endfor %}
     {% for part in parts %}
-    {%- if loop.first %}
-    <li class="fwin">
-      <a href="/0">
-        <span class="lbl">{{ part.title }}</span>
-        <span class="range">{{ t('Foreword and Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span></a>
-    </li>
-    {%- endif %}
-    <li{% if loop.first %} class="fwout"{% endif %}>
-      <a href="/{{ part.first_paper }}">
-        <span class="lbl">{{ part.title }}</span>
-        <span class="range">{{ t('Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span></a>
+    <li>
+      <a href="/part/{{ part.n }}">
+        <span class="pn">{{ t('Part {r}', r=roman[part.n]) }}</span>
+        <span class="lbl">{{ t(part.title) }}</span>
+        {%- if loop.first %}
+        <span class="range fwin">{{ t('Foreword and Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span>
+        {%- endif %}
+        <span class="range{% if loop.first %} fwout{% endif %}">{{ t('Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span></a>
     </li>
     {% endfor %}
   </ol>
 
+  {#- Six tiles, each a drawing (_chrome.html way_svg), a name as its page
+      titles itself, with no article, and a line of what is there (Tigran,
+      2026-11-17).  No tile for listening, which is part of the reader.  The
+      appendices are reached from the index, the three lists from Lists. #}
   <h2>{{ t('Other ways in') }}</h2>
-  <ul class="ways">
-    <li class="ix">{{ t('home:index', e=stats.az_entries, h=stats.headwords) }}</li>
-    <li class="ix">{{ t('home:appendices', e=stats.app_events, m=stats.app_names) }}</li>
+  <ul class="ftiles">
+    <li><a href="/read">{{ chrome.way_svg('contents') }}<span class="lbl">{{ t('Contents') }}</span>
+      <span class="sub">{{ t('home:t:contents', n=stats.papers) }}</span></a></li>
+    <li class="ix"><a href="/index">{{ chrome.way_svg('index') }}<span class="lbl">{{ t('Index') }}</span>
+      <span class="sub">{{ t('home:t:index', e=stats.az_entries, h=stats.headwords) }}</span></a></li>
     {#- The chart of the personalities (cosmology.html), where the build has one. #}
     {%- if stats.cosmo_persons %}
-    <li>{{ t('home:cosmology', p=stats.cosmo_persons, u=stats.cosmo_units) }}</li>
+    <li><a href="/cosmology">{{ chrome.way_svg('chart') }}<span class="lbl">{{ t('Cosmology of Personalities') }}</span>
+      <span class="sub">{{ t('home:cosmology', p=stats.cosmo_persons, u=stats.cosmo_units) }}</span></a></li>
+    {%- endif %}
+    {%- if stats.quiz_questions %}
+    <li class="quizway"><a href="/quiz">{{ chrome.way_svg('quiz') }}<span class="lbl">{{ t('Quiz') }}</span>
+      <span class="sub">{{ t('home:t:quiz', q=stats.quiz_questions, p=stats.quiz_papers) }}</span></a></li>
     {%- endif %}
     {#- Each list is named only while the setting that shows what it lists is
-        on (ub.css .n1955, .nst): with the 1955 readings off, the text has no
-        rings, and a list of them sent the reader to rings that were not there
-        (Tigran, 2026-10-18). #}
-    <li class="ways-lists{% if not stats.study_notes %} n1955{% endif %}">{{ t('<a href="/lists">Lists</a> — ') }}<span class="n1955">{{ t('home:lists-1955', n=stats.variants_1955) }}</span>
-      {%- if stats.study_notes %}<span class="n1955 nst">{{ t(', and |lists') }}</span><span class="nst">{{ t('home:lists-notes', n=stats.study_notes) }}
-      {%- if stats.study_sources %}{{ t('home:lists-bib', n=stats.study_sources) }}{% endif %}</span>
-      {%- endif %}.</li>
-    {%- if stats.quiz_questions %}
-    <li class="quizway">{{ t('home:quiz', q=stats.quiz_questions, p=stats.quiz_papers) }}</li>
-    {%- endif %}
-    <li>{{ t('home:citation') }}</li>
-    <li>{{ t('home:contents', n=stats.papers) }}</li>
-    {%- if stats.audio_mh_seconds %}
-    <li>{{ t('home:listening', n=(stats.audio_mh_seconds / 3600)|round|int) }}
-      {%- if stats.audio_voyner_seconds %} {{ t('home:listening:voyner', n=(stats.audio_voyner_seconds / 3600)|round|int) }}{% endif %}</li>
-    {%- endif %}
-    <li>{{ t('home:help') }}</li>
-    <li>{{ t('home:api') }}</li>
+        on (ub.css .n1955, .nst, .nstoff): with the 1955 readings off, the text
+        has no rings, and a list of them sent the reader to rings that were not
+        there (Tigran, 2026-10-18).  So the tile is the study notes' and their
+        bibliography's while the notes are shown, with the 1955 readings named
+        under them; the 1955 readings' own with the notes off; and gone with
+        both off. #}
+    <li class="ways-lists{% if not stats.study_notes %} n1955{% endif %}"><a href="/lists">{{ chrome.way_svg('notes') }}
+      {%- if stats.study_notes %}<span class="lbl nst">{{ t('Study notes and bibliography') }}</span><span class="lbl nstoff">{{ t('1955 readings') }}</span>
+      <span class="sub"><span class="nst">
+          {%- if stats.study_sources %}{{ t('home:t:notes', n=stats.study_notes, m=stats.study_sources) }}
+          {%- else %}{{ t('home:t:notes-only', n=stats.study_notes) }}{% endif %}</span><span class="n1955 nst">{{ t('home:t:and-1955', n=stats.variants_1955) }}</span><span class="nstoff">{{ t('home:t:1955', n=stats.variants_1955) }}</span></span>
+      {%- else %}<span class="lbl">{{ t('1955 readings') }}</span>
+      <span class="sub">{{ t('home:t:1955', n=stats.variants_1955) }}</span>{% endif %}</a></li>
+    {#- One tile, two pages: each a link of its own, a line to itself. #}
+    <li class="fpair">{{ chrome.way_svg('help') }}
+      <a href="/help">{{ t('Help') }}</a>
+      <a href="/api">{{ t('Text API') }}</a></li>
   </ul>
 
-  <h2>{{ t('About this edition') }}</h2>
-  <p>{{ t('home:edition', p=stats.papers, s=stats.sections, g=stats.paragraphs, r=stats.redletter_paragraphs, v=stats.variants_1955) }}</p>
-  <p class="ix">{{ t('home:the-index', c=stats.citations, x=stats.citation_targets) }}</p>
+  {#- Folded (Tigran, 2026-11-17: "let's hide that enormous text ... in a folded
+      state"), the page's lead with it, which stood under the name: a
+      <details>, so that it opens with scripts off and is in the page for a
+      search engine. #}
+  <details class="fabout">
+    <summary><h2>{{ t('About this edition') }}</h2></summary>
+    <p class="ix">{{ t('home:lead') }}</p>
+    <p>{{ t('home:edition', p=stats.papers, s=stats.sections, g=stats.paragraphs, r=stats.redletter_paragraphs, v=stats.variants_1955) }}</p>
+    <p class="ix">{{ t('home:the-index', c=stats.citations, x=stats.citation_targets) }}</p>
+  </details>
 
 </main>
 {% endblock %}

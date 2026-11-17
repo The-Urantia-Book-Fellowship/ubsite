@@ -25,17 +25,31 @@ class ForewordInPartOne(unittest.TestCase):
         self.assertIn(':root:not([data-foreword="off"]) .fwout, :root[data-foreword="off"] .fwin { display: none; }', css)
 
     def test_the_home_page(self):
-        # Part I opens on the Foreword and names it in its range; with the
-        # switch off, the Foreword's own row and Part I from Paper 1.
+        # Each part's card goes to its title page (Tigran, 2026-11-17), Part I's
+        # naming the Foreword in its range; with the switch off, the Foreword's
+        # own row before the parts and Part I's range from Paper 1.
         body = get("/")[2]
         toc = re.search(r'<ol class="front-toc">.*?</ol>', body, re.S).group(0)
-        rows = re.findall(r'<li(?: class="([^"]*)")?>\s*<a href="/(\d+)">.*?<span class="range">(.*?)</span>', toc, re.S)
+        rows = re.findall(r'<li(?: class="([^"]*)")?>\s*<a href="/([\w/]+)">(.*?)</a>', toc, re.S)
         self.assertEqual([(c, n) for c, n, _ in rows],
-                         [("foreword fwout", "0"), ("fwin", "0"), ("fwout", "1"), ("", "32"), ("", "57"), ("", "120")])
+                         [("foreword fwout", "0"), ("", "part/1"), ("", "part/2"), ("", "part/3"), ("", "part/4")])
         self.assertIn("Definitions and terminology", rows[0][2])
-        self.assertIn("Foreword and Papers 1&ndash;31", rows[1][2])
-        self.assertIn("Papers 1&ndash;31", rows[2][2])
-        self.assertNotIn("Foreword", rows[2][2])
+        ranges = [re.findall(r'<span class="(range[^"]*)">(.*?)</span>', r[2], re.S) for r in rows[1:]]
+        self.assertEqual([[c for c, _ in r] for r in ranges],
+                         [["range fwin", "range fwout"], ["range"], ["range"], ["range"]])
+        self.assertIn("Foreword and Papers 1&ndash;31", ranges[0][0][1])
+        self.assertIn("Papers 1&ndash;31", ranges[0][1][1])
+        self.assertNotIn("Foreword", ranges[0][1][1])
+        self.assertIn("Papers 32&ndash;56", ranges[1][0][1])
+        # A card's name is the interface's, in both languages (Tigran, 2026-11-17).
+        raw = re.search(r'<ol class="front-toc">.*?</ol>', get("/", raw=True)[2], re.S).group(0)
+        names = re.findall(r'<span class="lbl">(.*?)</span>', raw, re.S)
+        self.assertEqual(names, [f'<x-en>{e}</x-en><x-ru lang="ru">{r}</x-ru>' for e, r in [
+            ("Foreword", "Предисловие"),
+            ("The Central and Superuniverses", "Центральная вселенная и сверхвселенные"),
+            ("The Local Universe", "Локальная вселенная"),
+            ("The History of Urantia", "История Урантии"),
+            ("The Life and Teachings of Jesus", "Жизнь и учения Иисуса")]])
 
     def test_the_contents(self):
         body = get("/read")[2]

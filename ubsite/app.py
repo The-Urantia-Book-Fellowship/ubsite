@@ -1184,7 +1184,7 @@ def home(request: Request):
         "SELECT SUM(n_events), SUM(n_entries) FROM appendix").fetchone()
     parts = con.execute("SELECT * FROM part ORDER BY n").fetchall()
     papers = con.execute("SELECT * FROM paper ORDER BY n").fetchall()
-    return page(request, "home.html", stats=stats, parts=parts, papers=papers)
+    return page(request, "home.html", stats=stats, parts=parts, papers=papers, roman=ROMAN)
 
 
 @app.get("/read", response_class=HTMLResponse)

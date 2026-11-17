@@ -84,8 +84,15 @@ class ListOfNotes(unittest.TestCase):
         self.assertIn('<li class="nst"><a href="/lists/notes">List of study notes</a>', lists)
         self.assertIn('<li class="n1955"><a href="/lists/1955">', lists)
         home = get("/")[2]
-        self.assertIn('<span class="nst">of the <a href="/lists/notes">study notes</a>', home)
-        self.assertIn('<span class="n1955">of the <a href="/lists/1955">1955 readings</a>', home)
+        # The home page's tile for the lists: the study notes' and their bibliography's
+        # while the notes are shown, the 1955 readings' with them off (ub.css .nstoff).
+        self.assertRegex(home, r'<li class="ways-lists"><a href="/lists"><svg [^>]*>.*?</svg>'
+                               r'<span class="lbl nst">(?:<x-en>)?Study notes and bibliography')
+        self.assertRegex(home, r'<span class="lbl nstoff">(?:<x-en>)?1955 readings')
+        self.assertRegex(home, r'<span class="n1955 nst">(?:<x-en>)?, and the \d+ readings of 1955')
+        self.assertRegex(home, r'<span class="nstoff">(?:<x-en>)?the \d+ places where the text departs from the first printing')
+        css = (ROOT / "ubsite" / "static" / "ub.css").read_text()
+        self.assertIn(':root:not([data-studynotes="off"]) .nstoff { display: none; }', css)
 
 
 def works() -> list[tuple]:
@@ -145,9 +152,7 @@ class Bibliography(unittest.TestCase):
     def test_named_on_the_lists_and_the_home_page_by_its_switch(self):
         self.assertIn('<li class="nst"><a href="/lists/bibliography">Bibliography</a>', get("/lists")[2])
         n = len({k for k, _ in WORKS})
-        self.assertRegex(get("/")[2], r'<span class="nst">of the\s+<a href="/lists/notes">study notes</a>'
-                                      r'[^<]*, with a <a href="/lists/bibliography">bibliography</a>'
-                                      rf' of {n} works they cite</span>')
+        self.assertRegex(get("/")[2], rf'<span class="nst">(?:<x-en>)?[\d,]+ notes citing {n} works')
 
 
 class Setting(unittest.TestCase):

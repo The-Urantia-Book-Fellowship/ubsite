@@ -106,9 +106,14 @@ class Catalog(unittest.TestCase):
                                     s.replace("\\'", "'").replace('\\"', '"')))
         tabs = {g["legend"] + "|tab" for g in settings.groups([])}
         voices = {"Merritt Horn", "Grigory Voyner"}
+        # The four parts' titles, which the home page's cards say in the
+        # interface's language (home.html t(part.title); test_foreword.py
+        # holds the page to them).
+        parts = {"The Central and Superuniverses", "The Local Universe", "The History of Urantia",
+                 "The Life and Teachings of Jesus"}
         for key in CATALOG:
             with self.subTest(key=key):
-                self.assertTrue(key in literals or key in tabs or key in voices or key.startswith("css:")
+                self.assertTrue(key in literals or key in tabs or key in voices or key in parts or key.startswith("css:")
                                 or key == l10n.NUMBER_WORDS, "named nowhere")
 
     def test_what_ub_css_draws_is_the_catalog(self):

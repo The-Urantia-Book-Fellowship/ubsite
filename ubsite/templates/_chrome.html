@@ -21,6 +21,21 @@
 <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>
 {%- endmacro %}
 
+{#- The home page's tiles (home.html, Other ways in; Tigran, 2026-11-17, who
+    chose drawings made here over pictures from elsewhere): the contents, the
+    index, the chart, the quiz, the study notes and Help, in the gear's hand,
+    32 to the side, which ub.css colours and sizes (.ftiles svg). -#}
+{% set way_shapes = {
+  'contents': '<path d="M6 9.5h2M6 16h2M6 22.5h2M12.5 9.5H26M12.5 16H26M12.5 22.5h9"/>',
+  'index': '<path d="M5 26V8.5h7.2l2-2.5H27v20z"/><path d="M9.5 13.5h13M9.5 17.5h13M9.5 21.5h8"/>',
+  'chart': '<rect x="12" y="4.5" width="8" height="6" rx="1"/><rect x="3" y="21.5" width="8" height="6" rx="1"/><rect x="12" y="21.5" width="8" height="6" rx="1"/><rect x="21" y="21.5" width="8" height="6" rx="1"/><path d="M16 10.5v11M7 21.5V16h18v5.5"/>',
+  'quiz': '<rect x="4" y="8.5" width="15" height="15" rx="2"/><path d="M8 16l2.8 2.8 5-6"/><path d="M23 13a2.8 2.8 0 1 1 4.04 2.53c-.82.41-1.23.96-1.23 1.78v.35"/><path class="dot" d="M25.8 20.9h.01"/>',
+  'notes': '<path d="M8 4.5h16v23H8z"/><path d="M12 10h8M12 14h8M12 18h5M12 22.5h3"/>',
+  'help': '<circle cx="16" cy="16" r="12"/><path d="M12.27 13a3.73 3.73 0 1 1 5.37 3.37c-1.09.55-1.64 1.27-1.64 2.37v.46"/><path class="dot" d="M16 22.7h.01"/>'} %}
+{% macro way_svg(name) -%}
+<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">{{ way_shapes[name]|safe }}</svg>
+{%- endmacro %}
+
 {#- The player's icons (listen.js ICON, the same paths), and ↓ for keeping a
     recording (listen.js KEEP_ICONS.none). -#}
 {% set player_paths = {'play': 'M4.5 2.5v11l9-5.5z',
