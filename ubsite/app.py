@@ -665,6 +665,22 @@ def book() -> dict:
 
 
 T.env.globals["book"] = book
+
+
+@functools.lru_cache(maxsize=2)
+def _text_version(mtime_ns: int) -> str:
+    row = db().execute("SELECT value FROM stat WHERE key='text_version'").fetchone()
+    return str(row[0]) if row else ""
+
+
+def text_version() -> str:
+    """The version of the text this database carries (build/versions.py), which
+    the bar at the foot hands the browser (base.html `data-tv`), so that the
+    place it keeps, and a bookmark, says which text its reference is in."""
+    return _text_version(db_version())
+
+
+T.env.globals["text_version"] = text_version
 T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
 T.env.globals["site_defaults"] = settings.site_defaults()

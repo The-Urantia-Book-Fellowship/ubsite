@@ -287,9 +287,12 @@ def run() -> int:
         ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
         pg = ctx.new_page()
         pg.on("pageerror", lambda e: errors.append(str(e)))
-        foot = """(() => { const f = document.querySelector('footer'), p = [...f.querySelectorAll('p')];
+        # The footer's height less the bar's, where the page has the bar at its
+        # foot (base.html .fbar, 2026-11-17): the footer is the room it stands in.
+        foot = """(() => { const f = document.querySelector('footer'), p = [...f.querySelectorAll('p')],
+                           b = document.querySelector('.fbar'), bh = b && b.getClientRects().length ? b.getBoundingClientRect().height : 0;
             return [p.length, p.filter(x => getComputedStyle(x).display !== 'none').length,
-                    Math.round(f.getBoundingClientRect().height), getComputedStyle(f).borderTopWidth]; })()"""
+                    Math.round(f.getBoundingClientRect().height - bh), getComputedStyle(f).borderTopWidth]; })()"""
         for path in ("/", "/help", "/api"):
             pg.goto(BASE + path)
             f = pg.evaluate(foot)
@@ -299,7 +302,7 @@ def run() -> int:
             pg.goto(BASE + path)
             f = pg.evaluate(foot)
             ok(f[0] == 2 and f[1] == 0 and f[2] <= 40 and f[3] == "0px" and pg.inner_text("footer").strip() == "",
-               f"{path} carries it and shows none of it, a little room at its foot ({f[2]} px)")
+               f"{path} carries it and shows none of it, a little room at its foot ({f[2]} px, the bar's room apart)")
         ctx.close()
 
         ok(not errors, f"no script errors: {errors[:3]}")

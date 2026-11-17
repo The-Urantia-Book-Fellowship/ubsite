@@ -273,6 +273,39 @@ main:is(.front, .helppage, .api) ~ footer, footer[data-copy] { border-top: 1px s
                                                                 padding: 1.2rem 1rem; }
 main:is(.front, .helppage, .api) ~ footer p { display: block; }
 
+/* ---- the bar at the foot ----------------------------------------------- */
+/* Continue reading, to the place this browser keeps, or Begin reading where
+   it has none (Tigran, 2026-11-17; base.html .fbar, ub.js placeKeep): fixed
+   to the window's foot on every page but a page of the text, where reading
+   has the whole screen, and the chart, which has a strip of its own there.
+   It is in every page's markup, as the footer is, and shown by the <main>
+   before it: a part's title page has no text, so it is shown there.  The
+   footer gives it room, so that it covers the end of no page, and the player
+   stands over it while something is heard.  Its words are lowered by --lift,
+   as a pill's are. */
+.fbar { position: fixed; z-index: 5; left: 0; right: 0; bottom: 0; display: flex; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom); background: var(--card); border-top: 1px solid var(--rule);
+  box-shadow: 0 -6px 20px var(--shade); font-size: .92rem; line-height: 1.2; }
+main:is(.path, .cosmo) ~ .fbar, main.reader:not(:has(> .partpage)) ~ .fbar { display: none; }
+main:not(.path, .cosmo, .reader) ~ footer, main.reader:has(> .partpage) ~ footer {
+  padding-bottom: calc(3.1rem + 1.2rem + env(safe-area-inset-bottom)); }
+body.listening main:not(.path, .cosmo, .reader) ~ footer, body.listening main.reader:has(> .partpage) ~ footer {
+  padding-bottom: calc(3.1rem + 5.5rem + env(safe-area-inset-bottom)); }
+main:not(.path, .cosmo, .reader) ~ .player, main.reader:has(> .partpage) ~ .player {
+  bottom: calc(3.1rem + .6rem + env(safe-area-inset-bottom)); }
+html:has(dialog.settings[open]) .fbar { right: var(--sbw, 0px); }
+.fgo { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; gap: .6rem;
+  min-height: 3.1rem; padding: var(--lift) .9rem 0; color: var(--ink); text-decoration: none;
+  -webkit-tap-highlight-color: transparent; }
+.fgo svg { flex: none; width: .85rem; height: .85rem; fill: var(--link); }
+.fgo .fl { white-space: nowrap; }
+.fbar:not(.fhas) .fcont, .fbar.fhas .fbegin { display: none; }
+.fat { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faint); }
+.fbar.fhas .fttl:not(:empty)::before { content: "\00a0\00b7\00a0"; }
+@media (hover: hover) { .fgo:hover .fl { color: var(--link); } }
+/* A phone: the reference alone after the words, and with no place the words alone. */
+@media (max-width: 40rem) { .fttl { display: none; } }
+
 /* ---- the reader -------------------------------------------------------- */
 /* The gap between the rail and the text.  It was the gutter the paragraph
    references stood in on a wide screen, 4.4rem, empty with them turned off;
@@ -2299,7 +2332,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 /* ---- print ------------------------------------------------------------- */
 @media print {
   @page { margin: 22mm 20mm; }
-  .top, footer, .rail, .pager, .transport, .voicecredit, .playp, .player, .runhead, dialog { display: none; }
+  .top, footer, .fbar, .rail, .pager, .transport, .voicecredit, .playp, .player, .runhead, dialog { display: none; }
   .tour-shield, .tour-ring, .tour-card { display: none; }
   .changelog .ctabs { display: none; }
   .changelog .parts.tabbed .part, .changelog .parts.tabbed .part > h3 { display: block; }

@@ -2393,6 +2393,91 @@
   }, { passive: true });
   addEventListener('resize', hideHead);
   document.addEventListener('ub:swap', hideHead);
+
+  // The reading place (Tigran, 2026-11-17; DECISIONS.md, The home page): the
+  // paragraph this browser last had at the top of the screen on a page of the
+  // text, kept in localStorage `ub_place` with its paper's title, the time and
+  // the text's version, for Continue reading in the bar at the foot (base.html
+  // .fbar, window.ubBar).  No setting, so Restore the defaults leaves it, and
+  // nothing of it reaches the server.  A page counts as read once the reader
+  // has stayed on it RP_DWELL, or has moved it, by the wheel, a finger or a
+  // key, or is listening: a glance at a search's hit, or at a place an index
+  // entry cites, and Back, moves nothing.  From then the place follows the
+  // page as it scrolls, and is put down once more as the page is left.  While
+  // something is heard it is the paragraph being heard (p.t.now, which
+  // listen.js marks, and which is not asked anything: trap 51).  On a
+  // section's page and the whole paper's; not on a reading path, which is
+  // another order than the book's, nor on a part's title page.
+  var RP = 'ub_place', RP_DWELL = 5000, rpOn = false, rpSaid = '', rpTimer = 0, rpWait = 0;
+  function rpText() { return !!document.querySelector('main.reader article:not(.partpage) p.t[id]'); }
+  // The first paragraph with a line of its own showing under what stands over
+  // the text, the columns' names; at the page's very top, the first.
+  function rpPara() {
+    var now = document.body.classList.contains('listening') && document.querySelector('main.reader p.t.now[id]'),
+        ps, i, r, top = 0, names;
+    if (now) return now;
+    names = document.querySelector('main article.cmp .cmpnames');
+    if (names && (r = names.getBoundingClientRect()).height && r.top <= 1) top = r.bottom;
+    ps = document.querySelectorAll('main.reader article:not(.partpage) p.t[id]');
+    for (i = 0; i < ps.length; i++) {
+      r = ps[i].getBoundingClientRect();
+      if (r.height && r.bottom > top + 24) return ps[i];
+    }
+    return ps[ps.length - 1] || null;
+  }
+  function rpSave() {
+    var p, bar = document.querySelector('.fbar');
+    if (!rpOn || !rpText()) return;
+    p = rpPara();
+    if (!p || p.id === rpSaid) return;
+    try {
+      localStorage.setItem(RP, JSON.stringify({ ref: p.id, title: headOf(p).title, at: Date.now(),
+                                                v: bar && bar.dataset.tv || '' }));
+      rpSaid = p.id;
+    } catch (e) { return; }
+    if (window.ubBar) window.ubBar();
+  }
+  function rpEngage() { if (!rpOn && rpText()) { rpOn = true; rpSave(); } }
+  // The page as it is come to, or brought in by listen.js: not read yet,
+  // unless it is being heard.
+  function rpBegin() {
+    clearTimeout(rpTimer);
+    rpSaid = '';
+    rpOn = false;
+    if (!rpText()) return;
+    if (document.body.classList.contains('listening')) return rpEngage();
+    rpTimer = setTimeout(function tick() {
+      if (document.hidden) rpTimer = setTimeout(tick, RP_DWELL); else rpEngage();
+    }, RP_DWELL);
+  }
+  addEventListener('scroll', function () {
+    // The reader's own scroll is reading; arrive()'s, to the paragraph an
+    // address names, is not.
+    if (!rpOn && Date.now() - arriveTouched < 1500) rpEngage();
+    if (!rpOn || rpWait) return;
+    rpWait = setTimeout(function () { rpWait = 0; rpSave(); }, 400);
+  }, { passive: true });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) rpSave(); });
+  addEventListener('pagehide', rpSave);
+  // Back to a page the browser kept whole: the place is this page's again,
+  // and on a page with the bar, the bar's words are the place as it now is.
+  addEventListener('pageshow', function (ev) {
+    if (!ev.persisted) return;
+    rpSaid = '';
+    rpSave();
+    if (window.ubBar) window.ubBar();
+  });
+  addEventListener('storage', function (ev) { if (ev.key === RP && window.ubBar) window.ubBar(); });
+  document.addEventListener('ub:swap', function () { rpBegin(); if (window.ubBar) window.ubBar(); });
+  // Heard, the page need not move, Follow along being off, or the paragraph
+  // long: asked as the player opens (body.listening, listen.js's own mark,
+  // watched here), and now and then while it is open.
+  function rpHeard() { if (document.body.classList.contains('listening')) { rpEngage(); rpSave(); } }
+  if (window.MutationObserver)
+    new MutationObserver(function () { setTimeout(rpHeard, 0); })
+      .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  setInterval(rpHeard, 3000);
+  rpBegin();
   if (gear) gear.addEventListener('click', hideHead);
 
   // A search hit among the 1955 readings opens /93:5.8#note93_5_8_0, and

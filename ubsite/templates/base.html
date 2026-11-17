@@ -482,6 +482,31 @@ window.ubUnit = function (where) {
       2026-10-27, "I don't like wasting space in the footer"). #}
   <p class="disclaim">{{ t('Not affiliated with Urantia Foundation, whose translations are its copyright and used by permission.') }}</p>
 </footer>
+{#- The bar at the foot (Tigran, 2026-11-17; DECISIONS.md, The home page):
+    Continue reading, to the paragraph this browser last had on the screen on
+    a page of the text (localStorage ub_place, which ub.js keeps; no setting,
+    so Restore the defaults leaves it), and Begin reading, to the Foreword,
+    where it has none.  On every page, shown by the <main> before it as the
+    footer is (ub.css .fbar): not while a page of the text is read, nor on
+    the chart.  The same in every reader's page, the offline copy's too, so
+    the place is put in by the line of script after it, as the page is read
+    and before anything is drawn, and again by ub.js when it changes
+    (window.ubBar).  With scripts off it is Begin reading.  data-tv is the
+    text's version, kept with the place. #}
+<nav class="fbar" {{ ta('aria-label', 'Your place in the book') }} data-tv="{{ text_version() }}">
+  <a class="fgo" href="/0">{{ chrome.player_svg('play') }}<span class="fl fbegin">{{ t('Begin reading') }}</span><span class="fl fcont">{{ t('Continue reading') }}</span><span class="fat"><span class="fref"></span><span class="fttl">{{ t('Foreword') }}</span></span></a>
+</nav>
+<script>
+(window.ubBar = function () {
+  var b = document.querySelector('.fbar'), p = null;
+  try { p = JSON.parse(localStorage.getItem('ub_place') || 'null'); } catch (e) {}
+  if (!b || !p || !/^\d+:\d+\.\d+$/.test(p.ref)) return;
+  b.querySelector('.fgo').setAttribute('href', '/' + p.ref);
+  b.querySelector('.fref').textContent = p.ref;
+  b.querySelector('.fttl').textContent = p.title || '';
+  b.classList.add('fhas');
+})();
+</script>
 <script src="{{ l10n_url() }}" defer></script>
 <script src="{{ asset('ub.js') }}" defer></script>
 {% block scripts %}{% endblock %}
