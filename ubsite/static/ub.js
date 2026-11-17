@@ -1858,7 +1858,7 @@
       if (again || open(mark) !== false) ev.preventDefault();
       return;
     }
-    if (!card) { if (!tapHead(ev)) tapTurn(ev); return; }
+    if (!card) { tapHead(ev); return; }
     if (card.el.contains(t)) { if (t.closest('.x')) shut(true); return; }
     shut(false);
   });
@@ -2053,12 +2053,13 @@
   // shouldPropagateKeyEvent), and Safari has no such event.  So where the
   // book's text is, Space, Page Down and → go on a screen, and Shift+Space,
   // Page Up and ← back: from a keyboard, a page turner, or volume keys an
-  // Android app sends as Page Down.  With Settings' "Tap to turn the page", a
-  // tap on the text goes on in the lower half of the screen and back in the
-  // upper, less the band at the top, which the running head takes (tapHead,
-  // below).  A screen is what the window shows, less a line: the last whole line
-  // comes to the top, and going back, the first whole line to the bottom, so
-  // that no line the reader picks up at is cut.
+  // Android app sends as Page Down.  A tap never turns it: Settings' "Tap to
+  // turn the page", which made a tap on the lower half of the screen go on
+  // and one on the upper half back, is gone since 2026-11-17 (Tigran), a tap
+  // on a paragraph being what names it, for the running head and the bar at
+  // the foot (tapHead, below).  A screen is what the window shows, less a
+  // line: the last whole line comes to the top, and going back, the first
+  // whole line to the bottom, so that no line the reader picks up at is cut.
   var EDGE = 6, touch = false, selDown = false;
   // The line of text crossing y, as the box of one of its letters, or null.
   function lineAt(x, y) {
@@ -2125,14 +2126,6 @@
   // on its tabs, a name, a note's card or the room about them, where a tap is
   // no tap on the text.
   function inFold(t) { return !!t.closest('.tf') && !t.closest('.tf p.rt'); }
-  function tapTurn(ev) {
-    var t = ev.target;
-    if (document.documentElement.dataset.tappage !== 'true' || !touch || ev.button ||
-        !t.closest || !t.closest('main') || !getSelection().isCollapsed || inFold(t) ||
-        t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .blanket, .marginhead, .player')) return;
-    if (turn(ev.clientY < innerHeight / 2 ? -1 : 1)) ev.preventDefault();
-  }
-
   // The running head on demand (Tigran, 2026-10-31).  Reading on a phone, the
   // whole paper on one page and the paragraph references off, the header a
   // paper up the page, a reader had no way to Settings, to the reference of
@@ -2150,14 +2143,12 @@
   // float that would re-set its first two lines under the finger.  The next
   // tap takes it away, as do Escape, a card opening, Settings opening, a new
   // page, a turn of the window, and two lines of scrolling, so that it never
-  // covers the text while reading.  With Tap to turn the page on, a tap turns,
-  // and only the band at the window's top summons the head, naming the first
-  // paragraph on the screen, as a verso's head does.  Never a tap while words
+  // covers the text while reading.  Never a tap while words
   // are selected: the long press is the system's, with its Copy and Web
   // search, and since the browser clears the selection before the tap's
   // click, it is read at pointerdown (selDown, above).  Built here from what
   // the page carries, on <body>, which listen.js never swaps.
-  var head = null, headP = null, headAt = 0, headSlack = 56, BAND = 3.2;
+  var head = null, headP = null, headAt = 0, headSlack = 56;
   function clampY() {
     return Math.max(0, Math.min(scrollY, document.documentElement.scrollHeight - innerHeight));
   }
@@ -2361,7 +2352,7 @@
   // first part of the double-click is interpreted as a tap").
   var headSoon = 0, headBy = 0, DBL = 350;
   function tapHead(ev) {
-    var t = ev.target, tap, band, p;
+    var t = ev.target, p;
     if (ev.button || (ev.detail > 1 && !touch) || selDown || !t.closest || !t.closest('main') || !getSelection().isCollapsed || inFold(t) ||
         t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .cites, .blanket, .marginhead, .player, .pop, dialog') ||
         !document.querySelector('main p.t[id]')) return false;
@@ -2384,11 +2375,8 @@
       return true;
     }
     unhit();
-    tap = document.documentElement.dataset.tappage === 'true' && touch;
-    band = ev.clientY < BAND * parseFloat(getComputedStyle(document.documentElement).fontSize);
-    if (head && !head.hidden) { hideHead(); return !tap || band; }
-    if (tap && !band) return false;
-    showHead(tap ? firstOnScreen() : paraOf(t, ev.clientY) || firstOnScreen());
+    if (head && !head.hidden) { hideHead(); return true; }
+    showHead(paraOf(t, ev.clientY) || firstOnScreen());
     return true;
   }
   // The second press of a mouse's double-click, or the third of a triple

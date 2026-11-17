@@ -111,15 +111,12 @@ READING = [
     ("align", "segmented", "Alignment", "justify",
      [("justify", "Justified", "hyphenated where the book hyphenates", ""),
       ("ragged", "Ragged right", "even spaces, no hyphens", "")], ""),
-    # A tap on the text turns the page, on a phone or a tablet, as the volume
-    # keys would in a reading app: Chrome never lets a web page have them
-    # (Tigran, 2026-10-20).  Off unless a reader asks, since a tap made without
-    # meaning it would lose the reader's place; with it off a tap on the text
-    # shows the running head instead, and with it on the band at the window's
-    # top does (ub.js tapHead, 2026-10-31).  The keys, Space and Page Down
-    # among them, turn it always (ub.js turn()).
-    ("tappage", "switch", "Tap to turn the page", False, [],
-     "on a phone or a tablet: the lower half of the screen goes on, the upper half back"),
+    # No Tap to turn the page since 2026-11-17 (Tigran; `tappage`, a switch
+    # from 2026-10-20, off by default): a tap on a paragraph names it, for the
+    # running head and the bar at the foot, and a tap that turned the page
+    # could name none.  A browser that kept it on reads as if it were off, the
+    # key being no setting.  The keys, Space and Page Down among them, turn the
+    # page as they did (ub.js turn()).
     # The paragraph a reference points to, shown in a card of the notes' kind
     # where the pointer rests on the reference, in a note's card or endnote, a
     # 1955 card, an index entry or a search result; on a phone a tap shows it

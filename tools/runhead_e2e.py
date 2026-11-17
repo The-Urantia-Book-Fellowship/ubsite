@@ -3,8 +3,9 @@
 paragraph's reference and the paper's head, a tap or two lines of scrolling
 hides it, its gear opens Settings, its reference opens the Contents with the
 paper being read in view and its mark is a link home, a tap while words are
-selected does nothing, with Tap to turn the page on the top band shows it and the rest
-turns, the whole paper's page names the paper and not the section, a reading
+selected does nothing, a tap low on the screen names its paragraph and turns
+no page, though the browser kept Tap to turn the page on (gone 2026-11-17),
+the whole paper's page names the paper and not the section, a reading
 path names the paper of the paragraph, and a 1955 card and the head are never
 up together.  And the header's flags on a phone, where they fit.
 
@@ -245,28 +246,30 @@ def run() -> int:
         ok(not shown(pg), "a tap while words are selected does nothing")
         pg.evaluate("getSelection().removeAllRanges()")
 
-        print("Tap to turn the page on")
-        pg.evaluate("ubSettings.set('tappage', true)")
-        # The top of the window on a paragraph's text, so that a tap in the
-        # band lands on the text, not on a fold's line, which takes no tap.
+        print("A tap never turns the page")
+        # Settings' Tap to turn the page is gone (Tigran, 2026-11-17), and a
+        # browser that kept it on reads as if it never had: a tap low on the
+        # screen names the paragraph under it, and the page stays.
+        pg.evaluate("""() => { var s = JSON.parse(localStorage.getItem('ub_settings') || '{}');
+                               s.tappage = true; localStorage.setItem('ub_settings', JSON.stringify(s)); }""")
+        pg.reload()
+        pg.wait_for_selector("[id='101:4.3']")
+        ok(pg.evaluate("document.documentElement.dataset.tappage") is None, "a kept tappage sets nothing on the page")
         pg.evaluate("scrollTo(0, scrollY + document.getElementById('101:4.3').getBoundingClientRect().top + 10)")
         settle(pg)
         y = pg.evaluate("scrollY")
         low = text_y(pg, 824, 432)
         ok(low is not None, "a paragraph's text in the lower half of the screen")
+        want = pg.evaluate("(y) => { var p = document.elementFromPoint(195, y).closest('p.t[id]'); return p && p.id; }", low or 700)
         pg.touchscreen.tap(195, low or 700)
         settle(pg)
-        ok(pg.evaluate("scrollY") > y + 200 and not shown(pg), "a tap low on the screen turns the page, with no head")
-        pg.evaluate("scrollTo(0, scrollY + document.getElementById('101:4.3').getBoundingClientRect().top + 10)")
-        settle(pg)
-        pg.touchscreen.tap(195, 20)
-        settle(pg)
-        ok(shown(pg) and pg.inner_text(".runhead .ref") == "101:4.3",
-           "a tap in the band at the top shows it, naming the first paragraph on the screen")
-        pg.touchscreen.tap(195, 20)
+        ok(abs(pg.evaluate("scrollY") - y) < 2 and shown(pg) and pg.inner_text(".runhead .ref") == want,
+           "a tap low on the screen names its paragraph, and the page stays")
+        pg.touchscreen.tap(195, low or 700)
         settle(pg)
         ok(not shown(pg), "and again hides it")
-        pg.evaluate("ubSettings.set('tappage', false)")
+        pg.evaluate("""() => { var s = JSON.parse(localStorage.getItem('ub_settings') || '{}');
+                               delete s.tappage; localStorage.setItem('ub_settings', JSON.stringify(s)); }""")
 
         print("The paragraph an address arrived at")
         hit = "() => [...document.querySelectorAll('p.t.hit')].map(p => p.id)"
@@ -472,14 +475,7 @@ def run() -> int:
         pg.tap(FOLD + " p.who >> nth=0")
         settle(pg)
         ok(not shown(pg) and named(pg) == [], "a tap on a translation's name in the fold is no tap on the text")
-        pg.evaluate("ubSettings.set('tappage', true)")
-        pg.evaluate("(s) => document.querySelector(s).scrollIntoView({block: 'end'})", FOLD + " p.rt")
-        settle(pg)
-        y1 = pg.evaluate("scrollY")
-        pg.tap(FOLD + " p.rt")
-        pg.wait_for_timeout(650)
-        ok(pg.evaluate("scrollY") > y1 + 200 and not shown(pg), "with Tap to turn the page on, a tap on it low on the screen turns the page")
-        pg.evaluate("ubSettings.set('tappage', false); ubSettings.set('translations', ''); ubSettings.set('trtab', '')")
+        pg.evaluate("ubSettings.set('translations', ''); ubSettings.set('trtab', '')")
 
         print("A wide screen, the Contents folded away")
         ctx2 = b.new_context(viewport={"width": 1280, "height": 900})

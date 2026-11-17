@@ -36,10 +36,8 @@ class RunningHead(unittest.TestCase):
         # paragraphs are text, its tabs, names and the room about them not.
         self.assertIn("function inFold(t) { return !!t.closest('.tf') && !t.closest('.tf p.rt'); }", JS)
         head = JS[JS.index("function tapHead(ev) {"):JS.index("// The second press of a mouse's double-click")]
-        turn = JS[JS.index("function tapTurn(ev) {"):JS.index("// The running head on demand (Tigran, 2026-10-31).")]
-        for body in (head, turn):
-            self.assertIn("|| inFold(t) ||", body)
-            self.assertNotIn(".tf", body)
+        self.assertIn("|| inFold(t) ||", head)
+        self.assertNotIn(".tf", head)
         # A fold drawn again or shut takes the head of a paragraph in it.
         self.assertIn("if (headP && panel.contains(headP)) hideHead();", JS)
         self.assertIn("if (headP && tf.contains(headP)) hideHead();", JS)
@@ -86,7 +84,7 @@ class RunningHead(unittest.TestCase):
         self.assertIn("if (r.height && r.bottom > y) return ps[i];", js)
         self.assertIn("""own = sec && sec.querySelector('.rc[data-k="' + ch.dataset.k + '"] p.rt')""", js)
         self.assertIn("      p = paraOf(t, ev.clientY);\n", js)
-        self.assertIn("showHead(tap ? firstOnScreen() : paraOf(t, ev.clientY) || firstOnScreen());", js)
+        self.assertIn("showHead(paraOf(t, ev.clientY) || firstOnScreen());", js)
         self.assertNotIn("paraOf(t)", js)
 
     def test_a_double_click_is_never_a_tap(self):
@@ -207,10 +205,17 @@ class RunningHead(unittest.TestCase):
             if path.name != "help.html":
                 self.assertNotIn("runhead", path.read_text(), path.name)
 
-    def test_tap_comes_before_the_turn(self):
-        # The one click handler decides: a card, else the head, else the turn.
-        self.assertIn("if (!card) { if (!tapHead(ev)) tapTurn(ev); return; }", JS)
+    def test_a_tap_names_and_never_turns(self):
+        # The one click handler decides: a card, else the head.  A tap turned
+        # the page too, by Settings' Tap to turn the page, until 2026-11-17
+        # (Tigran): the setting, its handler and its band at the window's top
+        # are gone, and a tap on a paragraph names it wherever it lands.
+        self.assertIn("if (!card) { tapHead(ev); return; }", JS)
         self.assertRegex(JS, r"selDown = !getSelection\(\)\.isCollapsed")
+        for gone in ("tapTurn", "tappage", "BAND"):
+            self.assertNotIn(gone, JS)
+        self.assertNotIn("tappage", (ROOT / "ubsite" / "settings.py").read_text().replace("`tappage`", ""))
+        self.assertNotIn("Tap to turn the page", (ROOT / "ubsite" / "ru.toml").read_text())
 
 
 if __name__ == "__main__":

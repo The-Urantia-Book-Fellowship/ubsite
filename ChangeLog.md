@@ -159,6 +159,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Removed
 
+- Settings' Tap to turn the page: a tap on a paragraph now always names it, bringing the running head, and soon the bookmarks; Space, Page Down and the arrows turn the page as before.
 - The cloud at the header's corner: Settings' Offline tab, under the gear, says whether the site is reached and what this browser keeps, and does all the cloud did.
 - Settings' Translations in parallel columns: the columns now come by themselves where the window has room for them. On a phone, where the switch stood each translation under its paragraph, they are in the fold under it.
 - The half-dark circle in the header, which turned the theme light or dark: Settings' Theme does the same, and follows the device unless you choose otherwise.
