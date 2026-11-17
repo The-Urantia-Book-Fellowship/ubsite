@@ -35,8 +35,9 @@
   // Keyed by name, never by index, so that a step kept by an older build
   // cannot point at the wrong one.  `at` is the control to light, a selector
   // or a function; a control the page lacks (the index off, Listening off,
-  // no worker for the cloud, no note on the page) is stepped over, and the
-  // count is the page's own.  `ch` is the Help page's chapter.
+  // no note on the page) is stepped over, and the count is the page's own.
+  // `ch` is the Help page's chapter.  A step kept by a build that had one
+  // since taken out (the cloud's, until 2026-11-17) ends the tour (show).
   function drawn(el) { return el && !el.hidden && el.getClientRects().length ? el : null; }
   function lit(sel) {
     var els = document.querySelectorAll(sel);
@@ -56,7 +57,6 @@
     { k: 'listen', ch: 'listening', title: 'tour:listen:title', text: 'tour:listen', at: 'main p.t[id] .playp' },
     { k: 'notes', ch: 'notes', title: 'tour:notes:title', text: 'tour:notes', at: 'main a.fn' },
     { k: 'gear', ch: 'settings', title: 'tour:gear:title', text: 'tour:gear', at: '.top .gear' },
-    { k: 'cloud', ch: 'offline', title: 'tour:cloud:title', text: 'tour:cloud', at: '.top .offline' },
     { k: 'help', ch: '', title: 'tour:help:title', text: 'tour:help', at: '.top .help > summary', last: true }
   ];
   // The words, named here as literals so that the catalog carries them
@@ -71,7 +71,6 @@
     'tour:listen:title': T.k('tour:listen:title'), 'tour:listen': T.k('tour:listen'),
     'tour:notes:title': T.k('tour:notes:title'), 'tour:notes': T.k('tour:notes'),
     'tour:gear:title': T.k('tour:gear:title'), 'tour:gear': T.k('tour:gear'),
-    'tour:cloud:title': T.k('tour:cloud:title'), 'tour:cloud': T.k('tour:cloud'),
     'tour:help:title': T.k('tour:help:title'), 'tour:help': T.k('tour:help')
   };
   function target(s) {

@@ -59,7 +59,7 @@
   // where the copy keeps them all, and otherwise leaves to the server, which
   // sends every one (sw.js covered()).  With each change, before anyone hears
   // of it and asks for a section's again; and as a page loads (below, with
-  // the cloud).
+  // Work offline).
   function shownTo(o) {
     var sw = navigator.serviceWorker, w = sw && sw.controller;
     if (w) w.postMessage({ cmd: 'shown', tr: String(o.translations || '').split(' ').filter(Boolean) });
@@ -1702,8 +1702,8 @@
   }
   // What is added to the page later is spoken and untipped as it comes: the
   // player's controls, a <main> listen.js swaps in, a paper the rail fetches,
-  // a note's card, the offline menu's words; and a title set later is moved
-  // to data-tip, the folds' and the cloud's as they change.  Watched only
+  // a note's card, the Offline tab's words; and a title set later is moved
+  // to data-tip, the folds' as they change.  Watched only
   // while there is something to do: both languages drawn, or Tooltips off.
   var watch = null;
   function watching() {
@@ -1751,6 +1751,27 @@
       var b = ev.target.closest('.flag');
       if (b) window.ubSettings.set('lang', b.dataset.to);
     });
+    // On a phone (ub.css, under 40rem) the flags stand only where they fit
+    // beside the name (Tigran, 2026-11-17; never there from 2026-11-10 until
+    // then): where they would take the controls to a line of their own, they
+    // are left out (.noflags), unless the controls have that line anyway.
+    // Asked again as the window, the language, a size or the typeface
+    // changes, and once the fonts are in.  Measured with nothing painted
+    // between, so nothing is seen to move.
+    var flagTop = document.querySelector('.top'), flagName = flagTop && flagTop.querySelector('.brand'),
+        flagCtl = flagTop && flagTop.querySelector('.ctl'), flagPhone = matchMedia('(max-width: 40rem)');
+    var flagsFit = function () {
+      if (!flagName || !flagCtl) return;
+      var below = function () { return flagCtl.getBoundingClientRect().top >= flagName.getBoundingClientRect().bottom - 1; };
+      flagTop.classList.remove('noflags');
+      if (!flagPhone.matches || !below()) return;
+      flagTop.classList.add('noflags');
+      if (below()) flagTop.classList.remove('noflags');
+    };
+    flagsFit();
+    addEventListener('resize', flagsFit);
+    document.addEventListener('ub:settings', flagsFit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(flagsFit);
   }
 
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
@@ -2503,12 +2524,14 @@
     box.addEventListener('blur', function () { back = null; });
   }
 
-  // Work offline, at the header's corner where a service worker can run: an
-  // icon that says whether this page is online or offline, and whether a copy
-  // is kept (ub.css .top .offline), and opens Settings at its Offline tab,
-  // which says what the copy is (base.html; until 2026-10-30 a menu of its
-  // own, #offmenu, under the icon, and until 2026-10-14 a switch in Settings).
-  // static/offline.js runs the tab, and says what the copy is on the icon,
+  // Work offline, where a service worker can run: Settings' Offline tab,
+  // which says whether this page is online or offline, and what the copy is
+  // (base.html; until 2026-10-30 a menu of its own, #offmenu, and until
+  // 2026-10-14 a switch in Settings).  Until 2026-11-17 a cloud at the
+  // header's corner said both and opened the tab (Tigran: "its functions are
+  // duplicated in the Settings => Offline menu"); what it held of the page's
+  // state is on the tab's panel, data-net here and data-have in offline.js.
+  // static/offline.js runs the tab, and says what the copy is on the panel,
   // then 'ub:offline'.  It is loaded on every page since 2026-11-10 (Tigran:
   // every browser keeps the copy, and reads the site from it): at once on a
   // page the worker answers for, to say whether its copy is still the site's;
@@ -2516,17 +2539,16 @@
   // register the worker and fetch the copy; and when the tab opens.  The
   // browser's own offer to install the site waits in the tab too, rather than
   // in a banner of its own.
-  var cloud = document.querySelector('.top .offline'), offpanel = document.querySelector('dialog.settings .panel.offline');
-  if (cloud && offpanel && 'serviceWorker' in navigator && window.isSecureContext &&
+  var offpanel = document.querySelector('dialog.settings .panel.offline');
+  if (offpanel && 'serviceWorker' in navigator && window.isSecureContext &&
       window.HTMLDialogElement && 'showModal' in HTMLDialogElement.prototype) {
-    cloud.hidden = false;
-    // And Settings' tab for it: the tab and its panel.
+    // Settings' tab for it: the tab and its panel.
     document.querySelectorAll('dialog.settings .offline').forEach(function (el) { el.hidden = false; });
     // Offline (data-net) is the site out of reach: the browser says so, or the
     // worker answered for this page from its copy because the network did not,
     // which sw.js writes on the footer (a page it answers first, online, is
     // the server's as it is, unmarked); after that, as the browser says, and as the worker's check of
-    // the site says, which offline.js writes on the icon.  Each time the
+    // the site says, which offline.js writes on the panel.  Each time the
     // browser speaks, offline.js asks at once whether the site is there, and
     // where the page starts offline: the site's answer is the last word, as
     // Chrome can say offline with the network working (2026-10-27).
@@ -2535,27 +2557,23 @@
     // ubsite.ddns.net and ubsite.sigmaai.au (and under the name in the header,
     // which base.html's head script writes).
     offpanel.querySelector('.net .host').textContent = location.host;
-    // What offline.js says of the copy is cloud.ubSay, its words in each
-    // language; the date sw.js writes on the footer is in each too.
+    // The tab's first line: online, or offline, with the date of the copy
+    // where the page is from it, which sw.js writes on the footer in each
+    // language.
     var label = function () {
-      var on = cloud.dataset.net === 'on', none = cloud.dataset.have === 'none';
-      var t = !on ? (none ? T.k('Offline') : T.k('Offline: reading the copy kept in this browser'))
-            : cloud.ubSay || (none ? T.k('Online') : T.k('Online, with a copy kept for working offline'));
-      T.attr(cloud, 'title', t);
-      T.attr(cloud, 'aria-label', t);
-      offpanel.querySelector('.net .conn').innerHTML = on ? T('Online') : !fromCopy ? T('Offline')
+      offpanel.querySelector('.net .conn').innerHTML = offpanel.dataset.net === 'on' ? T('Online') : !fromCopy ? T('Offline')
         : T('Offline · the copy of {d}', { d: { en: T.esc(fromCopy.dataset.copy),
                                                 ru: T.esc(fromCopy.dataset.copyRu || fromCopy.dataset.copy) } });
     };
-    var net = function (on) { cloud.dataset.net = on ? 'on' : 'off'; label(); };
+    var net = function (on) { offpanel.dataset.net = on ? 'on' : 'off'; label(); };
     var script = function () {
       if (loaded) return;
       loaded = true;
       var sc = document.createElement('script');
-      sc.src = cloud.dataset.src;
+      sc.src = offpanel.dataset.src;
       document.head.appendChild(sc);
     };
-    cloud.dataset.have = navigator.serviceWorker.controller ? 'kept' : 'none';
+    offpanel.dataset.have = navigator.serviceWorker.controller ? 'kept' : 'none';
     net(navigator.onLine !== false && !fromCopy);
     window.addEventListener('online', function () { net(true); });
     window.addEventListener('offline', function () { net(false); });
@@ -2580,11 +2598,6 @@
     // loads, and when a worker takes it over.
     shownTo(load());
     navigator.serviceWorker.addEventListener('controllerchange', function () { shownTo(load()); });
-    // A tap on the icon opens Settings at that tab, as the gear opens Settings.
-    cloud.addEventListener('click', function () {
-      var gearBtn = document.querySelector('.gear'), tab = document.getElementById('set-t-offline');
-      if (gearBtn && tab) { gearBtn.click(); tab.click(); }
-    });
   }
 
   // Help, and the tour (static/help.js; Tigran, 2026-11-06).  The ? at the
@@ -2609,7 +2622,7 @@
   // browser opens and shuts at its mark; shut here by Escape, by a tap
   // anywhere else, and by one of its items.  Help is a link.  What's new? is
   // offline.js's dialog, what the last update brought, where Work offline can
-  // run (the cloud shown), asked for by 'ub:news', which the cloud's block
+  // run (its tab shown), asked for by 'ub:news', which Work offline's block
   // above hears; elsewhere the link goes on to the changelog.  About is a
   // small window drawn here, as What's new's is drawn: what the site is, and
   // where its source is kept.
@@ -2655,7 +2668,7 @@
       if (a.classList.contains('about') && window.HTMLDialogElement) {
         ev.preventDefault();
         openAbout();
-      } else if (a.classList.contains('whatsnew') && cloud && !cloud.hidden) {
+      } else if (a.classList.contains('whatsnew') && offpanel && !offpanel.hidden) {
         ev.preventDefault();
         document.dispatchEvent(new Event('ub:news'));
       }

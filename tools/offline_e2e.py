@@ -18,7 +18,8 @@ serves a scratch copy of var/offline/ from a server of its own, on
 by changing that copy, and leaves var/offline/ and the dev server alone.
 localhost is a secure context, so the worker runs there as on the live site.
 Not a gate: offline/check.py is, for every page; this shows that the worker,
-the icon at the header's corner and Settings' Offline tab do what they say.
+and Settings' Offline tab do what they say (the header's cloud too, until
+it went on 2026-11-17).
 """
 
 from __future__ import annotations
@@ -94,9 +95,10 @@ fails: list[str] = []
 # Merritt Horn's fold in Settings' Offline tab: each voice has one, drawn alike.
 MH = "dialog.settings .recvoice[data-key='mh'] "
 
-# Work offline's icon, and the line under the copy's tick in Settings' Offline
-# tab that says what the copy is.
-ICON = ".top .offline"
+# Settings' Offline tab, whose panel holds the page's state, data-net and
+# data-have (the header's cloud held them until 2026-11-17), and the line
+# under Base that says what the copy is.
+PANEL = "dialog.settings .panel.offline"
 STATE = "dialog.settings .offcopy .state"
 
 
@@ -195,9 +197,6 @@ SAYS_OFFLINE = """try { if (sessionStorage.getItem('ubSaysOffline'))
 SAVES_DATA = """try { if (sessionStorage.getItem('ubSavesData') || /ubSavesData=1/.test(document.cookie))
   Object.defineProperty(navigator, 'connection', { value: { saveData: true }, configurable: true }); } catch (e) {}"""
 
-# What the page shows while an update runs, in the tab and on the icon's
-# label, each line once, as it changes; in sessionStorage too, which the
-# reload at its end keeps.
 # An element's words as a reader of English has them: the interface is in the
 # page in Russian too (ubsite/l10n.py), which CSS hides; its textContent has both.
 EN = "(el => { const c = el.cloneNode(true); c.querySelectorAll('x-ru').forEach(x => x.remove()); return c.textContent; })"
@@ -206,13 +205,16 @@ EN = "(el => { const c = el.cloneNode(true); c.querySelectorAll('x-ru').forEach(
 def en(pg, sel: str) -> str:
     """The English of an element's words, the Russian stripped (EN)."""
     return pg.eval_on_selector(sel, EN).strip()
+
+
+# What the page shows while an update runs, in the tab (and until 2026-11-17
+# on the cloud's label), each line once, as it changes; in sessionStorage too,
+# which the reload at its end keeps.
 WATCH = """() => { window.shown = []; sessionStorage.shown = '[]';
-  const keep = () => { for (const t of [""" + EN + """(document.querySelector('dialog.settings .offcopy .state')),
-                                        document.querySelector('.top .offline').title])
+  const keep = () => { const t = """ + EN + """(document.querySelector('dialog.settings .offcopy .state'));
     if (!window.shown.includes(t)) window.shown.push(t);
     sessionStorage.shown = JSON.stringify(window.shown); };
-  new MutationObserver(keep).observe(document.body, {subtree: true, childList: true, characterData: true,
-                                                     attributes: true, attributeFilter: ['title']}); }"""
+  new MutationObserver(keep).observe(document.body, {subtree: true, childList: true, characterData: true}); }"""
 
 
 def wait_state(pg, test: str, timeout: int = 30000) -> None:
@@ -302,9 +304,13 @@ def tr_kept(pg, key: str, timeout: int = 60000) -> None:
                          ".querySelector('.st').textContent.startsWith('kept')", arg=key, timeout=timeout)
 
 
-def icon(pg) -> dict:
-    return pg.evaluate(f"(c => ({{net: c.dataset.net, have: c.dataset.have, title: c.title,"
-                       f" shown: !c.hidden}}))(document.querySelector('{ICON}'))")
+def copy_state(pg) -> dict:
+    """The page's state on the Offline tab's panel, the site reached (net) and
+    what the copy is (have), whether the tab is shown, and what its two lines
+    say, in English."""
+    return pg.evaluate(f"(c => ({{net: c.dataset.net, have: c.dataset.have, shown: !c.hidden,"
+                       f" says: [c.querySelector('.net .conn'), c.querySelector('.offcopy .state')]"
+                       f".map({EN}).join(' / ').trim()}}))(document.querySelector('{PANEL}'))")
 
 
 class Server:
@@ -379,18 +385,17 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ctx.clear_cookies()
         ok(pg.get_attribute("p.t .playp", "aria-label") == "Listen to this section, from its heading",
            "online, the first paragraph's play button starts the section")
-        i = icon(pg)
+        i = copy_state(pg)
         ok(i["shown"] and i["net"] == "on" and not pg.locator("footer[data-copy]").count()
            and not pg.evaluate("!!navigator.serviceWorker.controller"),
-           f"the first page is the server's, with no worker yet; the icon at the header's corner says online ({i['title']!r})")
+           f"the first page is the server's, with no worker yet; the page says online ({i['says']!r})")
+        ok(not pg.locator(".top .offline").count() and not pg.locator("#offmenu").count(),
+           "the header has no cloud (Tigran, 2026-11-17), nor its menu")
         host = pg.evaluate("getComputedStyle(document.querySelector('.brand .host'), '::before').content")
         ok(host == '"localhost:8131"' and not pg.inner_text(".brand .host"),
            f"the site's address stands under the name, drawn from the page's own, written by no server ({host})")
-        ok(not pg.locator("#offmenu").count(), "the icon has no menu")
-        pg.click(ICON)
-        pg.wait_for_selector("dialog.settings .offcopy", state="visible")
-        unfold(pg)
-        ok(pg.get_attribute("#set-t-offline", "aria-selected") == "true", "a tap on it opens Settings at the Offline tab")
+        offline_tab(pg)
+        ok(pg.get_attribute("#set-t-offline", "aria-selected") == "true", "the gear opens Settings, and it has an Offline tab")
         ok(pg.inner_text("dialog.settings .net .host") == "localhost:8131"
            and pg.inner_text("dialog.settings .net").lower().startswith("online"),
            "whose first line says online, and names the site from its address")
@@ -424,7 +429,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(fetched == len(ud["chunks"]), f"a translation ticked is fetched at once, its chunks alone ({fetched} chunks)")
         kept = pg.evaluate(KEPT)
         ok(kept["gz"] == len(m["chunks"]) + len(ud["chunks"]), f"the copy and the translation, in one cache ({kept})")
-        ok(icon(pg)["have"] == "kept", f"the icon says a copy is kept ({icon(pg)['title']!r})")
+        ok(copy_state(pg)["have"] == "kept", f"the page says a copy is kept ({copy_state(pg)['says']!r})")
         made = datetime.datetime.fromisoformat(m["made"].replace("Z", "+00:00"))
         ok(f"kept as the site was on {made:%B} {made.day}, with the text of" in said,
            "the tab says when the site was as the copy keeps it")
@@ -448,8 +453,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(asked_for(log, "/102:3") == n and pg.locator("p.t[id='102:3.1']").count() == 1
            and pg.evaluate("!!navigator.serviceWorker.controller"),
            f"online, the next page is read from the copy, and the server is not asked for it ({pg.title()!r})")
-        ok(not pg.locator("footer[data-copy]").count() and icon(pg)["net"] == "on",
-           "it is the server's page, unmarked, and the icon says online")
+        ok(not pg.locator("footer[data-copy]").count() and copy_state(pg)["net"] == "on",
+           "it is the server's page, unmarked, and the page says online")
         n = asked_for(log, "/search?q=mercy")
         pg.goto(BASE + "/search?q=mercy")
         ok(asked_for(log, "/search?q=mercy") == n and "In the text" in pg.inner_text("main"),
@@ -813,11 +818,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok("read online" in pg.inner_text("main"), "the quiz's board is said to be read online")
         pg.goto(BASE + "/101:4.2-3")
         ok(pg.locator("p.t.hit").count() == 2, "/101:4.2-3 marks two paragraphs")
-        i = icon(pg)
-        ok(i["net"] == "off" and i["have"] == "kept", f"the icon says offline ({i['title']!r})")
-        pg.click(ICON)
-        pg.wait_for_selector("dialog.settings .offcopy", state="visible")
-        unfold(pg)
+        i = copy_state(pg)
+        ok(i["net"] == "off" and i["have"] == "kept", f"the page says offline ({i['says']!r})")
+        offline_tab(pg)
         print("  " + pg.inner_text("dialog.settings .net"))
         ok(pg.inner_text("dialog.settings .net").lower().startswith("offline"), "and so does the tab's first line")
         ok(pg.inner_text("dialog.settings .net .host") == "localhost:8131", "and names the site from the copy too")
@@ -1024,23 +1027,21 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.is_hidden("#offnews") and pg.is_visible("dialog.settings"), "its × closes it, and only it")
         pg.keyboard.press("Escape")
         pg.reload()
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=5000)
-        print("  " + icon(pg)["title"])
-        ok(pg.evaluate(f"getComputedStyle(document.querySelector('{ICON} .dot')).display") != "none",
-           "after a reload, the icon's dot says an update is waiting")
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'stale'", timeout=5000)
+        ok(True, "after a reload, the page knows an update is waiting")
         ok(not pg.is_visible("dialog.settings") and not pg.locator(".offnote").count(),
-           "and nothing else does until the tab is opened")
+           "and says nothing of it until the tab is opened")
         n = asked_for(log, "/102:4")
         pg.goto(BASE + "/102:4")
         ok(asked_for(log, "/102:4") == n + 1 and pg.evaluate(SURE) is False and not pg.locator("footer[data-copy]").count(),
            "a copy out of date does not answer first: the page is the server's")
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=5000)
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'stale'", timeout=5000)
         # Offline and online again: the copy stays, out of date, and says so.
         ctx.set_offline(True)
         offline_tab(pg)
         wait_state(pg, "t.includes('once online')", 5000)
         print("  offline: " + pg.inner_text(STATE))
-        ok(not pg.locator("dialog.settings .offcopy .get").count() and icon(pg)["have"] == "stale",
+        ok(not pg.locator("dialog.settings .offcopy .get").count() and copy_state(pg)["have"] == "stale",
            "offline, the copy is still kept and still out of date, with no button to update it")
         ctx.set_offline(False)
         pg.wait_for_selector("dialog.settings .offcopy .get", timeout=10000)
@@ -1052,7 +1053,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         update(pg)
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == 1, f"the update fetched only what changed ({fetched} chunk)")
-        ok(icon(pg)["have"] == "kept", "and the dot goes")
+        ok(copy_state(pg)["have"] == "kept", "and the copy is kept, up to date")
         said = pg.evaluate("caches.open('e2e').then(c => Promise.all(['/installed', '/got'].map(u =>"
                            " c.match(u).then(r => r && r.text()))))")
         ok(said == ["newer", "get"], f"the site's newer worker came with it, and fetched the copy ({said})")
@@ -1100,7 +1101,6 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         steps = [t for t in shown if t.startswith("Updating: ")]
         print(f"  {len(steps)} steps shown: {steps[:2]} … {steps[-1:]}")
         ok(len(steps) >= 3, "the tab shows the update going on")
-        ok(any(t.startswith("Updating the offline copy: ") for t in shown), "and so does the icon's label")
         fetched = log.read_text().count("/offline/c/") - before
         ok(fetched == len(papers), f"it fetched only what changed ({fetched} chunks)")
         pg.keyboard.press("Escape")
@@ -1154,7 +1154,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.click("dialog.settings .offcopy .get")
         wait_state(pg, "t.includes('stopped')")
         print("  " + pg.inner_text(STATE))
-        ok(icon(pg)["have"] == "stale", "the icon still says an update is waiting")
+        ok(copy_state(pg)["have"] == "stale", "the page still knows an update is waiting")
         ok(pg.evaluate("window.ubStay") == 1, "and the page is not reloaded")
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
@@ -1172,8 +1172,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         offline_tab(pg)
         wait_state(pg, "t.includes('once online')", 10000)
         print("  " + pg.inner_text("dialog.settings .net") + ": " + pg.inner_text(STATE))
-        i = icon(pg)
-        ok(i["net"] == "off" and i["have"] == "stale", f"a page from the site, which then went: the icon says offline ({i['title']!r})")
+        i = copy_state(pg)
+        ok(i["net"] == "off" and i["have"] == "stale", f"a page from the site, which then went: the page says offline ({i['says']!r})")
         ok(not pg.locator("dialog.settings .offcopy .get").count() and not pg.locator("dialog.settings .offcopy .newsbtn").count(),
            "and the tab offers no Update now or What's new")
         pg.keyboard.press("Escape")
@@ -1182,8 +1182,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.evaluate(WATCH)
         offline_tab(pg)
         pg.wait_for_timeout(1500)
-        i = icon(pg)
-        ok(i["net"] == "off" and "once online" in pg.inner_text(STATE), f"and says offline ({i['title']!r})")
+        i = copy_state(pg)
+        ok(i["net"] == "off" and "once online" in pg.inner_text(STATE), f"and says offline ({i['says']!r})")
         ok(not any("Update now" in t for t in pg.evaluate("window.shown")) and not pg.locator("dialog.settings .offcopy .get").count(),
            "with Update now never offered")
         ok(pg.inner_text("dialog.settings .net").lower().startswith("offline"), "and the tab's first line says offline")
@@ -1191,9 +1191,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         srv.start()
         offline_tab(pg)
         pg.wait_for_selector("dialog.settings .offcopy .get", timeout=10000)
-        i = icon(pg)
+        i = copy_state(pg)
         ok(i["net"] == "on" and pg.inner_text("dialog.settings .net").lower().startswith("online"),
-           f"the site back, a page from the copy says online, and Update now is back ({i['title']!r})")
+           f"the site back, a page from the copy says online, and Update now is back ({i['says']!r})")
         pg.keyboard.press("Escape")
 
         print("The browser saying offline, the site there")
@@ -1201,11 +1201,11 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/read")
         ok(pg.evaluate("navigator.onLine") is False, "the browser says offline")
         ok(not pg.locator("footer[data-copy]").count(), "a page loaded comes from the site all the same")
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.net === 'on'", timeout=10000)
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.net === 'on'", timeout=10000)
         offline_tab(pg)
         pg.wait_for_selector("dialog.settings .offcopy .get", timeout=10000)
         ok(pg.inner_text("dialog.settings .net").lower().startswith("online"),
-           f"and without the tab opened the icon says online, and the tab offers Update now ({icon(pg)['title']!r})")
+           f"and without the tab opened the page says online, and the tab offers Update now ({copy_state(pg)['says']!r})")
         pg.keyboard.press("Escape")
         pg.evaluate("sessionStorage.removeItem('ubSaysOffline')")
 
@@ -1241,7 +1241,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(fetched == 1, f"it fetched only what changed ({fetched} chunk)")
         pg.wait_for_timeout(1000)
         ok(pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews") and not pg.locator("dialog[open]").count()
-           and icon(pg)["have"] == "kept",
+           and copy_state(pg)["have"] == "kept",
            "without a word: no What's new opens by itself, and the page is not reloaded (Tigran, 2026-11-10)")
         # What's new? is in the ?'s menu, and lists what the update brought:
         # this build's change, and the one that stopped's.
@@ -1286,7 +1286,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         until(pg, "async b => (await (await (await caches.open('ub-meta')).match('/offline/meta')).json())"
                   ".current === b", True, 60000, build)
         pg.wait_for_timeout(1000)
-        ok(pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews") and icon(pg)["have"] == "kept",
+        ok(pg.evaluate("window.ubStay") == 1 and pg.is_hidden("#offnews") and copy_state(pg)["have"] == "kept",
            "with nothing listed for it, the copy is updated without a word, and the page not reloaded")
         # While listening, and with the page out of view: nothing until it is in
         # view again; then What's new, and closing it does not stop the reading.
@@ -1341,10 +1341,10 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         before = log.read_text().count("/offline/c/")
         pg.evaluate(HOUR_LATER)
         pg.goto(BASE + "/read")
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=10000)
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'stale'", timeout=10000)
         pg.wait_for_timeout(1500)
         ok(log.read_text().count("/offline/c/") == before and pg.evaluate(META, "current") == held != build,
-           f"a newer build is not fetched by itself ({icon(pg)['title']!r})")
+           f"a newer build is not fetched by itself ({copy_state(pg)['says']!r})")
         ok(pg.evaluate(SURE) is False, "the copy is known not to be the site's build")
         n = asked_for(log, "/102:7")
         pg.goto(BASE + "/102:7")
@@ -1355,13 +1355,13 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/")
         ok(pg.title() == "The Urantia Book, listening" and asked_for(log, "/") == n,
            f"the page is the copy's, as it was kept, not the site's ({pg.title()!r})")
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=10000)
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'stale'", timeout=10000)
         offline_tab(pg)
         wait_state(pg, "t.includes('changed since')")
         print("  " + pg.inner_text(STATE))
         ok(pg.is_visible("dialog.settings .offcopy .get") and pg.is_visible("dialog.settings .offcopy .newsbtn")
-           and icon(pg)["net"] == "on" and not pg.is_checked(AUTO),
-           "the icon says an update is waiting, and the tab offers Update now and What's new")
+           and copy_state(pg)["net"] == "on" and not pg.is_checked(AUTO),
+           "an update is waiting, and the tab offers Update now and What's new")
         pg.click("dialog.settings .offcopy .newsbtn")
         pg.wait_for_function("document.querySelector('#offnews .days li')", timeout=10000)
         ok(f"number {change.n}" in pg.inner_text("#offnews") and pg.locator("#offnews li").count() == 1,
@@ -1395,7 +1395,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         before = log.read_text().count("/offline/c/")
         pg.evaluate(HOUR_LATER)
         pg.goto(BASE + "/read")
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'stale'", timeout=10000)
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'stale'", timeout=10000)
         pg.wait_for_timeout(1500)
         ok(log.read_text().count("/offline/c/") == before and pg.evaluate(META, "current") == held,
            "nor is the build after that fetched by itself")
@@ -1447,9 +1447,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/101:4")
         ok(not pg.evaluate("!!navigator.serviceWorker.controller") and not pg.locator("footer[data-copy]").count(),
            "the first page is the server's, with no worker yet")
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'busy'", timeout=20000)
-        print("  " + icon(pg)["title"])
-        ok(True, "with nothing tapped, the copy starts downloading, and the icon says so")
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'busy'", timeout=20000)
+        print("  " + copy_state(pg)["says"])
+        ok(True, "with nothing tapped, the copy starts downloading, and the page says so")
         # The worker stopped half way, as the browser stops one whose page has
         # gone, or whose message has run five minutes: the next page goes on
         # with the download, with what it had.
@@ -1464,14 +1464,14 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                                                         ".then(r => r ? r.json() : {}).then(x => !x.current)"),
            f"the worker stopped part of the way through, with no copy yet ({first} of {len(m['chunks'])} chunks)")
         pg.goto(BASE + "/101:5")
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.have === 'kept'", timeout=120000)
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'kept'", timeout=120000)
         fetched = log.read_text().count("/offline/c/") - before
         ok(len(m["chunks"]) <= fetched <= len(m["chunks"]) + 4,
            f"the next page goes on with it by itself, fetching only what it lacked ({fetched} fetches for {len(m['chunks'])} chunks)")
         ok(pg.evaluate(SURE) is True and pg.evaluate(KEPT)["gz"] == len(m["chunks"]), "and the copy is whole, and answers first")
         n = asked_for(log, "/101:6")
         pg.goto(BASE + "/101:6")
-        ok(asked_for(log, "/101:6") == n and not pg.locator("footer[data-copy]").count() and icon(pg)["net"] == "on",
+        ok(asked_for(log, "/101:6") == n and not pg.locator("footer[data-copy]").count() and copy_state(pg)["net"] == "on",
            "the page after is read from the copy, the server not asked, unmarked")
         offline_tab(pg)
         wait_state(pg, "t.startsWith('Up to date')")
@@ -1532,7 +1532,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.locator("footer[data-copy]").count() == 1 and "read online" in pg.inner_text("main"),
            "and a page the copy does not hold says it is read online, marked as the copy's")
         offline_tab(pg)
-        pg.wait_for_function(f"document.querySelector('{ICON}').dataset.net === 'off'", timeout=10000)
+        pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.net === 'off'", timeout=10000)
         ok(pg.inner_text("dialog.settings .net").lower().startswith("offline"), "the tab, asking the site, says offline")
         pg.keyboard.press("Escape")
         srv.start()

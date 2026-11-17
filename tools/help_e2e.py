@@ -106,8 +106,9 @@ def run() -> int:
         ok(seen(pg) == "seen", "seen once the welcome is answered")
         steps = walk(pg)
         ok(steps[0] == "chips", f"the tour goes on at the entries: {steps}")
-        # 127.0.0.1 is a secure context, so the worker can run and the cloud is shown.
-        ok("cloud" in steps and "listen" in steps and "notes" in steps, f"the cloud, the ▶ and a note among them: {steps}")
+        # No cloud since 2026-11-17: the gear's step says what it said.
+        ok("cloud" not in steps and "gear" in steps and "listen" in steps and "notes" in steps,
+           f"the gear, the ▶ and a note among them, and no cloud: {steps}")
         ok(steps[-1] == "help", "and ends at the ?")
         ok(step(pg) is None and not pg.query_selector(".tour-card"), "Done ends it and lets the step go")
         pg.reload()
@@ -309,8 +310,9 @@ def run() -> int:
 
 # The server with no offline copy to offer (the manifest a 404), so that no page
 # registers the worker and fetches the copy, 48 MB to each fresh context: since
-# 2026-11-10 every page does where the site has one (static/offline.js).  The
-# cloud is shown all the same.  tools/offline_e2e.py is the test of the copy.
+# 2026-11-10 every page does where the site has one (static/offline.js).
+# Settings' Offline tab is shown all the same.  tools/offline_e2e.py is the
+# test of the copy.
 NO_COPY = """
 import pathlib, sys
 import uvicorn

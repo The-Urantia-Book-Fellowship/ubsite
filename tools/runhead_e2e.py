@@ -6,7 +6,7 @@ paper being read in view and its mark is a link home, a tap while words are
 selected does nothing, with Tap to turn the page on the top band shows it and the rest
 turns, the whole paper's page names the paper and not the section, a reading
 path names the paper of the paragraph, and a 1955 card and the head are never
-up together.
+up together.  And the header's flags on a phone, where they fit.
 
     .venv/bin/python tools/runhead_e2e.py        (after make data)
 
@@ -62,6 +62,12 @@ def named(pg) -> list[str]:
 
 def settle(pg) -> None:
     pg.wait_for_timeout(150)
+
+
+# Whether the flags are drawn, and whether the controls stand on the name's line.
+FLAGS = """(() => { const b = document.querySelector('.top .brand').getBoundingClientRect(),
+  c = document.querySelector('.top .ctl').getBoundingClientRect();
+  return {flags: document.querySelector('.top .langs').getClientRects().length > 0, line: c.top < b.bottom}; })()"""
 
 
 def run() -> int:
@@ -535,6 +541,49 @@ def run() -> int:
         pg3.evaluate("ubSettings.set('translations', '')")
         ctx3.close()
 
+        print("The flags on a phone, where they fit")
+        # Since 2026-11-17 (Tigran; never on a phone from 2026-11-10): beside
+        # the name where the controls then stay on its line, else left out
+        # (.noflags), unless the controls have a line of their own anyway.
+        # Measured that day: from 360px at Standard in English, 412 at Larger,
+        # 480 at Largest; in Russian 344, 375 and 430.
+        for lang, size, w, want in (("en", "100", 360, True), ("en", "100", 344, False),
+                                    ("en", "112.5", 412, True), ("en", "112.5", 390, False),
+                                    ("en", "125", 480, True), ("en", "125", 430, False),
+                                    ("en", "125", 320, True), ("ru", "100", 344, True),
+                                    ("ru", "112.5", 375, True), ("ru", "125", 412, False)):
+            c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": w, "height": 700})
+            c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_settings', '%s'); }"
+                              " catch (e) {}" % ('{"lang":"%s","uisize":"%s"}' % (lang, size)))
+            q = c.new_page()
+            q.on("pageerror", lambda e: errors.append(str(e)))
+            q.goto(BASE + "/1:1")
+            q.wait_for_timeout(300)
+            f = q.evaluate(FLAGS)
+            ok(f["flags"] == want and (f["line"] or f["flags"]),
+               f"{lang}, {size}%, {w}px: the flags {'shown' if f['flags'] else 'left out'},"
+               f" the controls {'beside the name' if f['line'] else 'on a line of their own'}")
+            c.close()
+        c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": 600, "height": 700})
+        c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_settings',"
+                          " '{\"uisize\":\"125\"}'); } catch (e) {}")
+        q = c.new_page()
+        q.on("pageerror", lambda e: errors.append(str(e)))
+        q.goto(BASE + "/1:1")
+        q.wait_for_timeout(300)
+        seen = []
+        for w in (600, 430, 600):
+            q.set_viewport_size({"width": w, "height": 700})
+            q.wait_for_timeout(150)
+            seen.append(q.evaluate(FLAGS)["flags"])
+        ok(seen == [True, False, True], f"a resize leaves them out and brings them back ({seen})")
+        q.set_viewport_size({"width": 430, "height": 700})
+        q.wait_for_timeout(150)
+        q.evaluate("ubSettings.set('lang', 'ru')")
+        q.wait_for_timeout(200)
+        ok(q.evaluate(FLAGS) == {"flags": True, "line": True}, "and a shorter name in Russian brings them back")
+        c.close()
+
         ok(not errors, "no script error: " + "; ".join(errors))
         b.close()
     return 1 if fails else 0
@@ -542,8 +591,9 @@ def run() -> int:
 
 # The server with no offline copy to offer (the manifest a 404), so that no page
 # registers the worker and fetches the copy, 48 MB to each fresh context: since
-# 2026-11-10 every page does where the site has one (static/offline.js).  The
-# cloud is shown all the same.  tools/offline_e2e.py is the test of the copy.
+# 2026-11-10 every page does where the site has one (static/offline.js).
+# Settings' Offline tab is shown all the same.  tools/offline_e2e.py is the
+# test of the copy.
 NO_COPY = """
 import pathlib, sys
 import uvicorn

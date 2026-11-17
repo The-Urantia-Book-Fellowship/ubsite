@@ -168,11 +168,15 @@ class Pages(unittest.TestCase):
             h = hashlib.sha256((STATIC / name).read_bytes()).hexdigest()[:10]
             self.assertIn(f"/static/{name}?v={h}", body)
         self.assertIn('<link rel="manifest" href="/manifest.webmanifest">', body)
-        # Work offline's icon, at the header's corner, which ub.js shows: a
-        # sign, opening Settings' Offline tab, since 2026-10-30 (its own menu,
-        # #offmenu, until then; Settings until 2026-10-14).
-        self.assertRegex(body, r'<button class="offline" type="button" aria-label="Online"[^>]*\n?[^>]*'
-                               r'data-src="/static/offline\.js\?v=')
+        # No cloud at the header's corner since 2026-11-17 (Tigran: Settings'
+        # Offline tab does all it did); from 2026-10-14 Work offline's sign,
+        # a menu of its own (#offmenu) until 2026-10-30.  What it held of the
+        # page's state is on the tab's panel: the site reached, what the copy
+        # is, and offline.js's address, which ub.js loads on every page.
+        self.assertNotIn('class="offline" type="button"', body)
+        self.assertNotIn('<path class="cloud"', body)
+        self.assertRegex(body, r'id="set-p-offline" aria-labelledby="set-t-offline" hidden'
+                               r' data-net="on" data-have="none" data-src="/static/offline\.js\?v=')
         self.assertNotIn("offmenu", body)
         # The site's address under the name, drawn by CSS from the page's own
         # (base.html's head script, --host): never written by the server, since
@@ -188,7 +192,7 @@ class Pages(unittest.TestCase):
         self.assertRegex(body, r'<button type="button" role="tab" id="set-t-offline"[^>]*'
                                r' class="offline" hidden>Offline</button>')
         fs = re.search(r'<div class="panel offline" role="tabpanel"\s+id="set-p-offline"'
-                       r' aria-labelledby="set-t-offline" hidden>(.*?)<p class="install" hidden></p>', body, re.S)
+                       r' aria-labelledby="set-t-offline" hidden[^>]*>(.*?)<p class="install" hidden></p>', body, re.S)
         self.assertTrue(fs)
         self.assertEqual(re.findall(r'name="(\w+)"', fs.group(1)), [])
         self.assertNotIn("autoupdate", settings.defaults())

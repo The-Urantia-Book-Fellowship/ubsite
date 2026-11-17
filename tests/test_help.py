@@ -56,7 +56,7 @@ class Static(unittest.TestCase):
     def test_steps_are_keyed_by_name_and_the_page_shows_them(self):
         steps = re.findall(r"\{ k: '(\w+)'", HELP_JS)
         self.assertEqual(steps, ["welcome", "chips", "cited", "search", "contents", "transport", "runhead",
-                                 "listen", "notes", "gear", "cloud", "help"])
+                                 "listen", "notes", "gear", "help"])
         page = (TEMPLATES / "help.html").read_text(encoding="utf-8")
         for k in re.findall(r"showme\('(\w+)'\)", page):
             self.assertIn(k, steps)
@@ -120,8 +120,8 @@ class Pages(unittest.TestCase):
         self.assertIn('<aside class="note" id="fn11_7_3_0">', body)
         self.assertIn('<nav class="transport"', body)
         self.assertIn('<div class="player"', body)
-        for have in ("none", "kept", "busy", "stale"):
-            self.assertIn(f'data-have="{have}"', body)
+        # The cloud in its states until it left the header (2026-11-17).
+        self.assertNotIn('<path class="cloud"', body)
         self.assertIn('/static/help.js?v=', body)
         # The ? is on this page too, and on the text's.
         self.assertIn('<details class="help" data-src=', body)

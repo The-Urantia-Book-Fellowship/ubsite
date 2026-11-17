@@ -170,8 +170,9 @@ a:hover { text-decoration-thickness: 2px; }
 .brand .host { font-size: .66rem; letter-spacing: .07em; color: var(--faint); margin-top: .15em;
                white-space: nowrap; }
 .brand .host::before { content: var(--host, ""); }
-/* The controls (base.html .ctl): the gear, the cloud, the flags and the ?,
-   at the header's end, the ? the corner. */
+/* The controls (base.html .ctl): the gear, the flags and the ?, at the
+   header's end, the ? the corner (the cloud between the gear and the flags
+   until 2026-11-17, Settings' Offline tab doing all it did). */
 .top .ctl { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
 /* The search box is the first thing a visitor should find, so it is a field
    of its own tone with a magnifier, not a hairline on the paper (2026-10-09:
@@ -197,7 +198,7 @@ a:hover { text-decoration-thickness: 2px; }
 :is(.gear, .runhead .set) svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
 :is(.gear, .runhead .set) :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
 .eg .gear { cursor: default; }
-.gear:hover, .top .offline:hover { color: var(--ink); }
+.gear:hover { color: var(--ink); }
 /* The flags beside it (base.html .langs): the interface in English or in
    Russian, the one chosen full, the other faded, each in its own proportions,
    edged so that the white of the tricolour shows on the paper. */
@@ -235,42 +236,28 @@ a:hover { text-decoration-thickness: 2px; }
 .offnews.about p { margin: .5rem 0 0; }
 .offnews.about .repo a { overflow-wrap: anywhere; }
 /* On a phone the header is two lines: the name with the controls at its
-   end, the gear, the cloud and the ?, closer together, and the search box on
+   end, the gear, the flags and the ?, closer together, and the search box on
    a line of its own, since its placeholder wants nearly the whole width
-   (316px in Russian).  The flags are not drawn there (Tigran, 2026-11-10):
-   Settings' Interface language, first in Reading, does what they do.  Where
-   even so the controls do not fit beside the name (320px in English, or a
-   larger interface), they go all together to the line under it, the ? at
-   its end.  Until that day the flags and the ? stood beside the name and a
+   (316px in Russian).  The flags only where they fit beside the name
+   (Tigran, 2026-11-17; with the cloud gone they do from 360px at Standard
+   in English, 412px at Larger and 480px at Largest): where they would take
+   the controls to a line of their own, ub.js leaves them out (.noflags), and
+   Settings' Interface language, first in Reading, does what they do.  From
+   2026-11-10 until then they were not drawn here at all, the name and the
+   controls, the cloud among them, having wanted 458px of the 324 a 360px
+   phone has.  Where even so the controls do not fit beside the name (a
+   narrow phone at the larger sizes: below 375px at Largest in English), they
+   go all together to the line under it, the flags with them, the ? at its
+   end.  Until 2026-11-10 the flags and the ? stood beside the name and a
    nav, with Contents, Index and the theme's shortcut, under the box: three
    lines, and four where the ? did not fit beside the flags (360px in
    English). */
 @media (max-width: 40rem) {
   .top, .top .ctl { column-gap: .6rem; }
-  .top .langs { display: none; }
+  .top.noflags .langs { display: none; }
   .top .ctl { order: 1; }
   .top .find { order: 2; flex-basis: 100%; }
 }
-/* Work offline's icon, at the header's corner: a cloud, struck through while
-   offline; a check in it while a copy is kept, an arrow while one downloads,
-   and the flame's dot when an update is waiting.  One drawing, its parts shown
-   by data-net and data-have (ub.js, static/offline.js). */
-.top .offline { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer;
-                align-self: center; }
-/* The same drawing in the Help page's examples (.eg), in each of its states. */
-:is(.top, .eg) .offline svg { width: 1.3rem; height: 1.04rem; display: block; overflow: visible; }
-:is(.top, .eg) .offline path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round;
-                     stroke-linejoin: round; }
-:is(.top, .eg) .offline .cloud { fill: var(--paper); }
-:is(.top, .eg) .offline :is(.tick, .down, .slash, .dot) { display: none; }
-:is(.top, .eg) .offline[data-net="on"]:is([data-have="kept"], [data-have="stale"]) .tick,
-:is(.top, .eg) .offline[data-net="on"][data-have="busy"] .down,
-:is(.top, .eg) .offline[data-net="off"] .slash { display: inline; }
-/* The dot offline too: the copy being read is out of date (Tigran, 2026-10-14). */
-:is(.top, .eg) .offline[data-have="stale"] .dot { display: inline; fill: var(--flame);
-                                        stroke: var(--paper); stroke-width: 1.2; }
-.eg .offline { display: block; color: var(--faint); }
-
 /* The footer: which edition this is, its licence, and that the site is not
    the Foundation's.  Shown on the home page, Help and the API's page alone
    (Tigran, 2026-11-14: "On the actual data pages it is wasting a lot of

@@ -209,6 +209,19 @@ class Pages(unittest.TestCase):
         self.assertIn('<span class="langs" hidden>', body)
         self.assertIn('<title data-ru="Списки">Lists</title>', lists)
 
+    def test_the_flags_on_a_phone_where_they_fit(self):
+        # Never on a phone from 2026-11-10; since 2026-11-17 wherever they fit
+        # beside the name, ub.js leaving them out (.noflags) where they would
+        # take the controls to a line of their own (tools/runhead_e2e.py).
+        css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
+        phone = css[css.index("@media (max-width: 40rem) {\n  .top, .top .ctl"):]
+        phone = phone[:phone.index("}\n}") + 3]
+        self.assertIn(".top.noflags .langs { display: none; }", phone)
+        self.assertNotIn(".top .langs { display: none; }", css)
+        js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
+        self.assertIn("flagTop.classList.add('noflags');", js)
+        self.assertIn("document.addEventListener('ub:settings', flagsFit);", js)
+
     def test_no_markup_where_it_cannot_stand(self):
         """Not in an attribute, the title, a menu's option, nor the player's JSON."""
         with drawn():

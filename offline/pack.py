@@ -10,7 +10,7 @@ that has it need not fetch it again.  The manifest lists them all, and its
 `build` is a hash of their names and hashes: it moves only when something the
 copy holds does.  `format` is the shape of the chunks; a worker that cannot
 read a copy's format fetches the whole of a new one.  `news` is what changed
-on the site, for the cloud's "What's new" (news.py), and not in `build`.
+on the site, for "What's new" (news.py), and not in `build`.
 
 The translations are apart, in `translations`, in Settings' order: each a
 download of its own, which a reader chooses (Settings' Offline tab), with its

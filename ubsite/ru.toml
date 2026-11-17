@@ -185,7 +185,6 @@
 "offline:recwith" = { en = "Keeping a recording downloads the offline copy with it.", ru = "Вместе с записью чтения загрузится и офлайн-копия." }
 "offline:recoffline" = { en = "Offline, a recording can be let go, and downloaded once online.", ru = "Без сети запись чтения можно удалить, а загрузить — когда сеть появится." }
 "offline:nolist" = { en = "The offline copy must update before a recording can be kept.", ru = "Чтобы сохранять записи чтения, сначала должна обновиться офлайн-копия." }
-"Downloading {v}: Paper {n}, {a} of {b}" = "Загружается {v}: Документ {n}, {a} из {b}"
 # The player's ↓ (listen.js drawKeep), for the paper being heard.
 "Keep this paper’s recording offline" = "Сохранить запись чтения этого документа"
 "This paper’s recording is kept offline" = "Запись чтения этого документа сохранена"
@@ -387,7 +386,7 @@
 "This page is read online." = "Эта страница читается только в сети."
 "offline:path" = { en = 'A reading path is read online: it is made of paragraphs this copy has, read in another order. The headword’s <a href="/i/{s}">page in the index</a> is here.', ru = 'Путь чтения читается только в сети: он состоит из абзацев, которые в этой копии есть, но в другом порядке. <a href="/i/{s}">Страница</a> этого заглавного слова в указателе здесь есть.' }
 
-# --- Work offline: the worker's words (sw.js), the menu (offline.js) and the cloud (ub.js)
+# --- Work offline: the worker's words (sw.js), and the Offline tab's (offline.js, ub.js)
 
 "the site has no offline copy ({s})" = "на сайте нет офлайн-копии ({s})"
 "this browser has an older worker; reload the page and try again" = "в этом браузере старый обработчик; перезагрузите страницу и попробуйте снова"
@@ -395,8 +394,6 @@
 "{x} arrived damaged" = "{x} пришёл повреждённым"
 "this browser has no room for it ({e})" = "в этом браузере нет для неё места ({e})"
 "Offline" = "Не в сети"
-"Offline: reading the copy kept in this browser" = "Не в сети: читается копия, сохранённая в этом браузере"
-"Online, with a copy kept for working offline" = "В сети; копия для работы без сети сохранена"
 "Offline · the copy of {d}" = "Не в сети · копия от {d}"
 
 # --- ub.js: Settings, the folds, a note's card
@@ -433,7 +430,11 @@
 "End of the paper" = "Конец документа"
 "Next: {l} ›" = "Далее: {l} ›"
 "The recording could not be loaded. Your browser’s voice can read without it." = "Запись не удалось загрузить. Голос вашего браузера может читать без неё."
-"Offline, this needs Work offline: the cloud at the top of the page." = "Без сети для этого нужна работа без сети: облачко вверху страницы."
+# The key is listen.js's literal, from when the cloud stood at the header's corner
+# (until 2026-11-17); its words are new, and the key is renamed when listen.js next
+# changes for its own sake: a change to that script is all 197 papers' chunks of
+# the offline copy again, 7.3 MB to every reader (CLAUDE.md trap 51).
+"Offline, this needs Work offline: the cloud at the top of the page." = { en = "Offline, this needs the offline copy: Settings, Offline.", ru = "Без сети для этого нужна офлайн-копия: Настройки, вкладка «Офлайн»." }
 "The text could not be loaded." = "Текст не удалось загрузить."
 "{v} needs a connection, and this browser has no voice of its own." = "Голосу {v} нужна сеть, а своего голоса у этого браузера нет."
 "Your browser could not speak ({e})." = "Ваш браузер не смог прочитать ({e})."
@@ -447,21 +448,15 @@
 "Updating…" = "Обновляется…"
 "Downloading: {a} of {b}" = "Загружается: {a} из {b}"
 "Downloading…" = "Загружается…"
-"Updating the offline copy: {a} of {b}" = "Офлайн-копия обновляется: {a} из {b}"
-"Updating the offline copy…" = "Офлайн-копия обновляется…"
-"Downloading the offline copy: {a} of {b}" = "Офлайн-копия загружается: {a} из {b}"
-"Downloading the offline copy…" = "Офлайн-копия загружается…"
 "The download stopped: {e}." = "Загрузка остановилась: {e}."
 "The download did not finish." = "Загрузка не завершилась."
 "Try again" = "Попробовать снова"
-"Online; the offline copy did not finish downloading" = "В сети; офлайн-копия загрузилась не до конца"
 "Out of date: kept as the site was on {d}, which has changed since." = "Устарела: сохранена такой, каким сайт был {d}, а с тех пор он изменился."
 "Update now ({s})" = "Обновить ({s})"
 "What’s new" = "Что нового"
 "It updates by itself once online." = "Она обновится сама, когда появится сеть."
 "It can be updated once online." = "Её можно будет обновить, когда появится сеть."
 "The last update stopped: {e}." = "Последнее обновление остановилось: {e}."
-"An update to the offline copy is waiting ({s})" = "Офлайн-копию можно обновить ({s})"
 "Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser." = "Свежая: сохранена такой, каким сайт был {d}, с текстом от {t} и указателем от {i}; в этом браузере занимает {s}."
 "The site reads from it, and asks the server only for what it does not hold." = "Сайт читает из неё, а к серверу обращается только за тем, чего в ней нет."
 "It can be downloaded only online." = "Загрузить её можно только в сети."
@@ -593,15 +588,10 @@
 "help:translations:cap" = { en = "The fold under a paragraph, where the window has no room for columns.", ru = "Строка под абзацем там, где в окне нет места для колонок." }
 "help:translations:2" = { en = "<b>Columns need room</b>: each must be wide enough to read, about half a full line of the text or more, and they come all together or not at all. To have them where the translations are in folds, fold the Contents or the index away, choose a smaller Text size, widen the window, or tick fewer translations; a tablet may have room for two columns, and a phone lying down. The × at the corner of a translation’s column stops showing it. The contents can be shown in a translation too, from the list on the Contents line. A part’s title page shows the translations you have ticked as well, under the English, or beside it in columns.", ru = "<b>Колонкам нужно место</b>: каждая должна быть достаточно широкой для чтения, примерно в половину полной строки текста или шире, и появляются они все вместе или не появляются вовсе. Чтобы увидеть их там, где переводы свёрнуты под абзацами, сверните Содержание или указатель, выберите меньший размер текста, расширьте окно или отметьте меньше переводов; для двух колонок места может хватить и на планшете, и на телефоне, повёрнутом набок. × в углу колонки перевода перестаёт его показывать. Содержание тоже можно показать по переводу — из списка в строке Содержания. Титульная страница части тоже показывает отмеченные переводы: под английским или в колонках рядом с ним." }
 "help:settings:1" = { en = "The gear in the header, or <kbd>Ctrl</kbd>+<kbd>,</kbd>, opens Settings, in five tabs: <b>Reading</b> (the interface’s language, theme, the interface’s text size and the text’s, line spacing, typeface, width, alignment, tapping to turn the page, the whole paper on one page, paragraph previews), <b>Show</b> (what stands beside the text: the index, red letter, references, pilcrows, notes, the 1955 readings, the quiz, tooltips), <b>Translations</b>, <b>Listening</b> (the voice, its speed, following along) and <b>Offline</b>. The button beside the title restores the defaults. Everything is kept in this browser only; nothing is sent anywhere.", ru = "Шестерёнка в шапке или <kbd>Ctrl</kbd>+<kbd>,</kbd> открывает Настройки в пяти вкладках: <b>Чтение</b> (язык интерфейса, тема, размер интерфейса и размер текста, межстрочный интервал, шрифт, ширина, выравнивание, листание касанием, документ целиком на одной странице, просмотр абзацев), <b>Показ</b> (что стоит рядом с текстом: указатель, красные слова, номера, знаки абзаца, примечания, разночтения 1955 года, викторина, подсказки), <b>Переводы</b>, <b>Аудио</b> (голос, скорость, слежение за чтением) и <b>Офлайн</b>. Кнопка рядом с заголовком восстанавливает настройки по умолчанию. Всё хранится только в этом браузере; никуда ничего не отправляется." }
-"help:offline:1" = { en = "The cloud in the header is the sign of the offline copy. The whole site, about 48 MB, downloads into this browser by itself on your first visit and keeps itself up to date; the site then reads from it, so pages and search open at once, and go on working without a connection. Tap the cloud, or open Settings’ <b>Offline</b> tab, to see it, as <b>Base</b>; translations and the recordings, a paper or a part at a time, can be kept there too. <b>Automatic updates</b>, a switch under it, can be turned off: the copy then stays as it is, and the site goes on reading from it, until you tap <b>Update now</b>. <b>Install as an app</b> puts it on the home screen or in the dock, where it opens on its own.", ru = "Облако в шапке — знак офлайн-копии. Весь сайт, около 48 МБ, сам загружается в этот браузер при первом посещении и сам обновляется; после этого сайт читает из копии, так что страницы и поиск открываются сразу и продолжают работать без связи. Нажмите на облако или откройте вкладку <b>Офлайн</b> в Настройках, чтобы увидеть её: она называется <b>База</b>; там же можно сохранить переводы и записи, по документу или по части. <b>Автоматическое обновление</b>, переключатель под ней, можно выключить: тогда копия остаётся как есть, и сайт продолжает читать из неё, пока вы не нажмёте <b>Обновить</b>. <b>Установить как приложение</b> помещает сайт на главный экран или в док, откуда он открывается сам по себе." }
-"Online, no copy yet" = "В сети, копии пока нет"
-"A copy is kept" = "Копия сохранена"
-"Downloading|cloud" = "Загружается"
-"An update is waiting" = "Ждёт обновление"
-"Offline, reading the copy" = "Офлайн, читается копия"
+"help:offline:1" = { en = "The whole site, about 48 MB, downloads into this browser by itself on your first visit and keeps itself up to date; the site then reads from it, so pages and search open at once, and go on working without a connection. Open Settings’ <b>Offline</b> tab to see it, as <b>Base</b>; translations and the recordings, a paper or a part at a time, can be kept there too. <b>Automatic updates</b>, a switch under it, can be turned off: the copy then stays as it is, and the site goes on reading from it, until you tap <b>Update now</b>. <b>Install as an app</b> puts it on the home screen or in the dock, where it opens on its own.", ru = "Весь сайт, около 48 МБ, сам загружается в этот браузер при первом посещении и сам обновляется; после этого сайт читает из копии, так что страницы и поиск открываются сразу и продолжают работать без связи. Откройте вкладку <b>Офлайн</b> в Настройках, чтобы увидеть её: она называется <b>База</b>; там же можно сохранить переводы и записи, по документу или по части. <b>Автоматическое обновление</b>, переключатель под ней, можно выключить: тогда копия остаётся как есть, и сайт продолжает читать из неё, пока вы не нажмёте <b>Обновить</b>. <b>Установить как приложение</b> помещает сайт на главный экран или в док, откуда он открывается сам по себе." }
 "help:offline:2" = { en = "On an iPhone, Safari deletes what a site keeps after seven days without a visit, unless the site is added to the Home Screen; so add it.", ru = "На iPhone Safari удаляет всё, что хранит сайт, через семь дней без посещений, если только сайт не добавлен на экран «Домой»; поэтому добавьте его." }
 "help:quiz:1" = { en = "At the end of each paper the Cosmic Citizenship Quiz asks its questions on that paper, one at a time; some have more than one right answer. Each answer shows the passage that settles it. <a href=\"/quiz\">Quiz</a> on the home page gathers them all, ten at random from the whole book or a part, and keeps your best score in this browser. A board, if you wish, puts your name beside your score.", ru = "В конце каждого документа викторина «Космическое гражданство» задаёт вопросы по нему, по одному; у некоторых больше одного правильного ответа. Каждый ответ показывает отрывок, который его решает. <a href=\"/quiz\">Викторина</a> на главной странице собирает их все, десять наугад по всей книге или по части, и хранит ваш лучший результат в этом браузере. Таблица результатов, если хотите, поставит ваше имя рядом с вашим результатом." }
-"help:russian:1" = { en = "The two flags at the header’s corner, or <b>Interface language</b>, first in Settings’ Reading tab, which a phone has in place of the flags, switch everything the site says between English and Russian: the header, Settings, the folds, the player, the quiz’s words, this page. The book itself, its index and appendices stay in English; the Russian translations are read beside the text, as above. Until one is chosen, the site follows the language of your browser.", ru = "Два флага в углу шапки или <b>Язык интерфейса</b>, первая строка вкладки «Чтение» в Настройках (на телефоне вместо флагов), переключают всё, что говорит сайт, между английским и русским: шапку, Настройки, свёрнутые строки, проигрыватель, слова викторины, эту страницу. Сама книга, её указатель и приложения остаются на английском; русские переводы читаются рядом с текстом, как описано выше. Пока язык не выбран, сайт следует языку вашего браузера." }
+"help:russian:1" = { en = "The two flags at the header’s corner, or <b>Interface language</b>, first in Settings’ Reading tab, which does the same on a narrow screen where the flags do not fit, switch everything the site says between English and Russian: the header, Settings, the folds, the player, the quiz’s words, this page. The book itself, its index and appendices stay in English; the Russian translations are read beside the text, as above. Until one is chosen, the site follows the language of your browser.", ru = "Два флага в углу шапки или <b>Язык интерфейса</b>, первая строка вкладки «Чтение» в Настройках (на узком экране, где флагам нет места, вместо них), переключают всё, что говорит сайт, между английским и русским: шапку, Настройки, свёрнутые строки, проигрыватель, слова викторины, эту страницу. Сама книга, её указатель и приложения остаются на английском; русские переводы читаются рядом с текстом, как описано выше. Пока язык не выбран, сайт следует языку вашего браузера." }
 "On a screen" = "Экран вперёд"
 "Back a screen" = "Экран назад"
 "Search for the words selected; with none, go to the search box" = "Искать выделенные слова; без выделения — перейти в строку поиска"
@@ -647,9 +637,7 @@
 "tour:notes:title" = { en = "Notes, and the 1955 readings", ru = "Примечания и разночтения 1955 года" }
 "tour:notes" = { en = "A small raised number is a study note; a tiny ring marks words the 1955 printing had otherwise. Tap either to read it in a card.", ru = "Маленькая приподнятая цифра — примечание; крошечное кольцо отмечает слова, которые в издании 1955 года читались иначе. Нажмите — и откроется карточка." }
 "tour:gear:title" = { en = "Settings", ru = "Настройки" }
-"tour:gear" = { en = "The interface’s language, typeface, sizes and theme; what is shown beside the text; Russian translations under each paragraph, or beside the English in columns; the voice and its speed. Kept in this browser only.", ru = "Язык интерфейса, шрифт, размеры и тема; что показывать рядом с текстом; русские переводы под каждым абзацем или рядом с английским в колонках; голос и его скорость. Хранится только в этом браузере." }
-"tour:cloud:title" = { en = "Read offline", ru = "Читать офлайн" }
-"tour:cloud" = { en = "The whole site keeps itself in this browser, about 48 MB, so that pages open at once and can be read with no connection; it can be installed as an app too. This sign shows the copy’s state, and opens the tab that says what is kept.", ru = "Весь сайт сам сохраняется в этом браузере, около 48 МБ, чтобы страницы открывались сразу и читались без связи; его можно и установить как приложение. Этот значок показывает состояние копии и открывает вкладку, где видно, что сохранено." }
+"tour:gear" = { en = "The interface’s language, typeface, sizes and theme; what is shown beside the text; Russian translations under each paragraph, or beside the English in columns; the voice and its speed; and, under Offline, the copy of the whole site this browser keeps, to read with no connection. All kept in this browser only.", ru = "Язык интерфейса, шрифт, размеры и тема; что показывать рядом с текстом; русские переводы под каждым абзацем или рядом с английским в колонках; голос и его скорость; и во вкладке «Офлайн» — копия всего сайта, которую хранит этот браузер, чтобы читать без связи. Всё хранится только в этом браузере." }
 "tour:help:title" = { en = "Help", ru = "Справка" }
 "tour:help" = { en = "All of this, with every key and every setting, is in Help, the first thing under this mark, and the tour can be taken again from there; What’s new? under it lists the site’s latest changes. Enjoy the book.", ru = "Всё это, со всеми клавишами и настройками, есть в Справке — первый пункт под этим знаком; оттуда же можно повторить экскурсию. Пункт «Что нового?» под ней перечисляет последние изменения сайта. Приятного чтения." }
 "The Help page is read online." = "Страница Справки читается онлайн."

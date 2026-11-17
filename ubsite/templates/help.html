@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% set title = 'Help' %}
-{% from "_chrome.html" import gear_svg, cloud_sign, help_svg, glass_svg, player_svg, keep_svg, playp %}
+{% from "_chrome.html" import gear_svg, help_svg, glass_svg, player_svg, keep_svg, playp %}
 {% from "_para.html" import para %}
 {% from "_fold.html" import afold %}
 {% from "_text.html" import chip, blanket, endnotes, quizcall %}
@@ -10,7 +10,8 @@
     beside it, its box of what the whole section cites, the paragraph with a
     1955 ring and a study note, whose cards open here as on the text's pages
     (ub.js, with the article around them as host), the search box, the
-    transport bar, the player drawn still, the gear, the cloud in its states.
+    transport bar, the player drawn still, the gear (the cloud in its states
+    too, until it left the header on 2026-11-17).
     A page, not a dialog: an address to link to (/help#listening), in the
     offline copy once (offline/pages.py misc), read with JavaScript off; the ?
     at the header's corner is a link to it.  "Take the tour" and each
@@ -222,17 +223,7 @@
   <section id="offline">
     <h2>{{ t('Working offline, and the app') }}</h2>
     <p>{{ t('help:offline:1') }}</p>
-    <div class="eg">
-      <div class="icons">
-        <span>{{ cloud_sign('on', 'none') }}{{ t('Online, no copy yet') }}</span>
-        <span>{{ cloud_sign('on', 'kept') }}{{ t('A copy is kept') }}</span>
-        <span>{{ cloud_sign('on', 'busy') }}{{ t('Downloading|cloud') }}</span>
-        <span>{{ cloud_sign('on', 'stale') }}{{ t('An update is waiting') }}</span>
-        <span>{{ cloud_sign('off', 'kept') }}{{ t('Offline, reading the copy') }}</span>
-      </div>
-    </div>
     <p>{{ t('help:offline:2') }}</p>
-    {{ showme('cloud') }}
   </section>
 
   <section id="quiz">

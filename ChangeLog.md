@@ -76,6 +76,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- On a phone, and in any narrow window, the flags for English and Russian are back beside the gear wherever they fit beside the site's name; where they do not, Settings' Interface language still does what they do.
 - On a phone the Contents' heading stays at the top of the screen while they are open, and where the running head's reference opened them, a tap on it takes you back to the paragraph you came from, as Back does.
 - The reference in the running head over a translation's paragraph opens the Contents as that translation gives them, for that opening; from an English paragraph they open as you chose them in the list at their head.
 - In the running head that a tap on the text brings, Settings' gear comes first and the site's mark after it, as the gear is the first of the header's controls.
@@ -157,6 +158,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Removed
 
+- The cloud at the header's corner: Settings' Offline tab, under the gear, says whether the site is reached and what this browser keeps, and does all the cloud did.
 - Settings' Translations in parallel columns: the columns now come by themselves where the window has room for them. On a phone, where the switch stood each translation under its paragraph, they are in the fold under it.
 - The half-dark circle in the header, which turned the theme light or dark: Settings' Theme does the same, and follows the device unless you choose otherwise.
 - The header's Contents and Index links: the contents are at the left of every page of the book and the index in its margin, each with its own button, and the home page names both under Other ways in.

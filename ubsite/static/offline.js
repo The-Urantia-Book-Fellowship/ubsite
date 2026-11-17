@@ -5,12 +5,13 @@
 // gone): online or offline, and which site this is; the copy, "Base", with
 // what it is, or how far its download has gone, under it; the translations
 // kept in it; and the offer to install the site as an app.  And what the
-// cloud at the header's corner shows of the copy, data-have: none, kept,
-// stale (an update is waiting: the flame's dot) or busy.  ub.js shows the
-// cloud, says online or offline, opens the tab from it, and loads this on
-// every page: at once on one the worker controls, once it has loaded on one
-// it does not.  The worker (static/sw.js) does the work, and answers {cmd} on
-// a message port with its state:
+// copy is, on the panel, data-have: none, kept, stale (an update is waiting)
+// or busy, which the cloud at the header's corner showed until 2026-11-17
+// (Tigran: "its functions are duplicated in the Settings => Offline menu").
+// ub.js shows the tab, says online or offline (the panel's data-net), and
+// loads this on every page: at once on one the worker controls, once it has
+// loaded on one it does not.  The worker (static/sw.js) does the work, and
+// answers {cmd} on a message port with its state:
 //
 //   have    the copy kept: {build, made, text, index, bytes, raw, tr, trs}, or null
 //   latest  the site's, when it is another: {made, fetch, full, ...}, or null
@@ -64,8 +65,8 @@
 // (sw.js meta.tr), not a setting, so ↺ never removes one; and it is kept up to
 // date with the copy.  `ub:trkept` tells ub.js's folds when it changes.
 (function () {
-  var panel = document.querySelector('dialog.settings .panel.offline'), icon = document.querySelector('.top .offline');
-  if (!panel || !icon || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
+  var panel = document.querySelector('dialog.settings .panel.offline');
+  if (!panel || !('serviceWorker' in navigator) || !window.isSecureContext || window.ubOfflineUI) return;
   window.ubOfflineUI = {};
   var sw = navigator.serviceWorker, line = panel.querySelector('.offcopy .state'),
       inst = panel.querySelector('.install'), autoBox = panel.querySelector('.offcopy input.auto'), kept = false;
@@ -117,13 +118,10 @@
     });
   }
 
-  // The icon: what the copy is, and while online, what it would say of it, its
-  // words in each language (T.tr()).  ub.js words the rest of its label, by
-  // whether this page is online.
-  function mark(have, say) {
-    icon.dataset.have = have;
-    icon.ubSay = say || null;
-    document.dispatchEvent(new Event('ub:offline'));
+  // What the copy is, on the panel: the page's own record of it (until
+  // 2026-11-17 the cloud's, which drew it, with words to say of it).
+  function mark(have) {
+    panel.dataset.have = have;
   }
 
   // An update can be had only online; offline, the tab says so instead.
@@ -133,9 +131,9 @@
   // offline, its buttons would do nothing (Tigran, 2026-10-16).  And a site
   // that answers is online, whatever the browser says: Chrome can say offline
   // with the network working, until it is restarted (2026-10-27).
-  function online() { return icon.dataset.net === 'on'; }
+  function online() { return panel.dataset.net === 'on'; }
   function reach(on) {
-    icon.dataset.net = on ? 'on' : 'off';
+    panel.dataset.net = on ? 'on' : 'off';
     document.dispatchEvent(new Event('ub:offline'));
   }
   function heard(s) {
@@ -172,14 +170,13 @@
       var of = s.busy.total && { a: mb(s.busy.done), b: mb(s.busy.total) };
       line.innerHTML = have ? (of ? T('Updating: {a} of {b}', of) : T('Updating…'))
                             : (of ? T('Downloading: {a} of {b}', of) : T('Downloading…'));
-      mark('busy', have ? (of ? T.tr('Updating the offline copy: {a} of {b}', of) : T.tr('Updating the offline copy…'))
-                        : (of ? T.tr('Downloading the offline copy: {a} of {b}', of) : T.tr('Downloading the offline copy…')));
+      mark('busy');
     } else if (!have) {
       // No copy yet, and none on its way: it stopped, and goes on by itself
       // from the next page (keepUp), or at once from the button.
       line.innerHTML = (err ? T('The download stopped: {e}.', { e: err }) : T('The download did not finish.')) +
                        (online() ? ' <button type="button" class="pill solid get">' + T('Try again') + '</button>' : '');
-      mark('none', T.tr('Online; the offline copy did not finish downloading'));
+      mark('none');
     } else if (up) {
       // Out of date.  Online it is updated by itself at once (keepUp), unless
       // the reader has turned that off, the browser is saving data or this
@@ -193,7 +190,7 @@
                              : online() ? '' : off ? T('It can be updated once online.')
                              : T('It updates by itself once online.')) +
                        (err ? '<br>' + T('The last update stopped: {e}.', { e: err }) : '');
-      mark('stale', T.tr('An update to the offline copy is waiting ({s})', { s: mb(up.fetch) }));
+      mark('stale');
     } else {
       // The index's date whatever Settings' `index`: the copy keeps the index
       // either way, and counts it in its size (Tigran, 2026-11-09; until then
@@ -202,10 +199,8 @@
       var at = { d: day(have.made), t: day(have.text.date), i: day(have.index.date), s: mb(have.bytes) };
       line.innerHTML = T('Up to date: kept as the site was on {d}, with the text of {t} and the index of {i}, {s} in this browser.', at) +
                        ' ' + T('The site reads from it, and asks the server only for what it does not hold.');
-      // A recording downloading shows on the cloud as the copy's download does.
-      var rb = s.audio && s.audio.busy;
-      mark(rb ? 'busy' : 'kept', rb ? T.tr('Downloading {v}: Paper {n}, {a} of {b}',
-        { v: recName(rb.v), n: rb.n, a: mbw(rb.done), b: mbw(rb.total) }) : null);
+      // A recording downloading is busy, as the copy's download is.
+      mark(s.audio && s.audio.busy ? 'busy' : 'kept');
     }
   }
   // The translations: each one's tick what the copy keeps or is fetching, and

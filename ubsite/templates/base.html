@@ -202,15 +202,13 @@ window.ubUnit = function (where) {
     <button class="gear" type="button" {{ ta('aria-label', 'Settings') }} {{ ta('title', 'Settings (Ctrl+,)') }}
             aria-keyshortcuts="Control+Comma" aria-haspopup="dialog" hidden>
       {{ chrome.gear_svg() }}</button>
-    {#- Work offline: whether this page is online or offline, and whether a copy
-        is kept, drawn as one cloud whose parts ub.css shows by data-net and
-        data-have.  A sign, which opens Settings at its Offline tab, where the
-        copy is kept and let go (until 2026-10-30 it opened a menu of its own,
-        #offmenu).  Shown by ub.js only where a service worker can run. #}
-    <button class="offline" type="button" {{ ta('aria-label', 'Online') }} {{ ta('title', 'Online') }}
-      hidden data-net="on" data-have="none" data-src="{{ asset('offline.js') }}">
-      {{ chrome.cloud_svg() }}</button>
-  {#- The interface's language, at the corner, after the cloud: the Union Jack and the Russian
+    {#- No cloud since 2026-11-17 (Tigran: "its functions are duplicated in the
+        Settings => Offline menu"): from 2026-10-14 Work offline's sign, which
+        said whether this page was online and whether a copy was kept, and
+        opened Settings at its Offline tab (a menu of its own until
+        2026-10-30).  What it held of the page's state, data-net, data-have and
+        offline.js's address, is on that tab's panel now. #}
+  {#- The interface's language, at the corner, after the gear: the Union Jack and the Russian
       tricolour, each named in its own language, the one chosen full and the
       other faded (Tigran, 2026-10-25).  Drawn, never emoji, which Windows
       has none of.  Hidden until ub.js runs, and while the site has only
@@ -282,7 +280,8 @@ window.ubUnit = function (where) {
     <div class="panels">
     {%- for g in setgroups %}
     <div class="panel{% if loop.first %} on{% endif %}{% if g.cls %} {{ g.cls }}{% endif %}" role="tabpanel"
-         id="set-p-{{ g.key }}" aria-labelledby="set-t-{{ g.key }}"{% if g.cls %} hidden{% endif %}>
+         id="set-p-{{ g.key }}" aria-labelledby="set-t-{{ g.key }}"{% if g.cls %} hidden{% endif %}
+         {%- if g.key == 'offline' %} data-net="on" data-have="none" data-src="{{ asset('offline.js') }}"{% endif %}>
       {%- for it in g["items"] %}
       {#- Built inside the tag, so fonts.py, which reads a template's text for the
           characters to subset, does not count it as words on the page. #}
@@ -387,7 +386,11 @@ window.ubUnit = function (where) {
           and reads the site from (Tigran, 2026-11-10; a tick until then, which
           downloaded it and let it go), so a name and its hint, with nothing to
           tick.  Under it what the copy is, or how far its download has gone,
-          which offline.js writes.  Then the translations kept in the
+          which offline.js writes.  The panel itself holds the page's state,
+          data-net, the site reached or not (ub.js, offline.js), data-have,
+          what the copy is (offline.js), and data-src, offline.js's address,
+          which ub.js loads on every page: the header's cloud held them until
+          2026-11-17.  Then the translations kept in the
           copy, each a download of its own (ROADMAP item 15), the worker keeping
           them with it (meta.tr): a tick downloads one at once, with the copy
           where none is kept yet, and an untick lets it go (Tigran, 2026-10-26
