@@ -1,0 +1,63 @@
+{% extends "base.html" %}{% set title = 'Privacy' %}
+{#- What the site keeps about a reader, and what it does not (Tigran,
+    2026-11-18, with accounts: Google's verification of a sign-in asks for the
+    page, and a reader is owed it the day the site first keeps a name).  A
+    page of the server's and of the offline copy (offline/pages.py misc),
+    linked from the footer, which it shows as the home page does (main.legal,
+    ub.css).  Every word is in both languages (ru.toml, privacy:*).
+
+    Each statement of what is kept is one the code or a host bears out:
+    the counter's fields (ubsite/visits.sql), the web server's 14 days (each
+    host's /etc/logrotate.d/nginx), the place database (visits.py GEOIP),
+    what the browser keeps (ub.js), the board (ubsite/board.py).  Change it
+    with what it describes, and the date in privacy:lead with it
+    (tests/test_legal.py holds the date to the day named there, in both
+    languages). #}
+{% block body %}
+<main class="prose legal">
+  <h1>{{ t('Privacy') }}</h1>
+  <p class="lead">{{ t('privacy:lead') }}</p>
+
+  <h2>{{ t('Who runs the site') }}</h2>
+  <p>{{ t('privacy:who', mail=contact) }}</p>
+
+  <h2>{{ t('Reading needs no account') }}</h2>
+  <p>{{ t('privacy:reading') }}</p>
+
+  <h2>{{ t('What the server records of a visit') }}</h2>
+  <p>{{ t('privacy:visit:1') }}</p>
+  <p>{{ t('privacy:visit:2') }}</p>
+  <p>{{ t('privacy:visit:3') }}</p>
+
+  <h2>{{ t('The web server’s own log') }}</h2>
+  <p>{{ t('privacy:log') }}</p>
+
+  <h2>{{ t('What stays in your browser') }}</h2>
+  <p>{{ t('privacy:browser') }}</p>
+
+  <h2>{{ t('The quiz’s board') }}</h2>
+  <p>{{ t('privacy:board') }}</p>
+
+  <h2>{{ t('Signing in with Google') }}</h2>
+  <p>{{ t('privacy:account:1') }}</p>
+  <p>{{ t('privacy:account:2') }}</p>
+  <p>{{ t('privacy:account:3') }}</p>
+  <p>{{ t('privacy:account:4') }}</p>
+  <p>{{ t('privacy:account:5') }}</p>
+
+  <h2>{{ t('What the site does not do') }}</h2>
+  <p>{{ t('privacy:not') }}</p>
+
+  <h2>{{ t('Why, and on what ground') }}</h2>
+  <p>{{ t('privacy:why') }}</p>
+
+  <h2>{{ t('Your rights') }}</h2>
+  <p>{{ t('privacy:rights') }}</p>
+
+  <h2>{{ t('Children') }}</h2>
+  <p>{{ t('privacy:children') }}</p>
+
+  <h2>{{ t('Changes to this page') }}</h2>
+  <p>{{ t('privacy:changes') }}</p>
+</main>
+{% endblock %}

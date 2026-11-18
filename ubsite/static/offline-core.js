@@ -181,6 +181,8 @@
     if (path === '/api') return { res: away(sh, T('The page about the text API is read online.')) };
     // And one made before 2026-11-06 keeps no Help.
     if (path === '/help') return { res: away(sh, T('The Help page is read online.')) };
+    // Nor does one made before 2026-11-18 keep Privacy and Terms.
+    if (path === '/privacy' || path === '/terms') return { res: away(sh, T('This page is read online.')) };
     if (path === '/stats') return { res: away(sh, T('This page is read online.')) };
     if (path === '/quiz/board') return { res: away(sh, T('The quiz board is read online.')) };
     // The chart of the personalities (app.py cosmology_page), a chunk of its

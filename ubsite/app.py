@@ -708,6 +708,11 @@ T.env.globals["sites"] = SITES
 # header's corner; ub.js draws the window).
 REPO = "https://github.com/The-Urantia-Book-Fellowship/ubsite"
 T.env.globals["repo"] = REPO
+# Whom a reader writes to about what the site keeps and about its terms
+# (privacy.html, terms.html): the address /api gives for questions about the
+# API.  In the code, not a host's own, since the pages are kept in the offline
+# copy, which is one for every host.
+CONTACT = "tigran.aivazian@urantiabook.org"
 
 
 def _site(request: Request) -> tuple[str, str]:
@@ -1723,6 +1728,21 @@ def help_page(request: Request):
     return page(request, "help.html", paper=p, eg=d, eg_text=eg_text, eg_index=eg_index, eg_notes=eg_notes,
                 go=transport(con, paper, sec), nquiz=queries.quiz_count(con, paper),
                 playtimes=play_times(section_audio(con, s["id"])))
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy_page(request: Request):
+    """What the site keeps about a reader and what it does not
+    (templates/privacy.html; Tigran, 2026-11-18, with accounts).  A page, in
+    both languages, linked from the footer and kept in the offline copy
+    (offline/pages.py misc)."""
+    return page(request, "privacy.html", contact=CONTACT)
+
+
+@app.get("/terms", response_class=HTMLResponse)
+def terms_page(request: Request):
+    """The site's terms (templates/terms.html), beside /privacy and made as it is."""
+    return page(request, "terms.html", contact=CONTACT)
 
 
 # The passage /api shows a reply for: across a section's end, so that the reply

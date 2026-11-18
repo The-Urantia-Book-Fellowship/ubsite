@@ -281,7 +281,8 @@ def run() -> int:
 
         # The footer, the edition's licence and the site's disclaimer, is shown on
         # the home page, Help and the API's page, and nowhere else (Tigran,
-        # 2026-11-14); it is in every page's markup all the same.
+        # 2026-11-14), but on Privacy and Terms, which it links (2026-11-18);
+        # it is in every page's markup all the same.
         print("The footer")
         ctx = b.new_context(viewport={"width": 1380, "height": 860})
         ctx.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
@@ -293,11 +294,13 @@ def run() -> int:
                            b = document.querySelector('.fbar'), bh = b && b.getClientRects().length ? b.getBoundingClientRect().height : 0;
             return [p.length, p.filter(x => getComputedStyle(x).display !== 'none').length,
                     Math.round(f.getBoundingClientRect().height - bh), getComputedStyle(f).borderTopWidth]; })()"""
-        for path in ("/", "/help", "/api"):
+        for path in ("/", "/help", "/api", "/privacy", "/terms"):
             pg.goto(BASE + path)
             f = pg.evaluate(foot)
             ok(f[0] == 2 and f[1] == 2 and f[3] == "1px" and "CC" in pg.inner_text("footer"),
                f"{path} has the footer, its licence and its disclaimer")
+            ok(pg.locator('footer a[href="/privacy"]').is_visible() and pg.locator('footer a[href="/terms"]').is_visible(),
+               f"{path}'s footer links Privacy and Terms")
         for path in ("/1:1", "/1", "/read", "/index", "/i/god", "/appendix/B", "/lists", "/quiz", "/changelog", "/cosmology"):
             pg.goto(BASE + path)
             f = pg.evaluate(foot)

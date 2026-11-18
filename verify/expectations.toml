@@ -219,8 +219,8 @@ pace  = [0.8, 3.0]               # his median 1.63 words of the translation a se
                                  # paragraphs between 1.2 and 2.2, none outside 0.88-2.68
 
 [offline]
-measured_on = "2026-11-16"
-pages       = 10614      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,881 reading paths,
+measured_on = "2026-11-18"
+pages       = 10616      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,881 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
                          # 197 more the same day: the whole paper's page, /N, joined from its
@@ -236,6 +236,7 @@ pages       = 10614      # 1,626 sections, 4,735 headwords, 27 index letters, 21
                          # path, in book order or by theme (10,613 before);
                          # four more the same evening, at index 194519e, its readings of Papers 58
                          # and 59: dust and Wales have reading paths, in book order and by theme
+                         # (10,614 then); and two more since 2026-11-18: /privacy and /terms
 paths       = 3881       # 2,058 headwords in book order, 1,823 of them by theme too, since dust and Wales
                          # have paths at index 194519e (2026-11-16); 2,056 and 1,821 before; (2,057 and 1,822
                          # until 2026-11-16: Venus (planet) has no path since the index's reading of

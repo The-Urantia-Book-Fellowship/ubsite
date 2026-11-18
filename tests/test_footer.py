@@ -48,14 +48,15 @@ class Footer(unittest.TestCase):
             status, _, body = get(url)
             self.assertEqual(status, 200, url)
             self.assertEqual(body[body.rindex("<footer>"):body.rindex("</footer>")], self.footer, url)
-        for url, cls in (("/", "front"), ("/help", "helppage"), ("/api", "api")):
+        for url, cls in (("/", "front"), ("/help", "helppage"), ("/api", "api"), ("/privacy", "legal"),
+                         ("/terms", "legal")):
             _, _, body = get(url)
             self.assertRegex(body, r'<main class="[^"]*\b%s\b' % cls, url)
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
         self.assertIn("footer p { display: none;", css)
-        self.assertIn("main:is(.front, .helppage, .api) ~ footer p { display: block; }", css)
+        self.assertIn("main:is(.front, .helppage, .api, .legal) ~ footer p { display: block; }", css)
         # The line that says a page is from the offline copy is shown wherever it is so.
-        self.assertIn("main:is(.front, .helppage, .api) ~ footer, footer[data-copy] {", css)
+        self.assertIn("main:is(.front, .helppage, .api, .legal) ~ footer, footer[data-copy] {", css)
         # And the room for the player under a page's foot is still the footer's.
         self.assertIn("body.listening footer { padding-bottom: 5.5rem; }", css)
 

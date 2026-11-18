@@ -1,0 +1,46 @@
+{% extends "base.html" %}{% set title = 'Terms of use' %}
+{#- The site's terms (Tigran, 2026-11-18, with accounts, whose first sign-in
+    asks a reader to accept them).  Beside privacy.html, and made as it is: a
+    page of the server's and of the offline copy, linked from the footer, in
+    both languages (ru.toml, terms:*).
+
+    Not the Urantia Library's terms, which this is modelled on, in two
+    things (agreed 2026-11-09): that library forbids taking it in bulk and
+    passing its materials on, and this site invites both, by Work offline, by
+    the text API and by its licences, which is what "What you may do with what
+    is here" says. #}
+{% block body %}
+<main class="prose legal">
+  <h1>{{ t('Terms of use') }}</h1>
+  <p class="lead">{{ t('terms:lead') }}</p>
+
+  <h2>{{ t('These terms') }}</h2>
+  <p>{{ t('terms:accept') }}</p>
+
+  <h2>{{ t('What the site is') }}</h2>
+  <p>{{ t('terms:what') }}</p>
+
+  <h2>{{ t('What you may do with what is here') }}</h2>
+  <p>{{ t('terms:licence:1') }}</p>
+  <p>{{ t('terms:licence:2') }}</p>
+  <p>{{ t('terms:licence:3') }}</p>
+
+  <h2>{{ t('Fair use of the site') }}</h2>
+  <p>{{ t('terms:use') }}</p>
+
+  <h2>{{ t('Accounts') }}</h2>
+  <p>{{ t('terms:accounts') }}</p>
+
+  <h2>{{ t('The quiz’s board') }}</h2>
+  <p>{{ t('terms:board') }}</p>
+
+  <h2>{{ t('No warranty') }}</h2>
+  <p>{{ t('terms:warranty') }}</p>
+
+  <h2>{{ t('Changes, and the law') }}</h2>
+  <p>{{ t('terms:changes') }}</p>
+
+  <h2>{{ t('Questions') }}</h2>
+  <p>{{ t('terms:contact', mail=contact) }}</p>
+</main>
+{% endblock %}

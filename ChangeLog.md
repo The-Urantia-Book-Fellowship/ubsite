@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Privacy and Terms, two pages linked from the foot of the home page: what the site records of a visit and what it does not (no IP address, no cookie), what stays in your browser, and what an account will keep once signing in with Google arrives.
 - The home page shows a passage of the moment: a few sentences of the book, another at each visit, with the way to their place.
 - On the home page, a line over the header offers to install the site as an app, where the browser can; its cross puts it away for good.
 - The bar at the foot of the home page says how the offline copy stands, up to date, downloading, out of date or offline, and opens Settings' Offline tab.
