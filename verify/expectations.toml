@@ -78,7 +78,10 @@ figures_free         = 26
 # more than one; Tigran mended 30 of them on 2026-10-29 (0992882 to d6c3206),
 # from the checking of every question (var/quiz/flags.md): three deleted, one
 # moved to another paper, two new.
-source_commit = "d6c3206"
+# 0a1f055 since 2026-11-18: one question's wording mended there by Tigran, id 94
+# ("spare respiration" for space), its line of the ledger moved to the question
+# as edited (apply.py same) and ruled again from his review; every count as at d6c3206.
+source_commit = "0a1f055"
 measured_on   = "2026-10-30"
 questions            = 817
 papers               = 126       # of the 197; 29 of them have one question, Paper 0 57; 125 have one

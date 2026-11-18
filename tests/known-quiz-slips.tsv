@@ -1,5 +1,5 @@
 # The quiz's slips: what build/quiz.py finds in what the site shows, and the
-# study edition has not yet mended (quiz.tex at d6c3206; data/quiz/README.md).
+# study edition has not yet mended (quiz.tex at 0a1f055; data/quiz/README.md).
 # The build requires exactly these: a new one fails, and so does one mended
 # upstream and still listed here.  `note` gives the quiz.tex line of the
 # question's \qstart, for finding it; the build reads only kind, id and what.
