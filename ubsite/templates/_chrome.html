@@ -16,6 +16,15 @@
 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.6"/><path d="M5.95 6.35a2.05 2.05 0 1 1 2.95 1.85c-.6.3-.9.7-.9 1.3v.25"/><circle class="dot" cx="8" cy="11.7" r=".62"/></svg>
 {%- endmacro %}
 
+{#- Light or dark: a ring with one half filled, drawn as the gear is.  Back
+    in the header since 2026-11-18 (Tigran), where from the first day until
+    2026-11-10 it was the glyph U+25D0, set in the system's face, UB Goudy
+    having none: "it doesn't look right even on the desktop", he said as it
+    went.  Drawn, it is the gear's and the ?'s weight and size. -#}
+{% macro theme_svg() -%}
+<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.6"/><path class="half" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/></svg>
+{%- endmacro %}
+
 {#- The search box's magnifier. -#}
 {% macro glass_svg() -%}
 <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>

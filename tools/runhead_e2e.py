@@ -68,7 +68,8 @@ def settle(pg) -> None:
 # Whether the flags are drawn, and whether the controls stand on the name's line.
 FLAGS = """(() => { const b = document.querySelector('.top .brand').getBoundingClientRect(),
   c = document.querySelector('.top .ctl').getBoundingClientRect();
-  return {flags: document.querySelector('.top .langs').getClientRects().length > 0, line: c.top < b.bottom}; })()"""
+  return {flags: document.querySelector('.top .langs').getClientRects().length > 0, line: c.top < b.bottom,
+          theme: document.querySelector('.top .theme').getClientRects().length > 0}; })()"""
 
 
 def run() -> int:
@@ -701,12 +702,21 @@ def run() -> int:
         # the name where the controls then stay on its line, else left out
         # (.noflags), unless the controls have a line of their own anyway.
         # Measured that day: from 360px at Standard in English, 412 at Larger,
-        # 480 at Largest; in Russian 344, 375 and 430.
-        for lang, size, w, want in (("en", "100", 360, True), ("en", "100", 344, False),
-                                    ("en", "112.5", 412, True), ("en", "112.5", 390, False),
-                                    ("en", "125", 480, True), ("en", "125", 430, False),
-                                    ("en", "125", 320, True), ("ru", "100", 344, True),
-                                    ("ru", "112.5", 375, True), ("ru", "125", 412, False)):
+        # 480 at Largest; in Russian 344, 375 and 430.  With the half-disc of
+        # light or dark back beside the gear (Tigran, 2026-11-18), 27px of the
+        # line: from 380, 428 and 474; in Russian 358, 404 and 448.  And the
+        # half-disc itself gives way where the controls would go under the name
+        # even with the flags out (.notheme): below 356px at Larger in English
+        # and 396 at Largest, 370 at Largest in Russian; where the gear and
+        # the ? alone do not fit, the controls have a line of their own and
+        # everything is on it.
+        for lang, size, w, want, half in (
+                ("en", "100", 384, True, True), ("en", "100", 360, False, True), ("en", "100", 320, False, True),
+                ("en", "112.5", 430, True, True), ("en", "112.5", 412, False, True), ("en", "112.5", 344, False, False),
+                ("en", "125", 480, True, True), ("en", "125", 430, False, True), ("en", "125", 390, False, False),
+                ("en", "125", 320, True, True), ("ru", "100", 360, True, True), ("ru", "100", 344, False, True),
+                ("ru", "112.5", 412, True, True), ("ru", "112.5", 375, False, True), ("ru", "125", 412, False, True),
+                ("ru", "125", 360, False, False)):
             c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": w, "height": 700})
             c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_settings', '%s'); }"
                               " catch (e) {}" % ('{"lang":"%s","uisize":"%s"}' % (lang, size)))
@@ -715,8 +725,9 @@ def run() -> int:
             q.goto(BASE + "/1:1")
             q.wait_for_timeout(300)
             f = q.evaluate(FLAGS)
-            ok(f["flags"] == want and (f["line"] or f["flags"]),
+            ok(f["flags"] == want and f["theme"] == half and (f["line"] or (f["flags"] and f["theme"])),
                f"{lang}, {size}%, {w}px: the flags {'shown' if f['flags'] else 'left out'},"
+               f" the half-disc {'shown' if f['theme'] else 'left out'},"
                f" the controls {'beside the name' if f['line'] else 'on a line of their own'}")
             c.close()
         c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": 600, "height": 700})
@@ -732,11 +743,27 @@ def run() -> int:
             q.wait_for_timeout(150)
             seen.append(q.evaluate(FLAGS)["flags"])
         ok(seen == [True, False, True], f"a resize leaves them out and brings them back ({seen})")
-        q.set_viewport_size({"width": 430, "height": 700})
+        # At 460px, since the half-disc came back: at Largest the flags fit
+        # from 474px in English and from 448 in Russian (430px, with 440 and
+        # 414, until 2026-11-18).
+        q.set_viewport_size({"width": 460, "height": 700})
         q.wait_for_timeout(150)
+        en460 = q.evaluate(FLAGS)
         q.evaluate("ubSettings.set('lang', 'ru')")
         q.wait_for_timeout(200)
-        ok(q.evaluate(FLAGS) == {"flags": True, "line": True}, "and a shorter name in Russian brings them back")
+        ok(en460 == {"flags": False, "line": True, "theme": True}
+           and q.evaluate(FLAGS) == {"flags": True, "line": True, "theme": True},
+           "and a shorter name in Russian brings them back, the half-disc there in both")
+        # The half-disc flips the theme in effect, and the choice is kept.
+        was = q.evaluate("document.documentElement.dataset.theme || ''")
+        q.locator(".top .theme").tap()
+        q.wait_for_timeout(200)
+        one = q.evaluate("[document.documentElement.dataset.theme, JSON.parse(localStorage.getItem('ub_settings')).theme]")
+        q.locator(".top .theme").tap()
+        q.wait_for_timeout(200)
+        two = q.evaluate("[document.documentElement.dataset.theme, JSON.parse(localStorage.getItem('ub_settings')).theme]")
+        ok(was == "" and one == ["dark", "dark"] and two == ["light", "light"],
+           f"a tap on the half-disc goes dark from the device's light, and the next light ({was!r}, {one}, {two})")
         c.close()
 
         ok(not errors, "no script error: " + "; ".join(errors))

@@ -170,6 +170,20 @@
     }
   });
 
+  // The half-disc beside the gear flips light and dark, a shortcut to
+  // Settings' Theme (Tigran, 2026-11-18; it was in the header until
+  // 2026-11-10).  From System it goes to the other of what the device shows,
+  // and Settings alone gives System back.
+  var themeBtn = document.querySelector('.top .theme');
+  if (themeBtn) {
+    themeBtn.hidden = false;
+    themeBtn.addEventListener('click', function () {
+      var t = load().theme;
+      var dark = t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+      window.ubSettings.set('theme', dark ? 'light' : 'dark');
+    });
+  }
+
   var gear = document.querySelector('.gear'), dlg = document.querySelector('dialog.settings');
   if (gear && dlg && dlg.showModal) {
     gear.hidden = false;
@@ -1799,28 +1813,34 @@
       var b = ev.target.closest('.flag');
       if (b) window.ubSettings.set('lang', b.dataset.to);
     });
-    // On a phone (ub.css, under 40rem) the flags stand only where they fit
-    // beside the name (Tigran, 2026-11-17; never there from 2026-11-10 until
-    // then): where they would take the controls to a line of their own, they
-    // are left out (.noflags), unless the controls have that line anyway.
-    // Asked again as the window, the language, a size or the typeface
-    // changes, and once the fonts are in.  Measured with nothing painted
-    // between, so nothing is seen to move.
-    var flagTop = document.querySelector('.top'), flagName = flagTop && flagTop.querySelector('.brand'),
-        flagCtl = flagTop && flagTop.querySelector('.ctl'), flagPhone = matchMedia('(max-width: 40rem)');
-    var flagsFit = function () {
-      if (!flagName || !flagCtl) return;
-      var below = function () { return flagCtl.getBoundingClientRect().top >= flagName.getBoundingClientRect().bottom - 1; };
-      flagTop.classList.remove('noflags');
-      if (!flagPhone.matches || !below()) return;
-      flagTop.classList.add('noflags');
-      if (below()) flagTop.classList.remove('noflags');
-    };
-    flagsFit();
-    addEventListener('resize', flagsFit);
-    document.addEventListener('ub:settings', flagsFit);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(flagsFit);
   }
+  // On a phone (ub.css, under 40rem) the flags stand only where they fit
+  // beside the name (Tigran, 2026-11-17; never there from 2026-11-10 until
+  // then): where they would take the controls to a line of their own, they
+  // are left out (.noflags); and where the controls would go under the name
+  // even so, the half-disc of light or dark is left out too (.notheme; it
+  // came back on 2026-11-18, and is not to make a header of two lines one of
+  // three), Settings doing what each does.  Where the gear and the ? alone
+  // do not fit beside the name, the controls have a line of their own, and
+  // everything stands on it.  Asked again as the window, the language, a
+  // size or the typeface changes, and once the fonts are in.  Measured with
+  // nothing painted between, so nothing is seen to move.
+  var flagTop = document.querySelector('.top'), flagName = flagTop && flagTop.querySelector('.brand'),
+      flagCtl = flagTop && flagTop.querySelector('.ctl'), flagPhone = matchMedia('(max-width: 40rem)');
+  var flagsFit = function () {
+    if (!flagName || !flagCtl) return;
+    var below = function () { return flagCtl.getBoundingClientRect().top >= flagName.getBoundingClientRect().bottom - 1; };
+    flagTop.classList.remove('noflags', 'notheme');
+    if (!flagPhone.matches || !below()) return;
+    flagTop.classList.add('noflags');
+    if (!below()) return;
+    flagTop.classList.add('notheme');
+    if (below()) flagTop.classList.remove('noflags', 'notheme');
+  };
+  flagsFit();
+  addEventListener('resize', flagsFit);
+  document.addEventListener('ub:settings', flagsFit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(flagsFit);
 
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
   // endnote's words (section.html), which are hidden while this runs, and a

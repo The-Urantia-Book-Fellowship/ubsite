@@ -221,10 +221,14 @@ class Pages(unittest.TestCase):
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
         phone = css[css.index("@media (max-width: 40rem) {\n  .top, .top .ctl"):]
         phone = phone[:phone.index("}\n}") + 3]
-        self.assertIn(".top.noflags .langs { display: none; }", phone)
+        # And the half-disc of light or dark, back on 2026-11-18, gives way
+        # after them (.notheme) before the controls would go under the name.
+        self.assertIn(".top.noflags .langs, .top.notheme .theme { display: none; }", phone)
         self.assertNotIn(".top .langs { display: none; }", css)
         js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
         self.assertIn("flagTop.classList.add('noflags');", js)
+        self.assertLess(js.index("flagTop.classList.add('noflags');"), js.index("flagTop.classList.add('notheme');"))
+        self.assertIn("if (below()) flagTop.classList.remove('noflags', 'notheme');", js)
         self.assertIn("document.addEventListener('ub:settings', flagsFit);", js)
 
     def test_no_markup_where_it_cannot_stand(self):

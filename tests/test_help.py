@@ -39,10 +39,21 @@ class Static(unittest.TestCase):
         # the header, so that on a phone the controls wrap as one (ub.css .ctl).
         self.assertRegex(head, r'</details>\n  </div>\n</header>')
         self.assertLess(head.index('<div class="ctl">'), head.index('<button class="gear"'))
-        # No nav and no theme button in the header since the same day.
+        # No nav in the header since the same day.  The theme's half-disc went
+        # with it and is back since 2026-11-18 (Tigran), beside the gear and
+        # before the flags, a button drawn as the gear is and, like it, hidden
+        # until ub.js runs; named in both languages.
         top = head[head.index('<header class="top">'):head.index('</header>')]
         self.assertNotIn('<nav', top)
-        self.assertNotIn('class="theme"', top)
+        self.assertRegex(top, r'<button class="theme" type="button" \{\{ ta\(\'aria-label\', \'Light or dark\'\) \}\} '
+                              r'\{\{ ta\(\'title\', \'Light or dark\'\) \}\} hidden>\n      \{\{ chrome\.theme_svg\(\) \}\}</button>')
+        self.assertLess(top.index('<button class="gear"'), top.index('<button class="theme"'))
+        self.assertLess(top.index('<button class="theme"'), top.index('<span class="langs"'))
+        self.assertNotIn("◐", head)
+        js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
+        self.assertIn("var themeBtn = document.querySelector('.top .theme');", js)
+        self.assertIn("window.ubSettings.set('theme', dark ? 'light' : 'dark');", js)
+        self.assertEqual(js.count("themeBtn"), 4)
         self.assertLess(head.index('<span class="langs"'), head.index('<details class="help"'))
         # One dialog in the shell: offline/pages.py cut() takes the first </dialog>.
         self.assertEqual(base.count("<dialog"), 1)

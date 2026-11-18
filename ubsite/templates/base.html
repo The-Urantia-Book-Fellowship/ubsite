@@ -194,14 +194,22 @@ window.ubUnit = function (where) {
       it (ub.css .top .ctl).  Since 2026-11-10 (Tigran) no Contents or Index
       among them, which stood in a nav before the rest: on a page of the
       book the rail is the contents and the margin the index, each with its
-      own button, and elsewhere the home page names both, under Other ways in;
-      and no half-disc, the theme's shortcut, which Settings' Theme does, its
-      default the device's own. #}
+      own button, and elsewhere the home page names both, under Other ways in.
+      The half-disc, light or dark, went the same day and came back on
+      2026-11-18 (below). #}
   <div class="ctl">
     {#- Hidden until ub.js runs: with JavaScript off there is nothing to set. #}
     <button class="gear" type="button" {{ ta('aria-label', 'Settings') }} {{ ta('title', 'Settings (Ctrl+,)') }}
             aria-keyshortcuts="Control+Comma" aria-haspopup="dialog" hidden>
       {{ chrome.gear_svg() }}</button>
+    {#- Light or dark, beside the gear (Tigran, 2026-11-18: "that light/dark
+        switch on the top panel was useful, let's bring it back, seeing that
+        there is enough space for it even on the phone"; gone from 2026-11-10,
+        when it was a glyph in the system's face).  It flips the theme in
+        effect, a shortcut to Settings' Theme, which alone gives System back.
+        Drawn, as the gear is.  Hidden until ub.js runs, as the gear is. #}
+    <button class="theme" type="button" {{ ta('aria-label', 'Light or dark') }} {{ ta('title', 'Light or dark') }} hidden>
+      {{ chrome.theme_svg() }}</button>
     {#- No cloud since 2026-11-17 (Tigran: "its functions are duplicated in the
         Settings => Offline menu"): from 2026-10-14 Work offline's sign, which
         said whether this page was online and whether a copy was kept, and

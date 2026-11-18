@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The half-disc is back beside the gear at the header's corner: a tap switches between the light theme and the dark, as it did until November 10.
 - The four parts on the home page each have a picture, with the part's name set over it: the centre of all things, a galaxy, the Earth at sunrise and the Sea of Galilee.
 - Bookmarks: tap a paragraph and the bar at the foot offers Bookmark this paragraph; a ribbon then marks it in the margin, and the ribbon at the bar's right end, on every page, opens your bookmarks in the book's order, each a link to its place, with a cross to remove it and Undo. Kept in this browser only.
 - Continue reading: a bar along the foot of the home page, and of every page but the text's own and the chart, takes you back to the paragraph you were last reading, which this browser remembers by itself; before you have read anything it says Begin reading and opens the Foreword.

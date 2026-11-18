@@ -170,9 +170,10 @@ a:hover { text-decoration-thickness: 2px; }
 .brand .host { font-size: .66rem; letter-spacing: .07em; color: var(--faint); margin-top: .15em;
                white-space: nowrap; }
 .brand .host::before { content: var(--host, ""); }
-/* The controls (base.html .ctl): the gear, the flags and the ?, at the
-   header's end, the ? the corner (the cloud between the gear and the flags
-   until 2026-11-17, Settings' Offline tab doing all it did). */
+/* The controls (base.html .ctl): the gear, the half-disc of light or dark,
+   the flags and the ?, at the header's end, the ? the corner (the cloud
+   between the gear and the flags until 2026-11-17, Settings' Offline tab
+   doing all it did; the half-disc back on 2026-11-18). */
 .top .ctl { margin-left: auto; display: flex; gap: 1rem; align-items: baseline; }
 /* The search box is the first thing a visitor should find, so it is a field
    of its own tone with a magnifier, not a hairline on the paper (2026-10-09:
@@ -199,6 +200,15 @@ a:hover { text-decoration-thickness: 2px; }
 :is(.gear, .runhead .set) :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; }
 .eg .gear { cursor: default; }
 .gear:hover { color: var(--ink); }
+/* Light or dark, beside the gear (base.html .theme; back 2026-11-18): a ring
+   with one half filled, the gear's size and weight, where until 2026-11-10 it
+   was a glyph in the system's face.  Help shows it too (.eg). */
+.theme { background: none; border: 0; padding: 0; color: var(--faint); cursor: pointer; align-self: center; }
+.theme svg { width: 1.1rem; height: 1.1rem; display: block; overflow: visible; }
+.theme circle { fill: none; stroke: currentColor; stroke-width: 1.3; }
+.theme .half { fill: currentColor; stroke: none; }
+.eg .theme { cursor: default; }
+@media (hover: hover) { .theme:hover { color: var(--ink); } }
 /* The flags beside it (base.html .langs): the interface in English or in
    Russian, the one chosen full, the other faded, each in its own proportions,
    edged so that the white of the tricolour shows on the paper. */
@@ -236,25 +246,32 @@ a:hover { text-decoration-thickness: 2px; }
 .offnews.about p { margin: .5rem 0 0; }
 .offnews.about .repo a { overflow-wrap: anywhere; }
 /* On a phone the header is two lines: the name with the controls at its
-   end, the gear, the flags and the ?, closer together, and the search box on
-   a line of its own, since its placeholder wants nearly the whole width
-   (316px in Russian).  The flags only where they fit beside the name
-   (Tigran, 2026-11-17; with the cloud gone they do from 360px at Standard
-   in English, 412px at Larger and 480px at Largest): where they would take
-   the controls to a line of their own, ub.js leaves them out (.noflags), and
-   Settings' Interface language, first in Reading, does what they do.  From
-   2026-11-10 until then they were not drawn here at all, the name and the
-   controls, the cloud among them, having wanted 458px of the 324 a 360px
-   phone has.  Where even so the controls do not fit beside the name (a
-   narrow phone at the larger sizes: below 375px at Largest in English), they
-   go all together to the line under it, the flags with them, the ? at its
-   end.  Until 2026-11-10 the flags and the ? stood beside the name and a
-   nav, with Contents, Index and the theme's shortcut, under the box: three
-   lines, and four where the ? did not fit beside the flags (360px in
-   English). */
+   end, the gear, the half-disc, the flags and the ?, closer together, and the
+   search box on a line of its own, since its placeholder wants nearly the
+   whole width (316px in Russian).  The flags only where they fit beside the
+   name (Tigran, 2026-11-17): where they would take the controls to a line of
+   their own, ub.js leaves them out (.noflags), and Settings' Interface
+   language, first in Reading, does what they do.  The half-disc of light or
+   dark came back on 2026-11-18 (Tigran) and is 27px of that line, so the
+   flags fit from 380px at Standard in English (358 in Russian), 428 at
+   Larger (404) and 474 at Largest (448), where without it they did from 352
+   (332), 396 (374) and 440 (414); and where the controls would go under the
+   name even with the flags out, the half-disc is left out too (.notheme),
+   Settings' Theme doing what it does, so that no header of two lines became
+   one of three by it: below 356px at Larger in English and 396 at Largest
+   (332 and 370 in Russian).  Where the gear and the ? alone do not fit
+   beside the name (below 326px at Larger in English and 362 at Largest, 336
+   at Largest in Russian), the controls go all together to the line under
+   it, the half-disc and the flags with them, the ? at its end.  From
+   2026-11-10 until 2026-11-17 the flags were not drawn here at all, the
+   name and the controls, the cloud among them, having wanted 458px of the
+   324 a 360px phone has.  Until 2026-11-10 the flags and the ? stood beside
+   the name and a nav, with Contents, Index and the theme's shortcut, under
+   the box: three lines, and four where the ? did not fit beside the flags
+   (360px in English). */
 @media (max-width: 40rem) {
   .top, .top .ctl { column-gap: .6rem; }
-  .top.noflags .langs { display: none; }
+  .top.noflags .langs, .top.notheme .theme { display: none; }
   .top .ctl { order: 1; }
   .top .find { order: 2; flex-basis: 100%; }
 }
