@@ -291,7 +291,7 @@ Three places where the oracle is wrong and we are right are recorded in `tests/k
 - **A date in words is American, October 18, 2026**; one that names a build or a commit stays ISO. (The changelog and What's new)
 - **Slugs are data**: `data/slugs.tsv` is append-only, and a headword keeps its slug for ever. (Moving about the book)
 - **The book's text is black** (`--text`), everything around it `--ink`; **a link is grey** around the reading and **blue** where going somewhere is the page's job. (The text on the page)
-- **Never serve Goudy Handtooled BT**, which is Bitstream's. The Foundation's three concentric circles may be drawn, by its written permission to Tigran (2026-11-18; never, until then), and nothing was redrawn with them that day. SBL Greek and SBL Hebrew are served byte for byte, never subset. (The text on the page; The sites; `ARCHITECTURE.md`, Study notes)
+- **Never serve Goudy Handtooled BT**, which is Bitstream's. The Foundation's three concentric circles may be drawn, by its written permission to Tigran for his Urantia Book websites (Mo Siegel, then its President, 2019; the rule against them stood until 2026-11-18), and nothing was redrawn with them that day. SBL Greek and SBL Hebrew are served byte for byte, never subset. (The text on the page; The sites; `ARCHITECTURE.md`, Study notes)
 
 **The groups**, and what each decides:
 
