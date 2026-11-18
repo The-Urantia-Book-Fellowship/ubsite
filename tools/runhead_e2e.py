@@ -477,6 +477,64 @@ def run() -> int:
         ok(not shown(pg) and named(pg) == [], "a tap on a translation's name in the fold is no tap on the text")
         pg.evaluate("ubSettings.set('translations', ''); ubSettings.set('trtab', '')")
 
+        # The whole paper's Contents from a translation's paragraph (Tigran,
+        # 2026-11-18, of the Foreword in his own translation: on a desk, the
+        # reference 0:6.2 followed, "I see section '5. ЛИЧНОСТНЫЕ РЕАЛЬНОСТИ'
+        # highlighted", and on his phone section 6 marked, "but shows it in
+        # English for some reason").  Two faults.  The mark was the section at
+        # the window's top, whatever paragraph was named; and a section's link
+        # once followed from the Contents is in the reader's unit, /0#0:6,
+        # which the Contents drawn in a translation did not know for a
+        # section's.
+        print("The whole paper's Contents from a translation's paragraph")
+        FW = ".rail li.here.fwin > details > ol > li"
+        SECS = "[...document.querySelectorAll(%r)].map(li => li.querySelector('a'))" % FW
+        MARK = "[...document.querySelectorAll(%r)].filter(li => li.classList.contains('here')).map(li => li.textContent.trim())" % FW
+        FOLD6 = "[id='0:6.1'] ~ .tf"
+        # The index off, so that the fold's line stands under its paragraph,
+        # on the screen with section 6's title: a phone's entries, a screen
+        # of them at 0:6.1, come between.
+        pg.evaluate("ubSettings.set('whole', true); ubSettings.set('translations', 'ud'); ubSettings.set('trtab', 'ud'); ubSettings.set('index', false)")
+        pg.goto(BASE + "/0")
+        pg.wait_for_selector("article.whole")
+        settle(pg)
+        pg.tap(".railfold")
+        settle(pg)
+        pg.tap(FW + " a[href='/0:6']")
+        settle(pg)
+        ok(pg.evaluate("location.hash") == "#0:6" and pg.evaluate(SECS + "[6].getAttribute('href')") == "/0#0:6",
+           "a section followed from the Contents is a place on the page, its link now in the reader's unit")
+        pg.evaluate("scrollBy(0, document.getElementById('0:6').getBoundingClientRect().top - 100)")
+        settle(pg)
+        TOP6 = "document.getElementById('0:6').getBoundingClientRect().top"
+        ok(pg.evaluate(MARK) == ["5. Personality Realities"] and pg.evaluate(TOP6) > 60,
+           "(scrolled back a little, section 5 at the window's top and marked, section 6's title under it)")
+        # By the finger's place, never Playwright's tap on the element, which
+        # brings it into view first: the page moved, section 6 came to the
+        # window's top, and the mark was the window's own.
+        at = pg.evaluate("(s) => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.left + 30, y: r.top + r.height / 2 }; }", FOLD6 + " .trfold")
+        ok(at["y"] < 780, "(the fold's line under 0:6.1 on the screen: %.0f px)" % at["y"])
+        pg.touchscreen.tap(at["x"], at["y"])
+        pg.wait_for_selector(FOLD6 + ".open p.rt")
+        settle(pg)
+        at = pg.evaluate("(s) => { const r = document.querySelector(s).getBoundingClientRect(); return { x: r.left + 80, y: r.top + 14 }; }", FOLD6 + " p.rt")
+        ok(at["y"] < 780 and pg.evaluate(TOP6) > 60, "(the translation's paragraph on the screen, section 5 still at its top: %.0f px, %.0f)" % (at["y"], pg.evaluate(TOP6)))
+        pg.touchscreen.tap(at["x"], at["y"])
+        settle(pg)
+        ok(shown(pg) and pg.inner_text(".runhead .ref") == "0:6.1" and pg.evaluate(TOP6) > 60 and pg.evaluate(MARK) == ["6. Energy and Pattern"],
+           "a paragraph of section 6 named, the page not moved, the Contents mark section 6: %s" % pg.evaluate(MARK))
+        pg.tap(".runhead .ref")
+        pg.wait_for_timeout(600)
+        drawn = pg.evaluate(SECS + ".map(a => [a.textContent.trim(), a.lang, a.classList.contains('untr')])")
+        ok(len(drawn) == 13 and all(d[1] == "ru" and not d[2] for d in drawn) and drawn[6][0] == "6. ЭНЕРГИЯ И ОБРАЗЕЦ",
+           "its reference opens them in the translation, the link followed among them: %s" % drawn[6][0])
+        ok(pg.evaluate(MARK) == ["6. ЭНЕРГИЯ И ОБРАЗЕЦ"], "section 6 marked, the paragraph's, not the one at the window's top: %s" % pg.evaluate(MARK))
+        pg.select_option(".railtr select", "")
+        settle(pg)
+        ok(pg.evaluate(SECS + "[6].textContent.trim()") == "6. Energy and Pattern" and pg.evaluate(SECS + "[5].textContent.trim()") == "5. Personality Realities",
+           "and the book's own chosen in their list puts the English back, that link's too")
+        pg.evaluate("ubSettings.set('whole', false); ubSettings.set('translations', ''); ubSettings.set('trtab', ''); ubSettings.set('index', true)")
+
         print("A wide screen, the Contents folded away")
         ctx2 = b.new_context(viewport={"width": 1280, "height": 900})
         ctx2.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
@@ -534,6 +592,107 @@ def run() -> int:
         h = pg3.evaluate(HEAD) if shown(pg3) else {}
         ok(h.get("named") == ["ud 0:1.2"] and h.get("pn") == "Предисловие" and h.get("au") == "Божественный Советник",
            "the head is the translation's there too, the Foreword's with no number: %s, %s" % (h.get("pn"), h.get("au")))
+        # A click in a column's empty room: between two sections, above a
+        # translation's title, and beside a cell in the room between the
+        # columns (Tigran, 2026-11-18: "click outside the area of the text,
+        # e.g. in the space between the section or above the first section
+        # title selects the following English paragraph, even when clicked
+        # above Russian section title").  The paragraph named is the next
+        # down the page in the column the click fell in.
+        print("A click in a column's empty room")
+        # The middle of each column, the room between them, and the heights
+        # of what stands about section 2's title.
+        GEO = """() => { const r = id => document.querySelector(id).getBoundingClientRect(),
+            en = r("[id='0:2.1']"), ru = r(".rc[data-k='ud']:has(p.rt[data-ref='0:2.1'])"),
+            hd = r("[id='0:2'] .cmphd > .ch[data-k='ud']"),
+            last = [...document.querySelectorAll("[id='0:1'] .grid > .row")].pop().getBoundingClientRect().bottom;
+            return { en: en.left + en.width / 2, ru: ru.left + ru.width / 2, gap: (en.right + ru.left) / 2,
+                     above: (last + hd.top) / 2, hd: hd.top, row: en.bottom - 8 }; }"""
+        AT = "([x, y]) => { const e = document.elementFromPoint(x, y); return e.tagName + '.' + e.className; }"
+        pg3.evaluate("ubSettings.set('whole', true)")
+        pg3.goto(BASE + "/0")
+        pg3.wait_for_selector(".rc p.rt[data-ref='0:2.1']")
+        pg3.wait_for_timeout(400)
+        pg3.evaluate("scrollBy(0, document.getElementById('0:2').getBoundingClientRect().top - 400)")
+        settle(pg3)
+        g = pg3.evaluate(GEO)
+
+        def click3(x, y):
+            if shown(pg3):
+                pg3.mouse.click(g["en"], g["row"])
+                pg3.wait_for_timeout(450)
+            pg3.mouse.click(x, y)
+            pg3.wait_for_timeout(550)
+            return pg3.evaluate(HEAD)["named"] if shown(pg3) else []
+
+        ok(g["hd"] - g["above"] > 4 and not pg3.evaluate("([x, y]) => !!document.elementFromPoint(x, y).closest('p.t, .rc, .ch')", [g["ru"], g["above"]]),
+           "(room between sections 1 and 2, on no paragraph and no title: %s)" % pg3.evaluate(AT, [g["ru"], g["above"]]))
+        n = click3(g["ru"], g["above"])
+        ok(n == ["ud 0:2.1"], "in the translation's column it names the translation's next paragraph: %s" % n)
+        n = click3(g["en"], g["above"])
+        ok(n == ["en 0:2.1"], "and in the English column the English one: %s" % n)
+        ok(pg3.evaluate(AT, [g["gap"] + 3, g["row"]]) == "DIV.row", "(room between the columns, beside 0:2.1, on the row alone)")
+        n = click3(g["gap"] + 3, g["row"])
+        ok(n == ["ud 0:2.1"], "in the room between the columns, beside the paragraph, the nearer column's: %s" % n)
+        n = click3(g["gap"] - 3, g["row"])
+        ok(n == ["en 0:2.1"], "and a little to the left of its middle the English: %s" % n)
+        past = pg3.evaluate("document.querySelector(\".rc[data-k='ud']:has(p.rt[data-ref='0:2.1'])\").getBoundingClientRect().right") + 30
+        ok(not pg3.evaluate("([x, y]) => !!document.elementFromPoint(x, y).closest('p.t, .rc, .ch, a, button, .a, .cites, .blanket')", [past, g["above"]]),
+           "(the margin past the last column, between the sections: %s)" % pg3.evaluate(AT, [past, g["above"]]))
+        n = click3(past, g["above"])
+        ok(n == ["en 0:2.1"], "past the last column, in the margin, the English as before: %s" % n)
+        pg3.evaluate("scrollTo(0, 0)")
+        settle(pg3)
+        top = pg3.evaluate("""() => { const h = document.querySelector("[id='0:0'] .cmphd > .ch[data-k='ud']").getBoundingClientRect();
+            return { x: h.left + h.width / 2, y: h.top - 6 }; }""")
+        ok(not pg3.evaluate("([x, y]) => !!document.elementFromPoint(x, y).closest('p.t, .rc, .ch, a, button')", [top["x"], top["y"]]),
+           "(above the paper's head in the translation's column: %s)" % pg3.evaluate(AT, [top["x"], top["y"]]))
+        if shown(pg3):
+            pg3.mouse.click(g["en"], 500)
+            settle(pg3)
+        pg3.mouse.click(top["x"], top["y"])
+        pg3.wait_for_timeout(550)
+        n = pg3.evaluate(HEAD)["named"] if shown(pg3) else []
+        ok(n == ["ud 0:0.1"], "above the paper's head there, the translation's first paragraph: %s" % n)
+        pg3.mouse.click(top["x"], top["y"])
+        settle(pg3)
+
+        # The whole paper on a wide screen, where the end of one section is
+        # at the window's top and the next under it: a paragraph named there
+        # has the Contents' mark for its section while it is on the screen,
+        # and once it has scrolled off the mark is the window's again
+        # (Tigran, 2026-11-18).
+        print("The whole paper on a wide screen, the Contents' mark")
+        MARK3 = "[...document.querySelectorAll('.rail li.here li.here')].filter(li => li.offsetParent).map(li => li.textContent.trim())"
+        pg3.evaluate("ubSettings.set('whole', true)")
+        pg3.goto(BASE + "/0")
+        pg3.wait_for_selector(".rc p.rt[data-ref='0:6.2']")
+        pg3.wait_for_timeout(400)
+        pg3.evaluate("scrollBy(0, document.getElementById('0:6').getBoundingClientRect().top - 200)")
+        settle(pg3)
+        ok(pg3.evaluate(MARK3) == ["5. Personality Realities"],
+           "(section 6's title 200 px down the window, section 5 at its top and marked)")
+        pg3.click("[id='0:6.2']", position={"x": 150, "y": 12})
+        pg3.wait_for_timeout(550)
+        ok(shown(pg3) and pg3.inner_text(".runhead .ref") == "0:6.2" and pg3.evaluate(MARK3) == ["6. Energy and Pattern"],
+           "0:6.2 named, the Contents beside it mark section 6: %s" % pg3.evaluate(MARK3))
+        pg3.click("[id='0:6.2']", position={"x": 150, "y": 12})
+        settle(pg3)
+        pg3.evaluate("scrollBy(0, 40)")
+        settle(pg3)
+        ok(not shown(pg3) and pg3.evaluate(MARK3) == ["6. Energy and Pattern"], "which holds with the head gone, while the paragraph is on the screen")
+        pg3.evaluate("scrollBy(0, -1200)")
+        settle(pg3)
+        ok(pg3.evaluate(MARK3) == ["5. Personality Realities"], "and scrolled off, the mark is the section at the window's top again")
+        pg3.evaluate("scrollBy(0, 1160)")
+        settle(pg3)
+        pg3.click(".rc p.rt[data-ref='0:6.2']", position={"x": 150, "y": 12})
+        pg3.wait_for_timeout(550)
+        pg3.click(".runhead .ref")
+        pg3.wait_for_timeout(600)
+        ok(pg3.evaluate(MARK3) == ["6. ЭНЕРГИЯ И ОБРАЗЕЦ"],
+           "the translation's 0:6.2 and its reference: the Contents in the translation, section 6 marked: %s" % pg3.evaluate(MARK3))
+        pg3.evaluate("ubSettings.set('whole', false)")
         pg3.evaluate("ubSettings.set('translations', '')")
         ctx3.close()
 

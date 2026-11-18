@@ -59,7 +59,9 @@ class Address(unittest.TestCase):
     def test_whole_paper_has_the_click_first(self):
         # Which is why both forms: its handler is registered before the
         # preview's, both on the document in the capture phase.
-        unit = JS.index("if (to !== at) a.href = to;")
+        # (The link's first address is kept as it is rewritten, since
+        # 2026-11-18: tests/test_runhead.py.)
+        unit = JS.index("      a.href = to;\n", JS.index("if (to !== at) {\n      if (!hrefWas.has(a))"))
         self.assertLess(unit, JS.index("r = pvLink(t);"))
         self.assertRegex(JS[unit:JS.index("\n  // Bring the page's focus into view.")], r"\}, true\);")
 

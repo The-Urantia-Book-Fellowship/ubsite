@@ -452,12 +452,21 @@
   // the rail's and a paragraph's /15:3 to /15#15:3 with it on, which on the
   // paper's own page is a place on it, and scrolls -- before listen.js or the
   // browser follows it, so that no page is asked for twice.  In the capture
-  // phase, so first.
+  // phase, so first.  The link stays as it was put, and the address the page
+  // gave it is kept (`hrefWas`) for what tells a link by that address: the
+  // Contents drawn as a translation gives them (tocDraw, below) knew a
+  // section's link as /0:6 alone, and left one that had been followed, by
+  // then /0#0:6, in English among the translation's titles (Tigran,
+  // 2026-11-18, on his phone, which reads the whole paper).
+  var hrefWas = new WeakMap();
   if (window.ubUnit) document.addEventListener('click', function (ev) {
     var a = ev.target.closest && ev.target.closest('a[href]');
     if (!a || a.origin !== location.origin) return;
     var at = a.pathname + a.hash, to = window.ubUnit(at);
-    if (to !== at) a.href = to;
+    if (to !== at) {
+      if (!hrefWas.has(a)) hrefWas.set(a, a.getAttribute('href'));
+      a.href = to;
+    }
     // A place on this page, the whole paper's (/1#1:2.9, a note's reference):
     // where the page stands is kept in the entry's state, for Back (the
     // hashchange below).
@@ -561,16 +570,30 @@
       if (secs[i].getBoundingClientRect().top <= 60) at = secs[i]; else break;
     return at;
   }
-  var railMarkAt = null, railMarkWait = false;
+  var railMarkAt = null, railMarkWait = false, railMarkP = null;
   function railMark() {
     railMarkWait = false;
-    var s = sectionInView(), rail = document.querySelector('.rail');
-    if (!s || !rail || s === railMarkAt) return;
+    var s = sectionInView(), r;
+    if (!s || !document.querySelector('.rail')) return;
+    // A paragraph in hand holds the mark while it is on the screen
+    // (railMarkOf, below).
+    if (railMarkP) {
+      r = railMarkP.isConnected && railMarkP.getBoundingClientRect();
+      if (r && r.height && r.bottom > 0 && r.top < innerHeight) return;
+      railMarkP = null;
+    }
+    if (s === railMarkAt) return;
     // Above the text, at the Contents (toContents, below, or scrolled up by
     // hand), the mark stays on the section the reader left; only a page with
     // none marked yet takes the first.
     if (railMarkAt && s.getBoundingClientRect().top > 60) return;
     railMarkAt = s;
+    railPut(s);
+  }
+  // The rail's mark put on the whole paper's section `s`.
+  function railPut(s) {
+    var rail = document.querySelector('.rail');
+    if (!rail) return;
     // A link once clicked is in the reader's unit already (above): both are
     // compared in it.
     var want = window.ubUnit ? window.ubUnit('/' + s.id) : '/' + s.id;
@@ -579,13 +602,32 @@
       li.classList.toggle('here', !!a && (window.ubUnit ? window.ubUnit(a.pathname + a.hash) : a.getAttribute('href')) === want);
     });
   }
+  // A paragraph in hand, named in the running head (showHead, below), is the
+  // place being read, and the mark is its section's, whatever stands at the
+  // window's top: a wide window has the end of one section at its top and the
+  // next under it, and with 0:6.2 named there, and its reference followed to
+  // the Contents, they marked section 5 (Tigran, 2026-11-18).  It holds the
+  // mark while it is on the screen, the head up or not, and once it has
+  // scrolled off the mark is the window's again (railMark), which above the
+  // text, at a phone's Contents, leaves it where it is; and it is put again
+  // as the Contents open at an entry of the history, a page loaded afresh
+  // having marked by the window alone (toContents).  A translation's
+  // paragraph is in its section as the English is, in a column or a fold.
+  // Nothing on a section's own page, whose mark is the page's.
+  function railMarkOf(p) {
+    var s = p && p.closest && p.closest('article.whole > section[id]');
+    if (!s) return;
+    railMarkP = p;
+    railMarkAt = s;
+    railPut(s);
+  }
   railMark();
   addEventListener('scroll', function () {
     if (railMarkWait) return;
     railMarkWait = true;
     requestAnimationFrame(railMark);
   }, { passive: true });
-  document.addEventListener('ub:swap', function () { railMarkAt = null; railMark(); });
+  document.addEventListener('ub:swap', function () { railMarkAt = railMarkP = null; railMark(); });
 
   // The left rail is the whole book (templates/_rail.html), and only the paper
   // being read comes with its sections.  Another opened there fetches its own
@@ -688,6 +730,9 @@
       if (contentsAt) history.replaceState(state, ''); else history.pushState(state, '');
       contentsAt = state;
     }
+    // The section marked is the paragraph's they were opened from (railMarkOf,
+    // above), at an entry of the history the one its state names.
+    railMarkOf(p || (contentsAt && document.getElementById(contentsAt.p)));
     if (tocOver !== k) { tocOver = k; drawn = tocApply(); }
     var place = function () {
       var here = phone.matches && railHere(rail);
@@ -980,11 +1025,14 @@
     sel.value = tocKey();
   }
   // Each link of `root` the rail can place by its address, in the contents
-  // `d`, or the book's with none.
+  // `d`, or the book's with none.  By the address the rail gave it, which a
+  // link once clicked no longer has (hrefWas, above): in the reader's unit a
+  // section's is /0#0:6, which is no address of the rail's, and a paper's
+  // /15:0, which is its introduction's.
   function tocDraw(root, d) {
     if (!root) return;
     Array.prototype.forEach.call(root.querySelectorAll('a[href]'), function (a) {
-      var m = RE_RAILA.exec(a.getAttribute('href'));
+      var m = RE_RAILA.exec(hrefWas.get(a) || a.getAttribute('href'));
       if (!m) return;
       if (!tocEn.has(a)) tocEn.set(a, a.innerHTML);
       var en = tocEn.get(a), h = null, caps, k;
@@ -2175,15 +2223,21 @@
   // translation's title in columns that translation's: never the first on
   // the screen, which above a title is a paragraph of the section before
   // (Tigran, 2026-11-15: "clicking on the section title highlights one of
-  // the paragraphs of the previous section").
-  function paraOf(t, y) {
+  // the paragraphs of the previous section").  In columns that paragraph is
+  // the one of the column the tap fell in (`x`, its place across the window;
+  // paraCol): in the room between two sections, above a translation's title
+  // or over the paper's head, and in a row beside or above a cell, it named
+  // the English one whichever column it was in (Tigran, 2026-11-18: "selects
+  // the following English paragraph, even when clicked above Russian section
+  // title").
+  function paraOf(t, y, x) {
     var cell, row;
     if (!t.closest) return null;
     return t.closest('p.t[id], .rc p.rt, .tf p.rt') ||
            ((cell = t.closest('.rc')) && cell.querySelector('p.rt')) ||
-           ((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || paraUnder(t, y);
+           paraCol((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]'), x) || paraUnder(t, y, x);
   }
-  function paraUnder(t, y) {
+  function paraUnder(t, y, x) {
     var ch = t.closest('.cmphd > .ch[data-k]'), sec = ch && ch.closest('section'),
         own = sec && sec.querySelector('.rc[data-k="' + ch.dataset.k + '"] p.rt'), ps, i, r;
     if (own) return own;
@@ -2191,9 +2245,31 @@
     ps = document.querySelectorAll('main p.t[id]');
     for (i = 0; i < ps.length; i++) {
       r = ps[i].getBoundingClientRect();
-      if (r.height && r.bottom > y) return ps[i];
+      if (r.height && r.bottom > y) return paraCol(ps[i], x);
     }
     return null;
+  }
+  // In columns, the paragraph beside the English `p` in the column `x` is
+  // in: a translation's, where x is across one's cell of the row or in the
+  // nearer half of the room before it, measured, a row being a subgrid whose
+  // own column-gap says nothing, and the cell has the paragraph, a verse's
+  // line by its reference; else `p` itself, as for the English column, the
+  // margin past the last column, a column that has not the paragraph, and a
+  // page not in columns.
+  function paraCol(p, x) {
+    var row = p && p.closest('article.cmp .grid > .row'), text, cells, edge, at = null, i, r;
+    if (!row || !(x >= 0)) return p;
+    text = row.querySelector(':scope > p.t, :scope > .verse');
+    cells = row.querySelectorAll(':scope > .rc[data-k]');
+    edge = text ? text.getBoundingClientRect().right : 0;
+    for (i = 0; i < cells.length; i++) {
+      r = cells[i].getBoundingClientRect();
+      if (!r.width) continue;
+      if (x >= (edge + r.left) / 2) at = cells[i];
+      edge = r.right;
+    }
+    if (!at || x >= edge) return p;
+    return at.querySelector('p.rt[data-ref="' + p.id + '"]') || at.querySelector('p.rt') || p;
   }
   // The first paragraph on the screen: a verso's running head.
   function firstOnScreen() {
@@ -2319,6 +2395,9 @@
     headSlack = 2 * (parseFloat(getComputedStyle(p).lineHeight) || 28);
     // A tap is a touch of the page: arrive()'s late scroll must not undo it.
     arriveTouched = Date.now();
+    // The Contents mark its section, on the whole paper's page (railMarkOf,
+    // above).
+    railMarkOf(p);
     // And the bar at the foot, with Bookmark this paragraph (barUp, below).
     barUp();
   }
@@ -2369,7 +2448,7 @@
         !document.querySelector('main p.t[id]')) return false;
     if (!touch && (!head || head.hidden)) {
       clearTimeout(headSoon);
-      p = paraOf(t, ev.clientY);
+      p = paraOf(t, ev.clientY, ev.clientX);
       headSoon = setTimeout(function () {
         headSoon = 0;
         if (!getSelection().isCollapsed) return;
@@ -2387,7 +2466,7 @@
     }
     unhit();
     if (head && !head.hidden) { hideHead(); return true; }
-    showHead(paraOf(t, ev.clientY) || firstOnScreen());
+    showHead(paraOf(t, ev.clientY, ev.clientX) || firstOnScreen());
     return true;
   }
   // The second press of a mouse's double-click, or the third of a triple

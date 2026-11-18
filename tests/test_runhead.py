@@ -80,12 +80,57 @@ class RunningHead(unittest.TestCase):
         # of the section before (Tigran, 2026-11-15); under a translation's
         # title in columns, that translation's.  tools/compare_e2e.py clicks.
         js = (ROOT / "ubsite/static/ub.js").read_text()
-        self.assertIn("((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]')) || paraUnder(t, y);", js)
-        self.assertIn("if (r.height && r.bottom > y) return ps[i];", js)
+        self.assertIn("paraCol((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]'), x) || paraUnder(t, y, x);", js)
+        self.assertIn("if (r.height && r.bottom > y) return paraCol(ps[i], x);", js)
         self.assertIn("""own = sec && sec.querySelector('.rc[data-k="' + ch.dataset.k + '"] p.rt')""", js)
-        self.assertIn("      p = paraOf(t, ev.clientY);\n", js)
-        self.assertIn("showHead(paraOf(t, ev.clientY) || firstOnScreen());", js)
+        self.assertIn("      p = paraOf(t, ev.clientY, ev.clientX);\n", js)
+        self.assertIn("showHead(paraOf(t, ev.clientY, ev.clientX) || firstOnScreen());", js)
         self.assertNotIn("paraOf(t)", js)
+
+    def test_a_tap_in_a_columns_empty_room_names_that_columns_paragraph(self):
+        # Between two sections, above a translation's title, beside a cell:
+        # the paragraph named is the one of the column the tap fell in, never
+        # the English whichever it was (Tigran, 2026-11-18).  By the row's own
+        # cells, half the room between two columns to each; the English where
+        # the column has not the paragraph, past the last column, in the
+        # margin, and on a page not in columns.  The room is measured: a row
+        # is a subgrid, whose own column-gap computes to normal.
+        # tools/runhead_e2e.py clicks.
+        col = JS[JS.index("function paraCol(p, x) {"):JS.index("// The first paragraph on the screen")]
+        self.assertIn("var row = p && p.closest('article.cmp .grid > .row'), text, cells, edge, at = null, i, r;", col)
+        self.assertIn("if (!row || !(x >= 0)) return p;", col)
+        self.assertIn("if (x >= (edge + r.left) / 2) at = cells[i];", col)
+        self.assertIn("if (!at || x >= edge) return p;", col)
+        self.assertNotIn("columnGap", col)
+        self.assertIn("""at.querySelector('p.rt[data-ref="' + p.id + '"]') || at.querySelector('p.rt') || p;""", col)
+
+    def test_the_contents_mark_the_section_of_the_paragraph_named(self):
+        # On the whole paper's page the mark was the section at the window's
+        # top alone, and a wide window has the end of one there and the next
+        # under it: 0:6.2 named, the Contents marked section 5 (Tigran,
+        # 2026-11-18).  A paragraph named holds the mark while it is on the
+        # screen, and the Contents opened at an entry of the history take it
+        # from the entry's paragraph.
+        show = JS[JS.index("function showHead(p) {"):JS.index("function hideHead() {")]
+        self.assertIn("railMarkOf(p);", show)
+        to = JS[JS.index("function toContents(p, k) {"):JS.index("// The place the address names")]
+        self.assertIn("railMarkOf(p || (contentsAt && document.getElementById(contentsAt.p)));", to)
+        of = JS[JS.index("function railMarkOf(p) {"):JS.index("  railMark();\n")]
+        self.assertIn("var s = p && p.closest && p.closest('article.whole > section[id]');", of)
+        self.assertIn("railMarkP = p;\n    railMarkAt = s;\n    railPut(s);", of)
+        mark = JS[JS.index("function railMark() {"):JS.index("function railPut(s) {")]
+        self.assertIn("if (r && r.height && r.bottom > 0 && r.top < innerHeight) return;\n      railMarkP = null;", mark)
+        self.assertLess(mark.index("railMarkP = null;"), mark.index("if (s === railMarkAt) return;"))
+        self.assertIn("document.addEventListener('ub:swap', function () { railMarkAt = railMarkP = null; railMark(); });", JS)
+
+    def test_a_contents_link_is_told_by_the_address_the_rail_gave_it(self):
+        # The Whole paper handler rewrites a link as it is clicked and leaves
+        # it so (CLAUDE.md, trap 44): the Contents drawn in a translation knew
+        # /0:6 and not /0#0:6, and a section once followed stayed in English
+        # among the translation's titles (Tigran, 2026-11-18, his phone).
+        self.assertIn("if (!hrefWas.has(a)) hrefWas.set(a, a.getAttribute('href'));", JS)
+        self.assertLess(JS.index("hrefWas.set(a, a.getAttribute('href'));"), JS.index("a.href = to;"))
+        self.assertIn("var m = RE_RAILA.exec(hrefWas.get(a) || a.getAttribute('href'));", JS)
 
     def test_a_double_click_is_never_a_tap(self):
         # A mouse's click shows the head after DBL, which the second press

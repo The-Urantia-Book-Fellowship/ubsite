@@ -171,6 +171,9 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- With Whole paper on, the Contents mark the section of the paragraph you tapped; on a wide screen, with the end of one section at the window's top and the paragraph in the next, they marked the section before it.
+- The Contents shown in a translation give every section's title in it; with Whole paper on, a section you had gone to from the Contents stayed in English among the translated titles.
+- With the translations in columns, a click in the empty room of a translation's column, between two sections or above a title, names that translation's next paragraph; it named the English one, whichever column it was in.
 - On the chart, Cosmology of Personalities, the Legend's Far lines always shown stays as you left it: this browser now keeps it, where it went back to off each time you left the page.
 - A tap on a translation's paragraph in the fold under the English names it and brings the running head, as a tap on the English does; it did nothing. And the running head over a translation's paragraph, in the fold or in its column, gives the paper's number, title and author as that translation has them, not the English.
 - On a phone, with the Contents opened from the running head's reference, a tap on the section you are in goes to its start, as a tap on any other section does; the page went back to the paragraph you had left.
