@@ -134,8 +134,53 @@
   function online() { return panel.dataset.net === 'on'; }
   function reach(on) {
     panel.dataset.net = on ? 'on' : 'off';
+    barState(last);
     document.dispatchEvent(new Event('ub:offline'));
   }
+  // The home page's bar says how the copy stands, at its right end (base.html
+  // .fstate; Tigran's design, 2026-11-17), in the words his canvas has and
+  // fewer on a phone, and opens this tab, which says the rest: up to date, a
+  // tick alone on a phone; downloading, with how far, and a line along the
+  // bar's top; out of date, with Update now where the tab offers it (kept up
+  // by itself, it is downloading a moment later); and offline, with the day
+  // of the copy being read.  Nothing while there is no copy and none on its
+  // way.  The bar is the shell's, on every page; ub.css shows this on the
+  // home page alone.
+  var fstate = document.querySelector('.fbar .fstate'), fprog = document.querySelector('.fbar .fprog');
+  function barState(s) {
+    if (!fstate) return;
+    var st = '', long = '', short = '', have = s && s.have, part = 0, of, held;
+    if (s && s.busy) {
+      of = s.busy.total && { a: mb(s.busy.done), b: mb(s.busy.total) };
+      st = 'down';
+      long = of ? T('Downloading the offline copy: {a} of {b}', of) : T('Downloading the offline copy…');
+      short = of ? T('{a} of {b}', of) : '';
+      part = s.busy.total ? Math.min(1, s.busy.done / s.busy.total) : 0;
+    } else if (have && !online()) {
+      st = 'off';
+      long = T('Offline · reading from the copy of {d}', { d: day(have.made) });
+      short = T('Offline');
+    } else if (have && s.latest) {
+      held = s.auto === false || saving() || triedLately(s.latest.build);
+      st = 'stale';
+      long = held ? T('Offline copy out of date · Update now ({s})', { s: mb(s.latest.fetch) }) : T('Offline copy out of date');
+      short = held ? T('Update now') : '';
+    } else if (have) {
+      st = 'ok';
+      long = T('Offline copy up to date');
+    }
+    fstate.dataset.st = st;
+    fstate.querySelector('.fsl').innerHTML = long;
+    fstate.querySelector('.fss').innerHTML = short;
+    fstate.hidden = !st;
+    if (fprog) {
+      fprog.hidden = st !== 'down' || !part;
+      fprog.style.width = (part * 100).toFixed(1) + '%';
+    }
+  }
+  if (fstate) fstate.addEventListener('click', function () {
+    if (window.ubSettings && window.ubSettings.open) window.ubSettings.open('offline');
+  });
   function heard(s) {
     if (s && 'reached' in s) reach(s.reached);
     show(s);
@@ -144,6 +189,7 @@
   var last = null, refused = null;
   function show(s) {
     last = s;
+    barState(s);
     watch(s);
     trs(s);
     recShow(s);

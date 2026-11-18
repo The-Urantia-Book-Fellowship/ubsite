@@ -25,6 +25,14 @@
 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.6"/><path class="half" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/></svg>
 {%- endmacro %}
 
+{#- How the offline copy stands, at the right end of the home page's bar
+    (base.html .fstate; Tigran's design, 2026-11-17): up to date, downloading,
+    out of date, offline.  All four are in the bar, and ub.css shows the one
+    offline.js names (data-st). -#}
+{% macro state_svg() -%}
+<svg class="fs-ok" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.6l3.2 3.2L13 4.6"/></svg><svg class="fs-down" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.5v8M4.8 7.6L8 10.8l3.2-3.2M3 13.5h10"/></svg><svg class="fs-stale" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M12.8 6.2A5.2 5.2 0 1 0 13.2 8.8M13 2.8v3.6H9.4"/></svg><svg class="fs-off" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 2.5h7v9h-7zM3.5 5v8.5h7"/></svg>
+{%- endmacro %}
+
 {#- The search box's magnifier. -#}
 {% macro glass_svg() -%}
 <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>

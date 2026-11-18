@@ -131,6 +131,19 @@ window.ubUnit = function (where) {
   // 2026-10-30, so that which site this is can be seen at once, in an
   // installed app above all, which shows no address).
   r.style.setProperty('--host', JSON.stringify(location.host));
+  // The offer to install the site as an app, a line over the home page's
+  // header (Tigran's design, 2026-11-17; .appban below, ub.js): in a
+  // browser's tab only, never in the installed app, and never again once
+  // its cross was tapped.  Shown before anything is drawn where the browser
+  // made its offer on the last page here (ub_install, a key of its own and
+  // no setting), and on an iPhone or iPad, which makes none; ub.js takes it
+  // away where that offer does not come again.
+  try {
+    var ib = localStorage.getItem('ub_install'),
+        ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (location.pathname === '/' && ib !== 'no' && ib !== 'done' && (ib === 'offered' || ios) &&
+        !matchMedia('(display-mode: standalone)').matches && navigator.standalone !== true) r.dataset.install = ios ? 'ios' : '1';
+  } catch (e) {}
   try {
     var s = JSON.parse(localStorage.getItem('ub_settings') || '{}') || {};
     if (!('theme' in s) && localStorage.getItem('ub_theme')) s.theme = localStorage.getItem('ub_theme');
@@ -180,6 +193,19 @@ window.ubUnit = function (where) {
 {% block head %}{% endblock %}
 </head>
 <body>
+{#- Install as an app (Tigran's design, 2026-11-17, the third step; his words,
+    cut from "for offline reading", which said it twice): over the header, on
+    the home page alone and in a browser's tab alone, which ub.css shows by
+    data-install and the <main> (the head script above, ub.js).  The shell's,
+    so that no page's own piece of the offline copy has it.  Install is the
+    browser's own offer where it makes one (Chrome, Edge); on an iPhone or
+    iPad it opens Settings at Offline, which says how.  The cross is for
+    good.  Hidden by the stylesheet and not by the attribute, which ub.css
+    lets nothing override ([hidden]). #}
+<div class="appban" role="region" {{ ta('aria-label', 'Install as an app') }}>
+  <span class="abt">{{ t('Install as an app: it works fully offline and updates itself.') }}</span>
+  <span class="abb"><button type="button" class="abgo">{{ t('Install') }}</button><button type="button" class="abno" {{ ta('aria-label', 'Not now') }} {{ ta('title', 'Not now') }}><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></span>
+</div>
 <header class="top">
   {#- The name, and under it the site's address, which the head script hands
       CSS (--host); with scripts off, the name alone. #}
@@ -519,6 +545,15 @@ window.ubUnit = function (where) {
     <p class="fsh">{{ t('Bookmarks') }}</p>
     <ul></ul>
   </div>
+  {#- How the offline copy stands, at the bar's right end on the home page
+      alone (Tigran's design, 2026-11-17: the third step; ub.css shows it by
+      the <main>): a sign and a few words, fewer on a phone, which
+      static/offline.js puts in from what the worker says, and a line along
+      the bar's top while it downloads.  It opens Settings at its Offline
+      tab, which says the rest and has Update now.  Hidden until there is
+      something to say. #}
+  <button type="button" class="fstate" data-st="" hidden>{{ chrome.state_svg() }}<span class="fsl"></span><span class="fss"></span></button>
+  <span class="fprog" hidden></span>
 </nav>
 <script>
 (window.ubBar = function () {

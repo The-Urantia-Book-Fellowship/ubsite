@@ -56,6 +56,8 @@ math { font-family: "Garamond Math", math; }
   /* The quiz's marks (quiz.js): right and wrong, each with ✓ or ✗ beside it,
      so the colour is never all that tells them apart. */
   --right: oklch(0.47 0.11 150);
+  /* The install banner's ground and what stands on it (.appban). */
+  --gold: oklch(0.52 0.11 76); --on-gold: oklch(0.985 0.008 85);
   --wrong: oklch(0.52 0.13 40);
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
@@ -117,6 +119,7 @@ math { font-family: "Garamond Math", math; }
     --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
     --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
     --right: oklch(0.76 0.11 150);  --wrong: oklch(0.74 0.11 45);
+    --gold: oklch(0.47 0.10 76); --on-gold: oklch(0.97 0.010 85);
   }
 }
 :root[data-theme="dark"] {
@@ -127,6 +130,7 @@ math { font-family: "Garamond Math", math; }
   --field: oklch(0.255 0.016 250); --field-edge: oklch(0.47 0.045 250);
   --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
   --right: oklch(0.76 0.11 150);  --wrong: oklch(0.74 0.11 45);
+    --gold: oklch(0.47 0.10 76); --on-gold: oklch(0.97 0.010 85);
 }
 :root[data-theme="dark"] body, @media (prefers-color-scheme: dark) { }
 
@@ -170,6 +174,22 @@ a:hover { text-decoration-thickness: 2px; }
 .brand .host { font-size: .66rem; letter-spacing: .07em; color: var(--faint); margin-top: .15em;
                white-space: nowrap; }
 .brand .host::before { content: var(--host, ""); }
+/* Install as an app (base.html .appban; Tigran's design, 2026-11-17): a line
+   of gold over the header, on the home page alone and where the head script
+   or ub.js has said that the offer stands (data-install): a browser's tab,
+   never the installed app.  Its words, the browser's Install and a cross
+   that puts it away for good; they wrap as one on a phone. */
+.appban { display: none; }
+:root[data-install] body:has(> main.front) > .appban { display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: center; gap: .25rem 1rem; padding: .375rem 1rem; background: var(--gold); color: var(--on-gold);
+  font-size: 1.03rem; line-height: 1.3; text-align: center; }
+.appban .abb { display: inline-flex; align-items: center; gap: .25rem; }
+.appban .abgo { min-height: 2.75rem; padding: var(--lift) 1.15rem 0; font: inherit; font-size: 1rem; color: oklch(0.24 0.012 60);
+  background: var(--on-gold); border: 0; border-radius: 999px; cursor: pointer; }
+.appban .abno { width: 2.75rem; height: 2.75rem; display: inline-flex; align-items: center; justify-content: center;
+  padding: 0; color: var(--on-gold); background: none; border: 0; cursor: pointer; }
+.appban .abno svg { width: .95rem; height: .95rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.appban :is(.abgo, .abno):focus-visible { outline: 2px solid var(--on-gold); outline-offset: 2px; }
 /* The controls (base.html .ctl): the gear, the half-disc of light or dark,
    the flags and the ?, at the header's end, the ? the corner (the cloud
    between the gear and the flags until 2026-11-17, Settings' Offline tab
@@ -328,6 +348,29 @@ body:has(> .tour-ring) .fbar.fup { z-index: 9; }
 .fat { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faint); }
 .fbar.fhas .fttl:not(:empty)::before { content: "\00a0\00b7\00a0"; }
 @media (hover: hover) { :is(.fgo:hover .fl, .fmark:hover, .fgoto:hover .fr, .fundo:hover) { color: var(--link); } }
+/* How the offline copy stands (base.html .fstate, offline.js barState), at
+   the right end of the home page's bar and of no other page's: a sign, green
+   where it is up to date, and the words, the short ones on a phone, where up
+   to date is the sign alone.  A download draws a line along the bar's top,
+   as long as it has got. */
+.fbar .fstate, .fbar .fprog { display: none; }
+main.front ~ .fbar .fstate:not([hidden]) { display: flex; align-items: center; justify-content: center; gap: .55rem;
+  flex: 0 1 auto; min-width: 3rem; min-height: 3.1rem; padding: var(--lift) 1rem 0; font: inherit; color: var(--ink);
+  background: none; border: 0; border-left: 1px solid var(--rule); cursor: pointer; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent; }
+.fstate svg { display: none; flex: none; width: 1rem; height: 1rem; fill: none; stroke: var(--link); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round; position: relative; top: calc(-1 * var(--lift) / 2); }
+.fstate[data-st="ok"] .fs-ok { display: block; stroke: var(--right); stroke-width: 1.8; }
+.fstate[data-st="down"] .fs-down, .fstate[data-st="stale"] .fs-stale { display: block; }
+.fstate[data-st="off"] .fs-off { display: block; stroke: var(--faint); stroke-width: 1.5; }
+.fstate .fss, .fstate :is(.fsl, .fss):empty { display: none; }
+main.front ~ .fbar .fprog:not([hidden]) { display: block; position: absolute; left: 0; top: -2px; height: 3px;
+  background: var(--link); }
+@media (hover: hover) { .fstate:hover { color: var(--link); } }
+@media (max-width: 40rem) {
+  .fstate .fsl { display: none; }
+  .fstate .fss:not(:empty) { display: inline; }
+}
 /* A phone: the reference alone after the words, and with no place the words alone. */
 @media (max-width: 40rem) { .fttl { display: none; } }
 
@@ -2423,6 +2466,8 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 
 /* ---- print ------------------------------------------------------------- */
 @media print {
+  /* Nor the offer to install the site (.appban), on paper. */
+  .appban { display: none !important; }
   @page { margin: 22mm 20mm; }
   .top, footer, .fbar, .rail, .pager, .transport, .voicecredit, .playp, .player, .runhead, dialog { display: none; }
   p.t.bmk::after { display: none; }
@@ -2590,6 +2635,21 @@ h2.chap + .rh { margin-top: 1rem; }
 }
 .front h1 { font-size: clamp(2.4rem, 1.7rem + 3vw, 3.6rem); margin: 0; letter-spacing: .01em; }
 .front h2 { margin: 2.8rem 0 .9rem; text-align: center; }
+/* The passage of the moment (home.html .fpass; Tigran's design, 2026-11-17):
+   a card under the name, the passage in the book's own colour and larger than
+   the page's text, its reference and its paper under it, the way to its
+   place.  Its height is the passage's, which the line of script in the page
+   puts in before anything is drawn, so nothing moves. */
+.fpass { max-width: 42.5rem; margin: 1.75rem auto 0; padding: 1.4rem 1.75rem .9rem; background: var(--card);
+  border: 1px solid var(--rule); border-radius: .75rem; box-shadow: 0 8px 28px var(--shade); text-align: center; }
+.front .fpass h2 { margin: 0 0 .6rem; font-size: .84rem; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--faint); }
+.fpq { margin: 0; font-size: clamp(1.3rem, 1.1rem + .9vw, 1.55rem); line-height: 1.42; color: var(--text);
+  text-wrap: balance; }
+.fpat { margin: .25rem 0 0; font-size: .97rem; }
+.fpat a { display: inline-block; padding: .75rem .5rem .6rem; color: var(--faint); text-decoration: none; }
+.fpat a:hover { color: var(--link); }
+@media (max-width: 40rem) { .fpass { padding: 1.15rem 1rem .6rem; } }
 /* The parts: a card each, two to a row and one on a phone, each its picture
    (.fpart, below).  The Foreword on its own, with Settings' Foreword in
    Part I off, is a plain row across them. */

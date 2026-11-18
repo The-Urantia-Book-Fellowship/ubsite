@@ -13,6 +13,43 @@
     <h1>{{ t('The Urantia Book') }}</h1>
   </header>
 
+  {#- The passage of the moment (Tigran's design, 2026-11-17; DECISIONS.md, The
+      home page): words of one paragraph of the text, from a list he reviews
+      (data/passages.tsv, build/passage.py), another at each visit, with its
+      reference and its paper as the way to its place.  A stored page is the
+      same for every reader and every visit, so the page carries the whole
+      list, and the line of script after it shows one, before anything is
+      drawn: any but the one this browser was shown last (localStorage
+      ub_passage, a key of its own and no setting; read for that alone).  With
+      scripts off, the first.  The words are the book's, set as its paragraph
+      sets them, the red letter and the italics, and in its own colour. #}
+  {%- if passages %}
+  <section class="fpass">
+    <h2>{{ t('Passage of the moment') }}</h2>
+    <p class="fpq">{{ passages[0][2]|safe }}</p>
+    <p class="fpat"><a href="/{{ passages[0][0] }}"><span class="fpr">{{ passages[0][0] }}</span> · <span class="fpt">{{ passages[0][1] }}</span></a></p>
+    <script type="application/json" class="fpdata">{{ passages|tojson }}</script>
+    <script>
+(function () {
+  var box = document.currentScript.parentNode, all, last = null, i, key, a;
+  try { all = JSON.parse(box.querySelector('.fpdata').textContent); } catch (e) { return; }
+  if (!all || all.length < 2) return;
+  try { last = localStorage.getItem('ub_passage'); } catch (e) {}
+  do {
+    i = Math.floor(Math.random() * all.length);
+    key = (i + 1) + ' ' + all[i][0];
+  } while (key === last);
+  box.querySelector('.fpq').innerHTML = all[i][2];
+  a = box.querySelector('.fpat a');
+  a.setAttribute('href', '/' + all[i][0]);
+  a.querySelector('.fpr').textContent = all[i][0];
+  a.querySelector('.fpt').textContent = all[i][1];
+  try { localStorage.setItem('ub_passage', key); } catch (e) {}
+})();
+    </script>
+  </section>
+  {%- endif %}
+
   {# Reading begins here.  The parts ARE the entry points -- a separate "start
      reading" button sat apart from them and made the page read as two halves.
      Each is a card, two to a row, one on a phone, and is its picture

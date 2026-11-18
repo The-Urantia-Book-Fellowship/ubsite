@@ -189,7 +189,7 @@ class Bookmarks(unittest.TestCase):
         # Paragraph previews show the paragraph a reference points to; the
         # bar's links are ways to a place, and never get a card: one made the
         # page taller, and on a phone took the tap (Tigran, 2026-11-17).
-        self.assertIn("if (!a || a.closest('.pop.pv, .fbar')) return null;", JS)
+        self.assertIn("if (!a || a.closest('.pop.pv, .fbar, .fpass')) return null;", JS)
         self.assertEqual(len(re.findall(r"\bpvLink\(", JS)), 4)       # its definition, and the three that ask it
 
     def test_a_tap_meant_for_the_text_sets_nothing(self):

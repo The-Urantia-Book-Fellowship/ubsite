@@ -741,6 +741,23 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         got = pg.evaluate("Promise.all(['/static/ub.css?v=e2e-slow', '/quiz/board?e2e-slow=1'].map(u =>"
                           " fetch(u).then(r => r.text().then(t => [r.status, t.includes('read online')]))))")
         ok(got == [[200, False], [200, False]], f"a slow network's answer is waited for where the copy has none ({got})")
+        # The home page's bar says how the copy stands, at its right end, and
+        # opens Settings at Offline (base.html .fstate, offline.js barState;
+        # since 2026-11-18); no other page's bar does.
+        pg.goto(BASE + "/")
+        ok(until(pg, "() => document.querySelector('.fbar .fstate').dataset.st === 'ok'"),
+           "the home page's bar says the copy is up to date")
+        said = en(pg, ".fbar .fstate .fsl")
+        ok(said == "Offline copy up to date" and pg.locator(".fbar .fstate").is_visible(), f"in its words ({said})")
+        pg.click(".fbar .fstate")
+        pg.wait_for_timeout(300)
+        at = pg.evaluate("[document.querySelector('dialog.settings').open,"
+                         " (document.querySelector('dialog.settings [role=tab][aria-selected=true]') || {}).id]")
+        ok(at == [True, "set-t-offline"], f"and opens Settings at Offline ({at})")
+        pg.keyboard.press("Escape")
+        pg.goto(BASE + "/1:1")
+        ok(until(pg, "() => document.querySelector('.fbar .fstate').dataset.st === 'ok'")
+           and not pg.locator(".fbar .fstate").is_visible(), "on a page of the text the bar has no such sign")
         ctx.set_offline(True)
         probe = ("async (a) => { try { const r = await fetch(a[0], a[1] ? {headers: {Range: a[1]}} : {});"
                  " const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-range'), b.byteLength]; }"
@@ -758,6 +775,10 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(until(pg, "() => { const i = [...document.querySelectorAll('.front-toc .fpart img')];"
                      " return i.length === 4 && i.every(x => x.complete && x.naturalWidth > 0); }"),
            "offline, the home page's four part pictures are drawn from the copy")
+        ok(until(pg, "() => document.querySelector('.fbar .fstate').dataset.st === 'off'"),
+           "and its bar says offline")
+        said = en(pg, ".fbar .fstate .fsl")
+        ok(said.startswith("Offline · reading from the copy of "), f"with the day of the copy being read ({said})")
         pg.goto(BASE + "/161:1")
         pg.locator("p.t .playp").first.click()
         pg.wait_for_timeout(4000)

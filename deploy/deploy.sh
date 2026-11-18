@@ -136,10 +136,21 @@ if [ -n "$(git status --porcelain -- data/cosmology)" ]; then
     exit 1
 fi
 
+# The home page's passages of the moment (build/passage.py): a list Tigran
+# rules, a line at a time or a part whole.  One made for a look at the page before he has ruled
+# says so in its first lines (tools/passages/apply.py rule --accept), and one
+# not committed was not reviewed either.
+if [ -n "$(git status --porcelain -- data/passages.tsv)" ] || grep -q 'NOT YET RULED' data/passages.tsv 2>/dev/null; then
+    echo "refusing: data/passages.tsv is not committed, or holds passages not yet ruled." >&2
+    echo "          Rule them in var/passages/review.md, run tools/passages/apply.py rule, commit, then deploy." >&2
+    git status --short -- data/passages.tsv >&2
+    exit 1
+fi
+
 # What a host's tree keeps that no deploy sends, and so never deletes: the copy
 # to $NEXT leaves them out, and the swap from $NEXT into $DEST leaves them be.
 EXCLUDES=(--exclude '.git/' --exclude '.venv/' --exclude '__pycache__/' --exclude 'var/'
-          --exclude 'export/' --exclude 'data/uf/*.zip')
+          --exclude 'export/' --exclude 'data/uf/*.zip' --exclude 'data/art/*.jpeg')
 NEXT="$DEST.next"
 
 # The venv, synced to the requirements staged in $NEXT before any of it is

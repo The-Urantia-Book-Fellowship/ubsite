@@ -10,6 +10,9 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The home page shows a passage of the moment: a few sentences of the book, another at each visit, with the way to their place.
+- On the home page, a line over the header offers to install the site as an app, where the browser can; its cross puts it away for good.
+- The bar at the foot of the home page says how the offline copy stands, up to date, downloading, out of date or offline, and opens Settings' Offline tab.
 - The half-disc is back beside the gear at the header's corner: a tap switches between the light theme and the dark, as it did until November 10.
 - The four parts on the home page each have a picture, with the part's name set over it: the centre of all things, a galaxy, the Earth at sunrise and the Sea of Galilee.
 - Bookmarks: tap a paragraph and the bar at the foot offers Bookmark this paragraph; a ribbon then marks it in the margin, and the ribbon at the bar's right end, on every page, opens your bookmarks in the book's order, each a link to its place, with a cross to remove it and Undo. Kept in this browser only.
@@ -235,6 +238,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The passages of the moment are data/passages.tsv, each a paragraph's reference and the words of it shown, kept by tools/passages/apply.py from rulings in var/passages/review.md; build/passage.py holds each to the text (there once, whole sentences, at most 480 characters) and stores it rendered in the table passage (schema 013), and the home page carries the whole list, of which a line of script shows one. The install banner and the offline copy's state on the bar are the shell's (base.html .appban, .fstate), shown on the home page by the stylesheet; what is known of the browser's offer is kept as localStorage ub_install, the passage last shown as ub_passage, keys of their own and no settings. window.ubSettings.open(tab) opens Settings at a tab. tests/test_front.py; tools/front_e2e.py.
 - The home page's part pictures are made by hand with tools/make_art.py (cwebp) from four masters in data/art/, which are not committed and are named by SHA-256 in data/art/MANIFEST.tsv: WebP at 640 and 1280 wide in ubsite/static/art/, 0.47 MB for the eight, of which a browser takes the one its screen needs. The offline copy holds all eight, 431 chunks for 423, and its gate holds every picture a stored page names to the copy. tests/test_art.py; tools/art_e2e.py.
 - The quiz's board is each site's own: `quiz.js` asks `/quiz/board/lines`, `/join` and `/answers` at the page's origin, the quiz pages carry no `data-board`, and `UB_BOARD`, `UB_BOARD_ORIGINS`, `board.here()` and the routes' answers to another origin (`Access-Control-Allow-Origin`, `OPTIONS`) are gone. `deploy.sh` backs up each host's `var/quiz.db` to `var/board/quiz-<host>-<date>.db`. No setting `quizboard`. `tools/quiz_e2e.py` drives two sites, a board each, in Chrome.
 - A link in the Contents to the address their history entry already has is made a step of its own (`ub.js toPlace`, state `{ub: 'place'}`): the browser would only replace the entry, with a `popstate` at the same address and no `hashchange`, which the handler read as Back. A paragraph's play button carries its time as `data-ms` and `data-t` (`listen.js place()`, `clock()`), drawn by `ub.css .playp[data-t]::after`; `tools/play_e2e.py` drives it in Chrome.

@@ -448,6 +448,14 @@
       var t = ev.target.closest('[role="tab"]');
       if (t) show(t);
     });
+    // Settings opened from elsewhere, at a tab: the home page's bar opens it
+    // at Offline (offline.js barState), and so does the install banner where
+    // the browser has no offer of its own to make.
+    window.ubSettings.open = function (tab) {
+      var t = tab && document.getElementById('set-t-' + tab);
+      if (!dlg.open) gear.click();
+      if (t) show(t);
+    };
     dlg.addEventListener('keydown', function (ev) {
       if (!dlg.open || ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey || ev.defaultPrevented ||
           ev.target.closest('select') || (/^Arrow/.test(ev.key) && ev.target.type === 'radio')) return;
@@ -1969,7 +1977,9 @@
     // bar and the page jumped sideways (Tigran, 2026-11-17, with Paragraph
     // previews on); and on a phone a tap there would have shown the card
     // and gone nowhere.
-    if (!a || a.closest('.pop.pv, .fbar')) return null;
+    // Nor the home page's passage of the moment (home.html .fpass): its
+    // reference is the way to the paragraph whose words are already shown.
+    if (!a || a.closest('.pop.pv, .fbar, .fpass')) return null;
     m = PV.exec(a.getAttribute('href') || '');
     if (!m) return null;
     // In a translator's note's card, or a translation's cell: that translation's
@@ -3150,11 +3160,67 @@
     show(tabs[0]);
   });
 
+  // The offer to install the site as an app: Settings' Offline tab has its
+  // button (offline.js), and the home page a line over its header (base.html
+  // .appban; Tigran's design, 2026-11-17), in a browser's tab and never in
+  // the app.  ub_install, a key of its own and no setting, says what is
+  // known: 'offered', the browser made its offer here, so the head script
+  // shows the line before anything is drawn next time; 'no', its cross was
+  // tapped, for good; 'done', installed.  On an iPhone or iPad, which makes
+  // no offer, the line is shown until its cross is tapped, and Install opens
+  // Settings at Offline, which says how.
+  var appBan = document.querySelector('.appban'), APP = 'ub_install',
+      appIn = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var appKnown = function () { try { return localStorage.getItem(APP); } catch (e) { return null; } };
+  var appKeep = function (v) {
+    try { if (v) localStorage.setItem(APP, v); else localStorage.removeItem(APP); } catch (e) {}
+  };
+  var appRoot = document.documentElement;
+  var appShow = function (on) {
+    if (on) appRoot.dataset.install = appRoot.dataset.install || '1';
+    else delete appRoot.dataset.install;
+  };
   window.addEventListener('beforeinstallprompt', function (ev) {
     ev.preventDefault();
     window.ubInstall = ev;
+    if (appBan && !appIn && appKnown() !== 'no') {
+      appKeep('offered');
+      if (location.pathname === '/') appShow(true);
+    }
     document.dispatchEvent(new Event('ub:installable'));
   });
+  window.addEventListener('appinstalled', function () {
+    window.ubInstall = null;
+    appKeep('done');
+    appShow(false);
+    document.dispatchEvent(new Event('ub:installable'));
+  });
+  if (appBan) {
+    appBan.querySelector('.abgo').addEventListener('click', function () {
+      var offer = window.ubInstall;
+      if (!offer) return window.ubSettings.open && window.ubSettings.open('offline');
+      offer.prompt();
+      offer.userChoice.then(function (c) {
+        // The offer is spent either way.  Taken, 'done'; refused in the
+        // browser's own dialog, the line goes until the browser offers again.
+        window.ubInstall = null;
+        appKeep(c && c.outcome === 'accepted' ? 'done' : null);
+        appShow(false);
+        document.dispatchEvent(new Event('ub:installable'));
+      });
+    });
+    appBan.querySelector('.abno').addEventListener('click', function () {
+      appKeep('no');
+      appShow(false);
+    });
+    // Shown by the head script's guess, and the offer has not come: it is
+    // not coming (installed since, or refused in the browser's dialog).
+    if (appRoot.dataset.install === '1') setTimeout(function () {
+      if (window.ubInstall || appRoot.dataset.install !== '1') return;
+      appKeep(null);
+      appShow(false);
+    }, 4000);
+  }
 
   // The chart of the personalities (cosmology.html), brought in by listen.js
   // while it plays: its script, which a <main> swapped in leaves unrun, loaded

@@ -1200,7 +1200,11 @@ def home(request: Request):
         "SELECT SUM(n_events), SUM(n_entries) FROM appendix").fetchone()
     parts = con.execute("SELECT * FROM part ORDER BY n").fetchall()
     papers = con.execute("SELECT * FROM paper ORDER BY n").fetchall()
-    return page(request, "home.html", stats=stats, parts=parts, papers=papers, roman=ROMAN)
+    # The passages of the moment (build/passage.py), all of them: the page
+    # carries the list and a line of script shows one, another at each visit,
+    # since a stored page is the same for every reader and every visit.
+    passages = [list(r) for r in con.execute("SELECT ref, title, html FROM passage ORDER BY n")]
+    return page(request, "home.html", stats=stats, parts=parts, papers=papers, roman=ROMAN, passages=passages)
 
 
 @app.get("/read", response_class=HTMLResponse)

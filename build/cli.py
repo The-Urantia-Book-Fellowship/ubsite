@@ -206,6 +206,11 @@ def main(argv: list[str]) -> int:
             print(f"  the quiz: {len(quiz_built.questions)} questions,"
                   f" {sum(q['state'] not in ('-', 'drop') for q in quiz_built.questions)} reviewed,"
                   f" {len(set(quiz_built.slips))} slips listed in tests/known-quiz-slips.tsv")
+        # The passages of the moment (build/passage.py), which the home page
+        # shows one of: after the text and its spans.
+        from . import passage
+        n_passages = passage.load(con, report)
+        print(f"  {n_passages} passages of the moment, from data/passages.tsv")
         print("speech ...")
         from . import speech
         n_speech = speech.derive(con)
@@ -314,7 +319,8 @@ def main(argv: list[str]) -> int:
                 ("reading_paths", "SELECT COUNT(*) FROM reading_path"),
                 ("translations", "SELECT COUNT(*) FROM translation"),
                 ("tr_paragraphs", "SELECT COUNT(*) FROM tr_paragraph"),
-                ("tr_notes", "SELECT COUNT(*) FROM tr_note")]:
+                ("tr_notes", "SELECT COUNT(*) FROM tr_note"),
+                ("passages", "SELECT COUNT(*) FROM passage")]:
             con.execute("INSERT INTO stat VALUES (?,?)",
                         (k, con.execute(q).fetchone()[0]))
         con.executemany("INSERT INTO stat VALUES (?,?)", sorted(audio_stats.items()))
@@ -391,6 +397,9 @@ def main(argv: list[str]) -> int:
         print("\n== the chart of the personalities ==")
         from .checks.check_cosmo import run as cosmo_run
         rc |= cosmo_run(dbf) if dbf.exists() else absent("var/ub.db (make data)")
+        print("\n== the passages of the moment ==")
+        from .passage import check as passage_check
+        rc |= passage_check(dbf) if dbf.exists() else absent("var/ub.db (make data)")
         print("\n== italic spans vs press artifacts ==")
         from .checks.check_spans import load_press_italics, run as span_run
         if ital and ital.is_dir():
