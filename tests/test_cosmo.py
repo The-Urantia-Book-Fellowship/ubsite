@@ -6,9 +6,8 @@ The snapshot as the tool writes it, and sound; the reader seeing what is
 wrong with one that is not; a key the tool does not know stopping it; what
 the build derives, a line's path, a card's sign, a name found in the text;
 and the page as a reader is sent it: every card and entry once, every address
-on it landing, every source a place of the book, and no sign of three circles
-about one centre, which is the Foundation's mark and never drawn here
-(DECISIONS.md, The sites).
+on it landing, every source a place of the book, and the sign for Trinity
+origin on every card that has it.
 """
 
 from __future__ import annotations
@@ -243,25 +242,15 @@ class Pages(unittest.TestCase):
             self.assertIn(a, ends)
             self.assertIn(b, ends)
 
-    def test_no_sign_is_three_circles_about_one_centre(self):
-        """His page's sign for Trinity origin is three concentric azure
-        circles, the Foundation's mark: ours is three rings interlaced, each
-        about its own centre.  No sign has three circles about one centre,
-        and none a ring within a ring."""
+    def test_the_sign_for_trinity_origin(self):
+        """The sign for Trinity origin, three rings, the only circles not
+        filled: on every card of Trinity origin but a Deity's, and once in
+        the legend.  Until 2026-11-18 this also held that no sign was three
+        circles about one centre, the Foundation's mark, which may be drawn
+        since (DECISIONS.md, The sites)."""
         signs = re.findall(r'<svg class="cg".*?</svg>', self.raw, re.S)
         self.assertGreater(len(signs), 130)
-        trinity = 0
-
-        def centres(circles):
-            at = [(re.search(r'\bcx="([^"]+)"', c), re.search(r'\bcy="([^"]+)"', c)) for c in circles]
-            return [(float(x[1]) if x else 0.0, float(y[1]) if y else 0.0) for x, y in at]
-
-        for s in signs:
-            every = centres(re.findall(r"<(?:circle|ellipse)\b[^>]*>", s))
-            self.assertLess(max(every.count(c) for c in every) if every else 0, 3, s[:200])
-            rings = centres(re.findall(r'<circle class="gt"[^>]*>', s))        # the only circles not filled
-            self.assertEqual(len(rings), len(set(rings)), s[:200])
-            trinity += len(rings) == 3
+        trinity = sum(len(re.findall(r'<circle class="gt"[^>]*>', s)) == 3 for s in signs)
         # Every card of Trinity origin but a Deity's, and the legend's one.
         want = sum(1 for (g,) in self.con.execute(
             "SELECT p.glyph FROM cosmo_place c JOIN cosmo_person p ON p.id = c.person") if g == "trinity")

@@ -8,7 +8,7 @@ languages; and with scripts off:
 
   what is drawn: every unit's title no wider than his page drew it, which is
   what his lines were kept clear of; each language's lines and not the
-  other's; no sign of three circles about one centre;
+  other's;
 
   a card chosen: its address, its two cards and its lines lit, the rest stood
   back, its entry under the line's end, and the page not moved for a card in
@@ -119,11 +119,6 @@ CUT = """() => [...document.querySelectorAll('.cp .cn')].filter(n => n.scrollHei
 LINES = """() => { const shown = c => [...document.querySelectorAll('.cedges .' + c)]
       .filter(g => getComputedStyle(g).display !== 'none' && getComputedStyle(g.parentNode).display !== 'none').length;
     return [shown('en'), shown('ru')]; }"""
-# No sign is three circles about one centre.
-CONCENTRIC = """() => [...document.querySelectorAll('svg.cg')].filter(s => {
-    const c = [...s.querySelectorAll('circle')].filter(x => getComputedStyle(x).fill === 'none')
-      .map(x => (x.getAttribute('cx') || 0) + ',' + (x.getAttribute('cy') || 0));
-    return c.length >= 3 && new Set(c).size < c.length; }).length"""
 
 
 def fresh(b, settings: dict, **more):
@@ -201,7 +196,6 @@ def desktop(b, lang: str, whole: bool) -> None:
     en, ru = pg.evaluate(LINES)
     ok((en > 50 and ru == 0) if lang == "en" else (ru > 50 and en == 0),
        say + f"the lines drawn are this language's: {en} English, {ru} Russian")
-    ok(pg.evaluate(CONCENTRIC) == 0, say + "no sign is three circles about one centre")
     ok(not pg.evaluate("document.querySelector('.ctools').hidden")
        and pg.evaluate("!document.querySelector('main.cosmo [id]:not(marker)')"),
        say + "the tools are shown, and nothing on the chart keeps an id for the browser to scroll to")

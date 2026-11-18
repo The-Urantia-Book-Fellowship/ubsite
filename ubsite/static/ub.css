@@ -2823,8 +2823,9 @@ main.cosmo { padding: .6rem 0 0; --cedge: color-mix(in oklch, var(--ink) 42%, va
 .cview.far .cn, .cview.far .chere { visibility: hidden; }
 .cview.far .cut { font-size: 30px; line-height: 36px; }
 /* The signs.  The one for Trinity origin is the site's own, three rings
-   interlaced: his page draws three concentric azure circles, which are the
-   Foundation's mark and never drawn here (DECISIONS.md, The sites). */
+   interlaced, where his page draws three concentric azure circles, the
+   Foundation's mark: not to be drawn here when the chart was made, and kept
+   when that rule went, 2026-11-18 (DECISIONS.md, The sites). */
 .cg { display: block; width: 34px; height: 34px; overflow: visible; }
 .cg .gd { stroke: #fff; stroke-width: 2; }
 .cg .ga { fill: #fff; stroke: #9aa1ad; stroke-width: 1.5; }
