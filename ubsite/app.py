@@ -1847,52 +1847,38 @@ def quiz_page(request: Request):
     data = {"papers": [{"n": x["n"], "part": x["part"] or 0, "count": x["count"]} for x in papers],
             "q": queries.quiz(con)}
     return page(request, "quiz.html", papers=papers, parts=parts, roman=ROMAN, data=data,
-                total=sum(x["count"] for x in papers), board_url=board.BOARD)
+                total=sum(x["count"] for x in papers))
 
 
 # ---- the quiz's board (ubsite/board.py) -----------------------------------------
-# The page is every site's, filled by quiz.js from the board's site; its JSON
-# and its two POSTs are that site's alone, and answer the other sites' pages
-# across origins.  Not for search engines: the names are readers'.
+# Each site's own (Tigran, 2026-11-18): the page, filled by quiz.js from this
+# site's JSON, and the two POSTs, all asked by a page at its own origin.  No
+# other origin's page is answered: no Access-Control header is sent and no
+# OPTIONS answered, so a browser sends no JSON here from another site's page
+# and lets none read the lines.  Until that day the main site kept one board
+# for both, and answered the other's pages across origins.  Not for search
+# engines: the names are readers'.
 
 @app.get("/quiz/board", response_class=HTMLResponse)
 def quiz_board_page(request: Request):
-    resp = page(request, "quiz_board.html", board_url=board.BOARD)
+    resp = page(request, "quiz_board.html")
     resp.headers["X-Robots-Tag"] = "noindex"
     return resp
 
 
-def _board_cors(request: Request) -> dict:
-    origin = request.headers.get("origin")
-    head = {"Vary": "Origin", "Cache-Control": "no-store", "X-Robots-Tag": "noindex"}
-    if origin and origin in board.origins(SITES):
-        head["Access-Control-Allow-Origin"] = origin
-    return head
+BOARD_HEAD = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex"}
 
 
 def _board_json(request: Request, body: dict, status: int = 200) -> JSONResponse:
-    return JSONResponse(body, status_code=status, headers=_board_cors(request))
-
-
-def _board_preflight(request: Request):
-    if not board.here(request.headers.get("host")):
-        return Response(status_code=404)
-    return Response(status_code=204, headers={**_board_cors(request),
-                                              "Access-Control-Allow-Methods": "GET, POST",
-                                              "Access-Control-Allow-Headers": "Content-Type",
-                                              "Access-Control-Max-Age": "86400"})
+    return JSONResponse(body, status_code=status, headers=BOARD_HEAD)
 
 
 @app.get("/quiz/board/lines")
 def quiz_board_lines(request: Request):
-    if not board.here(request.headers.get("host")):
-        return _board_json(request, {"error": "no board here"}, 404)
     return _board_json(request, board.board().lines())
 
 
 async def _board_post(request: Request, act) -> JSONResponse:
-    if not board.here(request.headers.get("host")):
-        return _board_json(request, {"error": "no board here"}, 404)
     if int(request.headers.get("content-length") or 0) > board.MAX_BODY:
         return _board_json(request, {"error": "too large"}, 413)
     raw = await request.body()
@@ -1925,10 +1911,6 @@ async def quiz_board_answers(request: Request):
     return await _board_post(request, lambda d: board.board().add(d.get("t"), d.get("a", [])))
 
 
-for _path in ("/quiz/board/lines", "/quiz/board/join", "/quiz/board/answers"):
-    app.add_api_route(_path, _board_preflight, methods=["OPTIONS"], include_in_schema=False)
-
-
 @app.get("/quiz/{n:int}", response_class=HTMLResponse)
 def quiz_paper_page(request: Request, n: int):
     """A paper's questions, asked one at a time (quiz.js), and without
@@ -1946,8 +1928,7 @@ def quiz_paper_page(request: Request, n: int):
     nxt = next((x for x in papers if x["n"] > n), None)
     data = {"paper": n, "count": len(questions), "q": questions,
             "next": nxt and {"n": nxt["n"], "count": nxt["count"]}}
-    return page(request, "quiz_paper.html", paper=p, questions=questions, nxt=nxt, data=data,
-                board_url=board.BOARD)
+    return page(request, "quiz_paper.html", paper=p, questions=questions, nxt=nxt, data=data)
 
 
 @app.get("/part/{n:int}", response_class=HTMLResponse)

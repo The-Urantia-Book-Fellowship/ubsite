@@ -78,6 +78,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Each site keeps its own quiz board: ubsite.ddns.net and ubsite.sigmaai.au no longer share one. If you put your name on the board from ubsite.ddns.net, the offer comes once more after your next quiz there, and your answers go with the name.
 - The home page has a new look: the name under the site's mark, the four parts as cards, each opening its part's title page, the other ways in as six tiles (Contents, Index, Cosmology of Personalities, Quiz, Study notes and bibliography, Help and the text API), and About this edition opening from its heading.
 - On a phone, and in any narrow window, the flags for English and Russian are back beside the gear wherever they fit beside the site's name; where they do not, Settings' Interface language still does what they do.
 - On a phone the Contents' heading stays at the top of the screen while they are open, and where the running head's reference opened them, a tap on it takes you back to the paragraph you came from, as Back does.
@@ -161,6 +162,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Removed
 
+- Settings' Quiz board switch: the offer after a quiz to put your name on the board can simply be left unanswered.
 - Settings' Tap to turn the page: a tap on a paragraph now always names it, bringing the running head, and soon the bookmarks; Space, Page Down and the arrows turn the page as before.
 - The cloud at the header's corner: Settings' Offline tab, under the gear, says whether the site is reached and what this browser keeps, and does all the cloud did.
 - Settings' Translations in parallel columns: the columns now come by themselves where the window has room for them. On a phone, where the switch stood each translation under its paragraph, they are in the fold under it.
@@ -230,6 +232,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The quiz's board is each site's own: `quiz.js` asks `/quiz/board/lines`, `/join` and `/answers` at the page's origin, the quiz pages carry no `data-board`, and `UB_BOARD`, `UB_BOARD_ORIGINS`, `board.here()` and the routes' answers to another origin (`Access-Control-Allow-Origin`, `OPTIONS`) are gone. `deploy.sh` backs up each host's `var/quiz.db` to `var/board/quiz-<host>-<date>.db`. No setting `quizboard`. `tools/quiz_e2e.py` drives two sites, a board each, in Chrome.
 - A link in the Contents to the address their history entry already has is made a step of its own (`ub.js toPlace`, state `{ub: 'place'}`): the browser would only replace the entry, with a `popstate` at the same address and no `hashchange`, which the handler read as Back. A paragraph's play button carries its time as `data-ms` and `data-t` (`listen.js place()`, `clock()`), drawn by `ub.css .playp[data-t]::after`; `tools/play_e2e.py` drives it in Chrome.
 - No setting `compare`: `ub.js cmpFits` asks whether the English and every ticked translation the page has would each be `--mincol` wide (`ub.css`, 35/70 of the measure), what they need being the stylesheet's own sum on a probe (`.cprobe`) and what there is taken from the frame's boxes, which do not move with the answer; `cmpCheck` asks again on a resize, a fold of the Contents or the index, a size, the width or the typeface, and `cmpGo` draws in place, keeping the line at the window's top by the letter. `article.cmp` is columns at any width, the phone's stack gone; Measured's frame grows by `--textw`. The head script's class before first paint is a guess from `localStorage['ub_cols']`, the width of the window the last page was in columns in. `tools/compare_e2e.py` `room` holds the rule in Chrome.
 - A size is kept as itself, `"90"`, `"100"` (the default), `"112.5"`, `"125"`, for `size` and `uisize`, so that the names may move again and no one's text with them; the names kept before are read as what they meant, `smaller` 100% and `larger` and `largest` 125% (`ub.css` aliases, `ub.js stored()`), with no once-only migration. `--r0` is still a rem of the root at 112.5%, so every length at the three old sizes is to the pixel what it was.

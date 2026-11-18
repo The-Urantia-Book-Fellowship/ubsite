@@ -19,10 +19,13 @@ command line (`python -m ubsite.board`), its line and its name kept.  Kept:
 the name, the token's hash, the answers, the server's times.  No IP address,
 no cookie, nothing about the device, and nothing joined to var/visits.db.
 
-One board, on the main site (UB_BOARD, ubsite.sigmaai.au), which the other
-sites' pages send to and read from across origins; anywhere else these routes
-answer 404, and var/quiz.db is never made.  deploy.sh never ships it, and
-brings a copy back on each deploy.
+Each site keeps its own (Tigran, 2026-11-18): a page asks its own site, at
+/quiz/board/..., and no other origin's page is answered.  From 2026-10-28
+until then there was one board, on the main site, which the other site's pages
+sent to across origins, and a reader who could open one site and not the other
+had no board.  var/quiz.db is made by the first accepted write, on whichever
+host; deploy.sh never ships it, and brings a copy back from each host on each
+deploy.
 """
 
 from __future__ import annotations
@@ -37,15 +40,10 @@ import sys
 import threading
 import time
 import unicodedata
-import urllib.parse
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DB = pathlib.Path(os.environ.get("UB_BOARD_DB", ROOT / "var" / "quiz.db"))
 UB_DB = ROOT / "var" / "ub.db"
-# The site that keeps the board, which every quiz page names: the same bytes on
-# every host and in the one offline copy (offline/pages.py holds it so).
-DEFAULT = "https://ubsite.sigmaai.au"
-BOARD = os.environ.get("UB_BOARD", DEFAULT).rstrip("/")
 MAX_BODY = 16 * 1024
 MAX_ANSWERS = 2000
 CACHE_S = 10
@@ -250,25 +248,6 @@ class Board:
             con.close()
         self._cache = None
         return n == 1
-
-
-BOARD_HOST = urllib.parse.urlsplit(BOARD).netloc
-
-
-def here(host: str | None) -> bool:
-    """Whether this request is to the site that keeps the board: its Host, as
-    nginx passes it on (proxy_params), port and all, so that two servers on
-    one machine are two sites."""
-    return host is not None and host == BOARD_HOST
-
-
-def origins(sites) -> set[str]:
-    """The other sites whose pages may send to the board: every site the app
-    serves, as https, and those UB_BOARD_ORIGINS adds, for a test."""
-    out = {f"https://{h}" for h in sites}
-    out |= {o.strip().rstrip("/") for o in os.environ.get("UB_BOARD_ORIGINS", "").split(",") if o.strip()}
-    out.discard(BOARD)
-    return out
 
 
 _board: Board | None = None

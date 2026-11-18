@@ -162,7 +162,7 @@ The VPS has no `sqlite3` command, so its copy goes through Python. The two hosts
 
 `var/stats.passwd` is the scrypt hash of the `/stats` password, and is remade, not restored (`python -m ubsite.stats passwd`). The DB-IP database in `var/geoip/` is shipped by `deploy.sh`.
 
-**`var/quiz.db`** is the quiz's board (`ubsite/board.py`), on the VPS alone, which keeps it for both sites: the names readers chose and the first answers they gave, no IP address, no cookie. It is the one thing readers gave the site, and no build makes it again, so `deploy.sh` brings a copy of it here before every deploy that includes the VPS, made there by SQLite's own backup, to `var/board/quiz-<date>.db`. To restore one: stop the unit, put the copy at `~/ubsite/var/quiz.db` (and remove any `quiz.db-wal` and `quiz.db-shm` beside it), start the unit. `tests/test_board.py` restores a copy made the same way and reads the same board from it.
+**`var/quiz.db`** is the quiz's board (`ubsite/board.py`), one on each host since 2026-11-18, each site's own (the VPS kept one for both sites before): the names readers chose and the first answers they gave, no IP address, no cookie. It is the one thing readers gave a site, and no build makes it again, so `deploy.sh` brings a copy of each host's here before every deploy to that host, made there by SQLite's own backup, to `var/board/quiz-<host>-<date>.db` (the copies named `quiz-<date>.db`, with no host, are the VPS's from before that day). A host where nobody has joined has no file, and none is brought. To restore one: stop the unit on its host, put the copy at `~/ubsite/var/quiz.db` (and remove any `quiz.db-wal` and `quiz.db-shm` beside it), start the unit. A host's copy is that host's board, and is never put on the other. `tests/test_board.py` restores a copy made the same way and reads the same board from it.
 
 When reader annotations arrive they go in a separate `var/user.db`, and that will need a real backup, and a restore tested once, because an untested backup is a rumour.
 
@@ -170,9 +170,9 @@ When reader annotations arrive they go in a separate `var/user.db`, and that wil
 
 ## The quiz's board
 
-Kept by **ubsite.sigmaai.au** (`UB_BOARD`, which defaults to it, so the unit stays the same file on both hosts). pi5's pages send to it and read from it across origins; pi5's app answers the board's routes 404 and never makes a `var/quiz.db`. Its only POSTs, `/quiz/board/join` and `/quiz/board/answers`, have nginx locations of their own, exact matches (trap 19), with a body of up to 16 KB and 10 a minute from one address; everything else keeps the 1 KB limit.
+**Each site keeps its own** since 2026-11-18 (Tigran), in `var/quiz.db` on its host, made by the first name put on it: a page asks the site it is on, and nothing of the board on one site depends on reaching the other. From 2026-10-28 until then ubsite.sigmaai.au kept one board for both (`UB_BOARD`), and pi5's pages sent to it across origins. The unit is the same file on both hosts, and no environment variable names a board. Its only POSTs, `/quiz/board/join` and `/quiz/board/answers`, have nginx locations of their own, exact matches (trap 19), with a body of up to 16 KB and 10 a minute from one address; everything else keeps the 1 KB limit.
 
-**The nginx files changed with it (2026-10-28), so each host's must be installed again**, as root, which is Tigran's to run (CLAUDE.md, Privilege):
+**The nginx files changed with it on 2026-10-28**, and were installed on both hosts then; the change of 2026-11-18 is to a comment in each, the locations standing as they were, so nothing needs installing for it. To install one, as root, which is Tigran's to run (CLAUDE.md, Privilege):
 
 ```
 # pi5
@@ -183,9 +183,9 @@ sudo install -m0644 -o root -g root deploy/ubsite-sigmaai.nginx /etc/nginx/sites
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-Then, through nginx itself (trap 19): `curl -sI https://ubsite.sigmaai.au/quiz/board` is a 200, not a 301; an `OPTIONS` to `/quiz/board/join` with `Origin: https://ubsite.ddns.net` is a 204 naming that origin; a POST of 40 KB is a 413; and a POST to ubsite.ddns.net's is the app's 404.
+Then, through nginx itself (trap 19), on each site: `curl -sI https://ubsite.sigmaai.au/quiz/board` is a 200, not a 301; `/quiz/board/lines` is that site's lines, `{"lines": []}` where nobody has joined; a POST to `/quiz/board/answers` with a token the board has never had is the app's 404, `{"error": "unknown"}`; a join of 2 KB with a name that is none is the app's 400 and not nginx's 413, which a POST of 40 KB is; and an `OPTIONS` to `/quiz/board/join` with the other site's `Origin` is a 405 with no `Access-Control-Allow-Origin`.
 
-A name that should not be there is taken off on the VPS, its line kept and the name still taken:
+A name that should not be there is taken off on the host whose board it is on, its line kept and the name still taken:
 
 ```
 cd ~/ubsite && .venv/bin/python -m ubsite.board list

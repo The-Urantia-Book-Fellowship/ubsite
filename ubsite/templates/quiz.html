@@ -4,7 +4,7 @@
     as the contents list papers, each with how many questions it has and, filled
     in by quiz.js, how many of them this reader has had right. #}
 {% block body %}
-<main class="prose quiz quizhub" data-board="{{ board_url }}">
+<main class="prose quiz quizhub">
   <h1>{{ t('Cosmic Citizenship Quiz') }}</h1>
   <p class="lede">{{ t('quiz:hub', q=total, p=papers|length) }}</p>
   <div class="quizrun" aria-live="polite"></div>

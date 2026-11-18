@@ -393,6 +393,26 @@ class Pages(unittest.TestCase):
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text()
         self.assertIn(':root[data-quiz="off"] :is(.quizcall, .quizway) { display: none; }', css)
 
+    def test_the_board_has_no_setting(self):
+        """No Quiz board switch since 2026-11-18 (Tigran): the offer after a
+        quiz can be left unanswered.  With Quiz off there is still no offer
+        and no link to the board."""
+        from ubsite import settings
+        self.assertNotIn("quizboard", [s[0] for s in settings.SHOW])
+        self.assertNotIn("quizboard", settings.NEEDS)
+        css = (ROOT / "ubsite" / "static" / "ub.css").read_text()
+        self.assertNotIn("data-quizboard", css)
+        self.assertIn(':root[data-quiz="off"] .qboard { display: none; }', css)
+        js = (ROOT / "ubsite" / "static" / "quiz.js").read_text()
+        self.assertNotIn("g.quizboard", js)
+        self.assertIn("return g.quiz !== false;", js)
+        ru = (ROOT / "ubsite" / "ru.toml").read_text(encoding="utf-8")
+        self.assertNotIn('"Quiz board" =', ru)
+        # A browser that kept it off draws no attribute for it: the head script
+        # reads the settings there are, and this is none.
+        page = self.get("/quiz")[2]
+        self.assertNotIn("quizboard", page.replace('class="prose quiz quizboard"', ""))
+
 
 if __name__ == "__main__":
     unittest.main()

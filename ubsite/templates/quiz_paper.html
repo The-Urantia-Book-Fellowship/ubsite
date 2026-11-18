@@ -6,7 +6,7 @@
     English, as the book is; the words around them are the interface's. #}
 {% if paper.n %}{% set title = tr('The quiz on Paper {n}', n=paper.n) %}{% else %}{% set title = 'The quiz on the Foreword' %}{% endif %}
 {% block body %}
-<main class="prose quiz" data-paper="{{ paper.n }}" data-board="{{ board_url }}">
+<main class="prose quiz" data-paper="{{ paper.n }}">
   <p class="quizof"><a href="/{{ paper.n }}">{% if paper.n %}{{ t('Paper {n}', n=paper.n) }}. {% endif %}{{ paper.title }}</a></p>
   <h1>{{ t('Cosmic Citizenship Quiz') }}</h1>
   <p class="lede">{{ t('quiz:paper', n=questions|length) }}</p>

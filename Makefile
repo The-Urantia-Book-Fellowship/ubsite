@@ -171,16 +171,16 @@ HOST := 127.0.0.1
 PIDFILE := var/serve.pid
 
 ## serve         run the reader at http://$(HOST):$(PORT), in the foreground
-# The quiz's board is this server's own (ubsite/board.py), in var/quiz.db, so
-# that nothing a test does reaches the live one.
+# The quiz's board is this server's own (ubsite/board.py), in var/quiz.db, as
+# every site's is its own: nothing a test does reaches a live one.
 serve: stop
-	@UB_BOARD=http://localhost:$(PORT) $(PY) -m uvicorn ubsite.app:app \
+	@$(PY) -m uvicorn ubsite.app:app \
 		--host $(HOST) --port $(PORT) --reload
 
 ## serve-bg      same, in the background, recording its pid
 serve-bg: stop
 	@mkdir -p var
-	@UB_BOARD=http://localhost:$(PORT) nohup $(PY) -m uvicorn ubsite.app:app \
+	@nohup $(PY) -m uvicorn ubsite.app:app \
 		--host $(HOST) --port $(PORT) > var/serve.log 2>&1 & echo $$! > $(PIDFILE)
 	@sleep 2; echo "serving on http://$(HOST):$(PORT)  (pid $$(cat $(PIDFILE)))"
 

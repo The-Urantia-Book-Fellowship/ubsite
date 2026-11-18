@@ -17,20 +17,24 @@
 // layout, `first` {"366.1": mask}, whatever quiz it came in; and the best score
 // at one sitting of each paper, `best`, which /quiz shows beside the paper.
 //
-// The board (ubsite/board.py; Tigran, 2026-10-28): after a quiz, with Settings'
-// Quiz board on, an offer to put a name on it.  A reader who takes it gets a
-// token made here, which the board knows the line by, and the board is sent
-// every first answer; after each later quiz, those not yet sent (`sent`).  The
-// board marks them itself.  Nothing is sent before a reader asks, and nothing
-// at all with the board off.  The board is one site's, `data-board`, which
-// the other sites' pages send to across origins; offline, or with the browser
-// wrongly saying so (trap 40), the send is simply tried, and what is not sent
-// waits for the next quiz.  /quiz/board draws the board from there.
+// The board (ubsite/board.py; Tigran, 2026-10-28): after a quiz, an offer to
+// put a name on it, which a reader may leave unanswered: no switch in Settings
+// since 2026-11-18, when a browser that kept `quizboard` off began to read as
+// if it had no such key.  A reader who takes the offer gets a token made here,
+// which the board knows the line by, and the board is sent every first answer;
+// after each later quiz, those not yet sent (`sent`).  The board marks them
+// itself.  Nothing is sent before a reader asks.  The board is the site's own
+// since that day, asked at the page's origin, where one site kept it for both
+// before; so a browser on the board from the other site holds a token this
+// one does not know, and is offered again, its first answers going with the
+// name.  Offline, or with the browser wrongly saying so (trap 40), the send is
+// simply tried, and what is not sent waits for the next quiz.  /quiz/board
+// draws the board.
 (function () {
   'use strict';
   var main = document.querySelector('main.quiz');
   if (!main) return;
-  var T = window.ubT, BOARD = main.dataset.board || '';
+  var T = window.ubT;
   var json = document.getElementById('ub-quiz');
   var D = json ? JSON.parse(json.textContent) : null;
   var run = main.querySelector('.quizrun');
@@ -224,13 +228,15 @@
   }
 
   // ---- the board ------------------------------------------------------------------------
-  // Quiz board, which means nothing while Quiz is off (settings.py NEEDS).
+  // Offered after every quiz but with Quiz off, when a quiz is run only by a
+  // reader who asked for its address, and the links to the board are hidden
+  // too (ub.css .qboard).
   function boardOn() {
     var g = window.ubSettings ? window.ubSettings.get() : {};
-    return !!BOARD && g.quiz !== false && g.quizboard !== false;
+    return g.quiz !== false;
   }
   function post(path, body) {
-    return fetch(BOARD + path, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json' },
+    return fetch(path, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json' },
                                  body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); });
   }
@@ -329,10 +335,10 @@
     crypto.getRandomValues(b);
     return Array.prototype.map.call(b, function (x) { return (x + 256).toString(16).slice(1); }).join('');
   }
-  // /quiz/board: the board as its site gives it, this browser's line marked.
+  // /quiz/board: this site's board, this browser's line marked.
   function drawBoard() {
     var box = main.querySelector('.boardrun'), me = load().line;
-    fetch(BOARD + '/quiz/board/lines', { credentials: 'omit' }).then(function (r) {
+    fetch('/quiz/board/lines', { credentials: 'omit' }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
       return r.json();
     }).then(function (j) {

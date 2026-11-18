@@ -310,19 +310,23 @@ ship() {
     echo "==> $HOST done (not restarted)"
 }
 
-# The quiz's board (ubsite/board.py), kept by the main site: the one thing the
-# site holds that readers gave it, and no build can make again.  Before anything
-# is shipped, a copy of it, made by SQLite's own backup on the host, is brought
-# here to var/board/, dated; never shipped back.  None while nobody has joined.
-BOARD_HOST=sigmaai.au
-if [[ " $HOSTS " == *" $BOARD_HOST "* ]] && ssh "$BOARD_HOST" "test -f $DEST/var/quiz.db"; then
-    when="$(date +%F-%H%M%S)"
-    mkdir -p "$HERE/var/board"
-    ssh "$BOARD_HOST" "cd $DEST && .venv/bin/python -c 'import sqlite3; sqlite3.connect(\"var/quiz.db\").backup(sqlite3.connect(\"var/quiz-backup.db\"))'"
-    rsync -a "$BOARD_HOST:$DEST/var/quiz-backup.db" "$HERE/var/board/quiz-$when.db"
-    ssh "$BOARD_HOST" "rm -f $DEST/var/quiz-backup.db"
-    echo "==> the quiz's board, backed up: var/board/quiz-$when.db"
-fi
+# The quiz's board (ubsite/board.py), each site's own since 2026-11-18: the one
+# thing a site holds that readers gave it, and no build can make again.  Before
+# anything is shipped, a copy of each host's, made by SQLite's own backup on the
+# host, is brought here to var/board/, named for the host and dated; never
+# shipped back.  None from a host where nobody has joined.  (The copies named
+# quiz-<date>.db, without a host, are the VPS's, from when it kept the one
+# board for both sites.)
+for HOST in $HOSTS; do
+    if ssh "$HOST" "test -f $DEST/var/quiz.db"; then
+        when="$(date +%F-%H%M%S)"
+        mkdir -p "$HERE/var/board"
+        ssh "$HOST" "cd $DEST && .venv/bin/python -c 'import sqlite3; sqlite3.connect(\"var/quiz.db\").backup(sqlite3.connect(\"var/quiz-backup.db\"))'"
+        rsync -a "$HOST:$DEST/var/quiz-backup.db" "$HERE/var/board/quiz-$HOST-$when.db"
+        ssh "$HOST" "rm -f $DEST/var/quiz-backup.db"
+        echo "==> $HOST's quiz board, backed up: var/board/quiz-$HOST-$when.db"
+    fi
+done
 
 for HOST in $HOSTS; do
     ship "$HOST"

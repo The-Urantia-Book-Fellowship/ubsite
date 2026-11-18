@@ -404,11 +404,8 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     # questions, and each paper's, a chunk of their own, which moves only when
     # the quiz does, a reviewed paper's references with it; not misc, which
     # /changelog moves with every release.
-    # Every quiz page names the board's site, the same on every host and in this
-    # one copy: never a test's (UB_BOARD).
-    from ubsite import board
-    if board.BOARD != board.DEFAULT:
-        raise Shape(f"UB_BOARD is {board.BOARD}: the copy's quiz pages would send to it")
+    # A quiz page names no site: its board is the site it is read on (quiz.js;
+    # Tigran, 2026-11-18), so the one copy serves every host as it is.
     qpaths = ["/quiz"] + [f"/quiz/{n}" for n in u["quiz"]]
     chunks["quiz"] = {"pages": {path: own(path, pg)
                                 for path, pg in zip(qpaths, site.get_many([(m, "") for m in qpaths]))}}

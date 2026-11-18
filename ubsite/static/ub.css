@@ -866,9 +866,10 @@ p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
    switch shows one (home.html, contents.html, _rail.html, quiz.html; the
    recordings' tree is drawn by offline.js for the switch as it stands). */
 :root:not([data-foreword="off"]) .fwout, :root[data-foreword="off"] .fwin { display: none; }
-/* Its board turned off, or the quiz (settings.py NEEDS): the offer after a
-   quiz and the links to the board.  The board's page answers an address. */
-:root:is([data-quiz="off"], [data-quizboard="off"]) .qboard { display: none; }
+/* The quiz turned off: no offer after a quiz to put a name on the board, and
+   no links to it (a switch of the board's own, `quizboard`, hid them too
+   until 2026-11-18).  The board's page answers an address. */
+:root[data-quiz="off"] .qboard { display: none; }
 /* The index turned off, and the appendices with it (Tigran, 2026-10-18): the
    margin, the box of what a whole section or paper cites, the Index button,
    and whatever else is marked .ix, the header's link, the home page's lines,

@@ -200,10 +200,12 @@ SHOW = [
     # home page.  /quiz and /quiz/N answer an address asked for, as the index's
     # pages do (Tigran, 2026-10-28).
     ("quiz", "switch", "Quiz", True, [], "questions at the end of a paper, and on the home page"),
-    # Its board (ubsite/board.py): after a quiz, the offer to put a name on it,
-    # and the links to it; off, quiz.js sends nothing at all (Tigran,
-    # 2026-10-28).  A site may turn it off (SITE_DEFAULTS).
-    ("quizboard", "switch", "Quiz board", True, [], "the offer to put your name on it, and the links to it"),
+    # No Quiz board since 2026-11-18 (Tigran; `quizboard`, a switch from
+    # 2026-10-28, on by default, which hid the offer after a quiz to put a name
+    # on the board, and the links to it): the offer can be left unanswered, and
+    # nothing is sent before a reader takes it.  A browser that kept it off
+    # reads as if it had no such key.  With Quiz off there is still no offer
+    # and no link (ub.css .qboard, quiz.js boardOn).
     # The browser's own, drawn from a title="", which no stylesheet can hide:
     # ub.js takes every title off the page while this is off, and puts them
     # back (Tigran, 2026-10-14).  The icons keep their aria-labels.
@@ -354,7 +356,7 @@ SITE_DEFAULTS: dict[str, dict] = {}
 # translations in columns needed until 2026-11-16, and nothing does now.
 NEEDS = {"voice": "listen", "rate": "listen",
          "follow": "listen", "onward": "listen", "notesearch": "notes",
-         "indexsearch": "index", "studysearch": "studynotes", "quizboard": "quiz"}
+         "indexsearch": "index", "studysearch": "studynotes"}
 
 
 def _item(key, kind, label, default, choices, hint) -> dict:

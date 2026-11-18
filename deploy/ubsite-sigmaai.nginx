@@ -72,13 +72,13 @@ server {
         include /etc/nginx/proxy_params;
     }
 
-    # The quiz's board (ubsite/board.py), which ubsite.sigmaai.au keeps and the
-    # other site's pages send to; here, the app answers 404.  The only POSTs the
-    # site takes: a reader's name and first answers, at most 16 KB (819 answers
-    # come to about 12), 10 a minute, as a reader finishes a quiz.  Exact
-    # matches: a prefix location /quiz/board/ would answer /quiz/board, the
-    # board's page, with a 301 (trap 19).  The addresses stay in memory only,
-    # for the limit, as /search's do.
+    # The quiz's board (ubsite/board.py), each site's own since 2026-11-18 (one
+    # on ubsite.sigmaai.au for both before, which the other's pages sent to).
+    # The only POSTs the site takes: a reader's name and first answers, at most
+    # 16 KB (819 answers come to about 12), 10 a minute, as a reader finishes a
+    # quiz.  Exact matches: a prefix location /quiz/board/ would answer
+    # /quiz/board, the board's page, with a 301 (trap 19).  The addresses stay
+    # in memory only, for the limit, as /search's do.
     location = /quiz/board/join {
         client_max_body_size 16k;
         limit_req zone=ubsite_board burst=5 nodelay;

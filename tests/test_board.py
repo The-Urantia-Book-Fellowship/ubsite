@@ -1,10 +1,12 @@
 """The quiz's board (ubsite/board.py, its routes in app.py).
 
 Its marking against ub.db's right answers, the first answer winning, a layout
-moved on, names and their clashes, two joins racing; the routes, at the board's
-site and at another, across origins and refused; what the file keeps and does
-not; and a backup made as deploy.sh makes it, read back.  Each test has a board
-of its own in a temporary directory: nothing here writes var/quiz.db.
+moved on, names and their clashes, two joins racing; the routes, which every
+site answers for its own board and no other origin's page may use (Tigran,
+2026-11-18: one board on the main site before, asked across origins); what the
+file keeps and does not; and a backup made as deploy.sh makes it, read back.
+Each test has a board of its own in a temporary directory: nothing here writes
+var/quiz.db.
 """
 
 import asyncio
@@ -197,30 +199,63 @@ class Routes(unittest.TestCase):
         self.post("/quiz/board/join", {"t": T1, "n": "Gonod"})
         self.assertEqual(self.post("/quiz/board/join", {"t": T2, "n": "gonod"})[0], 409)
 
-    def test_another_site_has_no_board(self):
-        for st, _, j in (call("GET", "/quiz/board/lines", host="ubsite.ddns.net"),
-                         self.post("/quiz/board/join", {"t": T1, "n": "Gonod"}, host="ubsite.ddns.net"),
-                         call("OPTIONS", "/quiz/board/join", host="ubsite.ddns.net")):
-            self.assertEqual(st, 404)
-        self.assertFalse(board._board.path.exists())
+    def test_every_site_has_its_board(self):
+        """Whatever the Host, the app answers for the board beside it: no site
+        is named as the one that keeps it, and none refuses."""
+        for n, host in enumerate(("ubsite.sigmaai.au", "ubsite.ddns.net", "localhost:8130", "192.168.1.9:8130")):
+            token = f"{n + 1:032x}"
+            st, _, j = self.post("/quiz/board/join", {"t": token, "n": f"Reader {n}", "a": RIGHT[:1]}, host=host)
+            self.assertEqual((st, j["name"]), (200, f"Reader {n}"), host)
+            self.assertEqual(self.post("/quiz/board/answers", {"t": token, "a": RIGHT[1:2]}, host=host)[0], 200, host)
+            st, _, j = call("GET", "/quiz/board/lines", host=host)
+            self.assertEqual((st, len(j["lines"])), (200, n + 1), host)
+        for name in ("BOARD", "DEFAULT", "BOARD_HOST", "here", "origins"):
+            self.assertFalse(hasattr(board, name), name)
 
-    def test_across_origins(self):
-        st, h, _ = call("OPTIONS", "/quiz/board/join", origin="https://ubsite.ddns.net")
-        self.assertEqual((st, h["access-control-allow-origin"]), (204, "https://ubsite.ddns.net"))
-        self.assertIn("POST", h["access-control-allow-methods"])
-        self.assertEqual(h["vary"], "Origin")
-        st, h, _ = call("GET", "/quiz/board/lines", origin="https://ubsite.ddns.net")
-        self.assertEqual(h["access-control-allow-origin"], "https://ubsite.ddns.net")
-        for other in ("https://example.com", "https://ubsite.sigmaai.au", "null"):
-            st, h, _ = call("OPTIONS", "/quiz/board/join", origin=other)
-            self.assertNotIn("access-control-allow-origin", h, other)
+    def test_a_token_from_another_board_is_unknown(self):
+        """A browser on the board the other site kept holds a token this one
+        has never had: 404, on which quiz.js offers again, and the join that
+        follows takes every first answer it sends."""
+        st, _, j = self.post("/quiz/board/answers", {"t": T1, "a": RIGHT[:2]})
+        self.assertEqual((st, j), (404, {"error": "unknown"}))
+        self.assertFalse(board._board.path.exists())                  # and nothing was made for it
+        st, _, j = self.post("/quiz/board/join", {"t": T1, "n": "Ganid", "a": RIGHT})
+        self.assertEqual((st, j["place"]), (200, 1))
+        self.assertEqual(call("GET", "/quiz/board/lines")[2]["lines"][0]["right"], 6)
 
-    def test_the_page_is_every_sites(self):
+    def test_no_other_origin_is_answered(self):
+        """No Access-Control header whatever the Origin, the other site's
+        among them, and no OPTIONS: a browser then sends no JSON from another
+        origin's page, and lets none read the lines."""
+        for origin in ("https://ubsite.ddns.net", "https://ubsite.sigmaai.au", "https://example.com", "null", None):
+            for path in ("/quiz/board/lines", "/quiz/board/join", "/quiz/board/answers"):
+                st, h, _ = call("OPTIONS", path, origin=origin)
+                self.assertEqual(st, 405, (origin, path))
+                self.assertFalse([k for k in h if k.startswith("access-control-")], (origin, path))
+            st, h, _ = call("GET", "/quiz/board/lines", origin=origin)
+            self.assertEqual(st, 200)
+            self.assertFalse([k for k in h if k.startswith("access-control-")], origin)
+            self.assertNotIn("vary", h)
+            st, h, _ = self.post("/quiz/board/join", {"t": T2, "n": "Nalda"}, origin=origin)
+            self.assertEqual(st, 200)
+            self.assertFalse([k for k in h if k.startswith("access-control-")], origin)
+
+    def test_a_quiz_page_names_no_site(self):
+        """The board is asked at the page's own origin (quiz.js), so the pages
+        are the same on every host and in the one offline copy."""
         for host in ("ubsite.sigmaai.au", "ubsite.ddns.net"):
             st, h, body = call("GET", "/quiz/board", host=host)
             self.assertEqual(st, 200)
-            self.assertIn('data-board="https://ubsite.sigmaai.au"', body)
             self.assertEqual(h["x-robots-tag"], "noindex")
+            for path in ("/quiz/board", "/quiz", "/quiz/32"):
+                body = call("GET", path, host=host)[2]
+                self.assertNotIn("data-board", body, path)
+                self.assertNotIn("https://ubsite.", body.split("<main", 1)[1].split("</main>", 1)[0], path)
+        js = (ROOT / "ubsite" / "static" / "quiz.js").read_text(encoding="utf-8")
+        self.assertNotIn("dataset.board", js)
+        self.assertNotIn("BOARD", js)
+        self.assertEqual(js.count("fetch('/quiz/board/lines'"), 1)
+        self.assertEqual(js.count("return fetch(path, {"), 1)
 
 
 if __name__ == "__main__":
