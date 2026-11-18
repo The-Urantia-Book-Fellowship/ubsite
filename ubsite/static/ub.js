@@ -1838,12 +1838,23 @@
   var flagsFit = function () {
     if (!flagName || !flagCtl) return;
     var below = function () { return flagCtl.getBoundingClientRect().top >= flagName.getBoundingClientRect().bottom - 1; };
-    flagTop.classList.remove('noflags', 'notheme');
+    // Since 2026-11-18 the line has the account's mark too, and before
+    // anything is left out it is drawn closer (.tight, ub.css): there the
+    // mark, the flags and the rest all fit wherever the flags fitted
+    // before.  Under that the account's mark gives way first, the flags
+    // never to it (Tigran: "so that the flags are always there, in all
+    // combinations"); Settings' foot says who is signed in, and leads to the
+    // account.  On a line of their own the controls have room again.
+    flagTop.classList.remove('tight', 'noflags', 'notheme', 'noacct');
     if (!flagPhone.matches || !below()) return;
+    flagTop.classList.add('tight');
+    if (!below()) return;
+    flagTop.classList.add('noacct');
+    if (!below()) return;
     flagTop.classList.add('noflags');
     if (!below()) return;
     flagTop.classList.add('notheme');
-    if (below()) flagTop.classList.remove('noflags', 'notheme');
+    if (below()) flagTop.classList.remove('tight', 'noflags', 'notheme', 'noacct');
   };
   flagsFit();
   addEventListener('resize', flagsFit);
@@ -2968,6 +2979,119 @@
   // register the worker and fetch the copy; and when the tab opens.  The
   // browser's own offer to install the site waits in the tab too, rather than
   // in a banner of its own.
+  // A reader's account (ubsite/account.py; Tigran, 2026-11-18), on a host
+  // that has accounts (settings.py ACCOUNT_HOSTS, which base.html hands the
+  // page, a stored page being the same on every host).  At the header's
+  // corner a menu, as the ?'s is: with no one signed in, why one would and
+  // the button that goes to Google; signed in, the account's picture, and in
+  // the menu who, with Sign out and Delete my account.  And at Settings'
+  // foot, where the dialog says where the settings are kept, the same said
+  // in a line.  Not a tab, a sixth running past the dialog's edge on a phone,
+  // and not a page, but for a sign-in that went wrong (/account).
+  //
+  // Who is signed in is what the browser keeps of it, localStorage ub_who,
+  // the server's answer at /account/me as /account/done wrote it: a page is
+  // read from the offline copy and asks the server nothing, so it cannot be
+  // told any other way.  It is a note and no more: the server knows a reader
+  // by a cookie no script can read, and takes nothing a script says.  The
+  // head script's ubMe() draws it, before the header is painted; here is what
+  // the buttons do, and the note put right each time the menu is opened.
+  var acctKept = document.querySelector('dialog.settings .kept'), acctMenu = document.querySelector('.top .acctmenu');
+  if (acctKept && (window.ubAcct || []).indexOf(location.hostname) >= 0 && window.fetch) {
+    var acctWho = function () {
+      try {
+        var w = JSON.parse(localStorage.getItem('ub_who') || 'null');
+        return w && typeof w === 'object' && typeof w.email === 'string' ? w : null;
+      } catch (e) { return null; }
+    };
+    var acctKeep = function (me) {
+      try {
+        if (me) localStorage.setItem('ub_who', JSON.stringify(me)); else localStorage.removeItem('ub_who');
+      } catch (e) {}
+    };
+    var acctLine = function () {
+      acctKept.dataset.acct = acctWho() ? 'in' : 'out';
+      // The menu, its mark and every name (base.html ubMe); and one more
+      // control beside the name, or another, so the flags are fitted again.
+      if (window.ubMe) window.ubMe();
+      flagsFit();
+    };
+    acctLine();
+    addEventListener('storage', function (ev) { if (ev.key === 'ub_who') acctLine(); });
+    addEventListener('pageshow', function (ev) { if (ev.persisted) acctLine(); });
+    // Where the reader is, to come back to once signed in: the paragraph
+    // being read, the whole paper's too, whose address has a # in it.  On the
+    // account's own page, where the server says the reader came from.
+    var acctHere = function (box) {
+      return (box && box.dataset.next) ||
+        (/^\/account(\/|$)/.test(location.pathname) ? '/' : location.pathname + location.search + location.hash);
+    };
+    var acctGo = function (box) { location.assign('/account/login?next=' + encodeURIComponent(acctHere(box))); };
+    var acctPost = function (path, body) {
+      return fetch(path, { method: 'POST', credentials: 'same-origin', cache: 'no-store',
+                           headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
+        .then(function (r) { if (!r.ok) throw r; return r.json(); });
+    };
+    // The server's word on who is signed in: 401, no one.  The network
+    // failing changes nothing.
+    var acctAsk = function () {
+      return fetch('/account/me', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) {
+        if (r.status === 401) { acctKeep(null); return null; }
+        return r.ok ? r.json().then(acctKeep) : null;
+      }).catch(function () {}).then(acctLine);
+    };
+    var acctShut = function () { if (acctMenu) acctMenu.open = false; };
+    document.addEventListener('click', function (ev) {
+      var t = ev.target.closest && ev.target.closest('a.acctlink, .acct button'), box, me = acctWho(), dlg;
+      if (acctMenu && acctMenu.open && !acctMenu.contains(ev.target)) acctShut();
+      if (!t) return;
+      if (t.matches('a.acctlink')) {
+        // Settings' foot.  Signed out, straight to Google and back here;
+        // signed in, to the menu at the corner, or, where a narrow phone
+        // has left the menu out, to the account's page.
+        if (ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.button) return;
+        ev.preventDefault();
+        if (!me) return acctGo(null);
+        if (!acctMenu || !acctMenu.getClientRects().length) {
+          return location.assign('/account?next=' + encodeURIComponent(acctHere(null)));
+        }
+        dlg = t.closest('dialog');
+        if (dlg && dlg.open) dlg.close();
+        acctMenu.open = true;
+        acctMenu.querySelector('summary').focus();
+        return;
+      }
+      box = t.closest('.acct');
+      var said = box.querySelector('.acct-say'),
+          failed = function () { said.innerHTML = T('That did not work. Please try again in a moment.'); said.hidden = false; },
+          done = function () { acctKeep(null); acctLine(); };
+      said.hidden = true;
+      if (t.classList.contains('acct-go')) acctGo(box);
+      else if (t.classList.contains('acct-bye')) acctPost('/account/logout').then(done, failed);
+      else if (t.classList.contains('acct-del') && me && window.confirm(T.text('acct:delete?'))) {
+        acctPost('/account/delete', { email: me.email }).then(done, failed);
+      }
+    });
+    if (acctMenu) {
+      // Opened, the menu asks the server who is signed in, and says what it
+      // answers; shut by Escape, and by a tap anywhere else (above).
+      acctMenu.addEventListener('toggle', function () { if (acctMenu.open) acctAsk(); });
+      document.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Escape' || !acctMenu.open) return;
+        acctShut();
+        acctMenu.querySelector('summary').focus();
+      });
+    }
+    // The account's own page asks as it loads, as the menu does when opened.
+    if (document.querySelector('main .acct')) acctAsk();
+    // A session and nothing kept here of whose it is: Safari clears what a
+    // script keeps after seven days unvisited and leaves the server's
+    // cookies (CLAUDE.md, trap 23), one of which a script may read and says
+    // only that there is a session (app.py _acct_in).  The server is asked
+    // who, once, and the corner says so.
+    else if (!acctWho() && /(?:^|;\s*)ub_in=1(?:;|$)/.test(document.cookie)) acctAsk();
+  }
+
   var offpanel = document.querySelector('dialog.settings .panel.offline');
   if (offpanel && 'serviceWorker' in navigator && window.isSecureContext &&
       window.HTMLDialogElement && 'showModal' in HTMLDialogElement.prototype) {

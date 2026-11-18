@@ -37,7 +37,13 @@ class Static(unittest.TestCase):
         # After the flags, the last thing in the header: the corner on both
         # layouts.  Last in the controls' box since 2026-11-10, the box last in
         # the header, so that on a phone the controls wrap as one (ub.css .ctl).
-        self.assertRegex(head, r'</details>\n  </div>\n</header>')
+        # After it only a reader's account, a menu made as this one is and
+        # hidden where the host has none (Tigran, 2026-11-18;
+        # tests/test_account.py).
+        self.assertRegex(head, r'</details>\n  \{#-[^#]*#\}\n  <details class="acctmenu" hidden>\n'
+                               r'    <summary \{\{ ta\(\'aria-label\', \'Account\'\) \}\}[^\n]*</summary>\n'
+                               r'    <div class="acctitems">\n      \{\{ acct\(\) \}\}\n    </div>\n  </details>\n'
+                               r'  <script>window\.ubMe && window\.ubMe\(\);</script>\n  </div>\n</header>')
         self.assertLess(head.index('<div class="ctl">'), head.index('<button class="gear"'))
         # No nav in the header since the same day.  The theme's half-disc went
         # with it and is back since 2026-11-18 (Tigran), beside the gear and

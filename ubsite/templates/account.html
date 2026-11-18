@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% set title = 'Account' %}
+{% from "_account.html" import acct %}
+{#- /account (app.py account_page; Tigran, 2026-11-18): where the callback
+    says what went wrong with a sign-in (`failed`, account.Refused's why),
+    and offers it again; and a reader's account as the menu at the header's
+    corner has it, for a phone too narrow for that menu, which Settings' foot
+    then leads here from.  No page leads here otherwise: the menu is the
+    account's place.  `next` is where the reader came from, to go back to.
+    The server's alone: never in the offline copy, which says of it that it is
+    read online, and never counted. #}
+{% block body %}
+<main class="prose legal acctpage">
+  <h1>{{ t('Account') }}</h1>
+  {%- if failed %}
+  {%- set why = {'cancelled': 'acct:fail:cancelled', 'state': 'acct:fail:state',
+                 'unverified': 'acct:fail:unverified'}.get(failed, 'acct:fail:google') %}
+  <p class="acct-failed" role="alert">{{ t(why) }}</p>
+  {%- endif %}
+  {{ acct(next) }}
+  {%- if next != '/account' %}
+  <p class="acct-back"><a href="{{ next }}">{{ t('Continue reading') }}</a></p>
+  {%- endif %}
+</main>
+{% endblock %}

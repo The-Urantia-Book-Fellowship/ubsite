@@ -228,7 +228,25 @@ class Pages(unittest.TestCase):
         js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
         self.assertIn("flagTop.classList.add('noflags');", js)
         self.assertLess(js.index("flagTop.classList.add('noflags');"), js.index("flagTop.classList.add('notheme');"))
-        self.assertIn("if (below()) flagTop.classList.remove('noflags', 'notheme');", js)
+        # And the account's menu at the corner, since 2026-11-18 (.noacct),
+        # gives way before the flags: "so that the flags are always there, in
+        # all combinations" (Tigran).  Before anything is left out the line
+        # is drawn closer (.tight), so that the account's mark costs neither
+        # the flags nor itself.  All out and the controls still under the
+        # name, all stand on that line, with room.
+        self.assertIn(".top.noacct .acctmenu { display: none; }", phone)
+        fit = js[js.index("var flagsFit = function () {"):js.index("flagsFit();")]
+        order = [fit.index(x) for x in ("flagTop.classList.add('tight');", "flagTop.classList.add('noacct');",
+                                        "flagTop.classList.add('noflags');", "flagTop.classList.add('notheme');",
+                                        "if (below()) flagTop.classList.remove('tight', 'noflags', 'notheme', 'noacct');")]
+        self.assertEqual(order, sorted(order))
+        # Closer, and only on a phone (tools/account_e2e.py and runhead_e2e.py
+        # measure it in Chrome, in both languages, signed in and out).
+        tight = css[css.index("@media (max-width: 40rem) {\n  .top.tight, .top.tight .ctl { column-gap: .375rem; }"):]
+        tight = tight[:tight.index("}\n}") + 3]
+        for rule in (".top.tight .langs { gap: .3rem; }", ".top.tight .flag svg { height: .75rem; }",
+                     ".top.tight .acctmenu > summary :is(.acctphoto, .acctinit) { width: 1.25rem; height: 1.25rem;"):
+            self.assertIn(rule, tight)
         self.assertIn("document.addEventListener('ub:settings', flagsFit);", js)
 
     def test_no_markup_where_it_cannot_stand(self):
@@ -269,7 +287,9 @@ class Pages(unittest.TestCase):
         # the interface's words, not the book's title as listed (DECISIONS.md,
         # Russian, 2026-11-06).
         names = {"Ctrl", "OFL", "CC", "BY", "NC", "SA", "Goudy", "Uversa", "Press", "The", "Urantia", "Book",
-                 "British", "Study", "Edition", "Badanon", "English", "localhost", "Fellowship"}
+                 "British", "Study", "Edition", "Badanon", "English", "localhost", "Fellowship",
+                 # Whose sign-in it is, on the Account tab's button (2026-11-18).
+                 "Google"}
         # And the translations' short names, which no language translates (data/translations.toml).
         with open(ROOT / "data" / "translations.toml", "rb") as fh:
             names |= {w for x in tomllib.load(fh).values() for w in re.findall(r"[A-Za-z]{2,}", x["label"])}

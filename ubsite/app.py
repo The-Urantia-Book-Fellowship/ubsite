@@ -22,6 +22,7 @@ import pathlib
 import re
 import sqlite3
 import sys
+from urllib.parse import quote
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "vendor" / "index"))
@@ -36,7 +37,7 @@ from markupsafe import Markup, escape  # noqa: E402
 from starlette.concurrency import run_in_threadpool  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import api, board, l10n, queries, settings, stats, visits  # noqa: E402
+from ubsite import account, api, board, l10n, queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 STATIC = ROOT / "ubsite" / "static"
@@ -685,6 +686,7 @@ T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
 T.env.globals["site_defaults"] = settings.site_defaults()
 T.env.globals["settings_spared"] = settings.SPARED
+T.env.globals["account_hosts"] = settings.ACCOUNT_HOSTS
 T.env.globals["bilingual"] = lambda: l10n.BILINGUAL
 
 
@@ -709,10 +711,12 @@ T.env.globals["sites"] = SITES
 REPO = "https://github.com/The-Urantia-Book-Fellowship/ubsite"
 T.env.globals["repo"] = REPO
 # Whom a reader writes to about what the site keeps and about its terms
-# (privacy.html, terms.html): the address /api gives for questions about the
-# API.  In the code, not a host's own, since the pages are kept in the offline
-# copy, which is one for every host.
-CONTACT = "tigran.aivazian@urantiabook.org"
+# (privacy.html, terms.html): Tigran's own address (2026-11-18: "make them
+# both my Gmail"), the one Google's sign-in screen gives for the site too,
+# since the pages say that he runs it.  /api keeps its own, for questions
+# about the API.  In the code, not a host's own, since the pages are kept in
+# the offline copy, which is one for every host.
+CONTACT = "aivazian.tigran@gmail.com"
 
 
 def _site(request: Request) -> tuple[str, str]:
@@ -1933,6 +1937,216 @@ async def quiz_board_join(request: Request):
 @app.post("/quiz/board/answers")
 async def quiz_board_answers(request: Request):
     return await _board_post(request, lambda d: board.board().add(d.get("t"), d.get("a", [])))
+
+
+# ---- accounts (ubsite/account.py) ------------------------------------------------
+# Signing in with Google, each site's own (Tigran, 2026-11-18).  Every address
+# under /account is the server's alone: never in the offline copy, which the
+# worker leaves to the network (sw.js), never counted (visits.py), never kept
+# by a browser or a proxy, and none says where its reader came from or goes.
+# With no var/account.toml the site has no accounts, and all of them are 404.
+
+ACCT_HEAD = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex", "Referrer-Policy": "no-referrer"}
+ACCT_BODY = 1024              # nginx's own limit for the site (deploy/ubsite.nginx)
+
+
+def _acct() -> account.Config:
+    conf = account.config()
+    if conf is None:
+        raise HTTPException(404)
+    return conf
+
+
+def _acct_page(request: Request, template: str, status_code: int = 200, **ctx) -> Response:
+    resp = page(request, template, status_code=status_code, **ctx)
+    resp.headers.update(ACCT_HEAD)
+    return resp
+
+
+def _acct_json(body: dict, status: int = 200) -> JSONResponse:
+    return JSONResponse(body, status_code=status, headers=ACCT_HEAD)
+
+
+def _acct_go(to: str) -> RedirectResponse:
+    return RedirectResponse(to, 303, headers=ACCT_HEAD)
+
+
+def _acct_cookie(resp: Response, conf: account.Config, name: str, value: str | None, max_age: int = 0) -> None:
+    """A cookie of the server's own, which no script reads, set or (None) cleared."""
+    if value is None:
+        resp.delete_cookie(conf.cookie(name), path="/", secure=conf.secure, httponly=True, samesite="lax")
+    else:
+        resp.set_cookie(conf.cookie(name), value, max_age=max_age, path="/", secure=conf.secure,
+                        httponly=True, samesite="lax")
+
+
+def _acct_in(resp: Response, conf: account.Config, session: str | None) -> None:
+    """Signed in, or (None) out: the session's cookie, and beside it one a
+    script may read that says only that there is a session.  Safari clears
+    everything a script keeps after seven days unvisited and leaves the
+    server's cookies (CLAUDE.md, trap 23): a page that finds this one and
+    nothing in its own storage asks /account/me, and its reader has
+    everything back."""
+    _acct_cookie(resp, conf, "ub_sid", session, account.SESSION_S)
+    if session is None:
+        resp.delete_cookie("ub_in", path="/", secure=conf.secure, samesite="lax")
+    else:
+        resp.set_cookie("ub_in", "1", max_age=account.SESSION_S, path="/", secure=conf.secure, samesite="lax")
+
+
+def _acct_who(request: Request, conf: account.Config, renew: bool = False) -> dict | None:
+    return account.accounts().who(request.cookies.get(conf.cookie("ub_sid"), ""), renew)
+
+
+async def _acct_post(request: Request, conf: account.Config) -> dict:
+    """What a page of this site sent: JSON, from this site's own origin.  With
+    the session's cookie SameSite Lax, which no other site's request carries,
+    that is the defence against a request forged from elsewhere; the board's
+    POSTs, which carry no cookie, ask for neither."""
+    if (request.headers.get("origin") != conf.origin
+            or not request.headers.get("content-type", "").lower().startswith("application/json")):
+        raise account.Refused(403, "origin")
+    if int(request.headers.get("content-length") or 0) > ACCT_BODY:
+        raise account.Refused(413, "too large")
+    raw = await request.body()
+    if len(raw) > ACCT_BODY:
+        raise account.Refused(413, "too large")
+    try:
+        got = json.loads(raw)
+    except (ValueError, RecursionError):
+        got = None
+    if not isinstance(got, dict):
+        raise account.Refused(400, "json")
+    return got
+
+
+@app.get("/account", response_class=HTMLResponse)
+def account_page(request: Request, nxt: str = Query("", alias="next")):
+    """A reader's account, which Settings' foot leads to (templates/
+    account.html): signing in, and signed in, who, signing out and deleting.
+    `next` is where the reader came from, to go back to once signed in."""
+    _acct()
+    return _acct_page(request, "account.html", next=account.local(nxt) if nxt else "/account")
+
+
+@app.get("/account/login")
+def account_login(request: Request, nxt: str = Query("/", alias="next")):
+    conf = _acct()
+    url, kept = account.accounts().begin(conf, nxt)
+    resp = _acct_go(url)
+    _acct_cookie(resp, conf, "ub_oauth", kept, account.STATE_S)
+    return resp
+
+
+@app.get("/account/callback", response_class=HTMLResponse)
+def account_callback(request: Request, code: str = "", state: str = "", error: str = ""):
+    """Google's answer.  Whatever is wrong with it, a page of the site's and
+    never a 500: the worker would put the copy's own 404 in a 500's place."""
+    conf = _acct()
+    kept = request.cookies.get(conf.cookie("ub_oauth"), "")
+    try:
+        if error or not code:
+            raise account.Refused(400, "cancelled" if error == "access_denied" else "google")
+        kind, token, nxt = account.accounts().finish(conf, kept, state, code)
+    except account.Refused as e:
+        resp = _acct_page(request, "account.html", status_code=e.status if e.status < 500 else 400,
+                          failed=e.why, next="/account")
+        _acct_cookie(resp, conf, "ub_oauth", None)
+        return resp
+    except (sqlite3.Error, OSError):
+        resp = _acct_page(request, "account.html", status_code=400, failed="server", next="/account")
+        _acct_cookie(resp, conf, "ub_oauth", None)
+        return resp
+    to = "?next=" + quote(nxt, safe="")
+    if kind == "in":
+        resp = _acct_go("/account/done" + to)
+        _acct_cookie(resp, conf, "ub_oauth", None)
+        _acct_in(resp, conf, token)
+    else:
+        # No account yet: what Google said waits for the reader's tick.
+        resp = _acct_go("/account/welcome" + to)
+        _acct_cookie(resp, conf, "ub_oauth", token, account.PENDING_S)
+    return resp
+
+
+@app.get("/account/welcome", response_class=HTMLResponse)
+def account_welcome(request: Request, nxt: str = Query("/", alias="next")):
+    """A first sign-in: the terms, and a tick, before any account is made."""
+    conf = _acct()
+    who = account.accounts().pending(request.cookies.get(conf.cookie("ub_oauth"), ""))
+    if who is None:
+        return _acct_go("/account")
+    return _acct_page(request, "account_welcome.html", who=who, next=account.local(nxt))
+
+
+@app.post("/account/agree")
+async def account_agree(request: Request):
+    conf = _acct()
+    try:
+        got = await _acct_post(request, conf)
+        if got.get("agree") is not True:
+            raise account.Refused(400, "agree")
+        token = request.cookies.get(conf.cookie("ub_oauth"), "")
+        session = await run_in_threadpool(account.accounts().agree, conf, token)
+    except account.Refused as e:
+        return _acct_json({"error": e.why}, e.status)
+    resp = _acct_json({"ok": True})
+    _acct_cookie(resp, conf, "ub_oauth", None)
+    _acct_in(resp, conf, session)
+    return resp
+
+
+@app.get("/account/done", response_class=HTMLResponse)
+def account_done(request: Request, nxt: str = Query("/", alias="next")):
+    """Signed in: the page that tells the browser so (localStorage ub_who),
+    since every other page is the same for everyone and is read from the
+    offline copy, and then goes on to where the reader was.  `next` is checked
+    here and written into the page: its script never reads the address."""
+    _acct()
+    return _acct_page(request, "account_done.html", next=account.local(nxt))
+
+
+@app.get("/account/me")
+def account_me(request: Request):
+    conf = _acct()
+    me = _acct_who(request, conf, renew=True)
+    if me is None:
+        resp = _acct_json({"error": "signed out"}, 401)
+        _acct_in(resp, conf, None)
+        return resp
+    resp = _acct_json({k: me[k] for k in ("id", "name", "email", "photo", "features", "db")})
+    if me["renewed"]:
+        _acct_in(resp, conf, request.cookies.get(conf.cookie("ub_sid"), ""))
+    return resp
+
+
+@app.post("/account/logout")
+async def account_logout(request: Request):
+    conf = _acct()
+    try:
+        await _acct_post(request, conf)
+    except account.Refused as e:
+        return _acct_json({"error": e.why}, e.status)
+    await run_in_threadpool(account.accounts().sign_out, request.cookies.get(conf.cookie("ub_sid"), ""))
+    resp = _acct_json({"ok": True})
+    _acct_in(resp, conf, None)
+    return resp
+
+
+@app.post("/account/delete")
+async def account_delete(request: Request):
+    """The account and everything kept for it, gone at once: its reader names
+    it by its address."""
+    conf = _acct()
+    try:
+        got = await _acct_post(request, conf)
+        await run_in_threadpool(account.accounts().delete, request.cookies.get(conf.cookie("ub_sid"), ""),
+                                got.get("email"))
+    except account.Refused as e:
+        return _acct_json({"error": e.why}, e.status)
+    resp = _acct_json({"ok": True})
+    _acct_in(resp, conf, None)
+    return resp
 
 
 @app.get("/quiz/{n:int}", response_class=HTMLResponse)

@@ -576,7 +576,9 @@ self.addEventListener('fetch', function (e) {
   if (am) { e.respondWith(audioAnswer(req, url.pathname, am[1])); return; }
   // A recording's list, /offline/audio/<key>.json, is a page to the copy
   // (offline-core.js), not the worker's own.
-  if (/^\/(offline\/(?!audio\/)|sw\.js$|api\/|audio\/|healthz$|quiz\/board\/)/.test(url.pathname)) return;
+  // Nor a reader's account (ubsite/account.py): signing in, who is signed
+  // in, all of it the server's, never the copy's and never kept.
+  if (/^\/(offline\/(?!audio\/)|sw\.js$|api\/|audio\/|healthz$|quiz\/board\/|account\/)/.test(url.pathname)) return;
   // Nor what depends on the host: a copy kept before 2026-10-15 holds the
   // manifest and the touch icon as one host sent them.
   if (self.ubOffline.HOSTED.indexOf(url.pathname) >= 0) return;

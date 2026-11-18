@@ -710,13 +710,24 @@ def run() -> int:
         # and 396 at Largest, 370 at Largest in Russian; where the gear and
         # the ? alone do not fit, the controls have a line of their own and
         # everything is on it.
+        # Since the same evening the line is drawn closer before anything is
+        # left out (.tight: a narrower gap, smaller flags), to make room for
+        # the account's mark where a host has accounts (tools/account_e2e.py);
+        # with none, as here, the flags fit from 354px at Standard in English,
+        # 398 at Larger and 442 at Largest, in Russian 334, 374 and 416, and
+        # the half-disc gives way below 338 at Larger in English and 376 at
+        # Largest, 350 at Largest in Russian.
         for lang, size, w, want, half in (
-                ("en", "100", 384, True, True), ("en", "100", 360, False, True), ("en", "100", 320, False, True),
-                ("en", "112.5", 430, True, True), ("en", "112.5", 412, False, True), ("en", "112.5", 344, False, False),
-                ("en", "125", 480, True, True), ("en", "125", 430, False, True), ("en", "125", 390, False, False),
-                ("en", "125", 320, True, True), ("ru", "100", 360, True, True), ("ru", "100", 344, False, True),
-                ("ru", "112.5", 412, True, True), ("ru", "112.5", 375, False, True), ("ru", "125", 412, False, True),
-                ("ru", "125", 360, False, False)):
+                ("en", "100", 384, True, True), ("en", "100", 360, True, True), ("en", "100", 344, False, True),
+                ("en", "100", 320, False, True),
+                ("en", "112.5", 430, True, True), ("en", "112.5", 412, True, True), ("en", "112.5", 384, False, True),
+                ("en", "112.5", 330, False, False),
+                ("en", "125", 480, True, True), ("en", "125", 430, False, True), ("en", "125", 390, False, True),
+                ("en", "125", 360, False, False), ("en", "125", 320, True, True),
+                ("ru", "100", 360, True, True), ("ru", "100", 344, True, True), ("ru", "100", 326, False, True),
+                ("ru", "112.5", 412, True, True), ("ru", "112.5", 384, True, True), ("ru", "112.5", 364, False, True),
+                ("ru", "125", 430, True, True), ("ru", "125", 404, False, True), ("ru", "125", 360, False, True),
+                ("ru", "125", 340, False, False)):
             c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": w, "height": 700})
             c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_settings', '%s'); }"
                               " catch (e) {}" % ('{"lang":"%s","uisize":"%s"}' % (lang, size)))
@@ -743,10 +754,11 @@ def run() -> int:
             q.wait_for_timeout(150)
             seen.append(q.evaluate(FLAGS)["flags"])
         ok(seen == [True, False, True], f"a resize leaves them out and brings them back ({seen})")
-        # At 460px, since the half-disc came back: at Largest the flags fit
-        # from 474px in English and from 448 in Russian (430px, with 440 and
-        # 414, until 2026-11-18).
-        q.set_viewport_size({"width": 460, "height": 700})
+        # At 430px, since the line is drawn closer: at Largest the flags fit
+        # from 442px in English and from 416 in Russian (460px, with 474 and
+        # 448, while the half-disc was back and the line was not yet closer;
+        # 430px, with 440 and 414, until 2026-11-18).
+        q.set_viewport_size({"width": 430, "height": 700})
         q.wait_for_timeout(150)
         en460 = q.evaluate(FLAGS)
         q.evaluate("ubSettings.set('lang', 'ru')")

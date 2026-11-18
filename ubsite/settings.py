@@ -342,6 +342,17 @@ SPARED = ["lang"]
 # the Fellowship's site exists.
 SITE_DEFAULTS: dict[str, dict] = {}
 
+# The hosts whose pages offer to sign in (ubsite/account.py; Tigran,
+# 2026-11-18): at Settings' foot, where the dialog says where a reader's
+# settings are kept, and not in a tab of its own, a sixth tab running past the
+# dialog's edge on a phone (his choice the same day).  Chosen in the page from
+# location.hostname, as a site's defaults are, since the offline copy is one
+# for every host and a stored page cannot know which host has accounts.  A
+# host named here must have its var/account.toml, or the link leads to a 404.
+# The dev server alone until signing in and what follows the account are
+# deployed together.
+ACCOUNT_HOSTS: list[str] = ["localhost"]
+
 
 # A setting that means nothing while another is off ('off', or a switch turned
 # off): shown, greyed, and not to be changed (ub.js disables it).  With

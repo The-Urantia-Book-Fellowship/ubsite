@@ -39,9 +39,10 @@ SCHEMA = pathlib.Path(__file__).with_name("visits.sql")
 
 OFF = os.environ.get("UB_VISITS", "").lower() in ("off", "0", "no")
 # Pages that are not reading: what deploy.sh polls, the icons, the report itself,
-# and what Work offline asks for (the worker, the app manifest; /offline/ below).
+# and what Work offline asks for (the worker, the app manifest; /offline/ below);
+# and a reader's account (/account/ below).
 SKIP = frozenset({"/healthz", "/favicon.ico", "/apple-touch-icon.png", "/stats",
-                  "/sw.js", "/manifest.webmanifest"})
+                  "/sw.js", "/manifest.webmanifest", "/account"})
 # Set by /stats on the owner's browser, so that their own reading is not counted.
 OWNER = re.compile(rb"(?:^|;\s*)ub_me=1(?:;|$)")
 VIA = frozenset({"swap", "next"})              # listen.js's X-UB-Fetch
@@ -335,11 +336,15 @@ class Counter:
             if status not in (200, 304):
                 return
             kind, rest = "browser", ()
-        elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/", "/quiz/board/")):
+        elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/", "/quiz/board/", "/account/")):
             return                                 # /rail/N: a paper opened in the left rail;
                                                    # /offline/: a copy downloading (sw.js);
                                                    # /tr/: a section's translations, for a fold;
-                                                   # /quiz/board/: the board's JSON, for its page
+                                                   # /quiz/board/: the board's JSON, for its page;
+                                                   # /account/: signing in (account.py), whose
+                                                   # callback has Google's code in its query, which
+                                                   # a view would keep: nothing of an account is
+                                                   # written here, nor joined to what is
         elif path.startswith("/api/"):
             kind = "api"                           # another site's program, not a reader
         else:

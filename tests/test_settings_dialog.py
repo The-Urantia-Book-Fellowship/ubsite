@@ -32,6 +32,8 @@ class Tabs(unittest.TestCase):
         tabs = RE_TAB.findall(self.dialog)
         groups = settings.groups([])
         self.assertEqual([(t[0], t[4]) for t in tabs], [(g["key"], g["legend"]) for g in groups])
+        # Five, which fill a phone's width: a reader's account is at the
+        # dialog's foot and not a sixth (Tigran, 2026-11-18; tests/test_account.py).
         self.assertEqual([t[4] for t in tabs], ["Reading", "Show", "Translations", "Listening", "Offline"])
         self.assertEqual(self.dialog.count('role="tab"'), len(groups))
         for key, controls, _, _, _ in tabs:

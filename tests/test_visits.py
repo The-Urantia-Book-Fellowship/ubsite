@@ -155,6 +155,21 @@ class Pages(Counted):
             call(path)
         self.assertEqual(self.rows("SELECT path FROM view"), [])
 
+    def test_nothing_of_an_account_is_written(self):
+        """Signing in (ubsite/account.py) is not reading, and its callback's
+        address has Google's code in it, which a view would keep with its
+        query: no address under /account is counted, with accounts or without
+        (2026-11-18)."""
+        code = "4/0AeaYSHCzQpV-the-code-google-sent"
+        for path, query in (("/account", ""), ("/account/login", "next=/1:1"), ("/account/me", ""),
+                            ("/account/callback", f"code={code}&state=abc"), ("/account/done", "next=/1:1")):
+            call(path, query)
+        call("/102:3")                               # a page that is counted, so that there is a file to look in
+        self.assertEqual(self.rows("SELECT path FROM view"), [("/102:3",)])
+        blob = b"".join(p.read_bytes() for p in self.db.parent.iterdir() if p.name.startswith("visits.db"))
+        self.assertNotIn(code.encode(), blob)
+        self.assertNotIn(b"account", blob)
+
     @unittest.skipUnless((ROOT / "var" / "offline" / "manifest.json").exists(), "var/offline not built")
     def test_a_copy_asking_whether_it_is_current_is_a_browser(self):
         """Since 2026-11-10 the stylesheet comes from the browser's own copy,

@@ -1,4 +1,5 @@
 {% import "_chrome.html" as chrome -%}
+{% from "_account.html" import acct -%}
 <!doctype html>
 <html lang="en" data-mode="{{ mode }}">
 <head>
@@ -27,6 +28,49 @@
 window.ubBase = {{ settings_defaults|tojson }};
 window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[location.hostname]);
 window.ubSpared = {{ settings_spared|tojson }};
+// The hosts that have accounts (settings.py ACCOUNT_HOSTS): on those,
+// Settings' foot offers to sign in, by ub.js.
+window.ubAcct = {{ account_hosts|tojson }};
+// A reader's account, at the header's corner (Tigran, 2026-11-18: "in the
+// usual place -- in the top-right corner", and a menu as the ?'s is, not a
+// page): on a host that has accounts, a sign that opens it, which is the
+// account's picture where someone is signed in, or the first letter of their
+// name where the account has none; and in the menu, who, or the way to sign
+// in.  All from what the browser keeps of who is signed in (localStorage
+// ub_who: the server's answer at /account/me, the picture in it as a data:
+// URL, so that nothing is asked of anyone for it and it is there offline).
+// The markup is every reader's, the same; this shows it as it is for this
+// one, called by a line of script right after the menu, before the header is
+// painted, so that the controls beside it do not move, and by ub.js when who
+// is signed in changes.  The name and the address are put in as text, never
+// as markup: they are Google's words about the reader.  True if someone is
+// signed in.
+window.ubMe = function () {
+  var menu = document.querySelector('.top .acctmenu'), on = false, me = null, photo = '', letter = '',
+      each = function (sel, f) { Array.prototype.forEach.call(document.querySelectorAll(sel), f); };
+  try {
+    on = window.ubAcct.indexOf(location.hostname) >= 0;
+    if (on) me = JSON.parse(localStorage.getItem('ub_who') || 'null');
+  } catch (e) {}
+  if (!me || typeof me !== 'object' || typeof me.name !== 'string' || !me.name || typeof me.email !== 'string') me = null;
+  if (me) {
+    if (typeof me.photo === 'string' && /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(me.photo)) photo = me.photo;
+    letter = String.fromCodePoint(me.name.trim().codePointAt(0) || 63).toUpperCase();
+  }
+  if (menu) {
+    menu.hidden = !on;
+    if (me) menu.dataset.who = photo ? 'photo' : 'letter'; else delete menu.dataset.who;
+  }
+  each('.acct', function (box) { box.dataset.state = me ? 'in' : 'out'; });
+  each('.acctname', function (el) { el.textContent = me ? me.name : ''; });
+  each('.acctmail', function (el) { el.textContent = me ? me.email : ''; });
+  each('.acctphoto', function (el) {
+    if (photo) el.src = photo; else el.removeAttribute('src');
+    el.hidden = !photo;
+  });
+  each('.acctinit', function (el) { el.textContent = letter; el.hidden = !me || !!photo; });
+  return !!me;
+};
 // The interface's language (settings.py `lang`), v: a flag tapped, or until one
 // is ('auto'), the browser's own, Russian where it is Russian (Tigran,
 // 2026-10-25).  data-lang="ru" or nothing, as CSS shows the words of one
@@ -282,6 +326,26 @@ window.ubUnit = function (where) {
       <a class="about" href="/help#about">{{ t('About') }}</a>
     </div>
   </details>
+  {#- A reader's account, where a reader looks for it: the corner, after the ?
+      (Tigran, 2026-11-18).  A menu, as the ?'s is, a <details>: its mark a
+      head and shoulders, or, signed in, the account's picture; in it, the way
+      to sign in with Google, or who is signed in, with Sign out and Delete my
+      account (_account.html).  Not a page: "we can just show them in a small
+      menu like we do for the Help", after a first night as a link to
+      /account.  Hidden on a host with no accounts and with scripts off, which
+      is the page as stored: the head script's ubMe() shows it, as it is for
+      this reader, called here so that the header is painted with it; ub.js
+      does what its buttons ask.  On a phone it is one more thing beside the
+      name (ub.js flagsFit): with no one signed in it gives way first, the
+      header then as it was and Settings' foot the way to sign in; signed in,
+      the flags and the half-disc give way to the picture. #}
+  <details class="acctmenu" hidden>
+    <summary {{ ta('aria-label', 'Account') }} {{ ta('title', 'Account') }}><span class="acctsign">{{ chrome.person_svg() }}</span><img class="acctphoto" alt="" width="24" height="24" hidden><span class="acctinit" aria-hidden="true" hidden></span></summary>
+    <div class="acctitems">
+      {{ acct() }}
+    </div>
+  </details>
+  <script>window.ubMe && window.ubMe();</script>
   </div>
 </header>
 <dialog class="settings" aria-labelledby="settings-title">
@@ -493,7 +557,16 @@ window.ubUnit = function (where) {
     </div>
     {%- endfor %}
     </div>
-    <p class="kept">{{ t('Kept in this browser only.') }}</p>
+    {#- Where a reader's settings are kept, and with it the way to an account
+        (Tigran, 2026-11-18; ubsite/account.py): on a host that has accounts
+        (settings.py ACCOUNT_HOSTS) ub.js marks the line data-acct, `out` or
+        `in`, from what the browser keeps of who is signed in (localStorage
+        ub_who), and the stylesheet shows the words for it.  The same markup
+        for every reader, as the page is.  The link is to the page at /account,
+        which the offline copy answers as a page read online; ub.js sends
+        with it where the reader is, to come back to. #}
+    <p class="kept"><span class="kept-only">{{ t('Kept in this browser only.') }}</span>
+      <span class="kept-out">{{ t('kept:out') }}</span><span class="kept-in">{{ t('kept:in') }}</span></p>
   </form>
 </dialog>
 {% block body %}{% endblock %}

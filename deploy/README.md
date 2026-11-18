@@ -168,6 +168,22 @@ When reader annotations arrive they go in a separate `var/user.db`, and that wil
 
 ---
 
+## Accounts
+
+Signing in with Google (`ubsite/account.py`), each host's own. Not yet on the live sites: built on the dev server, and switched on for a host by the two things below, once what follows the account is built with it.
+
+A host has accounts when it has `var/account.toml`, which holds the site's own origin and Google's client id and secret, and which no deploy touches. As `tigran` on the host, no root:
+
+```
+cd ~/ubsite && .venv/bin/python -m ubsite.account setup
+```
+
+It asks for the origin (`https://ubsite.sigmaai.au`), the client id, and the secret, which it does not show, and writes the file with mode 0600. The client's redirect address in Google's console must be exactly the origin with `/account/callback`. The service need not be restarted: the file is read again when it changes. `python -m ubsite.account list` then names the origin and the callback, and lists the accounts; `grant ADDRESS FEATURE`, `revoke ADDRESS FEATURE` and `remove ADDRESS` are its other words.
+
+And the host's name goes into `settings.py ACCOUNT_HOSTS`, in the repository, which is what shows the account's menu at the header's corner, and the offer to sign in at Settings' foot, on that host.
+
+The accounts are `var/user.db`, made by the first sign-in. It is the first thing on a host that cannot be made again: its backup, and the nginx location that what follows the account needs, come with that step and are written here then.
+
 ## The quiz's board
 
 **Each site keeps its own** since 2026-11-18 (Tigran), in `var/quiz.db` on its host, made by the first name put on it: a page asks the site it is on, and nothing of the board on one site depends on reaching the other. From 2026-10-28 until then ubsite.sigmaai.au kept one board for both (`UB_BOARD`), and pi5's pages sent to it across origins. The unit is the same file on both hosts, and no environment variable names a board. Its only POSTs, `/quiz/board/join` and `/quiz/board/answers`, have nginx locations of their own, exact matches (trap 19), with a body of up to 16 KB and 10 a minute from one address; everything else keeps the 1 KB limit.

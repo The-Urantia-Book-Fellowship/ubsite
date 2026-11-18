@@ -176,7 +176,9 @@
       if (sh.audio.indexOf(m[1]) < 0) return { res: text(404, 'No such recording.\n') };
       return { chunk: 'audio-' + m[1], make: function (d) { return { status: 200, type: 'application/json', body: d.json }; } };
     }
-    if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$|quiz\/board\/)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
+    if (/^\/(api\/|audio\/|offline\/|healthz$|sw\.js$|quiz\/board\/|account\/)/.test(path) || HOSTED.indexOf(path) >= 0) return null;
+    // A reader's account is the server's (ubsite/account.py): its page too.
+    if (path === '/account') return { res: away(sh, T('This page is read online.')) };
     // A copy made before 2026-10-24 does not keep it.
     if (path === '/api') return { res: away(sh, T('The page about the text API is read online.')) };
     // And one made before 2026-11-06 keeps no Help.

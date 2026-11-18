@@ -12,6 +12,13 @@
 {%- endmacro %}
 
 {#- Help: a question mark in a ring, drawn as the gear is. -#}
+{#- An account, with no one signed in (Tigran, 2026-11-18): a head and
+    shoulders in a ring, drawn as the ? is, in the same lines.  Signed in,
+    the account's picture stands in its place (base.html ubMe). #}
+{% macro person_svg() -%}
+<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.6"/><circle cx="8" cy="6.4" r="2.05"/><path d="M4.05 12.75c.75-1.75 2.2-2.65 3.95-2.65s3.2.9 3.95 2.65"/></svg>
+{%- endmacro %}
+
 {% macro help_svg() -%}
 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.6"/><path d="M5.95 6.35a2.05 2.05 0 1 1 2.95 1.85c-.6.3-.9.7-.9 1.3v.25"/><circle class="dot" cx="8" cy="11.7" r=".62"/></svg>
 {%- endmacro %}

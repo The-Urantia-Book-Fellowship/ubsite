@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% set title = 'Account' %}
+{#- A first sign-in (app.py account_welcome; Tigran, 2026-11-18): Google has
+    said who this is, and no account is made until its reader has agreed to
+    the terms.  What Google said waits ten minutes on the server meanwhile
+    (account.py pending), found by a cookie no script reads.  A page of the
+    server's, not a dialog of the shell's, which the offline copy would carry.
+
+    The tick sends {"agree": true} to /account/agree as this site's own page,
+    and the account made, the browser goes to /account/done and on to `next`,
+    which the server has checked and written here: the script reads no address. #}
+{% block body %}
+<main class="prose legal acctpage">
+  <h1>{{ t('One more step') }}</h1>
+  <p>{{ t('acct:welcome', name=who.name, email=who.email) }}</p>
+  <p><label class="acct-tick"><input type="checkbox" class="acct-agree"> {{ t('acct:agree') }}</label></p>
+  <p class="acct-row"><button type="button" class="pill solid acct-make" disabled>{{ t('Create my account') }}</button>
+    <a class="pill" href="{{ next }}">{{ t('Not now') }}</a></p>
+  <p class="acct-say" role="alert" hidden>{{ t('That did not work. Please try again in a moment.') }}</p>
+</main>
+{% endblock %}
+{% block scripts %}
+<script type="application/json" class="acct-next">{{ next|tojson }}</script>
+<script>
+(function () {
+  var next = JSON.parse(document.querySelector('script.acct-next').textContent),
+      tick = document.querySelector('.acct-agree'), make = document.querySelector('.acct-make'),
+      say = document.querySelector('main .acct-say');
+  tick.addEventListener('change', function () { make.disabled = !tick.checked; });
+  make.addEventListener('click', function () {
+    if (!tick.checked) return;
+    make.disabled = true;
+    fetch('/account/agree', { method: 'POST', credentials: 'same-origin', cache: 'no-store',
+                              headers: { 'Content-Type': 'application/json' }, body: '{"agree":true}' })
+      .then(function (r) { if (!r.ok) throw r; location.replace('/account/done?next=' + encodeURIComponent(next)); })
+      .catch(function () { say.hidden = false; make.disabled = false; });
+  });
+})();
+</script>
+{% endblock %}

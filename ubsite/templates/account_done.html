@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% set title = 'Account' %}
+{#- Signed in (app.py account_done; Tigran, 2026-11-18).  Every other page is
+    the same for every reader and is read from the offline copy, so a page
+    learns who is signed in from the browser's own storage, with no request:
+    this is the page that writes it there (localStorage ub_who, the server's
+    answer at /account/me), and then goes on to where the reader was.  `next`
+    is the server's, checked and written here; the script reads no address.
+    With scripts off there is no account to speak of, and the link goes on. #}
+{% block body %}
+<main class="prose legal acctpage">
+  <p class="lead">{{ t('Signing you in…') }}</p>
+  <noscript><p><a href="{{ next }}">{{ t('Continue reading') }}</a></p></noscript>
+</main>
+{% endblock %}
+{% block scripts %}
+<script type="application/json" class="acct-next">{{ next|tojson }}</script>
+<script>
+(function () {
+  var next = JSON.parse(document.querySelector('script.acct-next').textContent);
+  fetch('/account/me', { credentials: 'same-origin', cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; })
+    .then(function (me) {
+      try {
+        if (me) localStorage.setItem('ub_who', JSON.stringify(me)); else localStorage.removeItem('ub_who');
+      } catch (e) {}
+      location.replace(next);
+    });
+})();
+</script>
+{% endblock %}
