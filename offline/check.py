@@ -151,13 +151,31 @@ def consistent(copy: pathlib.Path, manifest: dict) -> list[str]:
 
 RE_CSS_URL = re.compile(r"url\((/static/[^)\s]+)\)")
 RE_SRC = re.compile(r'<script src="([^"]+)"')
+# A picture in a stored page, as the chunk has it, a JSON string, and the
+# addresses its src and srcset name.
+RE_IMG = re.compile(rb"<img\b[^>]*>")
+RE_IMG_URL = re.compile(rb'/static/[^\s,"\\]+')
+
+
+def pictures(copy: pathlib.Path, manifest: dict) -> set[str]:
+    """Every /static/ address an <img> names, in the shell and in every stored
+    page, a translation's too: its src and each address of its srcset."""
+    found: set[str] = set()
+    for c in every(manifest):
+        if c["kind"] in ("pages", "tr") or c["name"] == "shell":
+            data = gzip.decompress((copy / c["file"]).read_bytes())
+            for tag in RE_IMG.findall(data):
+                found.update(u.decode() for u in RE_IMG_URL.findall(tag))
+    return found
 
 
 def assets(copy: pathlib.Path, manifest: dict) -> list[str]:
     """What a page loads besides itself, held to the copy: every url(/static/…)
-    in its stylesheet, a font among them, and every script the shell names.
-    The link check reads href= alone, and a font missing from the copy would
-    be drawn offline in whatever face the device had."""
+    in its stylesheet, a font among them, every script the shell names, and
+    every picture a stored page shows, at each width its srcset offers (since
+    2026-11-18, the home page's part cards).  The link check reads href=
+    alone: a font missing from the copy would be drawn offline in whatever
+    face the device had, and a picture not at all."""
     names = {c["name"] for c in manifest["chunks"]}
     read = lambda name: gzip.decompress((copy / next(c["file"] for c in manifest["chunks"]
                                                      if c["name"] == name)).read_bytes()).decode()
@@ -165,7 +183,7 @@ def assets(copy: pathlib.Path, manifest: dict) -> list[str]:
     if len(css) != 1:
         return [f"the copy holds {len(css)} stylesheets"]
     shell = "".join(json.loads(read("shell"))["shell"])
-    want = set(RE_CSS_URL.findall(read(css[0]))) | set(RE_SRC.findall(shell))
+    want = set(RE_CSS_URL.findall(read(css[0]))) | set(RE_SRC.findall(shell)) | pictures(copy, manifest)
     return [f"{u}: named by the copy's pages, not in it" for u in sorted(want - names)]
 
 

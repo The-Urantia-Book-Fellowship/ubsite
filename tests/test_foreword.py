@@ -30,7 +30,8 @@ class ForewordInPartOne(unittest.TestCase):
         # own row before the parts and Part I's range from Paper 1.
         body = get("/")[2]
         toc = re.search(r'<ol class="front-toc">.*?</ol>', body, re.S).group(0)
-        rows = re.findall(r'<li(?: class="([^"]*)")?>\s*<a href="/([\w/]+)">(.*?)</a>', toc, re.S)
+        # A part's link has its card's classes (fpart, and fpN for its picture's ground).
+        rows = re.findall(r'<li(?: class="([^"]*)")?>\s*<a(?: class="[^"]*")? href="/([\w/]+)">(.*?)</a>', toc, re.S)
         self.assertEqual([(c, n) for c, n, _ in rows],
                          [("foreword fwout", "0"), ("", "part/1"), ("", "part/2"), ("", "part/3"), ("", "part/4")])
         self.assertIn("Definitions and terminology", rows[0][2])

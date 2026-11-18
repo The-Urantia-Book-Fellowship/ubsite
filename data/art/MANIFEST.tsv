@@ -1,0 +1,16 @@
+# The home page's part pictures: each master (data/art/README.md) and each file
+# made from it, by tools/make_art.py.  Do not edit: run the tool.
+# cwebp 1.5.0
+file	sha256	bytes	width	height	from	made by
+data/art/partI.jpeg	de8a1e603449508087e4d9167ca7695915044e57e7512c5ad2c20c7e97ae0cf4	3135216	2752	1536	-	-
+ubsite/static/art/part1-640.webp	5362e9e4ebe4e60227673222f7f215f178eaeb1879a9cb0c3a81217b24dd210d	28682	640	358	partI.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 82 -resize 640 0
+ubsite/static/art/part1-1280.webp	8e8453e7b7a5d7ac6819d72ab1a1042d0654b0f8263bde2b48daebcba69ef217	68076	1280	715	partI.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 74 -resize 1280 0
+data/art/partII.jpeg	44337efe87158cbfa49e92ffeb02e0c99a34c360ac4ea81dafdf35377dbb4973	3184023	2752	1536	-	-
+ubsite/static/art/part2-640.webp	9d1990ba3307c8d2079fcc6a2d80dcf488efff0e316e236d8adf1da6f0d10450	41340	640	358	partII.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 82 -resize 640 0
+ubsite/static/art/part2-1280.webp	fca95d629db364affcf5452a82908fab061982644fb08fa5591496131589af60	90908	1280	715	partII.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 74 -resize 1280 0
+data/art/partIII.jpeg	5acb041fb56fd424a66ac16d97854899338d85e2bac3dd9cdee7c4db71e4834d	3064852	2752	1536	-	-
+ubsite/static/art/part3-640.webp	cab77efa003bc60ac5233bcad1a9d3688aac43482747036ade68c5ea16a5b89b	33408	640	358	partIII.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 82 -resize 640 0
+ubsite/static/art/part3-1280.webp	b079cb3c37cedac5cc89b69ead5d4990a2c7557bf516aad2bb289eeb94248de3	72282	1280	715	partIII.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 74 -resize 1280 0
+data/art/partIV.jpeg	319a2623e675fe263edbcb0fdde3b2b21deaacee2c72c918adb752d52b78bd81	3425484	2752	1536	-	-
+ubsite/static/art/part4-640.webp	03b85df27c7a4647a7752f75914ed960fcc1d34b66db9edc05a11e3bd465e0e3	39762	640	358	partIV.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 82 -resize 640 0
+ubsite/static/art/part4-1280.webp	8bb53fac5bc772b767bfd217f6ea29b64ca1c6ca316469d84b3ea91710162bf7	90724	1280	715	partIV.jpeg	cwebp -m 6 -sharp_yuv -metadata none -q 74 -resize 1280 0

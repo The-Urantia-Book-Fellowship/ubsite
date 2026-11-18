@@ -15,7 +15,13 @@
 
   {# Reading begins here.  The parts ARE the entry points -- a separate "start
      reading" button sat apart from them and made the page read as two halves.
-     Each is a card, two to a row, one on a phone, its picture to come, and
+     Each is a card, two to a row, one on a phone, and is its picture
+     (Tigran's four, 2026-11-17; data/art/, tools/make_art.py), the words set
+     over it by the page, in both languages, so no picture carries a letter:
+     made at two widths, of which the browser takes the one its screen needs,
+     each named with a hash of its content (app.py asset), with an empty alt,
+     the link's words being the card's name.  The offline copy holds every
+     picture a page names (offline/pack.py ART, check.py assets).  It
      goes to its part's title page (/part/N; Tigran, 2026-11-17: "the part
      cards should go to that part's title page, shown in multiple columns with
      translations, if any are enabled"), which has the translations' dividers
@@ -36,13 +42,14 @@
     {% endfor %}
     {% for part in parts %}
     <li>
-      <a href="/part/{{ part.n }}">
-        <span class="pn">{{ t('Part {r}', r=roman[part.n]) }}</span>
+      <a class="fpart fp{{ part.n }}" href="/part/{{ part.n }}">
+        <img class="fpic" src="{{ asset('art/part%d-640.webp' % part.n) }}" srcset="{{ asset('art/part%d-640.webp' % part.n) }} 640w, {{ asset('art/part%d-1280.webp' % part.n) }} 1280w" sizes="(max-width: 40rem) calc(100vw - 2rem), min(31.4rem, calc(50vw - 1.7rem))" width="1280" height="715" alt="" decoding="async">
+        <span class="fcap"><span class="pn">{{ t('Part {r}', r=roman[part.n]) }}</span>
         <span class="lbl">{{ t(part.title) }}</span>
         {%- if loop.first %}
         <span class="range fwin">{{ t('Foreword and Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span>
         {%- endif %}
-        <span class="range{% if loop.first %} fwout{% endif %}">{{ t('Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span></a>
+        <span class="range{% if loop.first %} fwout{% endif %}">{{ t('Papers {a}&ndash;{b}', a=part.first_paper, b=part.last_paper) }}</span></span></a>
     </li>
     {% endfor %}
   </ol>

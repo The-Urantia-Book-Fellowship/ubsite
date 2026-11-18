@@ -52,6 +52,7 @@ The rest are needed only by the tool named:
 | uv | 0.11 | `make venv`, `make lock` |
 | Google Chrome (`/usr/bin/google-chrome`) | 155 | `make e2e` (Playwright, in `.venv`), `tools/make_icons.py` |
 | ImageMagick 7 (`magick`) | 7.1 | `tools/make_icons.py` |
+| `cwebp` (libwebp, the package `webp`) | 1.5.0 | `tools/make_art.py` |
 | `pdftotext` (poppler-utils) | 26.01 | `tools/hyphen_print.py` |
 | `ffprobe` (ffmpeg) | 8.0 | `tools/audio/manifest.py` |
 

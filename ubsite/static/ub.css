@@ -2573,9 +2573,9 @@ h2.chap + .rh { margin-top: 1rem; }
 }
 .front h1 { font-size: clamp(2.4rem, 1.7rem + 3vw, 3.6rem); margin: 0; letter-spacing: .01em; }
 .front h2 { margin: 2.8rem 0 .9rem; text-align: center; }
-/* The parts: a card each, two to a row and one on a phone, its picture to
-   come.  The Foreword on its own, with Settings' Foreword in Part I off, is a
-   row across them. */
+/* The parts: a card each, two to a row and one on a phone, each its picture
+   (.fpart, below).  The Foreword on its own, with Settings' Foreword in
+   Part I off, is a plain row across them. */
 .front-toc { list-style: none; padding: 0; margin: 2.2rem 0 0;
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
 .front-toc li { display: flex; }
@@ -2592,6 +2592,37 @@ h2.chap + .rh { margin-top: 1rem; }
 .front-toc .foreword a { flex-direction: row; align-items: baseline; gap: 1rem; min-height: 0;
   padding: calc(.7rem + var(--lift)) 1rem .7rem; }
 .front-toc .foreword .lbl { font-variant-caps: small-caps; letter-spacing: .04em; }
+/* A part's card is its picture (Tigran's four, 2026-11-17; data/art/,
+   tools/make_art.py), edge to edge and whole, 16:9 as he made them, on a phone
+   too, with the words over its foot on a shade of their own (.fcap): as tall
+   as the words and no taller, fading out above them, so that a name of one
+   line leaves more of the picture clear than a name of two, and no word
+   stands on a bright place whatever the card's size (tools/art_e2e.py
+   measures the words against what is under them).  The words are white in the
+   light theme and the dark alike, a picture being of neither.  Under the
+   picture the card is a dark colour taken from it, the mean of its lower
+   third, so the words read before it arrives, and if it never does.  The
+   picture lies under the words by z-index, in the link's own stacking
+   context, so the whole card is the link whatever is under the pointer
+   (CLAUDE.md, trap 61).  No overflow is set: the picture and the shade take
+   the card's corners themselves, and a name too long for the card at a large
+   size makes it taller, where a box that clips would cut its first line. */
+.front-toc .fpart { position: relative; isolation: isolate; aspect-ratio: 16 / 9; min-height: 0;
+  align-items: stretch; justify-content: flex-end; gap: 0; padding: 0; border: 0; color: #fff;
+  background: var(--fground); text-shadow: 0 1px 2px rgb(0 0 0 / .6); }
+.fp1 { --fground: #1a2033; }
+.fp2 { --fground: #1f2c33; }
+.fp3 { --fground: #1c272e; }
+.fp4 { --fground: #5a4029; }
+.fpart .fpic { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; object-fit: cover;
+  border-radius: inherit; }
+.fpart .fcap { display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  padding: 2.75rem 1rem 1.05rem; border-bottom-left-radius: inherit; border-bottom-right-radius: inherit;
+  background: linear-gradient(to top, rgb(0 0 0 / .82), rgb(0 0 0 / .64) calc(100% - 2.75rem), rgb(0 0 0 / 0)); }
+.front-toc .fpart .pn, .front-toc .fpart .range { color: rgb(255 255 255 / .88); }
+.front-toc .fpart:hover .lbl { color: #fff; }
+.front-toc .fpart:hover { box-shadow: 0 0 0 2px var(--link); }
+.fpart:hover .fpic { filter: brightness(1.1); }
 /* The other ways in: six tiles, three to a row and two on a phone, each a
    drawing (_chrome.html way_svg), a name and a line of what is there. */
 .ftiles { list-style: none; padding: 0; margin: 0;

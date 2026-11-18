@@ -51,6 +51,13 @@ FORMAT = 2
 # were in it.  The tab's icon is chosen in the page from its address, so every
 # site's is kept (build()).
 ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js", "quiz.js", "help.js", "cosmo.js"]
+# The pictures a stored page shows, each at every width it is made at, since
+# the browser chooses one by its screen and the copy must have whichever it
+# asks for: the home page's four part cards (ubsite/static/art/, made by
+# tools/make_art.py; since 2026-11-18).  Named with their hash, as the page
+# names them.  check.assets() holds every <img> of a stored page to the copy.
+ART = sorted(p.relative_to(ROOT / "ubsite" / "static").as_posix()
+             for p in (ROOT / "ubsite" / "static" / "art").glob("*.webp"))
 PLAIN = ["/static/favicon.svg", "/static/fonts/UBGoudy.woff2", "/static/fonts/UBGoudy-Italic.woff2",
          "/static/fonts/OFL.txt", "/static/fonts/GaramondMath.woff2",
          "/static/fonts/OFL-GaramondMath.txt", "/static/fonts/EBGaramond-Cyrillic.woff2",
@@ -92,7 +99,7 @@ def build(con: sqlite3.Connection) -> dict:
     add("index.db", "db", searchdb.index_db(con))
     tabs = [f"/static/favicon{v}.{x}" for v in sorted(set(A.SITES.values()) - {""}) for x in ("svg", "ico")]
     # The scripts' words, which a page loads before ub.js (app.py l10n_url).
-    for url in [A.asset(a) for a in ASSETS] + [A.l10n_url()] + PLAIN + tabs:
+    for url in [A.asset(a) for a in ASSETS + ART] + [A.l10n_url()] + PLAIN + tabs:
         path, _, query = url.partition("?")
         got = site.get(path, query)
         if got.status != 200:

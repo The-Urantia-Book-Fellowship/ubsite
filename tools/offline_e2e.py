@@ -752,6 +752,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            "a range of it is cut from the cache, 206 with its Content-Range, as a seek asks")
         ok(pg.evaluate(probe, [f, "bytes=5000000-"]) == [416, "bytes */1163180", 0], "a range past its end is 416")
         ok(pg.evaluate(probe, ["/audio/mh/paper101/P101_04.mp3", None]) == ["rejected"], "a file not kept fails, as before")
+        # The home page's part cards, each its picture, whichever width this
+        # screen takes: the copy holds both (offline/pack.py ART; since 2026-11-18).
+        pg.goto(BASE + "/")
+        ok(until(pg, "() => { const i = [...document.querySelectorAll('.front-toc .fpart img')];"
+                     " return i.length === 4 && i.every(x => x.complete && x.naturalWidth > 0); }"),
+           "offline, the home page's four part pictures are drawn from the copy")
         pg.goto(BASE + "/161:1")
         pg.locator("p.t .playp").first.click()
         pg.wait_for_timeout(4000)

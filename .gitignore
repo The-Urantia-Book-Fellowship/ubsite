@@ -9,3 +9,9 @@ __pycache__/
 # data/uf/README.md): its copyright, shown on the site by its written permission,
 # never handed out from this public repository.  data/uf/MANIFEST.tsv names each.
 data/uf/*.zip
+
+# The home page's part pictures as they were made, 3 MB each (data/art/README.md):
+# no reader is sent them, and data/art/MANIFEST.tsv names each by its SHA-256.
+# What the site serves, made from them by tools/make_art.py, is committed, in
+# ubsite/static/art/.
+data/art/*.jpeg
