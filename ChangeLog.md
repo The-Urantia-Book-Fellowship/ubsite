@@ -182,6 +182,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- In the dark theme the scrollbars, of the Contents and the index above all, and the checkboxes and round buttons in Settings were drawn light; they are dark now.
 - The quiz's question on the cycle of space respiration, at Paper 11, read "spare respiration".
 - With Whole paper on, the Contents mark the section of the paragraph you tapped; on a wide screen, with the end of one section at the window's top and the paragraph in the next, they marked the section before it.
 - The Contents shown in a translation give every section's title in it; with Whole paper on, a section you had gone to from the Contents stayed in English among the translated titles.
