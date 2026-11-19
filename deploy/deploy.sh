@@ -339,6 +339,13 @@ for HOST in $HOSTS; do
     fi
 done
 
+# The accounts (ubsite/account.py), each host's own var/user.db: who has signed
+# in there, and what each keeps.  Backed up before anything is shipped too, by
+# the script that does it every night (deploy/backup-accounts.sh), which reads
+# each copy back and deletes those 29 days old.  None from a host with no
+# accounts.
+"$HERE/deploy/backup-accounts.sh" $HOSTS
+
 for HOST in $HOSTS; do
     ship "$HOST"
 done

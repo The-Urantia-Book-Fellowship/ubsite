@@ -165,6 +165,11 @@ window.ubUnit = function (where) {
 };
 (function (r, D, B) {
   r.classList.add('js');
+  // A host that has accounts (ubAcct, above): what a page says of an account,
+  // Help's chapter on it and a clause here and there, is shown there and on
+  // no other host, the page being one for all of them (ub.css .acctonly,
+  // .acctnone).
+  if (window.ubAcct.indexOf(location.hostname) >= 0) r.classList.add('hasacct');
   // The tab's icon says which site this is, the book burgundy on one of them
   // (app.py SITES).  Chosen here, from the page's own address, since the same
   // pages are served at both, and the offline copy holds them once for both.

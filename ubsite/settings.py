@@ -362,9 +362,11 @@ SITE_DEFAULTS: dict[str, dict] = {}
 # location.hostname, as a site's defaults are, since the offline copy is one
 # for every host and a stored page cannot know which host has accounts.  A
 # host named here must have its var/account.toml, or the link leads to a 404.
-# The dev server alone until signing in and what follows the account are
-# deployed together.
-ACCOUNT_HOSTS: list[str] = ["localhost"]
+# The dev server, and since 2026-11-19 the main site, with what follows the
+# account.  Not pi5's, ubsite.ddns.net (Tigran, that day: "let's leave pi5
+# without Google account for now. We'll implement it later as a separate
+# project in Google").
+ACCOUNT_HOSTS: list[str] = ["localhost", "ubsite.sigmaai.au"]
 
 
 # A setting that means nothing while another is off ('off', or a switch turned

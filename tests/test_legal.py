@@ -22,7 +22,7 @@ from ubsite import app as site, l10n  # noqa: E402
 
 PAGES = {"/privacy": ("Privacy", "privacy:lead"), "/terms": ("Terms of use", "terms:lead")}
 # When each last changed, as its lead says it: moved with the page's words.
-CHANGED = {"privacy:lead": "2026-11-18", "terms:lead": "2026-11-18"}
+CHANGED = {"privacy:lead": "2026-11-19", "terms:lead": "2026-11-18"}
 
 
 class Words(unittest.TestCase):
@@ -32,6 +32,23 @@ class Words(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertIn(str(day["en"]), str(entry["en"]))
                 self.assertIn(str(day["ru"]), str(entry["ru"]))
+
+    def test_privacy_says_where_signing_in_is_offered_and_what_then_leaves_the_browser(self):
+        """Held to settings.py: the hosts the page names as having accounts
+        and as having none are the hosts that do and do not; and what it says
+        is kept with an account is what follows one (account.py KINDS)."""
+        from ubsite import account, settings
+        first, browser = (str(l10n.tr(k)["en"]) for k in ("privacy:account:1", "privacy:browser"))
+        live = [h for h in settings.ACCOUNT_HOSTS if h != "localhost"]
+        self.assertEqual(live, ["ubsite.sigmaai.au"])
+        self.assertIn("offered at ubsite.sigmaai.au", first)
+        self.assertIn("ubsite.ddns.net has no accounts", first)
+        self.assertNotIn("being added", first)
+        self.assertIn("not sent to the server, unless you sign in: your settings, the place you last read and your "
+                      "bookmarks are then kept with your account too", browser)
+        self.assertEqual(account.KINDS, ("set", "place", "mark"))
+        for k in ("privacy:account:1", "privacy:browser"):
+            self.assertTrue(str(l10n.tr(k)["ru"]).strip())
 
     def test_the_footer_links_them_in_every_page(self):
         base = (ROOT / "ubsite" / "templates" / "base.html").read_text(encoding="utf-8")

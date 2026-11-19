@@ -693,6 +693,13 @@ class Accounts:
             for kind, key, value, at in changes:
                 was = con.execute("SELECT value, n, by, at FROM item WHERE user_id = ? AND kind = ? AND key = ?",
                                   (user, kind, key)).fetchone()
+                if was is not None and was[0] == value and not (first and kind == "set"):
+                    # As the server has it already, whoever wrote it: nothing
+                    # to settle, and nothing to send back.  But a first
+                    # exchange is answered with every setting of the account's,
+                    # which the browser puts in place of its own.
+                    took.add((kind, key))
+                    continue
                 if first:
                     take = not had if kind == "set" else value is not None and (
                         was is None or was[0] is None or at > was[3])
@@ -704,8 +711,8 @@ class Accounts:
                     take = False         # and of anything else, the first to arrive
                 if not take:
                     continue
-                if (was[0] if was else None) == value:
-                    took.add((kind, key))        # as the server has it already
+                if was is None and value is None:
+                    took.add((kind, key))        # removed, where the server never had it
                     continue
                 if kind == "mark":
                     live = was is not None and was[0] is not None

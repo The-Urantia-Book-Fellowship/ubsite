@@ -1928,6 +1928,10 @@ dialog.settings .kept:not([data-acct="out"]) .kept-out, dialog.settings .kept:no
 dialog.settings .kept[data-acct="in"] .kept-only { display: none; }
 dialog.settings .kept a { color: var(--link); }
 dialog.settings .kept .acctname { font-weight: normal; color: var(--ink); }
+/* What a page says of an account, where the host has accounts (the head
+   script's hasacct, from settings.py ACCOUNT_HOSTS), and what it says where
+   it has none: the pages are one for every host.  Help uses both. */
+:root:not(.hasacct) .acctonly, :root.hasacct .acctnone { display: none; }
 /* A reader's account, in the menu at the header's corner and on the page at
    /account (templates/_account.html).  The markup holds both states, the
    same for every reader, and one is shown (data-state: out or in).  Every

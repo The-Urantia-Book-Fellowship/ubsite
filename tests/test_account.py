@@ -798,6 +798,45 @@ class Following(WithAccounts):
         self.assertEqual(self.exchange(a, [THEME], first=True)["n"], 1)
         self.assertEqual(self.kept(), {("set", "theme"): "dark"})
 
+    def test_a_backup_put_back_loses_no_one_and_the_browser_starts_over(self):
+        """A copy made as deploy/backup-accounts.sh makes it, put back in the
+        file's place: who was signed in still is, the account keeps what it
+        kept when the copy was made, and a browser that has exchanged with it
+        since, its number ahead of the file's, begins again and brings what
+        it has."""
+        a = self.device()
+        self.exchange(a, [THEME, A_MARK], first=True)
+        copy = self.db.with_name("user-backup.db")
+        sqlite3.connect(self.db).backup(sqlite3.connect(copy))          # as the script makes it, on the host
+        self.exchange(a, [B_MARK, ["set", "theme", "light"]])
+        self.assertEqual(a.n, 2)
+        for p in self.db.parent.glob("user.db*"):                        # the file, and its journal
+            p.unlink()
+        copy.rename(self.db)
+        self.assertEqual(a.get("/account/me")[0], 200)                   # the session is in the copy
+        self.assertEqual(self.kept(), {("set", "theme"): "dark", ("mark", "101:4.2"): A_MARK[2]})
+        st, _, got = a.post("/account/sync", {"first": False, "db": a.db, "n": a.n, "ch": []})
+        self.assertEqual((st, got), (200, {"restart": True, "db": a.db}))
+        # Begun again: both bookmarks are the account's, and its settings the copy's.
+        got = self.exchange(a, [A_MARK, B_MARK, ["set", "theme", "light"]], first=True)
+        self.assertEqual(got["ch"], [THEME])
+        self.assertEqual(set(self.kept()), {("set", "theme"), ("mark", "101:4.2"), ("mark", "2:0.1")})
+
+    def test_the_backup_is_the_scripts_and_keeps_privacys_word(self):
+        """deploy/backup-accounts.sh: SQLite's own backup on the host, read
+        back here, and no copy kept thirty days, which Privacy promises;
+        deploy.sh runs it before it ships."""
+        deploy = ROOT / "deploy"
+        sh = (deploy / "backup-accounts.sh").read_text(encoding="utf-8")
+        self.assertIn(r"""sqlite3.connect(\"var/user.db\").backup(sqlite3.connect(\"var/user-backup.db\"))""", sh)
+        self.assertIn('PRAGMA integrity_check', sh)
+        self.assertIn("KEEP_DAYS=29", sh)
+        self.assertIn("""find "$OUT" -name 'user-*.db*' -type f -mtime +$((KEEP_DAYS - 1)) -print -delete""", sh)
+        self.assertIn("umask 077", sh)
+        self.assertIn("deleted within 30 days", str(l10n.tr("privacy:account:5")["en"]))
+        ship = (deploy / "deploy.sh").read_text(encoding="utf-8")
+        self.assertLess(ship.index('"$HERE/deploy/backup-accounts.sh" $HOSTS'), ship.index('    ship "$HOST"\ndone'))
+
     def test_the_hosts_list_says_what_an_account_keeps(self):
         a = self.device()
         self.exchange(a, [THEME, A_MARK, B_MARK, place("2:0.1", 5)], first=True)
@@ -909,7 +948,8 @@ class Words(unittest.TestCase):
                 self.assertEqual(re.findall(r'href="([^"]+)"', str(l10n.tr(key)[lang])), ["/account"], key)
         self.assertNotRegex(base, r'href="/account/')
         self.assertNotIn("account", [g["key"] for g in settings.groups([])])
-        self.assertEqual(settings.ACCOUNT_HOSTS, ["localhost"])            # until it is deployed with what it keeps
+        # The dev server and the main site; pi5's has none for now (Tigran, 2026-11-19).
+        self.assertEqual(settings.ACCOUNT_HOSTS, ["localhost", "ubsite.sigmaai.au"])
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
         self.assertIn('dialog.settings .kept:not([data-acct="out"]) .kept-out, dialog.settings .kept:not([data-acct="in"]) '
                       '.kept-in,\ndialog.settings .kept[data-acct="in"] .kept-only { display: none; }', css)

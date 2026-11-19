@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% set title = 'Help' %}
-{% from "_chrome.html" import gear_svg, theme_svg, help_svg, glass_svg, player_svg, keep_svg, playp, ribbon_svg, link_svg %}
+{% from "_chrome.html" import gear_svg, theme_svg, help_svg, glass_svg, player_svg, keep_svg, playp, ribbon_svg, link_svg, person_svg %}
 {% from "_para.html" import para %}
 {% from "_fold.html" import afold %}
 {% from "_text.html" import chip, blanket, endnotes, quizcall %}
@@ -47,6 +47,12 @@
 .helppage .eg .tf .trfold { display: inline; }
 .helppage .eg .trfold::before { content: "› "; }
 .helppage .eg .icons { display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: center; }
+/* The account's sign, as the header draws it (ub.css .top .acctmenu). */
+.helppage .eg .acctsign { color: var(--faint); }
+.helppage .eg .acctsign svg { width: 1.15rem; height: 1.15rem; display: block; overflow: visible; }
+.helppage .eg .acctsign :is(path, circle) { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+/* Your account: the chapter, and its line in the list, on a host that has accounts. */
+:root:not(.hasacct) .helppage :is(#account, .hnav li:has(> a[href="#account"])) { display: none; }
 .helppage .eg .icons > span { display: inline-flex; flex-direction: column; align-items: center; gap: .3rem;
   font-size: .8rem; color: var(--faint); text-align: center; }
 .helppage .playp { cursor: default; }
@@ -107,6 +113,7 @@
     <li><a href="#notes">{{ t('Notes and 1955 readings') }}</a></li>
     <li><a href="#translations">{{ t('Translations') }}</a></li>
     <li><a href="#settings">{{ t('Settings|help') }}</a></li>
+    <li><a href="#account">{{ t('Your account') }}</a></li>
     <li><a href="#offline">{{ t('Working offline, and the app') }}</a></li>
     <li><a href="#quiz">{{ t('The quiz|help') }}</a></li>
     <li><a href="#chart">{{ t('The chart of personalities|help') }}</a></li>
@@ -226,6 +233,21 @@
       <div class="icons"><span><span class="gear">{{ gear_svg() }}</span>{{ t('Settings') }}</span><span><span class="theme">{{ theme_svg() }}</span>{{ t('Light or dark') }}</span></div>
     </div>
     {{ showme('gear') }}
+  </section>
+
+  {#- A reader's account (ubsite/account.py, static/account.js; 2026-11-19).
+      The page is one for every host, the offline copy's too, and not every
+      host has accounts (settings.py ACCOUNT_HOSTS): this chapter and its line
+      in the list above are shown where the head script has found the host
+      among them (the class hasacct, the style above). #}
+  <section id="account">
+    <h2>{{ t('Your account') }}</h2>
+    <p>{{ t('help:account:1') }}</p>
+    <div class="eg">
+      <div class="icons"><span><span class="acctsign">{{ person_svg() }}</span>{{ t('Account') }}</span></div>
+    </div>
+    <p>{{ t('help:account:2') }}</p>
+    <p>{{ t('help:account:3') }}</p>
   </section>
 
   <section id="offline">

@@ -164,13 +164,21 @@ The VPS has no `sqlite3` command, so its copy goes through Python. The two hosts
 
 **`var/quiz.db`** is the quiz's board (`ubsite/board.py`), one on each host since 2026-11-18, each site's own (the VPS kept one for both sites before): the names readers chose and the first answers they gave, no IP address, no cookie. It is the one thing readers gave a site, and no build makes it again, so `deploy.sh` brings a copy of each host's here before every deploy to that host, made there by SQLite's own backup, to `var/board/quiz-<host>-<date>.db` (the copies named `quiz-<date>.db`, with no host, are the VPS's from before that day). A host where nobody has joined has no file, and none is brought. To restore one: stop the unit on its host, put the copy at `~/ubsite/var/quiz.db` (and remove any `quiz.db-wal` and `quiz.db-shm` beside it), start the unit. A host's copy is that host's board, and is never put on the other. `tests/test_board.py` restores a copy made the same way and reads the same board from it.
 
-When reader annotations arrive they go in a separate `var/user.db`, and that will need a real backup, and a restore tested once, because an untested backup is a rumour.
+**`var/user.db`** is the accounts (`ubsite/account.py`), on a host that has them: who has signed in, by Google's id, with an address, a name and a picture, and what each keeps, their settings, place and bookmarks. No build makes it again, and its readers would miss it. `deploy/backup-accounts.sh` brings a copy of each host's here, made there by SQLite's own backup, to `var/accounts/user-<host>-<date>.db`, mode 0600; reads it back, since an untested backup is a rumour (SQLite's integrity check, and how many accounts and things kept); and deletes every copy here that is 29 days old, because Privacy says that copies made for safekeeping are deleted within 30 days. `deploy.sh` runs it before it ships anything, and it is to run every night from this machine's crontab, which is Tigran's to install (`crontab -e`), the deploys being too far apart to keep either the copies fresh or that promise:
+
+```
+17 3 * * * cd /home/tigran/bible/ubsite && ./deploy/backup-accounts.sh >> var/accounts/backup.log 2>&1
+```
+
+It needs this machine to reach the hosts by ssh with no one at the keyboard; the log says each night what it brought, or why it could not. A copy is that host's accounts and is never put on the other.
+
+**To put one back**: stop the unit on its host (`sudo systemctl stop ubsite`, Tigran's to run), put the copy at `~/ubsite/var/user.db`, mode 0600, remove any `user.db-wal` and `user.db-shm` beside it, start the unit. Who was signed in when the copy was made still is. An account keeps what it kept then; a browser that has exchanged with the account since finds the server's number behind its own, begins again by itself and brings what it has, so that what a reader did after the copy comes back from their own devices: no bookmark is lost, one removed since may return, and the settings are the copy's. Tried in `tests/test_account.py` (`test_a_backup_put_back_loses_no_one_and_the_browser_starts_over`), on a copy made the same way.
 
 ---
 
 ## Accounts
 
-Signing in with Google (`ubsite/account.py`), each host's own, and what follows the account, a reader's settings, place and bookmarks (2026-11-19). Not yet on the live sites: built on the dev server, and switched on for a host by the three things below, together.
+Signing in with Google (`ubsite/account.py`), each host's own, and what follows the account, a reader's settings, place and bookmarks (2026-11-19). On the VPS, ubsite.sigmaai.au, since 2026-11-19, where all three things below were done that day; not on pi5, ubsite.ddns.net, which is to have a project of its own in Google's console (Tigran, the same day), since Google asks one home page of a project. A host is switched on by the three things below, together.
 
 A host has accounts when it has `var/account.toml`, which holds the site's own origin and Google's client id and secret, and which no deploy touches. As `tigran` on the host, no root:
 
@@ -182,11 +190,11 @@ It asks for the origin (`https://ubsite.sigmaai.au`), the client id, and the sec
 
 And the host's name goes into `settings.py ACCOUNT_HOSTS`, in the repository, which is what shows the account's menu at the header's corner, and the offer to sign in at Settings' foot, on that host.
 
-**And nginx needs its location for the exchange**, `location = /account/sync`, with its zone, `ubsite_sync`, in both files since 2026-11-19 and on neither host yet. The site's limit for a body is 1 KB, which the account's other POSTs fit; the exchange carries the bookmarks, 500 to a request, so its location allows 1 MB (`app.py SYNC_BODY`), 30 a minute from one address. Without it nginx answers an exchange of more than 1 KB with 413, and a reader's bookmarks never reach the account. To install it, as root, which is Tigran's to run (CLAUDE.md, Privilege): the two commands for each host under The quiz's board, below. Until a host has its `var/account.toml` the location answers the app's 404, so it may be installed first.
+**And nginx needs its location for the exchange**, `location = /account/sync`, with its zone, `ubsite_sync`, in both files since 2026-11-19; installed on the VPS that day by Tigran (the installed file is the repository's, and through nginx an exchange of 3 KB reached the app where 3 KB to `/account/logout` was nginx's 413), and not on pi5. The site's limit for a body is 1 KB, which the account's other POSTs fit; the exchange carries the bookmarks, 500 to a request, so its location allows 1 MB (`app.py SYNC_BODY`), 30 a minute from one address. Without it nginx answers an exchange of more than 1 KB with 413, and a reader's bookmarks never reach the account. To install it, as root, which is Tigran's to run (CLAUDE.md, Privilege): the two commands for each host under The quiz's board, below. Until a host has its `var/account.toml` the location answers the app's 404, so it may be installed first.
 
 **Tried here first** (2026-11-19), since no test of the app sees nginx (trap 19): nginx 1.28.3, the VPS's version, built in a scratch directory and run as an ordinary user in front of the dev server with the VPS's file, only the ports, the certificate and the paths changed. An exchange of 3 KB and one of 1 MB reached the app, which answered for itself (401, no one being signed in); one of 1.2 MB was nginx's 413; 3 KB to `/account/logout`, and to `/account/sync/` with a slash, were nginx's 413 as before, the site's 1 KB; a GET of `/account/sync` was the app's 405 and `/account` the page, with no redirect; of eighteen exchanges at once the twelfth and after were 429, and a page asked meanwhile was sent.
 
-The accounts are `var/user.db`, made by the first sign-in, and what each keeps. It is the first thing on a host that cannot be made again: its backup, with a restore tried, comes with the step that puts accounts on a live host, and is written here then.
+The accounts are `var/user.db`, made by the first sign-in, and what each keeps. It is the first thing on a host that cannot be made again: Backups, above, says how it is kept and put back.
 
 ## The quiz's board
 
