@@ -269,8 +269,9 @@ def run(tmp: pathlib.Path) -> int:
         ok([pg.evaluate(SAID, ".top .acctmenu .acct-bye"), pg.evaluate(SAID, ".top .acctmenu .acct-del")] == ["Sign out", "Delete my account"],
            "and Sign out and Delete my account")
         pg.wait_for_timeout(600)                     # the menu's opening is told to the script a moment after
-        ok([a for a in asked[before:] if "/account" in a] == [f"GET {SITE}/account/me"],
-           "opened, it asked the server who is signed in, once: " + repr([a for a in asked[before:] if "/account" in a]))
+        ok([a for a in asked[before:] if "/account" in a] == [f"GET {SITE}/account/me", f"POST {SITE}/account/sync"],
+           "opened, it asked the server who is signed in and what the account keeps, once each: "
+           + repr([a for a in asked[before:] if "/account" in a]))
         pg.keyboard.press("Escape")
         settings(pg)
         ok(pg.evaluate(FOOT) == "Kept in this browser and with your account, Ada Reader. Account", "Settings' foot says whose: " + repr(pg.evaluate(FOOT)))
@@ -281,7 +282,10 @@ def run(tmp: pathlib.Path) -> int:
         before = len(asked)
         pg.goto(SITE + "/101:5")
         pg.wait_for_load_state("networkidle")
-        ok(not [a for a in asked[before:] if "/account" in a], "another page asks the server nothing about it")
+        ok(not [a for a in asked[before:] if a.endswith("/account/me")], "another page does not ask the server who is signed in")
+        ok(not [a for a in asked[before:] if "/account/" in a and not a.endswith("/account/sync")],
+           "and asks of the account only what it keeps, if anything (tools/follow_e2e.py): "
+           + repr([a for a in asked[before:] if "/account" in a]))
         ok(pg.evaluate(corner)["who"] == "photo", "and has her picture at its corner")
 
         print("Signing out")
@@ -317,7 +321,7 @@ def run(tmp: pathlib.Path) -> int:
         before = len(asked)
         pg.reload()
         pg.wait_for_load_state("networkidle")
-        ok(not [a for a in asked[before:] if "/account" in a], "after which no page asks")
+        ok(not [a for a in asked[before:] if a.endswith("/account/me")], "after which no page asks who")
 
         print("The account deleted")
         pg.click(".top .acctmenu > summary")
@@ -434,7 +438,9 @@ uvicorn.run(A.app, host="127.0.0.1", port=int(sys.argv[2]), log_level="warning")
 """
 
 
-def main() -> int:
+def main(what=None) -> int:
+    """The site and the stand-in for Google, started, and `what` run against
+    them (run(), above; tools/follow_e2e.py brings its own)."""
     with tempfile.TemporaryDirectory() as d:
         tmp = pathlib.Path(d)
         conf = tmp / "account.toml"
@@ -453,7 +459,7 @@ def main() -> int:
                     break
                 except OSError:
                     time.sleep(0.2)
-            return run(tmp)
+            return (what or run)(tmp)
         finally:
             server.terminate()
             server.wait()

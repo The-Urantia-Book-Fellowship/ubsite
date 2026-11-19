@@ -28,6 +28,9 @@
 window.ubBase = {{ settings_defaults|tojson }};
 window.ubDefaults = Object.assign({}, window.ubBase, {{ site_defaults|tojson }}[location.hostname]);
 window.ubSpared = {{ settings_spared|tojson }};
+// The device's own (settings.py DEVICE): every other setting follows a
+// signed-in reader's account from one device to another (static/account.js).
+window.ubOwn = {{ settings_device|tojson }};
 // The hosts that have accounts (settings.py ACCOUNT_HOSTS): on those,
 // Settings' foot offers to sign in, by ub.js.
 window.ubAcct = {{ account_hosts|tojson }};
@@ -338,8 +341,10 @@ window.ubUnit = function (where) {
       does what its buttons ask.  On a phone it is one more thing beside the
       name (ub.js flagsFit): with no one signed in it gives way first, the
       header then as it was and Settings' foot the way to sign in; signed in,
-      the flags and the half-disc give way to the picture. #}
-  <details class="acctmenu" hidden>
+      the flags and the half-disc give way to the picture.  data-src is the
+      script of what follows the account (static/account.js), which ub.js
+      runs only for a reader signed in. #}
+  <details class="acctmenu" data-src="{{ asset('account.js') }}" hidden>
     <summary {{ ta('aria-label', 'Account') }} {{ ta('title', 'Account') }}><span class="acctsign">{{ chrome.person_svg() }}</span><img class="acctphoto" alt="" width="24" height="24" hidden><span class="acctinit" aria-hidden="true" hidden></span></summary>
     <div class="acctitems">
       {{ acct() }}

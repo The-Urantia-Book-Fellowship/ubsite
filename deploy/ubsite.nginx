@@ -16,6 +16,7 @@
 limit_req_zone $binary_remote_addr zone=ubsite_search:10m rate=30r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=40r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_board:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=ubsite_sync:10m rate=30r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_stats:10m rate=10r/m;
 
 # Where nginx keeps the offline copy's chunks it has sent once (the location
@@ -86,9 +87,9 @@ server {
 
     # The quiz's board (ubsite/board.py), each site's own since 2026-11-18 (one
     # on ubsite.sigmaai.au for both before, which the other's pages sent to).
-    # The only POSTs the site takes: a reader's name and first answers, at most
-    # 16 KB (819 answers come to about 12), 10 a minute, as a reader finishes a
-    # quiz.  Exact matches: a prefix location /quiz/board/ would answer
+    # The only POSTs the site takes of a reader with no account: a name and
+    # first answers, at most 16 KB (819 answers come to about 12), 10 a minute,
+    # as a reader finishes a quiz.  Exact matches: a prefix location /quiz/board/ would answer
     # /quiz/board, the board's page, with a 301 (trap 19).  The addresses stay
     # in memory only, for the limit, as /search's do.
     location = /quiz/board/join {
@@ -101,6 +102,21 @@ server {
     location = /quiz/board/answers {
         client_max_body_size 16k;
         limit_req zone=ubsite_board burst=5 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+
+    # What follows a reader's account (ubsite/account.py sync(),
+    # static/account.js): a signed-in reader's settings, place and bookmarks,
+    # exchanged as a page loads, after a change and as a page is left.  The
+    # account's other POSTs fit the site's 1 KB; this one carries the bookmarks,
+    # 500 to a request, so 1 MB (app.py SYNC_BODY), and 30 a minute, which a
+    # reader turning pages does not reach and whose refusal the browser takes
+    # as a network that failed, to try again.  An exact match (trap 19).
+    location = /account/sync {
+        client_max_body_size 1m;
+        limit_req zone=ubsite_sync burst=10 nodelay;
         limit_req_status 429;
         proxy_pass http://127.0.0.1:8130;
         include /etc/nginx/proxy_params;

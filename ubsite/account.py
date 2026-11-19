@@ -45,6 +45,21 @@ and the cookies' names all come: never from the Host a request names.
 `who()` is the one question everything else asks.  Google's session answers it
 here; on the Fellowship's site the same question would go to Laravel's
 endpoint (INTEGRATION.md, section 6).
+
+What follows the account (2026-11-19): a reader's settings, all but the
+device's own (settings.py DEVICE), the place last read and the bookmarks, a
+row each in `item`, so that they are the same on every device signed in.  The
+browser's copy stays the working copy, what a page is drawn from and what
+works offline; the server holds a replica, and `sync()` is the one exchange
+between them (static/account.js): the browser says what changed there since
+it last asked and the last of the account's running numbers it saw, and is
+answered with everything changed since that number.  The order is the
+server's, never the browsers' clocks: a change is taken where nothing else
+has touched that thing since the browser last looked.  Only where two devices
+changed one thing unseen by each other is there anything to settle: the place
+and a bookmark added by the times they were made, which they carry, and
+anything else by which arrived first.  A thing removed is a row too, so that
+it is removed everywhere.
 """
 
 from __future__ import annotations
@@ -53,6 +68,7 @@ import base64
 import getpass
 import hashlib
 import json
+import math
 import os
 import pathlib
 import re
@@ -65,9 +81,12 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from ubsite import settings
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CONF = pathlib.Path(os.environ.get("UB_ACCOUNT_CONF", ROOT / "var" / "account.toml"))
 DB = pathlib.Path(os.environ.get("UB_USER_DB", ROOT / "var" / "user.db"))
+UB_DB = ROOT / "var" / "ub.db"   # the book: a bookmark is a paragraph of it
 
 # The terms a reader agrees to as an account is made, by the day they last
 # changed: terms.html's, which tests/test_account.py holds this to.
@@ -90,6 +109,12 @@ PHOTO_PX = 96                    # asked of Google: three times the size it is s
 PHOTO_MAX = 64 * 1024            # a picture larger than this is not kept
 PHOTO_TYPES = ("image/jpeg", "image/png", "image/webp", "image/gif")
 
+# What follows the account (sync()).
+KINDS = ("set", "place", "mark")     # a setting, the place last read, a bookmark
+SYNC_MAX = 1000                  # changes to an exchange: a browser with more sends them in turns
+MARKS_MAX = 2000                 # bookmarks to an account
+TEXT_MAX = 500                   # a setting's value, where it is words
+
 SCHEMA = """
 PRAGMA journal_mode = WAL;
 CREATE TABLE IF NOT EXISTS meta (
@@ -108,6 +133,7 @@ CREATE TABLE IF NOT EXISTS user (
   agreed TEXT NOT NULL,              -- and when
   photo BLOB,                        -- the account's picture, a small copy fetched at sign-in; NULL for none
   photo_type TEXT,                   -- image/jpeg, ...
+  n INTEGER NOT NULL DEFAULT 0,      -- the account's running number: the last exchange that wrote (sync()); 0, none yet
   UNIQUE (provider, subject)
 );
 CREATE TABLE IF NOT EXISTS session (
@@ -128,6 +154,18 @@ CREATE TABLE IF NOT EXISTS pending (
   expires INTEGER NOT NULL,
   picture TEXT NOT NULL DEFAULT ''   -- where the account's picture is, fetched once there is an account
 );
+-- What a reader keeps, which follows the account from one device to another
+-- (sync()): a row to each thing, and a thing removed a row too.
+CREATE TABLE IF NOT EXISTS item (
+  user_id INTEGER NOT NULL REFERENCES user(id),
+  kind TEXT NOT NULL,                -- 'set' a setting, 'place' the place last read, 'mark' a bookmark
+  key TEXT NOT NULL,                 -- the setting's key; ''; the bookmark's paragraph, '101:4.2'
+  value TEXT,                        -- JSON; NULL for a bookmark removed, or a setting back at its default
+  n INTEGER NOT NULL,                -- the account's running number as this was written
+  by TEXT NOT NULL,                  -- the session that wrote it, by the first of its cookie's hash
+  at INTEGER NOT NULL,               -- ms: when the place or the bookmark was made, on its device; else when this arrived
+  PRIMARY KEY (user_id, kind, key)
+) WITHOUT ROWID;
 -- What some accounts may use and others not: given by address from the host's
 -- command line, and bound to the account itself the first time that address
 -- signs in, so that it follows the account and not an address that changes hands.
@@ -145,6 +183,8 @@ RE_ORIGIN = re.compile(r"https://[a-z0-9.-]+(?::\d+)?|http://localhost(?::\d+)?"
 # control character anywhere.
 RE_NEXT = re.compile(r"/(?![/\\])[^\\\x00-\x1f\x7f]{0,500}")
 RE_FEATURE = re.compile(r"[a-z][a-z0-9-]{0,31}")
+RE_REF = re.compile(r"\d{1,3}:\d{1,2}\.\d{1,3}")     # a paragraph's reference, which the book must have
+RE_CTRL = re.compile(r"[\x00-\x1f\x7f]")
 
 
 class Refused(Exception):
@@ -300,9 +340,78 @@ def claims_of(conf: Config, got: dict, nonce: str) -> tuple[str, str, str, str]:
     return sub[:255], email[:320], " ".join(name.split())[:200], picture
 
 
+def _text(v, most: int) -> str:
+    """Words a browser sent, as they are kept: bounded, one line."""
+    return RE_CTRL.sub(" ", v)[:most] if isinstance(v, str) else ""
+
+
+def _when(v, t: int) -> int:
+    """A time a browser gave, in ms: never counted as later than the server's
+    clock, and 0, the oldest there is, where it is no time."""
+    return min(int(v), t) if isinstance(v, (int, float)) and not isinstance(v, bool) and 0 < v < 1e15 else 0
+
+
+def _json(v) -> str:
+    return json.dumps(v, ensure_ascii=False, separators=(",", ":"))
+
+
+def changes_of(got, follows: dict, t: int) -> list[tuple[str, str, str | None, int]]:
+    """What a browser says changed there, as it may be kept: (kind, key, the
+    value as JSON or None for a thing removed, its time).  Refused where it is
+    not a list of [kind, key, value]; and one of them left out, the rest
+    standing, where it names a setting this site does not have or one that is
+    the device's own, a value not of its setting's type, or a place or a
+    bookmark that is no paragraph's reference: a browser holds the keys of
+    settings long gone.  A value is held to its setting's type and not to
+    today's choices, since a name kept from before is still read as what it
+    meant (ub.js stored())."""
+    if not isinstance(got, list) or len(got) > SYNC_MAX:
+        raise Refused(400, "changes")
+    out, seen = [], set()
+    for c in got:
+        if (not isinstance(c, list) or len(c) != 3 or c[0] not in KINDS or not isinstance(c[1], str)):
+            raise Refused(400, "changes")
+        kind, key, v = c
+        if (kind, key) in seen:
+            continue
+        seen.add((kind, key))
+        if kind == "set":
+            if key not in follows:
+                continue
+            d = follows[key]
+            if v is None:
+                pass
+            elif isinstance(d, bool):
+                if not isinstance(v, bool):
+                    continue
+            elif isinstance(d, (int, float)):
+                if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or abs(v) > 1e6:
+                    continue
+            elif not isinstance(v, str) or len(v) > TEXT_MAX or RE_CTRL.search(v):
+                continue
+            out.append((kind, key, None if v is None else _json(v), t))
+        elif kind == "place":
+            # One to an account, and never removed: a reader who has read has a place.
+            if key or not isinstance(v, dict) or not isinstance(v.get("ref"), str) or not RE_REF.fullmatch(v["ref"]):
+                continue
+            at = _when(v.get("at"), t)
+            out.append((kind, "", _json({"ref": v["ref"], "title": _text(v.get("title"), 200), "at": at,
+                                         "v": _text(v.get("v"), 20)}), at))
+        else:
+            if not RE_REF.fullmatch(key):
+                continue
+            if v is None:
+                out.append((kind, key, None, t))
+            elif isinstance(v, dict):
+                at = _when(v.get("at"), t)
+                out.append((kind, key, _json({"title": _text(v.get("title"), 200), "q": _text(v.get("q"), 400),
+                                              "at": at, "v": _text(v.get("v"), 20)}), at))
+    return out
+
+
 class Accounts:
-    def __init__(self, path: pathlib.Path | None = None):
-        self.path = pathlib.Path(path or DB)
+    def __init__(self, path: pathlib.Path | None = None, ub: pathlib.Path | None = None):
+        self.path, self.ub = pathlib.Path(path or DB), pathlib.Path(ub or UB_DB)
 
     def _con(self, write: bool) -> sqlite3.Connection | None:
         """A connection; None if nothing was ever written and this is only a
@@ -317,7 +426,8 @@ class Accounts:
         con.executescript(SCHEMA)
         # A file made before a column was: the column added, its rows as they were.
         for table, col, kind in (("user", "photo", "BLOB"), ("user", "photo_type", "TEXT"),
-                                 ("pending", "picture", "TEXT NOT NULL DEFAULT ''")):
+                                 ("pending", "picture", "TEXT NOT NULL DEFAULT ''"),
+                                 ("user", "n", "INTEGER NOT NULL DEFAULT 0")):
             if col not in {r[1] for r in con.execute(f"PRAGMA table_info({table})")}:
                 con.execute(f"ALTER TABLE {table} ADD COLUMN {col} {kind}")
         con.execute("INSERT OR IGNORE INTO meta VALUES ('id', ?)", (secrets.token_hex(8),))
@@ -502,11 +612,137 @@ class Accounts:
         con = self._con(True)
         try:
             con.execute("BEGIN IMMEDIATE")
-            for table, col in (("session", "user_id"), ("allow", "user_id"), ("user", "id")):
+            for table, col in (("session", "user_id"), ("allow", "user_id"), ("item", "user_id"), ("user", "id")):
                 con.execute(f"DELETE FROM {table} WHERE {col} = ?", (user_id,))
             con.execute("COMMIT")
             # And from the journal, where the rows written before still stand.
             con.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        finally:
+            con.close()
+
+    # ---- what follows the account ---------------------------------------------------
+    def _paragraphs(self, refs: set[str]) -> set[str]:
+        """Those of `refs` that are paragraphs of the book (var/ub.db, opened
+        to read): a bookmark, or the place, is a place in it."""
+        if not refs:
+            return set()
+        want, out = sorted(refs), set()
+        try:
+            con = sqlite3.connect(f"file:{self.ub}?mode=ro", uri=True, timeout=5)
+            try:
+                for i in range(0, len(want), 500):
+                    part = want[i:i + 500]
+                    out.update(r for (r,) in con.execute(
+                        f"SELECT ref FROM paragraph WHERE ref IN ({','.join('?' * len(part))})", part))
+            finally:
+                con.close()
+        except sqlite3.Error as e:
+            # Not dropped as unknown: the browser would take them for kept.
+            raise Refused(503, "book") from e
+        return out
+
+    def sync(self, token: str, got: dict) -> dict:
+        """The exchange (the module's own account of it, above).  `got` is
+        {n: the last running number this browser saw, db: the database it saw
+        it in, ch: [[kind, key, value], ...] what changed there since, first:
+        true where the browser has never exchanged with this account}.  The
+        answer: {db, id, n: the number now, ch: everything changed since the
+        browser's number that it has not just sent, had: whether the account
+        had been exchanged with before}; or {restart: true} where the
+        browser's number is not this database's, one restored from a backup or
+        made anew, and the browser starts over with `first`.
+
+        A first exchange, where both sides may hold something: the settings
+        are the account's where it has had an exchange, replacing the
+        device's, and the device's where it has not, since a setting left out
+        means its default and the two cannot be mixed a setting at a time;
+        every bookmark of both is kept, one here even if it was once removed
+        elsewhere; and the place is the newer."""
+        t = int(time.time() * 1000)
+        if not isinstance(got, dict):
+            raise Refused(400, "json")
+        first, seen = got.get("first") is True, got.get("n", 0)
+        if not isinstance(seen, int) or isinstance(seen, bool) or seen < 0:
+            raise Refused(400, "number")
+        changes = changes_of(got.get("ch", []), settings.followed(), t)
+        refs = {json.loads(v)["ref"] if kind == "place" else key for kind, key, v, _ in changes if kind != "set"}
+        known = self._paragraphs(refs)
+        changes = [c for c in changes
+                   if c[0] == "set" or (json.loads(c[2])["ref"] if c[0] == "place" else c[1]) in known]
+        con = self._con(False) if token else None
+        if con is None:
+            raise Refused(401, "signed out")
+        try:
+            h = digest(token)
+            con.execute("BEGIN IMMEDIATE")
+            row = con.execute("SELECT u.id, u.n FROM session s JOIN user u ON u.id = s.user_id"
+                              " WHERE s.token = ? AND s.expires > ?", (h, t // 1000)).fetchone()
+            if row is None:
+                con.execute("ROLLBACK")
+                raise Refused(401, "signed out")
+            user, n0 = row
+            db = con.execute("SELECT value FROM meta WHERE key = 'id'").fetchone()[0]
+            if not first and (got.get("db") != db or seen > n0):
+                con.execute("ROLLBACK")
+                return {"restart": True, "db": db}
+            if first:
+                seen = 0
+            had, by, n, took, wrote = n0 > 0, h[:16], n0 + 1, set(), False
+            marks = con.execute("SELECT COUNT(*) FROM item WHERE user_id = ? AND kind = 'mark' AND value IS NOT NULL",
+                                (user,)).fetchone()[0]
+            for kind, key, value, at in changes:
+                was = con.execute("SELECT value, n, by, at FROM item WHERE user_id = ? AND kind = ? AND key = ?",
+                                  (user, kind, key)).fetchone()
+                if first:
+                    take = not had if kind == "set" else value is not None and (
+                        was is None or was[0] is None or at > was[3])
+                elif was is None or was[1] <= seen or was[2] == by:
+                    take = True          # nothing else has touched it since this browser last looked
+                elif kind == "place" or (kind == "mark" and value is not None):
+                    take = at > was[3]   # two devices, unseen by each other: the later made
+                else:
+                    take = False         # and of anything else, the first to arrive
+                if not take:
+                    continue
+                if (was[0] if was else None) == value:
+                    took.add((kind, key))        # as the server has it already
+                    continue
+                if kind == "mark":
+                    live = was is not None and was[0] is not None
+                    if value is not None and not live:
+                        if marks >= MARKS_MAX:
+                            continue
+                        marks += 1
+                    elif value is None and live:
+                        marks -= 1
+                con.execute("INSERT OR REPLACE INTO item (user_id, kind, key, value, n, by, at) VALUES (?,?,?,?,?,?,?)",
+                            (user, kind, key, value, n, by, at))
+                took.add((kind, key))
+                wrote = True
+            if wrote or not had:
+                # A first exchange that brought nothing is still one: the
+                # account has settings from then on, every one its default.
+                con.execute("UPDATE user SET n = ? WHERE id = ?", (n, user))
+            else:
+                n = n0
+            out = [[kind, key, None if value is None else json.loads(value)]
+                   for kind, key, value in con.execute(
+                       "SELECT kind, key, value FROM item WHERE user_id = ? AND n > ? ORDER BY n, kind, key", (user, seen))
+                   if (kind, key) not in took and not (first and value is None)]
+            con.execute("COMMIT")
+        finally:
+            con.close()
+        return {"db": db, "id": user, "n": n, "had": had, "ch": out}
+
+    def kept(self, user_id: int) -> dict:
+        """How much an account keeps, for the host's command line: {set,
+        place, mark}, the things there are, those removed not counted."""
+        con = self._con(False)
+        if con is None:
+            return {}
+        try:
+            return dict(con.execute("SELECT kind, COUNT(*) FROM item WHERE user_id = ? AND value IS NOT NULL GROUP BY kind",
+                                    (user_id,)).fetchall())
         finally:
             con.close()
 
@@ -609,7 +845,10 @@ def main(argv: list[str]) -> int:
         conf = config()
         print(f"{CONF}: " + (f"{conf.origin}, callback {conf.callback}" if conf else "none, so this site has no accounts"))
         for u in a.users():
-            print(f"{u['id']:5}  {u['email']:40} {u['name']:30} made {u['made']}  seen {u['seen']}  {' '.join(u['features'])}")
+            k = a.kept(u["id"])
+            keeps = ", ".join(f"{k[x]} {w}" for x, w in (("set", "settings"), ("mark", "bookmarks"), ("place", "place")) if k.get(x))
+            print(f"{u['id']:5}  {u['email']:40} {u['name']:30} made {u['made']}  seen {u['seen']}  {' '.join(u['features'])}"
+                  + (f"  keeps {keeps}" if keeps else ""))
         for email, feature, user in a.grants():
             if user is None:
                 print(f"       {email:40} {feature}  (has not signed in)")

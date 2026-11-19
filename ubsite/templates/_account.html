@@ -24,8 +24,13 @@
       a data: URL (account.py who()): it is not asked of anyone.  Where the
       account has none, the first letter of its name. #}
   <p class="acct-in acct-who"><img class="acctphoto" alt="" width="40" height="40" hidden><span class="acctinit" aria-hidden="true" hidden></span><span><b class="acctname"></b><span class="acctmail"></span></span></p>
+  {#- What follows the account (static/account.js), said once; and with Sign
+      out the offer to take it out of this browser too, for a computer that
+      is not one's own: a box with no name, so no setting. #}
+  <p class="acct-in acct-keeps">{{ t('acct:in') }}</p>
   <p class="acct-in acct-row"><button type="button" class="pill acct-bye">{{ t('Sign out') }}</button>
     <button type="button" class="pill acct-del">{{ t('Delete my account') }}</button></p>
+  <p class="acct-in acct-also"><label><input type="checkbox" class="acct-clear"> <span>{{ t('acct:clear') }}</span></label></p>
   <p class="acct-say" role="status" hidden></p>
   <p class="acct-more">{{ t('acct:links') }}</p>
 </div>

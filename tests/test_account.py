@@ -3,8 +3,9 @@ signing in with Google by the server's own flow, with Google's answer a
 stand-in here; what is refused, each with a page or a reason and never a 500;
 the cookies; a first sign-in making no account before its reader's tick; who
 is signed in; signing out; an account deleted, its bytes gone from the file;
-what only some accounts are given; and a site with no var/account.toml, which
-has no accounts at all.  Each test has a database and a configuration of its
+what only some accounts are given; what follows the account, the exchange
+between a browser and the server, two browsers each a device (2026-11-19);
+and a site with no var/account.toml, which has no accounts at all.  Each test has a database and a configuration of its
 own in a temporary directory: nothing here writes var/user.db, and nothing
 asks Google.
 """
@@ -529,20 +530,279 @@ class Leaving(WithAccounts):
         self.sign_in(b)
         self.sign_in(other)
         account.accounts().grant(ADA["email"], "ai")
+        b.post("/account/sync", {"first": True, "n": 0, "ch": [
+            ["set", "theme", "dark"], ["mark", "101:4.2", {"title": "The Real Nature of Religion",
+                                                           "q": "kept-words-of-a-bookmark", "at": 5, "v": "8"}]]})
+        self.assertEqual(self.rows("SELECT COUNT(*) FROM item"), [(2,)])
         st, _, j = b.post("/account/delete", {"email": "someone@else.example"})
         self.assertEqual((st, j), (400, {"error": "address"}))
         self.assertEqual(self.rows("SELECT COUNT(*) FROM user"), [(1,)])
         st, _, j = b.post("/account/delete", {"email": " ada.reader@EXAMPLE.org "})
         self.assertEqual((st, j), (200, {"ok": True}))
-        for table in ("user", "session", "allow", "pending"):
+        for table in ("user", "session", "allow", "pending", "item"):
             self.assertEqual(self.rows(f"SELECT COUNT(*) FROM {table}"), [(0,)], table)
         self.assertEqual(other.get("/account/me")[0], 401)                 # every session of it
         # The bytes too: not in the database, nor in its journal.
         blob = b"".join(p.read_bytes() for p in self.db.parent.iterdir() if p.name.startswith("user.db"))
-        for word in (ADA["sub"].encode(), b"Ada.Reader@example.org", b"ada.reader@example.org", b"Ada Reader", JPEG[4:40]):
+        for word in (ADA["sub"].encode(), b"Ada.Reader@example.org", b"ada.reader@example.org", b"Ada Reader", JPEG[4:40],
+                     b"kept-words-of-a-bookmark"):
             self.assertNotIn(word, blob, word)
         st, _, j = b.post("/account/delete", {"email": ADA["email"]})
         self.assertEqual(st, 401)
+
+
+THEME = ["set", "theme", "dark"]
+A_MARK = ["mark", "101:4.2", {"title": "The Real Nature of Religion", "q": "Revelation is a technique", "at": 1000, "v": "8"}]
+B_MARK = ["mark", "2:0.1", {"title": "The Nature of God", "q": "Inasmuch as man\u2019s highest", "at": 2000, "v": "8"}]
+
+
+def place(ref: str, at: int) -> list:
+    return ["place", "", {"ref": ref, "title": "A paper", "at": at, "v": "8"}]
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db not built")
+class Following(WithAccounts):
+    """What follows the account (account.py sync()).  Each Browser is a
+    device, signed in to the one account; `said` is what the exchange
+    answered, and a device keeps the number and the database it was told."""
+
+    def device(self) -> Browser:
+        b = self.browser()
+        self.sign_in(b)
+        b.n, b.db = 0, None
+        return b
+
+    def exchange(self, b: Browser, ch=(), first: bool = False, **kw) -> dict:
+        st, _, got = b.post("/account/sync", {"first": first, "db": b.db, "n": b.n, "ch": list(ch), **kw})
+        self.assertEqual(st, 200, got)
+        if not got.get("restart"):
+            b.n, b.db = got["n"], got["db"]
+        return got
+
+    def kept(self) -> dict:
+        return {(k, key): (None if v is None else json.loads(v))
+                for k, key, v in self.rows("SELECT kind, key, value FROM item")}
+
+    def test_a_new_account_takes_what_the_first_device_has(self):
+        a = self.device()
+        got = self.exchange(a, [THEME, ["set", "whole", True], ["set", "rate", 1.25], A_MARK, place("101:4.2", 500)], first=True)
+        self.assertEqual((got["n"], got["had"], got["ch"], got["id"]), (1, False, [], 1))
+        self.assertEqual(got["db"], self.rows("SELECT value FROM meta WHERE key = 'id'")[0][0])
+        self.assertEqual(self.kept(), {
+            ("set", "theme"): "dark", ("set", "whole"): True, ("set", "rate"): 1.25,
+            ("mark", "101:4.2"): A_MARK[2],
+            ("place", ""): {"ref": "101:4.2", "title": "A paper", "at": 500, "v": "8"}})
+        # With nothing changed and nothing elsewhere, nothing comes, and the number stands.
+        self.assertEqual(self.exchange(a)["ch"], [])
+        self.assertEqual(a.n, 1)
+
+    def test_a_first_exchange_that_brings_nothing_is_still_one(self):
+        a, b = self.device(), self.device()
+        self.assertEqual(self.exchange(a, first=True)["n"], 1)
+        # So the second device's settings do not become the account's: it has
+        # had an exchange, and its settings are every one its default.
+        got = self.exchange(b, [THEME], first=True)
+        self.assertEqual((got["had"], got["ch"], self.kept()), (True, [], {}))
+
+    def test_a_second_device_takes_the_accounts_settings_and_keeps_every_bookmark(self):
+        a, b = self.device(), self.device()
+        self.exchange(a, [THEME, A_MARK, place("101:4.2", 5000)], first=True)
+        got = self.exchange(b, [["set", "theme", "light"], ["set", "redletter", False], B_MARK, place("2:0.1", 4000)],
+                            first=True)
+        self.assertTrue(got["had"])
+        # The account's settings, whole, and not this device's; its bookmark;
+        # its place, the newer.  This device's bookmark is taken, and not sent back.
+        self.assertCountEqual(got["ch"], [THEME, A_MARK, place("101:4.2", 5000)])
+        k = self.kept()
+        self.assertEqual(k[("set", "theme")], "dark")
+        self.assertNotIn(("set", "redletter"), k)
+        self.assertEqual((k[("mark", "2:0.1")], k[("mark", "101:4.2")]), (B_MARK[2], A_MARK[2]))
+        self.assertEqual(k[("place", "")]["ref"], "101:4.2")
+        # And the first device learns of the second's bookmark, and of nothing else.
+        self.assertEqual(self.exchange(a)["ch"], [B_MARK])
+
+    def test_a_newer_place_on_a_second_device_becomes_the_accounts(self):
+        a, b = self.device(), self.device()
+        self.exchange(a, [place("101:4.2", 5000)], first=True)
+        self.assertEqual(self.exchange(b, [place("2:0.1", 6000)], first=True)["ch"], [])
+        self.assertEqual(self.exchange(a)["ch"], [place("2:0.1", 6000)])
+
+    def test_a_bookmark_here_is_kept_though_removed_elsewhere(self):
+        a, b = self.device(), self.device()
+        self.exchange(a, [A_MARK], first=True)
+        self.exchange(a, [["mark", "101:4.2", None]])
+        self.assertIsNone(self.kept()[("mark", "101:4.2")])                # a removal is a row
+        got = self.exchange(b, [A_MARK], first=True)                      # signing in loses no bookmark
+        self.assertEqual(got["ch"], [])
+        self.assertEqual(self.kept()[("mark", "101:4.2")], A_MARK[2])
+        self.assertEqual(self.exchange(a)["ch"], [A_MARK])
+
+    def test_a_change_reaches_the_other_device_and_so_does_a_removal(self):
+        a, b = self.device(), self.device()
+        self.exchange(a, [THEME, A_MARK], first=True)
+        self.exchange(b, first=True)
+        got = self.exchange(a, [["set", "theme", None], ["set", "lang", "ru"], ["mark", "101:4.2", None], B_MARK])
+        self.assertEqual((got["n"], got["ch"]), (2, []))
+        self.assertCountEqual(self.exchange(b)["ch"],
+                              [["set", "theme", None], ["set", "lang", "ru"], ["mark", "101:4.2", None], B_MARK])
+        self.assertEqual(self.exchange(b)["ch"], [])                       # once
+
+    def test_two_devices_unseen_by_each_other(self):
+        """Only then is there anything to settle: a setting and a removal by
+        which arrived first, the place and a bookmark added by when they were
+        made, whatever order they arrived in."""
+        a, b = self.device(), self.device()
+        self.exchange(a, [A_MARK], first=True)
+        self.exchange(b, first=True)
+        # A setting: a's arrives first and stands; b is told so.
+        self.exchange(a, [THEME])
+        got = self.exchange(b, [["set", "theme", "light"]])
+        self.assertEqual((got["ch"], self.kept()[("set", "theme")]), ([THEME], "dark"))
+        # Seen, b's next change of it is taken.
+        self.assertEqual(self.exchange(b, [["set", "theme", "light"]])["ch"], [])
+        self.assertEqual(self.exchange(a)["ch"], [["set", "theme", "light"]])
+        # The place: b's was made later, and arrives first; a's older one does not replace it.
+        self.exchange(b, [place("2:0.1", 9000)])
+        self.assertEqual(self.exchange(a, [place("101:4.2", 8000)])["ch"], [place("2:0.1", 9000)])
+        # And the other way round: a's is the later made, though it arrives second.
+        self.exchange(b, [place("2:0.2", 9500)])
+        self.assertEqual(self.exchange(a, [place("101:4.3", 9900)])["ch"], [])
+        self.assertEqual(self.exchange(b)["ch"], [place("101:4.3", 9900)])
+        # A bookmark removed on one device and, unseen, set again on another
+        # before that: the removal, which arrived first, stands.
+        self.exchange(a, [["mark", "101:4.2", None]])
+        again = ["mark", "101:4.2", dict(A_MARK[2], at=1500)]
+        self.assertEqual(self.exchange(b, [again])["ch"], [["mark", "101:4.2", None]])
+        self.assertIsNone(self.kept()[("mark", "101:4.2")])
+
+    def test_a_time_is_never_later_than_the_servers_clock(self):
+        a, b = self.device(), self.device()
+        self.exchange(a, first=True)
+        self.exchange(b, first=True)
+        ahead = int(time.time() * 1000) + 10 * 86400 * 1000            # a's clock is ten days fast
+        self.exchange(a, [place("101:4.2", ahead)])
+        kept = self.kept()[("place", "")]["at"]
+        self.assertLessEqual(kept, int(time.time() * 1000))
+        time.sleep(0.01)
+        # So b's place, made after it by the server's clock, is not held back for ten days.
+        self.assertEqual(self.exchange(b, [place("2:0.1", int(time.time() * 1000))])["ch"], [])
+
+    def test_an_answer_lost_and_the_same_sent_again(self):
+        a, b = self.device(), self.device()
+        self.exchange(a, first=True)
+        self.exchange(b, first=True)
+        n, db = a.n, a.db
+        self.exchange(a, [THEME, A_MARK])
+        a.n, a.db = n, db                                                  # as if the answer never came
+        got = self.exchange(a, [THEME, A_MARK])
+        self.assertEqual((got["ch"], got["n"]), ([], n + 1))                # taken as its own, and written once
+        self.assertCountEqual(self.exchange(b)["ch"], [THEME, A_MARK])
+
+    def test_what_is_not_taken_and_the_rest_that_is(self):
+        a = self.device()
+        got = self.exchange(a, [
+            ["set", "size", "125"],                 # the device's own
+            ["set", "tappage", True],               # a setting long gone
+            ["set", "whole", "yes"],                # not its setting's type
+            ["set", "rate", True],
+            ["set", "face", "x" * 501],              # longer than any setting's words
+            ["mark", "999:1.1", A_MARK[2]],         # no paragraph of the book
+            ["mark", "1:1", A_MARK[2]],             # nor a paragraph's reference
+            ["place", "", {"ref": "999:1.1", "at": 5}],
+            ["place", "x", {"ref": "1:1.1", "at": 5}],
+            ["set", "theme", "sepia"],              # of its type: a name is not held to today's choices
+            ["set", "theme", "dark"],               # said twice: the first stands
+            A_MARK], first=True)
+        self.assertEqual(got["ch"], [])
+        self.assertEqual(self.kept(), {("set", "theme"): "sepia", ("mark", "101:4.2"): A_MARK[2]})
+        # Words are kept on one line, and bounded.
+        self.exchange(a, [["mark", "2:0.1", {"title": "T\n" + "t" * 300, "q": "q" * 900, "at": "soon", "v": 8}]])
+        kept = self.kept()[("mark", "2:0.1")]
+        self.assertEqual((kept["title"][:3], len(kept["title"]), len(kept["q"]), kept["at"], kept["v"]),
+                         ("T t", 200, 400, 0, ""))
+
+    def test_what_is_no_exchange_at_all(self):
+        a = self.device()
+        for bad in ({"ch": "x"}, {"ch": [["set", "theme"]]}, {"ch": [["note", "1:1.1", None]]}, {"ch": [["set", 5, None]]},
+                    {"n": -1}, {"n": "1"}, {"n": True}, {"ch": [THEME] * (account.SYNC_MAX + 1)}):
+            st, _, j = a.post("/account/sync", {"first": True, "n": 0, "ch": [], **bad})
+            self.assertEqual(st, 400, bad)
+        self.assertEqual(self.rows("SELECT COUNT(*) FROM item"), [(0,)])
+        self.assertEqual(self.rows("SELECT n FROM user"), [(0,)])
+
+    def test_another_database_or_a_number_ahead_starts_over(self):
+        a = self.device()
+        self.exchange(a, [THEME], first=True)
+        for kw in ({"db": "another"}, {"n": a.n + 5}, {"db": None}):
+            st, _, got = a.post("/account/sync", {"first": False, "db": a.db, "n": a.n, "ch": [["set", "theme", "light"]], **kw})
+            self.assertEqual((st, got), (200, {"restart": True, "db": a.db}), kw)
+        self.assertEqual(self.kept(), {("set", "theme"): "dark"})          # nothing was written
+        # And the browser begins again, with everything it has: the account's settings come back.
+        self.assertEqual(self.exchange(a, [["set", "theme", "light"]], first=True)["ch"], [THEME])
+
+    def test_no_more_bookmarks_than_an_account_may_have(self):
+        a = self.device()
+        saved, account.MARKS_MAX = account.MARKS_MAX, 2
+        try:
+            marks = [["mark", f"1:1.{i}", {"title": "", "q": "", "at": i, "v": "8"}] for i in (1, 2, 3)]
+            self.exchange(a, marks, first=True)
+            self.assertEqual(sorted(k[1] for k in self.kept()), ["1:1.1", "1:1.2"])
+            self.exchange(a, [["mark", "1:1.1", None], marks[2]])           # one removed makes room for one
+            self.assertEqual(sorted(k[1] for k, v in self.kept().items() if v), ["1:1.2", "1:1.3"])
+        finally:
+            account.MARKS_MAX = saved
+
+    def test_only_a_reader_signed_in_from_this_site(self):
+        a, out = self.device(), self.browser()
+        body = {"first": True, "n": 0, "ch": [THEME]}
+        st, h, j = out.post("/account/sync", body)
+        self.assertEqual((st, j), (401, {"error": "signed out"}))
+        self.assertEqual(h["cache-control"], "no-store")
+        self.assertEqual(a.post("/account/sync", body, origin="https://elsewhere.example")[0], 403)
+        self.assertEqual(a.post("/account/sync", body, ctype="text/plain")[0], 403)
+        self.assertEqual(self.rows("SELECT COUNT(*) FROM item"), [(0,)])
+        # A session ended: the cookie that says there is one is taken back.
+        self.exchange(a, first=True)
+        a.post("/account/logout")
+        a.jar["__Host-ub_sid"], a.jar["ub_in"] = "stale", "1"
+        st, _, _ = a.post("/account/sync", body)
+        self.assertEqual(st, 401)
+        self.assertNotIn("ub_in", a.jar)
+
+    def test_larger_than_the_accounts_other_posts_and_no_larger_than_nginx_lets_through(self):
+        from ubsite import app as A
+        a = self.device()
+        marks = [["mark", f"1:{s}.{p}", {"title": "The Universal Father", "q": "w" * 300, "at": p, "v": "8"}]
+                 for s in range(1, 6) for p in range(1, 6)]
+        self.assertGreater(len(json.dumps(marks)), 4 * A.ACCT_BODY)
+        got = self.exchange(a, marks, first=True)
+        self.assertEqual(len(self.kept()), sum(1 for (c,) in self.rows(
+            "SELECT 1 FROM item")))                                         # those the book has, each a row
+        self.assertGreater(len(self.kept()), 10)
+        st, _, j = a.post("/account/sync", b'{"first": true, "n": 0, "ch": [], "pad": "' + b"x" * A.SYNC_BODY + b'"}')
+        self.assertEqual((st, j), (413, {"error": "too large"}))
+        # nginx's location for it lets through what the app takes, and no more.
+        for name in ("ubsite.nginx", "ubsite-sigmaai.nginx"):
+            conf = (ROOT / "deploy" / name).read_text(encoding="utf-8")
+            block = conf[conf.index("location = /account/sync {"):]
+            self.assertIn("client_max_body_size 1m;", block[:block.index("}")], name)
+        self.assertEqual(A.SYNC_BODY, 1024 * 1024)
+
+    def test_a_file_made_before_the_exchange_gains_what_it_needs(self):
+        a = self.device()
+        con = sqlite3.connect(self.db)
+        con.execute("DROP TABLE item")
+        con.execute("ALTER TABLE user DROP COLUMN n")
+        con.commit()
+        con.close()
+        self.assertEqual(self.exchange(a, [THEME], first=True)["n"], 1)
+        self.assertEqual(self.kept(), {("set", "theme"): "dark"})
+
+    def test_the_hosts_list_says_what_an_account_keeps(self):
+        a = self.device()
+        self.exchange(a, [THEME, A_MARK, B_MARK, place("2:0.1", 5)], first=True)
+        self.exchange(a, [["mark", "2:0.1", None]])
+        self.assertEqual(account.accounts().kept(1), {"set": 1, "mark": 1, "place": 1})
 
 
 @unittest.skipUnless(DB.exists(), "var/ub.db not built")
@@ -671,7 +931,8 @@ class Words(unittest.TestCase):
         accounts, with whoever is signed in, from the browser's own note."""
         base = (ROOT / "ubsite" / "templates" / "base.html").read_text(encoding="utf-8")
         header = base[base.index('<header class="top">'):base.index("</header>")]
-        self.assertLess(header.index('<details class="help"'), header.index('<details class="acctmenu" hidden>'))
+        self.assertLess(header.index('<details class="help"'),
+                        header.index("""<details class="acctmenu" data-src="{{ asset('account.js') }}" hidden>"""))
         self.assertIn("{{ chrome.person_svg() }}", header)
         head = base[:base.index("</head>")]
         self.assertIn("window.ubMe = function () {", head)
@@ -679,7 +940,38 @@ class Words(unittest.TestCase):
         self.assertIn("menu.hidden = !on;", head)
         # Google's words about the reader go in as text, never as markup.
         self.assertNotRegex(head[head.index("window.ubMe"):], r"innerHTML")
-        self.assertFalse((ROOT / "ubsite" / "static" / "account.js").exists())
+
+    def test_the_script_of_what_follows_is_run_for_a_reader_signed_in(self):
+        """static/account.js: named on the menu, and run by ub.js where the
+        browser's note says someone is signed in, so a reader with no account
+        runs none of it.  Its words are in the scripts' catalog, without which
+        its first T() throws, and it is in the offline copy with the rest."""
+        from ubsite.app import L10N_SCRIPTS
+        from offline import pack
+        static = ROOT / "ubsite" / "static"
+        self.assertIn("account.js", L10N_SCRIPTS)
+        self.assertIn("account.js", pack.ASSETS)
+        ub = (static / "ub.js").read_text(encoding="utf-8")
+        self.assertIn("if (acctRun || !acctMenu || !acctMenu.dataset.src || !acctWho() || "
+                      "/^\\/account\\//.test(location.pathname)) return;", ub)
+        self.assertEqual(ub.count("acctMenu.dataset.src"), 2)
+        js = (static / "account.js").read_text(encoding="utf-8")
+        self.assertIn("fetch('/account/sync'", js)
+        # The one address it asks, and nothing of anyone else.
+        self.assertEqual(re.findall(r"fetch\('([^']+)'", js), ["/account/sync"])
+        self.assertNotRegex(js, r"https?://")
+
+    def test_the_devices_own_settings_are_settings_and_the_page_is_told(self):
+        from ubsite import settings
+        every = settings.defaults()
+        self.assertEqual(settings.DEVICE, ["uisize", "size", "lead", "width", "bvoice", "trvoices",
+                                           "rail", "margin", "trtab", "toc"])
+        self.assertTrue(set(settings.DEVICE) < set(every))
+        self.assertEqual(set(settings.followed()), set(every) - set(settings.DEVICE))
+        for k in ("whole", "lang", "theme", "translations", "voice"):      # Whole paper follows (Tigran, 2026-11-18)
+            self.assertIn(k, settings.followed())
+        base = (ROOT / "ubsite" / "templates" / "base.html").read_text(encoding="utf-8")
+        self.assertIn("window.ubOwn = {{ settings_device|tojson }};", base[:base.index("</head>")])
 
 
 def l10n_en(body: str) -> str:

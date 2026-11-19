@@ -92,7 +92,8 @@ T.env.globals["asset"] = asset
 # place of __CATALOG__.  Made again when any of them changes, as the dev
 # server runs; named by a hash of what it sends, so a build that changes
 # nothing moves nothing (CLAUDE.md trap 29).
-L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js", "help.js", "cosmo.js")
+L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js", "help.js", "cosmo.js",
+                "account.js")
 L10N_JS = ROOT / "ubsite" / "l10n.js"
 
 
@@ -686,6 +687,8 @@ T.env.globals["settings_groups"] = settings.groups
 T.env.globals["settings_defaults"] = settings.defaults()
 T.env.globals["site_defaults"] = settings.site_defaults()
 T.env.globals["settings_spared"] = settings.SPARED
+settings.followed()          # or ValueError: settings.DEVICE names a setting there is not
+T.env.globals["settings_device"] = settings.DEVICE
 T.env.globals["account_hosts"] = settings.ACCOUNT_HOSTS
 T.env.globals["bilingual"] = lambda: l10n.BILINGUAL
 
@@ -1948,6 +1951,7 @@ async def quiz_board_answers(request: Request):
 
 ACCT_HEAD = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex", "Referrer-Policy": "no-referrer"}
 ACCT_BODY = 1024              # nginx's own limit for the site (deploy/ubsite.nginx)
+SYNC_BODY = 1024 * 1024       # and for /account/sync, which has a location of its own there
 
 
 def _acct() -> account.Config:
@@ -1998,7 +2002,7 @@ def _acct_who(request: Request, conf: account.Config, renew: bool = False) -> di
     return account.accounts().who(request.cookies.get(conf.cookie("ub_sid"), ""), renew)
 
 
-async def _acct_post(request: Request, conf: account.Config) -> dict:
+async def _acct_post(request: Request, conf: account.Config, most: int = ACCT_BODY) -> dict:
     """What a page of this site sent: JSON, from this site's own origin.  With
     the session's cookie SameSite Lax, which no other site's request carries,
     that is the defence against a request forged from elsewhere; the board's
@@ -2006,10 +2010,14 @@ async def _acct_post(request: Request, conf: account.Config) -> dict:
     if (request.headers.get("origin") != conf.origin
             or not request.headers.get("content-type", "").lower().startswith("application/json")):
         raise account.Refused(403, "origin")
-    if int(request.headers.get("content-length") or 0) > ACCT_BODY:
+    try:
+        said = int(request.headers.get("content-length") or 0)
+    except ValueError:
+        said = most + 1
+    if said > most:
         raise account.Refused(413, "too large")
     raw = await request.body()
-    if len(raw) > ACCT_BODY:
+    if len(raw) > most:
         raise account.Refused(413, "too large")
     try:
         got = json.loads(raw)
@@ -2131,6 +2139,26 @@ async def account_logout(request: Request):
     resp = _acct_json({"ok": True})
     _acct_in(resp, conf, None)
     return resp
+
+
+@app.post("/account/sync")
+async def account_sync(request: Request):
+    """What follows the account, in one exchange (account.py sync(),
+    static/account.js): the browser says what changed there, and is told what
+    changed elsewhere.  A session that has ended is answered as /account/me
+    answers it, so that the browser stops asking."""
+    conf = _acct()
+    try:
+        got = await _acct_post(request, conf, SYNC_BODY)
+        out = await run_in_threadpool(account.accounts().sync, request.cookies.get(conf.cookie("ub_sid"), ""), got)
+    except account.Refused as e:
+        resp = _acct_json({"error": e.why}, e.status)
+        if e.status == 401:
+            _acct_in(resp, conf, None)
+        return resp
+    except sqlite3.Error:
+        return _acct_json({"error": "server"}, 503)
+    return _acct_json(out)
 
 
 @app.post("/account/delete")

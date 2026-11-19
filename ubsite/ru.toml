@@ -828,4 +828,12 @@
 "Create my account" = "Создать учётную запись"
 "Signing you in…" = "Выполняется вход…"
 "acct:delete?" = { en = 'Delete your account, and everything kept with it? This cannot be undone.', ru = 'Удалить вашу учётную запись и всё, что с ней хранится? Это нельзя отменить.' }
+# What follows the account (static/account.js, 2026-11-19): what the menu
+# says of it signed in, the offer with Sign out for a computer that is not
+# one's own, Settings' question before the defaults are restored, and the
+# question where the browser holds another account's things.
+"acct:in" = { en = 'Your settings, your bookmarks and the place you last read are kept with this account, and are the same on every device where you sign in.', ru = 'Ваши настройки, закладки и место, где вы читали в последний раз, хранятся вместе с этой учётной записью и одинаковы на всех устройствах, где вы вошли.' }
+"acct:clear" = { en = 'When I sign out, also remove them from this browser', ru = 'При выходе также удалить их из этого браузера' }
+"reset:account?" = { en = 'Restore every setting to its default? Those kept with your account are restored on every device where you are signed in.', ru = 'Вернуть все настройки к значениям по умолчанию? Те, что хранятся вместе с вашей учётной записью, будут возвращены на всех устройствах, где вы вошли.' }
+"sync:other?" = { en = 'This browser holds the settings, bookmarks and reading place of another account. Replace them with those of {name}? The other account keeps its own. Cancel signs you out and leaves this browser as it is.', ru = 'В этом браузере хранятся настройки, закладки и место чтения другой учётной записи. Заменить их теми, что хранит учётная запись {name}? У другой учётной записи всё своё останется. «Отмена» — выйти и оставить этот браузер как есть.' }
 "That did not work. Please try again in a moment." = "Не получилось. Пожалуйста, попробуйте ещё раз чуть позже."

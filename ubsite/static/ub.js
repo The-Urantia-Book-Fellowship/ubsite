@@ -1,7 +1,9 @@
 // 15 KB budget, no dependencies. Everything here is an enhancement: the site is
 // complete and correct with JavaScript off.
 (function () {
-  // Settings: one JSON object in localStorage, per browser, no account.  What
+  // Settings: one JSON object in localStorage, per browser; a reader signed in
+  // has them kept with the account too, all but the device's own, and the
+  // same on every device (static/account.js, which runs only then).  What
   // the settings are, and their defaults, is ubsite/settings.py, handed over
   // by the head script in base.html, which also applies them before first
   // paint.  This keeps them, runs the dialog, and tells listen.js of a change.
@@ -148,6 +150,23 @@
       var o = load();
       apply(o);
       for (var k in DEF) announce(k, o);
+    },
+    // For a reader signed in (static/account.js): what is stored, as it is,
+    // which is what an exchange with the account compares, load() filling in
+    // the defaults; and what an exchange brought, {key: its value, or null
+    // for its default}, kept and put on the page as a change made on another
+    // page is (shown, below).  Whoever shows the settings hears 'ub:brought'.
+    kept: stored,
+    take: function (ch) {
+      var s = stored(), k;
+      for (k in ch) {
+        if (!(k in DEF)) continue;
+        if (ch[k] === null || ch[k] === DEF[k]) delete s[k];
+        else if (typeof ch[k] === typeof DEF[k]) s[k] = ch[k];
+      }
+      save(s);
+      shown();
+      document.dispatchEvent(new Event('ub:brought'));
     }
   };
   // Shown again from the browser's page cache, by Back or Forward, the page
@@ -155,20 +174,25 @@
   // this one, and announced as if changed here, where it came back in the
   // size, the theme or the columns it was left in (review of 2026-11-09);
   // with Whole paper changed, in its other unit, as the head script would.
+  // And what an exchange with the reader's account brought from another
+  // device (take, above) is put on the page by the same steps, the whole
+  // paper's page then left at the section being read.
   var shownWith = load();
   document.addEventListener('ub:settings', function (ev) { shownWith = ev.detail.all; });
-  addEventListener('pageshow', function (ev) {
-    if (!ev.persisted) return;
-    var o = load(), was = shownWith, k, here, to;
+  function shown() {
+    var o = load(), was = shownWith, k, s, here, to;
     apply(o);
     shownWith = o;
     for (k in DEF) if (was[k] !== o[k]) announce(k, o);
     if (was.whole !== o.whole && window.ubUnit) {
-      here = location.pathname + location.hash;
+      s = sectionInView();
+      here = location.pathname + (s ? '#' + s.id : location.hash);
       to = window.ubUnit(here);
-      if (to !== here) location.replace(to.replace(/#.*$/, '') + location.search + to.replace(/^[^#]*/, ''));
+      if (to !== location.pathname + location.hash)
+        location.replace(to.replace(/#.*$/, '') + location.search + to.replace(/^[^#]*/, ''));
     }
-  });
+  }
+  addEventListener('pageshow', function (ev) { if (ev.persisted) shown(); });
 
   // The half-disc beside the gear flips light and dark, a shortcut to
   // Settings' Theme (Tigran, 2026-11-18; it was in the header until
@@ -398,10 +422,22 @@
       resettable();
     });
     // It stands beside ×, so it asks first (Tigran, 2026-10-14).
+    // Signed in, the settings that follow the account go back to their
+    // defaults on every device, and the question says so.
     reset.addEventListener('click', function () {
-      if (!window.confirm(T.text('Restore every setting to its default?'))) return;
+      var kept = form.querySelector('.kept');
+      if (!window.confirm(kept && kept.dataset.acct === 'in'
+                          ? T.text('reset:account?') : T.text('Restore every setting to its default?'))) return;
       window.ubSettings.reset();
       fill();
+      resettable();
+    });
+    // What an exchange with the reader's account brought (ubSettings.take),
+    // while the dialog is open: its controls as the settings now are.
+    document.addEventListener('ub:brought', function () {
+      if (!dlg.open) return;
+      fill();
+      idle(load());
       resettable();
     });
     // A click on the backdrop closes it, as Escape does.
@@ -2570,11 +2606,14 @@
   // text, kept in localStorage `ub_place` with its paper's title, the time and
   // the text's version, for Continue reading in the bar at the foot (base.html
   // .fbar, window.ubBar).  No setting, so Restore the defaults leaves it, and
-  // nothing of it reaches the server.  A page counts as read once the reader
-  // has stayed on it RP_DWELL, or has moved it, by the wheel, a finger or a
-  // key, or is listening: a glance at a search's hit, or at a place an index
-  // entry cites, and Back, moves nothing.  From then the place follows the
-  // page as it scrolls, and is put down once more as the page is left.  While
+  // nothing of it reaches the server, but for a reader signed in, whose
+  // account keeps it (static/account.js, which is told as it is written,
+  // 'ub:kept', and sends it as the page is left).  A page counts as read
+  // once the reader has stayed on it RP_DWELL, or has moved it, by the wheel,
+  // a finger or a key, or is listening: a glance at a search's hit, or at a
+  // place an index entry cites, and Back, moves nothing.  From then the place
+  // follows the page as it scrolls, and is put down once more as the page is
+  // left.  While
   // something is heard it is the paragraph being heard (p.t.now, which
   // listen.js marks, and which is not asked anything: trap 51), a
   // translation's too, by the paragraph it translates; and that paragraph
@@ -2624,6 +2663,7 @@
       rpSaid = p.id;
     } catch (e) { return; }
     if (window.ubBar) window.ubBar();
+    document.dispatchEvent(new CustomEvent('ub:kept', { detail: 'place' }));
   }
   function rpEngage() { if (!rpOn && rpText()) { rpOn = true; rpSave(); } }
   // The page as it is come to, or brought in by listen.js: not read yet,
@@ -2672,9 +2712,11 @@
   // Bookmarks (Tigran, 2026-11-17; DECISIONS.md, The home page): paragraphs
   // the reader marks by hand, kept in localStorage `ub_marks`, each with its
   // paper's title, its opening words, the time and the text's version; no
-  // setting, as the reading place is none.  One construct with Continue
-  // reading: the bar at the foot (base.html .fbar) has the list's button at
-  // its right end, a ribbon and their number, where there is one, and on a
+  // setting, as the reading place is none, and as it is, kept with the
+  // account of a reader signed in (static/account.js).  One construct with
+  // Continue reading: the bar at the foot (base.html .fbar) has the list's
+  // button at its right end, a ribbon and their number, where there is one,
+  // and on a
   // page of the text it comes with the running head, at a tap on a paragraph
   // (showHead, above), with Bookmark this paragraph in Continue reading's
   // place.  A bookmarked paragraph has a ribbon in the margin, a class here
@@ -2703,6 +2745,8 @@
       if (m.length) localStorage.setItem(BM, JSON.stringify(m.sort(bmOrder))); else localStorage.removeItem(BM);
     } catch (e) { return; }
     bmSync();
+    // Said for a reader signed in, whose account keeps them (account.js).
+    document.dispatchEvent(new CustomEvent('ub:kept', { detail: 'mark' }));
   }
   function bmAt(m, ref) {
     for (var i = 0; i < m.length; i++) if (m[i].ref === ref) return i;
@@ -2887,6 +2931,10 @@
     document.addEventListener('ub:swap', bmPaint);
     bmPaint();
   }
+  // What an exchange with the reader's account brought from another device
+  // (static/account.js): the bookmarks and the place as the browser now
+  // keeps them, wherever they show.
+  document.addEventListener('ub:brought', bmSync);
   if (gear) gear.addEventListener('click', hideHead);
 
   // A paragraph's link (Tigran, 2026-11-19: "we definitely need a way to save
@@ -3120,12 +3168,27 @@
         if (me) localStorage.setItem('ub_who', JSON.stringify(me)); else localStorage.removeItem('ub_who');
       } catch (e) {}
     };
+    // What follows the account (static/account.js, its address on the menu):
+    // run for a reader who is signed in, and for no other, as offline.js is
+    // run only where Work offline can be.
+    // Not on the pages a sign-in passes through (/account/welcome,
+    // /account/done), which are left at once: the page come back to runs it.
+    var acctRun = false, acctFollow = function () {
+      if (acctRun || !acctMenu || !acctMenu.dataset.src || !acctWho() || /^\/account\//.test(location.pathname)) return;
+      acctRun = true;
+      var sc = document.createElement('script');
+      sc.src = acctMenu.dataset.src;
+      document.head.appendChild(sc);
+    };
     var acctLine = function () {
       acctKept.dataset.acct = acctWho() ? 'in' : 'out';
       // The menu, its mark and every name (base.html ubMe); and one more
       // control beside the name, or another, so the flags are fitted again.
       if (window.ubMe) window.ubMe();
       flagsFit();
+      acctFollow();
+      // Said for account.js, which asks the server what the account keeps.
+      document.dispatchEvent(new Event('ub:who'));
     };
     acctLine();
     addEventListener('storage', function (ev) { if (ev.key === 'ub_who') acctLine(); });
@@ -3152,6 +3215,15 @@
       }).catch(function () {}).then(acctLine);
     };
     var acctShut = function () { if (acctMenu) acctMenu.open = false; };
+    var acctDone = function () { acctKeep(null); acctLine(); };
+    // Signed out of a computer that is not one's own (the box under Sign
+    // out): what followed the account is taken out of this browser too, by
+    // the script that keeps it in step (account.js forget), and the page
+    // read again as it then is.
+    var acctClear = function () {
+      acctKeep(null);
+      if (window.ubFollow) window.ubFollow.forget(); else acctLine();
+    };
     document.addEventListener('click', function (ev) {
       var t = ev.target.closest && ev.target.closest('a.acctlink, .acct button'), box, me = acctWho(), dlg;
       if (acctMenu && acctMenu.open && !acctMenu.contains(ev.target)) acctShut();
@@ -3173,20 +3245,43 @@
         return;
       }
       box = t.closest('.acct');
-      var said = box.querySelector('.acct-say'),
-          failed = function () { said.innerHTML = T('That did not work. Please try again in a moment.'); said.hidden = false; },
-          done = function () { acctKeep(null); acctLine(); };
+      var said = box.querySelector('.acct-say'), also = box.querySelector('.acct-clear'),
+          failed = function () { said.innerHTML = T('That did not work. Please try again in a moment.'); said.hidden = false; };
       said.hidden = true;
       if (t.classList.contains('acct-go')) acctGo(box);
-      else if (t.classList.contains('acct-bye')) acctPost('/account/logout').then(done, failed);
-      else if (t.classList.contains('acct-del') && me && window.confirm(T.text('acct:delete?'))) {
-        acctPost('/account/delete', { email: me.email }).then(done, failed);
+      else if (t.classList.contains('acct-bye')) {
+        // What has not reached the account yet goes first (account.js);
+        // then signed out, the browser left as it is, or, the box ticked,
+        // what followed the account taken out of it too.
+        (window.ubFollow ? window.ubFollow.flush() : Promise.resolve()).then(function () {
+          return acctPost('/account/logout');
+        }).then(also && also.checked ? acctClear : acctDone, failed);
+      } else if (t.classList.contains('acct-del') && me && window.confirm(T.text('acct:delete?'))) {
+        // The account gone, the browser keeps what it has, as no one's: a
+        // later sign-in begins from it.
+        acctPost('/account/delete', { email: me.email }).then(function () {
+          try { localStorage.removeItem('ub_sync'); } catch (e) {}
+          acctDone();
+        }, failed);
       }
+    });
+    // From account.js: the reader would not have another account's things
+    // replaced by this one's, and is signed out again ('out'); or the server
+    // says the session has ended ('gone').
+    document.addEventListener('ub:acct', function (ev) {
+      if (ev.detail === 'out') acctPost('/account/logout').then(acctDone, acctDone);
+      else if (ev.detail === 'gone') acctDone();
     });
     if (acctMenu) {
       // Opened, the menu asks the server who is signed in, and says what it
-      // answers; shut by Escape, and by a tap anywhere else (above).
-      acctMenu.addEventListener('toggle', function () { if (acctMenu.open) acctAsk(); });
+      // answers, and what the account keeps is brought at once, whenever it
+      // was last asked for (account.js); shut by Escape, and by a tap
+      // anywhere else (above).
+      acctMenu.addEventListener('toggle', function () {
+        if (!acctMenu.open) return;
+        acctAsk();
+        if (window.ubFollow && acctWho()) window.ubFollow.now();
+      });
       document.addEventListener('keydown', function (ev) {
         if (ev.key !== 'Escape' || !acctMenu.open) return;
         acctShut();

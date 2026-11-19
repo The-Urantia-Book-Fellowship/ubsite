@@ -40,7 +40,7 @@ class Static(unittest.TestCase):
         # After it only a reader's account, a menu made as this one is and
         # hidden where the host has none (Tigran, 2026-11-18;
         # tests/test_account.py).
-        self.assertRegex(head, r'</details>\n  \{#-[^#]*#\}\n  <details class="acctmenu" hidden>\n'
+        self.assertRegex(head, r'</details>\n  \{#-[^#]*#\}\n  <details class="acctmenu" data-src="\{\{ asset\(\'account\.js\'\) \}\}" hidden>\n'
                                r'    <summary \{\{ ta\(\'aria-label\', \'Account\'\) \}\}[^\n]*</summary>\n'
                                r'    <div class="acctitems">\n      \{\{ acct\(\) \}\}\n    </div>\n  </details>\n'
                                r'  <script>window\.ubMe && window\.ubMe\(\);</script>\n  </div>\n</header>')

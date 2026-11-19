@@ -1,4 +1,8 @@
-"""Settings: what a reader may change, kept per browser, with no account.
+"""Settings: what a reader may change, kept per browser; and for a reader who
+is signed in, kept with the account too, all but the device's own (DEVICE),
+so that they are the same on every device (ubsite/account.py).  No page is
+drawn by the server from a setting: a reader's are put on the page by the
+browser, from its own copy, as below.
 
 Every setting is declared here, once:
 
@@ -330,6 +334,15 @@ KEPT = [
 # the settings is not handed an English page (Tigran, 2026-10-25).
 SPARED = ["lang"]
 
+# The device's own: what a reader signed in keeps on each device apart, where
+# every other setting follows the account from one device to another (Tigran,
+# 2026-11-18; ubsite/account.py, static/account.js).  The two text sizes, the
+# line spacing and the width, which are chosen for a screen; the browser's
+# voices, which are the device's; and what is folded.  Whole paper follows the
+# account (his ruling the same day), and so does the language.  The browser
+# sends none of these, and the server takes none (followed()).
+DEVICE = ["uisize", "size", "lead", "width", "bvoice", "trvoices", "rail", "margin", "trtab", "toc"]
+
 
 # A site's own defaults, by the host a page is read at, where they differ from
 # those above: {"read.urantiabook.org": {"pages": True}}.  The Fellowship
@@ -410,6 +423,16 @@ def groups(voices: list[dict], translations: list[dict] = ()) -> list[dict]:
 def defaults() -> dict:
     """{key: default} for every setting, for the head script and ub.js."""
     return {s[0]: s[3] for s in READING + SHOW + TRANSLATIONS + LISTEN + OFFLINE + KEPT}
+
+
+def followed() -> dict:
+    """{key: default} for the settings that follow an account: every one but
+    the device's own (DEVICE), each of which must be a setting."""
+    base = defaults()
+    for k in DEVICE:
+        if k not in base:
+            raise ValueError(f"settings.DEVICE: {k!r} is no setting")
+    return {k: v for k, v in base.items() if k not in DEVICE}
 
 
 def site_defaults() -> dict:

@@ -1947,6 +1947,13 @@ dialog.settings .kept .acctname { font-weight: normal; color: var(--ink); }
 .acct .acct-row, .acctpage .acct-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .6rem; }
 .acct .acct-more, .acct .acct-say { font-size: .88rem; color: var(--faint); }
 .acct .acct-more a { color: var(--link); }
+/* What follows the account, in a line under who; and under the buttons the
+   offer to take it out of this browser as one signs out, a box and its words,
+   the words beside the box and never under it. */
+.acct .acct-keeps { font-size: .88rem; }
+.acct .acct-also { font-size: .88rem; color: var(--faint); }
+.acct .acct-also label { display: flex; align-items: baseline; gap: .45rem; cursor: pointer; }
+.acct .acct-also input { flex: none; margin: 0; translate: 0 .1em; }
 /* Google's button, as its branding guidelines give a sign-in button of one's
    own: its mark in its four colours on white, a hairline round it, and the
    words in a plain face at 14 on 20, not the book's.  The same in the dark

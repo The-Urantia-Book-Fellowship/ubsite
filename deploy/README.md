@@ -170,7 +170,7 @@ When reader annotations arrive they go in a separate `var/user.db`, and that wil
 
 ## Accounts
 
-Signing in with Google (`ubsite/account.py`), each host's own. Not yet on the live sites: built on the dev server, and switched on for a host by the two things below, once what follows the account is built with it.
+Signing in with Google (`ubsite/account.py`), each host's own, and what follows the account, a reader's settings, place and bookmarks (2026-11-19). Not yet on the live sites: built on the dev server, and switched on for a host by the three things below, together.
 
 A host has accounts when it has `var/account.toml`, which holds the site's own origin and Google's client id and secret, and which no deploy touches. As `tigran` on the host, no root:
 
@@ -182,7 +182,11 @@ It asks for the origin (`https://ubsite.sigmaai.au`), the client id, and the sec
 
 And the host's name goes into `settings.py ACCOUNT_HOSTS`, in the repository, which is what shows the account's menu at the header's corner, and the offer to sign in at Settings' foot, on that host.
 
-The accounts are `var/user.db`, made by the first sign-in. It is the first thing on a host that cannot be made again: its backup, and the nginx location that what follows the account needs, come with that step and are written here then.
+**And nginx needs its location for the exchange**, `location = /account/sync`, with its zone, `ubsite_sync`, in both files since 2026-11-19 and on neither host yet. The site's limit for a body is 1 KB, which the account's other POSTs fit; the exchange carries the bookmarks, 500 to a request, so its location allows 1 MB (`app.py SYNC_BODY`), 30 a minute from one address. Without it nginx answers an exchange of more than 1 KB with 413, and a reader's bookmarks never reach the account. To install it, as root, which is Tigran's to run (CLAUDE.md, Privilege): the two commands for each host under The quiz's board, below. Until a host has its `var/account.toml` the location answers the app's 404, so it may be installed first.
+
+**Tried here first** (2026-11-19), since no test of the app sees nginx (trap 19): nginx 1.28.3, the VPS's version, built in a scratch directory and run as an ordinary user in front of the dev server with the VPS's file, only the ports, the certificate and the paths changed. An exchange of 3 KB and one of 1 MB reached the app, which answered for itself (401, no one being signed in); one of 1.2 MB was nginx's 413; 3 KB to `/account/logout`, and to `/account/sync/` with a slash, were nginx's 413 as before, the site's 1 KB; a GET of `/account/sync` was the app's 405 and `/account` the page, with no redirect; of eighteen exchanges at once the twelfth and after were 429, and a page asked meanwhile was sent.
+
+The accounts are `var/user.db`, made by the first sign-in, and what each keeps. It is the first thing on a host that cannot be made again: its backup, with a restore tried, comes with the step that puts accounts on a live host, and is written here then.
 
 ## The quiz's board
 

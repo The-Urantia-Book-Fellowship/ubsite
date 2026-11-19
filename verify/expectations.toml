@@ -244,7 +244,10 @@ paths       = 3881       # 2,058 headwords in book order, 1,823 of them by theme
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
                          # 1,821 until 2026-11-09: terrestrial escape cites a second chapter since its reading of Papers 49-52)
 spoken      = 1626       # one to a section
-chunks      = 431        # 423 until 2026-11-18, when the home page's part cards took their pictures:
+chunks      = 432        # 431 until 2026-11-19: one more among the assets, static/account.js, the
+                         # script of what follows a reader's account, which only a reader signed
+                         # in runs;
+                         # 423 until 2026-11-18, when the home page's part cards took their pictures:
                          # eight files among the assets, four pictures at two widths, 0.47 MB
                          # (ubsite/static/art/, tools/make_art.py);
                          # 424 for an evening, 2026-11-15, at index 54775e2, never deployed: the
