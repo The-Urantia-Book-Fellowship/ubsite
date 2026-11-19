@@ -799,20 +799,20 @@ class Following(WithAccounts):
         self.assertEqual(self.kept(), {("set", "theme"): "dark"})
 
     def test_a_backup_put_back_loses_no_one_and_the_browser_starts_over(self):
-        """A copy made as deploy/backup-accounts.sh makes it, put back in the
-        file's place: who was signed in still is, the account keeps what it
-        kept when the copy was made, and a browser that has exchanged with it
-        since, its number ahead of the file's, begins again and brings what
-        it has."""
+        """A copy made as the host makes it every night (backup()), put back
+        in the file's place: who was signed in still is, the account keeps
+        what it kept when the copy was made, and a browser that has exchanged
+        with it since, its number ahead of the file's, begins again and brings
+        what it has."""
         a = self.device()
         self.exchange(a, [THEME, A_MARK], first=True)
-        copy = self.db.with_name("user-backup.db")
-        sqlite3.connect(self.db).backup(sqlite3.connect(copy))          # as the script makes it, on the host
+        made = account.accounts().backup()
+        self.assertEqual((made["accounts"], made["kept"], made["deleted"]), (1, 2, []))
         self.exchange(a, [B_MARK, ["set", "theme", "light"]])
         self.assertEqual(a.n, 2)
         for p in self.db.parent.glob("user.db*"):                        # the file, and its journal
             p.unlink()
-        copy.rename(self.db)
+        made["copy"].rename(self.db)
         self.assertEqual(a.get("/account/me")[0], 200)                   # the session is in the copy
         self.assertEqual(self.kept(), {("set", "theme"): "dark", ("mark", "101:4.2"): A_MARK[2]})
         st, _, got = a.post("/account/sync", {"first": False, "db": a.db, "n": a.n, "ch": []})
@@ -822,20 +822,62 @@ class Following(WithAccounts):
         self.assertEqual(got["ch"], [THEME])
         self.assertEqual(set(self.kept()), {("set", "theme"), ("mark", "101:4.2"), ("mark", "2:0.1")})
 
-    def test_the_backup_is_the_scripts_and_keeps_privacys_word(self):
-        """deploy/backup-accounts.sh: SQLite's own backup on the host, read
-        back here, and no copy kept thirty days, which Privacy promises;
-        deploy.sh runs it before it ships."""
-        deploy = ROOT / "deploy"
-        sh = (deploy / "backup-accounts.sh").read_text(encoding="utf-8")
-        self.assertIn(r"""sqlite3.connect(\"var/user.db\").backup(sqlite3.connect(\"var/user-backup.db\"))""", sh)
-        self.assertIn('PRAGMA integrity_check', sh)
-        self.assertIn("KEEP_DAYS=29", sh)
-        self.assertIn("""find "$OUT" -name 'user-*.db*' -type f -mtime +$((KEEP_DAYS - 1)) -print -delete""", sh)
-        self.assertIn("umask 077", sh)
+    def test_the_nightly_copy_is_its_readers_alone_and_no_copy_is_kept_thirty_days(self):
+        """backup(), which each host's crontab runs: nothing where there are
+        no accounts; a copy beside them that only its owner can read, whole;
+        and every copy 29 days old deleted, a day inside what Privacy says."""
+        import io
+        import os
+        from contextlib import redirect_stdout
+        acc = account.accounts()
+        self.assertIsNone(acc.backup())
+        self.assertFalse((self.db.parent / "accounts").exists())
+        a = self.device()
+        self.exchange(a, [THEME, A_MARK, B_MARK], first=True)
+        self.exchange(a, [["mark", "2:0.1", None]])
+        t = time.time()
+        first = acc.backup(now=t - 30 * 86400)                           # thirty nights ago
+        os.utime(first["copy"], (t - 30 * 86400,) * 2)
+        mid = acc.backup(now=t - 28 * 86400)
+        os.utime(mid["copy"], (t - 28 * 86400,) * 2)
+        got = acc.backup(now=t - 60)                                     # tonight's, a minute before the next
+        self.assertEqual((got["accounts"], got["kept"], got["deleted"]), (1, 2, [first["copy"].name]))
+        self.assertEqual(sorted(p.name for p in got["copy"].parent.iterdir()), sorted([mid["copy"].name, got["copy"].name]))
+        self.assertEqual(got["copy"].stat().st_mode & 0o777, 0o600)
+        self.assertEqual(got["copy"].parent, self.db.parent / "accounts")
+        self.assertRegex(got["copy"].name, r"^user-\d{4}-\d\d-\d\d-\d{6}\.db$")
+        con = sqlite3.connect(got["copy"])
+        self.assertEqual(con.execute("SELECT email FROM user").fetchall(), [(ADA["email"],)])
+        con.close()
+        self.assertEqual(account.KEEP_DAYS, 29)
         self.assertIn("deleted within 30 days", str(l10n.tr("privacy:account:5")["en"]))
-        ship = (deploy / "deploy.sh").read_text(encoding="utf-8")
-        self.assertLess(ship.index('"$HERE/deploy/backup-accounts.sh" $HOSTS'), ship.index('    ship "$HOST"\ndone'))
+        # The crontab's line: one line to its log each night.
+        out = io.StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(account.main(["backup"]), 0)
+        self.assertRegex(out.getvalue(), r"^\S+Z user-[\d-]+\.db, read back whole: 1 accounts, 2 things kept\n$")
+
+    def test_a_deploy_takes_one_copy_off_the_host_and_says_how_the_nightly_ones_stand(self):
+        """deploy.sh, on a machine that is on only while it is worked at: a
+        copy made on the host by SQLite's own backup, whatever build the host
+        runs, before anything is shipped; read back; that one alone kept here,
+        and not for thirty days; and a warning where the host's crontab has
+        made none of late.  No script runs nightly from here."""
+        deploy = ROOT / "deploy"
+        self.assertFalse((deploy / "backup-accounts.sh").exists())
+        sh = (deploy / "deploy.sh").read_text(encoding="utf-8")
+        take = sh.index("""sqlite3.connect(\\"var/user.db\\").backup(sqlite3.connect(\\"var/user-backup.db\\"))""")
+        self.assertLess(take, sh.index('    ship "$HOST"\ndone'))
+        self.assertIn("PRAGMA integrity_check", sh)
+        self.assertIn("""find "$HERE/var/accounts" -name "user-$HOST-*.db*" ! -name "$(basename "$copy")" -type f -delete""", sh)
+        self.assertIn("WARNING: $HOST has made no nightly copy of its accounts", sh)
+        self.assertIn("make -s accounts-prune", sh)
+        make = (ROOT / "Makefile").read_text(encoding="utf-8")
+        self.assertIn("find var/accounts -name 'user-*.db*' -type f -mtime +28 -delete", make)
+        self.assertIn("serve: stop accounts-prune", make)
+        readme = (deploy / "README.md").read_text(encoding="utf-8")
+        self.assertIn("17 3 * * * cd /home/tigran/ubsite && .venv/bin/python -m ubsite.account backup >> var/accounts/backup.log 2>&1",
+                      readme)
 
     def test_the_hosts_list_says_what_an_account_keeps(self):
         a = self.device()

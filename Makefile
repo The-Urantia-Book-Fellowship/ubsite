@@ -12,7 +12,7 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot data check offline e2e test paranoid serve serve-bg stop ports geoip clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot data check offline e2e test paranoid serve serve-bg stop accounts-prune ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
@@ -170,15 +170,24 @@ PORT := 8130
 HOST := 127.0.0.1
 PIDFILE := var/serve.pid
 
+# The one copy of each host's accounts that a deploy keeps here (deploy.sh,
+# var/accounts/) is deleted at 29 days, since Privacy says that copies made for
+# safekeeping are deleted within 30: at the next deploy, or as the dev server
+# is started, whichever comes first on a machine that is on only while it is
+# worked at.  The hosts' own nightly copies are theirs to delete
+# (`python -m ubsite.account backup`, from each host's crontab).
+accounts-prune:
+	@find var/accounts -name 'user-*.db*' -type f -mtime +28 -delete 2>/dev/null || true
+
 ## serve         run the reader at http://$(HOST):$(PORT), in the foreground
 # The quiz's board is this server's own (ubsite/board.py), in var/quiz.db, as
 # every site's is its own: nothing a test does reaches a live one.
-serve: stop
+serve: stop accounts-prune
 	@$(PY) -m uvicorn ubsite.app:app \
 		--host $(HOST) --port $(PORT) --reload
 
 ## serve-bg      same, in the background, recording its pid
-serve-bg: stop
+serve-bg: stop accounts-prune
 	@mkdir -p var
 	@nohup $(PY) -m uvicorn ubsite.app:app \
 		--host $(HOST) --port $(PORT) > var/serve.log 2>&1 & echo $$! > $(PIDFILE)

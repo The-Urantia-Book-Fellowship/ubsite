@@ -60,6 +60,12 @@ changed one thing unseen by each other is there anything to settle: the place
 and a bookmark added by the times they were made, which they carry, and
 anything else by which arrived first.  A thing removed is a row too, so that
 it is removed everywhere.
+
+The accounts are the one thing on a host that no build can make again, so
+they are backed up where they are, every night, by the host's own crontab
+(`python -m ubsite.account backup`, backup() below): a copy beside them in
+var/accounts/, read back, and every copy 29 days old deleted, which is how
+Privacy's "deleted within 30 days" is kept, by a machine that is always on.
 """
 
 from __future__ import annotations
@@ -114,6 +120,8 @@ KINDS = ("set", "place", "mark")     # a setting, the place last read, a bookmar
 SYNC_MAX = 1000                  # changes to an exchange: a browser with more sends them in turns
 MARKS_MAX = 2000                 # bookmarks to an account
 TEXT_MAX = 500                   # a setting's value, where it is words
+
+KEEP_DAYS = 29                   # a copy made for safekeeping is deleted at this age: Privacy says within 30 days
 
 SCHEMA = """
 PRAGMA journal_mode = WAL;
@@ -753,6 +761,53 @@ class Accounts:
         finally:
             con.close()
 
+    # ---- kept safe ------------------------------------------------------------------
+    def backup(self, now: float | None = None) -> dict | None:
+        """A copy of the accounts beside them, var/accounts/user-<date>.db,
+        made by SQLite's own backup, so that it is whole whatever the site is
+        writing meanwhile, and read back, since an untested backup is a
+        rumour; then every copy KEEP_DAYS old deleted.  Its own reader's
+        alone, as the accounts are.  None where the host has no accounts.
+        {copy, accounts, kept, deleted}; Refused where the copy does not read
+        back whole, and it is not kept."""
+        now = time.time() if now is None else now
+        out = self.path.parent / "accounts"
+        gone = []
+        if out.is_dir():
+            for old in sorted(out.glob("user-*.db*")):
+                if now - old.stat().st_mtime >= KEEP_DAYS * 86400:
+                    old.unlink()
+                    gone.append(old.name)
+        if not self.path.exists():
+            return None
+        out.mkdir(mode=0o700, parents=True, exist_ok=True)
+        copy = out / f"user-{time.strftime('%Y-%m-%d-%H%M%S', time.localtime(now))}.db"
+        os.close(os.open(copy, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600))     # no one else's from the first byte
+        src = sqlite3.connect(f"file:{self.path}?mode=ro", uri=True, timeout=30)
+        try:
+            dst = sqlite3.connect(copy)
+            try:
+                src.backup(dst)
+            finally:
+                dst.close()
+        finally:
+            src.close()
+        # Read as it lies, so that nothing is written beside it.
+        con = sqlite3.connect(f"file:{copy}?mode=ro&immutable=1", uri=True)
+        try:
+            said = con.execute("PRAGMA integrity_check").fetchone()[0]
+            if said == "ok":
+                accounts = con.execute("SELECT COUNT(*) FROM user").fetchone()[0]
+                kept = (con.execute("SELECT COUNT(*) FROM item WHERE value IS NOT NULL").fetchone()[0]
+                        if con.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'item'").fetchone()
+                        else 0)
+        finally:
+            con.close()
+        if said != "ok":
+            copy.unlink()
+            raise Refused(500, f"the copy does not read back whole: {said}")
+        return {"copy": copy, "accounts": accounts, "kept": kept, "deleted": gone}
+
     # ---- the host's command line --------------------------------------------------
     def users(self) -> list[dict]:
         con = self._con(False)
@@ -869,9 +924,21 @@ def main(argv: list[str]) -> int:
         if not a.remove(argv[1]):
             print("no such account", file=sys.stderr)
             return 1
+    elif argv[:1] == ["backup"] and len(argv) == 1:
+        # Every night, from the host's own crontab: one line to its log.
+        try:
+            got = a.backup()
+        except (Refused, sqlite3.Error, OSError) as e:
+            print(f"{now()} FAILED: {e}", file=sys.stderr)
+            return 1
+        if got is None:
+            print(f"{now()} no accounts: nothing to back up")
+        else:
+            print(f"{now()} {got['copy'].name}, read back whole: {got['accounts']} accounts, {got['kept']} things kept"
+                  + (f"; deleted, {KEEP_DAYS} days old: {', '.join(got['deleted'])}" if got["deleted"] else ""))
     else:
         print("usage: python -m ubsite.account setup | list | grant ADDRESS FEATURE | revoke ADDRESS FEATURE"
-              " | remove ADDRESS", file=sys.stderr)
+              " | remove ADDRESS | backup", file=sys.stderr)
         return 2
     return 0
 

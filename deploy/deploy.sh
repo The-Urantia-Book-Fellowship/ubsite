@@ -340,11 +340,42 @@ for HOST in $HOSTS; do
 done
 
 # The accounts (ubsite/account.py), each host's own var/user.db: who has signed
-# in there, and what each keeps.  Backed up before anything is shipped too, by
-# the script that does it every night (deploy/backup-accounts.sh), which reads
-# each copy back and deletes those 29 days old.  None from a host with no
-# accounts.
-"$HERE/deploy/backup-accounts.sh" $HOSTS
+# in there, and what each keeps.  The host backs them up itself every night, by
+# its own crontab (`python -m ubsite.account backup`; deploy/README.md,
+# Backups), and keeps those copies 29 days.  This machine is on only while it
+# is worked at, so it takes one copy off the host as it deploys, before
+# anything is shipped: made there by SQLite's own backup, as the board's is,
+# whatever build the host is running; read back here; and kept alone, the copy
+# of the deploy before going as this one comes, and this one at 29 days
+# (Makefile, accounts-prune), since Privacy says within 30.  And it says how
+# the host's own nightly copies stand, nobody watching a crontab.  None from a
+# host with no accounts.
+for HOST in $HOSTS; do
+    if ssh "$HOST" "test -f $DEST/var/user.db"; then
+        when="$(date +%F-%H%M%S)"
+        mkdir -p -m 700 "$HERE/var/accounts"
+        copy="$HERE/var/accounts/user-$HOST-$when.db"
+        ssh "$HOST" "cd $DEST && umask 077 && rm -f var/user-backup.db && .venv/bin/python -c 'import sqlite3; sqlite3.connect(\"var/user.db\").backup(sqlite3.connect(\"var/user-backup.db\"))'"
+        rsync -a "$HOST:$DEST/var/user-backup.db" "$copy"
+        ssh "$HOST" "rm -f $DEST/var/user-backup.db"
+        chmod 600 "$copy"
+        # Read back, as it lies: an untested backup is a rumour.
+        .venv/bin/python -c 'import sqlite3, sys
+c = sqlite3.connect("file:" + sys.argv[1] + "?mode=ro&immutable=1", uri=True)
+s = c.execute("PRAGMA integrity_check").fetchone()[0]
+if s != "ok": sys.exit("the copy of the accounts does not read back whole: " + s)
+print("    read back whole:", c.execute("SELECT COUNT(*) FROM user").fetchone()[0], "accounts")' "$copy"
+        find "$HERE/var/accounts" -name "user-$HOST-*.db*" ! -name "$(basename "$copy")" -type f -delete
+        echo "==> $HOST's accounts, backed up: var/accounts/$(basename "$copy")"
+        last="$(ssh "$HOST" "ls -t $DEST/var/accounts/user-*.db 2>/dev/null | head -1")"
+        if [ -z "$last" ] || [ -n "$(ssh "$HOST" "find '$last' -mtime +1 2>/dev/null")" ]; then
+            echo "==> WARNING: $HOST has made no nightly copy of its accounts since ${last:-it had any}: see its crontab (deploy/README.md, Backups)"
+        else
+            echo "    $HOST's own nightly copy: $(basename "$last")"
+        fi
+    fi
+done
+make -s accounts-prune
 
 for HOST in $HOSTS; do
     ship "$HOST"
