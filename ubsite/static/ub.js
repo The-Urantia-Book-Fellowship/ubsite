@@ -510,8 +510,10 @@
   // (paper.html) the place after # is a section's or a paragraph's address,
   // as ubUnit makes it, a range marked as the section's page marks it
   // (/15:3.4-6 as /15#15:3.4-6), or a card's, which names its paragraph
-  // (#note15_3_4_0); what follows a second # is arriveTr's.
-  function arrive() {
+  // (#note15_3_4_0); what follows a second # is arriveTr's.  `again` is the
+  // page placed once more, the columns drawn, and no new arrival: the marks
+  // are not made again, nor counted again (hitLater, below).
+  function arrive(again) {
     var focus = null, m, el, i, whole = document.querySelector('article.whole');
     // On the chart of the personalities an address names a card, which
     // cosmo.js brings into its own window: never the page to it.
@@ -523,17 +525,18 @@
     try {
       m = whole && (/^#(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?(?:#.*)?$/.exec(location.hash) ||
                     /^#(?:note|fnref|fn)(?:st|tn_[a-z0-9-]+_)?(\d+)_(\d+)_(\d+)_\d+$/.exec(location.hash));
-      if (m) {
-        Array.prototype.forEach.call(document.querySelectorAll(HIT), function (p) { p.classList.remove('hit'); });
+      if (m && !again) {
+        unhit();
         for (i = +m[3]; m[3] && i <= +(m[4] || m[3]); i++) {
           el = document.getElementById(m[1] + ':' + m[2] + '.' + i);
           if (el) el.classList.add('hit');
         }
-        focus = document.getElementById(m[1] + ':' + m[2] + (m[3] ? '.' + m[3] : ''));
       }
+      if (m) focus = document.getElementById(m[1] + ':' + m[2] + (m[3] ? '.' + m[3] : ''));
       focus = focus || (location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)))) ||
               document.querySelector('.hit');
     } catch (e) {}
+    if (!again) hitLater();
     // A translation's hit in its column, once Compare has drawn it.
     focus = cmpHit() || focus;
     if (!focus) return;
@@ -559,6 +562,30 @@
   // The paragraph marked as the place the page opened at: the English, or in
   // columns a translation's, where a search's hit in it opened the page (cmpHit).
   var HIT = 'p.t.hit, .rc p.rt.hit';
+  // And let go of by itself, seven seconds after it was arrived at, fading
+  // (ub.css .hitgo) for most of one more (Tigran, 2026-11-19: "to unhighlight
+  // it you have to tap it twice ... which is not very convenient.  On the
+  // other hand, not highlighting it at all is also not good.  So, how about we
+  // make the highlight disappear after, say, 7 seconds?").  A paragraph
+  // tapped (p.t.named) keeps its tint: only this mark goes by itself.  In a
+  // tab not shown, a reference opened in the background, counted from when it
+  // is shown.  Again from the start at each new arrival; a tap lets go of it
+  // sooner (unhit, which ends the count too).
+  var HIT_HOLD = 7000, hitTimer = 0, hitWaits = false;
+  function hitLater() {
+    clearTimeout(hitTimer);
+    hitTimer = 0;
+    hitWaits = false;
+    if (!document.querySelector(HIT)) return;
+    if (document.hidden) { hitWaits = true; return; }
+    hitTimer = setTimeout(function () {
+      Array.prototype.forEach.call(document.querySelectorAll(HIT), function (p) { p.classList.add('hitgo'); });
+      hitTimer = setTimeout(unhit, 800);
+    }, HIT_HOLD);
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (hitWaits && !document.hidden) hitLater();
+  });
   // A search's hit in a translation, /0:1.13#tr-ud, or in a translator's
   // note, /0:5.10#notetn_ud_0_5_10_0, on the whole paper's page after the
   // place (/0#0:1.13#tr-ud): arriveTr's, and cmpHit's in columns.  Here,
@@ -568,7 +595,7 @@
     addEventListener(e, function () { arriveTouched = Date.now(); }, { passive: true });
   });
   arrive();
-  document.addEventListener('ub:page', arrive);
+  document.addEventListener('ub:page', function () { arrive(); });
   // Back on the whole paper's page from a place on it (#1:2.9, a note's
   // reference followed) to its address with no place: the marks go, and the
   // page returns to where it stood, kept in the entry's state as the place
@@ -577,7 +604,7 @@
   // paragraph still marked.
   addEventListener('hashchange', function () {
     if (location.hash || !document.querySelector('article.whole')) return arrive();
-    Array.prototype.forEach.call(document.querySelectorAll(HIT), function (p) { p.classList.remove('hit'); });
+    unhit();
     var s = history.state;
     if (s && s.ubY != null) { scrollTo({ top: s.ubY, behavior: 'instant' }); arriveTouched = Date.now(); }
   });
@@ -1618,7 +1645,7 @@
       // Not in columns, the class the head script guessed is gone, and the
       // page is where arrive() put it.
       if (!cmpIs) return;
-      if (arriveTouched <= t) arrive();
+      if (arriveTouched <= t) arrive(true);
       var m = /^#note(tn_[a-z0-9-]+_\d+_\d+_\d+_\d+)$/.exec(location.hash),
           mark = m && document.getElementById('fnref' + m[1]);
       if (!mark || !mark.closest('.rc')) return;
@@ -1636,7 +1663,7 @@
   document.addEventListener('ub:page', function () {
     var drawn = cmpSwapped, t = Date.now();
     cmpSwapped = null;
-    if (drawn && cmpOn()) drawn.then(function () { if (arriveTouched <= t) arrive(); });
+    if (drawn && cmpOn()) drawn.then(function () { if (arriveTouched <= t) arrive(true); });
   });
   // A column's ×, at its name's corner, takes that translation out of those
   // shown, as Settings' Translations does, and the columns are drawn again
@@ -2477,9 +2504,13 @@
   // (p.t.hit: the server's mark on a section's page, arrive()'s on the whole
   // paper's), which stayed tinted beside the one named and had no other way
   // to be let go of (Tigran, 2026-10-31), as listen.js lets go of it when
-  // playing starts: one thing on the page is marked.
+  // playing starts: one thing on the page is marked.  Since 2026-11-19 it goes
+  // by itself too (hitLater, above), whose count and fade end here.
   function unhit() {
-    Array.prototype.forEach.call(document.querySelectorAll(HIT), function (p) { p.classList.remove('hit'); });
+    clearTimeout(hitTimer);
+    hitTimer = 0;
+    hitWaits = false;
+    Array.prototype.forEach.call(document.querySelectorAll(HIT + ', .hitgo'), function (p) { p.classList.remove('hit', 'hitgo'); });
   }
   // True when the tap was the head's: to show it, or to hide it.  Not a
   // mouse's second click, a double-click; a finger's quick second tap, which

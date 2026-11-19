@@ -85,6 +85,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The paragraph a link takes you to is tinted for seven seconds and then fades by itself, where until now it stayed tinted until you tapped the text; a paragraph you tap yourself keeps its tint until you tap again, as before.
 - On a phone the controls at the top stand a little closer where they would not otherwise fit beside the site's name, so the two flags stay on narrower phones than before.
 - Privacy and Terms give another address to write to, and Privacy says that signing in with Google, when it arrives, will keep the account's picture with its name and address, copied to the site and never loaded from Google by a page.
 - Each site keeps its own quiz board: ubsite.ddns.net and ubsite.sigmaai.au no longer share one. If you put your name on the board from ubsite.ddns.net, the offer comes once more after your next quiz there, and your answers go with the name.

@@ -30,6 +30,21 @@ class RunningHead(unittest.TestCase):
     def test_named_paragraph_is_tinted_as_a_hit(self):
         self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named {", CSS)
 
+    def test_the_paragraph_arrived_at_is_let_go_of_by_itself(self):
+        # Tigran, 2026-11-19: the mark of the paragraph a link arrived at
+        # goes after seven seconds, fading; one tapped (.named) stays.  The
+        # columns' second placing (arrive(true)) neither marks again nor
+        # counts again, and arrive() as a listener is handed no event for it.
+        self.assertIn("var HIT_HOLD = 7000,", JS)
+        self.assertIn("p.t.hit.hitgo, .rc p.rt.hit.hitgo { background-color: transparent;", CSS)
+        self.assertIn(".verse p.t.hit.hitgo::before { background-color: transparent;", CSS)
+        self.assertNotRegex(CSS, r"\.named[^{]*\.hitgo|\.hitgo[^{]*\.named")
+        self.assertIn("if (!again) hitLater();", JS)
+        self.assertEqual(JS.count("arrive(true)"), 2)
+        self.assertNotIn("addEventListener('ub:page', arrive)", JS)
+        unhit = JS[JS.index("function unhit() {"):JS.index("// True when the tap was the head's")]
+        self.assertIn("clearTimeout(hitTimer);", unhit)
+
     def test_a_translation_tapped_in_the_fold_is_named_too(self):
         # The fold under a paragraph is how a phone shows a translation, and
         # a tap on its text did nothing there (Tigran, 2026-11-17): its

@@ -283,6 +283,34 @@ def run() -> int:
         settle(pg)
         ok(not shown(pg) and named(pg) == [] and pg.evaluate(hit) == [], "and the second tap leaves nothing marked")
 
+        # Tigran, 2026-11-19: the mark goes by itself after seven seconds,
+        # fading for most of one more; a paragraph tapped stays named.
+        print("The mark let go of by itself")
+        gone = "() => !document.querySelector('p.t.hit, .rc p.rt.hit, .hitgo')"
+        fading = "() => [...document.querySelectorAll('p.t.hit.hitgo')].map(p => p.id)"
+
+        def at(t0: float, ms: int) -> None:
+            pg.wait_for_timeout(max(0, ms - (time.monotonic() - t0) * 1000))
+
+        pg.goto(BASE + "/0:1.2")
+        t0 = time.monotonic()
+        ok(pg.evaluate(hit) == ["0:1.2"], "a section's page opens with it marked")
+        at(t0, 5000)
+        ok(pg.evaluate(hit) == ["0:1.2"] and pg.evaluate(fading) == [], "still marked, and not fading, five seconds on")
+        at(t0, 7400)
+        ok(pg.evaluate(fading) == ["0:1.2"], "fading at seven and a half")
+        at(t0, 8600)
+        ok(pg.evaluate(gone), "and let go of by eight and a half, nothing left marked")
+        pg.goto(BASE + "/0:1.2")
+        pg.tap("[id='0:1.3']")
+        settle(pg)
+        t0 = time.monotonic()
+        ok(shown(pg) and named(pg) == ["0:1.3"] and pg.evaluate(hit) == [], "a tap lets go of it at once, and names another")
+        at(t0, 8600)
+        ok(shown(pg) and named(pg) == ["0:1.3"] and pg.evaluate(gone), "which stays named eight and a half seconds on")
+        pg.tap("[id='0:1.3']")
+        settle(pg)
+
         print("The whole paper")
         pg.evaluate("ubSettings.set('whole', true)")
         pg.goto(BASE + "/0#0:1.2")
@@ -295,6 +323,22 @@ def run() -> int:
         pg.tap("[id='0:1.2']")
         settle(pg)
         ok(not shown(pg) and named(pg) == [] and pg.evaluate(hit) == [], "and the second tap leaves it plain")
+        # Loaded afresh: the page is at /0#0:1.2 already, and a step to its
+        # own address loads nothing (trap 64).
+        pg.goto(BASE + "/1#1:2.9")
+        pg.wait_for_selector("article.whole")
+        t0 = time.monotonic()
+        ok(pg.evaluate(hit) == ["1:2.9"], "the whole paper's page marks the paragraph a load arrives at")
+        at(t0, 8600)
+        ok(pg.evaluate(gone), "and lets go of it by itself")
+        pg.evaluate("location.hash = '1:3.2'")
+        settle(pg)
+        t0 = time.monotonic()
+        ok(pg.evaluate(hit) == ["1:3.2"], "a place on the page arrived at is marked again")
+        at(t0, 5000)
+        ok(pg.evaluate(hit) == ["1:3.2"] and pg.evaluate(fading) == [], "its count started again from that arrival")
+        at(t0, 8600)
+        ok(pg.evaluate(gone), "and it goes by itself too")
         pg.goto(BASE + "/101#101:4")
         pg.wait_for_selector("article.whole")
         pg.tap("[id='101:4.2']")
