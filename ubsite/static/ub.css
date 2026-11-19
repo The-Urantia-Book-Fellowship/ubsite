@@ -406,7 +406,7 @@ body:has(> .tour-ring) .fbar.fup { z-index: 9; }
 .fbar:not(.fhas) .fcont, .fbar.fhas .fbegin { display: none; }
 .fat { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faint); }
 .fbar.fhas .fttl:not(:empty)::before { content: "\00a0\00b7\00a0"; }
-@media (hover: hover) { :is(.fgo:hover .fl, .fmark:hover, .fgoto:hover .fr, .fundo:hover) { color: var(--link); } }
+@media (hover: hover) { :is(.fgo:hover .fl, .fmark:hover, .fcopy:hover, .fgoto:hover .fr, .fundo:hover) { color: var(--link); } }
 /* How the offline copy stands (base.html .fstate, offline.js barState), at
    the right end of the home page's bar and of no other page's: a sign, green
    where it is up to date, and the words, the short ones on a phone, where up
@@ -436,13 +436,22 @@ main.front ~ .fbar .fprog:not([hidden]) { display: block; position: absolute; le
 /* The bookmarks: the button that sets one, for the paragraph the running head
    names, its ribbon filled and its word Bookmarked where the paragraph has
    one; and the list's button, a ribbon, their number and a chevron, which
-   points up while the list is shut, the way it opens. */
-.fmark, .flist { display: flex; align-items: center; justify-content: center; min-height: 3.1rem;
+   points up while the list is shut, the way it opens.  Beside the first,
+   the two in the middle together, Copy link (2026-11-19; ub.js copyLink),
+   on a phone its drawing alone, so that the bar fits at 320 px. */
+.fmark, .flist, .fcopy { display: flex; align-items: center; justify-content: center; min-height: 3.1rem;
   padding: var(--lift) .8rem 0; font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer;
   -webkit-tap-highlight-color: transparent; }
 /* As wide as its words, in the middle: the bar's ground about it is no button,
    and a tap there takes the bars away, as one on the running head's does. */
-.fmark { flex: 0 1 auto; min-width: 0; margin: 0 auto; padding-left: 1.1rem; padding-right: 1.1rem; gap: .6rem; white-space: nowrap; }
+.fmark { flex: 0 1 auto; min-width: 0; margin: 0 0 0 auto; padding-left: 1.1rem; padding-right: 1.1rem; gap: .6rem; white-space: nowrap; }
+.fcopy { flex: none; margin: 0 auto 0 0; padding-left: .8rem; padding-right: 1.1rem; gap: .5rem; white-space: nowrap; }
+.flink { flex: none; width: 1rem; height: 1rem; position: relative; top: calc(-1 * var(--lift) / 2);
+  fill: none; stroke: var(--link); stroke-width: 1.4; }
+@media (max-width: 40rem) {
+  .fcopy { min-width: 2.75rem; padding-left: .7rem; padding-right: .7rem; }
+  .fcopy .fcl { display: none; }
+}
 .flist { flex: none; gap: .4rem; min-width: 4rem; border-left: 1px solid var(--rule); }
 .frib { flex: none; width: .62rem; height: .93rem; position: relative; top: calc(-1 * var(--lift) / 2); }
 .frib path { fill: var(--link); stroke: var(--link); stroke-width: 1.2; stroke-linejoin: round; }
@@ -483,11 +492,20 @@ main.front ~ .fbar .fprog:not([hidden]) { display: block; position: absolute; le
 /* Help's drawing of the two (help.html): theirs, in a box, with nothing to press. */
 .fbareg { display: flex; align-items: stretch; max-width: 24rem; background: var(--card); border: 1px solid var(--rule);
   border-radius: 8px; font-size: .92rem; line-height: 1.2; }
-.fbareg :is(.fmark, .flist) { cursor: default; }
+.fbareg :is(.fmark, .fcopy, .flist) { cursor: default; }
 .fbareg .fmark { flex: 1 1 auto; }
 @media (max-width: 40rem) {
   .fsheet { left: 0; right: 0; bottom: 100%; width: auto; border-width: 1px 0 0; border-radius: 14px 14px 0 0; }
 }
+/* Link copied, a moment over what was pressed, the reference or the bar's
+   button (ub.js copySaid), and gone with its words; nothing while empty. */
+.lnote { position: fixed; z-index: 12; left: 0; top: 0; padding: calc(.3rem + var(--lift)) .65rem .3rem;
+  font-size: .85rem; line-height: 1.2; white-space: nowrap; color: var(--ink); background: var(--card);
+  border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 4px 14px var(--shade);
+  pointer-events: none; opacity: 0; }
+.lnote:empty { padding: 0; border: 0; box-shadow: none; }
+.lnote.lon { animation: lnote 1.6s ease both; }
+@keyframes lnote { 0% { opacity: 0; } 10%, 75% { opacity: 1; } 100% { opacity: 0; } }
 /* A bookmarked paragraph: a ribbon in the margin, level with its reference,
    drawn here on a class ub.js gives it (bmPaint), so that no page's markup
    knows of it; the shape is the drawing's (_chrome.html ribbon_svg).  An
@@ -877,7 +895,9 @@ p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named { background: c
 /* The paragraph's full reference, so the reader always knows which one this is;
    Settings can turn it off.  Text, not a link, since 2026-10-31 (Tigran): a
    tap on it opened the paragraph's own page and left it marked as the place
-   the page opened at, for nothing.  It stands at the start of the paragraph, the play
+   the page opened at, for nothing.  Since 2026-11-19 a click or a tap on it
+   copies the paragraph's link, and still goes nowhere (ub.js copyLink): a
+   pointer over it, and an underline where it rests.  It stands at the start of the paragraph, the play
    button under it and the 1955 page under that, as a drop capital stands: the
    text runs beside them for two lines, and then the full width.  One float,
    .stk (_para.html; listen.js puts the button in it), so that a list's label
@@ -957,6 +977,8 @@ p.t.head::before { content: ""; float: right; height: 1px; font-size: .78rem;
 /* Settings (ubsite/settings.py), set on <html> before first paint. */
 :root[data-redletter="off"] .jesus { color: inherit; }
 :root[data-paranum="off"] .num { display: none; }
+p.t[id] > .stk > span.num { cursor: pointer; }
+@media (hover: hover) { p.t[id] > .stk > span.num:hover { text-decoration: underline; text-underline-offset: .15em; } }
 :root[data-pilcrow="off"] p.t .pcm { display: none; }
 /* The 1955 readings' switch, which a study note and a translator's (a fold's,
    shown whenever its translation is) are not under. */

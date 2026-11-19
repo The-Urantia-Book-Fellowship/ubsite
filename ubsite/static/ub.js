@@ -1937,12 +1937,21 @@
     el.focus({ preventScroll: true });
   }
   document.addEventListener('click', function (ev) {
-    var t = ev.target, mark = t.closest && t.closest('a.fn');
+    var t = ev.target, mark = t.closest && t.closest('a.fn'), num = t.closest && t.closest(NUM);
     if (mark) {
       var again = card && card.mark === mark;
       hideHead();
       shut(false);
       if (again || open(mark) !== false) ev.preventDefault();
+      return;
+    }
+    // A paragraph's reference copies its link (copyLink, below), and is no tap
+    // on the text: the running head stays as it was.  Not a second click,
+    // which selects the reference, for Ctrl+X, nor the end of a drag.
+    if (num && bmRef(num.closest('p.t'))) {
+      if (ev.button || ev.detail > 1 || !getSelection().isCollapsed) return;
+      if (card) shut(false);
+      copyLink(bmRef(num.closest('p.t')), num);
       return;
     }
     if (!card) { tapHead(ev); return; }
@@ -2776,6 +2785,7 @@
     if (!bmMark) return;
     if (!fbar.classList.contains('fup')) barAt = Date.now();
     bmMark.hidden = false;
+    if (fcopy) fcopy.hidden = false;
     fbar.classList.add('fup');
     bmPress();
   }
@@ -2784,6 +2794,7 @@
     bmShut();
     fbar.classList.remove('fup');
     bmMark.hidden = true;
+    if (fcopy) fcopy.hidden = true;
   }
   if (bmMark && bmList && bmSheet) {
     // The bar comes up under the finger where the paragraph tapped was low on
@@ -2847,6 +2858,67 @@
   }
   if (gear) gear.addEventListener('click', hideHead);
 
+  // A paragraph's link (Tigran, 2026-11-19: "we definitely need a way to save
+  // a stable reference to the current paragraph, which can be sent outside"):
+  // its address on this site, /101:2.3, which opens it whatever the reader's
+  // unit, put on the clipboard as plain text.  A translation's paragraph gives
+  // the paragraph it translates, as a bookmark does (bmRef).  Two ways in: a
+  // click or a tap on the paragraph's reference, where references are shown
+  // (the notes' click listener, above, which has every click on the text),
+  // and Copy link in the bar at the foot, with them shown or not (base.html
+  // .fcopy), copying on a phone too, not the phone's Share (his choice, the
+  // same day).  The clipboard's own call in a secure context; elsewhere, the
+  // dev server at a LAN address, or where the call is refused, the browser's
+  // copy command, whose event the soft hyphens' listener (below) fills with
+  // the address.  A note over what was pressed says it was done, the only
+  // sign on a phone, where the bar's button is its drawing alone.
+  var NUM = 'main p.t > .stk > span.num', copyNext = null, fcopy = fbar && fbar.querySelector('.fcopy'),
+      lnote = document.createElement('div'), lnoteGo = 0;
+  lnote.className = 'lnote';
+  lnote.setAttribute('role', 'status');
+  document.body.appendChild(lnote);
+  function copyLink(ref, el) {
+    var url = location.origin + '/' + ref;
+    function old() {
+      copyNext = url;
+      try { document.execCommand('copy'); } catch (e) {}
+      // The event came and took the address, or nothing was copied.
+      if (copyNext === null) copySaid(el);
+      copyNext = null;
+    }
+    if (navigator.clipboard && window.isSecureContext)
+      navigator.clipboard.writeText(url).then(function () { copySaid(el); }, old);
+    else old();
+  }
+  // Over the thing pressed, or under it at the window's top, and inside the
+  // window; gone after a moment, the words with it.
+  function copySaid(el) {
+    var r = el.getBoundingClientRect(), w, h, y;
+    clearTimeout(lnoteGo);
+    lnote.classList.remove('lon');
+    lnote.innerHTML = T('Link copied');
+    w = lnote.offsetWidth;
+    h = lnote.offsetHeight;
+    y = r.top - h - 6;
+    if (y < 6) y = r.bottom + 6;
+    lnote.style.left = Math.max(6, Math.min(innerWidth - w - 6, r.left + r.width / 2 - w / 2)) + 'px';
+    lnote.style.top = y + 'px';
+    lnote.classList.add('lon');
+    lnoteGo = setTimeout(function () { lnote.classList.remove('lon'); lnote.textContent = ''; }, 1600);
+  }
+  if (fcopy) fcopy.addEventListener('click', function () {
+    var ref = bmRef(headP);
+    if (ref) copyLink(ref, fcopy);
+  });
+  // The reference says what a click does, where the pointer rests on it: set
+  // the first time, so that no page's markup carries it.  Tooltips off, the
+  // watcher (tips, above) takes it away as it comes.
+  document.addEventListener('mouseover', function (ev) {
+    var n = ev.target.closest && ev.target.closest(NUM);
+    if (n && !n.hasAttribute('title') && !n.hasAttribute('data-tip') && bmRef(n.closest('p.t')))
+      T.attr(n, 'title', 'Copy link to this paragraph');
+  });
+
   // A search hit among the 1955 readings opens /93:5.8#note93_5_8_0, and
   // arrive() brings its paragraph into view: its card opens too -- if the ring
   // shows, which it does not with the readings turned off.  Not #fnref…, the
@@ -2877,7 +2949,15 @@
   // reverse, so each goes where it was.  A list's label, floated in a box of
   // its own (ub.css .mark), drops the space after it from the copy, so for the
   // same moment the page is .copying, and the labels stand in the line.
-  document.addEventListener('copy', function () {
+  // But a paragraph's link, copied by the copy command (copyLink, above), is
+  // the address alone.
+  document.addEventListener('copy', function (ev) {
+    if (copyNext !== null) {
+      ev.clipboardData.setData('text/plain', copyNext);
+      ev.preventDefault();
+      copyNext = null;
+      return;
+    }
     var sel = getSelection(), gone = [], i, r, root, w, n, k, html = document.documentElement;
     html.classList.add('copying');
     for (i = 0; i < sel.rangeCount; i++) {

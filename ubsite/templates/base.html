@@ -612,11 +612,14 @@ window.ubUnit = function (where) {
     list it opens, whose rows ub.js makes.  On a page of the text the bar
     comes with the running head, at a tap on a paragraph (ub.js showHead,
     .fbar.fup), with Bookmark this paragraph in Continue reading's place,
-    pressed and reading Bookmarked where the paragraph has one.  Both
-    buttons are hidden until a script shows them. #}
+    pressed and reading Bookmarked where the paragraph has one, and Copy
+    link beside it (2026-11-19), the paragraph's address on the clipboard,
+    a link's drawing alone on a phone (ub.js copyLink).  The three buttons
+    are hidden until a script shows them. #}
 <nav class="fbar" {{ ta('aria-label', 'Your place in the book') }} data-tv="{{ text_version() }}">
   <a class="fgo" href="/0">{{ chrome.player_svg('play') }}<span class="fl fbegin">{{ t('Begin reading') }}</span><span class="fl fcont">{{ t('Continue reading') }}</span><span class="fat"><span class="fref"></span><span class="fttl">{{ t('Foreword') }}</span></span></a>
   <button type="button" class="fmark" aria-pressed="false" hidden>{{ chrome.ribbon_svg() }}<span class="fmset">{{ t('Bookmark this paragraph') }}</span><span class="fmis">{{ t('Bookmarked') }}</span></button>
+  <button type="button" class="fcopy" {{ ta('aria-label', 'Copy link to this paragraph') }} hidden>{{ chrome.link_svg() }}<span class="fcl">{{ t('Copy link') }}</span></button>
   <button type="button" class="flist" aria-expanded="false" aria-controls="fsheet" {{ ta('aria-label', 'Bookmarks') }} {{ ta('title', 'Bookmarks') }} hidden>{{ chrome.ribbon_svg() }}<span class="fcount"></span></button>
   <div class="fsheet" id="fsheet" hidden>
     <p class="fsh">{{ t('Bookmarks') }}</p>

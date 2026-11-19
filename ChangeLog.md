@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- A paragraph's link, its address on this site, can be copied to send or keep: click or tap the paragraph's reference, such as 101:4.2, or tap the paragraph and choose Copy link in the bar at the foot, which is there with the references hidden too.
 - Privacy and Terms, two pages linked from the foot of the home page: what the site records of a visit and what it does not (no IP address, no cookie), what stays in your browser, and what an account will keep once signing in with Google arrives.
 - The home page shows a passage of the moment: a few sentences of the book, another at each visit, with the way to their place.
 - On the home page, a line over the header offers to install the site as an app, where the browser can; its cross puts it away for good.

@@ -68,6 +68,12 @@
 <svg class="frib" viewBox="3.5 1.5 9 13.5" aria-hidden="true" focusable="false"><path d="M4.5 2.5h7v11.2l-3.5-2.6-3.5 2.6z"/></svg>
 {%- endmacro %}
 
+{#- A paragraph's link (base.html .fcopy, help.html; 2026-11-19): two links of a
+    chain, aslant, drawn here; on the bar at the foot, beside the ribbon. -#}
+{% macro link_svg() -%}
+<svg class="flink" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><g transform="rotate(-45 8 8)"><rect x="1" y="5.25" width="8" height="5.5" rx="2.75"/><rect x="7" y="5.25" width="8" height="5.5" rx="2.75"/></g></svg>
+{%- endmacro %}
+
 {#- The player's icons (listen.js ICON, the same paths), and ↓ for keeping a
     recording (listen.js KEEP_ICONS.none). -#}
 {% set player_paths = {'play': 'M4.5 2.5v11l9-5.5z',

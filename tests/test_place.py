@@ -202,7 +202,66 @@ class Bookmarks(unittest.TestCase):
         self.assertIn("ev.stopPropagation();", guard)
         self.assertIn("hideHead();", guard)
         self.assertIn("}, true);", guard)
-        self.assertRegex(CSS, r"\.fmark \{ flex: 0 1 auto; min-width: 0; margin: 0 auto;")
+        # Copy link beside it, the two in the middle together (2026-11-19).
+        self.assertRegex(CSS, r"\.fmark \{ flex: 0 1 auto; min-width: 0; margin: 0 0 0 auto;")
+        self.assertRegex(CSS, r"\.fcopy \{ flex: none; margin: 0 auto 0 0;")
+
+
+@unittest.skipUnless(DB.exists(), "var/ub.db has not been built")
+class ParagraphLink(unittest.TestCase):
+    """A paragraph's link copied (Tigran, 2026-11-19: "we definitely need a
+    way to save a stable reference to the current paragraph, which can be sent
+    outside"): a click or a tap on its reference, where references are shown,
+    and Copy link in the bar, with them shown or not, copying on a phone too.
+    Chrome copies through both in tools/place_e2e.py."""
+
+    def test_the_bars_button(self):
+        # In the shell with the bar, hidden until a script shows it, after the
+        # bookmark's button and before the list's; on a phone its drawing alone.
+        bar = RE_BAR.search(get("/", raw=True)[2]).group(0)
+        self.assertRegex(bar, r'<button type="button" class="fcopy" aria-label="Copy link to this paragraph"'
+                              r' data-ru-aria-label="Скопировать ссылку на этот абзац" hidden><svg class="flink"[^>]*>.*?</svg>'
+                              r'<span class="fcl"><x-en>Copy link</x-en><x-ru lang="ru">Копировать ссылку</x-ru></span></button>')
+        self.assertLess(bar.index('class="fmark"'), bar.index('class="fcopy"'))
+        self.assertLess(bar.index('class="fcopy"'), bar.index('class="flist"'))
+        self.assertRegex(CSS, r"@media \(max-width: 40rem\) \{\n  \.fcopy \{ min-width: 2\.75rem;[^}]*\}\n  \.fcopy \.fcl \{ display: none; \}")
+
+    def test_it_comes_and_goes_with_the_bar(self):
+        up = JS[JS.index("  function barUp() {"):JS.index("  function barDown() {")]
+        down = JS[JS.index("  function barDown() {"):JS.index("  if (bmMark && bmList && bmSheet) {")]
+        self.assertIn("if (fcopy) fcopy.hidden = false;", up)
+        self.assertIn("if (fcopy) fcopy.hidden = true;", down)
+        self.assertIn("var ref = bmRef(headP);\n    if (ref) copyLink(ref, fcopy);", JS)
+
+    def test_the_reference_copies_and_goes_nowhere(self):
+        # Before the running head hears the click, and never a link in the
+        # markup: no stored page moves (CLAUDE.md trap 29).
+        self.assertIn("var NUM = 'main p.t > .stk > span.num'", JS)
+        click = JS.index("    if (num && bmRef(num.closest('p.t'))) {")
+        self.assertLess(click, JS.index("    if (!card) { tapHead(ev); return; }"))
+        self.assertIn("if (ev.button || ev.detail > 1 || !getSelection().isCollapsed) return;", JS[click:click + 200])
+        body = get("/101:4", raw=True)[2]
+        self.assertIn('id="101:4.1"><span class="stk"><span class="num">101:4.1</span>', body)
+        self.assertNotIn('title="Copy link', body)
+        self.assertIn('p.t[id] > .stk > span.num { cursor: pointer; }', CSS)
+
+    def test_the_address_is_the_paragraphs_own(self):
+        # /101:4.2, whatever the reader's unit (CLAUDE.md trap 44), on the
+        # site the reader is on.
+        self.assertIn("var url = location.origin + '/' + ref;", JS)
+
+    def test_the_copy_command_takes_the_address_alone(self):
+        # Where the clipboard's own call is not to be had: the copy event
+        # carries the address, and nothing of the soft hyphens' work.
+        at = JS.index("  document.addEventListener('copy', function (ev) {")
+        self.assertIn("if (copyNext !== null) {\n      ev.clipboardData.setData('text/plain', copyNext);\n"
+                      "      ev.preventDefault();", JS[at:at + 300])
+        self.assertIn("if (navigator.clipboard && window.isSecureContext)", JS)
+
+    def test_its_words_are_in_help(self):
+        body = get("/help")[2]
+        self.assertIn("Copy link", re.search(r'<section id="moving">.*?</section>', body, re.S).group(0))
+        self.assertIn("copies the paragraph’s link", body)
 
 
 if __name__ == "__main__":

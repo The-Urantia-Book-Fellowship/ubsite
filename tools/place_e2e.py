@@ -30,6 +30,12 @@ its paper's title; another tab follows; what the browser keeps that is no
 reference is not followed, and what it keeps is put in as text; the words
 fit at 320 px in both languages; and with scripts off there is no control.
 
+And a paragraph's link (ub.js copyLink, 2026-11-19): a click or a tap on its
+reference copies its address, and Copy link in the bar, with the references
+shown or not, in the paragraph's own address whatever the reader's unit; a
+translation's paragraph gives the paragraph it translates; the copy command
+does it where the clipboard's call is refused.
+
     .venv/bin/python tools/place_e2e.py        (after make data)
 
 Playwright is in .venv as a dev requirement and drives the system's Chrome.
@@ -375,9 +381,10 @@ def marks(b, errors: list) -> None:
     ok(pg.evaluate(RIBBON, ref) is not None, "and its ribbon")
     ctx.close()
 
-    print("320 px, in both languages")
-    for lang, label, done in (("en", "Bookmark this paragraph", "Bookmarked"), ("ru", "Поставить закладку", "В закладках")):
-        ctx = fresh(b, has_touch=True, is_mobile=True, viewport={"width": 320, "height": 640}, device_scale_factor=2)
+    print("320 and 390 px, in both languages, with Copy link beside it")
+    for lang, label, done, w in [(*t, w) for t in (("en", "Bookmark this paragraph", "Bookmarked"), ("ru", "Поставить закладку", "В закладках"))
+                                 for w in (320, 390)]:
+        ctx = fresh(b, has_touch=True, is_mobile=True, viewport={"width": w, "height": 640}, device_scale_factor=2)
         ctx.add_init_script("""try { localStorage.setItem('ub_settings', JSON.stringify({lang: '%s'}));
             if (!localStorage.getItem('ub_marks')) localStorage.setItem('ub_marks', JSON.stringify(
               [{ref: '139:11.12', title: 'The Twelve Apostles', q: 'One, two, three.', at: 1, v: '9'}])); } catch (e) {}""" % lang)
@@ -386,12 +393,15 @@ def marks(b, errors: list) -> None:
         pg.goto(BASE + "/101:4")
         tap_para(pg, "101:4.2")
         x = ctl(pg)
-        one = pg.evaluate("""() => { const m = document.querySelector('.fmark').getBoundingClientRect(), l = document.querySelector('.flist').getBoundingClientRect();
-            return m.height < 60 && l.left >= m.right - .5 && l.right <= document.documentElement.clientWidth + .5; }""")
-        ok(x["label"] == label and x["fits"] and x["over"] <= 0 and one and x["count"] == "1", f"{lang}: {label}, beside the list's button, nothing cut")
+        one = pg.evaluate("""() => { const m = document.querySelector('.fmark').getBoundingClientRect(), l = document.querySelector('.flist').getBoundingClientRect(),
+            c = document.querySelector('.fcopy'), cr = c.getBoundingClientRect();
+            return m.height < 60 && cr.left >= m.right - .5 && l.left >= cr.right - .5 && cr.width >= 44 && c.scrollWidth <= c.clientWidth + 1
+              && !c.querySelector('.fcl').getClientRects().length && l.right <= document.documentElement.clientWidth + .5; }""")
+        ok(x["label"] == label and x["fits"] and x["over"] <= 0 and one and x["count"] == "1",
+           f"{lang} {w}px: {label}, Copy link's drawing, the list's button, nothing cut")
         pg.tap(".fbar .fmark")
         pg.wait_for_timeout(150)
-        ok(ctl(pg)["label"] == done and ctl(pg)["fits"], f"{lang}: {done}")
+        ok(ctl(pg)["label"] == done and ctl(pg)["fits"], f"{lang} {w}px: {done}")
         ctx.close()
 
     print("A desk, with a mouse")
@@ -554,6 +564,149 @@ def marks(b, errors: list) -> None:
        and not pg.locator(".fbar .fsheet").is_visible() and pg.locator(".fbar .fgo").is_visible(), "the bar is Begin reading alone")
     pg.goto(BASE + "/101:4")
     ok(not pg.locator(".fbar").is_visible(), "and a page of the text has none")
+    ctx.close()
+
+
+CLIP = "() => navigator.clipboard.readText()"
+# The note that says the link was copied, as shown, and where.
+NOTE = """() => { const n = document.querySelector('.lnote'); if (!n || !n.classList.contains('lon')) return null;
+  const r = n.getBoundingClientRect(), xs = [...n.querySelectorAll('x-en, x-ru')].filter(e => e.getClientRects().length);
+  return {said: xs.length ? xs.map(e => e.textContent).join('') : n.textContent, l: r.left, r: r.right, t: r.top, b: r.bottom,
+          vw: document.documentElement.clientWidth, vh: innerHeight}; }"""
+# A box, [left, top, right, bottom].
+BOX = "(sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }"
+
+
+def clip(pg, what: str = "nothing yet") -> None:
+    pg.evaluate("(w) => navigator.clipboard.writeText(w)", what)
+
+
+def said_over(pg, sel: str) -> bool:
+    """Whether the note says Link copied, inside the window, over or under `sel`."""
+    n, r = pg.evaluate(NOTE), pg.evaluate(BOX, sel)
+    return (n is not None and n["said"] in ("Link copied", "Ссылка скопирована") and n["l"] >= 0 and n["r"] <= n["vw"] + .5
+            and (abs(n["b"] + 6 - r[1]) < 1.5 or abs(n["t"] - 6 - r[3]) < 1.5))
+
+
+def links(b, errors: list) -> None:
+    """A paragraph's link (Tigran, 2026-11-19): a click or a tap on its
+    reference copies its address, /101:4.2, and names nothing in the running
+    head; Copy link in the bar does, with the references shown or not; with
+    Whole paper on the address is still the paragraph's own; a translation's
+    paragraph gives the paragraph it translates; Help's example copies
+    nothing; and where the clipboard's own call is refused, the copy command
+    does it."""
+    print("A paragraph's link, with a mouse")
+    ctx = fresh(b, viewport={"width": 1280, "height": 900}, permissions=["clipboard-read", "clipboard-write"])
+    pg = ctx.new_page()
+    pg.on("pageerror", lambda e: errors.append(str(e)))
+    pg.goto(BASE + "/101:4")
+    clip(pg)
+    num = "[id='101:4.2'] .num"
+    pg.hover(num)
+    ok(pg.get_attribute(num, "title") == "Copy link to this paragraph", "the reference says what a click does")
+    ok(pg.evaluate("(s) => getComputedStyle(document.querySelector(s)).cursor", num) == "pointer", "with a pointer")
+    pg.click(num)
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate(CLIP) == BASE + "/101:4.2", f"a click on it copies {BASE}/101:4.2 ({pg.evaluate(CLIP)!r})")
+    ok(said_over(pg, num), f"and says Link copied over it ({pg.evaluate(NOTE)})")
+    pg.wait_for_timeout(800)
+    ok(not ctl(pg)["head"] and not ctl(pg)["on"], "the running head and the bar stay away")
+    pg.wait_for_timeout(1000)
+    ok(pg.evaluate(NOTE) is None and pg.evaluate("document.querySelector('.lnote').textContent") == "", "the note goes, its words with it")
+    clip(pg)
+    pg.dblclick(num)
+    pg.wait_for_timeout(900)
+    sel = pg.evaluate("getSelection().toString().trim()")
+    ok(sel and sel in "101:4.2" and not ctl(pg)["head"], f"a double-click selects in the reference, for Ctrl+X, and names nothing ({sel!r})")
+    pg.evaluate("getSelection().removeAllRanges()")
+
+    tap_para(pg, "101:4.5", touch=False)
+    x = ctl(pg)
+    words = pg.evaluate("() => [...document.querySelectorAll('.fcopy .fcl x-en, .fcopy .fcl x-ru')].filter(e => e.getClientRects().length).map(e => e.textContent).join('')")
+    ok(x["head"] and x["ref"] == "101:4.5" and words == "Copy link", f"a click on the text: the bar has Copy link, in words ({words!r})")
+    pg.wait_for_timeout(450)
+    pg.click(".fbar .fcopy")
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate(CLIP) == BASE + "/101:4.5" and said_over(pg, ".fbar .fcopy"), "Copy link copies the paragraph named, and says so over the button")
+    ok(ctl(pg)["head"], "and the bar stays up")
+    pg.keyboard.press("Escape")
+
+    print("  references off")
+    pg.evaluate("ubSettings.set('paranum', false)")
+    ok(not pg.is_visible(num), "no reference shown")
+    clip(pg)
+    tap_para(pg, "101:4.6", touch=False)
+    pg.wait_for_timeout(450)
+    pg.click(".fbar .fcopy")
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate(CLIP) == BASE + "/101:4.6", f"Copy link copies it all the same ({pg.evaluate(CLIP)!r})")
+    pg.keyboard.press("Escape")
+    pg.evaluate("ubSettings.set('paranum', true)")
+
+    print("  Whole paper on")
+    pg.evaluate("ubSettings.set('whole', true)")
+    pg.goto(BASE + "/101:4")
+    pg.wait_for_timeout(300)
+    clip(pg)
+    pg.click(num)
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate("location.pathname") == "/101" and pg.evaluate(CLIP) == BASE + "/101:4.2",
+       f"on the whole paper's page the address is still the paragraph's own ({pg.evaluate(CLIP)!r})")
+    pg.evaluate("ubSettings.set('whole', false)")
+
+    print("  Help's example, and the copy command")
+    pg.goto(BASE + "/help")
+    clip(pg)
+    eg = "main.helppage p.t .num"
+    pg.click(eg)
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate(CLIP) == "nothing yet" and pg.evaluate(NOTE) is None and not pg.get_attribute(eg, "title"),
+       "a click on Help's example copies nothing")
+    ctx.close()
+    ctx = fresh(b, viewport={"width": 1280, "height": 900}, permissions=["clipboard-read", "clipboard-write"])
+    ctx.add_init_script("navigator.clipboard.writeText = () => Promise.reject(new DOMException('refused', 'NotAllowedError'));")
+    pg = ctx.new_page()
+    pg.on("pageerror", lambda e: errors.append(str(e)))
+    pg.goto(BASE + "/101:4")
+    pg.click(num)
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate(CLIP) == BASE + "/101:4.2" and said_over(pg, num),
+       f"the clipboard's call refused, the copy command copies the address alone ({pg.evaluate(CLIP)!r})")
+    ctx.close()
+
+    print("A paragraph's link, with a finger")
+    ctx = fresh(b, has_touch=True, is_mobile=True, viewport={"width": 390, "height": 844}, device_scale_factor=2,
+                permissions=["clipboard-read", "clipboard-write"])
+    pg = ctx.new_page()
+    pg.on("pageerror", lambda e: errors.append(str(e)))
+    pg.goto(BASE + "/101:4")
+    clip(pg)
+    pg.evaluate("(s) => { const r = document.querySelector(s).getBoundingClientRect(); scrollTo(0, scrollY + r.top - 200); }", num)
+    pg.wait_for_timeout(150)
+    pg.tap(num)
+    pg.wait_for_timeout(550)
+    ok(pg.evaluate(CLIP) == BASE + "/101:4.2" and not ctl(pg)["head"], "a tap on the reference copies it, and names nothing")
+    tap_para(pg, "101:4.5")
+    c = pg.evaluate(BOX, ".fbar .fcopy")
+    ok(ctl(pg)["head"] and c[2] - c[0] >= 44 and not pg.evaluate("document.querySelector('.fcopy .fcl').getClientRects().length"),
+       f"a tap on the text: Copy link, its drawing alone, {c[2] - c[0]:.0f} px wide")
+    pg.tap(".fbar .fcopy")
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate(CLIP) == BASE + "/101:4.5" and said_over(pg, ".fbar .fcopy"), "a tap on it copies, and the note says so over it")
+    pg.evaluate("localStorage.removeItem('ub_marks'); ubSettings.set('translations', 'urantia-ru'); ubSettings.set('trtab', 'urantia-ru')")
+    pg.goto(BASE + "/101:4")
+    fold = "[id='101:4.3'] ~ .tf"
+    pg.wait_for_selector(fold + " .trfold")
+    pg.tap(fold + " .trfold")
+    pg.wait_for_selector(fold + ".open p.rt")
+    pg.wait_for_timeout(200)
+    pg.tap(fold + " p.rt")
+    pg.wait_for_timeout(550)
+    clip(pg)
+    pg.tap(".fbar .fcopy")
+    pg.wait_for_timeout(150)
+    ok(pg.evaluate(CLIP) == BASE + "/101:4.3", f"a translation's paragraph gives the paragraph it translates ({pg.evaluate(CLIP)!r})")
     ctx.close()
 
 
@@ -787,6 +940,9 @@ def run() -> int:
 
         marks(b, errors)
         ok(errors == [], "bookmarks: no script error: " + "; ".join(errors))
+
+        links(b, errors)
+        ok(errors == [], "a paragraph's link: no script error: " + "; ".join(errors))
 
         print("A phone, in both languages")
         for lang, label, begin in (("en", "Continue reading", "Begin reading"), ("ru", "Продолжить чтение", "Начать чтение")):
