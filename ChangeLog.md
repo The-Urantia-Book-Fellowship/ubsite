@@ -87,6 +87,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The player's list of voices, and Settings' Listening, offer only the texts shown in Settings' Texts, the English first and then the translations by language and name; hiding the text being heard, the English or a translation, stops the player, where a translation unticked used to give way to the English.
 - In parallel columns each column's play button now stands at the start of its paragraph, as the first column's does, with the time the paragraph takes where a recording reads it; the paragraph's reference stays with the first column alone.
 - Settings' Translations tab is now Texts, and the English is one of the texts in it: put any text first and it stands where the English stood, the others beside it in columns or folded under it, and hide any of them, the English too; where the first has no paragraph, the next that has it stands in, named.
 - Where the translations are folded under the paragraphs, as on a phone, opening one paragraph's now opens them under every paragraph, and folding one folds them all; they stay as you left them on every page and at your next visit, and, signed in, on your other devices, with the tab you chose in them.

@@ -330,9 +330,11 @@ def menus(b) -> None:
     pg.click(".gear")
     pg.click("dialog.settings [role=tab]:has-text('Listening')")
     got = pg.evaluate(MENUS)
+    # The translations by language and short name, whatever their order
+    # shown (Tigran, 2026-11-20): Aivazian before USGNY, ticked after it.
     ok(got == [["English text", ["Merritt Horn", "Google US English", "English (America)"], "Merritt Horn"],
-               ["USGNY", ["Grigory Voyner", "Google русский", "Russian"], "Grigory Voyner"],
-               ["Aivazian", ["Google русский", "Russian"], "Google русский"]],
+               ["Aivazian", ["Google русский", "Russian"], "Google русский"],
+               ["USGNY", ["Grigory Voyner", "Google русский", "Russian"], "Grigory Voyner"]],
        f"a menu against each text, the English first, its recording first, each voice once ({got})")
     heads = pg.evaluate("[...document.querySelectorAll('dialog.settings .panel.on .sub')].map(e => (" + EN + ")(e))")
     ok(heads == ["Voices"], f"under one heading ({heads})")
@@ -356,13 +358,13 @@ def menus(b) -> None:
     pg.keyboard.press("Escape")
     pg.click(".gear")
     got = pg.evaluate(MENUS)
-    ok([g[2] for g in got] == ["Merritt Horn", "Grigory Voyner", "Russian"], f"opened again, each menu shows what reads its text ({[g[2] for g in got]})")
+    ok([g[2] for g in got] == ["Merritt Horn", "Russian", "Grigory Voyner"], f"opened again, each menu shows what reads its text ({[g[2] for g in got]})")
     # What was kept before this day: the browser's own choice for a
     # translation with a recording, "browser", is its best voice by name.
     pg.evaluate("window.ubSettings.setTrVoice('urantia-ru', 'browser')")
     pg.keyboard.press("Escape")
     pg.click(".gear")
-    ok(pg.evaluate(MENUS)[1][2] == "Google русский", "a choice of the browser's voice kept before is shown as its best, by name")
+    ok(pg.evaluate(MENUS)[2][2] == "Google русский", "a choice of the browser's voice kept before is shown as its best, by name")
     ok(not errors, "no script error: " + "; ".join(errors))
     ctx.close()
 
@@ -373,8 +375,8 @@ def menus(b) -> None:
     pg.click("dialog.settings [role=tab]:has-text('Listening')")
     got = pg.evaluate(MENUS)
     ok(got == [["English text", ["Merritt Horn", "Your browser’s voice"], "Merritt Horn"],
-               ["USGNY", ["Grigory Voyner", "Your browser’s voice"], "Grigory Voyner"],
-               ["Aivazian", ["Your browser’s voice"], "Your browser’s voice"]],
+               ["Aivazian", ["Your browser’s voice"], "Your browser’s voice"],
+               ["USGNY", ["Grigory Voyner", "Your browser’s voice"], "Grigory Voyner"]],
        f"one entry stands for the browser's voices until it lists them ({got})")
     ok(not errors, "no script error: " + "; ".join(errors))
     ctx.close()
@@ -396,8 +398,8 @@ def bar(b) -> None:
     pg.click(".player .voicebox .voice")
     menu = pg.evaluate(BAR)
     ok(menu == ["# English text", "Merritt Horn", "Google US English", "English (America)",
-                "# USGNY · Russian", "Grigory Voyner", "Google русский", "Russian",
-                "# Aivazian · Russian", "Google русский", "Russian"],
+                "# Aivazian · Russian", "Google русский", "Russian",
+                "# USGNY · Russian", "Grigory Voyner", "Google русский", "Russian"],
        f"each text's recording and the browser's voices are one list under it, the English first ({menu})")
     checked = "[...document.querySelectorAll('.player .voices [aria-checked=true]')].map(%s)" % EN
     ok(pg.evaluate(checked) == ["Merritt Horn"], f"the voice heard is the one checked ({pg.evaluate(checked)})")

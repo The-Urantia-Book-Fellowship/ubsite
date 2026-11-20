@@ -142,6 +142,12 @@
     return r && (!synth || !S.trChoice(t)) ? r.key : 'browser:' + t;
   }
   function ticked() { return String(S.get().translations || '').split(' ').filter(function (kk) { return TRS[kk]; }); }
+  // The texts shown, in the reader's order, the English, "up", among them
+  // where it is shown (Settings' Texts, base.html ubTexts; 2026-11-20).
+  function textsShown() {
+    var o = S.get(), ks = window.ubTexts ? window.ubTexts(o.translations, o.english) : ['up'].concat(ticked());
+    return ks.filter(function (kk) { return kk === 'up' || TRS[kk]; });
+  }
   function scan() {
     // The section's title, or over an introduction, which has none, the
     // paper's: what its spoken heading reads.
@@ -606,18 +612,36 @@
         en.push({ html: T.esc(v.name), on: !!cur && cur.name === v.name,
                   pick: function () { S.set('bvoice', v.name); browser(); } });
       });
-      // Each translation ticked that the section has, in Settings' order: its
-      // recording first, where it has one, then the browser's voices in its
-      // language; none of those, where the browser has listed voices and none
-      // of them in it.  A browser that cannot speak has the recordings.
-      var listed = synth ? synth.getVoices().length : 0;
-      ticked().forEach(function (t) {
+      // Each text shown that the section has (Tigran, 2026-11-20: "the voice
+      // list should follow the Texts"), the English first where it is shown
+      // ("In the list of voices English should be the first"), then the
+      // translations by language, and within one by short name ("in some
+      // canonical (alphabetical by label?) order, not necessarily matching
+      // the 'show' order", "but grouped by language!"), as Settings'
+      // Listening has them: a translation's recording first, where it has
+      // one, then the browser's voices in its language; none of those, where
+      // the browser has listed voices and none of them in it.  A browser that
+      // cannot speak has the recordings.
+      var listed = synth ? synth.getVoices().length : 0, out = [], groups = 0,
+          order = textsShown().sort(function (a, b) {
+            if (a === 'up' || b === 'up') return (b === 'up') - (a === 'up');
+            var x = TRS[a], y = TRS[b];
+            return x.lang < y.lang ? -1 : x.lang > y.lang ? 1 : x.label.localeCompare(y.label, 'en');
+          });
+      order.forEach(function (t) {
+        if (t === 'up') {
+          if (en.length) { out.push({ group: T.k('English text') }); groups++; }
+          out = out.concat(en);
+          return;
+        }
+        tr = [];
         var x = TRS[t], kk = 'browser:' + t, them = synth ? S.usable(x.lang) : [];
         var now = key === kk && S.voice(x.lang, t), recs = D.tr && D.tr[t] ? recsOf(D, t) : [];
         function pick() { hear(kk); }
         if (!D.tr || !D.tr[t]) return;
         if (!recs.length && (!synth || (listed && !them.length))) return;
         tr.push({ group: T.tr('{a} · {b}', { a: T.html(x.label), b: x.language }) });
+        groups++;
         recs.forEach(function (r) {
           tr.push({ html: T(word(r.label)), on: key === r.key,
                     pick: function () { S.setTrVoice(t, ''); hear(r.key); } });
@@ -629,8 +653,10 @@
           tr.push({ html: T.esc(v.name), on: !!now && now.name === v.name,
                     pick: function () { S.setTrVoice(t, v.name); pick(); } });
         });
+        out = out.concat(tr);
       });
-      return (tr.length ? [{ group: T.k('English text') }] : []).concat(en, tr);
+      // The English alone has no heading over its voices, as before.
+      return groups === 1 && out[0] && out[0].group && order[0] === 'up' && en.length ? out.slice(1) : out;
     });
     // The name in a span of its own, which a long one runs out of (ub.css).
     box.firstChild.appendChild(document.createElement('span'));
@@ -806,12 +832,16 @@
         scrollTo(0, 0);
         D = P;
         kk = t && D.tr[t] ? trKey(D, t) : null;
+        // Never into a text the reader has hidden: the English, where the
+        // section has not the translation and a tap on Next asked for it.
+        if (!kk && t && textsShown().indexOf('up') < 0) { finish(); return tell(T('The next section is not in {l}.', { l: T.html(TRS[t].label) })); }
         if (kk) { key = kk; V = voiceOf(D, kk); } else { V = PV; key = pkey; }
       } else {
         // The reader is elsewhere: what is heard moves on, and the page stays.
         D = JSON.parse(json.textContent);
         D.ids = ids(doc);
         D.tr = trIds(doc);
+        if (t && !D.tr[t] && textsShown().indexOf('up') < 0) { finish(); return tell(T('The next section is not in {l}.', { l: T.html(TRS[t].label) })); }
         key = t && D.tr[t] ? trKey(D, t) : choose(D);
         V = voiceOf(D, key);
       }
@@ -1290,8 +1320,14 @@
     if (what === 'voice') { if (trOf(key)) build(); else revoice(); }
     // Listening turned off stops whatever is heard, the English or a translation.
     if (what === 'listen') revoice();
-    // A translation unticked while it was heard gives way to the English.
-    if (what === 'translations' && trOf(key) && ticked().indexOf(trOf(key)) < 0) revoice(choose(D));
+    // The text being heard hidden in Settings' Texts, or by its column's ×,
+    // the English or a translation: the player stops, and what to hear next
+    // is the reader's to choose (Tigran, 2026-11-20: "If one hides the
+    // English text while it is playing, I think one should stop the player
+    // completely instead of switching to playing the first available text.
+    // It is up to the user to decide whether to play anything or not").
+    // Until then a translation unticked gave way to the English.
+    if ((what === 'translations' || what === 'english') && bar && textsShown().indexOf(trOf(key) || 'up') < 0) close();
     // Following again, from another page: back to the reading.
     if (what === 'follow' && S.get().follow) toReading(false);
   });

@@ -247,9 +247,11 @@
           sel.add(x);
         });
         any.hidden = any.disabled = !synth || listed > 0;
-        // The text's row: a translation's while it is ticked, and either
-        // while there is anything to choose.
-        l.hidden = (!!k && ticked.indexOf(k) < 0) || (!recs.length && (!synth || (listed && !all.length)));
+        // The text's row: a translation's while it is ticked, the English's
+        // while it is shown (2026-11-20: the voices follow the Texts), and
+        // either while there is anything to choose.
+        l.hidden = (!!k && ticked.indexOf(k) < 0) || (!k && texts().indexOf('up') < 0) ||
+                   (!recs.length && (!synth || (listed && !all.length)));
         some = some || !l.hidden;
         // What reads it now: a recording, the first unless the English's is
         // another; or the browser's voice named, else its best, the first
@@ -260,10 +262,15 @@
           sel.value = all.some(function (v) { return v.name === w; }) ? w : all.length ? all[0].name : any.value;
         else if (rec) rec.selected = true;
       });
-      // The texts in the reader's order, as the columns and the player's
-      // list have them, the English's row where the English stands.
-      texts().forEach(function (k) {
-        var l = vrows.querySelector('label[data-k="' + (k === 'up' ? '' : k) + '"]');
+      // The English first, where it is shown, then the translations shown,
+      // by language and within it by short name, as the player's list has
+      // them (Tigran, 2026-11-20: "In the list of voices English should be
+      // the first"; "the translations should be in some canonical
+      // (alphabetical by label?) order, not necessarily matching the 'show'
+      // order"; "but grouped by language!"), whatever their order among the
+      // texts.
+      ticked.filter(function (k) { return trBy[k]; }).sort(voiceOrder).forEach(function (k) {
+        var l = vrows.querySelector('label[data-k="' + k + '"]');
         if (l) vrows.appendChild(l);
       });
       vrows.hidden = !some;
@@ -1204,6 +1211,12 @@
                                         : ['up'].concat(String(o.translations || '').split(' '));
     ks = ks.filter(function (k) { return k === 'up' || trBy[k]; });
     return ks.length ? ks : ['up'];
+  }
+  // The order of the translations in a list of voices: by language, as
+  // Settings' Texts groups them, and within one by short name (2026-11-20).
+  function voiceOrder(a, b) {
+    var x = trBy[a], y = trBy[b];
+    return x.lang < y.lang ? -1 : x.lang > y.lang ? 1 : x.label.localeCompare(y.label, 'en');
   }
   // The two settings an order is, {translations, english}.
   function textsOf(order) {

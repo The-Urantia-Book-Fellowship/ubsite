@@ -257,12 +257,67 @@ def reload_and_unreachable(b):
     ctx.close()
 
 
+VOICES = """() => [...document.querySelectorAll('.player .voices [role=group] > :not([role=menuitemradio])')]
+    .map(e => e.querySelector('x-en') ? e.querySelector('x-en').textContent : e.textContent)"""
+
+
+def voices(b):
+    print("The voices follow the texts, and a text hidden while heard stops the player")
+    ctx, pg, errors = fresh(b, {"translations": "urantia-ru", "english": "1", "rail": "folded"}, phone=False, w=1440, h=900)
+    pg.goto(BASE + "/1:1")
+    ok(until(pg, "!!document.querySelector('article.cmp') && " + READY), "in columns, USGNY first")
+    pg.click("p.t:not(.rt)[data-ref='1:1.2'] .stk > .playp")
+    ok(until(pg, "!!document.querySelector('.player')"), "the English's ▶ opens the player")
+    pg.click(".player .voicebox .voice")
+    groups = pg.evaluate(VOICES)
+    ok(groups == ["English text", "USGNY · Russian"], f"its list of voices, the English first, whatever its place among the texts ({groups})")
+    pg.keyboard.press("Escape")
+    pg.click('.cmpnames .cnx[data-k="up"]')
+    ok(until(pg, "!document.querySelector('.player')"), "the English hidden while it is heard: the player stops, nothing else plays")
+    pg.click("[id='1:1.2'] .stk > .playp")
+    ok(until(pg, "!!document.querySelector('.player')"), "USGNY's ▶ opens it again")
+    pg.click(".player .voicebox .voice")
+    groups = pg.evaluate(VOICES)
+    ok(groups == ["USGNY · Russian"], f"and the English is no longer among its voices ({groups})")
+    pg.keyboard.press("Escape")
+    pg.evaluate("ubSettings.setAll({translations: 'ud', english: '1'})")
+    ok(until(pg, "!document.querySelector('.player')"), "USGNY unticked while it is heard: the player stops")
+    pg.click(".top .gear")
+    pg.click("#set-t-listening")
+    rows = pg.evaluate("[...document.querySelectorAll('.setvoices label[data-k]')].filter(l => !l.hidden).map(l => l.dataset.k || 'up')")
+    ok(rows == ["up", "ud"], f"Settings' voices, a row to each text shown, the English first though it is second ({rows})")
+    pg.keyboard.press("Escape")
+    pg.evaluate("ubSettings.setAll({translations: 'urantia-ru uf-ru ud', english: '3'})")
+    pg.click(".top .gear")
+    pg.click("#set-t-listening")
+    rows = pg.evaluate("[...document.querySelectorAll('.setvoices label[data-k]')].filter(l => !l.hidden).map(l => l.dataset.k || 'up')")
+    ok(rows == ["up", "ud", "uf-ru", "urantia-ru"],
+       f"the English first, then the translations by language and short name, Aivazian, UF-RUS, USGNY, whatever their order shown ({rows})")
+    pg.keyboard.press("Escape")
+    pg.click("[id='1:1.3'] .stk > .playp")
+    ok(until(pg, "!!document.querySelector('.player')"), "the player opened again, from USGNY, first")
+    pg.click(".player .voicebox .voice")
+    groups = [g.split(" · ")[0] for g in pg.evaluate(VOICES)]
+    ok(groups == [g for g in ["English text", "Aivazian", "UF-RUS", "USGNY"] if g in groups] and groups[0] == "English text" and len(groups) > 2,
+       f"and the player's list so too ({groups})")
+    pg.keyboard.press("Escape")
+    pg.keyboard.press("Escape")
+    pg.evaluate("ubSettings.setAll({translations: 'ud', english: 'off'})")
+    pg.click(".top .gear")
+    pg.click("#set-t-listening")
+    rows = pg.evaluate("[...document.querySelectorAll('.setvoices label[data-k]')].filter(l => !l.hidden).map(l => l.dataset.k || 'up')")
+    ok(rows == ["ud"], f"none for the English hidden ({rows})")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+
+
 def run() -> int:
     with sync_playwright() as p:
-        b = p.chromium.launch(executable_path="/usr/bin/google-chrome")
+        b = p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--autoplay-policy=no-user-gesture-required"])
         only = set(sys.argv[1:])
         for name, step in [("default", default), ("phone", phone), ("stand", stand_in), ("columns", columns),
-                           ("dialog", dialog), ("search", search_and_part), ("reload", reload_and_unreachable)]:
+                           ("dialog", dialog), ("search", search_and_part), ("reload", reload_and_unreachable),
+                           ("voices", voices)]:
             if not only or name in only:
                 step(b)
         b.close()
