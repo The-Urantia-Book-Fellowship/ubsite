@@ -181,7 +181,7 @@ class Pages(unittest.TestCase):
         # The site's address under the name, drawn by CSS from the page's own
         # (base.html's head script, --host): never written by the server, since
         # the offline copy's shell is one for both hosts.
-        self.assertIn('<a class="brand" href="/">', body)
+        self.assertIn('<a class="brand" href="/" aria-keyshortcuts="Home">', body)
         self.assertIn('<span class="host"></span></span></a>', body)
         self.assertIn("r.style.setProperty('--host', JSON.stringify(location.host))", body)
         # The Offline tab holds no setting: the copy's tick and the

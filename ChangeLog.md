@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The Home key goes to the home page from any page, on a phone or tablet with a keyboard too; Ctrl+Home still goes to the top of the page.
 - You can sign in with your Google account on ubsite.sigmaai.au, from the head and shoulders at the corner of the page: your settings, your bookmarks and the place you last read are then kept with your account, and are the same on every device where you sign in. Reading needs no account, and nothing changes for a reader who has none. Help has a chapter on it, Your account.
 - A paragraph's link, its address on this site, can be copied to send or keep: click or tap the paragraph's reference, such as 101:4.2, or tap the paragraph and choose Copy link in the bar at the foot, which is there with the references hidden too.
 - Privacy and Terms, two pages linked from the foot of the home page: what the site records of a visit and what it does not (no IP address, no cookie), what stays in your browser, and what an account will keep once signing in with Google arrives.

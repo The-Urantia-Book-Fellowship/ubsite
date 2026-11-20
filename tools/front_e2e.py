@@ -20,7 +20,12 @@ the visit counter off and no offline copy to offer.
   browser's offer, and taken it is gone for good; its cross is for good,
   whatever the browser offers after; never where the page is the installed
   app; and on an iPhone, which makes no offer, it stays and Install opens
-  Settings at Offline.
+  Settings at Offline;
+
+  the Home key: from a section's page and the whole paper's it goes to the
+  home page, on a phone too; not with Ctrl, nor in the search box, nor in
+  Settings or the changelog's tabs, whose own key it is, nor on the home page
+  itself, where it goes to the page's top.
 """
 
 from __future__ import annotations
@@ -253,6 +258,69 @@ def run() -> int:
         pg.wait_for_timeout(300)
         opened = pg.evaluate("[document.querySelector('dialog.settings').open, (document.querySelector('dialog.settings [role=tab][aria-selected=true]') || {}).id]")
         ok(opened == [True, "set-t-offline"], f"and Install opens Settings at Offline, which says how ({opened})")
+        ctx.close()
+
+        print("The Home key")
+        for whole, at in ((False, "/1:1"), (True, "/1")):
+            ctx = fresh(b, settings={"whole": True} if whole else None)
+            pg = ctx.new_page()
+            pg.on("pageerror", lambda e: errors.append(str(e)))
+            pg.goto(BASE + at)
+            pg.mouse.wheel(0, 1500)
+            pg.wait_for_timeout(300)
+            pg.keyboard.press("Home")
+            pg.wait_for_url(BASE + "/", timeout=5000)
+            ok(pg.url == BASE + "/", f"Home on {at} goes to the home page" + (" (Whole paper on)" if whole else ""))
+            ctx.close()
+        ctx = fresh(b, 390, 800, device_scale_factor=2, is_mobile=True, has_touch=True)
+        pg = ctx.new_page()
+        pg.on("pageerror", lambda e: errors.append(str(e)))
+        pg.goto(BASE + "/101:4")
+        pg.keyboard.press("Home")
+        pg.wait_for_url(BASE + "/", timeout=5000)
+        ok(pg.url == BASE + "/", "and on a phone with a keyboard")
+        ctx.close()
+
+        ctx = fresh(b)
+        pg = ctx.new_page()
+        pg.on("pageerror", lambda e: errors.append(str(e)))
+        pg.goto(BASE + "/1:1")
+        pg.mouse.wheel(0, 1500)
+        pg.wait_for_timeout(300)
+        pg.keyboard.press("Control+Home")
+        pg.wait_for_timeout(500)
+        ok(pg.url == BASE + "/1:1" and pg.evaluate("scrollY") == 0, "Ctrl+Home stays the browser's: the page's top")
+        pg.fill(".find input", "Paradise")
+        pg.focus(".find input")
+        pg.keyboard.press("Home")
+        pg.wait_for_timeout(500)
+        ok(pg.url == BASE + "/1:1" and pg.evaluate("document.querySelector('.find input').selectionStart") == 0,
+           "in the search box it moves the caret, and the page stays")
+        pg.click("main p.t")
+        pg.keyboard.press("Control+Comma")
+        pg.wait_for_timeout(300)
+        pg.keyboard.press("ArrowRight")
+        pg.keyboard.press("Home")
+        pg.wait_for_timeout(500)
+        tab = pg.evaluate("[document.querySelector('dialog.settings').open, [...document.querySelectorAll('dialog.settings [role=tab]')]"
+                          ".filter(t => !t.hidden).findIndex(t => t.getAttribute('aria-selected') === 'true')]")
+        ok(pg.url == BASE + "/1:1" and tab == [True, 0], f"in Settings it goes to the first tab, and the page stays ({tab})")
+        pg.keyboard.press("Escape")
+        pg.goto(BASE + "/changelog")
+        tabs = pg.locator("main [role=tablist]").first.locator("[role=tab]")
+        tabs.nth(1).click()
+        pg.keyboard.press("Home")
+        pg.wait_for_timeout(500)
+        ok(pg.url == BASE + "/changelog" and tabs.nth(0).get_attribute("aria-selected") == "true",
+           "on the changelog's tabs it goes to the first, and the page stays")
+        pg.goto(BASE + "/")
+        pg.mouse.wheel(0, 600)
+        pg.wait_for_timeout(300)
+        before = pg.evaluate("scrollY")
+        pg.keyboard.press("Home")
+        pg.wait_for_timeout(500)
+        ok(pg.url == BASE + "/" and before > 0 and pg.evaluate("scrollY") == 0,
+           f"on the home page itself it is the browser's, to the top ({before} px up)")
         ctx.close()
 
         ok(not errors, "no script error: " + "; ".join(errors))

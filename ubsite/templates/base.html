@@ -261,7 +261,7 @@ window.ubUnit = function (where) {
 <header class="top">
   {#- The name, and under it the site's address, which the head script hands
       CSS (--host); with scripts off, the name alone. #}
-  <a class="brand" href="/">{{ mark }}<span class="nm">{{ t('The Urantia Book') }}<span class="host"></span></span></a>
+  <a class="brand" href="/" aria-keyshortcuts="Home">{{ mark }}<span class="nm">{{ t('The Urantia Book') }}<span class="host"></span></span></a>
   <form class="find" action="/search" role="search">
     <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>
     <input name="q" value="{{ q|default('') }}" {{ ta('aria-label', 'Search') }}

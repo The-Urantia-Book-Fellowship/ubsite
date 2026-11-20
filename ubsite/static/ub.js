@@ -2501,6 +2501,26 @@
     if (!dir || (t.closest && t.closest('input, textarea, select, button, summary, [contenteditable], dialog, [popover], .pop, .player'))) return;
     if (turn(dir)) ev.preventDefault();
   });
+  // Home goes to the home page, from any page (Tigran, 2026-11-20: "We have
+  // Ctl+Home and Ctl+End go to the top and to the bottom of the page
+  // respectively. So, why not map Home button to go to the home page? It
+  // should work even on the mobile, if there is a keyboard connected").
+  // Ctrl+Home stays the browser's, to the page's top, and so does Home on the
+  // home page itself.  By the header's own link, clicked: so the key does
+  // what a click on the mark does, and while a recording plays listen.js
+  // swaps the home page in and the reading goes on.  Not in a field, where
+  // Home moves the caret, nor in a row of tabs, a menu or a dialog, whose own
+  // key it is (Settings' tabs, the changelog's, which take it first).
+  document.addEventListener('keydown', function (ev) {
+    var t = ev.target, a;
+    if (ev.key !== 'Home' || ev.defaultPrevented || ev.repeat ||
+        ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey ||
+        document.querySelector('dialog[open], main.front') ||
+        (t.closest && t.closest('input, textarea, select, [contenteditable], [role="tablist"], [role="menu"], [role="listbox"], [popover], .pop, .player'))) return;
+    ev.preventDefault();
+    a = document.querySelector('header a.brand');
+    if (a) a.click(); else location.assign('/');
+  });
   // Only a finger's tap, or a pen's: a mouse's click selects words.  And the
   // selection as it stood before the tap, which the browser clears before the
   // tap's click (tapHead, below).
