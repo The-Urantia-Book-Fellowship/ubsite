@@ -1835,6 +1835,54 @@
       placeHold(pl, t);
     });
   }
+  // The line at the window's top, kept in the page's entry in the history as
+  // the reader moves the page and as the page is left (2026-11-20), for when
+  // it is loaded again from that entry: by Back or Forward where the
+  // browser's page cache has not kept it whole, by a reload, or a phone's tab
+  // put back after the browser let it go.  The browser puts the page back
+  // where it stood, but by its height as first drawn, before the folds open
+  // under every paragraph (trAll) or the columns are drawn, and then keeps
+  // whatever that height shows: on a phone with the folds open, three
+  // paragraphs on (measured in Chrome that day: 101:4.3 came back as
+  // 101:4.6).  So the line is kept by what it is, a paragraph or a
+  // translation's line in a fold, and how high it stood, and put back once
+  // the page is drawn (cmpArrive, below).  Where nothing is drawn late the
+  // browser's own is right, and nothing is done.  Not listen.js's own entries,
+  // which keep a place of their own.
+  var RE_AT = /^\d+:\d+\.\d+$/, atWait = 0;
+  function atNow() {
+    if (scrollY <= 0) return { top: true };
+    var ps = document.querySelectorAll('main :is(p.t[id], .tf.open p.rt[data-ref])'), r;
+    for (var i = 0; i < ps.length; i++) {
+      r = ps[i].getBoundingClientRect();
+      if (r.height && r.bottom > 4) return { ref: ps[i].id || ps[i].dataset.ref, k: ps[i].id ? '' : ps[i].dataset.k, y: r.top };
+    }
+    return null;
+  }
+  function atKeep() {
+    clearTimeout(atWait);
+    atWait = 0;
+    if (!document.querySelector('main.reader article p.t[id]')) return;
+    try { history.replaceState(Object.assign({}, history.state, { ubAt: atNow() }), ''); } catch (e) {}
+  }
+  addEventListener('scroll', function () { if (!atWait) atWait = setTimeout(atKeep, 400); }, { passive: true });
+  addEventListener('pagehide', atKeep);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) atKeep(); });
+  // True where the page is loaded again from its entry, and is put back.
+  function atBack() {
+    var s = history.state && history.state.ubAt, el = null, pl,
+        nav = window.performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+    if (!s || !nav || !/^(back_forward|reload)$/.test(nav.type)) return false;
+    if (s.top) { scrollTo({ top: 0, behavior: 'instant' }); return true; }
+    if (!RE_AT.test(s.ref || '') || typeof s.y !== 'number') return false;
+    if (s.k && /^[a-z0-9-]+$/.test(s.k)) el = document.querySelector('main .tf.open p.rt[data-k="' + s.k + '"][data-ref="' + s.ref + '"]');
+    el = el || document.getElementById(s.ref);
+    if (!el) return false;
+    pl = { el: el, y: s.y };
+    placeBack(pl);
+    placeHold(pl, Date.now());
+    return true;
+  }
   // Opened with it on: drawn, then the paragraph cited brought into view
   // again, as the rows have changed height, unless the reader has
   // scrolled meanwhile (by hand: the fonts coming in move the page too, and
@@ -1848,7 +1896,8 @@
       // paragraph, which moved it as the columns do (Continue reading, a
       // reference followed: the paragraph come to, under the folds above it).
       if (!cmpIs && !opened) return;
-      if (arriveTouched <= t) arrive(true);
+      // Loaded again from its entry, where it stood (atBack, above).
+      if (arriveTouched <= t && !atBack()) arrive(true);
       if (card) place();
       var m = /^#note(tn_[a-z0-9-]+_\d+_\d+_\d+_\d+)$/.exec(location.hash),
           mark = m && document.getElementById('fnref' + m[1]);

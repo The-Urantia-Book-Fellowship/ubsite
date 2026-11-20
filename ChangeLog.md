@@ -186,6 +186,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- Back to a page, or the page loaded again, with the translations in columns or open under the paragraphs, could come back a few paragraphs further on; it comes back to the line you left.
 - Help's chapter on the translations showed a caption with nothing above it: the line it describes, under a paragraph, is shown.
 - In the dark theme the scrollbars, of the Contents and the index above all, and the checkboxes and round buttons in Settings were drawn light; they are dark now.
 - The quiz's question on the cycle of space respiration, at Paper 11, read "spare respiration".

@@ -224,6 +224,14 @@ class OneState(unittest.TestCase):
         self.assertIn("ps = document.querySelectorAll('main :is(p.t[id], .tf.open p.rt)');", js)
         self.assertIn("if (!pl.el.isConnected || !pl.el.getClientRects().length) return placeBack(pl.alt);", js)
 
+    def test_a_page_loaded_again_from_its_entry_comes_back_at_its_line(self):
+        js = self.JS
+        self.assertIn("try { history.replaceState(Object.assign({}, history.state, { ubAt: atNow() }), ''); } catch (e) {}", js)
+        self.assertIn("if (!s || !nav || !/^(back_forward|reload)$/.test(nav.type)) return false;", js)
+        self.assertIn("if (arriveTouched <= t && !atBack()) arrive(true);", js)
+        # listen.js's own entries keep their own, and it is not touched.
+        self.assertNotIn("ubAt", (ROOT / "ubsite" / "static" / "listen.js").read_text(encoding="utf-8"))
+
     def test_help_shows_its_example(self):
         h = (ROOT / "ubsite" / "templates" / "help.html").read_text(encoding="utf-8")
         self.assertIn(".helppage .eg .tf { display: block; margin: 0; }", h)

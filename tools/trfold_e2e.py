@@ -332,6 +332,50 @@ def longest(b) -> None:
     ctx.close()
 
 
+# The line at the window's top: a paragraph's or a translation's line in an
+# open fold, and where it stands.
+LINE = """() => { for (const e of document.querySelectorAll('main :is(p.t[id], .tf.open p.rt[data-ref])')) {
+  const r = e.getBoundingClientRect(); if (r.height && r.bottom > 4) return [e.id || e.dataset.k + ' ' + e.dataset.ref, Math.round(r.top)]; } }"""
+
+
+def back(b) -> None:
+    """A page loaded again from its entry in the history, where the browser
+    puts it back by its height as first drawn, before the folds or the
+    columns (ub.js atBack): Playwright's Chrome keeps no page in its cache,
+    so every Back here is such a load, as a reload is."""
+    print("\nBack and a reload, the page loaded again from its entry")
+    for label, s, path, w, at in (("folds open, a section", {"tropen": True}, "/101:4", 390, 0.45),
+                                  ("folds open, the whole paper", {"tropen": True, "whole": True}, "/101", 390, 0.45),
+                                  ("folds open, come to a paragraph", {"tropen": True}, "/101:4.3", 390, 0.7),
+                                  ("folds open, the top in a fold", {"tropen": True}, "/101:4", 390, None),
+                                  ("in columns", {"rail": "folded", "margin": False}, "/101:4", 1700, 0.45)):
+        ctx, pg, errors = fresh(b, s, phone=w < 1000, w=w, h=900)
+        pg.goto(BASE + path)
+        pg.wait_for_selector("main .tf[data-has]", state="attached")
+        until(pg, ALL_OPEN if s.get("tropen") else "!!document.querySelector('main article.cmp .rc')")
+        pg.wait_for_timeout(1200)
+        if at is None:
+            pg.evaluate("""() => { const tr = document.querySelector('.grid > .row:has(> p.t[id="101:4.5"]) .tf .tr');
+              window.dispatchEvent(new WheelEvent('wheel')); scrollBy({top: tr.getBoundingClientRect().top + 40, behavior: 'instant'}); }""")
+        else:
+            pg.evaluate("(f) => { window.dispatchEvent(new WheelEvent('wheel'));"
+                        " scrollTo({top: document.documentElement.scrollHeight * f, behavior: 'instant'}); }", at)
+        pg.wait_for_timeout(700)
+        was = pg.evaluate(LINE)
+        pg.goto(BASE + "/1:1")
+        pg.wait_for_timeout(500)
+        pg.go_back(wait_until="commit")
+        pg.wait_for_timeout(2500)
+        came = pg.evaluate(LINE)
+        ok(came == was, f"{label}: Back puts it back at the same line ({was} → {came})")
+        pg.reload()
+        pg.wait_for_timeout(2500)
+        came = pg.evaluate(LINE)
+        ok(came == was, f"{label}: and so does a reload ({was} → {came})")
+        ok(not errors, label + ": no script error: " + "; ".join(errors))
+        ctx.close()
+
+
 def help_example(b) -> None:
     print("\nHelp's example of a fold")
     ctx, pg, errors = fresh(b)
@@ -353,6 +397,7 @@ def run() -> int:
         steps = [("bug", lambda: [continue_reading(b, w, m) for w, m in ((False, True), (True, True), (False, False), (True, False))]),
                  ("tabs", lambda: tabs_and_index(b)), ("hits", lambda: hits_and_reading(b)), ("columns", lambda: columns(b)),
                  ("place", lambda: place_in_fold(b)), ("nothing", lambda: nothing_kept(b)), ("longest", lambda: longest(b)),
+                 ("back", lambda: back(b)),
                  ("help", lambda: help_example(b))]
         for name, step in steps:
             if not only or name in only:
