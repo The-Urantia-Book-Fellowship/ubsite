@@ -171,6 +171,10 @@ UNPACK = """async () => { let n = 0;
     } }
   return n; }"""
 # How the copy in use keeps its chunks: {gz: n, have: n}.
+# The translations' folds folded again, as a step that opens them begins
+# (they stay open from page to page once opened: ub.js trAll, 2026-11-20).
+FOLDED = "ubSettings.set('tropen', false)"
+
 KEPT = """async () => { const out = {gz: 0, have: 0};
   for (const name of (await caches.keys()).filter(k => k.startsWith('ub-copy-')))
     for (const req of await (await caches.open(name)).keys()) {
@@ -517,22 +521,26 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/1:1")
         ok(pg.locator(".tf .trfold").first.inner_text() == "2 translations",
            f"ticked, a fold under each paragraph says how many ({pg.locator('.tf .trfold').first.inner_text()!r})")
+        # A fold's line opens every fold, and they stay so, from page to page
+        # (ub.js trAll; Tigran, 2026-11-20): each step that opens them here
+        # begins with them folded (FOLDED).
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .rt")
+        ok(pg.evaluate("[...document.querySelectorAll('.tf[data-has]')].every(f => f.classList.contains('open'))"),
+           "a fold's line opens every fold")
         # Its words, without the soft hyphens of its own hyphenation.
         words = lambda i: pg.evaluate("i => document.querySelectorAll('.tf.open .rt')[i].textContent"
                                       ".replace(/\u00ad/g, '')", i)
         ok("Из всех имен, под которыми" in words(0),
            "opened, it shows the first in the reader's order, the USGNY's, which the copy does not keep:"
            " the section's translations are the server's while one shown is not kept")
-        pg.locator(".tf.open .trtabs button[data-tab=ud]").click()
+        pg.locator(".tf.open .trtabs button[data-tab=ud]").first.click()
         pg.wait_for_function("document.querySelector('.tf.open .rt').textContent.includes('Из всех имён')")
         ok(True, "a tab shows another, Aivazian's")
-        pg.locator(".tf .trfold").nth(1).click()
-        pg.wait_for_function("document.querySelectorAll('.tf.open .rt').length > 1")
-        ok("Всеобщий Отец никогда" in words(1), "and the next fold opens at the tab chosen")
+        pg.wait_for_function("document.querySelectorAll('.tf.open .rt').length > 1"
+                             " && document.querySelectorAll('.tf.open .rt')[1].textContent.replace(/\u00ad/g, '').includes('Всеобщий')")
+        ok("Всеобщий Отец никогда" in words(1), "and every other fold shows it too")
         fold = pg.locator(".grid > .row:has(p.t[id='1:1.3']) .tf")
-        fold.locator(".trfold").click()
         fold.locator('.tr a.fn[data-k="tn"]').first.click()
         pg.wait_for_selector(".pop.tn")
         card = pg.evaluate("(() => { const c = document.querySelector('.pop.tn'), x = c.cloneNode(true);"
@@ -545,6 +553,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/140:4")
         ok(pg.locator(".tf .trfold").first.inner_text() == "1 translation",
            "a section one of them lacks counts the other alone")
+        pg.evaluate(FOLDED)
 
         # A setting from 2026-11-08 to 2026-11-16; since then the columns
         # come where the window has room for them (ub.js cmpFits; Tigran).
@@ -880,16 +889,16 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.url.endswith("/1:3"), f"offline too an old Compare address goes to the page's own, the worker answering it ({pg.url})")
         pg.set_viewport_size(USUAL)                               # no room: the folds below
         pg.wait_for_function("!document.querySelector('article.cmp')")
+        pg.evaluate(FOLDED)
         pg.goto(BASE + "/1:1")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .rt")
         ok("Из всех имён" in words(0), "a fold shows the translation kept, at the tab chosen")
-        pg.locator(".tf.open .trtabs button[data-tab=urantia-ru]").click()
+        pg.locator(".tf.open .trtabs button[data-tab=urantia-ru]").first.click()
         pg.wait_for_selector(".tf.open .gap")
         ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "one not kept says so in its tab")
-        pg.locator(".tf.open .trtabs button[data-tab=ud]").click()
+        pg.locator(".tf.open .trtabs button[data-tab=ud]").first.click()
         fold = pg.locator(".grid > .row:has(p.t[id='1:1.3']) .tf")
-        fold.locator(".trfold").click()
         fold.locator('.tr a.fn[data-k="tn"]').first.click()
         pg.wait_for_selector(".pop.tn")
         ok("Note 6" in pg.inner_text(".pop.tn"), "and its notes open as cards")
@@ -909,6 +918,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_function("(document.querySelector('.tf.open .gap') || {}).textContent", timeout=10000)
         ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "and the folds open say so at once")
         pg.goto(BASE + "/2:1")
+        pg.wait_for_timeout(800)
+        ok(pg.locator(".tf.open").count() == 0, "a page come to then, none of its translations kept, opens no fold")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .gap")
         ok("not in the offline copy" in pg.inner_text(".tf.open .gap"), "as does a fold opened after")
@@ -1161,6 +1172,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.keyboard.press("Escape")
         ctx.set_offline(True)
         pg.evaluate("ubSettings.set('translations', 'ud')")
+        pg.evaluate(FOLDED)
         pg.goto(BASE + "/1:1")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .rt")
@@ -1520,6 +1532,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(asked_for(log, BOG) == n + 1 and not pg.locator(".notkept").count()
            and pg.locator(".trhits [data-tr=urantia-ru] li").count() > 0,
            "with a translation shown that the copy does not keep, a search is the server's")
+        pg.evaluate(FOLDED)
         pg.goto(BASE + "/1:1")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .rt")
@@ -1534,6 +1547,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + BOG)
         ok(asked_for(log, BOG) == n and pg.locator(".trhits [data-tr=urantia-ru] li").count() > 0,
            "kept, the search is the copy's, the translation's hits with it")
+        pg.evaluate(FOLDED)
         pg.goto(BASE + "/1:2")
         pg.locator(".tf .trfold").first.click()
         pg.wait_for_selector(".tf.open .rt")

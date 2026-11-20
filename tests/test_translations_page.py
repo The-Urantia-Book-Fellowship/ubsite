@@ -15,7 +15,7 @@ import re
 import sqlite3
 import unittest
 
-from test_appendix_pages import DB, get
+from test_appendix_pages import DB, ROOT, get
 from ubsite import settings
 
 RE_TF = re.compile(r'<div class="tf" data-has="([a-z -]+)"><button class="trfold" type="button"'
@@ -168,6 +168,67 @@ class Dialog(unittest.TestCase):
                                    self.panel, re.S)[1])
         self.assertEqual([x["key"] for x in got], ["ud", "urantia-ru", "uf-ru"])
         self.assertEqual([x["label"] for x in got], ["Aivazian", "USGNY", "UF-RUS"])
+
+
+class OneState(unittest.TestCase):
+    """The folds open or shut together, kept (Tigran, 2026-11-20: "Folding or
+    unfolding a single paragraph's translations should affect all paragraphs
+    and this state should be preserved globally").  A setting with no row in
+    Settings, which follows the account; ub.js opens every fold where it is
+    on and the page is not in columns, and keeps the line tapped where it
+    stood.  Driven in Chrome by tools/trfold_e2e.py."""
+
+    JS = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
+
+    def test_a_setting_that_follows_the_account_with_its_tab(self):
+        d = settings.defaults()
+        self.assertIs(d["tropen"], False)
+        self.assertIn(("tropen", "kept", "Translations", False, [], ""), settings.KEPT)
+        for k in ("tropen", "trtab"):
+            self.assertIn(k, settings.followed())
+            self.assertNotIn(k, settings.DEVICE)
+
+    def test_the_page_opens_them_where_it_is_not_in_columns(self):
+        js = self.JS
+        # As the page is drawn, and not in columns: as it loads, as listen.js
+        # brings one in, as the columns give way, as a translation is ticked.
+        self.assertIn("if (!ks.length || !secs.length) { cmpUndraw(art); return trAll(); }", js)
+        trall = js[js.index("  function trAll() {"):js.index("  function trPlace(tf) {")]
+        # Asked again once the translations are had: no fold drawn under columns.
+        self.assertIn("if (n !== cmpN || !trOpen || cmpIs || !art.isConnected) return 0;", trall)
+        # A section's translations not had, or a fold with nothing to show: shut.
+        self.assertIn("if (got) shutIn(sec).forEach(function (tf) {", trall)
+        # Placed again once they are open, where the page was come to at a paragraph.
+        self.assertIn("if (!cmpIs && !opened) return;", js)
+        self.assertIn("if (drawn) drawn.then(function (opened) { if ((cmpIs || opened) && arriveTouched <= t) arrive(true); });", js)
+
+    def test_a_tap_asks_the_page_and_not_what_is_stored(self):
+        js = self.JS
+        click = js[js.index("    var ks = trKeys(tf), pl = trPlace(tf), want;"):js.index("  // The line a translation's voice is reading")]
+        # Help's example of a fold is none.
+        self.assertIn("if (!ks.length) return;", click)
+        self.assertIn("if (want === trOpen) return void (want && trKeep(pl, trAll(), true));", click)
+        self.assertIn("try { window.ubSettings.set('tropen', want); } finally { trTap = false; }", click)
+        self.assertNotIn("load().tropen", click)
+        # The place by the fold's line, never its .tf, which has no box on a
+        # phone with the index folded (base.html ubTr).
+        self.assertIn("var b = tf && tf.querySelector('.trfold');", js)
+        self.assertIn("r + '>:is(.a,.tf){display:contents}'",
+                      (ROOT / "ubsite" / "templates" / "base.html").read_text(encoding="utf-8"))
+        # The reading shuts none where every fold is open.
+        self.assertIn("if (trOpen) { trMine = null; return; }", js)
+
+    def test_the_place_is_the_paragraph_whose_translations_stand_at_the_top(self):
+        js = self.JS
+        self.assertIn("if (r.height && r.bottom > top + 24) return foldOver(ps[i - 1], top + 24) || ps[i];", js)
+        self.assertIn("ps = document.querySelectorAll('main :is(p.t[id], .tf.open p.rt)');", js)
+        self.assertIn("if (!pl.el.isConnected || !pl.el.getClientRects().length) return placeBack(pl.alt);", js)
+
+    def test_help_shows_its_example(self):
+        h = (ROOT / "ubsite" / "templates" / "help.html").read_text(encoding="utf-8")
+        self.assertIn(".helppage .eg .tf { display: block; margin: 0; }", h)
+        self.assertNotIn(".helppage .eg .trfold::before", h)
+        self.assertIn("Array.prototype.forEach.call(document.querySelectorAll('.tf[data-has]'), function (tf) {", self.JS)
 
 
 if __name__ == "__main__":

@@ -363,6 +363,17 @@ def _json(v) -> str:
     return json.dumps(v, ensure_ascii=False, separators=(",", ":"))
 
 
+def _version(v, unsaid: int) -> int:
+    """The version of the exchange a script speaks, or its kept state was made
+    by: `unsaid` where it names none, as the first script named none; Refused
+    where what it names is no version."""
+    if v is None:
+        return unsaid
+    if not isinstance(v, int) or isinstance(v, bool) or not 1 <= v <= 10_000:
+        raise Refused(400, "version")
+    return v
+
+
 def changes_of(got, follows: dict, t: int) -> list[tuple[str, str, str | None, int]]:
     """What a browser says changed there, as it may be kept: (kind, key, the
     value as JSON or None for a thing removed, its time).  Refused where it is
@@ -660,6 +671,15 @@ class Accounts:
         browser's number is not this database's, one restored from a backup or
         made anew, and the browser starts over with `first`.
 
+        `v` is the version of the exchange the browser's script speaks, 1
+        where it names none, and `was` the version of the script that made
+        the state it keeps.  A setting that came to follow the account later
+        (settings.LATE) is neither told to an older script nor heard from it,
+        which would say it was back at its default; and to a browser whose
+        script has just come to know it, it is new: sent whatever its number,
+        and what the browser says of it settled as unseen, the first to
+        arrive standing.
+
         A first exchange, where both sides may hold something: the settings
         are the account's where it has had an exchange, replacing the
         device's, and the device's where it has not, since a setting left out
@@ -672,7 +692,13 @@ class Accounts:
         first, seen = got.get("first") is True, got.get("n", 0)
         if not isinstance(seen, int) or isinstance(seen, bool) or seen < 0:
             raise Refused(400, "number")
-        changes = changes_of(got.get("ch", []), settings.followed(), t)
+        ver = _version(got.get("v"), 1)
+        ver0 = min(_version(got.get("was"), ver), ver)
+        late = settings.LATE
+        # The settings this script knows to follow, and of them those new to this browser.
+        knows = {k: d for k, d in settings.followed().items() if late.get(k, 1) <= ver}
+        fresh = {k for k in knows if ver0 < late.get(k, 1)}
+        changes = changes_of(got.get("ch", []), knows, t)
         refs = {json.loads(v)["ref"] if kind == "place" else key for kind, key, v, _ in changes if kind != "set"}
         known = self._paragraphs(refs)
         changes = [c for c in changes
@@ -711,7 +737,7 @@ class Accounts:
                 if first:
                     take = not had if kind == "set" else value is not None and (
                         was is None or was[0] is None or at > was[3])
-                elif was is None or was[1] <= seen or was[2] == by:
+                elif was is None or was[1] <= (0 if kind == "set" and key in fresh else seen) or was[2] == by:
                     take = True          # nothing else has touched it since this browser last looked
                 elif kind == "place" or (kind == "mark" and value is not None):
                     take = at > was[3]   # two devices, unseen by each other: the later made
@@ -740,10 +766,15 @@ class Accounts:
                 con.execute("UPDATE user SET n = ? WHERE id = ?", (n, user))
             else:
                 n = n0
+            rows = con.execute("SELECT kind, key, value FROM item WHERE user_id = ? AND n > ? ORDER BY n, kind, key",
+                               (user, seen)).fetchall()
+            if fresh and seen:
+                # What this browser's script has just come to know, however long the account has had it.
+                rows += [r for r in con.execute("SELECT kind, key, value FROM item WHERE user_id = ? AND kind = 'set'"
+                                                " AND n <= ? ORDER BY n, key", (user, seen)) if r[1] in fresh]
             out = [[kind, key, None if value is None else json.loads(value)]
-                   for kind, key, value in con.execute(
-                       "SELECT kind, key, value FROM item WHERE user_id = ? AND n > ? ORDER BY n, kind, key", (user, seen))
-                   if (kind, key) not in took and not (first and value is None)]
+                   for kind, key, value in rows
+                   if (kind, key) not in took and not (first and value is None) and (kind != "set" or key in knows)]
             con.execute("COMMIT")
         finally:
             con.close()

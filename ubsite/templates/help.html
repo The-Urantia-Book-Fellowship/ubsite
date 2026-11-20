@@ -44,8 +44,9 @@
 .helppage .eg .transport, .helppage .eg .quizcall, .helppage .eg .blanket { margin: 0; }
 .helppage .eg .player { position: static; transform: none; display: inline-flex; max-width: 100%; }
 .helppage .eg .runhead { position: static; box-shadow: none; border: 1px solid var(--rule); border-radius: 4px; }
-.helppage .eg .tf .trfold { display: inline; }
-.helppage .eg .trfold::before { content: "› "; }
+/* The fold's line as the page draws it: shown though it names no
+   translation (ub.css shows a fold only for those ticked), and no control. */
+.helppage .eg .tf { display: block; margin: 0; }
 .helppage .eg .icons { display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: center; }
 /* The account's sign, as the header draws it (ub.css .top .acctmenu). */
 .helppage .eg .acctsign { color: var(--faint); }

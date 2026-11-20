@@ -58,7 +58,15 @@
       EVERY = 5 * 60 * 1000,   // an exchange as a page loads, if the last was longer ago than this
       SOON = 3000,             // after a setting or a bookmark changes
       TURN = 500,              // changes to an exchange: more go in further turns
-      LEAVING = 60000;         // bytes: a request that may outlive its page is no larger (the browsers' limit is 64 KB)
+      LEAVING = 60000,         // bytes: a request that may outlive its page is no larger (the browsers' limit is 64 KB)
+      // The version of the exchange this script speaks: which settings it
+      // knows to follow the account (settings.py LATE, by the version that
+      // first knew each).  The server tells a script nothing of a setting
+      // later than its version, and takes nothing from it on one: the first
+      // script, which named no version, noted whatever it was sent and said
+      // of a setting it did not keep that it was back at its default.  Raised
+      // whenever a setting comes to follow the account.
+      V = 2;
   var timer = 0, running = null, declined = false;
 
   function get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
@@ -113,7 +121,9 @@
   function changed(base, now) {
     var ch = [], k;
     for (k in now.set) if (now.set[k] !== base.set[k]) ch.push(['set', k, now.set[k]]);
-    for (k in base.set) if (!(k in now.set)) ch.push(['set', k, null]);
+    // Only of a setting this script keeps: one it does not know is not its to
+    // call back to its default (note, below, which no longer takes one in).
+    for (k in base.set) if (follows(k) && !(k in now.set)) ch.push(['set', k, null]);
     if (now.place && !samePlace(now.place, base.place)) ch.push(['place', '', now.place]);
     for (k in now.marks) if (base.marks[k] !== now.marks[k].at) ch.push(['mark', k, now.marks[k]]);
     for (k in base.marks) if (!now.marks[k]) ch.push(['mark', k, null]);
@@ -140,7 +150,10 @@
   // One change, sent or come, put on the base.
   function note(base, c) {
     var v = c[2];
-    if (c[0] === 'set') { if (v === null) delete base.set[c[1]]; else base.set[c[1]] = v; }
+    if (c[0] === 'set') {
+      if (!follows(c[1])) return;
+      if (v === null) delete base.set[c[1]]; else base.set[c[1]] = v;
+    }
     else if (c[0] === 'place') { if (v && RE_REF.test(v.ref)) base.place = { ref: v.ref, at: when(v) }; }
     else if (c[0] === 'mark') { if (v === null) delete base.marks[c[1]]; else base.marks[c[1]] = when(v); }
   }
@@ -209,7 +222,10 @@
     snap = here();
     ch = all ? [] : saying(sy, snap);
     send = ch.slice(0, TURN);
-    body = JSON.stringify({ first: first, db: sy.db, n: sy.n, ch: send });
+    // `was`: the version of the script that made what is kept of the last
+    // exchange, 1 where it named none.  A setting that script did not know
+    // is new to this browser, and the server sends it whatever its number.
+    body = JSON.stringify({ first: first, db: sy.db, n: sy.n, v: V, was: (sy.v | 0) >= 1 ? sy.v | 0 : 1, ch: send });
     // Noted as sent before it goes.  Not on a first exchange, which has
     // nothing kept to note it in, and is begun again whole if it fails.
     if (!first && ch.length) {
@@ -244,7 +260,7 @@
         if (!who() || who().id !== me.id) return false;
         bring(got.ch.filter(Array.isArray), snap, { all: all, sets: replace });
         // Answered for: nothing stands noted as sent but what waits its turn.
-        put(KEY, { id: got.id, db: got.db, n: got.n, t: Date.now(), base: base,
+        put(KEY, { id: got.id, db: got.db, n: got.n, t: Date.now(), v: V, base: base,
                    sent: ch.slice(send.length).map(function (c) { return [c[0], c[1]]; }) });
         // Everything here was another's: the page read again as it now is.
         if (all) location.reload();

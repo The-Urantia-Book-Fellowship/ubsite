@@ -239,6 +239,41 @@ def run(tmp: pathlib.Path) -> int:
         ok(until(d.pg, "document.documentElement.dataset.align === 'ragged'"), "until its reader opens the menu at the corner")
         d.pg.keyboard.press("Escape")
 
+        print("The translations' folds follow the account, with their tab (Tigran, 2026-11-20)")
+        ALL = ("(() => { const f = [...document.querySelectorAll('main .tf[data-has]')].filter(e => e.querySelector('.trfold').textContent.trim());"
+               " return f.length > 0 && f.every(e => e.classList.contains('open') && e.querySelector('.tr p.rt')); })()")
+        a.pg.goto(SITE + "/101:4")
+        a.pg.evaluate("ubSettings.set('translations', 'urantia-ru uf-ru')")
+        a.pg.reload()
+        a.pg.wait_for_selector("main .tf[data-has] .trfold:not(:empty)")
+        a.pg.click(".grid > .row:has(> p.t[id='101:4.3']) .trfold")
+        ok(until(a.pg, ALL), "a fold opened on the first device opens them all")
+        a.pg.click(".grid > .row:has(> p.t[id='101:4.3']) .trtabs button[data-tab='all']")
+        ok(wait(lambda: items(db).get(("set", "tropen")) is True and items(db).get(("set", "trtab")) == "all"),
+           "and the account has them open, at All: " + repr((items(db).get(("set", "tropen")), items(db).get(("set", "trtab")))))
+        d.pg.goto(SITE + "/101:4")
+        d.pg.wait_for_load_state("networkidle")
+        d.later()
+        ok(until(d.pg, ALL) and until(d.pg, "document.querySelectorAll('.tf.open .trtabs button[data-tab=all][aria-pressed=true]').length"
+                                            " === document.querySelectorAll('.tf.open').length"),
+           "the other device opens them, at All, without a reload")
+        ok(d.kept()["set"].get("tropen") is True and d.kept()["set"].get("trtab") == "all", "and keeps them so")
+        # A page from before the deploy: its script names no version, and would
+        # call both back to their defaults (settings.LATE; CLAUDE.md trap 71).
+        sy = d.kept()["sync"]
+        st = d.pg.evaluate("""(sy) => fetch('/account/sync', {method: 'POST', credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({first: false, db: sy.db, n: sy.n, ch: [['set', 'tropen', null], ['set', 'trtab', null]]})})
+            .then(r => r.json())""", sy)
+        ok(not [c for c in st.get("ch", [None]) if c[1] in ("tropen", "trtab")]
+           and items(db).get(("set", "tropen")) is True and items(db).get(("set", "trtab")) == "all",
+           "a script from before is told nothing of them, and takes nothing back: " + repr(st.get("ch")))
+        d.pg.click(".grid > .row:has(> p.t[id='101:4.5']) .trfold")
+        ok(until(d.pg, "document.querySelectorAll('.tf.open').length === 0"), "folded on the second device, all of them")
+        ok(wait(lambda: items(db).get(("set", "tropen"), 0) is None), "the account has them folded")
+        a.later()
+        ok(until(a.pg, "document.querySelectorAll('.tf.open').length === 0"), "and so has the first device")
+
         print("A bookmark set on one device, and one taken off on the other")
         d.pg.goto(SITE + "/101:4")
         d.pg.wait_for_load_state("networkidle")

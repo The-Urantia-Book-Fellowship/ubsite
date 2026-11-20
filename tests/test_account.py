@@ -552,6 +552,9 @@ class Leaving(WithAccounts):
 
 
 THEME = ["set", "theme", "dark"]
+# The translations open under every paragraph, and the tab chosen in them:
+# they came to follow the account on 2026-11-20 (settings.LATE).
+OPEN, TAB = ["set", "tropen", True], ["set", "trtab", "all"]
 A_MARK = ["mark", "101:4.2", {"title": "The Real Nature of Religion", "q": "Revelation is a technique", "at": 1000, "v": "8"}]
 B_MARK = ["mark", "2:0.1", {"title": "The Nature of God", "q": "Inasmuch as man\u2019s highest", "at": 2000, "v": "8"}]
 
@@ -721,10 +724,69 @@ class Following(WithAccounts):
         self.assertEqual((kept["title"][:3], len(kept["title"]), len(kept["q"]), kept["at"], kept["v"]),
                          ("T t", 200, 400, 0, ""))
 
+    def test_a_script_from_before_a_setting_followed_is_told_nothing_of_it_and_takes_nothing_back(self):
+        """settings.LATE.  The first script, which names no version, noted
+        every setting it was sent, known to it or not, and said of one it did
+        not keep that it was back at its default, which the server took: a
+        page left open from before a deploy would have folded the translations
+        on every other device each time it was left (found in review,
+        2026-11-20).  So it is told nothing of such a setting, and nothing it
+        says of one is heard."""
+        new, old = self.device(), self.device()
+        self.exchange(new, [OPEN, TAB, THEME], first=True, v=2, was=1)
+        self.assertEqual((self.kept()[("set", "tropen")], self.kept()[("set", "trtab")]), (True, "all"))
+        # A first exchange is answered with every setting of the account's: but for these.
+        self.assertEqual(self.exchange(old, first=True)["ch"], [THEME])
+        # And what the first script would then have said of them.
+        got = self.exchange(old, [["set", "tropen", None], ["set", "trtab", None], ["set", "theme", "light"]])
+        self.assertEqual(got["ch"], [])
+        k = self.kept()
+        self.assertEqual((k[("set", "tropen")], k[("set", "trtab")], k[("set", "theme")]), (True, "all", "light"))
+        # Nor may it set one, having no such setting to set.
+        self.exchange(old, [["set", "tropen", False], ["set", "trtab", "ud"]])
+        self.assertEqual((self.kept()[("set", "tropen")], self.kept()[("set", "trtab")]), (True, "all"))
+        # The device with today's script hears of the theme alone.
+        self.assertEqual(self.exchange(new, v=2, was=2)["ch"], [["set", "theme", "light"]])
+        # A later change of one of them is not told to the old script either.
+        self.exchange(new, [["set", "tropen", None]], v=2, was=2)
+        self.assertEqual(self.exchange(old)["ch"], [])
+
+    def test_a_browser_whose_script_has_just_come_to_know_a_setting_is_sent_it_whatever_its_number(self):
+        """`was`, the version of the script that made what the browser keeps
+        of its last exchange.  Under the old script its number went on past
+        the rows it was not told of, so the new one is sent them, once; and
+        what it says of them is settled as unseen, the first to arrive
+        standing, so that a tab chosen long ago on this device does not
+        replace the account's."""
+        a, b = self.device(), self.device()
+        self.exchange(a, first=True, v=2, was=1)
+        self.exchange(b, first=True)
+        self.exchange(a, [OPEN, TAB, THEME], v=2, was=2)
+        self.assertEqual(self.exchange(b)["ch"], [THEME])                  # the old script: its number is past them now
+        n = b.n
+        got = self.exchange(b, [["set", "trtab", "ud"]], v=2, was=1)       # the page loaded again, the new script
+        self.assertCountEqual(got["ch"], [OPEN, TAB])
+        self.assertEqual((self.kept()[("set", "trtab")], b.n), ("all", n))
+        self.assertEqual(self.exchange(b, v=2, was=2)["ch"], [])           # once
+        # Seen, its next change of the tab is taken, and the other device hears.
+        self.assertEqual(self.exchange(b, [["set", "trtab", "ud"]], v=2, was=2)["ch"], [])
+        self.assertEqual(self.exchange(a, v=2, was=2)["ch"], [["set", "trtab", "ud"]])
+
+    def test_a_tab_kept_on_a_device_becomes_the_accounts_where_it_has_none(self):
+        a, b = self.device(), self.device()
+        self.exchange(a, first=True, v=2, was=1)
+        self.exchange(b, first=True)
+        self.assertEqual(self.exchange(b, [["set", "trtab", "ud"]], v=2, was=1)["ch"], [])
+        self.assertEqual(self.kept()[("set", "trtab")], "ud")
+        self.assertEqual(self.exchange(a, v=2, was=2)["ch"], [["set", "trtab", "ud"]])
+        # A state said to be of a later script than the one speaking is of that one's.
+        self.assertEqual(self.exchange(a, v=2, was=7)["ch"], [])
+
     def test_what_is_no_exchange_at_all(self):
         a = self.device()
         for bad in ({"ch": "x"}, {"ch": [["set", "theme"]]}, {"ch": [["note", "1:1.1", None]]}, {"ch": [["set", 5, None]]},
-                    {"n": -1}, {"n": "1"}, {"n": True}, {"ch": [THEME] * (account.SYNC_MAX + 1)}):
+                    {"n": -1}, {"n": "1"}, {"n": True}, {"ch": [THEME] * (account.SYNC_MAX + 1)},
+                    {"v": 0}, {"v": "2"}, {"v": True}, {"v": 2.0}, {"v": 2, "was": 0}, {"v": 2, "was": "1"}):
             st, _, j = a.post("/account/sync", {"first": True, "n": 0, "ch": [], **bad})
             self.assertEqual(st, 400, bad)
         self.assertEqual(self.rows("SELECT COUNT(*) FROM item"), [(0,)])
@@ -1047,13 +1109,40 @@ class Words(unittest.TestCase):
         from ubsite import settings
         every = settings.defaults()
         self.assertEqual(settings.DEVICE, ["uisize", "size", "lead", "width", "bvoice", "trvoices",
-                                           "rail", "margin", "trtab", "toc"])
+                                           "rail", "margin", "toc"])
         self.assertTrue(set(settings.DEVICE) < set(every))
         self.assertEqual(set(settings.followed()), set(every) - set(settings.DEVICE))
         for k in ("whole", "lang", "theme", "translations", "voice"):      # Whole paper follows (Tigran, 2026-11-18)
             self.assertIn(k, settings.followed())
+        # And the translations' folds, open or shut, with the tab chosen in
+        # them, which was the device's own until then (Tigran, 2026-11-20).
+        self.assertEqual((every["tropen"], every["trtab"]), (False, ""))
+        for k in ("tropen", "trtab"):
+            self.assertIn(k, settings.followed())
         base = (ROOT / "ubsite" / "templates" / "base.html").read_text(encoding="utf-8")
         self.assertIn("window.ubOwn = {{ settings_device|tojson }};", base[:base.index("</head>")])
+
+
+    def test_a_setting_that_comes_to_follow_later_is_named_with_its_version(self):
+        """settings.LATE, and account.js's V.  FIRST is what the first script
+        of the exchange followed, 2026-11-19, for ever: whatever follows
+        beyond it must be in LATE, with the version of the exchange that
+        first knew it, or a page from before it would take it back from the
+        account (the test above, of a script from before).  V is the latest."""
+        from ubsite import settings
+        FIRST = {"align", "face", "follow", "foreword", "index", "indexsearch", "lang", "listen", "notes",
+                 "notesearch", "onward", "pages", "paranum", "pilcrow", "preview", "quiz", "rate", "redletter",
+                 "studynotes", "studysearch", "theme", "tips", "translations", "trsearch", "voice", "whole"}
+        self.assertEqual(set(settings.followed()) - FIRST, set(settings.LATE))
+        self.assertEqual(settings.LATE, {"tropen": 2, "trtab": 2})
+        self.assertTrue(all(isinstance(v, int) and v >= 2 for v in settings.LATE.values()))
+        js = (ROOT / "ubsite" / "static" / "account.js").read_text(encoding="utf-8")
+        self.assertEqual(re.findall(r"\n      V = (\d+);\n", js), [str(max(settings.LATE.values()))])
+        self.assertIn("v: V, was: (sy.v | 0) >= 1 ? sy.v | 0 : 1, ch: send });", js)
+        self.assertIn("t: Date.now(), v: V, base: base,", js)
+        # It notes no setting it does not keep, and calls none back to its default.
+        self.assertIn("if (!follows(c[1])) return;", js)
+        self.assertIn("for (k in base.set) if (follows(k) && !(k in now.set)) ch.push(['set', k, null]);", js)
 
 
 def l10n_en(body: str) -> str:

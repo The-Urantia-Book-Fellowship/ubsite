@@ -331,8 +331,10 @@
       form.querySelector('.trnone').hidden = order.length > 0;
       form.querySelector('.trothers').hidden = !form.querySelector('.trother li');
     };
+    // The place kept (keepPlace): with the translations open under every
+    // paragraph, one ticked or unticked changes the page's height by screens.
     var trSet = function (order) {
-      window.ubSettings.set('translations', order.join(' '));
+      keepPlace(function () { window.ubSettings.set('translations', order.join(' ')); });
       fill();                          // and Listening's menus of their voices
       resettable();
     };
@@ -428,7 +430,7 @@
       var kept = form.querySelector('.kept');
       if (!window.confirm(kept && kept.dataset.acct === 'in'
                           ? T.text('reset:account?') : T.text('Restore every setting to its default?'))) return;
-      window.ubSettings.reset();
+      keepPlace(function () { window.ubSettings.reset(); });
       fill();
       resettable();
     });
@@ -912,6 +914,19 @@
   // top; or else the line at the window's top, by the letter there, so that a
   // paragraph begun above the window is kept at the line being read.  At the
   // page's top the page stays at its top.  Columns keep their own (cmpGo).
+  // The line at the window's top is a translation's as often as not, with
+  // the translations open under every paragraph (trAll, below; 2026-11-20):
+  // kept by its letter as the English is; and since such a line may be drawn
+  // again by the change, or folded away with every other, the fold's own
+  // line, which stays, is taken with it (`alt`), for placeBack to go by then;
+  // and the English over it, for when the fold goes too, its last
+  // translation unticked.
+  function placeAlt(pl) {
+    var tf = pl.el.closest('.tf'), b = tf && tf.querySelector('.trfold'), row = tf && tf.closest('.row'),
+        en = row && row.querySelector('p.t[id]');
+    if (b) pl.alt = { el: b, y: b.getBoundingClientRect().top, alt: en && { el: en, y: en.getBoundingClientRect().top } };
+    return pl;
+  }
   var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, .rt.now)';
   function placeNow() {
     var ms = document.querySelectorAll(MARKED), ps, i, r, p = null, c, n, at, q, rs, top = 0, over;
@@ -928,15 +943,15 @@
     });
     for (i = 0; i < ms.length; i++) {
       r = ms[i].getBoundingClientRect();
-      if (r.height && r.top >= top && r.top < innerHeight) return { el: ms[i], y: r.top };
+      if (r.height && r.top >= top && r.top < innerHeight) return placeAlt({ el: ms[i], y: r.top });
     }
-    ps = document.querySelectorAll('main p.t[id]');
+    ps = document.querySelectorAll('main :is(p.t[id], .tf.open p.rt)');
     for (i = 0; i < ps.length; i++) {
       r = ps[i].getBoundingClientRect();
       if (r.height && r.bottom > top + 4) { p = ps[i]; break; }
     }
     if (!p) return null;
-    if (r.top >= top + 4) return { el: p, y: r.top };
+    if (r.top >= top + 4) return placeAlt({ el: p, y: r.top });
     c = document.caretPositionFromPoint ? document.caretPositionFromPoint(r.left + r.width / 2, top + 6) : null;
     if (c) { n = c.offsetNode; at = c.offset; }
     else if (document.caretRangeFromPoint && (c = document.caretRangeFromPoint(r.left + r.width / 2, top + 6))) {
@@ -948,13 +963,17 @@
       q.setStart(n, at);
       q.setEnd(n, at + 1);
       rs = q.getClientRects();
-      if (rs.length) return { el: p, node: n, at: at, y: rs[0].top };
+      if (rs.length) return placeAlt({ el: p, node: n, at: at, y: rs[0].top });
     }
-    return { el: p, y: r.top };
+    return placeAlt({ el: p, y: r.top });
   }
+  // What is gone from the page, or has no box, says nothing of where the page
+  // should stand: measured, it stood at the window's top, and the page went
+  // up by the whole of its height.  A fold's line stands in for its words.
   function placeBack(pl) {
     var y = null, q, rs;
-    if (!pl || !pl.el.isConnected) return;
+    if (!pl) return;
+    if (!pl.el.isConnected || !pl.el.getClientRects().length) return placeBack(pl.alt);
     if (pl.node && pl.node.isConnected && pl.at < pl.node.length) {
       q = document.createRange();
       q.setStart(pl.node, pl.at);
@@ -964,6 +983,26 @@
     }
     if (y === null) y = pl.el.getBoundingClientRect().top;
     if (Math.abs(y - pl.y) >= 1) scrollBy({ top: y - pl.y, behavior: 'instant' });
+  }
+  // Held there while the page settles, frame by frame: what was drawn asks
+  // for a typeface not yet here, the Cyrillic of a translation first shown,
+  // and as it comes in the lines break again, the English's too, and the
+  // browser moves the page to keep what it takes for the place, which is
+  // another line.  For a third of a second, and as long after a typeface was
+  // last on its way, two and a half seconds at the most; and let go as soon
+  // as the reader moves the page, or the page is taken elsewhere (arrive): by
+  // what is done (arriveTouched), not by where the page is, which the browser
+  // has just changed.  One place at a time: a later one ends an earlier.
+  var holdN = 0;
+  function placeHold(pl, t) {
+    var busy = t, n = ++holdN;
+    requestAnimationFrame(function hold() {
+      var now = Date.now();
+      if (n !== holdN || arriveTouched > t) return;
+      placeBack(pl);
+      if (document.fonts && document.fonts.status === 'loading') busy = now;
+      if (now - busy < 300 && now - t < 2500) requestAnimationFrame(hold);
+    });
   }
   // `placeKept` is the place while the change is made, for what the change
   // sets off to keep the same one: a fold that turns the page into columns,
@@ -1070,7 +1109,21 @@
   // translation a download of its own, chosen in Settings' Offline tab
   // (offline.js), which tells the folds when what it keeps changes
   // (`ub:trkept`): one ticked here and not kept there says so in its tab.
-  var TRS = [], trBy = {}, trGot = {};
+  // A fold's line opens the translations under every paragraph, and folds
+  // them all again, and they stay so: on the next page, in the next session,
+  // and for a reader signed in on every device (settings.py KEPT `tropen`,
+  // which follows the account, as the tab does; Tigran, 2026-11-20: "Folding
+  // or unfolding a single paragraph's translations should affect all
+  // paragraphs and this state should be preserved globally").  Until then a
+  // line opened its own paragraph's, for that page, and Continue reading
+  // came back to the paragraph with the translations folded again.
+  // `trOpen` is what this page shows, every fold open or every fold shut:
+  // the setting's as the page begins, then a tap's here, or a change's from
+  // outside (below).  A tap asks it and never the setting as stored, which a
+  // browser that keeps nothing never changes, and another tab may have.
+  // `trTap` is true while a tap here changes a setting, whose listener then
+  // leaves the folds to the tap.
+  var TRS = [], trBy = {}, trGot = {}, trOpen = load().tropen === true, trTap = false;
   try { TRS = JSON.parse((document.getElementById('ub-translations') || {}).textContent || '[]'); } catch (e) {}
   TRS.forEach(function (x) { trBy[x.key] = x; });
 
@@ -1239,6 +1292,17 @@
     });
     return { h: h, notes: notes };
   }
+  // The tab a fold of `ks` is drawn at: the one asked for, or the one last
+  // chosen (`trtab`), where the fold has it; else its first.
+  function trTab(ks, tab) {
+    var want = tab || load().trtab;
+    return want === 'all' && ks.length > 1 ? 'all' : ks.indexOf(want) >= 0 ? want : ks[0];
+  }
+  function trUnfold(tf) {
+    var b = tf.querySelector('.trfold');
+    tf.classList.add('open');
+    if (b) b.setAttribute('aria-expanded', 'true');
+  }
   // `tab`, where a search's hit names one (arriveTr), opens the fold at it in
   // place of the one last chosen, which it does not change.  Its promise is kept
   // once the fold is drawn.
@@ -1255,8 +1319,7 @@
     if (!refs.length) return Promise.resolve();
     return trFetch(tf.closest('section[data-trv]'), refs[0].split('.')[0]).then(function (got) {
       if (!tf.classList.contains('open')) return;
-      var want = tab || load().trtab, h = '', notes = '',
-          cur = want === 'all' && ks.length > 1 ? 'all' : ks.indexOf(want) >= 0 ? want : ks[0];
+      var cur = trTab(ks, tab), h = '', notes = '';
       // A line that names one translation says so, `data-play`: listen.js
       // puts that translation's ▶ at its start ('ub:trfold', below).
       if (ks.length > 1) {
@@ -1320,25 +1383,119 @@
     if (b) b.setAttribute('aria-expanded', 'false');
     if (panel) panel.hidden = true;
   }
+  // Each fold's line says how many it holds, and a fold that is open is drawn
+  // again, at the tab now chosen, or shut where none is left to show.  Only a
+  // fold of the text's (data-has): Help's example of one is words (help.html).
+  // A promise, kept once those drawn again are drawn.
   function trSync() {
-    Array.prototype.forEach.call(document.querySelectorAll('.tf'), function (tf) {
+    var draws = [];
+    Array.prototype.forEach.call(document.querySelectorAll('.tf[data-has]'), function (tf) {
       var ks = trKeys(tf), b = tf.querySelector('.trfold');
       if (!b) return;
       b.innerHTML = ks.length ? T('{n} translations', { n: ks.length }) : '';
       if (!tf.classList.contains('open')) return;
-      if (ks.length) trDraw(tf, ks); else trShut(tf);
+      if (ks.length) draws.push(trDraw(tf, ks)); else trShut(tf);
     });
+    return Promise.all(draws);
+  }
+  // Every fold of the page opened, where the reader has them open (trOpen)
+  // and the page is not in columns.  Each section's translations are had
+  // first, all of them (trFetch, a request to a section, as the columns ask),
+  // so that the folds open in one step and the page is put back once; then
+  // every fold with a translation the reader shows, not yet open.  Asked
+  // again once they are had: the page may have gone into columns meanwhile,
+  // where no fold is drawn and a note's number would stand twice, or the
+  // reader may have folded them.  A fold already open is left as it is, a
+  // search's hit's at its own translation (arriveTr).  Where a section's
+  // could not be had, or a fold would show nothing of what it holds, it
+  // stays shut: offline, with a translation not kept, the page does not say
+  // so under every paragraph, and the fold tapped does (the click, below).
+  // A promise of how many it opened.
+  function trAll() {
+    var art = cmpArt(), n = cmpN, secs, shutIn = function (sec) {
+      return Array.prototype.filter.call(sec.querySelectorAll('.tf[data-has]:not(.open)'), function (tf) {
+        return trKeys(tf).length;
+      });
+    };
+    if (!trOpen || !art || cmpOn()) return Promise.resolve(0);
+    secs = Array.prototype.filter.call(art.querySelectorAll('section[data-trv]'), function (sec) { return shutIn(sec).length; });
+    if (!secs.length) return Promise.resolve(0);
+    return Promise.all(secs.map(function (sec) {
+      return trFetch(sec, sec.id).then(function (got) { return got; }, function () { return null; });
+    })).then(function (gots) {
+      var draws = [];
+      if (n !== cmpN || !trOpen || cmpIs || !art.isConnected) return 0;
+      secs.forEach(function (sec, j) {
+        var got = gots[j];
+        if (got) shutIn(sec).forEach(function (tf) {
+          var ks = trKeys(tf), cur = trTab(ks);
+          if (!(cur === 'all' ? ks : [cur]).some(function (k) { return got.t[k]; })) return;
+          trUnfold(tf);
+          draws.push(trDraw(tf, ks));
+        });
+      });
+      // They are all the reader's now: the reading shuts none of them (ubTrRead).
+      if (draws.length) trMine = null;
+      return Promise.all(draws).then(function () { return draws.length; });
+    });
+  }
+  // The place while every fold opens, shuts, or is drawn again, the page
+  // above it growing or shrinking by screens: a fold's own line, which the
+  // reader tapped, kept where it stands; or, with no tap, the line at the
+  // window's top (placeNow).  The line and never its .tf, which on a phone
+  // with the index folded has no box (base.html ubTr, display: contents).
+  function trPlace(tf) {
+    var b = tf && tf.querySelector('.trfold');
+    return b && b.getClientRects().length ? { el: b, y: b.getBoundingClientRect().top } : placeNow();
+  }
+  // And put back: at once, where what the change did is done; again once
+  // `job` is kept, the folds drawn, and held while a typeface comes in; a
+  // note's card, which stands by its mark, with it.  `own` is a tap here,
+  // the reader's own move, which an arrival still under way gives way to; a
+  // change from outside is none, and counts no page as read (rpEngage).
+  function trKeep(pl, job, own) {
+    var t = Date.now();
+    if (own) arriveTouched = t;
+    placeBack(pl);
+    return job.then(function (got) {
+      if (arriveTouched <= t) {
+        placeBack(pl);
+        if (pl) placeHold(pl, t);
+      }
+      if (card) place();
+      return got;
+    }, function () {});
+  }
+  // Every fold, as the page now has them.
+  function trTurn(pl, own) {
+    if (cmpOn()) return Promise.resolve(0);
+    if (!trOpen) Array.prototype.forEach.call(document.querySelectorAll('.tf.open'), trShut);
+    return trKeep(pl, trOpen ? trAll() : Promise.resolve(0), own);
   }
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('.trfold, .trtabs button[data-tab]'), tf = b && b.closest('.tf');
     if (!tf) return;
+    var ks = trKeys(tf), pl = trPlace(tf), want;
+    // Help's example of a fold has none to show, and is no control.
+    if (!ks.length) return;
     if (b.classList.contains('trfold')) {
-      if (tf.classList.contains('open')) return trShut(tf);
-      tf.classList.add('open');
-      b.setAttribute('aria-expanded', 'true');
-      return trDraw(tf, trKeys(tf));
+      want = !tf.classList.contains('open');
+      // The one tapped at once, and it says why where it has nothing to show.
+      if (want) { trUnfold(tf); trDraw(tf, ks); } else trShut(tf);
+      // As the page already has them, this one stood alone: opened by a
+      // search's hit or by the reading with the rest shut, or left shut with
+      // the rest open, its words not to be had.  Open, the rest are tried again.
+      if (want === trOpen) return void (want && trKeep(pl, trAll(), true));
+      trOpen = want;
+      trTap = true;
+      try { window.ubSettings.set('tropen', want); } finally { trTap = false; }
+      return void trTurn(pl, true);
     }
-    window.ubSettings.set('trtab', b.dataset.tab);
+    // A tab: every open fold is drawn again at it (trSync), which is every
+    // fold of the page where they are open.
+    trTap = true;
+    try { window.ubSettings.set('trtab', b.dataset.tab); } finally { trTap = false; }
+    trKeep(pl, trSync().then(trAll), true);
   });
   // The line a translation's voice is reading (listen.js; Tigran, 2026-10-27),
   // for it to mark: in Compare its column's, else the fold's under the
@@ -1354,6 +1511,8 @@
     var tf = row && row.querySelector('.tf');
     var pick = function (root) { return root && root.querySelector('p.rt[data-k="' + k + '"][data-ref="' + ref + '"]'); };
     var shutMine = function () {
+      // With every fold open none is the reading's own to shut.
+      if (trOpen) { trMine = null; return; }
       if (trMine && trMine !== tf && trMine.classList.contains('open')) trShut(trMine);
       if (trMine !== tf) trMine = null;
     };
@@ -1387,10 +1546,22 @@
   trSync();
   arriveTr();
   document.addEventListener('ub:page', arriveTr);
+  // A change from outside a tap here: Settings' list of translations; and
+  // what an exchange with the reader's account brought from another device,
+  // a page shown again from the browser's cache, or Restore the defaults,
+  // the folds open or shut and their tab, the line at the window's top kept.
   document.addEventListener('ub:settings', function (ev) {
-    if (ev.detail.key === 'translations' || ev.detail.key === 'trtab') trSync();
+    var k = ev.detail.key;
+    if (k === 'translations') trSync();
+    if (trTap) return;
+    // In columns there is no fold to draw; nor is there with every one shut.
+    if (k === 'trtab' && !cmpOn() && (trOpen || document.querySelector('.tf.open'))) trKeep(trPlace(), trSync().then(trAll));
+    if (k === 'tropen' && (ev.detail.all.tropen === true) !== trOpen) {
+      trOpen = ev.detail.all.tropen === true;
+      trTurn(trPlace());
+    }
   });
-  document.addEventListener('ub:swap', trSync);
+  document.addEventListener('ub:swap', function () { trSync(); });
   document.addEventListener('ub:trkept', function () { trGot = {}; trSync(); cmpDraw(); });
   // A search the copy answered (sw.js) says of a translation it does not keep
   // that it is not kept (offline-core.js trList, .notkept), in a list no one
@@ -1523,7 +1694,11 @@
     if (secs.length && cmpKeys(art).length) try {
       if (on) localStorage.setItem('ub_cols', innerWidth); else localStorage.removeItem('ub_cols');
     } catch (e) {}
-    if (!ks.length || !secs.length) { cmpUndraw(art); return Promise.resolve(); }
+    // Not in columns, the folds: open under every paragraph where the reader
+    // has them so (trAll), as the page loads, as listen.js brings one in, as
+    // the columns give way in a window made narrower, and as a translation is
+    // ticked.  How many it opened, for whoever places the page after.
+    if (!ks.length || !secs.length) { cmpUndraw(art); return trAll(); }
     // Each section of the page in columns: the one of a section's page, or
     // every one of the whole paper's (paper.html), each with its own heads:
     // the paper's over the first, and each section's title over its own.
@@ -1640,34 +1815,24 @@
   // at the window's top was put there from its start, which was enough for
   // a switch in Settings.  A line that stood where the columns' names now
   // stand is brought out from under them; a mark in a translation's column,
-  // which goes with the column, is kept by the English beside it; and at
-  // the page's top the page stays there.
+  // which goes with the column, is kept by the English beside it, and so is
+  // a line in a fold, which goes as the columns come; and at the page's top
+  // the page stays there.
   function cmpGo(kept) {
-    var pl = kept || placeNow(), row = pl && pl.el.closest('.rc') && pl.el.closest('.row'), en = row && row.querySelector('p.t[id]');
-    if (en) pl = { el: en, y: en.getBoundingClientRect().top };
+    var pl = kept || placeNow(), cell = pl && pl.el.closest('.rc, .tf'), row = cell && pl.el.closest('.row'), en = row && row.querySelector('p.t[id]'),
+        enAt = en && { el: en, y: en.getBoundingClientRect().top };
+    // A column's cell goes whatever is drawn; a fold's line only as the
+    // columns come, and where the page stays in folds it keeps the place
+    // itself, or its fold's own line does (placeAlt).
+    if (enAt && cell.classList.contains('rc')) pl = enAt;
     return cmpDraw().then(function () {
       var names = document.querySelector('article.cmp .cmpnames'), floor = names ? names.offsetHeight + 2 : 0, t = Date.now();
+      if (enAt && cmpIs) pl = enAt;
       if (!pl) return;
       if (pl.y < floor) pl.y = floor;
       placeBack(pl);
-      // Held there while the page settles, frame by frame: the columns laid
-      // out ask for a typeface not yet here, the Cyrillic of a translation
-      // first shown, and as it comes in the lines break again, the
-      // English's too, and the browser moves the page to keep what it takes
-      // for the place, which is another line.  For a third of a second, and
-      // as long after a typeface was last on its way, two and a half
-      // seconds at the most; and let go as soon as the reader moves the
-      // page, or the page is taken elsewhere (arrive): by what is done
-      // (arriveTouched), not by where the page is, which the browser has
-      // just changed.
-      var busy = t;
-      requestAnimationFrame(function hold() {
-        var now = Date.now();
-        if (arriveTouched > t) return;
-        placeBack(pl);
-        if (document.fonts && document.fonts.status === 'loading') busy = now;
-        if (now - busy < 300 && now - t < 2500) requestAnimationFrame(hold);
-      });
+      // And held there while the page settles (placeHold).
+      placeHold(pl, t);
     });
   }
   // Opened with it on: drawn, then the paragraph cited brought into view
@@ -1677,11 +1842,14 @@
   // opened from its column.
   function cmpArrive() {
     var t = Date.now();
-    cmpDraw().then(function () {
+    cmpDraw().then(function (opened) {
       // Not in columns, the class the head script guessed is gone, and the
-      // page is where arrive() put it.
-      if (!cmpIs) return;
+      // page is where arrive() put it; unless the folds opened under every
+      // paragraph, which moved it as the columns do (Continue reading, a
+      // reference followed: the paragraph come to, under the folds above it).
+      if (!cmpIs && !opened) return;
       if (arriveTouched <= t) arrive(true);
+      if (card) place();
       var m = /^#note(tn_[a-z0-9-]+_\d+_\d+_\d+_\d+)$/.exec(location.hash),
           mark = m && document.getElementById('fnref' + m[1]);
       if (!mark || !mark.closest('.rc')) return;
@@ -1699,7 +1867,7 @@
   document.addEventListener('ub:page', function () {
     var drawn = cmpSwapped, t = Date.now();
     cmpSwapped = null;
-    if (drawn && cmpOn()) drawn.then(function () { if (arriveTouched <= t) arrive(true); });
+    if (drawn) drawn.then(function (opened) { if ((cmpIs || opened) && arriveTouched <= t) arrive(true); });
   });
   // A column's ×, at its name's corner, takes that translation out of those
   // shown, as Settings' Translations does, and the columns are drawn again
@@ -2389,7 +2557,8 @@
     var ps = document.querySelectorAll('main p.t[id]'), r;
     for (var i = 0; i < ps.length; i++) {
       r = ps[i].getBoundingClientRect();
-      if (r.height && r.bottom > 0) return ps[i];
+      // Or the one before, its translations open at the window's top (foldOver).
+      if (r.height && r.bottom > 0) return foldOver(ps[i - 1], 0) || ps[i];
     }
     return ps[0] || null;
   }
@@ -2632,6 +2801,18 @@
     var el = document.body.classList.contains('listening') && document.querySelector('main.reader :is(p.t.now[id], p.rt.now)');
     return !el ? null : el.id ? el : document.getElementById(el.dataset.ref || '');
   }
+  // The paragraph whose translations, open in the fold under it, stand across
+  // height y of the window: it is the one being read there, in translation,
+  // and not the next, whose first line may be a screen below.  With the folds
+  // open under every paragraph that is where a phone's window mostly stands
+  // (2026-11-20), and Continue reading came back a paragraph on.  By the
+  // fold's words, the .tf itself having no box on a phone with the index
+  // folded.  `q` is the paragraph before the first that reaches below y.
+  function foldOver(q, y) {
+    var row = q && q.closest('.row'), panel = row && row.querySelector(':scope > .tf.open > .tr'),
+        b = panel && panel.getBoundingClientRect();
+    return b && b.height && b.top <= y && b.bottom > y ? row.querySelector('p.t[id]') : null;
+  }
   // The paragraph heard, or the one last heard while it is on the screen;
   // else the first paragraph with a line of its own showing under what stands
   // over the text, the columns' names; at the page's very top, the first.
@@ -2648,7 +2829,7 @@
     ps = document.querySelectorAll('main.reader article:not(.partpage) p.t[id]');
     for (i = 0; i < ps.length; i++) {
       r = ps[i].getBoundingClientRect();
-      if (r.height && r.bottom > top + 24) return ps[i];
+      if (r.height && r.bottom > top + 24) return foldOver(ps[i - 1], top + 24) || ps[i];
     }
     return ps[ps.length - 1] || null;
   }

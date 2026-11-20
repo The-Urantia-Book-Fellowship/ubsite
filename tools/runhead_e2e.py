@@ -520,7 +520,9 @@ def run() -> int:
         pg.tap(FOLD + " p.who >> nth=0")
         settle(pg)
         ok(not shown(pg) and named(pg) == [], "a tap on a translation's name in the fold is no tap on the text")
-        pg.evaluate("ubSettings.set('translations', ''); ubSettings.set('trtab', '')")
+        # The tap on the fold opened every fold, and they stay so (ub.js
+        # trAll, 2026-11-20): folded again for what follows.
+        pg.evaluate("ubSettings.set('translations', ''); ubSettings.set('trtab', ''); ubSettings.set('tropen', false)")
 
         # The whole paper's Contents from a translation's paragraph (Tigran,
         # 2026-11-18, of the Foreword in his own translation: on a desk, the
@@ -578,7 +580,8 @@ def run() -> int:
         settle(pg)
         ok(pg.evaluate(SECS + "[6].textContent.trim()") == "6. Energy and Pattern" and pg.evaluate(SECS + "[5].textContent.trim()") == "5. Personality Realities",
            "and the book's own chosen in their list puts the English back, that link's too")
-        pg.evaluate("ubSettings.set('whole', false); ubSettings.set('translations', ''); ubSettings.set('trtab', ''); ubSettings.set('index', true)")
+        pg.evaluate("ubSettings.set('whole', false); ubSettings.set('translations', ''); ubSettings.set('trtab', ''); ubSettings.set('index', true);"
+                    " ubSettings.set('tropen', false)")
 
         print("A wide screen, the Contents folded away")
         ctx2 = b.new_context(viewport={"width": 1280, "height": 900})

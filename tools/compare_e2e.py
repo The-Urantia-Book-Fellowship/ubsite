@@ -410,18 +410,29 @@ def room(b) -> None:
     ok(not errors, f"no error in the page ({errors})")
     ctx.close()
 
-    # A fold a reader opened goes with the folds as the columns come, and is
-    # shut when they come back.
+    # A fold a reader opens opens every fold, and they go as the columns
+    # come, none of them drawn under the columns; and come back as the reader
+    # left them, open, or shut (Tigran, 2026-11-20; until then a fold opened
+    # came back shut).
+    ALL = ("(() => { const f = [...document.querySelectorAll('main .tf[data-has]')].filter(e => getComputedStyle(e).display !== 'none');"
+           " return f.length > 0 && f.every(e => e.classList.contains('open') && e.querySelector('.tr p.rt')); })()")
     ctx, pg, errors = context(b, {"translations": TR[1]}, size=(1440, 900))
     pg.goto(BASE + "/15:1")
     settled(pg)
     pg.locator(".trfold").first.click()
-    ok(until(pg, "!!document.querySelector('.tf.open .tr p.rt')"), "a fold opened shows its translation")
+    ok(until(pg, ALL), "a fold opened opens them all, each showing its translation")
     pg.locator(".railfold").click()
-    ok(until(pg, "!!document.querySelector('article.cmp .cmphd')") and pg.locator(".tf.open").count() == 0, "the Contents folded: columns, and no fold open")
+    ok(until(pg, "!!document.querySelector('article.cmp .cmphd')") and pg.locator(".tf.open").count() == 0
+       and pg.locator("main .tf .tr").count() == 0, "the Contents folded: columns, and no fold open or drawn")
+    pg.locator(".railfold").click()
+    ok(until(pg, "!document.querySelector('article.cmp')") and until(pg, ALL), "shown again: the folds, all open, as the reader left them")
+    pg.locator(".trfold").first.click()
+    ok(until(pg, "document.querySelectorAll('.tf.open').length === 0"), "a tap on one folds them all")
+    pg.locator(".railfold").click()
+    ok(until(pg, "!!document.querySelector('article.cmp .cmphd')"), "the Contents folded again: columns")
     pg.locator(".railfold").click()
     ok(until(pg, "!document.querySelector('article.cmp')") and pg.locator(".tf.open").count() == 0 and pg.evaluate(STATE)["folds"] > 0,
-       "shown again: the folds, shut")
+       "shown again: the folds, shut, as left")
     ok(not errors, f"no error in the page ({errors})")
     ctx.close()
 

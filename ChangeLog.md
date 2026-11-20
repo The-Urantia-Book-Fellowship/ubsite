@@ -86,6 +86,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Where the translations are folded under the paragraphs, as on a phone, opening one paragraph's now opens them under every paragraph, and folding one folds them all; they stay as you left them on every page and at your next visit, and, signed in, on your other devices, with the tab you chose in them.
 - Privacy now says where signing in is offered, and that a signed-in reader's settings, place and bookmarks are kept with the account as well as in the browser.
 - The paragraph a link takes you to is tinted for seven seconds and then fades by itself, where until now it stayed tinted until you tapped the text; a paragraph you tap yourself keeps its tint until you tap again, as before.
 - On a phone the controls at the top stand a little closer where they would not otherwise fit beside the site's name, so the two flags stay on narrower phones than before.
@@ -185,6 +186,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- Help's chapter on the translations showed a caption with nothing above it: the line it describes, under a paragraph, is shown.
 - In the dark theme the scrollbars, of the Contents and the index above all, and the checkboxes and round buttons in Settings were drawn light; they are dark now.
 - The quiz's question on the cycle of space respiration, at Paper 11, read "spare respiration".
 - With Whole paper on, the Contents mark the section of the paragraph you tapped; on a wide screen, with the end of one section at the window's top and the paragraph in the next, they marked the section before it.
@@ -246,6 +248,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The translations' folds are one setting, tropen (settings.py KEPT), which follows the account, and so does trtab, no longer the device's own. The exchange with an account has a version (account.js V, a request's v and was; settings.LATE): a script from before a setting came to follow is neither told of it nor heard on it, since the first script called a setting it did not keep back to its default. tools/trfold_e2e.py drives the folds in Chrome.
 - Accounts: signing in and what follows the account are offered on ubsite.sigmaai.au (settings.py ACCOUNT_HOSTS; a host also needs its var/account.toml and nginx's location for the exchange), not on ubsite.ddns.net; Each host backs up its own var/user.db every night from its crontab (python -m ubsite.account backup: a copy beside it, read back, copies 29 days old deleted), and a deploy takes one copy off the host. What follows the account was built on the dev server first. A signed-in reader's settings, all but the device's own (settings.py DEVICE), the place last read and the bookmarks are kept in var/user.db too, a row of its table item to each, and kept in step with the browser's copy by one exchange, POST /account/sync (account.py sync()), which static/account.js makes, a script only a reader signed in runs; a page is still drawn from the browser's own copy, and is the same for every reader. Both nginx files have a location for the exchange, to be installed on a host before it has accounts (deploy/README.md). tools/follow_e2e.py drives two browsers as two devices.
 - Accounts: signing in with Google is built, and offered on the dev server alone (settings.py ACCOUNT_HOSTS) until what follows the account is built with it. ubsite/account.py keeps var/user.db: accounts by Google's id with a small copy of the account's picture, sessions as their hashes, and what some accounts are given. A host has accounts when it has var/account.toml, which python -m ubsite.account setup writes; without it every address under /account is 404. tests/test_account.py holds the flow and what is refused, and tools/account_e2e.py drives it in Chrome against a stand-in for Google.
 - The passages of the moment are data/passages.tsv, each a paragraph's reference and the words of it shown, kept by tools/passages/apply.py from rulings in var/passages/review.md; build/passage.py holds each to the text (there once, whole sentences, at most 480 characters) and stores it rendered in the table passage (schema 013), and the home page carries the whole list, of which a line of script shows one. The install banner and the offline copy's state on the bar are the shell's (base.html .appban, .fstate), shown on the home page by the stylesheet; what is known of the browser's offer is kept as localStorage ub_install, the passage last shown as ub_passage, keys of their own and no settings. window.ubSettings.open(tab) opens Settings at a tab. tests/test_front.py; tools/front_e2e.py.

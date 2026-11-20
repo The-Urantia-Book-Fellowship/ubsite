@@ -179,7 +179,10 @@ class Rail(unittest.TestCase):
         # A language's browser voice is in it where a translation is in that language.
         ru = [{"key": "ud", "lang": "ru", "label": "Aivazian", "language": l10n.tr("Russian")}]
         shown = [it["key"] for g in settings.groups([], ru) for it in g["items"]]
-        self.assertEqual(sorted(set(d) - set(shown)), ["margin", "rail", "toc", "trtab"])
+        # And the translations' folds, open under every paragraph or shut, a
+        # fold's own line their only control (Tigran, 2026-11-20).
+        self.assertEqual(sorted(set(d) - set(shown)), ["margin", "rail", "toc", "tropen", "trtab"])
+        self.assertIs(d["tropen"], False)
         self.assertEqual(len(shown), len(set(shown)))
 
     def test_139_names_its_combined_section(self):

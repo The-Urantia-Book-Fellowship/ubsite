@@ -325,6 +325,13 @@ KEPT = [
     # The tab last chosen in a fold of translations, which the next fold opens
     # at (Tigran, 2026-10-26): a translation's key, "all", or "" for the first.
     ("trtab", "kept", "Translation", "", [], ""),
+    # The translations open under every paragraph, where the window has no room
+    # for them in columns, or folded, each to its line: a tap on any one fold's
+    # line opens them all or folds them all, on every page of the text from
+    # then on (Tigran, 2026-11-20: "Folding or unfolding a single paragraph's
+    # translations should affect all paragraphs and this state should be
+    # preserved globally"; ub.js trAll).  Folded unless a reader opens them.
+    ("tropen", "kept", "Translations", False, [], ""),
     # The contents in the left rail as a translation gives them, chosen on the
     # rail's line (Tigran, 2026-10-27; ub.js tocApply): a translation's key, or
     # "" for the book's own.  One no longer ticked reads as "".
@@ -338,10 +345,26 @@ SPARED = ["lang"]
 # every other setting follows the account from one device to another (Tigran,
 # 2026-11-18; ubsite/account.py, static/account.js).  The two text sizes, the
 # line spacing and the width, which are chosen for a screen; the browser's
-# voices, which are the device's; and what is folded.  Whole paper follows the
-# account (his ruling the same day), and so does the language.  The browser
-# sends none of these, and the server takes none (followed()).
-DEVICE = ["uisize", "size", "lead", "width", "bvoice", "trvoices", "rail", "margin", "trtab", "toc"]
+# voices, which are the device's; and what is folded of the page's frame, the
+# Contents and the index.  Whole paper follows the account (his ruling the
+# same day), and so does the language; and so, since 2026-11-20, do the
+# translations' folds, open or shut, and the tab chosen in them (his word that
+# day: "if I was reading with translations unfolded on the phone I expect to
+# see them unfolded on the computer or tablet also, as long as I am logged in
+# to the same Google account"; the tab asked of him, and "follows too").  The
+# browser sends none of these, and the server takes none (followed()).
+DEVICE = ["uisize", "size", "lead", "width", "bvoice", "trvoices", "rail", "margin", "toc"]
+
+# The settings that came to follow the account after the first exchange was
+# written, each by the version of the exchange that first knows it
+# (static/account.js V; account.py sync()).  A script older than a setting's
+# version is neither told of it nor heard on it: the first script noted
+# whatever it was sent, and said of a setting it did not keep that it was back
+# at its default, which the server took, so a page left open from before a
+# deploy would have folded the translations on every other device (found in
+# review, 2026-11-20, before it reached a reader).  A setting that comes to
+# follow later is named here with the next version, and V is raised with it.
+LATE = {"tropen": 2, "trtab": 2}
 
 
 # A site's own defaults, by the host a page is read at, where they differ from
@@ -434,6 +457,9 @@ def followed() -> dict:
     for k in DEVICE:
         if k not in base:
             raise ValueError(f"settings.DEVICE: {k!r} is no setting")
+    for k in LATE:
+        if k not in base or k in DEVICE:
+            raise ValueError(f"settings.LATE: {k!r} does not follow an account")
     return {k: v for k, v in base.items() if k not in DEVICE}
 
 
