@@ -217,7 +217,10 @@ class Pages(unittest.TestCase):
         # A tab is a button that names one: the ▶ in their row is not a tab.
         self.assertIn("closest('.trfold, .trtabs button[data-tab]')", ub)
         fold = js[js.index("function foldPlay(panel)"):js.index("// ---- the bar")]
-        self.assertIn("trButton(t, panel.querySelector('p.rt[data-k=\"' + t + '\"][data-ref]'))", fold)
+        self.assertIn("line = panel.querySelector('p.rt[data-k=\"' + t + '\"][data-ref]');", fold)
+        # The English, folded too where another text is first (2026-11-20),
+        # reads in its own voice from there.
+        self.assertIn("(t === 'up' ? enButton(line) : trButton(t, line))", fold)
         self.assertIn("document.addEventListener('ub:trfold', function (ev) { foldPlay(ev.detail); });", fold)
         self.assertEqual(js.count("function trButton("), 1)
 

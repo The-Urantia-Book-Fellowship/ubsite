@@ -108,7 +108,7 @@ class Pages(unittest.TestCase):
         _, _, body = get("/search?q=jesus")
         self.assertIn('<section class="ix"><h2>Headwords</h2>', body)
         self.assertIn('<section class="ix"><h2>In the index', body)
-        self.assertIn("<section><h2>In the text", body)
+        self.assertIn('<section data-tr="up"><h2>In the text', body)
         _, _, body = get("/search?q=jesus&in=index")
         self.assertIn("<section><h2>Headwords</h2>", body)
         self.assertIn("<section><h2>In the index", body)

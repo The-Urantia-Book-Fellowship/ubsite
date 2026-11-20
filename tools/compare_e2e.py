@@ -143,7 +143,9 @@ MARKS = """() => { const bs = [...document.querySelectorAll('main article > sect
   return { boxes: bs.length, long: bs.filter(b => n(b) >= 5).length, marked: bs.filter(b => b.classList.contains('cmpfold')).length,
            wrong: bs.filter(b => b.classList.contains('cmpfold') !== (n(b) >= 5)).length }; }"""
 # What a tap has named: the English paragraph, or a translation's line with whose it is; and the running head.
-NAMED = """() => ({ en: [...document.querySelectorAll('main p.t.named')].map(p => p.id),
+# The English's (or a first text's) line, not a column's first line, which is
+# a p.t too since 2026-11-20 (ub.js trLines, its ▶ in its stack).
+NAMED = """() => ({ en: [...document.querySelectorAll('main p.t.named')].filter(p => !p.closest('.rc')).map(p => p.id),
   tr: [...document.querySelectorAll('main .rc p.rt.named')].map(p => p.closest('.rc').dataset.k + ' ' + p.dataset.ref),
   head: (h => h && !h.hidden ? h.querySelector('.ref').textContent : null)(document.querySelector('.runhead')) })"""
 # The room round a section's title: from the last paragraph of the section
@@ -712,7 +714,7 @@ def titles(b) -> None:
         first = pg.evaluate("(() => { const ps = document.querySelectorAll('main p.t[id]');"
                             " for (const p of ps) { const r = p.getBoundingClientRect(); if (r.height && r.bottom > 0) return p.id; } })()")
         ok(first.startswith("15:12."), f"{label}: the first paragraph on the screen is one of the section before ({first})")
-        pg.locator('[id="15:13"] .cmphd > .ch:not([data-k]) h2' if st.get("translations") else '[id="15:13"] > .papertop h2').click()
+        pg.locator('[id="15:13"] .cmphd > .ch[data-k="up"] h2' if st.get("translations") else '[id="15:13"] > .papertop h2').click()
         ok(until(pg, "!!document.querySelector('.runhead:not([hidden])')", 4), f"{label}: a click on the title brings the running head")
         n = pg.evaluate(NAMED)
         ok(n == {"en": ["15:13.1"], "tr": [], "head": "15:13.1"}, f"{label}: naming the section's own first paragraph ({n})")

@@ -62,7 +62,9 @@ class Room(unittest.TestCase):
     in Chrome by tools/compare_e2e.py; here, its parts in place."""
 
     def test_no_setting_and_nothing_that_needs_one(self):
-        self.assertEqual([s[0] for s in TRANSLATIONS], ["translations"])
+        # The texts' order, the English's place among them its own setting
+        # (2026-11-20), and no switch.
+        self.assertEqual([s[0] for s in TRANSLATIONS], ["translations", "english"])
         self.assertNotIn("compare", NEEDS)
         self.assertNotIn("compare", defaults())
         body = get("/1:1", raw=True)[2]
@@ -91,7 +93,8 @@ class Room(unittest.TestCase):
         # wide as the one the last page read was in columns in.
         body = get("/1:1", raw=True)[2]
         self.assertIn("var cw = +localStorage.getItem('ub_cols');", body)
-        self.assertIn("if (cw && innerWidth >= cw && ('translations' in s ? s.translations : D.translations)) r.classList.add('compare');", body)
+        self.assertIn("if (cw && innerWidth >= cw && window.ubTexts('translations' in s ? s.translations : D.translations,\n"
+                      "                                                 'english' in s ? s.english : D.english).length > 1) r.classList.add('compare');", body)
         self.assertNotIn("s.compare", body)
         self.assertIn(':root[data-margin="off"]:not(.compare, [data-index="off"])', body)
         # A part's page in columns by the class alone, at any width.
@@ -119,8 +122,9 @@ class Room(unittest.TestCase):
         self.assertIn("probe.className = 'cprobe';", fits)
         self.assertIn("probe.style.setProperty('--n', n);", fits)
         self.assertNotRegex(fits, r"\d+(rem|ch|px)\b")
-        # All the columns or none: one more than the translations the page has.
-        self.assertIn("return (cmpIs = ks.length > 0 && cmpFits(art, ks.length + 1));", js)
+        # All the columns or none: the texts shown the page has, the English
+        # among them where it is shown (2026-11-20), two or more.
+        self.assertIn("return (cmpIs = ks.length > 1 && cmpFits(art, ks.length));", js)
 
     def test_the_frame_grows_to_hold_a_measure_to_a_column(self):
         css = (ROOT / "ubsite/static/ub.css").read_text()
@@ -129,7 +133,7 @@ class Room(unittest.TestCase):
                       "  --textw: calc(var(--cols) * var(--measure) + (var(--cols) - 1) * 2rem); }", css)
         self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 4)
         self.assertNotRegex(css, r"\.reader[^{]*\{[^}]*max-width: calc\(var\(--measure\)")
-        self.assertIn("if (on) art.parentNode.style.setProperty('--cols', ks.length + 1);", js)
+        self.assertIn("if (on) art.parentNode.style.setProperty('--cols', ks.length);", js)
         self.assertNotIn("art.style.setProperty('--cols'", js)
 
     def test_decided_again_as_the_room_changes(self):
@@ -173,8 +177,10 @@ class Names(unittest.TestCase):
 
     def test_each_column_by_its_short_name(self):
         js = self.JS
-        self.assertIn('<p class="cn" style="--c:1"><b lang="en">Uversa Press</b></p>', js)
-        self.assertIn("""'"><b lang="en">' + trBy[k].label + '</b>'""", js)
+        # Every text's, the English's among them in its place (2026-11-20):
+        # the press's short name, as a translation's is its own.
+        self.assertIn("var UP = { key: 'up', label: 'Uversa Press', lang: 'en' };", js)
+        self.assertIn("""'"><b lang="en">' + txt(k).label + '</b>'""", js)
         # No title of the book over a column: the English's, nor a translation's.
         self.assertNotIn("<b>The Urantia Book</b> (Uversa Press)", js)
         start = js.index("    var draw = function (gots) {")
@@ -298,7 +304,7 @@ class SearchHit(unittest.TestCase):
     def test_the_mark_moves_to_its_column_and_back(self):
         js = self.JS
         self.assertIn("var row = p.closest('.row'), rt = row && row.querySelector('.rc[data-k=\"' + k + '\"] p.rt[data-ref=\"' + p.id + '\"]');", js)
-        self.assertIn("      cmpHit();\n      // listen.js puts each translation's ▶ in its cells.", js)
+        self.assertIn("      cmpHit();\n      bmPaint();\n      ftxReady();\n      // listen.js puts each translation's ▶ in its cells.", js)
         start = js.index("function cmpUndraw(art) {")
         self.assertIn("var p = document.getElementById(rt.dataset.ref);", js[start:start + 600])
 

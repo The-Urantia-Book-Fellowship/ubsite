@@ -102,27 +102,77 @@ window.ubLang = function (r, v) {
 // (part.html, 2026-11-07).
 // One rule, since the keys are the reader's own list; ub.js says it again on
 // a change.
-window.ubTr = function (v) {
+//
+// The texts shown, in the reader's order (Tigran, 2026-11-20: the English one
+// of them, "not singling out English as special"): `translations`, the keys
+// ticked in order, with the English, "up", put in at its place, `english`
+// (settings.py): '' first, a number counted from 0, or "off".  With none
+// left, the English alone, which stands wherever no text shown has a
+// paragraph.  ub.js takes the same order from here, keeping only the
+// translations the site has.
+window.ubTexts = function (tr, en) {
+  var ks = [], i;
+  String(tr || '').split(' ').forEach(function (k) {
+    if (/^[a-z0-9-]+$/.test(k) && k !== 'up' && ks.indexOf(k) < 0) ks.push(k);
+  });
+  if (en !== 'off') {
+    i = /^[0-9]+$/.test(en || '') ? Math.min(+en, ks.length) : 0;
+    ks.splice(i, 0, 'up');
+  }
+  return ks.length ? ks : ['up'];
+};
+window.ubTr = function (tr, en) {
   var st = document.getElementById('ub-tr');
   if (!st) { st = document.createElement('style'); st.id = 'ub-tr'; document.head.appendChild(st); }
-  var ks = String(v || '').split(' ').filter(function (k) { return /^[a-z0-9-]+$/.test(k); });
-  var f = ks.map(function (k) { return '.tf[data-has~="' + k + '"]'; }).join(),
-      d = ks.map(function (k) { return '.divider[data-k="' + k + '"]'; }).join(),
+  var all = window.ubTexts(tr, en), up = all.indexOf('up'),
+      ks = all.filter(function (k) { return k !== 'up'; }), f = [], i, j;
+  // A row's fold, where it has two of the texts shown or more: with the
+  // English shown, any translation shown, as it always was; with it hidden,
+  // any two.
+  if (up >= 0) ks.forEach(function (k) { f.push('.tf[data-has~="' + k + '"]'); });
+  else for (i = 0; i < ks.length; i++) for (j = i + 1; j < ks.length; j++)
+    f.push('.tf[data-has~="' + ks[i] + '"][data-has~="' + ks[j] + '"]');
+  f = f.join();
+  // Where a translation comes before the English, or the English is hidden,
+  // the English of a row that one of those has, and of a head over such rows,
+  // is not painted until ub.js has drawn the first text in its place, or in
+  // columns put each text in its own (cmpDraw, .ftxready): the room kept, and
+  // nothing in English seen for a moment by a reader who does not read it.
+  var pre = (up < 0 ? ks : ks.slice(0, up)).map(function (k) { return '[data-has~="' + k + '"]'; }).join(),
+      hide = pre ? ':root:not(.ftxready) .grid>.row:has(>.tf:is(' + pre + '))>:is(p.t,.verse),' +
+                   ':root:not(.ftxready) main.reader>article:has(.tf:is(' + pre + ')) :is(article>.papertop,section>.papertop)' +
+                   '{visibility:hidden}' : '';
+  var d = ks.map(function (k) { return '.divider[data-k="' + k + '"]'; }).join(),
       r = ':root[data-margin="off"]:not(.compare, [data-index="off"]) .grid>.row:has(>:is(' + f + '))',
-      s = ks.map(function (k) { return '>[data-tr="' + k + '"]'; });
-  st.textContent = ks.length ? f + '{display:block}' +
+      sk = up > 0 ? all : ks, s = sk.map(function (k) { return '>[data-tr="' + k + '"]'; });
+  st.textContent = hide + (f ? f + '{display:block}' +
     '@media screen and (max-width:62rem){' + r +
     '{flex-flow:row wrap;align-items:baseline;margin-bottom:1rem}' + r + '>:is(.a,.tf){display:contents}' +
     r + ' :is(.afold,.trfold){margin-top:-.4rem}' +
-    r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold{margin-right:1em}}' +
-    '.trhits:has(' + s.join() + '){display:flex}' +
+    r + ' .afold{display:inline-flex;width:auto}' + r + ' .a>.afold{margin-right:1em}}' : '') +
+    (ks.length ? '.trhits:has(' + s.join() + '){display:flex}' +
     s.map(function (x, i) { return '.trhits' + x + '{display:block;order:' + i + '}'; }).join('') +
     // A part's page (part.html): each ticked translation's divider, in the
-    // reader's order after the English's, and where the window has room for
-    // columns (.compare, below) a column each (ub.css .dividers, keyed on
+    // reader's order, the English's among them, and where the window has room
+    // for columns (.compare, below) a column each (ub.css .dividers, keyed on
     // data-translations).
-    ks.map(function (k, i) { return '.partpage .dividers>.divider[data-k="' + k + '"]{display:block;order:' + (i + 1) + '}'; }).join('') +
-    ':root.compare .partpage .dividers>:is(' + d + '){display:grid}' : '';
+    all.map(function (k, i) {
+      return k !== 'up' ? '.partpage .dividers>.divider[data-k="' + k + '"]{display:block;order:' + i + '}' :
+             i ? '.partpage .dividers>.divider.en{order:' + i + '}' : '';
+    }).join('') +
+    (up < 0 ? '.partpage .dividers>.divider.en{display:none!important}' : '') +
+    // Stacked, the first text's divider stands first, with no rule over it,
+    // and the English's after another is ruled off and named as theirs are.
+    (up !== 0 ? '.partpage .dividers>.divider[data-k="' + all[0] + '"]{margin-top:0;padding-top:0;border-top:0}' : '') +
+    (up > 0 ? '.partpage .dividers>.divider.en{margin-top:2.6rem;padding-top:1.8rem;border-top:1px solid var(--rule)}' +
+              '.partpage .dividers>.divider.en>.who{display:block}' : '') +
+    ':root.compare .partpage .dividers>:is(' + d + '){display:grid}' : '') +
+    // Among the search results, the text's list, the English's, where it is
+    // not first, is put among the translations' by ub.js (srOrder), in its
+    // place; hidden, it goes, as a translation's does (Tigran, 2026-11-20:
+    // "Follow the order, hide with it"), on the overview, the page with no
+    // hint over it; opened whole, always.
+    (up < 0 ? 'main.results:not(:has(>.hint))>[data-tr="up"]{display:none}' : '');
 };
 window.ubTitle = function () {
   var t = document.querySelector('title');
@@ -207,7 +257,7 @@ window.ubUnit = function (where) {
     if (x !== B[k]) r.dataset[k] = x === false ? 'off' : x;
   }
   window.ubLang(r, 'lang' in s ? s.lang : D.lang);
-  window.ubTr('translations' in s ? s.translations : D.translations);
+  window.ubTr('translations' in s ? s.translations : D.translations, 'english' in s ? s.english : D.english);
   // The translations in columns beside the text, where the window has room
   // for them, which ub.js finds from the page as it is laid out (cmpFits;
   // Tigran, 2026-11-16: a setting until then, `compare`).  Here, before
@@ -219,7 +269,8 @@ window.ubUnit = function (where) {
   // wrong guess ub.js puts right as it runs.
   try {
     var cw = +localStorage.getItem('ub_cols');
-    if (cw && innerWidth >= cw && ('translations' in s ? s.translations : D.translations)) r.classList.add('compare');
+    if (cw && innerWidth >= cw && window.ubTexts('translations' in s ? s.translations : D.translations,
+                                                 'english' in s ? s.english : D.english).length > 1) r.classList.add('compare');
   } catch (e) {}
   // This address in the reader's unit (ubUnit, above), or the page is left for
   // it before it is drawn, with no entry in the history, as the server's
@@ -435,12 +486,23 @@ window.ubUnit = function (where) {
           ub.js keeps.  A tick shows one; once shown, × hides it, and its card is
           no switch (Tigran, 2026-10-26).  Its short name, never translated,
           after its title: what a fold calls it. #}
-      <input type="hidden" name="{{ it.key }}">
+      {#- And the English, a row like the rest since 2026-11-20 (Tigran: all
+          the texts treated alike), its place among them `english`, the
+          second hidden input, which ub.js keeps with the first.  Drawn among
+          those shown, where it stands until a reader moves or hides it; its
+          × greyed while it is the only one shown, as every row's is then. #}
+      <input type="hidden" name="{{ it.key }}"><input type="hidden" name="english">
       <p class="trintro">{{ t('tr:intro') }}</p>
       <p class="sub">{{ t('Shown, in this order') }}</p>
-      <p class="trnone">{{ t('tr:none') }}</p>
       <ol class="trlist trshown"></ol>
-      <p class="sub trothers">{{ t('Other translations') }}</p>
+      <p class="sub trothers">{{ t('Other texts') }}</p>
+      <p class="trlang">{{ t('English') }}</p>
+      <ul class="trlist trother" data-lang="en">
+        <li data-k="up"><label><input type="checkbox" value="up">
+          <span class="w"><span lang="en">The Urantia Book</span> <span class="nobreak">(Uversa Press)</span> <span class="lang">{{ t('English') }}</span></span>
+          <small class="d">{{ t('tr:original') }} · {{ t('the whole book') }}</small></label>
+          <span class="mv"><button type="button" class="up" {{ ta('aria-label', 'Move up') }} {{ ta('title', 'Move up') }}>↑</button><button type="button" class="down" {{ ta('aria-label', 'Move down') }} {{ ta('title', 'Move down') }}>↓</button><button type="button" class="drop" {{ ta('aria-label', 'Hide this text') }} {{ ta('title', 'Hide this text') }}>×</button></span></li>
+      </ul>
       {%- for lang, rows in translations()|groupby('lang') %}
       <p class="trlang">{{ t(LANGUAGES[lang]) }}</p>
       <ul class="trlist trother" data-lang="{{ lang }}">
@@ -448,7 +510,7 @@ window.ubUnit = function (where) {
         <li data-k="{{ x.key }}"><label><input type="checkbox" value="{{ x.key }}">
           <span class="w"><span lang="{{ x.lang }}">{{ x.title }}</span> <span class="nobreak">({{ x.label }})</span> <span class="lang">{{ t(LANGUAGES[lang]) }}</span></span>
           <small class="d">{{ t(x.by) }} · {{ t(x.cover) }}{% if x.credit %}<span class="cr">{{ t(x.credit) }}</span>{% endif %}</small></label>
-          <span class="mv"><button type="button" class="up" {{ ta('aria-label', 'Move up') }} {{ ta('title', 'Move up') }}>↑</button><button type="button" class="down" {{ ta('aria-label', 'Move down') }} {{ ta('title', 'Move down') }}>↓</button><button type="button" class="drop" {{ ta('aria-label', 'Hide this translation') }} {{ ta('title', 'Hide this translation') }}>×</button></span></li>
+          <span class="mv"><button type="button" class="up" {{ ta('aria-label', 'Move up') }} {{ ta('title', 'Move up') }}>↑</button><button type="button" class="down" {{ ta('aria-label', 'Move down') }} {{ ta('title', 'Move down') }}>↓</button><button type="button" class="drop" {{ ta('aria-label', 'Hide this text') }} {{ ta('title', 'Hide this text') }}>×</button></span></li>
         {%- endfor %}
       </ul>
       {%- endfor %}

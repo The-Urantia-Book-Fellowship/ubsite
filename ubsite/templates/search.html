@@ -27,7 +27,10 @@
   {%- else %}<a class="app" href="{{ appendix_href(e.scope, e.anchor) }}"><span class="lbl">{{ e.appendix }}</span> {{ e.marked }}</a>{% endif %}</li>{% endfor %}</ul>
 {{ more(idx, 'index', 'Show all {n:,} index entries') }}
 {% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endif %}
-{% if scope in ('', 'text') %}<section><h2>{{ t('In the text') }} {% if txt %}{{ count(txt) }}{% else %}<span>(0)</span>{% endif %}</h2>
+{#- The English among the texts (2026-11-20): its list in the reader's order
+    with the translations' on the overview, and gone while it is hidden
+    (base.html ubTr), as a translation's is. #}
+{% if scope in ('', 'text') %}<section data-tr="up"><h2>{{ t('In the text') }} {% if txt %}{{ count(txt) }}{% else %}<span>(0)</span>{% endif %}</h2>
 {% if txt and txt.rows %}<ul class="hits">{% for t in txt.rows %}<li><a href="/{{ t.ref }}">{{ t.ref }}</a> {{ t.s|safe }}</li>{% endfor %}</ul>
 {{ more(txt, 'text', 'Show all {n:,} paragraphs') }}
 {% else %}<p class="none">{{ t('nothing') }}</p>{% endif %}</section>{% endif %}

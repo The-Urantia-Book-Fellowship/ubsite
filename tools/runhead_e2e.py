@@ -486,7 +486,9 @@ def run() -> int:
         pg.go_back()
         settle(pg)
         c = pg.evaluate(TOC)
-        ok(not pg.evaluate(SHOWN) and c["list"] == "" and c["paper"] == "101. The Real Nature of Religion", "Back folds them, the book's own again")
+        # The book's own is "up" in the list since 2026-11-20, '' there being
+        # the first text's, whichever it is.
+        ok(not pg.evaluate(SHOWN) and c["list"] == "up" and c["paper"] == "101. The Real Nature of Religion", "Back folds them, the book's own again")
         pg.go_forward()
         pg.wait_for_timeout(600)
         c = pg.evaluate(TOC)
@@ -498,7 +500,7 @@ def run() -> int:
         pg.tap(".runhead .ref")
         pg.wait_for_timeout(600)
         c = pg.evaluate(TOC)
-        ok(pg.evaluate(SHOWN) and c["list"] == "" and c["paper"] == "101. The Real Nature of Religion",
+        ok(pg.evaluate(SHOWN) and c["list"] == "up" and c["paper"] == "101. The Real Nature of Religion",
            "from the English paragraph they open as the reader chose, the book's")
         pg.go_back()
         settle(pg)
@@ -576,7 +578,7 @@ def run() -> int:
         ok(len(drawn) == 13 and all(d[1] == "ru" and not d[2] for d in drawn) and drawn[6][0] == "6. ЭНЕРГИЯ И ОБРАЗЕЦ",
            "its reference opens them in the translation, the link followed among them: %s" % drawn[6][0])
         ok(pg.evaluate(MARK) == ["6. ЭНЕРГИЯ И ОБРАЗЕЦ"], "section 6 marked, the paragraph's, not the one at the window's top: %s" % pg.evaluate(MARK))
-        pg.select_option(".railtr select", "")
+        pg.select_option(".railtr select", "up")
         settle(pg)
         ok(pg.evaluate(SECS + "[6].textContent.trim()") == "6. Energy and Pattern" and pg.evaluate(SECS + "[5].textContent.trim()") == "5. Personality Realities",
            "and the book's own chosen in their list puts the English back, that link's too")

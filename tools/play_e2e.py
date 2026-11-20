@@ -236,17 +236,24 @@ def band(pg, where: str) -> None:
 def desk(b) -> None:
     print("A desk: the columns and the rail")
     ctx, pg, errors = context(b, {"translations": "urantia-ru"}, phone=False, width=1920)
-    open_at(pg, "/1:1", ".rc > .playp")
-    ok(pg.evaluate("document.querySelectorAll('.rc > .playp').length") > 5
-       and pg.evaluate("document.querySelectorAll('.rc > .playp[data-t], .tf .playp[data-t]').length") == 0,
-       "a translation's ▶ has no time")
+    # A translation's ▶ in the stack at its paragraph's start, as the first
+    # column's, with its time where a recording reads it, USGNY's Григорий
+    # Войнер's (Tigran, 2026-11-20); in the gap before the column, with no
+    # time, until then.
+    open_at(pg, "/1:1", ".rc p.rt > .stk > .playp")
+    ok(pg.evaluate("document.querySelectorAll('.rc p.rt > .stk > .playp').length") > 5
+       and pg.evaluate("document.querySelectorAll('.rc > .playp, .tf .playp[data-t]').length") == 0,
+       "a translation's ▶ stands in its paragraph, none in the gap")
+    t12 = pg.evaluate("(document.querySelector(\".rc[data-k='urantia-ru'] p.rt[data-ref='1:1.2'] > .stk > .playp\") || {dataset: {}}).dataset.t")
+    ok(bool(t12) and ":" in t12, f"with the time its recording takes ({t12})")
     want = {ref: clock(ms) for ref, ms in recorded(1, 1).items()}
     ok(pg.evaluate(TIMES) == want and pg.evaluate(DRAWN, "1:1.2") == want["1:1.2"], "the English beside it has its own")
-    x = pg.evaluate("""() => { const rc = document.querySelector(".rc[data-k='urantia-ru']:has(p.rt[data-ref='1:1.2'])"),
-        b = rc.querySelector(':scope > .playp').getBoundingClientRect(), t = rc.querySelector('p.rt').getBoundingClientRect();
-      return [b.right, t.left, b.top, t.top, b.width]; }""")
-    ok(x[0] <= x[1] + 1 and abs(x[2] - x[3]) < 12 and abs(x[4] - 22.4) < .5,
-       "it stands in the gap before its column, clear of the text: %.0f px before it" % (x[1] - x[0]))
+    x = pg.evaluate("""() => { const p = document.querySelector(".rc[data-k='urantia-ru'] p.rt[data-ref='1:1.2']"),
+        b = p.querySelector('.stk > .playp').getBoundingClientRect(), c = p.closest('.rc').getBoundingClientRect(),
+        r = document.createRange(); r.setStart(p.querySelector('.stk').nextSibling, 0); r.setEnd(p.querySelector('.stk').nextSibling, 1);
+        const t = r.getBoundingClientRect(); return [b.left, c.left, b.right, t.left, Math.abs(b.top - p.getBoundingClientRect().top)]; }""")
+    ok(x[0] >= x[1] - 7 and x[2] <= x[3] + 1 and x[4] < 12,
+       "inside its column, the text set after it on the first line: %.0f px after it" % (x[3] - x[2]))
     ok(not errors, "no script error: " + "; ".join(errors))
     ctx.close()
     ctx, pg, errors = context(b, phone=False)

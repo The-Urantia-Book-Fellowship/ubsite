@@ -53,7 +53,7 @@
       else r.dataset[k] = o[k] === false ? 'off' : String(o[k]);
     }
     if (window.ubLang) window.ubLang(r, o.lang);
-    if (window.ubTr) window.ubTr(o.translations);
+    if (window.ubTr) window.ubTr(o.translations, o.english);
   }
   // The translations shown beside the text, told to the worker (sw.js, {cmd:
   // 'shown'}), which has no other way to Settings: what depends on them, a
@@ -141,6 +141,18 @@
       var o = load();
       apply(o);
       announce(k, o);
+    },
+    // Several at once, {key: value}, each announced once all are kept: the
+    // texts' order is two settings, the translations and the English's place
+    // (settings.py TRANSLATIONS), and whoever hears of one must find the
+    // other as it is to be.
+    setAll: function (m) {
+      var s = stored(), k, o;
+      for (k in m) if (k in DEF) { if (m[k] === DEF[k]) delete s[k]; else s[k] = m[k]; }
+      save(s);
+      o = load();
+      apply(o);
+      for (k in m) if (k in DEF) announce(k, o);
     },
     // Every setting but the spared (settings.py SPARED): the language.
     reset: function () {
@@ -248,10 +260,10 @@
           sel.value = all.some(function (v) { return v.name === w; }) ? w : all.length ? all[0].name : any.value;
         else if (rec) rec.selected = true;
       });
-      // The translations in the reader's order, as the columns and the
-      // player's list have them.
-      ticked.forEach(function (k) {
-        var l = k && vrows.querySelector('label[data-k="' + k + '"]');
+      // The texts in the reader's order, as the columns and the player's
+      // list have them, the English's row where the English stands.
+      texts().forEach(function (k) {
+        var l = vrows.querySelector('label[data-k="' + (k === 'up' ? '' : k) + '"]');
         if (l) vrows.appendChild(l);
       });
       vrows.hidden = !some;
@@ -301,14 +313,16 @@
       idle(o);
       trFill();
     };
-    // The Translations tab (settings.py TRANSLATIONS): those shown, in the
-    // reader's order, numbered, each with ↑ and ↓, then the others, by
-    // language, in the order the page drew them.  A tick puts one at the end of
-    // the order, or back among the others (Tigran, 2026-10-26).
+    // The Texts tab (settings.py TRANSLATIONS): those shown, in the reader's
+    // order, numbered, each with ↑ and ↓, then the others, by language, in
+    // the order the page drew them.  A tick puts one at the end of the order,
+    // or back among the others (Tigran, 2026-10-26).  The English a row like
+    // the rest since 2026-11-20, "up", which texts() puts in its place; the
+    // last one shown is never hidden, its × greyed.
     var trShown = form.querySelector('.trshown');
     var trOrder = function () {
-      return String(load().translations || '').split(' ').filter(function (k) {
-        return k && form.querySelector('.trlist li[data-k="' + k + '"]');
+      return texts().filter(function (k) {
+        return form.querySelector('.trlist li[data-k="' + k + '"]');
       });
     };
     var trFill = function () {
@@ -321,6 +335,7 @@
           li.querySelector('input').checked = at >= 0;
           li.querySelector('.up').disabled = at <= 0;
           li.querySelector('.down').disabled = at < 0 || at === order.length - 1;
+          li.querySelector('.drop').disabled = at < 0 || order.length < 2;
           if (at < 0) form.querySelector('.trother[data-lang="' + li.dataset.lang + '"]').appendChild(li);
         });
       order.forEach(function (k) { trShown.appendChild(form.querySelector('.trlist li[data-k="' + k + '"]')); });
@@ -328,13 +343,14 @@
       Array.prototype.forEach.call(form.querySelectorAll('.trother'), function (ul) {
         ul.hidden = ul.previousElementSibling.hidden = !ul.children.length;
       });
-      form.querySelector('.trnone').hidden = order.length > 0;
       form.querySelector('.trothers').hidden = !form.querySelector('.trother li');
     };
     // The place kept (keepPlace): with the translations open under every
     // paragraph, one ticked or unticked changes the page's height by screens.
+    // Two settings, the translations in order and the English's place among
+    // them, set together (setAll).
     var trSet = function (order) {
-      keepPlace(function () { window.ubSettings.set('translations', order.join(' ')); });
+      keepPlace(function () { window.ubSettings.setAll(textsOf(order)); });
       fill();                          // and Listening's menus of their voices
       resettable();
     };
@@ -349,6 +365,8 @@
         if (el.type !== 'checkbox' || !el.closest('.trlist')) return;
         var order = trOrder().filter(function (k) { return k !== el.value; });
         if (el.checked) order.push(el.value);
+        // The last one shown stays.
+        if (!order.length) { el.checked = true; return; }
         trSet(order);
       });
       form.addEventListener('click', function (ev) {
@@ -809,7 +827,7 @@
     var b = document.querySelector('.railfold'), rail = b && b.closest('.rail'), shut, state, drawn, t;
     if (!rail) return false;
     shut = railShut(rail);
-    k = k && tocTicked().indexOf(k) >= 0 ? k : null;
+    k = k && (k === 'up' || tocTicked().indexOf(k) >= 0) ? k : null;
     if (phone.matches && p) {
       // Measured before the Contents open above it, as it will stand after
       // they fold again.
@@ -921,11 +939,38 @@
   // line, which stays, is taken with it (`alt`), for placeBack to go by then;
   // and the English over it, for when the fold goes too, its last
   // translation unticked.
+  //
+  // And the line kept by what it is, its paragraph's address and its text,
+  // and how far into it the place stood, its letter and its height: a
+  // paragraph's first text, where it is not the English, is drawn anew as
+  // the order of the texts or the columns change (ftxPut, 2026-11-20), and
+  // the line taken is then gone; placeBack finds the same paragraph in the
+  // same text, or in the one now first.
   function placeAlt(pl) {
     var tf = pl.el.closest('.tf'), b = tf && tf.querySelector('.trfold'), row = tf && tf.closest('.row'),
-        en = row && row.querySelector('p.t[id]');
+        en = row && row.querySelector('p.t[id]'), r, q;
     if (b) pl.alt = { el: b, y: b.getBoundingClientRect().top, alt: en && { el: en, y: en.getBoundingClientRect().top } };
+    if ((pl.ref = pl.el.id || pl.el.dataset.ref || '')) {
+      pl.k = pl.el.dataset.k || 'up';
+      r = pl.el.getBoundingClientRect();
+      pl.f = r.height ? (pl.y - r.top) / r.height : 0;
+      if (pl.node && pl.el.contains(pl.node)) {
+        q = document.createRange();
+        q.setStart(pl.el, 0);
+        q.setEnd(pl.node, pl.at);
+        pl.off = q.toString().length;
+      }
+    }
     return pl;
+  }
+  // The line of paragraph `ref` in text k as the page now has it, shown;
+  // else the paragraph's own line, its first text's.
+  function placeAgain(pl) {
+    var all = document.querySelectorAll(pl.k === 'up' ? 'main p.t:not(.rt)[id="' + pl.ref + '"], main p.t:not(.rt)[data-ref="' + pl.ref + '"], main .tf p.rt[data-k="up"][data-ref="' + pl.ref + '"]'
+                                                     : 'main p[data-k="' + pl.k + '"][data-ref="' + pl.ref + '"]'), i;
+    for (i = 0; i < all.length; i++) if (all[i].getClientRects().length) return all[i];
+    all = document.getElementById(pl.ref);
+    return all && all.getClientRects().length ? all : null;
   }
   var MARKED = 'main :is(p.t.hit, p.t.named, p.t.now, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, .rt.now)';
   function placeNow() {
@@ -971,9 +1016,28 @@
   // should stand: measured, it stood at the window's top, and the page went
   // up by the whole of its height.  A fold's line stands in for its words.
   function placeBack(pl) {
-    var y = null, q, rs;
+    var y = null, q, rs, el, w, n, off, r;
     if (!pl) return;
-    if (!pl.el.isConnected || !pl.el.getClientRects().length) return placeBack(pl.alt);
+    if (!pl.el.isConnected || !pl.el.getClientRects().length) {
+      el = pl.ref && placeAgain(pl);
+      if (!el) return placeBack(pl.alt);
+      // The same text's line, by its letter; another's, by how far down it.
+      r = el.getBoundingClientRect();
+      y = r.top + (pl.f || 0) * r.height;
+      if (pl.off != null && (el.dataset.k || 'up') === pl.k) {
+        w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        for (off = pl.off, n = w.nextNode(); n && off > n.length; n = w.nextNode()) off -= n.length;
+        if (n && off < n.length) {
+          q = document.createRange();
+          q.setStart(n, off);
+          q.setEnd(n, off + 1);
+          rs = q.getClientRects();
+          if (rs.length) y = rs[0].top;
+        }
+      }
+      if (Math.abs(y - pl.y) >= 1) scrollBy({ top: y - pl.y, behavior: 'instant' });
+      return;
+    }
     if (pl.node && pl.node.isConnected && pl.at < pl.node.length) {
       q = document.createRange();
       q.setStart(pl.node, pl.at);
@@ -1127,6 +1191,31 @@
   try { TRS = JSON.parse((document.getElementById('ub-translations') || {}).textContent || '[]'); } catch (e) {}
   TRS.forEach(function (x) { trBy[x.key] = x; });
 
+  // The texts shown, in the reader's order (Tigran, 2026-11-20: the English
+  // one of them, "not singling out English as special, even though it is the
+  // original"): "up" the English, put in among the translations ticked at its
+  // place (base.html ubTexts, settings.py TRANSLATIONS), and the translations
+  // the site has.  Never none: the English, which stands wherever no text
+  // shown has a paragraph.  Each paragraph's first text of these is set where
+  // the English stood, and the rest are in columns beside it where the window
+  // has room, and in its fold where it has not (cmpDraw).
+  function texts() {
+    var o = load(), ks = window.ubTexts ? window.ubTexts(o.translations, o.english)
+                                        : ['up'].concat(String(o.translations || '').split(' '));
+    ks = ks.filter(function (k) { return k === 'up' || trBy[k]; });
+    return ks.length ? ks : ['up'];
+  }
+  // The two settings an order is, {translations, english}.
+  function textsOf(order) {
+    var up = order.indexOf('up');
+    return { translations: order.filter(function (k) { return k !== 'up'; }).join(' '),
+             english: up < 0 ? 'off' : up ? String(up) : '' };
+  }
+  // A text's names, the English's as the columns name it, its short name the
+  // press's, as a translation's is its own (data/translations.toml label).
+  var UP = { key: 'up', label: 'Uversa Press', lang: 'en' };
+  function txt(k) { return k === 'up' ? UP : trBy[k]; }
+
   // The contents in a translation (Tigran, 2026-10-27).  The list on the
   // rail's line (templates/_rail.html) offers the book, as Compare names it,
   // and each translation ticked, by its short name, in Settings' order; the
@@ -1149,18 +1238,21 @@
   function tocTicked() {
     return String(load().translations || '').split(' ').filter(function (k) { return trBy[k]; });
   }
+  // The contents chosen: a translation's key, or '' for the book's own.  Not
+  // chosen (`toc` ''), the first text's (texts(), 2026-11-20), which is the
+  // book's own while the English is first; "up" is the book's chosen.
   function tocKey() {
-    var k = tocOver || load().toc || '';
+    var k = tocOver || load().toc || texts()[0];
     return tocTicked().indexOf(k) >= 0 ? k : '';
   }
   function tocSync() {
     var l = document.querySelector('.railtr'), sel = l && l.querySelector('select'), ks = tocTicked();
     if (!sel) return;
     l.hidden = !ks.length;
-    sel.innerHTML = '<option value="">Uversa Press</option>' + ks.map(function (k) {
+    sel.innerHTML = '<option value="up">Uversa Press</option>' + ks.map(function (k) {
       return '<option value="' + k + '">' + trBy[k].label + '</option>';
     }).join('');
-    sel.value = tocKey();
+    sel.value = tocKey() || 'up';
   }
   // Each link of `root` the rail can place by its address, in the contents
   // `d`, or the book's with none.  By the address the rail gave it, which a
@@ -1224,12 +1316,14 @@
     if (!ev.target.closest || !ev.target.closest('.railtr')) return;
     // The reader's choice, which ends what a reference opened them in; drawn
     // here too, the choice being no change where it is what was kept.
+    // The first text's chosen is no choice: the contents follow the first,
+    // whichever it comes to be.
     tocOver = null;
-    window.ubSettings.set('toc', ev.target.value);
+    window.ubSettings.set('toc', ev.target.value === texts()[0] ? '' : ev.target.value);
     tocApply();
   });
   document.addEventListener('ub:settings', function (ev) {
-    if (ev.detail.key === 'toc' || ev.detail.key === 'translations') tocApply();
+    if (ev.detail.key === 'toc' || ev.detail.key === 'translations' || ev.detail.key === 'english') tocApply();
   });
   // listen.js's <main>, the rail with it: a new page, as the reader chose.
   document.addEventListener('ub:swap', function () { tocOver = null; tocApply(); });
@@ -1238,10 +1332,14 @@
   // `phone` is, which toContents asks, and the translations and their
   // contents, which it may open in.
   if (history.state && history.state.ub === 'contents') { contentsAt = history.state; toContents(null, history.state.k); }
+  // The texts a row's fold holds, in the reader's order: those shown that the
+  // row has, the English among them where it is shown, but the row's first
+  // text, which stands over the fold (firstOf, below).
   function trKeys(tf) {
-    var has = (tf.dataset.has || '').split(' ');
-    return String(load().translations || '').split(' ').filter(function (k) {
-      return trBy[k] && has.indexOf(k) >= 0;
+    var has = (tf.dataset.has || '').split(' '), row = tf.parentNode, ks = texts(),
+        first = row && row.classList && row.classList.contains('row') ? firstOf(row, ks, null) : 'up';
+    return ks.filter(function (k) {
+      return k !== first && (k === 'up' || has.indexOf(k) >= 0);
     });
   }
   // `sec` is the section's address, `el` its element, section[data-trv],
@@ -1282,15 +1380,39 @@
   // paper's first paragraph its first letter dropped, as the English's are and
   // as each translation's own TeX sets them (\lettrine); and the notes of those
   // lines, which their numbers open as cards.
-  function trLines(got, k, lines) {
+  // In columns (`stk`) a paragraph's first line is set as the English's is,
+  // p.t, with a stack at its start for its ▶ and the time it takes to hear
+  // (listen.js trPlay), and no reference, which is the first column's
+  // (Tigran, 2026-11-20: "maybe then we should do with the other columns
+  // what we do with the first, i.e. place the playback triangle inside the
+  // paragraph ... But with the paragraph reference you made the correct
+  // decision to display it only against the first column"); its ▶ stood in
+  // the gap before the column until then, with no time.
+  function trLines(got, k, lines, stk) {
     var x = trBy[k], h = '', notes = '';
-    Array.prototype.forEach.call(lines, function (q) {
-      var t = (got.t[k] || {})[q.id], c = q.classList;
-      if (t != null) h += '<p class="rt' + (c.contains('head') ? ' head' : '') + (c.contains('opening') ? ' opening' : '') +
-                          '" lang="' + x.lang + '" data-k="' + k + '" data-ref="' + q.id + '">' + trLead(t) + '</p>';
-      notes += (got.n[k] || {})[q.id] || '';
+    Array.prototype.forEach.call(lines, function (q, i) {
+      var ref = q.id || q.dataset.ref, t = (got.t[k] || {})[ref], c = q.classList, s = stk && i === 0;
+      if (t != null) h += '<p class="' + (s ? 't rt' : 'rt') + (c.contains('head') ? ' head' : '') + (c.contains('opening') ? ' opening' : '') +
+                          '" lang="' + x.lang + '" data-k="' + k + '" data-ref="' + ref + '">' + (s ? '<span class="stk"></span>' : '') +
+                          trLead(t) + '</p>';
+      notes += (got.n[k] || {})[ref] || '';
     });
     return { h: h, notes: notes };
+  }
+  // The English's lines for a fold, as a translation's are drawn there: each
+  // a p.rt with its address as data-ref, without the stack at its start,
+  // which is the row's, and without an id, which stays the row's (no id
+  // stands twice); its marks, the 1955 rings and the study notes' numbers,
+  // open their cards from here too.
+  function enFold(lines) {
+    var h = '';
+    lines.forEach(function (q) {
+      var c = q.cloneNode(true), cls = ['opening', 'head', 'pc'].filter(function (n) { return q.classList.contains(n); });
+      Array.prototype.forEach.call(c.querySelectorAll('.stk, .ftxwho'), function (el) { el.remove(); });
+      Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (el) { el.removeAttribute('id'); });
+      h += '<p class="rt' + (cls.length ? ' ' + cls.join(' ') : '') + '" lang="en" data-k="up" data-ref="' + refOf(q) + '">' + c.innerHTML + '</p>';
+    });
+    return h;
   }
   // The tab a fold of `ks` is drawn at: the one asked for, or the one last
   // chosen (`trtab`), where the fold has it; else its first.
@@ -1314,8 +1436,7 @@
       tf.appendChild(panel);
     }
     panel.hidden = false;
-    var lines = tf.parentNode.querySelectorAll('p.t[id]'),
-        refs = Array.prototype.map.call(lines, function (q) { return q.id; });
+    var lines = enLines(tf.parentNode), refs = lines.map(refOf);
     if (!refs.length) return Promise.resolve();
     return trFetch(tf.closest('section[data-trv]'), refs[0].split('.')[0]).then(function (got) {
       if (!tf.classList.contains('open')) return;
@@ -1325,7 +1446,7 @@
       if (ks.length > 1) {
         h += '<div class="trtabs" role="group"' + (cur === 'all' ? '' : ' data-play="' + cur + '"') + '>' + ks.map(function (k) {
           return '<button type="button" data-tab="' + k + '" aria-pressed="' + (cur === k) + '">' +
-                 trBy[k].label + '</button>';
+                 txt(k).label + '</button>';
         }).join('') + '<button type="button" data-tab="all" aria-pressed="' + (cur === 'all') + '">' +
                  T('All|translations') + '</button></div>';
       }
@@ -1333,8 +1454,11 @@
       // would take two lines on a phone, and Settings says it (Tigran,
       // 2026-10-26).
       (cur === 'all' ? ks : [cur]).forEach(function (k) {
-        var x = trBy[k];
+        var x = txt(k);
         if (cur === 'all' || ks.length === 1) h += '<p class="who" data-play="' + k + '">' + x.label + '</p>';
+        // The English, where it is no paragraph's first text, is folded too
+        // (Tigran, 2026-11-20), from the page's own.
+        if (k === 'up') return (h += enFold(lines));
         // Every one the fold counts is in the fragment the server sends, so one
         // missing is offline, and not kept in the copy.
         if (!got.t[k]) return (h += '<p class="gap">' + T('tr:notkept') + '</p>');
@@ -1392,7 +1516,8 @@
     Array.prototype.forEach.call(document.querySelectorAll('.tf[data-has]'), function (tf) {
       var ks = trKeys(tf), b = tf.querySelector('.trfold');
       if (!b) return;
-      b.innerHTML = ks.length ? T('{n} translations', { n: ks.length }) : '';
+      // "2 texts" where the English is among them (2026-11-20).
+      b.innerHTML = !ks.length ? '' : ks.indexOf('up') < 0 ? T('{n} translations', { n: ks.length }) : T('{n} texts', { n: ks.length });
       if (!tf.classList.contains('open')) return;
       if (ks.length) draws.push(trDraw(tf, ks)); else trShut(tf);
     });
@@ -1506,10 +1631,19 @@
   // the heading, which only Compare gives a translation; k null shuts the fold
   // the reading opened.  A promise of the element, or of null.
   var trMine = null;
+  // Since 2026-11-20 any text may be a paragraph's first, set where the
+  // English stood (ftxPut), the English among those in a fold or a column:
+  // k "up" is the English, and the line read may be the row's first, its
+  // own line; a text's head on the page is its own (.ftxhd, .ch).  For the
+  // English shown nowhere, the row's first line, what the reader has of it.
   window.ubTrRead = function (ref, k, open) {
     var art = cmpArt(), q = ref && document.getElementById(ref), row = q && q.closest('.row');
     var tf = row && row.querySelector('.tf');
-    var pick = function (root) { return root && root.querySelector('p.rt[data-k="' + k + '"][data-ref="' + ref + '"]'); };
+    var pick = function (root) {
+      var all = root ? root.querySelectorAll('p[data-k="' + k + '"][data-ref="' + ref + '"]') : [], i;
+      for (i = 0; i < all.length; i++) if (all[i].getClientRects().length) return all[i];
+      return null;
+    };
     var shutMine = function () {
       // With every fold open none is the reading's own to shut.
       if (trOpen) { trMine = null; return; }
@@ -1521,14 +1655,15 @@
       shutMine();
       return Promise.resolve(null);
     }
-    if (art && art.classList.contains('cmp')) {
-      // A heading: the page's one section's (ref null), or on the whole paper's
-      // page the section the ref names (listen.js isHead).
-      var sec = ref && ref.indexOf('.') < 0 ? q : null;
-      if (!ref || sec) return Promise.resolve((sec || art).querySelector('header.ch[data-k="' + k + '"]'));
-      return Promise.resolve(pick(row));
-    }
-    if (!tf) return Promise.resolve(null);
+    // A heading: the page's one section's (ref null), or on the whole paper's
+    // page the section the ref names (listen.js isHead).
+    var sec = ref && ref.indexOf('.') < 0 ? q : null;
+    if (art && (!ref || sec)) return Promise.resolve((sec || art).querySelector('header:is(.ch, .ftxhd)[data-k="' + k + '"]'));
+    if (art && art.classList.contains('cmp')) return Promise.resolve(pick(row));
+    // The row's first text, or the English shown in no fold of its own.
+    var own = pick(row);
+    if (own && !(tf && tf.contains(own))) { shutMine(); return Promise.resolve(own); }
+    if (!tf || (k === 'up' && trKeys(tf).indexOf(k) < 0)) return Promise.resolve(k === 'up' && q && q.getClientRects().length ? q : null);
     if (tf.classList.contains('open')) {
       shutMine();
       // Its own fold, at another translation: a voice chosen anew.
@@ -1552,7 +1687,7 @@
   // the folds open or shut and their tab, the line at the window's top kept.
   document.addEventListener('ub:settings', function (ev) {
     var k = ev.detail.key;
-    if (k === 'translations') trSync();
+    if (k === 'translations' || k === 'english') trSync();
     if (trTap) return;
     // In columns there is no fold to draw; nor is there with every one shut.
     if (k === 'trtab' && !cmpOn() && (trOpen || document.querySelector('.tf.open'))) trKeep(trPlace(), trSync().then(trAll));
@@ -1563,6 +1698,37 @@
   });
   document.addEventListener('ub:swap', function () { trSync(); });
   document.addEventListener('ub:trkept', function () { trGot = {}; trSync(); cmpDraw(); });
+  // Among the search results, the text's list, the English's, in its place
+  // among the translations' where the English is not first (Tigran,
+  // 2026-11-20: "Follow the order, hide with it"): put in their column
+  // (.trhits), which takes the English's place on the page, and each stands
+  // in the reader's order by the head script's rule (base.html ubTr), or
+  // with the English hidden is not shown there, as an unticked one.  Not
+  // with "Translations in search results" off, which hides that column, nor
+  // where no translation found anything and it is not there; and back where
+  // it stood when the English comes first again.  On the overview alone: a
+  // list opened whole is the only one.
+  var srAt = null;
+  function srOrder() {
+    var main = document.querySelector('main.results'), en = main && main.querySelector('section[data-tr="up"]'),
+        box = main && main.querySelector('.trhits'), o = load(), up;
+    if (!en || !box || main.querySelector(':scope > .hint')) return;
+    up = texts().indexOf('up');
+    if (up !== 0 && o.trsearch !== false) {
+      if (en.parentNode === box) return;
+      srAt = box.nextSibling;
+      main.insertBefore(box, en);
+      box.appendChild(en);
+    } else if (en.parentNode === box) {
+      main.insertBefore(en, box);
+      main.insertBefore(box, srAt);
+    }
+  }
+  srOrder();
+  document.addEventListener('ub:swap', srOrder);
+  document.addEventListener('ub:settings', function (ev) {
+    if (/^(translations|english|trsearch)$/.test(ev.detail.key)) srOrder();
+  });
   // A search the copy answered (sw.js) says of a translation it does not keep
   // that it is not kept (offline-core.js trList, .notkept), in a list no one
   // sees until that translation is shown.  Ticked now, online, the page is
@@ -1612,17 +1778,18 @@
   // lays them in columns (part.html, ub.css .dividers).
   var cmpN = 0, cmpIs = null, cmpW = innerWidth;
   function cmpArt() { return document.querySelector('main.reader > article'); }
-  // The ticked translations that have any paragraph here, in the reader's
-  // order; on a part's page, those whose divider it has.
+  // The texts shown that this page has, in the reader's order: the English,
+  // which every page has, where it is shown, and each translation ticked that
+  // has any paragraph here, or on a part's page whose divider it has.
   function cmpKeys(art) {
-    var has = {};
+    var has = { up: true };
     Array.prototype.forEach.call(art.querySelectorAll('.tf[data-has]'), function (tf) {
       tf.dataset.has.split(' ').forEach(function (k) { has[k] = true; });
     });
     Array.prototype.forEach.call(art.querySelectorAll(':scope > .dividers > .divider[data-k]'), function (d) {
       has[d.dataset.k] = true;
     });
-    return String(load().translations || '').split(' ').filter(function (k) { return trBy[k] && has[k]; });
+    return texts().filter(function (k) { return has[k]; });
   }
   // Whether n columns have room on this page.  What they need is the
   // stylesheet's own sum, asked of a probe put in the article for the asking
@@ -1649,14 +1816,175 @@
   }
   // Decided from the page as it now is, and kept: asked before the first
   // drawing too (arriveTr, above, which runs before these lines do, so that
-  // nothing is yet null).
+  // nothing is yet null).  Columns are two texts or more, each with room.
   function cmpDecide() {
     var art = cmpArt(), ks = art ? cmpKeys(art) : [];
     cmpW = innerWidth;
-    return (cmpIs = ks.length > 0 && cmpFits(art, ks.length + 1));
+    return (cmpIs = ks.length > 1 && cmpFits(art, ks.length));
   }
   function cmpOn() { return cmpIs == null ? cmpDecide() : cmpIs; }
+
+  // Each paragraph's first text (Tigran, 2026-11-20): the first of the texts
+  // shown, in the reader's order, that has it, set where the English stood,
+  // unfolded, the others in columns beside it or in its fold; where the
+  // first of all has not the paragraph, the next that has it stands in, its
+  // short name over it; and where none has it, the English, shown or not.
+  // So a reader of Russian alone may put a Russian translation first, and
+  // fold the English away or hide it.  The English is the server's, the
+  // rest are drawn here from the section's fragment (trFetch), as the
+  // columns and the folds draw them.
+  //
+  // The paragraph's address goes with its first text: the line drawn carries
+  // it as its id, p.t as the English's does, with the reference over it,
+  // and the English's line gives it up for data-ref, so that whatever finds
+  // a paragraph by its address or among main p.t[id], the place being read,
+  // an address arrived at, the running head, a bookmark's ribbon, the tour,
+  // finds the line the reader sees.  Where the English is first, which it
+  // is unless a reader moves it, nothing here is drawn.
+  //
+  // The English of a row, its paragraph or its block of verse as the server
+  // set it, and its lines.
+  function enOf(row) { return row.querySelector(':scope > p.t:not(.rt), :scope > .verse:not(.ftx)'); }
+  function enLines(row) {
+    var en = enOf(row);
+    return !en ? [] : en.classList.contains('verse') ? Array.prototype.slice.call(en.querySelectorAll(':scope > p.t')) : [en];
+  }
+  function refOf(q) { return q.id || q.dataset.ref; }
+  // A row's first text among `ks`: the first that has every line of the
+  // row, by its section's fragment `got`, from which a translation the copy
+  // does not keep is missing; the English where none has.  Without the
+  // fragment, by what the page says the row has (.tf[data-has]); and once
+  // drawn, what was drawn.
+  function firstOf(row, ks, got) {
+    var refs = enLines(row).map(refOf), tf = row.querySelector(':scope > .tf[data-has]'),
+        has = tf ? tf.dataset.has.split(' ') : [], i, k;
+    if (!got && row.dataset.ftx) return row.dataset.ftx;
+    for (i = 0; i < ks.length; i++) {
+      k = ks[i];
+      if (k === 'up') return k;
+      if (got ? refs.length && refs.every(function (r) { return got.t[k] && got.t[k][r] != null; }) : has.indexOf(k) >= 0) return k;
+    }
+    return 'up';
+  }
+  // Translation k set as a row's first text, after the English: its lines as
+  // the English's are, each with its reference in a stack at its start, its
+  // classes, and its address as its id; and its translator's notes, for
+  // their cards.  The English's lines give up their ids first, so that none
+  // stands twice, and the mark the page opened at goes with the address.
+  // `who`: its short name over it, where it stands in for the first of all.
+  function ftxPut(row, k, got, who) {
+    var en = enOf(row), lines = enLines(row), x = trBy[k], h = '', notes = '',
+        verse = en.classList.contains('verse');
+    lines.forEach(function (q, i) {
+      var ref = refOf(q), c = q.classList, w = i === 0 && who,
+          cls = ['opening', 'head', 'verse', 'setoff', 'hit'].filter(function (n) { return c.contains(n); });
+      h += '<p class="t rt' + (verse ? '' : ' ftx') + (cls.length ? ' ' + cls.join(' ') : '') + (w ? ' ftxw' : '') +
+           '" lang="' + x.lang + '" data-k="' + k + '" data-ref="' + ref + '" id="' + ref + '"><span class="stk"><span class="num">' +
+           ref + '</span>' + (w ? '<span class="ftxwho" data-who="' + x.label + '"></span>' : '') + '</span>' +
+           trLead(got.t[k][ref]) + '</p>';
+      notes += (got.n[k] || {})[ref] || '';
+      c.remove('hit');
+      q.removeAttribute('id');
+      q.dataset.ref = ref;
+      q.dataset.k = 'up';
+    });
+    en.insertAdjacentHTML('afterend', (verse ? '<div class="verse ftx" data-k="' + k + '" lang="' + x.lang + '">' + h + '</div>' : h) +
+                                      (notes ? '<div class="tnotes ftx" hidden>' + notes + '</div>' : ''));
+    row.dataset.ftx = k;
+    return row.querySelector(':scope > .ftx');
+  }
+  // The English standing in, named over its first line.
+  function enWho(row) {
+    var q = enLines(row)[0], stk = q && q.querySelector(':scope > .stk');
+    if (!stk) return;
+    q.classList.add('ftxw');
+    stk.insertAdjacentHTML('beforeend', '<span class="ftxwho" data-who="' + UP.label + '"></span>');
+  }
+  // A section's head in its first text, where that is a translation: the
+  // paper's number, title and author over a paper's first section, and the
+  // section's title, as its TeX sets them (/tr/'s data-head), in place of
+  // the English's, which goes (.enoff).  `top` is the English's head.
+  function ftxHead(top, k, g, paper) {
+    var x = trBy[k], whole = !!top.closest('article.whole'), sect = !paper || !whole;
+    top.insertAdjacentHTML('afterend', '<header class="papertop ftxhd" data-k="' + k + '" lang="' + x.lang + '">' +
+      (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
+      (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (sect && g.section ? '<h2>' + g.section + '</h2>' : '') +
+      '</header>');
+    top.classList.add('enoff');
+  }
+  // All of it taken away: the English as the server set it.
+  function ftxUndraw(art) {
+    if (card && card.mark.closest('.ftx')) shut(false);
+    if (headP && headP.closest('.ftx')) hideHead();
+    Array.prototype.forEach.call(art.querySelectorAll('.grid > .row[data-ftx]'), function (row) {
+      var hit = Array.prototype.map.call(row.querySelectorAll(':scope > .ftx .hit, :scope > .ftx.hit'), function (q) { return q.id; });
+      Array.prototype.forEach.call(row.querySelectorAll(':scope > .ftx'), function (el) { el.remove(); });
+      enLines(row).forEach(function (q) {
+        if (q.dataset.ref) { q.id = q.dataset.ref; delete q.dataset.ref; }
+        delete q.dataset.k;
+        if (hit.indexOf(q.id) >= 0) q.classList.add('hit');
+      });
+      delete row.dataset.ftx;
+    });
+    Array.prototype.forEach.call(art.querySelectorAll('.ftxwho, .ftxhd'), function (el) { el.remove(); });
+    Array.prototype.forEach.call(art.querySelectorAll('.ftxw, .enoff'), function (el) { el.classList.remove('ftxw', 'enoff'); });
+    Array.prototype.forEach.call(art.querySelectorAll('.grid > .row > :is(p.t, .verse)[style]'), function (el) {
+      el.style.removeProperty('--c');
+      if (!el.getAttribute('style')) el.removeAttribute('style');
+    });
+  }
+  // Each row's first text set where it is not the English, and the English
+  // let go of where it is shown in no column of its own: the folds' page,
+  // `ks` the texts shown in their order, and `cols` null; in columns, the
+  // texts of the columns, each its own, the first text in its column.
+  // Over a run of rows in a section whose first text stands in for the
+  // first of all, its short name, in the folds alone, the columns being
+  // named.  A section with no fragment keeps the English.
+  function ftxRows(art, secs, gots, ks, cols) {
+    Array.prototype.forEach.call(secs, function (sec, j) {
+      var got = gots[j], grid = sec.querySelector('.grid'), lead = texts()[0], prev = lead;
+      if (!grid) return;
+      Array.prototype.forEach.call(grid.children, function (row) {
+        if (!row.classList.contains('row') || !enOf(row)) return;
+        var first = got ? firstOf(row, cols || ks, got) : 'up', en = enOf(row), el = null,
+            who = !cols && first !== lead && first !== prev;
+        prev = first;
+        if (first !== 'up') {
+          el = ftxPut(row, first, got, who);
+          if (!cols || cols.indexOf('up') < 0) en.classList.add('enoff');
+        } else if (who) enWho(row);
+        if (cols) {
+          if (el) el.style.setProperty('--c', cols.indexOf(first) + 1);
+          if (cols.indexOf('up') > 0) en.style.setProperty('--c', cols.indexOf('up') + 1);
+        }
+        row.dataset.ftx = first;
+      });
+    });
+  }
+  // The page's head in the first text where its first row's is a
+  // translation, on the folds' page: over a section's page the paper's and
+  // the section's, over the whole paper's the paper's, and each section's
+  // title over its own.
+  function ftxHeads(art, secs, gots) {
+    Array.prototype.forEach.call(secs, function (sec, j) {
+      var got = gots[j], row = sec.querySelector('.grid > .row[data-ftx]'), k = row && row.dataset.ftx,
+          top = sec.querySelector(':scope > .papertop') || (j === 0 && art.querySelector(':scope > .papertop'));
+      if (!got || !k || k === 'up' || !top || !got.h[k]) return;
+      ftxHead(top, k, got.h[k], top.parentNode === art);
+      if (j === 0 && top.parentNode !== art && art.querySelector(':scope > .papertop'))
+        ftxHead(art.querySelector(':scope > .papertop'), k, got.h[k], true);
+    });
+  }
+  // Whether a text other than the English comes first: a translation before
+  // the English, or the English hidden; and then on every page of the text,
+  // where the English stands in for one the page has not, named so.
+  function ftxAny() { return texts()[0] !== 'up'; }
+  // Painted: the English the head script held back before first paint where
+  // another text comes first (base.html ubTr) is shown or let go of now.
+  function ftxReady() { document.documentElement.classList.add('ftxready'); }
+
   function cmpUndraw(art) {
+    ftxUndraw(art);
     if (!art.classList.contains('cmp')) return;
     if (card && card.mark.closest('.rc')) shut(false);
     // The running head naming a translation's paragraph goes with it, which
@@ -1670,7 +1998,8 @@
       el.remove();
     });
     Array.prototype.forEach.call(art.querySelectorAll('.blanket.cmpfold'), function (el) { el.classList.remove('cmpfold'); });
-    art.classList.remove('cmp');
+    art.classList.remove('cmp', 'cmpnoen');
+    art.style.removeProperty('--cu');
     indexSync();
   }
   // Draws what the page has room for; its promise is kept once drawn.
@@ -1680,44 +2009,62 @@
     // script guessed it before first paint, and here it follows the page,
     // once cmpGo has measured the paragraph to keep.
     document.documentElement.classList.toggle('compare', on);
-    if (!art) return Promise.resolve();
-    var ks = on ? cmpKeys(art) : [], secs = art.querySelectorAll('section[data-trv]');
+    if (!art) { ftxReady(); return Promise.resolve(); }
+    var ks = cmpKeys(art), secs = art.querySelectorAll('section[data-trv]');
     // The frame is told how many, which Measured makes it wide enough for
     // (ub.css --textw), once the columns are drawn, or on a part's page at
     // once.
-    if (on) art.parentNode.style.setProperty('--cols', ks.length + 1);
+    if (on) art.parentNode.style.setProperty('--cols', ks.length);
     else art.parentNode.style.removeProperty('--cols');
     // And the next page's first paint, how wide a window this one was in
     // columns in (base.html): a page of the text that has a translation,
     // which is what was asked about; a part's page has more room, having no
     // margin, and says nothing of the next.
-    if (secs.length && cmpKeys(art).length) try {
+    if (secs.length && ks.length > 1) try {
       if (on) localStorage.setItem('ub_cols', innerWidth); else localStorage.removeItem('ub_cols');
     } catch (e) {}
     // Not in columns, the folds: open under every paragraph where the reader
     // has them so (trAll), as the page loads, as listen.js brings one in, as
     // the columns give way in a window made narrower, and as a translation is
-    // ticked.  How many it opened, for whoever places the page after.
-    if (!ks.length || !secs.length) { cmpUndraw(art); return trAll(); }
+    // ticked.  How many it opened, for whoever places the page after.  Where
+    // the English is first, nothing else is drawn; where another text is,
+    // that first, once every section's fragment is had.
+    if (!secs.length || (!on && !ftxAny())) {
+      cmpUndraw(art);
+      ftxReady();
+      return trAll();
+    }
     // Each section of the page in columns: the one of a section's page, or
     // every one of the whole paper's (paper.html), each with its own heads:
     // the paper's over the first, and each section's title over its own.
     // The names of the columns stand once, over them all (below).  `got` is
     // a section's /tr/ fragment, or null where it could not be had.
     var draw = function (gots) {
-      if (n !== cmpN || !art.isConnected) return;
+      if (n !== cmpN || !art.isConnected) return 0;
       cmpUndraw(art);
-      // The folds' words go, so that no note's number stands twice.
+      // The folds' words go, so that no note's number stands twice; and with
+      // them those of a fold whose texts are now others (trKeys).
       Array.prototype.forEach.call(art.querySelectorAll('.tf.open'), trShut);
       Array.prototype.forEach.call(art.querySelectorAll('.tf .tr'), function (el) { el.remove(); });
+      if (!on) {
+        ftxRows(art, secs, gots, ks, null);
+        ftxHeads(art, secs, gots);
+        bmPaint();
+        ftxReady();
+        // listen.js puts each first text's ▶ under its reference, as in columns.
+        document.dispatchEvent(new CustomEvent('ub:cmp', { detail: art }));
+        return 1;
+      }
       art.classList.add('cmp');
-      // A column's name: a translation's short name, and over the English the
-      // press's, as the rail's list of contents has them (tocSync), and no
-      // longer the work's title before it, «Урантийские документы
-      // (Aivazian)» (Tigran, 2026-11-15: "no need for the name of the book
-      // as it is obvious", and what a translation calls itself is in
-      // Settings' Translations); and a translation's ×, which stops showing
-      // it (Tigran, 2026-11-10; below).
+      art.classList.toggle('cmpnoen', ks.indexOf('up') < 0);
+      art.style.setProperty('--cu', ks.indexOf('up') + 1);
+      // A column's name: a text's short name, the English's the press's, as
+      // the rail's list of contents has them (tocSync), and no longer the
+      // work's title before it, «Урантийские документы (Aivazian)» (Tigran,
+      // 2026-11-15: "no need for the name of the book as it is obvious", and
+      // what a translation calls itself is in Settings' Texts); and its ×,
+      // which stops showing it (Tigran, 2026-11-10; below), the English's
+      // too since 2026-11-20, when it became a text like the rest.
       // One row to the page, the article's own child, as the Index's button
       // is (.marginhead), so that it stays at the window's top down the whole
       // paper: a row in each section's grid stayed only while that section
@@ -1725,20 +2072,21 @@
       // (Tigran, 2026-11-15: "we keep the header showing what each column is,
       // so there is no need to print it at the end of each section").  A grid
       // of its own, with the text's tracks (ub.css article.cmp .grid).
-      var names = '<div class="grid cmpnames"><p class="cn" style="--c:1"><b lang="en">Uversa Press</b></p>' +
-          ks.map(function (k, i) {
-            return '<p class="cn" style="--c:' + (i + 2) + '"><b lang="en">' + trBy[k].label + '</b>' +
+      var names = '<div class="grid cmpnames">' + ks.map(function (k, i) {
+            return '<p class="cn" style="--c:' + (i + 1) + '"><b lang="en">' + txt(k).label + '</b>' +
                    '<button type="button" class="cnx" data-k="' + k + '" ' +
-                   T.a('aria-label', 'Hide this translation') + ' ' + T.a('title', 'Hide this translation') + '>×</button></p>';
+                   T.a('aria-label', 'Hide this text') + ' ' + T.a('title', 'Hide this text') + '>×</button></p>';
           }).join('') + '</div>';
       art.querySelector(':scope > section').insertAdjacentHTML('beforebegin', names);
+      ftxRows(art, secs, gots, ks, ks);
       Array.prototype.forEach.call(secs, function (sec, j) {
         var failed = !gots[j], got = gots[j] || { t: {}, n: {}, h: {} }, grid = sec.querySelector('.grid'),
             top = sec.querySelector(':scope > .papertop') || art.querySelector(':scope > .papertop');
         if (!grid || !top) return;
         var heads = '<div class="row cmphd">';
         ks.forEach(function (k, i) {
-          var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 2) + '"', paper = j === 0;
+          if (k === 'up') return;
+          var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 1) + '"', paper = j === 0;
           heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
                    (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
                    (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +
@@ -1756,23 +2104,29 @@
         // 5 or more lines are present", "folded by default, of course").
         var box = sec.querySelector(':scope > .blanket');
         if (box) box.classList.toggle('cmpfold', box.querySelectorAll(':scope > ul > li').length >= 5);
-        var en = top.cloneNode(true);
-        en.classList.add('ch');
-        en.style.setProperty('--c', 1);
-        grid.querySelector('.cmphd').prepend(en);
+        if (ks.indexOf('up') >= 0) {
+          var en = top.cloneNode(true);
+          en.classList.add('ch');
+          en.dataset.k = 'up';
+          en.style.setProperty('--c', ks.indexOf('up') + 1);
+          grid.querySelector('.cmphd').prepend(en);
+        }
         Array.prototype.forEach.call(grid.children, function (row) {
           if (row.classList.contains('stars')) {
             row.insertAdjacentHTML('beforeend', ks.map(function (k, i) {
-              return '<i class="rs" style="--c:' + (i + 2) + '" data-stars="' + row.dataset.stars + '" aria-hidden="true"></i>';
+              return k === 'up' ? '' : '<i class="rs" style="--c:' + (i + 1) + '" data-stars="' + row.dataset.stars + '" aria-hidden="true"></i>';
             }).join(''));
             return;
           }
-          var text = row.querySelector(':scope > p.t, :scope > .verse');
-          if (!text) return;
-          var lines = row.querySelectorAll('p.t[id]');
+          var text = row.querySelector(':scope > .ftx') || enOf(row);
+          if (!text || !row.classList.contains('row')) return;
+          var lines = enLines(row), first = row.dataset.ftx;
+          // The tnotes of the first text, which follow it, stay next to it.
+          if (text.nextElementSibling && text.nextElementSibling.matches('.tnotes.ftx')) text = text.nextElementSibling;
           text.insertAdjacentHTML('afterend', ks.map(function (k, i) {
-            var x = trBy[k], w = trLines(got, k, lines);
-            return '<div class="rc" style="--c:' + (i + 2) + '" data-k="' + k + '" lang="' + x.lang + '">' +
+            if (k === 'up' || k === first) return '';
+            var x = trBy[k], w = trLines(got, k, lines, true);
+            return '<div class="rc" style="--c:' + (i + 1) + '" data-k="' + k + '" lang="' + x.lang + '">' +
                    (w.h && '<p class="who">' + x.label + '</p>' + w.h) +
                    (w.notes && '<div class="tnotes" hidden>' + w.notes + '</div>') + '</div>';
           }).join(''));
@@ -1780,12 +2134,20 @@
       });
       indexSync();
       cmpHit();
+      bmPaint();
+      ftxReady();
       // listen.js puts each translation's ▶ in its cells.
       document.dispatchEvent(new CustomEvent('ub:cmp', { detail: art }));
+      return 0;
     };
     return Promise.all(Array.prototype.map.call(secs, function (sec) {
       return trFetch(sec, sec.id).then(function (got) { return got; }, function () { return null; });
-    })).then(draw);
+    })).then(function (gots) {
+      var drew = draw(gots);
+      if (on || n !== cmpN) return drew;
+      // The folds, now that each row's first text is known (trKeys).
+      return trSync().then(trAll).then(function (opened) { return drew + opened; });
+    });
   }
   // A search's hit in a translation (#tr-ud, or a translator's note's,
   // templates/search.html), in columns: the paragraph marked is that
@@ -1820,7 +2182,7 @@
   // the page stays there.
   function cmpGo(kept) {
     var pl = kept || placeNow(), cell = pl && pl.el.closest('.rc, .tf'), row = cell && pl.el.closest('.row'), en = row && row.querySelector('p.t[id]'),
-        enAt = en && { el: en, y: en.getBoundingClientRect().top };
+        enAt = en && placeAlt({ el: en, y: en.getBoundingClientRect().top });
     // A column's cell goes whatever is drawn; a fold's line only as the
     // columns come, and where the page stays in folds it keeps the place
     // itself, or its fold's own line does (placeAlt).
@@ -1923,11 +2285,10 @@
   // without it, the place kept (below); a copy kept offline keeps it.  On the
   // document, since listen.js swaps <main>.
   document.addEventListener('click', function (ev) {
-    var b = ev.target.closest && ev.target.closest('article.cmp .cmpnames .cnx');
+    var b = ev.target.closest && ev.target.closest('article.cmp .cmpnames .cnx'), order;
     if (!b) return;
-    window.ubSettings.set('translations', String(load().translations || '').split(' ').filter(function (k) {
-      return k && k !== b.dataset.k;
-    }).join(' '));
+    order = texts().filter(function (k) { return k !== b.dataset.k; });
+    if (order.length) window.ubSettings.setAll(textsOf(order));
   });
   // Asked again when what the room rests on has changed, and the page drawn
   // again only where the answer has: in place, the paragraph at the window's
@@ -1946,7 +2307,7 @@
   var cmpSoon = false, cmpMust = false,
       CMP_ROOM = { rail: 1, margin: 1, index: 1, size: 1, uisize: 1, width: 1, face: 1 };
   document.addEventListener('ub:settings', function (ev) {
-    if (ev.detail.key === 'translations') cmpMust = true;
+    if (ev.detail.key === 'translations' || ev.detail.key === 'english') cmpMust = true;
     else if (!CMP_ROOM.hasOwnProperty(ev.detail.key)) return;
     if (cmpSoon) return;
     cmpSoon = true;
@@ -2284,8 +2645,11 @@
     if (!m) return null;
     // In a translator's note's card, or a translation's cell: that translation's
     // paragraph (Tigran, 2026-11-07: a reader of a translation expects it).
+    // The English, "up", where it is folded or listed among the texts
+    // (2026-11-20), is the English's paragraph, as everywhere else.
     c = a.closest('[data-tr], p.rt[data-k]');
-    return { a: a, p: m[1], s: m[2], n: +m[3], last: m[4] ? +m[4] : +m[3], tr: c ? (c.dataset.tr || c.dataset.k) : '' };
+    c = c ? c.dataset.tr || c.dataset.k : '';
+    return { a: a, p: m[1], s: m[2], n: +m[3], last: m[4] ? +m[4] : +m[3], tr: c === 'up' ? '' : c };
   }
   function pvPage(p, s) {
     var url = '/' + p + ':' + s;
@@ -2300,7 +2664,10 @@
   function pvParas(doc, r) {
     var out = [], n, p;
     for (n = r.n; n <= r.last; n++) {
+      // The English's line, whichever text is first on this page and has
+      // the address as its id (ftxPut).
       p = doc.getElementById(r.p + ':' + r.s + '.' + n);
+      if (p && p.classList.contains('rt')) p = doc.querySelector('p.t:not(.rt)[data-ref="' + p.id + '"]');
       if (!p) break;
       p = p.cloneNode(true);
       p.removeAttribute('id');
@@ -2476,7 +2843,7 @@
     return null;
   }
   function turn(dir) {
-    var col = document.querySelector('main p.t'), pl = document.querySelector('.player'),
+    var col = document.querySelector('main p.t[id]'), pl = document.querySelector('.player'),
         lo = EDGE, hi = innerHeight - EDGE, x, L, d;
     if (!col) return false;
     // Not under the player, while it is open.
@@ -2583,7 +2950,7 @@
   function paraOf(t, y, x) {
     var cell, row;
     if (!t.closest) return null;
-    return t.closest('p.t[id], .rc p.rt, .tf p.rt') ||
+    return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt') ||
            ((cell = t.closest('.rc')) && cell.querySelector('p.rt')) ||
            paraCol((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]'), x) || paraUnder(t, y, x);
   }
@@ -2599,27 +2966,29 @@
     }
     return null;
   }
-  // In columns, the paragraph beside the English `p` in the column `x` is
-  // in: a translation's, where x is across one's cell of the row or in the
-  // nearer half of the room before it, measured, a row being a subgrid whose
-  // own column-gap says nothing, and the cell has the paragraph, a verse's
-  // line by its reference; else `p` itself, as for the English column, the
-  // margin past the last column, a column that has not the paragraph, and a
-  // page not in columns.
+  // In columns, the paragraph `p` (the row's line with the id, its first
+  // text's) as the column `x` is in has it: the column x is across, or in
+  // the nearer half of the room before it, measured left to right, a row
+  // being a subgrid whose own column-gap says nothing, whichever text stands
+  // there, the English too since it may stand anywhere (2026-11-20); a
+  // verse's line by its reference; else `p` itself, for the margin past the
+  // last column, a column that has not the paragraph, and a page not in
+  // columns.
   function paraCol(p, x) {
-    var row = p && p.closest('article.cmp .grid > .row'), text, cells, edge, at = null, i, r;
+    var row = p && p.closest('article.cmp .grid > .row'), cols, edge = 0, at = null, i, r, ref;
     if (!row || !(x >= 0)) return p;
-    text = row.querySelector(':scope > p.t, :scope > .verse');
-    cells = row.querySelectorAll(':scope > .rc[data-k]');
-    edge = text ? text.getBoundingClientRect().right : 0;
-    for (i = 0; i < cells.length; i++) {
-      r = cells[i].getBoundingClientRect();
-      if (!r.width) continue;
-      if (x >= (edge + r.left) / 2) at = cells[i];
+    ref = refOf(p);
+    cols = Array.prototype.filter.call(row.querySelectorAll(':scope > :is(p.t, .verse, .rc[data-k])'), function (c) {
+      return c.getBoundingClientRect().width;
+    }).sort(function (a, b) { return a.getBoundingClientRect().left - b.getBoundingClientRect().left; });
+    for (i = 0; i < cols.length; i++) {
+      r = cols[i].getBoundingClientRect();
+      if (!i || x >= (edge + r.left) / 2) at = cols[i];
       edge = r.right;
     }
     if (!at || x >= edge) return p;
-    return at.querySelector('p.rt[data-ref="' + p.id + '"]') || at.querySelector('p.rt') || p;
+    if (at.matches('p.t')) return at;
+    return at.querySelector('p[data-ref="' + ref + '"], p[id="' + ref + '"]') || at.querySelector('p.rt, p.t') || p;
   }
   // The first paragraph on the screen: a verso's running head.
   function firstOnScreen() {
@@ -2630,6 +2999,16 @@
       if (r.height && r.bottom > 0) return foldOver(ps[i - 1], 0) || ps[i];
     }
     return ps[0] || null;
+  }
+  // The paper's title for a paragraph: where a translation is its first
+  // text, the line with its address, the translation's, as the page draws
+  // its head (ftxHead) or in columns (2026-11-20: Continue reading and a
+  // bookmark name the paper in the text read first); else the English's, as
+  // it was for a translation's line in a fold or a column.
+  function titleOf(p) {
+    var k = p && p.id && p.dataset.k, h = k && k !== 'up' &&
+            document.querySelector('main article :is(header.ftxhd, header.ch)[data-k="' + k + '"] h1');
+    return h ? h.textContent : headOf(p).title;
   }
   // The paper's head for a paragraph: the article's own, with the title (the
   // whole paper's sections have heads of their own, each the section's title
@@ -2662,12 +3041,13 @@
     ref.type = 'button';
     ref.className = 'ref';
     T.attr(ref, 'title', 'Show in the contents');
-    // A translation's paragraph is kept for Back by its row's English one,
-    // which has the id.
+    // A paragraph is kept for Back by its row's line with the id, its first
+    // text's (ftxPut); the Contents open in the text tapped, the English's
+    // where the English is not first.
     ref.addEventListener('click', function () {
       var p = headP;
       hideHead();
-      toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)), p && !p.id ? p.dataset.k : '');
+      toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)), p && p.dataset.k || '');
     });
     head.insertBefore(ref, head.firstChild);
     // The gear and Home together at the right: the gear first, as it is the
@@ -2740,7 +3120,7 @@
     headP = p;
     p.classList.add('named');
     head.querySelector('.ref').textContent = p.id || p.dataset.ref;
-    if (!p.id && p.dataset.k && p.dataset.ref) headTr(p); else headSay(headOf(p));
+    if (p.dataset.k && p.dataset.k !== 'up' && p.dataset.ref) headTr(p); else headSay(headOf(p));
     head.hidden = false;
     headAt = clampY();
     headSlack = 2 * (parseFloat(getComputedStyle(p).lineHeight) || 28);
@@ -2908,7 +3288,7 @@
     p = rpPara();
     if (!p || p.id === rpSaid) return;
     try {
-      localStorage.setItem(RP, JSON.stringify({ ref: p.id, title: headOf(p).title, at: Date.now(),
+      localStorage.setItem(RP, JSON.stringify({ ref: p.id, title: titleOf(p), at: Date.now(),
                                                 v: bar && bar.dataset.tv || '' }));
       rpSaid = p.id;
     } catch (e) { return; }
@@ -3010,7 +3390,7 @@
   // Its paper's title: the page's head, or on a reading path the line that
   // names the paper before it, "Paper 101 · The Real Nature of Religion".
   function bmTitle(p) {
-    var t = headOf(p).title, rhs, rh = null, i, a;
+    var t = titleOf(p), rhs, rh = null, i, a;
     if (t) return t;
     rhs = document.querySelectorAll('main .rh-paper');
     for (i = 0; i < rhs.length; i++)

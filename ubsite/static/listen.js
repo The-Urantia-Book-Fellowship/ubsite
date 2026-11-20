@@ -104,9 +104,14 @@
   // A ref that names a section, "15:3", or null: a spoken heading's, never a
   // paragraph's, which has its number after a dot.
   function isHead(ref) { return !ref || ref.indexOf('.') < 0; }
-  // The ids of the paragraphs in root, in reading order.
+  // The addresses of the paragraphs in root, in reading order, by the
+  // English's lines, which the server set: a paragraph's address is the id
+  // of its first text's line, the English's unless a reader put another
+  // text first (ub.js ftxPut, 2026-11-20), when the English keeps it as
+  // data-ref.
+  function enLines(root) { return root.querySelectorAll('p.t:not(.rt)[id], p.t:not(.rt)[data-ref]'); }
   function ids(root) {
-    return Array.prototype.map.call(root.querySelectorAll('p.t[id]'), function (p) { return p.id; });
+    return Array.prototype.map.call(enLines(root), function (p) { return p.id || p.dataset.ref; });
   }
   // Those each translation has, {key: [ids]}, by the folds under their rows.
   function trIds(root) {
@@ -142,8 +147,7 @@
     // paper's: what its spoken heading reads.
     head = document.querySelector('article > .papertop h2') || document.querySelector('.papertop h1');
     paras = {};
-    Array.prototype.forEach.call(document.querySelectorAll('p.t[id]'),
-                                 function (p) { paras[p.id] = p; });
+    Array.prototype.forEach.call(enLines(document), function (p) { paras[p.id || p.dataset.ref] = p; });
     // On the whole paper's page, each section's own title, by the section's
     // address; the introduction's is the paper's.
     heads = {};
@@ -244,7 +248,7 @@
     // A paragraph can be started only once the reading is aligned to them;
     // until then the first paragraph's button starts the section.
     if (PV.by !== 'paragraph') {
-      var p0 = document.querySelector('p.t[id]');
+      var p0 = enLines(document)[0];
       if (p0) place(p0, 0, T.k('Listen to this section'));
       return;
     }
@@ -299,11 +303,31 @@
     });
     return b;
   }
-  // In Compare, in each of its cells (ub.js 'ub:cmp').
+  // The first texts' buttons with a time (trPlay), said again at another speed.
+  var trTimes = [];
+  // In Compare, in each of its cells (ub.js 'ub:cmp').  And where a
+  // translation is a paragraph's first text, set where the English stood
+  // (ub.js ftxPut; 2026-11-20), under its reference, as the English's is.
+  // In each column since 2026-11-20 in the stack at its paragraph's start,
+  // with its time, as the first column's (ub.js trLines); in the gap before
+  // the cell where it has none.
   function trPlay(root) {
     Array.prototype.forEach.call(root.querySelectorAll('.rc[data-k]'), function (rc) {
+      if (rc.querySelector('p.rt > .stk')) return;
       var b = !rc.querySelector(':scope > .playp') && trButton(rc.dataset.k, rc.querySelector('p.rt[data-ref]'));
       if (b) rc.appendChild(b);          // last: .who:first-child keeps its place (ub.css)
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('p.t.rt[data-k][id], .rc[data-k] p.t.rt[data-ref]'), function (q) {
+      var stk = q.querySelector(':scope > .stk'), num = stk && stk.querySelector(':scope > .num'),
+          b = stk && !stk.querySelector(':scope > .playp') && trButton(q.dataset.k, q), kk, nv, ms = 0;
+      if (!b) return;
+      // The time it takes to hear, as the English's ▶ has it, where a
+      // recording reads it (Григорий Войнер's of USGNY).
+      kk = trKey(P, q.dataset.k);
+      nv = RECS[kk] ? voiceOf(P, kk) : null;
+      if (nv && nv.segs) nv.segs.forEach(function (s) { if (s[0] === q.dataset.ref) ms += (s[3] - s[2]) || 0; });
+      if (ms > 0) { b.dataset.ms = ms; b.dataset.t = clock(ms); trTimes.push(b); }
+      stk.insertBefore(b, num ? num.nextSibling : stk.firstChild);
     });
   }
   document.addEventListener('ub:cmp', function (ev) { trPlay(ev.detail); });
@@ -314,16 +338,34 @@
   // line that names one translation (`data-play`), its tabs' row, or its own
   // name where all are shown or one alone is ticked.  A fold open before this
   // script ran, a search's hit's, has its own now.
+  // The English is folded too, where another text is a paragraph's first
+  // (2026-11-20): its ▶ there reads it in its own voice, from that paragraph.
   function foldPlay(panel) {
     Array.prototype.forEach.call(panel.querySelectorAll('[data-play]'), function (at) {
-      var t = at.dataset.play;
-      var b = !at.querySelector(':scope > .playp') &&
-              trButton(t, panel.querySelector('p.rt[data-k="' + t + '"][data-ref]'));
+      var t = at.dataset.play, line = panel.querySelector('p.rt[data-k="' + t + '"][data-ref]');
+      var b = !at.querySelector(':scope > .playp') && (t === 'up' ? enButton(line) : trButton(t, line));
       if (b) at.insertBefore(b, at.firstChild);
     });
   }
+  // The English's ▶ where it stands in a fold: in the page's voice, the
+  // English's, from the paragraph `line` is of, or the next it reads.
+  function enButton(line) {
+    if (!P || !PV || !line) return null;
+    var ref = line.dataset.ref;
+    var b = button('playp', T.tr('Listen from {r}', { r: ref }), 'play');
+    b.addEventListener('click', function () {
+      var at = P.ids.indexOf(ref), i = at > 0 && PV.by === 'paragraph' ? -1 : 0;
+      for (var j = at; i < 0 && j < P.ids.length; j++)
+        for (var q = 0; q < PV.segs.length; q++)
+          if (PV.segs[q][0] === P.ids[j]) { i = q; break; }
+      if (i >= 0) start(i, PV, pkey);
+    });
+    return b;
+  }
   document.addEventListener('ub:trfold', function (ev) { foldPlay(ev.detail); });
   Array.prototype.forEach.call(document.querySelectorAll('.tf .tr'), foldPlay);
+  // And what ub.js drew before this script ran, columns or a first text.
+  trPlay(document);
 
   // ---- the bar ---------------------------------------------------------------
   var voiceMenu = null;
@@ -895,7 +937,7 @@
   function toReading(always) {
     touched = 0;                       // and Follow along takes over again
     if (k < 0) return;
-    var el = reading();
+    var el = line && line.isConnected && line.getClientRects().length ? line : reading();
     if (!el) return visit(href(D), true, null, function () { var e = reading(); if (e) show(e); });
     var r = el.getBoundingClientRect();
     if (always || r.top < 40 || r.bottom > innerHeight - 80) show(el);
@@ -1189,9 +1231,12 @@
     // actually leaving the screen.
     var follow = S.get().follow && Date.now() - touched >= 4000;
     // What is read is what is marked: a translation's line, or where the page
-    // does not show it, its paragraph, never both (Tigran, 2026-10-27).
-    if (V && V.tr && window.ubTrRead)
-      return void window.ubTrRead(V.segs[k][0], V.tr, S.get().follow).then(function (got) {
+    // does not show it, its paragraph, never both (Tigran, 2026-10-27).  And
+    // the English's, where it is not a paragraph's first text (2026-11-20):
+    // in its fold, its column, or where it is shown nowhere, the paragraph's
+    // first text, which is what the reader has of it.
+    if (window.ubTrRead && ((V && V.tr) || !el.getClientRects().length))
+      return void window.ubTrRead(V.segs[k][0], (V && V.tr) || 'up', S.get().follow).then(function (got) {
         if (marked !== el) return;                 // moved on meanwhile
         if (got) lineMark(got); else el.classList.add('now');
         if (follow) into(got || el);
@@ -1233,7 +1278,8 @@
       if (said.on) speakFrom(said.n);             // the sentence again, at the new speed
       render();
       // And each paragraph's time beside its ▶.
-      controls.forEach(function (c) { if (c.dataset.ms) c.dataset.t = clock(+c.dataset.ms); });
+      trTimes = trTimes.filter(function (c) { return c.isConnected; });
+      controls.concat(trTimes).forEach(function (c) { if (c.dataset.ms) c.dataset.t = clock(+c.dataset.ms); });
     }
     // A translation's voice changed while it is heard, its recording for a
     // browser's or back: it goes on in the one now chosen.

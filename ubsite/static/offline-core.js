@@ -701,7 +701,7 @@
     }
     o += '\n';
     if (scope === '' || scope === 'text') {
-      o += '<section><h2>' + T('In the text') + ' ' + (txt ? count(txt) : '<span>(0)</span>') + '</h2>\n';
+      o += '<section data-tr="up"><h2>' + T('In the text') + ' ' + (txt ? count(txt) : '<span>(0)</span>') + '</h2>\n';
       if (txt && txt.rows.length) {
         o += '<ul class="hits">';
         txt.rows.forEach(function (t) { o += '<li><a href="/' + esc(t.ref) + '">' + esc(t.ref) + '</a> ' + t.s + '</li>'; });

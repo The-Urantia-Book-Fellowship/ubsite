@@ -62,7 +62,9 @@ class RunningHead(unittest.TestCase):
         # from the fragment its paragraph was drawn from, never the English
         # (Tigran, 2026-11-17: "the page header is from English even on the
         # Russian text"); the English only where the fragment cannot be had.
-        self.assertIn("if (!p.id && p.dataset.k && p.dataset.ref) headTr(p); else headSay(headOf(p));", JS)
+        # A translation's line, its first text's too, which has the id
+        # (2026-11-20); the English's own head for the English, "up".
+        self.assertIn("if (p.dataset.k && p.dataset.k !== 'up' && p.dataset.ref) headTr(p); else headSay(headOf(p));", JS)
         tr = JS[JS.index("function headTr(p) {"):JS.index("function showHead(p) {")]
         self.assertIn("trFetch(sec, p.dataset.ref.split('.')[0]).then(function (got) {", tr)
         self.assertIn("var g = got.h[k];", tr)
@@ -86,9 +88,9 @@ class RunningHead(unittest.TestCase):
     def test_a_translation_tapped_in_columns_is_named_alone(self):
         # Never the English beside it (Tigran, 2026-11-08): its own reference
         # in the head, and Back from the Contents kept by the row's English.
-        self.assertIn("return t.closest('p.t[id], .rc p.rt, .tf p.rt') ||", JS)
+        self.assertIn("return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt') ||", JS)
         self.assertIn("head.querySelector('.ref').textContent = p.id || p.dataset.ref;", JS)
-        self.assertIn("toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)), p && !p.id ? p.dataset.k : '');", JS)
+        self.assertIn("toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)), p && p.dataset.k || '');", JS)
 
     def test_a_tap_on_a_title_names_its_own_sections_first_paragraph(self):
         # Never the first on the screen, which above a title is a paragraph
@@ -112,12 +114,15 @@ class RunningHead(unittest.TestCase):
         # is a subgrid, whose own column-gap computes to normal.
         # tools/runhead_e2e.py clicks.
         col = JS[JS.index("function paraCol(p, x) {"):JS.index("// The first paragraph on the screen")]
-        self.assertIn("var row = p && p.closest('article.cmp .grid > .row'), text, cells, edge, at = null, i, r;", col)
+        # Since 2026-11-20 any text may stand in any column, the English too:
+        # the columns are the row's own, whichever text, left to right.
+        self.assertIn("var row = p && p.closest('article.cmp .grid > .row'), cols, edge = 0, at = null, i, r, ref;", col)
+        self.assertIn("row.querySelectorAll(':scope > :is(p.t, .verse, .rc[data-k])')", col)
         self.assertIn("if (!row || !(x >= 0)) return p;", col)
-        self.assertIn("if (x >= (edge + r.left) / 2) at = cells[i];", col)
+        self.assertIn("if (!i || x >= (edge + r.left) / 2) at = cols[i];", col)
         self.assertIn("if (!at || x >= edge) return p;", col)
         self.assertNotIn("columnGap", col)
-        self.assertIn("""at.querySelector('p.rt[data-ref="' + p.id + '"]') || at.querySelector('p.rt') || p;""", col)
+        self.assertIn("""return at.querySelector('p[data-ref="' + ref + '"], p[id="' + ref + '"]') || at.querySelector('p.rt, p.t') || p;""", col)
 
     def test_the_contents_mark_the_section_of_the_paragraph_named(self):
         # On the whole paper's page the mark was the section at the window's
@@ -224,15 +229,16 @@ class RunningHead(unittest.TestCase):
         # automatically to that translation's variant of Contents"): for that
         # opening, the reader's own choice, `toc`, never changed by it.
         to = JS[JS.index("function toContents(p, k) {"):JS.index("// The place the address names")]
-        self.assertIn("k = k && tocTicked().indexOf(k) >= 0 ? k : null;", to)
+        self.assertIn("k = k && (k === 'up' || tocTicked().indexOf(k) >= 0) ? k : null;", to)
         self.assertIn("if (tocOver !== k) { tocOver = k; drawn = tocApply(); }", to)
         self.assertNotIn("ubSettings.set", to)
-        self.assertIn("var k = tocOver || load().toc || '';", JS)
+        # Not chosen, the first text's (2026-11-20).
+        self.assertIn("var k = tocOver || load().toc || texts()[0];", JS)
         # Forward to the entry opens them in it again, Back lets go of it, and
         # so do a choice in the list and a new page.
         self.assertIn("if (s && s.ub === 'contents') { contentsAt = s; toContents(null, s.k); return; }", JS)
         self.assertIn("if (tocOver) { tocOver = null; tocApply(); }", JS)
-        self.assertIn("    tocOver = null;\n    window.ubSettings.set('toc', ev.target.value);\n    tocApply();", JS)
+        self.assertIn("    tocOver = null;\n    window.ubSettings.set('toc', ev.target.value === texts()[0] ? '' : ev.target.value);\n    tocApply();", JS)
         self.assertIn("document.addEventListener('ub:swap', function () { tocOver = null; tocApply(); });", JS)
         # The entry's fresh load comes after the translations are read.
         self.assertLess(JS.index("TRS.forEach(function (x) { trBy[x.key] = x; });"),

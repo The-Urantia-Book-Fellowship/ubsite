@@ -66,7 +66,7 @@
       // script, which named no version, noted whatever it was sent and said
       // of a setting it did not keep that it was back at its default.  Raised
       // whenever a setting comes to follow the account.
-      V = 2;
+      V = 3;
   var timer = 0, running = null, declined = false;
 
   function get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }

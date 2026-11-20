@@ -43,7 +43,8 @@ class PlayButton(unittest.TestCase):
         self.assertIn("var n = Math.max(1, Math.round(ms / rate() / 1000));", LISTEN)
         self.assertIn("return Math.floor(n / 60) + ':' + ('0' + n % 60).slice(-2);", LISTEN)
         rate = LISTEN[LISTEN.index("if (what === 'rate') {"):LISTEN.index("// A translation's voice changed while it is heard")]
-        self.assertIn("controls.forEach(function (c) { if (c.dataset.ms) c.dataset.t = clock(+c.dataset.ms); });", rate)
+        # The first text's too, where a recording reads it (trPlay, 2026-11-20).
+        self.assertIn("controls.concat(trTimes).forEach(function (c) { if (c.dataset.ms) c.dataset.t = clock(+c.dataset.ms); });", rate)
 
     def test_a_translations_has_none(self):
         tr = LISTEN[LISTEN.index("function trButton(t, line) {"):LISTEN.index("// In Compare, in each of its cells")]

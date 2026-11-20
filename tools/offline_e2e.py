@@ -572,7 +572,8 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.set_viewport_size(WIDE)
         pg.wait_for_selector("article.cmp .rc .rt")
         cols = pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
-        ok(pg.url.endswith("/1:1") and cols == ["en", "urantia-ru", "ud"],
+        # The English's head is "up" since it became one of the texts (2026-11-20).
+        ok(pg.url.endswith("/1:1") and cols == ["up", "urantia-ru", "ud"],
            f"the window made wide, the page is drawn again in place, the English and each one ticked a column each, in the reader's order ({cols})")
         ok(pg.locator(".tf").first.is_hidden(), "and the folds give way to the columns")
         pg.locator('.rc[data-k=ud] a.fn[data-k="tn"]').first.click()
@@ -585,7 +586,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/140:4")
         pg.wait_for_selector("article.cmp .rc .rt")
         ok(pg.evaluate("[...document.querySelectorAll('article.cmp .cmphd > .ch')].map(c => c.dataset.k || 'en')")
-           == ["en", "urantia-ru"], "a translation without the section has no column")
+           == ["up", "urantia-ru"], "a translation without the section has no column")
 
         print("Compare kept as one moves about")                  # Tigran, 2026-11-06; the window's since 2026-11-16
         pg.goto(BASE + "/1:1")
@@ -669,7 +670,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.goto(BASE + "/1:2")
         pg.wait_for_selector(":root.tocready")
         ok("Всеобщий Отец" in pg.evaluate(RAIL1), "and stays chosen from page to page")
-        pg.select_option(".railtr select", "")
+        pg.select_option(".railtr select", "up")
         pg.wait_for_function("""document.querySelector('.rail a[href="/1"]').textContent.includes('The Universal Father')""")
         ok(pg.locator(".rail a.untr").count() == 0, "Uversa Press puts the book's contents back")
 

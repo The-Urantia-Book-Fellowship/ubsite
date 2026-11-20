@@ -222,8 +222,23 @@ SHOW = [
 # not a list, so that every path here and in ub.js takes it as it takes the
 # rest.  The dialog draws the list of them from the database (app.py
 # translations()), and ub.js keeps it.
+#
+# And the English among them since 2026-11-20 (Tigran: "let's treat all texts
+# in a uniform and symmetric manner, not singling out English as special,
+# even though it is the original"): the tab is Texts, the English a row of
+# its list like any translation, moved up and down and hidden.  Its place is
+# `english`, a setting of its own, so that `translations` keeps its meaning
+# for every script from before (a page left open, an offline copy held with
+# Automatic updates off, sw.js covered()): '' first, as it always stood, a
+# number, its place among the texts counted from 0, or "off", not shown.
+# The texts in order are `translations` with the English put in at that
+# place (base.html ubTexts), the first of them that a paragraph has set
+# unfolded where the English stood, the rest in columns where the window has
+# room, and in its fold where it has not; and where none of those shown has a
+# paragraph, the English, shown or not.
 TRANSLATIONS = [
-    ("translations", "translations", "Translations", "", [], ""),
+    ("translations", "translations", "Texts", "", [], ""),
+    ("english", "part", "", "", [], ""),
 ]
 # Until 2026-11-16 a switch stood under the list, `compare`, "Translations in
 # parallel columns": the English and each translation ticked side by side, a
@@ -323,7 +338,8 @@ KEPT = [
     ("rail", "kept", "Contents", "open", [], ""),
     ("margin", "kept", "Index", True, [], ""),
     # The tab last chosen in a fold of translations, which the next fold opens
-    # at (Tigran, 2026-10-26): a translation's key, "all", or "" for the first.
+    # at (Tigran, 2026-10-26): a translation's key, "up" for the English since
+    # it may stand in a fold too (2026-11-20), "all", or "" for the first.
     ("trtab", "kept", "Translation", "", [], ""),
     # The translations open under every paragraph, where the window has no room
     # for them in columns, or folded, each to its line: a tap on any one fold's
@@ -333,8 +349,10 @@ KEPT = [
     # preserved globally"; ub.js trAll).  Folded unless a reader opens them.
     ("tropen", "kept", "Translations", False, [], ""),
     # The contents in the left rail as a translation gives them, chosen on the
-    # rail's line (Tigran, 2026-10-27; ub.js tocApply): a translation's key, or
-    # "" for the book's own.  One no longer ticked reads as "".
+    # rail's line (Tigran, 2026-10-27; ub.js tocApply): a translation's key,
+    # "up" for the book's own, or "" for the first of the texts shown, which
+    # is the book's own while the English is first, as it was until
+    # 2026-11-20, when "" was the book's.  One no longer ticked reads as "".
     ("toc", "kept", "Contents", "", [], ""),
 ]
 # Kept through ↺ "Restore the defaults": a reader who chose Russian and resets
@@ -364,7 +382,9 @@ DEVICE = ["uisize", "size", "lead", "width", "bvoice", "trvoices", "rail", "marg
 # deploy would have folded the translations on every other device (found in
 # review, 2026-11-20, before it reached a reader).  A setting that comes to
 # follow later is named here with the next version, and V is raised with it.
-LATE = {"tropen": 2, "trtab": 2}
+# `english`, the English's place among the texts, came at 3 (2026-11-20): a
+# script before it shows the English first whatever the account says.
+LATE = {"tropen": 2, "trtab": 2, "english": 3}
 
 
 # A site's own defaults, by the host a page is read at, where they differ from
@@ -440,7 +460,7 @@ def groups(voices: list[dict], translations: list[dict] = ()) -> list[dict]:
                 for x in translations]
     return [{"key": "reading", "legend": "Reading", "items": [_item(*s) for s in READING]},
             {"key": "show", "legend": "Show", "items": [_item(*s) for s in SHOW]},
-            {"key": "translations", "legend": "Translations", "items": [_item(*s) for s in TRANSLATIONS]},
+            {"key": "translations", "legend": "Texts", "items": [_item(*s) for s in TRANSLATIONS]},
             {"key": "listening", "legend": "Listening", "items": items},
             {"key": "offline", "legend": "Offline", "items": [_item(*s) for s in OFFLINE], "cls": "offline"}]
 

@@ -57,7 +57,9 @@ EN = """el => { if (!el) return ''; const c = el.cloneNode(true);
     c.querySelectorAll('x-ru').forEach(x => x.remove()); return c.textContent.trim(); }"""
 # What is marked as being read: the translation's line, with whose it is, and
 # the English paragraph.
-NOW = """() => { const l = document.querySelector('p.rt.now'), p = document.querySelector('p.t.now');
+# The English's paragraph is a p.t that is no translation's: a column's first
+# line is a p.t too since 2026-11-20, its ▶ in its stack.
+NOW = """() => { const l = document.querySelector('p.rt.now'), p = document.querySelector('p.t.now:not(.rt)');
     return { line: l ? l.dataset.ref : null, of: l ? l.dataset.k : null, para: p ? p.id : null }; }"""
 VOICE = "() => (" + EN + ")(document.querySelector('.player .voicebox .voice'))"
 # The bar's list of voices as it reads, a heading marked "# ".
@@ -122,7 +124,8 @@ def columns(b, whole: bool) -> None:
     say = "Whole paper on: " if whole else "Whole paper off: "
     print("\nIn parallel columns, " + say.rstrip(": "))
     pg.goto(BASE + ("/1" if whole else "/1:1"))
-    cell = ".rc[data-k='urantia-ru']:has(p.rt[data-ref='1:1.2']) > .playp"
+    # In the paragraph's stack since 2026-11-20, as the first column's.
+    cell = ".rc[data-k='urantia-ru']:has(p.rt[data-ref='1:1.2']) .stk > .playp"
     pg.wait_for_selector(cell, timeout=15000)
     ok(pg.get_attribute(cell, "aria-label") == "Listen to USGNY from 1:1.2", say + "the translation's cell has its ▶")
 
@@ -209,7 +212,7 @@ def fold(b, whole: bool) -> None:
     print("\nIn the fold under the paragraph, with no room for columns, on a phone, " + say.rstrip(": "))
     pg.goto(BASE + ("/1" if whole else "/1:1"))
     pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
-    ok(pg.locator(".rc > .playp, .tf .playp").count() == 0, say + "a fold that is shut has no ▶")
+    ok(pg.locator(".rc .playp, .tf .playp").count() == 0, say + "a fold that is shut has no ▶")
     row = ".row:has([id='1:1.2']) "
     pg.click(row + ".trfold")
     play = row + ".tf.open .who[data-play='urantia-ru'] > .playp"
@@ -437,7 +440,7 @@ def lacking(b) -> None:
     ctx.add_init_script(QUICK_SPEECH)
     print("\nA section the recording lacks, 19:0, read a section at a time")
     pg.goto(BASE + "/19:0")
-    cell = ".rc[data-k='urantia-ru']:has(p.rt[data-ref='19:0.9']) > .playp"
+    cell = ".rc[data-k='urantia-ru']:has(p.rt[data-ref='19:0.9']) .stk > .playp"
     pg.wait_for_selector(cell, timeout=15000)
     pg.click(cell)
     ok(asks(pg, asked, "/speech/urantia-ru/19:0"), f"its own ▶ there is the browser's voice ({sorted(set(asked))})")
@@ -456,7 +459,7 @@ def lacking(b) -> None:
     sel = ".rc[data-k='urantia-ru'] p.rt[data-ref]"
     pg.wait_for_selector(sel, timeout=15000)
     last = pg.evaluate("[...document.querySelectorAll(\"%s\")].pop().dataset.ref" % sel)
-    pg.click(f".rc[data-k='urantia-ru']:has(p.rt[data-ref='{last}']) > .playp")
+    pg.click(f".rc[data-k='urantia-ru']:has(p.rt[data-ref='{last}']) .stk > .playp")
     ok(asks(pg, asked, "/audio/voyner/18-07.mp3") and until(pg, "/Voyner/.test((%s)())" % VOICE),
        f"18:7's last paragraph, {last}, plays in the recording")
     ok(until(pg, "location.pathname !== '/18:7'", 25), "at its end the reading carries on")

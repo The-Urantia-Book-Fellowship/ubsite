@@ -7,6 +7,7 @@ in-memory table with the tokenizer the database uses, so no ub.db is needed.
 """
 
 import pathlib
+import re
 import sqlite3
 import sys
 import unittest
@@ -272,7 +273,9 @@ class Translations(unittest.TestCase):
         self.assertLess(main.index('<div class="trhits"><section data-tr="ud">'),
                         main.index('<section data-tr="urantia-ru">'))
         self.assertNotIn("trhits", results("Hume"))
-        self.assertNotIn("data-tr=", results("prayer"))
+        # No translation's list: only the text's, the English's among the
+        # texts since 2026-11-20 (data-tr="up").
+        self.assertEqual(re.findall(r'data-tr="([^"]*)"', results("prayer")), ["up"])
 
     def test_a_note_under_its_paragraph(self):
         # Only a note matched at 0:0.1: it stands beside the reference.
@@ -292,7 +295,7 @@ class Translations(unittest.TestCase):
                       ' <span class="nobreak">(USGNY)</span> <span>(1–100 of ', main)
         self.assertIn('<a class="next" href="/search?q=%D0%B1%D0%BE%D0%B3&amp;in=urantia-ru&amp;page=2">', main)
         self.assertIn("(101–200 of ", results("бог", "urantia-ru", "2"))
-        self.assertNotIn("data-tr=", results("бог", "text"))
+        self.assertEqual(re.findall(r'data-tr="([^"]*)"', results("бог", "text")), ["up"])
         # Nothing found, opened whole, says so, as with no words to find.
         for q in ("Badanon", '"'):
             self.assertIn('(0)</span></h2>\n<p class="none">nothing</p>', results(q, "ud"))

@@ -100,7 +100,8 @@ class TheBar(unittest.TestCase):
         block = JS[JS.index("  // The reading place (Tigran, 2026-11-17;"):JS.index("  rpBegin();\n") + 14]
         self.assertIn("var RP = 'ub_place', RP_DWELL = 5000,", block)
         self.assertEqual(block.count("localStorage."), 1)
-        self.assertIn("localStorage.setItem(RP, JSON.stringify({ ref: p.id, title: headOf(p).title, at: Date.now(),", block)
+        # The paper named as the paragraph read is, in its own text (titleOf).
+        self.assertIn("localStorage.setItem(RP, JSON.stringify({ ref: p.id, title: titleOf(p), at: Date.now(),", block)
         self.assertIn("main.reader article:not(.partpage) p.t[id]", block)
         # Heard, the place is the paragraph listen.js marks, a translation's
         # line by the paragraph it translates, and it stays that paragraph

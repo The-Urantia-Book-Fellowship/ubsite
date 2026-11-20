@@ -1295,6 +1295,24 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
 .row:not(:has(> .verse)) > .tf .rt:not(.opening, .head),
 article.cmp .row:not(:has(> .verse)) > .rc .rt:not(.opening, .head, :has(> .mark)) { text-indent: 1em; }
 
+/* The texts in the reader's order (Tigran, 2026-11-20: the English one of
+   them, "not singling out English as special"; ub.js ftxPut).  A paragraph's
+   first text stands where the English stood, set as the English is (p.t),
+   its reference over it and its address its id; the English where it is not
+   first is folded with the others, or in columns stands in a column of its
+   own, without its reference, which is the first text's; and where it is
+   shown in neither, or a head of the page is another text's, it goes. */
+.grid > .row > .enoff, .papertop.enoff { display: none; }
+p.t[data-k="up"] > .stk > .num { display: none; }
+/* A first text standing in for the first of all, a paragraph that one has
+   not, is named over its first line, as a fold names a text, in the line an
+   opening's reference stands in; and so is the English standing in where
+   none of those shown has it. */
+p.t.ftxw { margin-top: 1.5rem; }
+.stk > .ftxwho { position: absolute; float: none; top: -1.4rem; right: 0; margin: 0;
+  font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+.ftxwho::before { content: attr(data-who); content: attr(data-who) / ""; }
+
 /* Compare (ROADMAP item 15, step 2; ub.js cmpDraw): the English and each
    translation ticked, a column each, a row to a paragraph, laid on the
    grid's columns as a paragraph and its entries are, the margin's last.
@@ -1340,9 +1358,9 @@ article.cmp .cmpnames { position: sticky; top: 0; z-index: 2; background: var(--
   padding: 1rem 0 .3rem; margin-top: -1rem; border-bottom: 1px solid var(--rule); }
 article.cmp .cmpnames .cn { margin: 0; font-size: .8rem; line-height: 1.3; letter-spacing: .06em;
   text-transform: uppercase; color: var(--faint); }
-/* A translation's ×, at its name's top right corner, stops showing it, as
-   the × in Settings' Translations does (Tigran, 2026-11-10; ub.js cmpDraw).
-   Not the English's, which is always shown. */
+/* A text's ×, at its name's top right corner, stops showing it, as the × in
+   Settings' Texts does (Tigran, 2026-11-10; ub.js cmpDraw); the English's
+   too since 2026-11-20, when it became a text like the rest. */
 article.cmp .cmpnames .cn:has(> .cnx) { position: relative; padding-right: 1.6rem; }
 article.cmp .cmpnames .cnx { position: absolute; top: 0; right: 0; padding: 0 .2rem; border: 0;
   background: none; color: var(--faint); font: inherit; font-size: 1.15rem; line-height: 1; cursor: pointer; }
@@ -1371,6 +1389,13 @@ article.cmp .stars > .rs[data-stars="* * * * *"]::before { word-spacing: .45em; 
    here, the margin's last, and under 62rem the phone's, with no margin
    (below, with the phone's rules). */
 article.cmp .grid > .row > :is(.rc, .ch), article.cmp .cmpnames > .cn { grid-column: var(--c); grid-row: 1; }
+/* The English in the column of its place, and a paragraph's first text in
+   its own (ub.js ftxRows): the first of all unless a reader moved it
+   (Tigran, 2026-11-20).  Its separator's stars with it, and none where it is
+   hidden. */
+article.cmp .grid > .row > :is(p.t, .verse) { grid-column: var(--c, 1); grid-row: 1; }
+article.cmp .stars::before { grid-column: var(--cu, 1); }
+article.cmp.cmpnoen .stars::before { content: none; }
 /* On the whole paper's page a section's title in columns has the room it
    has without them (article.whole > section > .papertop), 2.6rem above and
    1.2rem below: the names of the columns no longer stand between two
@@ -1670,6 +1695,23 @@ p.t { position: relative; }
    in the gap before its column, level with the cell's first line; on a phone,
    in the margin before the rule, level with the translation's name. */
 article.cmp .rc { position: relative; }
+/* Since 2026-11-20 in the stack at its paragraph's start, as the first
+   column's is, with the time it takes to hear (ub.js trLines, listen.js
+   trPlay; Tigran: "place the playback triangle inside the paragraph,
+   pushing the text a little bit to the right"), and no reference, which is
+   the first column's alone.  The cell keeps the room above an opening (below),
+   where its ▶ stands as the English's does there, at the line's start; and
+   a paragraph whose stack holds a ▶ is not set in besides. */
+article.cmp .rc > p.t.opening { margin-top: 0; }
+article.cmp .rc > p.t.opening .playp { left: -.375rem; }
+/* Beside a block of verse, in that line above too, as the English's block has
+   it (.verse p.t:first-child), the cell keeping the room (below). */
+article.cmp .row:has(> .verse) > .rc > p.t.rt > .stk { float: none; }
+article.cmp .row:has(> .verse) > .rc > p.t.rt > .stk > .playp { position: absolute; top: -1.575rem; left: -.375rem;
+  width: auto; height: 1.4rem; margin: 0; padding: .15rem; justify-content: center; }
+:root:not([data-paranum="off"], [data-pages="true"]) article.cmp .row:has(> .verse) > .rc > .rt > .stk > .playp::after {
+  align-self: auto; position: relative; top: calc(.39rem * var(--line) - .375rem); }
+:root:not([data-listen="off"]) article.cmp .rc > p.t.rt:has(> .stk > .playp) { text-indent: 0; }
 article.cmp .rc > .playp { position: absolute; margin: 0; left: -1.725rem;
   top: calc((var(--size) * var(--lead) - 1.4rem) / 2); }
 article.cmp .rc:has(.rt.now) > .playp svg { opacity: 1; }

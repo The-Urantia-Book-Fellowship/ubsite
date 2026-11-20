@@ -159,9 +159,12 @@ class Dialog(unittest.TestCase):
         self.assertNotIn('class="cr"', self._li("ud"))
 
     def test_its_value_is_one_hidden_input(self):
-        # Alone: Compare's switch stood under the list from 2026-11-08 to
-        # 2026-11-16, since when the columns come where the window has room.
-        self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations"])
+        # The list and the English's place in it (2026-11-20): Compare's
+        # switch stood under the list from 2026-11-08 to 2026-11-16, since
+        # when the columns come where the window has room.
+        self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations", "english"])
+        # The English is a row of the list, among the others until shown.
+        self.assertIn('<li data-k="up"><label><input type="checkbox" value="up">', self.panel)
 
     def test_a_fold_is_handed_their_names(self):
         got = json.loads(re.search(r'<script type="application/json" id="ub-translations">(.*?)</script>',
@@ -192,7 +195,10 @@ class OneState(unittest.TestCase):
         js = self.JS
         # As the page is drawn, and not in columns: as it loads, as listen.js
         # brings one in, as the columns give way, as a translation is ticked.
-        self.assertIn("if (!ks.length || !secs.length) { cmpUndraw(art); return trAll(); }", js)
+        # Where the English is first: another first text is drawn first, and
+        # the folds after it (2026-11-20).
+        self.assertIn("if (!secs.length || (!on && !ftxAny())) {\n      cmpUndraw(art);\n      ftxReady();\n      return trAll();", js)
+        self.assertIn("return trSync().then(trAll).then(function (opened) { return drew + opened; });", js)
         trall = js[js.index("  function trAll() {"):js.index("  function trPlace(tf) {")]
         # Asked again once the translations are had: no fold drawn under columns.
         self.assertIn("if (n !== cmpN || !trOpen || cmpIs || !art.isConnected) return 0;", trall)
@@ -222,7 +228,9 @@ class OneState(unittest.TestCase):
         js = self.JS
         self.assertIn("if (r.height && r.bottom > top + 24) return foldOver(ps[i - 1], top + 24) || ps[i];", js)
         self.assertIn("ps = document.querySelectorAll('main :is(p.t[id], .tf.open p.rt)');", js)
-        self.assertIn("if (!pl.el.isConnected || !pl.el.getClientRects().length) return placeBack(pl.alt);", js)
+        # Gone or with no box: the same paragraph found again, in its text or
+        # the one now first (placeAgain, 2026-11-20), else the fold's line.
+        self.assertIn("if (!pl.el.isConnected || !pl.el.getClientRects().length) {\n      el = pl.ref && placeAgain(pl);\n      if (!el) return placeBack(pl.alt);", js)
 
     def test_a_page_loaded_again_from_its_entry_comes_back_at_its_line(self):
         js = self.JS
