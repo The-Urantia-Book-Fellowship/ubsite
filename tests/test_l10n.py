@@ -211,43 +211,75 @@ class Pages(unittest.TestCase):
             body = get("/101:4", raw=True)[2]
             lists = get("/lists", raw=True)[2]
         self.assertIn('<x-ru lang="ru">Документ 101</x-ru>', body)
-        self.assertIn('<span class="langs" hidden>', body)
+        self.assertIn('<details class="langmenu" hidden>', body)
         self.assertIn('<title data-ru="Списки">Lists</title>', lists)
 
-    def test_the_flags_on_a_phone_where_they_fit(self):
-        # Never on a phone from 2026-11-10; since 2026-11-17 wherever they fit
-        # beside the name, ub.js leaving them out (.noflags) where they would
-        # take the controls to a line of their own (tools/runhead_e2e.py).
+    def test_the_language_a_list(self):
+        # Two flags side by side from 2026-10-25, a list since 2026-11-21
+        # (Tigran, to make room for full screen): closed, the flag of the
+        # language in effect, which the stylesheet chooses by data-lang
+        # before first paint; open, each language its flag and its name in
+        # its own language.  The Union Jack's clip is named once a copy.
+        with drawn():
+            body = get("/101:4", raw=True)[2]
+        menu = body[body.index('<details class="langmenu" hidden>'):]
+        menu = menu[:menu.index("</details>")]
+        summary = menu[:menu.index("</summary>")]
+        self.assertIn('<span class="fl" data-to="en">', summary)
+        self.assertIn('<span class="fl" data-to="ru">', summary)
+        self.assertIn('class="lchev"', summary)
+        for k, name in (("en", "English"), ("ru", "Русский")):
+            self.assertIn(f'<button type="button" data-to="{k}" lang="{k}" aria-pressed="false">', menu)
+            self.assertIn(f"<span>{name}</span>", menu)
+        self.assertEqual(menu.count('id="uk-a"') + menu.count('id="uk-b"'), 2)
+        self.assertEqual(body.count('id="uk-'), 2)
+        css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
+        self.assertIn(":root:not([data-lang]) .top .langmenu .fl[data-to=\"en\"],\n"
+                      ":root[data-lang=\"ru\"] .top .langmenu .fl[data-to=\"ru\"] { display: block; }", css)
+        self.assertNotIn(".top .langs", css)
+
+    def test_full_screen_beside_the_half_disc(self):
+        # Full screen (Tigran, 2026-11-21): after the half-disc, before the
+        # language, hidden until ub.js finds the browser can do it.
+        with drawn():
+            body = get("/101:4", raw=True)[2]
+        ctl = body[body.index('<div class="ctl">'):body.index("</header>")]
+        order = [ctl.index(x) for x in ('class="gear"', 'class="theme"', 'class="fscreen"',
+                                        'class="langmenu"', 'class="help"', 'class="acctmenu"')]
+        self.assertEqual(order, sorted(order))
+        self.assertIn('<button class="fscreen" type="button" aria-pressed="false" aria-label="Full screen"', ctl)
+        self.assertIn('data-ru-aria-label="Во весь экран"', ctl)
+        js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
+        self.assertIn("if (fsBtn && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {", js)
+
+    def test_the_controls_on_a_phone_where_they_fit(self):
+        # Beside the name where they fit (tools/runhead_e2e.py and
+        # account_e2e.py measure it in Chrome): the line first drawn closer
+        # (.tight), then the account's mark left out (.noacct, 2026-11-18),
+        # never the language to it ("so that the flags are always there, in
+        # all combinations", Tigran), then the language (.nolang; the flags,
+        # .noflags, from 2026-11-17), the half-disc (.notheme, 2026-11-18) and
+        # last full screen (.nofull, 2026-11-21).  All out and the controls
+        # still under the name, all stand on that line, with room.
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text(encoding="utf-8")
         phone = css[css.index("@media (max-width: 40rem) {\n  .top, .top .ctl"):]
         phone = phone[:phone.index("}\n}") + 3]
-        # And the half-disc of light or dark, back on 2026-11-18, gives way
-        # after them (.notheme) before the controls would go under the name.
-        self.assertIn(".top.noflags .langs, .top.notheme .theme { display: none; }", phone)
-        self.assertNotIn(".top .langs { display: none; }", css)
-        js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
-        self.assertIn("flagTop.classList.add('noflags');", js)
-        self.assertLess(js.index("flagTop.classList.add('noflags');"), js.index("flagTop.classList.add('notheme');"))
-        # And the account's menu at the corner, since 2026-11-18 (.noacct),
-        # gives way before the flags: "so that the flags are always there, in
-        # all combinations" (Tigran).  Before anything is left out the line
-        # is drawn closer (.tight), so that the account's mark costs neither
-        # the flags nor itself.  All out and the controls still under the
-        # name, all stand on that line, with room.
+        self.assertIn(".top.nolang .langmenu, .top.notheme .theme, .top.nofull .fscreen { display: none; }", phone)
         self.assertIn(".top.noacct .acctmenu { display: none; }", phone)
-        fit = js[js.index("var flagsFit = function () {"):js.index("flagsFit();")]
-        order = [fit.index(x) for x in ("flagTop.classList.add('tight');", "flagTop.classList.add('noacct');",
-                                        "flagTop.classList.add('noflags');", "flagTop.classList.add('notheme');",
-                                        "if (below()) flagTop.classList.remove('tight', 'noflags', 'notheme', 'noacct');")]
+        self.assertNotIn(".top .langmenu { display: none; }", css)
+        js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
+        self.assertIn("CTL_OUT = ['noacct', 'nolang', 'notheme', 'nofull'];", js)
+        fit = js[js.index("var ctlFit = function () {"):js.index("ctlFit();")]
+        order = [fit.index(x) for x in ("ctlTop.classList.add('tight');", "ctlTop.classList.add(CTL_OUT[i]);",
+                                        "if (below()) DOMTokenList.prototype.remove.apply(ctlTop.classList, all);")]
         self.assertEqual(order, sorted(order))
-        # Closer, and only on a phone (tools/account_e2e.py and runhead_e2e.py
-        # measure it in Chrome, in both languages, signed in and out).
-        tight = css[css.index("@media (max-width: 40rem) {\n  .top.tight, .top.tight .ctl { column-gap: .375rem; }"):]
+        # Closer, and only on a phone.
+        tight = css[css.index("@media (max-width: 40rem) {\n  .top.tight, .top.tight .ctl { column-gap: .35rem; }"):]
         tight = tight[:tight.index("}\n}") + 3]
-        for rule in (".top.tight .langs { gap: .3rem; }", ".top.tight .flag svg { height: .75rem; }",
+        for rule in (".top.tight .langmenu > summary .flg { height: .7rem; }",
                      ".top.tight .acctmenu > summary :is(.acctphoto, .acctinit) { width: 1.25rem; height: 1.25rem;"):
             self.assertIn(rule, tight)
-        self.assertIn("document.addEventListener('ub:settings', flagsFit);", js)
+        self.assertIn("document.addEventListener('ub:settings', ctlFit);", js)
 
     def test_no_markup_where_it_cannot_stand(self):
         """Not in an attribute, the title, a menu's option, nor the player's JSON."""

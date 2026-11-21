@@ -9,7 +9,8 @@ signing out, the sign staying at the corner; signing in again from Settings'
 foot on a whole paper's page, back to the very paragraph; everything a script
 keeps cleared, as Safari clears it, and who is signed in found again by the
 cookie; the account deleted; a phone, at 412 and 390 px in both languages, signed in
-and out, with everything on the name's line and both flags; the narrowest,
+and out, with everything on the name's line, the language and full screen
+among it; the narrowest,
 where the sign gives way and Settings' foot leads to the page at /account; cancelling
 at Google; and in Russian, nothing wider than the window and five tabs as
 before.
@@ -333,16 +334,20 @@ def run(tmp: pathlib.Path) -> int:
         ok(ADA["email"].encode() not in blob and b"Ada Reader" not in blob and PNG[16:] not in blob, "its bytes too, the picture's among them")
         ctx.close()
 
-        print("A phone: everything on the name's line, the flags always")
-        flags = "() => [...document.querySelectorAll('.top .flag')].filter(f => f.getClientRects().length > 0).length"
+        print("A phone: everything on the name's line, the language always")
+        # The list of languages and full screen, beside the half-disc, since
+        # 2026-11-21, where two flags stood: everything from 384px in English
+        # and 356 in Russian at Standard, signed out (from 380 and 360 with
+        # the flags); signed in, the letter or the picture 1.6px wider.
+        flags = "() => ['.top .langmenu', '.top .fscreen', '.top .theme'].filter(s => document.querySelector(s).getClientRects().length > 0).length"
         for lang in ("en", "ru"):
             for width in (412, 390):
                 ctx, pg, asked = fresh(b, "localStorage.setItem('ub_settings', JSON.stringify({lang: '%s'}));" % lang, width, 700)
                 pg.goto(SITE + "/101:4")
                 pg.wait_for_load_state("networkidle")
                 c, before = pg.evaluate(corner), pg.evaluate(tall)
-                ok(c["there"] and c["sign"] and c["inWindow"] and c["no"] == "" and pg.evaluate(flags) == 2,
-                   f"{width} px, {lang}, no one signed in: the gear, the half-disc, both flags, the ? and the account's sign ({c['no'] or 'nothing left out'})")
+                ok(c["there"] and c["sign"] and c["inWindow"] and c["no"] == "" and pg.evaluate(flags) == 3,
+                   f"{width} px, {lang}, no one signed in: the gear, the half-disc, full screen, the language, the ? and the account's sign ({c['no'] or 'nothing left out'})")
                 Google.who = {"sub": "222", "email": "bob@example.org", "name": "bob the reader"}
                 pg.click(".top .acctmenu > summary")
                 pg.click(".top .acctmenu .acct-go")
@@ -354,7 +359,7 @@ def run(tmp: pathlib.Path) -> int:
                 pg.wait_for_load_state("networkidle")
                 Google.who = dict(ADA)
                 c = pg.evaluate(corner)
-                ok(c["there"] and c["letter"] == "B" and c["who"] == "letter" and c["inWindow"] and c["no"] == "" and pg.evaluate(flags) == 2,
+                ok(c["there"] and c["letter"] == "B" and c["who"] == "letter" and c["inWindow"] and c["no"] == "" and pg.evaluate(flags) == 3,
                    f"{width} px, {lang}, signed in: the same, with the first letter of his name for the sign ({c['no'] or 'nothing left out'})")
                 ok(pg.evaluate(tall) <= before + 1, f"{width} px, {lang}: the header has no more lines than it had ({before} px, {pg.evaluate(tall)} px)")
                 ok(pg.evaluate("() => document.documentElement.scrollWidth <= document.documentElement.clientWidth"),
@@ -364,7 +369,7 @@ def run(tmp: pathlib.Path) -> int:
                 ok(fit and until(pg, "document.querySelector('.top .acctmenu .acct').dataset.state === 'in'"), f"{width} px, {lang}: the menu is within the window")
                 ctx.close()
 
-        print("The narrowest phone: the account's sign gives way, and then the flags")
+        print("The narrowest phone: the account's sign gives way, and then the language")
         ctx, pg, asked = fresh(b, "", 320, 700)
         pg.goto(SITE + "/101:4")
         pg.wait_for_load_state("networkidle")

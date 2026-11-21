@@ -7,7 +7,8 @@ selected does nothing, a tap low on the screen names its paragraph and turns
 no page, though the browser kept Tap to turn the page on (gone 2026-11-17),
 the whole paper's page names the paper and not the section, a reading
 path names the paper of the paragraph, and a 1955 card and the head are never
-up together.  And the header's flags on a phone, where they fit.
+up together.  And the header's controls on a phone, where they fit; the list
+of languages; and full screen, kept from page to page by the first tap.
 
     .venv/bin/python tools/runhead_e2e.py        (after make data)
 
@@ -65,11 +66,15 @@ def settle(pg) -> None:
     pg.wait_for_timeout(150)
 
 
-# Whether the flags are drawn, and whether the controls stand on the name's line.
+# Whether the list of languages, the half-disc and full screen are drawn, and
+# whether the controls stand on the name's line.
 FLAGS = """(() => { const b = document.querySelector('.top .brand').getBoundingClientRect(),
-  c = document.querySelector('.top .ctl').getBoundingClientRect();
-  return {flags: document.querySelector('.top .langs').getClientRects().length > 0, line: c.top < b.bottom,
-          theme: document.querySelector('.top .theme').getClientRects().length > 0}; })()"""
+  c = document.querySelector('.top .ctl').getBoundingClientRect(),
+  vis = s => document.querySelector(s).getClientRects().length > 0;
+  return {lang: vis('.top .langmenu'), line: c.top < b.bottom, theme: vis('.top .theme'),
+          full: vis('.top .fscreen')}; })()"""
+# Full screen as the page has it: in it, the button pressed, the choice kept.
+FULL = "() => [!!document.fullscreenElement, document.querySelector('.top .fscreen').getAttribute('aria-pressed'), localStorage.getItem('ub_full')]"
 
 
 def run() -> int:
@@ -754,37 +759,43 @@ def run() -> int:
         pg3.evaluate("ubSettings.set('translations', '')")
         ctx3.close()
 
-        print("The flags on a phone, where they fit")
-        # Since 2026-11-17 (Tigran; never on a phone from 2026-11-10): beside
-        # the name where the controls then stay on its line, else left out
-        # (.noflags), unless the controls have a line of their own anyway.
-        # Measured that day: from 360px at Standard in English, 412 at Larger,
-        # 480 at Largest; in Russian 344, 375 and 430.  With the half-disc of
-        # light or dark back beside the gear (Tigran, 2026-11-18), 27px of the
-        # line: from 380, 428 and 474; in Russian 358, 404 and 448.  And the
-        # half-disc itself gives way where the controls would go under the name
-        # even with the flags out (.notheme): below 356px at Larger in English
-        # and 396 at Largest, 370 at Largest in Russian; where the gear and
-        # the ? alone do not fit, the controls have a line of their own and
-        # everything is on it.
-        # Since the same evening the line is drawn closer before anything is
-        # left out (.tight: a narrower gap, smaller flags), to make room for
-        # the account's mark where a host has accounts (tools/account_e2e.py);
-        # with none, as here, the flags fit from 354px at Standard in English,
-        # 398 at Larger and 442 at Largest, in Russian 334, 374 and 416, and
-        # the half-disc gives way below 338 at Larger in English and 376 at
-        # Largest, 350 at Largest in Russian.
-        for lang, size, w, want, half in (
-                ("en", "100", 384, True, True), ("en", "100", 360, True, True), ("en", "100", 344, False, True),
-                ("en", "100", 320, False, True),
-                ("en", "112.5", 430, True, True), ("en", "112.5", 412, True, True), ("en", "112.5", 384, False, True),
-                ("en", "112.5", 330, False, False),
-                ("en", "125", 480, True, True), ("en", "125", 430, False, True), ("en", "125", 390, False, True),
-                ("en", "125", 360, False, False), ("en", "125", 320, True, True),
-                ("ru", "100", 360, True, True), ("ru", "100", 344, True, True), ("ru", "100", 326, False, True),
-                ("ru", "112.5", 412, True, True), ("ru", "112.5", 384, True, True), ("ru", "112.5", 364, False, True),
-                ("ru", "125", 430, True, True), ("ru", "125", 404, False, True), ("ru", "125", 360, False, True),
-                ("ru", "125", 340, False, False)):
+        print("The controls on a phone, where they fit")
+        # Beside the name where the controls then stay on its line (Tigran,
+        # 2026-11-17, of the flags; never on a phone from 2026-11-10): where
+        # they would not, the line is first drawn closer (.tight), then the
+        # account's mark is left out (tools/account_e2e.py; none here), then
+        # the language (.nolang), the half-disc (.notheme) and last full
+        # screen (.nofull); where the gear and the ? alone do not fit, the
+        # controls have a line of their own and everything is on it.
+        # Measured on 2026-11-21, with the list of languages for the flags
+        # and full screen beside the half-disc (two pixels at a time): the
+        # language fits from 360px at Standard in English, 404 at Larger and
+        # 448 at Largest, in Russian 332, 374 and 416; the half-disc from 324,
+        # 364 and 404, in Russian 302, 340 and 378; full screen at Standard
+        # down to 300 and less, from 338 at Larger and 374 at Largest, in
+        # Russian 314 and 348; and the controls go to a line of their own
+        # under 312px at Larger in English and 346 at Largest, 320 at Largest
+        # in Russian.  With the flags and
+        # no full screen, until that day, the flags fitted from 354, 398 and
+        # 442, in Russian 334, 374 and 416.
+        for lang, size, w, want, half, full in (
+                ("en", "100", 400, True, True, True), ("en", "100", 372, True, True, True),
+                ("en", "100", 360, True, True, True),
+                ("en", "100", 356, False, True, True), ("en", "100", 330, False, True, True),
+                ("en", "100", 316, False, False, True),
+                ("en", "112.5", 420, True, True, True), ("en", "112.5", 400, False, True, True),
+                ("en", "112.5", 356, False, False, True), ("en", "112.5", 330, False, False, False),
+                ("en", "112.5", 304, True, True, True),
+                ("en", "125", 470, True, True, True), ("en", "125", 430, False, True, True),
+                ("en", "125", 390, False, False, True), ("en", "125", 360, False, False, False),
+                ("en", "125", 330, True, True, True),
+                ("ru", "100", 350, True, True, True), ("ru", "100", 320, False, True, True),
+                ("ru", "100", 300, False, False, True),
+                ("ru", "112.5", 392, True, True, True), ("ru", "112.5", 360, False, True, True),
+                ("ru", "112.5", 330, False, False, True), ("ru", "112.5", 306, False, False, False),
+                ("ru", "125", 440, True, True, True), ("ru", "125", 400, False, True, True),
+                ("ru", "125", 364, False, False, True), ("ru", "125", 336, False, False, False),
+                ("ru", "125", 312, True, True, True)):
             c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": w, "height": 700})
             c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_settings', '%s'); }"
                               " catch (e) {}" % ('{"lang":"%s","uisize":"%s"}' % (lang, size)))
@@ -793,9 +804,11 @@ def run() -> int:
             q.goto(BASE + "/1:1")
             q.wait_for_timeout(300)
             f = q.evaluate(FLAGS)
-            ok(f["flags"] == want and f["theme"] == half and (f["line"] or (f["flags"] and f["theme"])),
-               f"{lang}, {size}%, {w}px: the flags {'shown' if f['flags'] else 'left out'},"
+            ok(f["lang"] == want and f["theme"] == half and f["full"] == full
+               and (f["line"] or (f["lang"] and f["theme"] and f["full"])),
+               f"{lang}, {size}%, {w}px: the language {'shown' if f['lang'] else 'left out'},"
                f" the half-disc {'shown' if f['theme'] else 'left out'},"
+               f" full screen {'shown' if f['full'] else 'left out'},"
                f" the controls {'beside the name' if f['line'] else 'on a line of their own'}")
             c.close()
         c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": 600, "height": 700})
@@ -809,20 +822,20 @@ def run() -> int:
         for w in (600, 430, 600):
             q.set_viewport_size({"width": w, "height": 700})
             q.wait_for_timeout(150)
-            seen.append(q.evaluate(FLAGS)["flags"])
-        ok(seen == [True, False, True], f"a resize leaves them out and brings them back ({seen})")
-        # At 430px, since the line is drawn closer: at Largest the flags fit
-        # from 442px in English and from 416 in Russian (460px, with 474 and
-        # 448, while the half-disc was back and the line was not yet closer;
-        # 430px, with 440 and 414, until 2026-11-18).
+            seen.append(q.evaluate(FLAGS)["lang"])
+        ok(seen == [True, False, True], f"a resize leaves the language out and brings it back ({seen})")
+        # At 430px and Largest the language fits from 448px in English and
+        # from 416 in Russian.
         q.set_viewport_size({"width": 430, "height": 700})
         q.wait_for_timeout(150)
-        en460 = q.evaluate(FLAGS)
+        en430 = q.evaluate(FLAGS)
         q.evaluate("ubSettings.set('lang', 'ru')")
         q.wait_for_timeout(200)
-        ok(en460 == {"flags": False, "line": True, "theme": True}
-           and q.evaluate(FLAGS) == {"flags": True, "line": True, "theme": True},
-           "and a shorter name in Russian brings them back, the half-disc there in both")
+        ok(en430 == {"lang": False, "line": True, "theme": True, "full": True}
+           and q.evaluate(FLAGS) == {"lang": True, "line": True, "theme": True, "full": True},
+           f"and a shorter name in Russian brings it back, the half-disc and full screen there in both ({en430}, {q.evaluate(FLAGS)})")
+        q.evaluate("ubSettings.set('lang', 'en')")
+        q.wait_for_timeout(200)
         # The half-disc flips the theme in effect, and the choice is kept.
         was = q.evaluate("document.documentElement.dataset.theme || ''")
         q.locator(".top .theme").tap()
@@ -833,6 +846,106 @@ def run() -> int:
         two = q.evaluate("[document.documentElement.dataset.theme, JSON.parse(localStorage.getItem('ub_settings')).theme]")
         ok(was == "" and one == ["dark", "dark"] and two == ["light", "light"],
            f"a tap on the half-disc goes dark from the device's light, and the next light ({was!r}, {one}, {two})")
+        c.close()
+
+        print("The list of languages")
+        # Tigran, 2026-11-21, where two flags stood: closed, the flag of the
+        # language in effect and a chevron; open, each language, the one in
+        # effect pressed; an item chosen shuts it.
+        c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": 412, "height": 800})
+        c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
+        q = c.new_page()
+        q.on("pageerror", lambda e: errors.append(str(e)))
+        q.goto(BASE + "/1:1")
+        q.wait_for_timeout(300)
+        lshown = "() => [...document.querySelectorAll('.top .langmenu > summary .fl')].filter(f => f.getClientRects().length).map(f => f.dataset.to)"
+        lpressed = "() => [...document.querySelectorAll('.top .langitems button')].map(b => b.dataset.to + ':' + b.getAttribute('aria-pressed'))"
+        ok(q.evaluate(lshown) == ["en"] and not q.evaluate("document.querySelector('.top .langmenu').open"),
+           "closed, it shows the Union Jack alone")
+        q.tap(".top .langmenu > summary")
+        q.wait_for_timeout(150)
+        box = q.evaluate("(() => { const r = document.querySelector('.top .langitems').getBoundingClientRect(); return [r.left, r.right, innerWidth]; })()")
+        ok(q.evaluate(lpressed) == ["en:true", "ru:false"] and box[0] >= 0 and box[1] <= box[2],
+           f"open, English is pressed, and the list is within the window ({box})")
+        q.tap(".top .langitems button[data-to=ru]")
+        q.wait_for_timeout(250)
+        ok(q.evaluate("[document.documentElement.dataset.lang, document.querySelector('.top .langmenu').open, JSON.parse(localStorage.getItem('ub_settings')).lang]") == ["ru", False, "ru"]
+           and q.evaluate(lshown) == ["ru"] and q.evaluate(lpressed) == ["en:false", "ru:true"],
+           "Русский chosen: the page in Russian, the list shut, the tricolour shown, Русский pressed")
+        q.tap(".top .langmenu > summary")
+        q.wait_for_timeout(150)
+        q.tap("main p.t >> nth=1")
+        q.wait_for_timeout(150)
+        away = q.evaluate("document.querySelector('.top .langmenu').open")
+        q.tap(".top .langmenu > summary")
+        q.wait_for_timeout(150)
+        q.keyboard.press("Escape")
+        q.wait_for_timeout(150)
+        ok(not away and q.evaluate("[document.querySelector('.top .langmenu').open, document.activeElement.matches('.top .langmenu > summary')]") == [False, True],
+           "a tap elsewhere shuts it, and Escape, giving its mark the focus")
+        q.reload()
+        q.wait_for_timeout(300)
+        ok(q.evaluate(lshown) == ["ru"], "a page loaded in Russian shows the tricolour from the first")
+        c.close()
+
+        print("Full screen")
+        # Tigran, 2026-11-21: a tap on the corners; the browser leaves full
+        # screen as a new page loads, and the first tap on the next page,
+        # not on a link, brings it back; the button, Back or Esc (an end the
+        # page did not ask for) ends it for good; a mouse never brings it
+        # back.  The old page hears no end of it as it is left (checked in
+        # Chrome: only pagehide).
+        c = b.new_context(has_touch=True, is_mobile=True, viewport={"width": 412, "height": 800})
+        c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); } catch (e) {}")
+        q = c.new_page()
+        q.on("pageerror", lambda e: errors.append(str(e)))
+        q.goto(BASE + "/1:1")
+        q.wait_for_timeout(300)
+        if not q.evaluate("document.fullscreenEnabled"):
+            ok(False, "this Chrome cannot put a page in full screen")
+        else:
+            fstart = q.evaluate(FULL)
+            q.tap(".top .fscreen")
+            q.wait_for_timeout(500)
+            ok(fstart == [False, "false", None] and q.evaluate(FULL) == [True, "true", "1"],
+               f"a tap on the corners: full screen, the button pressed, the choice kept ({q.evaluate(FULL)})")
+            q.evaluate("location.href = '/1:2'")
+            q.wait_for_url("**/1:2")
+            q.wait_for_timeout(500)
+            ok(q.evaluate(FULL) == [False, "false", "1"], "a new page is not in full screen, and the choice is still kept")
+            link = q.locator("main a[href^='/']:visible").first
+            link.evaluate("a => a.addEventListener('click', ev => ev.preventDefault())")
+            link.tap()
+            q.wait_for_timeout(500)
+            ok(q.evaluate("!!document.fullscreenElement") is False, "a tap on a link does not bring it back")
+            q.tap("main p.t >> nth=2")
+            q.wait_for_timeout(600)
+            ok(q.evaluate(FULL) == [True, "true", "1"] and not q.evaluate("!!document.querySelector('.runhead:not([hidden])')"),
+               "a tap on the text brings it back, and does only that, with no running head")
+            q.evaluate("document.exitFullscreen()")
+            q.wait_for_timeout(400)
+            soon = q.evaluate(FULL)
+            q.wait_for_timeout(1500)
+            ok(soon == [False, "false", "1"] and q.evaluate(FULL) == [False, "false", None],
+               "ended from outside (Back, Esc), it is forgotten a moment later")
+            q.tap("main p.t >> nth=3")
+            q.wait_for_timeout(500)
+            ok(q.evaluate("!!document.fullscreenElement") is False, "and the next tap does nothing")
+            q.tap(".top .fscreen")
+            q.wait_for_timeout(500)
+            q.tap(".top .fscreen")
+            q.wait_for_timeout(500)
+            ok(q.evaluate(FULL) == [False, "false", None], "the corners again end it, and forget it")
+        c.close()
+        c = b.new_context(viewport={"width": 1200, "height": 800})
+        c.add_init_script("try { localStorage.setItem('ub_tour', 'seen'); localStorage.setItem('ub_full', '1'); } catch (e) {}")
+        q = c.new_page()
+        q.on("pageerror", lambda e: errors.append(str(e)))
+        q.goto(BASE + "/1:2")
+        q.wait_for_timeout(300)
+        q.click("main p.t >> nth=2")
+        q.wait_for_timeout(600)
+        ok(q.evaluate(FULL) == [False, "false", "1"], "a mouse's click does not bring it back")
         c.close()
 
         ok(not errors, "no script error: " + "; ".join(errors))

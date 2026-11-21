@@ -220,6 +220,79 @@
     });
   }
 
+  // Full screen, after the half-disc (base.html .fscreen; Tigran,
+  // 2026-11-21: "especially useful on the phone in our webapk"): the page
+  // fills the screen, the browser's bars gone, and on a phone the system's.
+  // Shown only where the browser can put a page in full screen, which an
+  // iPhone cannot.  The browser leaves full screen as any new page loads,
+  // and only a tap or a key may enter it, so the choice is kept on the
+  // device (ub_full, a key of its own and no setting, which no account
+  // carries: the phone's full screen is not the desktop's), and on each new
+  // page the first tap on a touch screen brings it back (asked, Tigran chose
+  // that over a switch each page loses): not one on a link, which is leaving
+  // the page anyway, nor a mouse's, the desktop having F11, which lasts from
+  // page to page, and Chrome there saying "Press Esc to exit full screen" at
+  // every entry.  A tap on the text that brings it back does only that,
+  // without the running head.  The button, Back or Esc ends it for good:
+  // any end the page did not ask for is taken as the reader's, unless the
+  // page is being left or hidden within a moment of it (a new page loading,
+  // which ends it as the browser commits to the new one; another app).  A
+  // whole paper is one page, and a recording playing swaps pages without
+  // loading them (listen.js), so those keep it.
+  var fsBtn = document.querySelector('.top .fscreen'), fsRoot = document.documentElement, FS = 'ub_full',
+      fsLeaving = false, fsTimer = 0, fsSwallow = false;
+  var fsNow = function () { return !!(document.fullscreenElement || document.webkitFullscreenElement); };
+  var fsWant = function (v) {
+    try {
+      if (v === undefined) return localStorage.getItem(FS) === '1';
+      if (v) localStorage.setItem(FS, '1'); else localStorage.removeItem(FS);
+    } catch (e) {}
+    return false;
+  };
+  var fsGo = function () {
+    var r;
+    try {
+      r = fsRoot.requestFullscreen ? fsRoot.requestFullscreen({ navigationUI: 'hide' }) : fsRoot.webkitRequestFullscreen();
+    } catch (e) {}
+    if (r && r.catch) r.catch(function () {});
+  };
+  var fsBack = function () {
+    var r;
+    try { r = document.exitFullscreen ? document.exitFullscreen() : document.webkitExitFullscreen(); } catch (e) {}
+    if (r && r.catch) r.catch(function () {});
+  };
+  if (fsBtn && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+    fsBtn.hidden = false;
+    fsBtn.addEventListener('click', function () {
+      if (fsNow()) { fsWant(false); fsBack(); } else { fsWant(true); fsGo(); }
+    });
+    var fsChange = function () {
+      var on = fsNow();
+      fsBtn.setAttribute('aria-pressed', String(on));
+      clearTimeout(fsTimer);
+      if (!on && fsWant()) fsTimer = setTimeout(function () {
+        if (!fsLeaving && !document.hidden && !fsNow()) fsWant(false);
+      }, 1500);
+    };
+    document.addEventListener('onfullscreenchange' in document ? 'fullscreenchange' : 'webkitfullscreenchange', fsChange);
+    addEventListener('pagehide', function () { fsLeaving = true; clearTimeout(fsTimer); });
+    addEventListener('pageshow', function (ev) { if (ev.persisted) { fsLeaving = false; fsChange(); } });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) clearTimeout(fsTimer); });
+    document.addEventListener('pointerup', function (ev) {
+      var t = ev.target;
+      if (ev.pointerType === 'mouse' || fsNow() || !fsWant() || !t.closest || t.closest('a[href], .fscreen')) return;
+      fsGo();
+      fsSwallow = !t.closest('button, summary, label, input, select, textarea, details, dialog, [role], [tabindex]');
+      setTimeout(function () { fsSwallow = false; }, 600);
+    }, true);
+    document.addEventListener('click', function (ev) {
+      if (!fsSwallow) return;
+      fsSwallow = false;
+      ev.stopPropagation();
+      ev.preventDefault();
+    }, true);
+  }
+
   var gear = document.querySelector('.gear'), dlg = document.querySelector('dialog.settings');
   if (gear && dlg && dlg.showModal) {
     gear.hidden = false;
@@ -2549,63 +2622,73 @@
     if (ev.detail.key === 'lang') { speak(document); flags(); }
   });
 
-  // The flags at the header's corner (base.html .langs): the interface in
-  // English or in Russian, kept as the setting 'lang' (settings.py KEPT).
+  // The list of languages at the header's corner (base.html .langmenu;
+  // Tigran, 2026-11-21, where two flags stood from 2026-10-25): the interface
+  // in English or in Russian, kept as the setting 'lang' (settings.py KEPT).
+  // Closed it shows the flag of the language in effect, which the stylesheet
+  // draws; open, the one in effect is pressed.  An item chosen shuts it.
   // Shown only while the site draws both.
-  var langs = document.querySelector('.top .langs');
+  var langMenu = document.querySelector('.top .langmenu');
   function flags() {
-    if (!langs) return;
+    if (!langMenu) return;
     var now = T.lang();
-    each.call(langs.querySelectorAll('.flag'), function (b) {
+    each.call(langMenu.querySelectorAll('.langitems button'), function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.to === now));
     });
   }
-  if (langs && T.bilingual) {
-    langs.hidden = false;
+  if (langMenu && T.bilingual) {
+    langMenu.hidden = false;
     flags();
-    langs.addEventListener('click', function (ev) {
-      var b = ev.target.closest('.flag');
-      if (b) window.ubSettings.set('lang', b.dataset.to);
+    menuShuts(langMenu);
+    langMenu.querySelector('.langitems').addEventListener('click', function (ev) {
+      var b = ev.target.closest('button[data-to]');
+      if (!b) return;
+      langMenu.open = false;
+      window.ubSettings.set('lang', b.dataset.to);
     });
   }
-  // On a phone (ub.css, under 40rem) the flags stand only where they fit
-  // beside the name (Tigran, 2026-11-17; never there from 2026-11-10 until
-  // then): where they would take the controls to a line of their own, they
-  // are left out (.noflags); and where the controls would go under the name
-  // even so, the half-disc of light or dark is left out too (.notheme; it
-  // came back on 2026-11-18, and is not to make a header of two lines one of
-  // three), Settings doing what each does.  Where the gear and the ? alone
-  // do not fit beside the name, the controls have a line of their own, and
-  // everything stands on it.  Asked again as the window, the language, a
-  // size or the typeface changes, and once the fonts are in.  Measured with
-  // nothing painted between, so nothing is seen to move.
-  var flagTop = document.querySelector('.top'), flagName = flagTop && flagTop.querySelector('.brand'),
-      flagCtl = flagTop && flagTop.querySelector('.ctl'), flagPhone = matchMedia('(max-width: 40rem)');
-  var flagsFit = function () {
-    if (!flagName || !flagCtl) return;
-    var below = function () { return flagCtl.getBoundingClientRect().top >= flagName.getBoundingClientRect().bottom - 1; };
-    // Since 2026-11-18 the line has the account's mark too, and before
-    // anything is left out it is drawn closer (.tight, ub.css): there the
-    // mark, the flags and the rest all fit wherever the flags fitted
-    // before.  Under that the account's mark gives way first, the flags
-    // never to it (Tigran: "so that the flags are always there, in all
+  // On a phone (ub.css, under 40rem) the controls stand beside the name
+  // where they fit: where they would take the controls to a line of their
+  // own, the line is first drawn closer (.tight), and then one thing after
+  // another is left out, Settings doing what each does: the account's mark
+  // (.noacct; 2026-11-18), the language (.nolang; the flags from 2026-11-17
+  // until the list, 2026-11-21, and on no phone from 2026-11-10 until
+  // then), the half-disc of light or dark (.notheme; back on 2026-11-18, and
+  // not to make a header of two lines one of three), and last full screen
+  // (.nofull; 2026-11-21, "especially useful on the phone").  Where the gear
+  // and the ? alone do not fit beside the name, the controls have a line of
+  // their own, and everything stands on it.  Asked again as the window, the
+  // language, a size or the typeface changes, as full screen comes or goes,
+  // and as each face comes in: the Cyrillic one is fetched only when a page
+  // turned into Russian first asks for it, and the line measured in the face
+  // standing in for it, wider, had left the language out at 430 px at
+  // Largest, where it fits (found 2026-11-21).  Measured with nothing
+  // painted between, so nothing is seen to move.
+  var ctlTop = document.querySelector('.top'), ctlName = ctlTop && ctlTop.querySelector('.brand'),
+      ctlBox = ctlTop && ctlTop.querySelector('.ctl'), ctlPhone = matchMedia('(max-width: 40rem)'),
+      CTL_OUT = ['noacct', 'nolang', 'notheme', 'nofull'];
+  var ctlFit = function () {
+    if (!ctlName || !ctlBox) return;
+    var below = function () { return ctlBox.getBoundingClientRect().top >= ctlName.getBoundingClientRect().bottom - 1; },
+        all = ['tight'].concat(CTL_OUT), i;
+    // The account's mark gives way first, the language never to it (Tigran,
+    // 2026-11-18, of the flags: "so that the flags are always there, in all
     // combinations"); Settings' foot says who is signed in, and leads to the
     // account.  On a line of their own the controls have room again.
-    flagTop.classList.remove('tight', 'noflags', 'notheme', 'noacct');
-    if (!flagPhone.matches || !below()) return;
-    flagTop.classList.add('tight');
-    if (!below()) return;
-    flagTop.classList.add('noacct');
-    if (!below()) return;
-    flagTop.classList.add('noflags');
-    if (!below()) return;
-    flagTop.classList.add('notheme');
-    if (below()) flagTop.classList.remove('tight', 'noflags', 'notheme', 'noacct');
+    DOMTokenList.prototype.remove.apply(ctlTop.classList, all);
+    if (!ctlPhone.matches || !below()) return;
+    ctlTop.classList.add('tight');
+    for (i = 0; i < CTL_OUT.length; i++) {
+      if (!below()) return;
+      ctlTop.classList.add(CTL_OUT[i]);
+    }
+    if (below()) DOMTokenList.prototype.remove.apply(ctlTop.classList, all);
   };
-  flagsFit();
-  addEventListener('resize', flagsFit);
-  document.addEventListener('ub:settings', flagsFit);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(flagsFit);
+  ctlFit();
+  addEventListener('resize', ctlFit);
+  document.addEventListener('ub:settings', ctlFit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(ctlFit);
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', ctlFit);
 
   // A 1955 reading opens as a card at its ring (ub.css .pop), carrying its
   // endnote's words (section.html), which are hidden while this runs, and a
@@ -3918,9 +4001,9 @@
     var acctLine = function () {
       acctKept.dataset.acct = acctWho() ? 'in' : 'out';
       // The menu, its mark and every name (base.html ubMe); and one more
-      // control beside the name, or another, so the flags are fitted again.
+      // control beside the name, or another, so the controls are fitted again.
       if (window.ubMe) window.ubMe();
-      flagsFit();
+      ctlFit();
       acctFollow();
       // Said for account.js, which asks the server what the account keeps.
       document.dispatchEvent(new Event('ub:who'));
@@ -4120,16 +4203,22 @@
   // above hears; elsewhere the link goes on to the changelog.  About is a
   // small window drawn here, as What's new's is drawn: what the site is, and
   // where its source is kept.
-  if (helpLink && helpLink.tagName === 'DETAILS') {
-    var shutHelp = function () { helpLink.open = false; };
+  // A menu at the header's corner, a <details> (the ?'s, the list of
+  // languages): shut by a tap anywhere else, and by Escape, which gives its
+  // mark the focus back.  The account's menu has its own, doing more.
+  function menuShuts(d) {
     document.addEventListener('click', function (ev) {
-      if (helpLink.open && !helpLink.contains(ev.target)) shutHelp();
+      if (d.open && !d.contains(ev.target)) d.open = false;
     });
     document.addEventListener('keydown', function (ev) {
-      if (ev.key !== 'Escape' || !helpLink.open) return;
-      shutHelp();
-      helpLink.querySelector('summary').focus();
+      if (ev.key !== 'Escape' || !d.open) return;
+      d.open = false;
+      d.querySelector('summary').focus();
     });
+  }
+  if (helpLink && helpLink.tagName === 'DETAILS') {
+    var shutHelp = function () { helpLink.open = false; };
+    menuShuts(helpLink);
     var aboutDlg = null;
     var openAbout = function () {
       if (!aboutDlg) {

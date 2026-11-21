@@ -47,20 +47,22 @@ class Static(unittest.TestCase):
         self.assertLess(head.index('<div class="ctl">'), head.index('<button class="gear"'))
         # No nav in the header since the same day.  The theme's half-disc went
         # with it and is back since 2026-11-18 (Tigran), beside the gear and
-        # before the flags, a button drawn as the gear is and, like it, hidden
-        # until ub.js runs; named in both languages.
+        # before full screen (2026-11-21) and the language, a button drawn as
+        # the gear is and, like it, hidden until ub.js runs; named in both
+        # languages.
         top = head[head.index('<header class="top">'):head.index('</header>')]
         self.assertNotIn('<nav', top)
         self.assertRegex(top, r'<button class="theme" type="button" \{\{ ta\(\'aria-label\', \'Light or dark\'\) \}\} '
                               r'\{\{ ta\(\'title\', \'Light or dark\'\) \}\} hidden>\n      \{\{ chrome\.theme_svg\(\) \}\}</button>')
         self.assertLess(top.index('<button class="gear"'), top.index('<button class="theme"'))
-        self.assertLess(top.index('<button class="theme"'), top.index('<span class="langs"'))
+        self.assertLess(top.index('<button class="theme"'), top.index('<button class="fscreen"'))
+        self.assertLess(top.index('<button class="fscreen"'), top.index('<details class="langmenu"'))
         self.assertNotIn("◐", head)
         js = (ROOT / "ubsite" / "static" / "ub.js").read_text(encoding="utf-8")
         self.assertIn("var themeBtn = document.querySelector('.top .theme');", js)
         self.assertIn("window.ubSettings.set('theme', dark ? 'light' : 'dark');", js)
         self.assertEqual(js.count("themeBtn"), 4)
-        self.assertLess(head.index('<span class="langs"'), head.index('<details class="help"'))
+        self.assertLess(head.index('<details class="langmenu"'), head.index('<details class="help"'))
         # One dialog in the shell: offline/pages.py cut() takes the first </dialog>.
         self.assertEqual(base.count("<dialog"), 1)
 

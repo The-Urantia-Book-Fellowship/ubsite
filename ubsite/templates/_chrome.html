@@ -32,6 +32,43 @@
 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.6"/><path class="half" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/></svg>
 {%- endmacro %}
 
+{#- Full screen (Tigran, 2026-11-21): four corners, drawn as the gear is, in
+    its lines; pointing out to go full screen (.fsgo), and in to come back
+    (.fsback), the stylesheet showing one by the button's aria-pressed. -#}
+{% macro full_svg() -%}
+<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path class="fsgo" d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/><path class="fsback" d="M2.5 6H6V2.5M10 2.5V6h3.5M13.5 10H10v3.5M6 13.5V10H2.5"/></svg>
+{%- endmacro %}
+
+{#- The interface's languages, each its flag (Tigran, 2026-10-25): the Union
+    Jack and the Russian tricolour, drawn, never emoji, which Windows has none
+    of.  In the header's list of languages twice, closed and open (base.html
+    .langmenu), so the Union Jack's clip is named by `id`, which each copy
+    gives its own. -#}
+{% macro flag_svg(lang, id='a') -%}
+{%- if lang == 'en' -%}
+<svg class="flg" data-l="en" viewBox="0 0 60 30" aria-hidden="true" focusable="false">
+        <clipPath id="uk-{{ id }}"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath>
+        <path d="M0 0h60v30H0z" fill="#012169"/>
+        <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/>
+        <path d="M0 0l60 30m0-30L0 30" clip-path="url(#uk-{{ id }})" stroke="#c8102e" stroke-width="4"/>
+        <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
+        <path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6"/></svg>
+{%- else -%}
+<svg class="flg" data-l="ru" viewBox="0 0 45 30" aria-hidden="true" focusable="false">
+        <path d="M0 0h45v10H0z" fill="#fff"/><path d="M0 10h45v10H0z" fill="#0039a6"/>
+        <path d="M0 20h45v10H0z" fill="#d52b1e"/></svg>
+{%- endif -%}
+{%- endmacro %}
+
+{#- The list of languages' chevron, closed (.lchev), and the tick at the
+    language chosen, open (.lcheck). -#}
+{% macro lchev_svg() -%}
+<svg class="lchev" viewBox="0 0 10 6" aria-hidden="true" focusable="false"><path d="M1.2 1.1L5 4.9l3.8-3.8"/></svg>
+{%- endmacro %}
+{% macro lcheck_svg() -%}
+<svg class="lcheck" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.6l3.2 3.2L13 4.6"/></svg>
+{%- endmacro %}
+
 {#- How the offline copy stands, at the right end of the home page's bar
     (base.html .fstate; Tigran's design, 2026-11-17): up to date, downloading,
     out of date, offline.  All four are in the bar, and ub.css shows the one

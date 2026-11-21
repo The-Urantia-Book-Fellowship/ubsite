@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- Full screen: the four corners beside the half-disc fill the screen with the page, hiding the browser's bars and, on a phone, the system's, most useful in the installed app. While it is on, each new page goes back to full screen at your first tap; the corners, Back or Esc end it. Not on an iPhone, which cannot.
 - The Home key goes to the home page from any page, on a phone or tablet with a keyboard too; Ctrl+Home still goes to the top of the page.
 - You can sign in with your Google account on ubsite.sigmaai.au, from the head and shoulders at the corner of the page: your settings, your bookmarks and the place you last read are then kept with your account, and are the same on every device where you sign in. Reading needs no account, and nothing changes for a reader who has none. Help has a chapter on it, Your account.
 - A paragraph's link, its address on this site, can be copied to send or keep: click or tap the paragraph's reference, such as 101:4.2, or tap the paragraph and choose Copy link in the bar at the foot, which is there with the references hidden too.
@@ -87,6 +88,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The two flags at the header's corner are one list of languages: closed, it shows the flag of the language in use; a tap opens it, each language named in its own words, which leaves room for full screen and for languages to come.
 - On a phone, a tap on any paragraph's line of index entries opens the entries under every paragraph, or folds them all, as the Index line at the top of the page does, and they stay so from page to page, Continue reading included; each box keeps its line, open or folded.
 - Where the translations are folded under the paragraphs, the paper's and the section's titles have a fold too, with the other texts' titles in it, opening and folding with the others and at the same tab.
 - The player's list of voices, and Settings' Listening, offer only the texts shown in Settings' Texts, the English first and then the translations by language and name; hiding the text being heard, the English or a translation, stops the player, where a translation unticked used to give way to the English.
@@ -192,6 +194,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- On a phone, switching the interface to Russian could leave the language out of the header where it fits, until the next page.
 - With a translation put first and the English chosen as the tab in the folds, opening the translations under every paragraph left all but the one tapped folded.
 - Back to a page, or the page loaded again, with the translations in columns or open under the paragraphs, could come back a few paragraphs further on; it comes back to the line you left.
 - Help's chapter on the translations showed a caption with nothing above it: the line it describes, under a paragraph, is shown.
@@ -256,6 +259,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- Full screen: base.html `button.fscreen`, ub.js `fsGo`/`fsBack`, the choice in `localStorage ub_full` (a key of its own, the device's, no setting), brought back by a capture `pointerup` that is not a mouse's nor on a link, forgotten 1.5 s after an end the page did not ask for unless the page was left or hidden. The flags are `details.langmenu`, its closed flag chosen by CSS from `data-lang`; `flagsFit` is `ctlFit`, leaving out `noacct`, `nolang`, `notheme`, `nofull` in that order, and it fits again as each face loads (`loadingdone`). `menuShuts(d)` shuts the ?'s menu and the list.
 - The texts' order: settings.py `english`, the English's place among the translations ticked ('' first, a number, or "off"), which follows the account from the exchange's version 3 (settings.LATE, account.js V); `translations` keeps its meaning for older scripts. ub.js draws each paragraph's first text where it is not the English (ftxPut), the line carrying the paragraph's address as its id, the English's keeping it as data-ref; the search's text list is `section[data-tr="up"]`.
 - The translations' folds are one setting, tropen (settings.py KEPT), which follows the account, and so does trtab, no longer the device's own. The exchange with an account has a version (account.js V, a request's v and was; settings.LATE): a script from before a setting came to follow is neither told of it nor heard on it, since the first script called a setting it did not keep back to its default. tools/trfold_e2e.py drives the folds in Chrome.
 - Accounts: signing in and what follows the account are offered on ubsite.sigmaai.au (settings.py ACCOUNT_HOSTS; a host also needs its var/account.toml and nginx's location for the exchange), not on ubsite.ddns.net; Each host backs up its own var/user.db every night from its crontab (python -m ubsite.account backup: a copy beside it, read back, copies 29 days old deleted), and a deploy takes one copy off the host. What follows the account was built on the dev server first. A signed-in reader's settings, all but the device's own (settings.py DEVICE), the place last read and the bookmarks are kept in var/user.db too, a row of its table item to each, and kept in step with the browser's copy by one exchange, POST /account/sync (account.py sync()), which static/account.js makes, a script only a reader signed in runs; a page is still drawn from the browser's own copy, and is the same for every reader. Both nginx files have a location for the exchange, to be installed on a host before it has accounts (deploy/README.md). tools/follow_e2e.py drives two browsers as two devices.

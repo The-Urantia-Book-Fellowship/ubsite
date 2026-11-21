@@ -83,7 +83,7 @@ class RunningHead(unittest.TestCase):
         self.assertLess(eg.index('<span class="set">'), eg.index('<a class="home"'))
         base = (ROOT / "ubsite" / "templates" / "base.html").read_text()
         ctl = base[base.index('<div class="ctl">'):]
-        self.assertLess(ctl.index('class="gear"'), ctl.index('class="langs"'))
+        self.assertLess(ctl.index('class="gear"'), ctl.index('class="langmenu"'))
 
     def test_a_translation_tapped_in_columns_is_named_alone(self):
         # Never the English beside it (Tigran, 2026-11-08): its own reference

@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% set title = 'Help' %}
-{% from "_chrome.html" import gear_svg, theme_svg, help_svg, glass_svg, player_svg, keep_svg, playp, ribbon_svg, link_svg, person_svg %}
+{% from "_chrome.html" import gear_svg, theme_svg, full_svg, help_svg, glass_svg, player_svg, keep_svg, playp, ribbon_svg, link_svg, person_svg %}
 {% from "_para.html" import para %}
 {% from "_fold.html" import afold %}
 {% from "_text.html" import chip, blanket, endnotes, quizcall %}
@@ -231,8 +231,9 @@
     <h2>{{ t('Settings|help') }}</h2>
     <p>{{ t('help:settings:1') }}</p>
     <div class="eg">
-      <div class="icons"><span><span class="gear">{{ gear_svg() }}</span>{{ t('Settings') }}</span><span><span class="theme">{{ theme_svg() }}</span>{{ t('Light or dark') }}</span></div>
+      <div class="icons"><span><span class="gear">{{ gear_svg() }}</span>{{ t('Settings') }}</span><span><span class="theme">{{ theme_svg() }}</span>{{ t('Light or dark') }}</span><span><span class="fscreen">{{ full_svg() }}</span>{{ t('Full screen') }}</span></div>
     </div>
+    <p>{{ t('help:full:1') }}</p>
     {{ showme('gear') }}
   </section>
 
