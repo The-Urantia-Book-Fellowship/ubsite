@@ -43,8 +43,13 @@
 .helppage .eg .find { max-width: 24rem; }
 .helppage .eg .transport, .helppage .eg .quizcall, .helppage .eg .blanket { margin: 0; }
 .helppage .eg .player { position: static; transform: none; display: inline-flex; max-width: 100%; }
-/* On a phone the bar is two rows, a grid (ub.css, 2026-11-21), and so is its picture here. */
-@media (max-width: 34rem) { .helppage .eg .player { display: inline-grid; } }
+/* On a phone the bar is two rows, a grid (ub.css .player.two, 2026-11-21),
+   and so is its picture here: both are drawn, and the width chooses. */
+.helppage .eg .player.two { display: none; }
+@media (max-width: 34rem) {
+  .helppage .eg .player:not(.two) { display: none; }
+  .helppage .eg .player.two { display: inline-grid; }
+}
 .helppage .eg .runhead { position: static; box-shadow: none; border: 1px solid var(--rule); border-radius: 4px; }
 /* The fold's line as the page draws it: shown though it names no
    translation (ub.css shows a fold only for those ticked), and no control. */
@@ -199,7 +204,12 @@
     <div class="eg">
       {#- The bar as listen.js makeBar() builds it, its buttons inert: an
           illustration, so hidden from assistive technology and the tab order. #}
-      <div class="player" aria-hidden="true"><button type="button" class="prev" tabindex="-1">{{ player_svg('prev') }}</button><button type="button" class="toggle" tabindex="-1">{{ player_svg('play') }}</button><button type="button" class="next" tabindex="-1">{{ player_svg('next') }}</button><span class="mid"><span class="where"><button type="button" class="at" tabindex="-1">{{ eg_text.p.ref }}</button><span class="who"></span></span><span class="voicebox"><button type="button" class="voice" tabindex="-1"><span>Merritt Horn</span></button></span></span><button type="button" class="keep" data-st="none" tabindex="-1">{{ keep_svg() }}</button><span class="tleft">{{ lcd_svg('4:06') }}<span class="tnow">4:06</span></span><span class="ratebox"><button type="button" class="rate" tabindex="-1">1×</button></span><button type="button" class="close" tabindex="-1">{{ player_svg('close') }}</button></div>
+      {#- One row on a wide screen, two on a phone, as listen.js rows() sets the
+          bar's class; a static page has no script for it, so both are drawn
+          and the width chooses (2026-11-21). #}
+      {%- for cls in ("player", "player two") %}
+      <div class="{{ cls }}" aria-hidden="true"><button type="button" class="prev" tabindex="-1">{{ player_svg('prev') }}</button><button type="button" class="toggle" tabindex="-1">{{ player_svg('play') }}</button><button type="button" class="next" tabindex="-1">{{ player_svg('next') }}</button><span class="mid"><span class="where"><button type="button" class="at" tabindex="-1">{{ eg_text.p.ref }}</button><span class="who"></span></span><span class="voicebox"><button type="button" class="voice" tabindex="-1"><span>Merritt Horn</span></button></span></span><button type="button" class="keep" data-st="none" tabindex="-1">{{ keep_svg() }}</button><span class="tleft">{{ lcd_svg('4:06') }}<span class="tnow">4:06</span></span><span class="ratebox"><button type="button" class="rate" tabindex="-1">1×</button></span><button type="button" class="close" tabindex="-1">{{ player_svg('close') }}</button></div>
+      {%- endfor %}
       <p class="cap">{{ t('help:listening:cap') }}</p>
     </div>
     <p>{{ t('help:listening:2') }}</p>

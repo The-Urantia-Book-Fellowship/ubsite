@@ -331,8 +331,26 @@
     el.dataset.fit = 'plain';
     if (over()) el.dataset.fit = 'none';
   }
-  window.addEventListener('resize', function () { if (bar) leftFit(); });
-  if (document.fonts) document.fonts.addEventListener('loadingdone', function () { if (bar) leftFit(); });
+  // The bar's form: two rows, the reference and the voice a line over the
+  // buttons (ub.css .player.two), under 34rem always, and above it wherever
+  // one row would cut the voice's name or the reference, measured with no
+  // time shown (Tigran, 2026-11-21: a small tablet's at the larger text
+  // sizes cut "USGNY · Григорий Войнер" to 629 px; a fixed width makes such a
+  // band, CLAUDE.md trap 68).  Then the time's room (leftFit).
+  var PHONE = window.matchMedia ? matchMedia('(max-width: 34rem)') : null;
+  function rows() {
+    if (!bar) return;
+    var t = bar.querySelector('.tleft'), f = t.dataset.fit;
+    var cut = function (e) { return e.scrollWidth > e.clientWidth + 1; };
+    bar.classList.remove('two');
+    t.dataset.fit = 'none';
+    var two = (PHONE && PHONE.matches) || cut(bar.querySelector('.voice span')) || cut(bar.querySelector('.where'));
+    if (f) t.dataset.fit = f; else delete t.dataset.fit;
+    bar.classList.toggle('two', !!two);
+  }
+  function fit() { rows(); leftFit(); }
+  window.addEventListener('resize', function () { if (bar) fit(); });
+  if (document.fonts) document.fonts.addEventListener('loadingdone', function () { if (bar) fit(); });
   // The time left as a watch's screen shows it (Tigran, 2026-11-21: "a nice
   // background 'screen' ... and segmented 'digital' digits"): seven segments
   // to a digit, slanted, those unlit drawn faint; under ten minutes the first
@@ -486,7 +504,7 @@
     if (synth) synth.getVoices();
     shuts = [];
     bar = document.createElement('div');
-    bar.className = 'player';
+    bar.className = 'player' + (PHONE && PHONE.matches ? ' two' : '');   // a phone's from the first frame (rows)
     bar.setAttribute('role', 'region');
     T.attr(bar, 'aria-label', 'Listening');
     var prev = button('prev', T.k('Back to the start of this paragraph (twice: the one before)'), 'prev');
@@ -802,7 +820,7 @@
     // The name and the reference as they now stand: changed, the time's
     // room is measured again (leftFit, by drawLeft below).
     var tl = bar.querySelector('.tleft'), sig = bar.querySelector('.mid').textContent;
-    if (tl.dataset.sig !== sig) { tl.dataset.sig = sig; delete tl.dataset.fit; }
+    if (tl.dataset.sig !== sig) { tl.dataset.sig = sig; rows(); delete tl.dataset.fit; }
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
     // The next section's name, as app.py makes it in each language.
@@ -1287,12 +1305,25 @@
     if (v) u.voice = v;
     u.lang = v ? v.lang : V.tr ? TRS[V.tr].lang : 'en-US';
     u.rate = rate();
+    // A browser that names no voice and has not begun in five seconds has
+    // none to speak with: the bar says so, where it stood silent with ⏸ shown
+    // (Tigran's tablet, 2026-11-21, with no speech engine Chrome could use,
+    // until he installed Google's).  A slow voice of a browser that has
+    // named its voices is waited for, however long.
+    var mute = setTimeout(function () {
+      if (gen !== said.gen || said.u !== u || u.started || synth.getVoices().length) return;
+      hush();
+      tell(T('This browser has no voice to read with.'));
+    }, 5000);
+    u.onstart = function () { u.started = true; };
     u.onend = function () {
+      clearTimeout(mute);
       if (gen !== said.gen) return;
       said.n++;
       utter(gen);
     };
     u.onerror = function (e) {
+      clearTimeout(mute);
       if (gen !== said.gen || e.error === 'interrupted' || e.error === 'canceled') return;
       hush();
       // Refused before a tap (arriving by "#listen"): the bar waits for one.
@@ -1426,7 +1457,7 @@
 
   document.addEventListener('ub:settings', function (ev) {
     var what = ev.detail.key;
-    if ((what === 'uisize' || what === 'lang') && bar) leftFit();
+    if ((what === 'uisize' || what === 'lang') && bar) fit();
     if (what === 'rate') {
       audio.playbackRate = audio.defaultPlaybackRate = rate();
       if (said.on) speakFrom(said.n);             // the sentence again, at the new speed

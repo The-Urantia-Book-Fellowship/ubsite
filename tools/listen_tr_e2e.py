@@ -503,6 +503,13 @@ GEO = """() => { const b = document.querySelector('.player'), q = s => { const e
     n = b.querySelector('.voice span');
   return { bar: q(''), mid: q('.mid'), prev: q('.prev'), toggle: q('.toggle'), close: q('.close'), onward: q('.onward'),
            left: q('.tleft'), rate: q('.rate'), t: b.querySelector('.tleft').textContent, title: b.querySelector('.tleft').title,
+           two: b.classList.contains('two'),
+           order: (() => { const k = [...b.children].filter(e => !e.matches('.mid, .onward') && e.getClientRects().length),
+               n = e => e.className.split(' ')[0], s = k.slice().sort((x, y) => x.getBoundingClientRect().left - y.getBoundingClientRect().left);
+             return s.map(n).join(' ') === k.map(n).join(' ') ? 'ok' : s.map(n).join(' '); })(),
+           side: (() => { const r = b.getBoundingClientRect(), k = [...b.children].filter(e => !e.matches('.mid, .onward') && e.getClientRects().length)
+               .map(e => e.getBoundingClientRect());
+             return [Math.min(...k.map(x => x.left)) - r.left, r.right - Math.max(...k.map(x => x.right))]; })(),
            shown: n.clientWidth, need: n.scrollWidth, on: b.querySelector('.onward').scrollWidth > b.querySelector('.onward').clientWidth + 1,
            vw: innerWidth, vh: innerHeight, inner: (() => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
              return [r.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft),
@@ -531,6 +538,8 @@ def one_line(g: dict) -> bool:
     mid = lambda r: (r[1] + r[3]) / 2
     if g["prev"][0] < g["inner"][0] - 1 or g["close"][2] > g["inner"][1] + 1:
         return False                           # and inside the bar's padding
+    if g["order"] != "ok" or (g["two"] and abs(g["side"][0] - g["side"][1]) > 2):
+        return False                           # in their order, and in two rows centred
     return all(abs(mid(g[x]) - mid(g["toggle"])) <= 2 for x in ("prev", "close", "rate") + (("left",) if g["left"] else ()))
 
 
@@ -539,6 +548,60 @@ def secs(t: str) -> int:
     for x in t.split(":"):
         n = n * 60 + int(x)
     return n
+
+
+# A browser with no speech engine: it names no voice, and an utterance never
+# begins (Tigran's tablet, 2026-11-21).  And one that names its voices and is
+# slow to begin, which is waited for: its voices are no SpeechSynthesisVoice,
+# so neither is the utterance.
+NO_ENGINE = """
+(() => {
+  const fake = { speaking: false, pending: false, paused: false, onvoiceschanged: null, said: 0,
+    getVoices: () => [], pause() {}, resume() {}, addEventListener() {}, removeEventListener() {}, cancel() {},
+    speak() { this.said++; } };
+  Object.defineProperty(window, 'speechSynthesis', { value: fake, configurable: true });
+})();
+"""
+SLOW = VOICES + "window.SpeechSynthesisUtterance = function (t) { this.text = t; };\n"
+
+
+def no_voice(b) -> None:
+    """A browser with no voice to read with says so in the bar, five seconds
+    on, and stops, where it stood silent with ⏸ shown (Tigran, 2026-11-21);
+    one that names its voices is waited for, however slow."""
+    print("\nA browser with no voice to read with")
+    for name, stub, says in (("no voices", NO_ENGINE, True), ("voices, slow to begin", SLOW, False)):
+        ctx, pg, asked, errors = context(b, {"voice": "browser"})
+        ctx.add_init_script(stub)
+        pg.goto(BASE + "/1:1")
+        pg.wait_for_selector("[id='1:1.2'] .stk > .playp", timeout=15000)
+        pg.click("[id='1:1.2'] .stk > .playp")
+        pg.wait_for_selector(".player .voice span", timeout=15000)
+        told = until(pg, "(document.querySelector('.player .who') || {}).textContent.includes('This browser has no voice to read with')", 8)
+        label = pg.get_attribute(".player .toggle", "aria-label")
+        if says:
+            ok(told and label == "Play" and pg.evaluate("speechSynthesis.said") >= 1,
+               f"{name}: the bar says so, and stops ({label!r})")
+            # On a phone, in Russian: the message whole on lines of its own,
+            # the voice's name whole under it, the buttons centred.
+            ph, pp, _, perr = context(b, {"voice": "browser", "lang": "ru"}, phone=True)
+            ph.add_init_script(stub)
+            pp.set_viewport_size({"width": 360, "height": 800})
+            pp.goto(BASE + "/1:1")
+            pp.wait_for_selector("[id='1:1.2'] .stk > .playp", timeout=15000)
+            pp.click("[id='1:1.2'] .stk > .playp")
+            until(pp, "(document.querySelector('.player .who') || {}).textContent.length > 0", 8)
+            pp.wait_for_timeout(200)
+            g = pp.evaluate(GEO)
+            whole = pp.evaluate("(() => { const w = document.querySelector('.player .where'); return w.scrollWidth <= w.clientWidth + 1; })()")
+            ok(whole and g["need"] <= g["shown"] + 1 and one_line(g) and g["two"],
+               f"{name}, a phone in Russian: the message and the name whole, the buttons centred ({g['side']}, {g['order']})")
+            ok(not perr, f"{name}, a phone: no script error: " + "; ".join(perr))
+            ph.close()
+        else:
+            ok(not told and label == "Pause", f"{name}: nothing said, the voice waited for ({label!r})")
+        ok(not errors, f"{name}: no script error: " + "; ".join(errors))
+        ctx.close()
 
 
 def phone_bar(b) -> None:
@@ -627,6 +690,35 @@ def phone_bar(b) -> None:
         ok(not errors, say + "no script error: " + "; ".join(errors))
         ctx.close()
 
+    # A small tablet, just above a phone's 34rem: one row where it holds the
+    # name, two where one would cut it (rows; it cut "USGNY · Григорий Войнер"
+    # up to 629 px at 125% in Russian), the name whole at every width.
+    for lang, ui in (("en", "125"), ("ru", "112.5"), ("ru", "125")):
+        ctx, pg, asked, errors = context(b, {"translations": "urantia-ru", "lang": lang, "uisize": ui})
+        pg.set_viewport_size({"width": 700, "height": 900})
+        pg.goto(BASE + "/1:1")
+        pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
+        pg.wait_for_timeout(500)
+        if pg.locator("article.cmp").count():
+            pg.click(".rc[data-k='urantia-ru']:has(p.rt[data-ref='1:1.2']) .stk > .playp")
+        else:
+            pg.click(".row:has([id='1:1.2']) .trfold")
+            pg.click(".row:has([id='1:1.2']) .tf.open .who[data-play='urantia-ru'] > .playp")
+        pg.wait_for_selector(".player .voice span", timeout=15000)
+        seen, bad = [], []
+        for w in range(546, 701, 22):
+            pg.set_viewport_size({"width": w, "height": 900})
+            pg.wait_for_timeout(150)
+            g = pg.evaluate(GEO)
+            two = pg.evaluate("document.querySelector('.player').classList.contains('two')")
+            seen.append((w, "two" if two else "one"))
+            if g["need"] > g["shown"] + 1 or not one_line(g) or g["bar"][0] < 0 or g["bar"][2] > g["vw"]:
+                bad.append(w)
+        ok(not bad and seen[0][1] == "two" and seen[-1][1] == "one",
+           f"tablet {lang} {ui}%: the name whole from 546 to 700 px, two rows only where one would cut it ({seen}; bad {bad})")
+        ok(not errors, f"tablet {lang} {ui}%: no script error: " + "; ".join(errors))
+        ctx.close()
+
     # A phone of 320 px: the row in the bar at every size, the time on its
     # screen, or plain, or left out, as there is room.
     for ui in ("100", "112.5", "125"):
@@ -691,9 +783,12 @@ def phone_bar(b) -> None:
                     n = document.querySelector('.player .voice span'), w = document.querySelector('.player .where'),
                     a = [n.clientWidth, w.clientWidth]; t.dataset.fit = 'none'; const z = [n.clientWidth, w.clientWidth];
                     t.dataset.fit = f; return [z[0] - a[0], z[1] - a[1]]; }""")
-                ok(abs(mid(g["mid"]) - mid(g["toggle"])) <= 3 and g["bar"][0] >= 0 and g["bar"][2] <= g["vw"]
-                   and g["close"][2] <= g["inner"][1] + 1 and g["prev"][0] >= g["inner"][0] - 1,
-                   say + f"one row, in the window ({g['bar']})")
+                two = pg.evaluate("document.querySelector('.player').classList.contains('two')")
+                ok(((not two and abs(mid(g["mid"]) - mid(g["toggle"])) <= 3) or (two and g["mid"][3] <= g["toggle"][1] + 1))
+                   and g["bar"][0] >= 0 and g["bar"][2] <= g["vw"] and g["close"][2] <= g["inner"][1] + 1
+                   and g["prev"][0] >= g["inner"][0] - 1 and g["need"] <= g["shown"] + 1
+                   and (w > 600 or ui == "100") <= (not two),
+                   say + f"{'two rows' if two else 'one row'}, the name whole ({g['shown']} of {g['need']} px), in the window")
                 ok(cost[0] <= 1 and cost[1] <= 1 and fit in ("lcd", "plain", "none")
                    and (fit != "lcd" or (drawn == g["t"] and g["left"][2] <= g["rate"][0] + 1)),
                    say + f"the time {fit}, before the speed, costing the name and the reference nothing ({cost}, drawn {drawn!r})")
@@ -742,6 +837,7 @@ def run() -> int:
         bar(b)
         lacking(b)
         phone_bar(b)
+        no_voice(b)
         b.close()
     return 1 if fails else 0
 

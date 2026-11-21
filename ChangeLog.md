@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- A browser with no voice to read with now says so in the player, where it stood silent with the pause button shown.
 - The player shows the time left in the section being heard, or in the paper on the whole paper's page, before the speed, counting down at the speed chosen, on a little screen in digital digits, as on a watch.
 - A translation's play button in the fold under a paragraph has beside it the time the paragraph takes to hear, as in parallel columns, where a recording reads it (USGNY, Григорий Войнер).
 - Full screen: the four corners beside the half-disc fill the screen with the page, hiding the browser's bars and, on a phone, the system's, most useful in the installed app. While it is on, each new page goes back to full screen at your first tap; the corners, Back or Esc end it. Not on an iPhone, which cannot.
@@ -196,6 +197,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- On a small tablet at the larger text sizes the player no longer cuts the voice's name: it takes two rows wherever one would cut it, as on a phone; and on a phone a message in the player, such as a recording not kept, is shown whole over the voice.
 - On a phone the player shows the voice's name whole, the paragraph's reference and the voice on a line over the buttons, where "USGNY · Григорий Войнер" was cut to "USG…"; at the end of a section "Next" stands on that line, where it ran past the player's edge and hid ×; and Follow along keeps the line being read clear of the player.
 - On a phone, switching the interface to Russian could leave the language out of the header where it fits, until the next page.
 - With a translation put first and the English chosen as the tab in the folds, opening the translations under every paragraph left all but the one tapped folded.
@@ -262,6 +264,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### For developers
 
+- The player's two rows are `.player.two`, set by listen.js `rows()` under 34rem and wherever one row would cut the voice's name or the reference, measured; nine columns, the outer two flexible and held by pseudo-elements, so the buttons stay centred; Help draws its picture of the bar in both forms. `utter()` says "This browser has no voice to read with." where the browser names no voice and nothing has begun in five seconds. tools/listen_tr_e2e.py `no_voice` and a sweep of a small tablet's widths.
 - The player on a phone (under 34rem) is a grid of two rows, the line spanning seven columns, `width: max-content` (ub.css; help.html's picture `inline-grid`); listen.js `clearOf()` is Follow along's margin, the bar's top and 16 px, never under 80; `drawLeft()` the time left, `.tleft`, on every screen, a seventh column on a phone, the columns spaced by margins so that an empty one takes no room; `clock()` writes an hour and more as h:mm:ss. listen.js `timed()` gives a text's play button its paragraph's time, in a column (trPlay) and in the fold (foldPlay). The screen: listen.js `lcd()` draws the digits as SVG from one segment table, which _chrome.html `lcd_svg` repeats for Help (tests/test_help.py compares them under Node), colours `--lcd*`; `leftFit()` falls back to plain figures, then none, where the row would leave the bar's padding or, in a desk's one row, take room from the voice's name or the reference. tools/listen_tr_e2e.py `phone_bar` holds it at 360 and 412 px, three sizes, both languages.
 - A recording's file that failed is fetched once, for certain: offline.js `pump()` asks `keep` with `next`, which sw.js `keepOne(next)` refuses after a failure, and the worker writes the error before it lets the file go. A state told to every page could arrive after the answer carrying the error and set the page pumping again (CLAUDE.md trap 73), which offline_e2e's check met now and then; it now forces that order. And the three second copies in Григорий Войнер's directory (7-07, 19-00, 50-00) are deleted, here and on both hosts, with their lines in voyner-files.tsv, voyner-frames.tsv and voyner-overrides.tsv.
 - Full screen: base.html `button.fscreen`, ub.js `fsGo`/`fsBack`, the choice in `localStorage ub_full` (a key of its own, the device's, no setting), brought back by a capture `pointerup` that is not a mouse's nor on a link, forgotten 1.5 s after an end the page did not ask for unless the page was left or hidden. The flags are `details.langmenu`, its closed flag chosen by CSS from `data-lang`; `flagsFit` is `ctlFit`, leaving out `noacct`, `nolang`, `notheme`, `nofull` in that order, and it fits again as each face loads (`loadingdone`). `menuShuts(d)` shuts the ?'s menu and the list.
