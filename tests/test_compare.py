@@ -96,13 +96,14 @@ class Room(unittest.TestCase):
         self.assertIn("if (cw && innerWidth >= cw && window.ubTexts('translations' in s ? s.translations : D.translations,\n"
                       "                                                 'english' in s ? s.english : D.english).length > 1) r.classList.add('compare');", body)
         self.assertNotIn("s.compare", body)
-        self.assertIn(':root[data-margin="off"]:not(.compare, [data-index="off"])', body)
+        self.assertIn(':root:not(.compare, [data-index="off"]) .grid>.row:has(', body)
         # A part's page in columns by the class alone, at any width.
         self.assertIn("':root.compare .partpage .dividers>:is(' + d + '){display:grid}'", body)
         self.assertNotIn("@media (min-width:62.01rem){:root.compare", body)
         css = (ROOT / "ubsite/static/ub.css").read_text()
         self.assertNotIn("[data-compare", css)
-        self.assertIn(':root.compare .grid > .row > .tf', css)
+        # The folds, a head's among them (2026-11-21), give way to the columns.
+        self.assertIn(':root.compare :is(.grid > .row > .tf, section > .tf.tfh)', css)
         js = (ROOT / "ubsite/static/ub.js").read_text()
         self.assertIn("document.documentElement.classList.toggle('compare', on);", js)
         self.assertNotIn("load().compare", js)
@@ -249,8 +250,9 @@ class Names(unittest.TestCase):
         self.assertIn("if (box) box.classList.toggle('cmpfold', box.querySelectorAll(':scope > ul > li').length >= 5);", js)
         start = js.index("function cmpUndraw(art) {")
         self.assertIn("art.querySelectorAll('.blanket.cmpfold'), function (el) { el.classList.remove('cmpfold'); }", js[start:start + 1300])
-        self.assertIn("var box = x.parentNode, folds = box.classList.contains('cmpfold') && !phone.matches;", js)
-        self.assertIn("x.setAttribute('aria-expanded', String((on && !folds) || box.classList.contains('shown')));", js)
+        # On a phone every box is as the index is, its line the Index's switch
+        # (2026-11-21); here, a box of many lines folded though it is shown.
+        self.assertIn("x.setAttribute('aria-expanded', String(phone.matches ? on : (on && !box.classList.contains('cmpfold')) || box.classList.contains('shown')));", js)
         start = css.index("@media screen and (min-width: 62.01rem) {\n  article.cmp > section[id] { display: grid; gap: 0 2rem; }")
         block = css[start:css.index("\n}\n", start)]
         for rule in ("  article.cmp > section[id] > .blanket.cmpfold > .afold { display: flex; width: 100%; font-size: .9rem; }",

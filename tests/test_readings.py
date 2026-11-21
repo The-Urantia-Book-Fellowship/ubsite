@@ -211,8 +211,11 @@ class Pages(unittest.TestCase):
         js = (ROOT / "ubsite" / "static" / "listen.js").read_text()
         ub = (ROOT / "ubsite" / "static" / "ub.js").read_text()
         draw = ub[ub.index("function trDraw(tf, ks, tab)"):ub.index("function arriveTr()")]
-        self.assertIn("(cur === 'all' ? '' : ' data-play=\"' + cur + '\"')", draw)
-        self.assertIn("'<p class=\"who\" data-play=\"' + k + '\">'", draw)
+        # A head's fold has none (2026-11-21): a section is heard from its
+        # heading by the English's ▶.
+        self.assertIn("var play = function (k) { return head ? '' : ' data-play=\"' + k + '\"'; };", draw)
+        self.assertIn("(cur === 'all' ? '' : play(cur))", draw)
+        self.assertIn("'<p class=\"who\"' + play(k) + '>'", draw)
         self.assertIn("new CustomEvent('ub:trfold', { detail: panel })", draw)
         # A tab is a button that names one: the ▶ in their row is not a tab.
         self.assertIn("closest('.trfold, .trtabs button[data-tab]')", ub)

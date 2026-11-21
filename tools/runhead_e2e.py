@@ -453,7 +453,12 @@ def run() -> int:
         pg.wait_for_selector(FOLD + " .trfold")
         pg.tap(FOLD + " .trfold")
         pg.wait_for_selector(FOLD + ".open p.rt")
-        settle(pg)
+        # Every fold opening, the head's among them (2026-11-21), the line
+        # tapped is held where it stood while a typeface comes in (ub.js
+        # placeHold), here the Cyrillic italic of the head's author: a
+        # reader's touch lets go of it, Playwright's scroll to the element
+        # before its tap does not, and the tap fell on the tabs above.
+        pg.evaluate("document.fonts.ready.then(() => new Promise(r => setTimeout(r, 400)))")
         pg.tap(FOLD + " p.rt")
         settle(pg)
         h = pg.evaluate(HEAD) if shown(pg) else {}
@@ -553,7 +558,10 @@ def run() -> int:
         settle(pg)
         ok(pg.evaluate("location.hash") == "#0:6" and pg.evaluate(SECS + "[6].getAttribute('href')") == "/0#0:6",
            "a section followed from the Contents is a place on the page, its link now in the reader's unit")
-        pg.evaluate("scrollBy(0, document.getElementById('0:6').getBoundingClientRect().top - 100)")
+        # 200 px down: the folds about to open under the heads too (2026-11-21),
+        # section 6's titles in the translation come between its title and the
+        # line tapped, which stays, and the title goes up by them.
+        pg.evaluate("scrollBy(0, document.getElementById('0:6').getBoundingClientRect().top - 200)")
         settle(pg)
         TOP6 = "document.getElementById('0:6').getBoundingClientRect().top"
         ok(pg.evaluate(MARK) == ["5. Personality Realities"] and pg.evaluate(TOP6) > 60,

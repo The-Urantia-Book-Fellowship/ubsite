@@ -87,6 +87,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- On a phone, a tap on any paragraph's line of index entries opens the entries under every paragraph, or folds them all, as the Index line at the top of the page does, and they stay so from page to page, Continue reading included; each box keeps its line, open or folded.
+- Where the translations are folded under the paragraphs, the paper's and the section's titles have a fold too, with the other texts' titles in it, opening and folding with the others and at the same tab.
 - The player's list of voices, and Settings' Listening, offer only the texts shown in Settings' Texts, the English first and then the translations by language and name; hiding the text being heard, the English or a translation, stops the player, where a translation unticked used to give way to the English.
 - In parallel columns each column's play button now stands at the start of its paragraph, as the first column's does, with the time the paragraph takes where a recording reads it; the paragraph's reference stays with the first column alone.
 - Settings' Translations tab is now Texts, and the English is one of the texts in it: put any text first and it stands where the English stood, the others beside it in columns or folded under it, and hide any of them, the English too; where the first has no paragraph, the next that has it stands in, named.
@@ -190,6 +192,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- With a translation put first and the English chosen as the tab in the folds, opening the translations under every paragraph left all but the one tapped folded.
 - Back to a page, or the page loaded again, with the translations in columns or open under the paragraphs, could come back a few paragraphs further on; it comes back to the line you left.
 - Help's chapter on the translations showed a caption with nothing above it: the line it describes, under a paragraph, is shown.
 - In the dark theme the scrollbars, of the Contents and the index above all, and the checkboxes and round buttons in Settings were drawn light; they are dark now.

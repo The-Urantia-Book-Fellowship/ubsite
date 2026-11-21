@@ -21,6 +21,19 @@ control.  The longest paper, 30, whole, timed.  And a page loaded again by
 Back or a reload comes back at the line it was left at, the folds open or in
 columns, where the browser alone would put it paragraphs on.
 
+And since 2026-11-21 (Tigran: "only the first text shows the paper and
+section titles"; "folding/unfolding the index entries under one paragraph
+should fold/unfold them everywhere and persist"): a fold under each head
+holds the other texts' titles, as each gives them where it is first, opening
+with every fold, at the tab chosen, and its own line turning them all; on the
+whole paper the paper's over the introduction and each section's over its
+own; none in columns; a heading read in a translation marked there.  With a
+translation first and the folds at Uversa Press, every fold opens, which only
+the one tapped did.  And on a phone a box of index entries' line is the
+Index's switch: a tap on one opens or folds every box, the line kept where it
+stood, Continue reading coming back with them as left, with Whole paper off
+and on, and a reading path's captions the same.
+
     .venv/bin/python tools/trfold_e2e.py        (after make data)
 
 Playwright is in .venv as a dev requirement and drives the system's Chrome.
@@ -70,7 +83,7 @@ FOLDS = """() => {
   const all = [...document.querySelectorAll('main .tf[data-has]')].filter(tf => tf.querySelector('.trfold').textContent.trim());
   return {n: all.length, open: all.filter(tf => tf.classList.contains('open')).length,
           drawn: all.filter(tf => tf.querySelector('.tr:not([hidden]) :is(p.rt, .gap)')).length,
-          shown: all.filter(tf => tf.querySelector('.tr:not([hidden]) p.rt')).length,
+          shown: all.filter(tf => tf.querySelector('.tr:not([hidden]) :is(p.rt, .fhd)')).length,
           cols: !!document.querySelector('main article.cmp'),
           under: document.querySelectorAll('main article.cmp .tf .tr').length}; }"""
 ALL_OPEN = "(() => { const f = (%s)(); return f.n > 0 && f.open === f.n && f.shown === f.n; })()" % FOLDS
@@ -254,6 +267,7 @@ def columns(b) -> None:
     pg.wait_for_timeout(800)
     f = pg.evaluate(FOLDS)
     ok(f["under"] == 0 and pg.locator("main .tf .tr").count() == 0, f"and no fold's words under them ({f})")
+    ok(not any(x["seen"] for x in pg.evaluate(HEADS)), "nor a head's fold")
     pg.set_viewport_size({"width": 1000, "height": 900})
     ok(until(pg, "!(%s)().cols" % FOLDS) and until(pg, ALL_OPEN), f"narrowed again: the folds, all open ({pg.evaluate(FOLDS)})")
     ok(pg.locator("[id^='fnref']").evaluate_all("els => els.length === new Set(els.map(e => e.id)).size"), "no note's number twice")
@@ -390,6 +404,156 @@ def help_example(b) -> None:
     ctx.close()
 
 
+# Each head's fold: its section, open or not, its line, whether it is seen,
+# and the titles drawn in it, [key, h1, h2] each.
+HEADS = """() => [...document.querySelectorAll('main .tfh')].map(tf => ({sec: tf.parentNode.id, open: tf.classList.contains('open'),
+  line: (b => { const c = b.cloneNode(true); c.querySelectorAll('x-ru').forEach(e => e.remove()); return c.textContent.trim(); })(tf.querySelector('.trfold')),
+  seen: tf.getClientRects().length > 0,
+  hd: [...tf.querySelectorAll('.tr:not([hidden]) .fhd')].map(h => [h.dataset.k, (h.querySelector('h1') || {}).textContent || '',
+                                                                   (h.querySelector('h2') || {}).textContent || ''])}))"""
+
+
+def heads(b) -> None:
+    print("\nThe other texts' titles, in a fold under each head")
+    # What each text calls 1:1 where it is first, the page's own head.
+    want = {}
+    for k in ("urantia-ru", "uf-ru", "up"):
+        ctx, pg, errors = fresh(b, {"translations": k if k != "up" else "", "english": "1"})
+        pg.goto(BASE + "/1:1")
+        until(pg, "document.documentElement.classList.contains('ftxready')")
+        pg.wait_for_timeout(500)
+        want[k] = pg.evaluate("""() => { const h = document.querySelector('main article > header.papertop:is(.ftxhd, :not(.enoff))');
+          return [h.querySelector('h1').textContent, h.querySelector('h2').textContent]; }""")
+        ctx.close()
+    ctx, pg, errors = fresh(b, {"tropen": True, "trtab": "all"})
+    pg.goto(BASE + "/1:1")
+    ok(until(pg, ALL_OPEN), "the folds open: the head's too")
+    h = pg.evaluate(HEADS)
+    ok(len(h) == 1 and h[0]["open"] and h[0]["line"] == "2 translations"
+       and h[0]["hd"] == [["urantia-ru"] + want["urantia-ru"], ["uf-ru"] + want["uf-ru"]],
+       f"the English first: under its head each translation's titles, as it gives them first ({h}; {want})")
+    el = pg.evaluate("ubTrRead(null, 'uf-ru').then(e => e && e.className + ' ' + e.dataset.k)")
+    ok(el == "fhd uf-ru", f"a heading read in a translation is marked in the fold ({el})")
+    # A row's tab is the head's.
+    pg.locator(".grid > .row:has(> p.t[id='1:1.1']) .trtabs button[data-tab='uf-ru']").tap()
+    ok(until(pg, "(%s)()[0].hd.map(x => x[0]).join() === 'uf-ru'" % HEADS), "a tab chosen in a paragraph's fold is the head's")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+    # Shut, and its own line tapped.
+    ctx, pg, errors = fresh(b)
+    pg.goto(BASE + "/1:1")
+    pg.wait_for_selector("main .tfh .trfold:not(:empty)")
+    ok(until(pg, ALL_SHUT) and pg.evaluate(HEADS)[0]["seen"], "the folds shut: the head's line is there, shut")
+    q = "main .tfh .trfold"
+    y0, _ = tap_fold(pg, q)
+    ok(until(pg, ALL_OPEN), "a tap on the head's line opens every fold")
+    pg.wait_for_timeout(1000)
+    y1 = pg.evaluate(TOP, q)
+    ok(abs(y1 - y0) <= 1 and pg.evaluate(STORED).get("tropen") is True, f"the line where it stood, and kept ({y0:.1f} → {y1:.1f})")
+    tap_fold(pg, q)
+    ok(until(pg, ALL_SHUT), "and folds them all")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+    # A translation first, the English in the folds at its own tab: every
+    # fold opens (until 2026-11-21 none did but the one tapped).
+    ctx, pg, errors = fresh(b, {"translations": "ud urantia-ru", "english": "1", "tropen": True, "trtab": "up"})
+    pg.goto(BASE + "/1:1")
+    ok(until(pg, ALL_OPEN), f"Aivazian first, the folds at Uversa Press: every fold open ({pg.evaluate(FOLDS)})")
+    h = pg.evaluate(HEADS)
+    ok(h and h[0]["line"] == "2 texts" and h[0]["hd"] == [["up"] + want["up"]], f"and under Aivazian's head the English's ({h})")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+    # The whole paper: the paper's over the introduction, each section's over its own.
+    ctx, pg, errors = fresh(b, {"tropen": True, "whole": True, "trtab": "urantia-ru"})
+    pg.goto(BASE + "/1")
+    ok(until(pg, ALL_OPEN), "the whole paper, the folds open")
+    h = {x["sec"]: x for x in pg.evaluate(HEADS)}
+    ok(len(h) == 8 and all(x["open"] and len(x["hd"]) == 1 for x in h.values()), f"a fold under every head, open ({sorted(h)})")
+    ok(h["1:0"]["hd"][0][1] == want["urantia-ru"][0] and h["1:0"]["hd"][0][2] == "", f"over the introduction the paper's ({h['1:0']['hd']})")
+    ok(h["1:1"]["hd"][0][1] == "" and h["1:1"]["hd"][0][2] == want["urantia-ru"][1], f"over 1:1 its own ({h['1:1']['hd']})")
+    el = pg.evaluate("ubTrRead('1:3', 'urantia-ru').then(e => e && e.closest('section').id)")
+    ok(el == "1:3", f"a section's heading read is marked in its own fold ({el})")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+
+
+# The boxes of index entries on the page, those with a line: how many, how
+# many open (anything but the line shown), how many lines seen, and how many
+# say they are open.
+BOXES = """() => { const bs = [...document.querySelectorAll('main :is(.grid > .row > .a, section > .blanket, .path .row)')].filter(a => a.querySelector(':scope > .afold'));
+  const shown = a => a.matches('.path .row') ? a.querySelector(':scope > .cites').getClientRects().length > 0
+                   : [...a.children].some(c => !c.classList.contains('afold') && c.getClientRects().length);
+  return {n: bs.length, open: bs.filter(shown).length, lines: bs.filter(a => a.querySelector(':scope > .afold').getClientRects().length).length,
+          expanded: bs.filter(a => a.querySelector(':scope > .afold').getAttribute('aria-expanded') === 'true').length}; }"""
+BOXES_OPEN = "(() => { const x = (%s)(); return x.n > 0 && x.open === x.n && x.lines === x.n && x.expanded === x.n; })()" % BOXES
+BOXES_SHUT = "(() => { const x = (%s)(); return x.n > 0 && x.open === 0 && x.lines === x.n && x.expanded === 0; })()" % BOXES
+# The first paragraph from `ref` on whose row a box has its line.
+BOX_AT = """(ref) => { let on = false; for (const r of document.querySelectorAll('main .grid > .row')) {
+  const p = r.querySelector(':scope > p.t[id]'); if (p && p.id === ref) on = true;
+  if (on && p && r.querySelector(':scope > .a > .afold')) return p.id; } return null; }"""
+
+
+def index_boxes(b, whole: bool) -> None:
+    """On a phone a box of entries' line is the Index's switch (Tigran,
+    2026-11-21): his report, a box opened, an entry followed, and Continue
+    reading came back with it folded."""
+    say = ("Whole paper on" if whole else "Whole paper off") + ": "
+    print("\nThe index's boxes, " + say.rstrip(": "))
+    ctx, pg, errors = fresh(b, dict({"margin": False}, **({"whole": True} if whole else {})))
+    pg.goto(BASE + "/")
+    pg.evaluate("localStorage.setItem('ub_place', JSON.stringify({ref: '101:4.3', title: 'The Real Nature of Religion', at: Date.now(), v: ''}))")
+    pg.reload()
+    pg.click(".fbar .fgo")
+    pg.wait_for_selector("main .grid > .row > .a > .afold")
+    ok(until(pg, BOXES_SHUT), say + f"the index folded: every box folded to its line ({pg.evaluate(BOXES)})")
+    ref = pg.evaluate(BOX_AT, "101:4.3")
+    q = f".grid > .row:has(> p.t[id='{ref}']) > .a > .afold"
+    y0, _ = tap_fold(pg, q)
+    ok(until(pg, BOXES_OPEN), say + f"a tap on {ref}'s line opens every box, each keeping its line ({pg.evaluate(BOXES)})")
+    pg.wait_for_timeout(800)
+    y1 = pg.evaluate(TOP, q)
+    ok(abs(y1 - y0) <= 1, say + f"the line tapped where it stood ({y0:.1f} → {y1:.1f})")
+    ok("margin" not in pg.evaluate(STORED) and pg.locator(".indexfold[aria-expanded='true']").count() == 1,
+       say + "kept as the Index's state, which its line at the page's head says")
+    # An entry followed, and Continue reading.
+    pg.locator(q.replace(" > .afold", " .chips a")).first.click()
+    pg.wait_for_load_state()
+    pg.goto(BASE + "/")
+    pg.click(".fbar .fgo")
+    pg.wait_for_selector("main .grid > .row > .a > .afold")
+    ok(until(pg, BOXES_OPEN), say + f"an entry followed, and Continue reading: every box open ({pg.evaluate(BOXES)})")
+    # Folded again from another box.
+    pg.wait_for_timeout(800)
+    ref = pg.evaluate(BOX_AT, pg.evaluate("JSON.parse(localStorage.getItem('ub_place')).ref"))
+    q = f".grid > .row:has(> p.t[id='{ref}']) > .a > .afold"
+    y0, _ = tap_fold(pg, q)
+    ok(until(pg, BOXES_SHUT), say + f"a tap on {ref}'s folds them all")
+    pg.wait_for_timeout(800)
+    y1 = pg.evaluate(TOP, q)
+    ok(abs(y1 - y0) <= 1 and pg.evaluate(STORED).get("margin") is False, say + f"the line where it stood, and kept ({y0:.1f} → {y1:.1f})")
+    ok(not errors, say + "no script error: " + "; ".join(errors))
+    ctx.close()
+
+
+def path_boxes(b) -> None:
+    print("\nA reading path's captions on a phone")
+    ctx, pg, errors = fresh(b, {"margin": False})
+    pg.goto(BASE + "/i/prayer/read")
+    pg.wait_for_selector(".path .row > .afold")
+    ok(until(pg, BOXES_SHUT), f"folded, each to its line ({pg.evaluate(BOXES)})")
+    pg.evaluate("document.querySelectorAll('.path .row > .afold')[2].id = 'tafold'")
+    q = "#tafold"
+    y0, _ = tap_fold(pg, q)
+    ok(until(pg, BOXES_OPEN), f"a tap on one opens them all ({pg.evaluate(BOXES)})")
+    pg.wait_for_timeout(500)
+    ok(abs(pg.evaluate(TOP, q) - y0) <= 1, "the line tapped where it stood")
+    pg.reload()
+    pg.wait_for_selector(".path .row > .afold")
+    ok(until(pg, BOXES_OPEN), "and open on the page loaded again")
+    ok(not errors, "no script error: " + "; ".join(errors))
+    ctx.close()
+
+
 def run() -> int:
     with sync_playwright() as p:
         b = p.chromium.launch(executable_path="/usr/bin/google-chrome", headless=True)
@@ -398,6 +562,8 @@ def run() -> int:
                  ("tabs", lambda: tabs_and_index(b)), ("hits", lambda: hits_and_reading(b)), ("columns", lambda: columns(b)),
                  ("place", lambda: place_in_fold(b)), ("nothing", lambda: nothing_kept(b)), ("longest", lambda: longest(b)),
                  ("back", lambda: back(b)),
+                 ("heads", lambda: heads(b)),
+                 ("index", lambda: [index_boxes(b, w) for w in (False, True)]), ("path", lambda: path_boxes(b)),
                  ("help", lambda: help_example(b))]
         for name, step in steps:
             if not only or name in only:

@@ -66,15 +66,18 @@ class Switch(unittest.TestCase):
         self.assertIn(':root[data-index="off"] :is(.ix, .a, .blanket, .reader .marginhead) { display: none; }', css)
         self.assertIn(':root:not([data-index="off"]) .noix { display: none; }', css)
 
-    def test_the_phone_s_one_line_row_is_for_the_index_folded_not_off(self):
-        # On a phone with the index folded (settings.py KEPT `margin`, which the
-        # switch leaves as it was), base.html's ubTr lays a row's entries and
-        # translations on one line, by a rule that outranks the one above: so it
-        # must leave the index turned off alone, and the screen is its medium,
-        # since a printed page is narrower than 62rem too.  Until 2026-10-31 the
+    def test_the_phone_s_one_line_row_is_for_the_index_shown_or_folded_not_off(self):
+        # On a phone, base.html's ubTr lays a row's entries' line and its
+        # translations' on one line, by a rule that outranks the one above:
+        # with the index folded (settings.py KEPT `margin`, which the switch
+        # leaves as it was), and since 2026-11-21 with it shown too, each box
+        # keeping its line, which folds them all (Tigran).  So it must leave
+        # the index turned off alone, and the screen is its medium, since a
+        # printed page is narrower than 62rem too.  Until 2026-10-31 the
         # entries' fold showed on that line with the index off, and printed.
         tpl = (ROOT / "ubsite" / "templates" / "base.html").read_text()
-        self.assertIn(''':root[data-margin="off"]:not(.compare, [data-index="off"]) .grid>.row:has(>:is(''', tpl)
+        self.assertIn(''':root:not(.compare, [data-index="off"]) .grid>.row:has(>:is(''', tpl)
+        self.assertNotIn(''':root[data-margin="off"]:not(.compare''', tpl)
         self.assertIn("'@media screen and (max-width:62rem){'", tpl)
         # And the fold's place under a row whose hidden entries are still beside it.
         css = (ROOT / "ubsite" / "static" / "ub.css").read_text()

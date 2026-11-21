@@ -616,7 +616,7 @@ p.t.bmk::after { content: ""; position: absolute; left: -.92rem;
    in capitals, ud's section titles, is set in small capitals, synthesised in
    Cyrillic, which EB Garamond has none of. */
 .rail a.untr { color: var(--faint); }
-.rail .caps, article.cmp .ch .caps { font-variant-caps: all-small-caps; font-synthesis: small-caps; }
+.rail .caps, article.cmp .ch .caps, .tfh .fhd .caps { font-variant-caps: all-small-caps; font-synthesis: small-caps; }
 /* Until the contents chosen are drawn, the tree waits unseen, so that the
    book's English never shows first (base.html sets data-toc; ub.js, or the
    head script after 1.5 s, .tocready). */
@@ -642,8 +642,10 @@ p.t.bmk::after { content: ""; position: absolute; left: -.92rem;
    there as the page scrolls, on the paper, which hides the entries passing
    under it as the rail's hides the rail's: the paper reaches up to the top of
    the window.  On a phone it is a line at the page's head, and each box of
-   entries folds to a line of its own, opened by itself for that page (.shown).
-   Neither is drawn without JavaScript. */
+   entries has a line of its own, open or folded, which is the same switch
+   (Tigran, 2026-11-21; ub.js): until then a box's line opened it alone, for
+   that page (.shown), which the columns' box of many lines on a wide screen
+   still does.  Neither is drawn without JavaScript. */
 .marginhead, .afold { display: none; }
 :root.js .marginhead { display: block; }
 .indexfold, .afold { align-items: baseline; font: inherit; color: var(--faint);
@@ -1103,9 +1105,9 @@ x-ru { font-synthesis: small-caps; }
      or half of what the gap leaves where that is more: the grid's two tracks grow
      alike until the margin's is 26ch.  The head above it and the box of what the
      whole section cites are as wide, so that the head is centred over the text. */
-  :root:not([data-margin="off"], [data-index="off"]) :is(.papertop, .blanket) {
+  :root:not([data-margin="off"], [data-index="off"]) :is(.papertop, .blanket, .tfh) {
          max-width: min(var(--measure), max(100% - 26ch - 2rem, (100% - 2rem) / 2)); }
-  :root[data-width="full"]:not([data-margin="off"], [data-index="off"]) .papertop {
+  :root[data-width="full"]:not([data-margin="off"], [data-index="off"]) :is(.papertop, .tfh) {
          max-width: calc(100% - 26ch - 2rem); }
   :root[data-width="full"] .reader { grid-template-columns: clamp(16rem, 20vw, 24rem) minmax(0, 1fr); }
   :root[data-width="full"] .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
@@ -1168,7 +1170,7 @@ x-ru { font-synthesis: small-caps; }
   :root[data-margin="off"][data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
          grid-template-columns: minmax(0, 1fr); }
 }
-:root[data-width="full"] :is(p.t, .papertop, .blanket, .pager, .transport, .prose) { max-width: none; }
+:root[data-width="full"] :is(p.t, .papertop, .tfh, .blanket, .pager, .transport, .prose) { max-width: none; }
 :root[data-width="full"] .blanket ul { columns: 16rem; }
 :root[data-width="full"] .applist { columns: 24rem; }
 /* A superscript (28,012th, a card's "11th edition") raised above its line's
@@ -1278,6 +1280,19 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
   text-align: justify; hyphens: manual; -webkit-hyphens: manual;
   hyphenate-character: "-"; -webkit-hyphenate-character: "-"; -webkit-hyphenate-limit-lines: 1; }
 :is(.tf, .rc) .rt.head { text-align: center; }
+/* A head's fold (ub.js trHeads; Tigran, 2026-11-21): under the paper's head
+   and each section's, the other texts' titles, opening with every fold.  As
+   wide as the head over it (.papertop, and on a wide screen below), close
+   under it, and the text's room after it; the titles in it centred as a
+   head's are, a size down, since they are the fold's and not the page's. */
+.tf.tfh { max-width: var(--measure); margin: -1rem 0 1.4rem; }
+article.whole > section > .tf.tfh { margin-top: -.6rem; }
+.tfh .fhd { text-align: center; margin: .2rem 0 .7rem; }
+.tfh .fhd :is(h1, h2) { text-wrap: balance; color: var(--text); }
+.tfh .fhd .papernum { font-size: calc(.85rem * var(--tk)); }
+.tfh .fhd h1 { font-size: calc(1.5rem * var(--tk)); margin: .1rem 0 .2rem; }
+.tfh .fhd h2 { font-size: calc(1.1rem * var(--tk)); margin: .4rem 0 .2rem; }
+.tfh .fhd .author { font-size: .95em; margin-bottom: .2rem; }
 :is(.tf, .rc) .rt .leadrow { display: flex; align-items: baseline; }
 :is(.tf, .rc) .rt .leadrow .fig { margin-left: auto; white-space: nowrap; }
 :is(.tf, .cmp) .gap { color: var(--faint); font-style: italic; margin: 0 0 .4rem; }
@@ -1341,7 +1356,7 @@ p.t.ftxw { margin-top: 1.5rem; }
    (base.html) and ub.js cmpDraw keeps: it is what is drawn, and it changes
    only once cmpGo has measured the paragraph at the window's top, which a
    fold shown at once would move. */
-:root.compare .grid > .row > .tf, article.cmp > .papertop, article.cmp > section > .papertop { display: none; }
+:root.compare :is(.grid > .row > .tf, section > .tf.tfh), article.cmp > .papertop, article.cmp > section > .papertop { display: none; }
 /* Over the columns, a line naming each, which stays at the window's top, level
    with the Contents' and the Index's buttons, on the paper, which hides the
    text passing under it.  One to the page, the article's own child and not a
@@ -1727,7 +1742,7 @@ article.cmp .rc:has(.rt.now) > .playp svg { opacity: 1; }
 :root[data-listen="off"] :is(.voicecredit, .playp) { display: none; }
 /* What is being read, tinted as a search hit is; listen.js clears .hit when
    playing starts, so only one thing on the page is marked. */
-p.t.now, .papertop :is(h1, h2).now, .rt.now, header.ch.now { background: color-mix(in oklch, var(--link) 11%, transparent);
+p.t.now, .papertop :is(h1, h2).now, .rt.now, header:is(.ch, .fhd).now { background: color-mix(in oklch, var(--link) 11%, transparent);
   border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 11%, transparent);
   transition: background .3s, box-shadow .3s; }
 /* The running head on demand (ub.js tapHead; Tigran, 2026-10-31): over the
@@ -2582,18 +2597,19 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   :root.js .rail:not(.shown) > ol { display: none; }
   :root.js .rail:not(.shown) { padding-bottom: .2rem; }
   .rail:not(.shown) .railfold::before { transform: rotate(-45deg); }
-  /* The index's line, and each box of entries folded to a line saying how many
-     it holds, its chevron pointing right until it is opened. */
+  /* The index's line, and each box of entries under a line of its own saying
+     how many it holds, folded to it with the index and open with it, its
+     chevron pointing right while folded: a tap on any opens or folds them
+     all (ub.js; Tigran, 2026-11-21), so each keeps its line open too. */
   :root.js .marginhead { margin: 0 0 1rem; }
   .indexfold { width: 100%; padding: .35rem 0; }
   :root[data-margin="off"] .indexfold::before { transform: rotate(-45deg); }
-  :root[data-margin="off"] .afold { display: flex; width: 100%; font-size: .9rem; padding: .15rem 0; }
-  :root[data-margin="off"] :is(.a, .blanket):not(.shown) > :not(.afold),
-  :root[data-margin="off"] .path .row:not(.shown) > .cites { display: none; }
-  :is(.a, .blanket, .path .row):not(.shown) > .afold::before { transform: rotate(-45deg); }
-  :root[data-margin="off"] .blanket:not(.shown) { padding-block: .35rem; }
-  :root[data-margin="off"] .path .afold { border-left: 2px solid var(--rule); padding-left: .5rem;
-                                          margin-bottom: .3rem; }
+  :root.js .afold { display: flex; width: 100%; font-size: .9rem; padding: .15rem 0; }
+  :root[data-margin="off"] :is(.a, .blanket) > :not(.afold),
+  :root[data-margin="off"] .path .row > .cites { display: none; }
+  :root[data-margin="off"] :is(.a, .blanket, .path .row) > .afold::before { transform: rotate(-45deg); }
+  :root[data-margin="off"] .blanket { padding-block: .35rem; }
+  .path .afold { border-left: 2px solid var(--rule); padding-left: .5rem; margin-bottom: .3rem; }
   /* Never wider than the screen, whatever one paragraph asks: a `1fr` track
      grows to its widest item's least width, and one long dot-leader row once
      pushed all of 15:2 off the side. */
@@ -2661,7 +2677,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   .tour-shield, .tour-ring, .tour-card { display: none; }
   .changelog .ctabs { display: none; }
   .changelog .parts.tabbed .part, .changelog .parts.tabbed .part > h3 { display: block; }
-  :root.js .marginhead, :root[data-margin="off"] .afold,
+  :root.js .marginhead, :root.js .afold,
   :root[data-margin="off"] :is(.a, .blanket, .path .row > .cites) { display: none; }
   body { font-size: 11pt; background: #fff; color: #000; }
   .reader, .grid, .grid > .row { display: block; }

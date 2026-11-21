@@ -1079,9 +1079,11 @@
   // sets off to keep the same one: a fold that turns the page into columns,
   // or out of them (cmpGo), which taking the place again, after the fold,
   // would keep by another letter of the line, a line off as often as not.
+  // `at`, where given, is the place to keep, a line the reader tapped that
+  // stays on the page whatever the change (a box of entries' own, below).
   var placeKept = null;
-  function keepPlace(change) {
-    var pl = placeNow();
+  function keepPlace(change, at) {
+    var pl = at || placeNow();
     placeKept = pl;
     try { change(); } finally { placeKept = null; }
     if (!pl) return;
@@ -1141,8 +1143,15 @@
   // The index folds (templates/_fold.html, ub.css .indexfold): its button,
   // kept as the setting 'margin' (settings.py KEPT), folds the margin to the
   // right on a wide screen, and on a phone every box of entries to its line.
-  // A box's own line opens it, or folds it again, for this page only.  Folding
-  // them all folds those opened too.
+  // On a phone a box's own line is the same switch (Tigran, 2026-11-21:
+  // "folding/unfolding the index entries under one paragraph should
+  // fold/unfold them everywhere and persist"): a tap on it opens every box or
+  // folds them all, on every page from then on, and the line, which every box
+  // keeps open or folded, stays where it stood.  Until then it opened its own
+  // box for that page alone (`.shown`), and Continue reading came back to the
+  // paragraph with it folded again.  On a wide screen the only line is the
+  // columns' box of many entries (cmpDraw, .cmpfold), the index being shown
+  // there, which opens for that page as before.
   function indexSync() {
     var on = load().margin !== false, b = document.querySelector('.indexfold');
     if (b) {
@@ -1151,11 +1160,12 @@
       T.attr(b, 'title', w);
       T.attr(b, 'aria-label', w);
     }
-    // In columns on a wide screen a box of many lines is folded to its line
-    // though the index is shown (cmpDraw, .cmpfold).
+    // On a phone every box as the index is; in columns on a wide screen a box
+    // of many lines is folded to its line though the index is shown (cmpDraw,
+    // .cmpfold), and opened for the page (.shown).
     Array.prototype.forEach.call(document.querySelectorAll('.afold'), function (x) {
-      var box = x.parentNode, folds = box.classList.contains('cmpfold') && !phone.matches;
-      x.setAttribute('aria-expanded', String((on && !folds) || box.classList.contains('shown')));
+      var box = x.parentNode;
+      x.setAttribute('aria-expanded', String(phone.matches ? on : (on && !box.classList.contains('cmpfold')) || box.classList.contains('shown')));
     });
   }
   document.addEventListener('click', function (ev) {
@@ -1163,9 +1173,15 @@
     if (!b) return;
     if (b.classList.contains('indexfold'))
       return keepPlace(function () { window.ubSettings.set('margin', load().margin === false); });
+    if (phone.matches && b.getClientRects().length)
+      return keepPlace(function () { window.ubSettings.set('margin', load().margin === false); },
+                       { el: b, y: b.getBoundingClientRect().top });
     b.parentNode.classList.toggle('shown');
     indexSync();
   });
+  // Whatever changed it, a tap here or Restore the defaults: each line says
+  // which way it goes.
+  document.addEventListener('ub:settings', function (ev) { if (ev.detail.key === 'margin') indexSync(); });
   indexSync();
   if (phone.addEventListener) phone.addEventListener('change', indexSync);
   // A row's translations, folded under it (ROADMAP item 15, step 2; templates/
@@ -1347,10 +1363,13 @@
   if (history.state && history.state.ub === 'contents') { contentsAt = history.state; toContents(null, history.state.k); }
   // The texts a row's fold holds, in the reader's order: those shown that the
   // row has, the English among them where it is shown, but the row's first
-  // text, which stands over the fold (firstOf, below).
+  // text, which stands over the fold (firstOf, below).  A head's fold (.tfh,
+  // trHeads) holds those its section has but the text of the head over it,
+  // which is its first row's (ftxHeads).
   function trKeys(tf) {
-    var has = (tf.dataset.has || '').split(' '), row = tf.parentNode, ks = texts(),
-        first = row && row.classList && row.classList.contains('row') ? firstOf(row, ks, null) : 'up';
+    var has = (tf.dataset.has || '').split(' '), row = tf.parentNode, ks = texts(), first;
+    if (tf.classList.contains('tfh')) row = row.querySelector(':scope > .grid > .row');
+    first = row && row.classList && row.classList.contains('row') ? firstOf(row, ks, null) : 'up';
     return ks.filter(function (k) {
       return k !== first && (k === 'up' || has.indexOf(k) >= 0);
     });
@@ -1442,22 +1461,24 @@
   // place of the one last chosen, which it does not change.  Its promise is kept
   // once the fold is drawn.
   function trDraw(tf, ks, tab) {
-    var panel = tf.querySelector('.tr');
+    var panel = tf.querySelector('.tr'), head = tf.classList.contains('tfh'), sec = tf.closest('section[data-trv]');
     if (!panel) {
       panel = document.createElement('div');
       panel.className = 'tr';
       tf.appendChild(panel);
     }
     panel.hidden = false;
-    var lines = enLines(tf.parentNode), refs = lines.map(refOf);
-    if (!refs.length) return Promise.resolve();
-    return trFetch(tf.closest('section[data-trv]'), refs[0].split('.')[0]).then(function (got) {
+    var lines = head ? [] : enLines(tf.parentNode), refs = lines.map(refOf);
+    if (!head && !refs.length) return Promise.resolve();
+    return trFetch(sec, head ? sec.id : refs[0].split('.')[0]).then(function (got) {
       if (!tf.classList.contains('open')) return;
       var cur = trTab(ks, tab), h = '', notes = '';
       // A line that names one translation says so, `data-play`: listen.js
-      // puts that translation's ▶ at its start ('ub:trfold', below).
+      // puts that translation's ▶ at its start ('ub:trfold', below).  Not a
+      // head's: a section is heard from its heading by the English's ▶.
+      var play = function (k) { return head ? '' : ' data-play="' + k + '"'; };
       if (ks.length > 1) {
-        h += '<div class="trtabs" role="group"' + (cur === 'all' ? '' : ' data-play="' + cur + '"') + '>' + ks.map(function (k) {
+        h += '<div class="trtabs" role="group"' + (cur === 'all' ? '' : play(cur)) + '>' + ks.map(function (k) {
           return '<button type="button" data-tab="' + k + '" aria-pressed="' + (cur === k) + '">' +
                  txt(k).label + '</button>';
         }).join('') + '<button type="button" data-tab="all" aria-pressed="' + (cur === 'all') + '">' +
@@ -1468,13 +1489,14 @@
       // 2026-10-26).
       (cur === 'all' ? ks : [cur]).forEach(function (k) {
         var x = txt(k);
-        if (cur === 'all' || ks.length === 1) h += '<p class="who" data-play="' + k + '">' + x.label + '</p>';
+        if (cur === 'all' || ks.length === 1) h += '<p class="who"' + play(k) + '>' + x.label + '</p>';
         // The English, where it is no paragraph's first text, is folded too
         // (Tigran, 2026-11-20), from the page's own.
-        if (k === 'up') return (h += enFold(lines));
+        if (k === 'up') return (h += head ? enHead(tf) : enFold(lines));
         // Every one the fold counts is in the fragment the server sends, so one
         // missing is offline, and not kept in the copy.
         if (!got.t[k]) return (h += '<p class="gap">' + T('tr:notkept') + '</p>');
+        if (head) return (h += trHead(tf, k, got.h[k] || {}));
         var w = trLines(got, k, lines);
         h += w.h;
         notes += w.notes;
@@ -1523,9 +1545,11 @@
   // Each fold's line says how many it holds, and a fold that is open is drawn
   // again, at the tab now chosen, or shut where none is left to show.  Only a
   // fold of the text's (data-has): Help's example of one is words (help.html).
+  // The heads' folds made first, where the page has none yet (trHeads).
   // A promise, kept once those drawn again are drawn.
   function trSync() {
     var draws = [];
+    trHeads();
     Array.prototype.forEach.call(document.querySelectorAll('.tf[data-has]'), function (tf) {
       var ks = trKeys(tf), b = tf.querySelector('.trfold');
       if (!b) return;
@@ -1566,8 +1590,12 @@
       secs.forEach(function (sec, j) {
         var got = gots[j];
         if (got) shutIn(sec).forEach(function (tf) {
+          // The English is the page's own, never in the fragment: a fold at
+          // its tab opens too, which it did not until 2026-11-21, so that with
+          // a translation first and the folds at Uversa Press only the fold
+          // tapped opened.
           var ks = trKeys(tf), cur = trTab(ks);
-          if (!(cur === 'all' ? ks : [cur]).some(function (k) { return got.t[k]; })) return;
+          if (!(cur === 'all' ? ks : [cur]).some(function (k) { return k === 'up' || got.t[k]; })) return;
           trUnfold(tf);
           draws.push(trDraw(tf, ks));
         });
@@ -1670,8 +1698,13 @@
     }
     // A heading: the page's one section's (ref null), or on the whole paper's
     // page the section the ref names (listen.js isHead).
+    // A head's own, its column's, or in its fold where that is open (trHeads).
     var sec = ref && ref.indexOf('.') < 0 ? q : null;
-    if (art && (!ref || sec)) return Promise.resolve((sec || art).querySelector('header:is(.ch, .ftxhd)[data-k="' + k + '"]'));
+    if (art && (!ref || sec)) {
+      var hs = (sec || art).querySelectorAll('header:is(.ch, .ftxhd)[data-k="' + k + '"], .tfh.open header.fhd[data-k="' + k + '"]'), h;
+      for (h = 0; h < hs.length; h++) if (hs[h].getClientRects().length) return Promise.resolve(hs[h]);
+      return Promise.resolve(null);
+    }
     if (art && art.classList.contains('cmp')) return Promise.resolve(pick(row));
     // The row's first text, or the English shown in no fold of its own.
     var own = pick(row);
@@ -1913,6 +1946,15 @@
     q.classList.add('ftxw');
     stk.insertAdjacentHTML('beforeend', '<span class="ftxwho" data-who="' + UP.label + '"></span>');
   }
+  // A translation's titles, `g` its section's (/tr/'s data-head), as its TeX
+  // sets them: the paper's number, title and author where `paper`, and the
+  // section's title where `sect`.  The inside of a head, which the first
+  // text's (ftxHead), a column's (cmpDraw) and a head's fold (trHead) each
+  // put in a header of their own.
+  function headInner(g, paper, sect) {
+    return (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
+           (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (sect && g.section ? '<h2>' + g.section + '</h2>' : '');
+  }
   // A section's head in its first text, where that is a translation: the
   // paper's number, title and author over a paper's first section, and the
   // section's title, as its TeX sets them (/tr/'s data-head), in place of
@@ -1920,10 +1962,61 @@
   function ftxHead(top, k, g, paper) {
     var x = trBy[k], whole = !!top.closest('article.whole'), sect = !paper || !whole;
     top.insertAdjacentHTML('afterend', '<header class="papertop ftxhd" data-k="' + k + '" lang="' + x.lang + '">' +
-      (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
-      (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (sect && g.section ? '<h2>' + g.section + '</h2>' : '') +
-      '</header>');
+      headInner(g, paper, sect) + '</header>');
     top.classList.add('enoff');
+  }
+  // The other texts' titles, in a fold under the head of the page and under
+  // each section's own on the whole paper's (Tigran, 2026-11-21: "only the
+  // first text shows the paper and section titles, the rest show only the
+  // text of each paragraph"; asked, a fold as a paragraph's, opening and
+  // folding with every other, at the tab chosen).  One to a section, made
+  // here and not by the server, so that no stored page moves: under the
+  // English's own head where the section has one (the whole paper's, after
+  // the first text's beside it, ftxHead), else first in the section, under
+  // the page's (a section's page, or the introduction of a whole paper).  It
+  // holds whatever translations have a paragraph in the section, which are
+  // those with its titles (queries.translated); and, as a row's fold, the
+  // English where another text is the head's first (trKeys).  Where none is
+  // ticked, the head's fold goes with the folds' line (base.html ubTr).
+  function trHeads() {
+    var art = cmpArt();
+    if (!art) return;
+    Array.prototype.forEach.call(art.querySelectorAll(':scope > section[data-trv]'), function (sec) {
+      var tf = sec.querySelector(':scope > .tfh'), has = [], own;
+      Array.prototype.forEach.call(sec.querySelectorAll(':scope > .grid > .row > .tf[data-has]'), function (x) {
+        x.dataset.has.split(' ').forEach(function (k) { if (k && has.indexOf(k) < 0) has.push(k); });
+      });
+      if (!has.length) { if (tf) tf.remove(); return; }
+      if (!tf) {
+        tf = document.createElement('div');
+        tf.className = 'tf tfh';
+        tf.innerHTML = '<button class="trfold" type="button" aria-expanded="false"></button>';
+        own = sec.querySelectorAll(':scope > header.papertop');
+        if (own.length) own[own.length - 1].after(tf); else sec.prepend(tf);
+      }
+      tf.dataset.has = has.join(' ');
+    });
+  }
+  // What a head's fold stands under: its section's own head, the English's,
+  // or the page's; and whether that heads a paper, a section, or both.
+  function headUnder(tf) {
+    var sec = tf.parentNode, own = sec.querySelector(':scope > header.papertop:not(.ftxhd)'),
+        whole = !!sec.closest('article.whole');
+    return { en: own || sec.parentNode.querySelector(':scope > header.papertop:not(.ftxhd)'),
+             paper: !own, sect: !!own || !whole };
+  }
+  // A translation's titles in a head's fold, set as a head is, smaller.
+  function trHead(tf, k, g) {
+    var at = headUnder(tf);
+    return '<header class="fhd" data-k="' + k + '" lang="' + trBy[k].lang + '">' + headInner(g, at.paper, at.sect) + '</header>';
+  }
+  // The English's, from the page's own head, without its ids or marks.
+  function enHead(tf) {
+    var at = headUnder(tf), c = at.en && at.en.cloneNode(true);
+    if (!c) return '';
+    Array.prototype.forEach.call(c.querySelectorAll('[id]'), function (el) { el.removeAttribute('id'); });
+    Array.prototype.forEach.call(c.querySelectorAll('.now'), function (el) { el.classList.remove('now'); });
+    return '<header class="fhd" data-k="up" lang="en">' + c.innerHTML + '</header>';
   }
   // All of it taken away: the English as the server set it.
   function ftxUndraw(art) {
@@ -2101,8 +2194,7 @@
           if (k === 'up') return;
           var x = trBy[k], g = got.h[k] || {}, c = ' style="--c:' + (i + 1) + '"', paper = j === 0;
           heads += '<header class="papertop ch"' + c + ' data-k="' + k + '" lang="' + x.lang + '"><p class="who">' + x.label + '</p>' +
-                   (paper && g.paper ? '<p class="papernum">' + g.paper + '</p>' : '') + (paper && g.title ? '<h1>' + g.title + '</h1>' : '') +
-                   (paper && g.author ? '<p class="author">' + g.author + '</p>' : '') + (g.section ? '<h2>' + g.section + '</h2>' : '') +
+                   headInner(g, paper, true) +
                    // Every one counted is in the fragment the server sends, so one
                    // missing is offline, and not kept in the copy.
                    (got.t[k] ? '' : '<p class="gap">' + T(failed ? 'tr:unreachable' : 'tr:notkept') + '</p>') + '</header>';

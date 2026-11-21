@@ -417,7 +417,7 @@ def room(b) -> None:
     # left them, open, or shut (Tigran, 2026-11-20; until then a fold opened
     # came back shut).
     ALL = ("(() => { const f = [...document.querySelectorAll('main .tf[data-has]')].filter(e => getComputedStyle(e).display !== 'none');"
-           " return f.length > 0 && f.every(e => e.classList.contains('open') && e.querySelector('.tr p.rt')); })()")
+           " return f.length > 0 && f.every(e => e.classList.contains('open') && e.querySelector('.tr :is(p.rt, .fhd)')); })()")
     ctx, pg, errors = context(b, {"translations": TR[1]}, size=(1440, 900))
     pg.goto(BASE + "/15:1")
     settled(pg)
@@ -686,12 +686,14 @@ def folds(b) -> None:
     ctx.close()
 
     # Under 62rem no box is folded by its length, the index's own button
-    # folding them all: in columns, on a tablet, the paper's is whole.
+    # folding them all: in columns, on a tablet, the paper's is whole, under
+    # its line, which every box keeps on a phone, and which is the index's
+    # switch (2026-11-21).
     ctx, pg, errors = context(b, st, size=(800, 1100), phone=True)
     pg.goto(BASE + "/193")
     drawn(pg)
     x = pg.evaluate(FOLD, "193:0")
-    ok(x["lists"] and not x["line"] and x["says"] == "true", f"on a tablet, in columns, the paper's box is whole ({x})")
+    ok(x["lists"] and x["line"] and x["says"] == "true", f"on a tablet, in columns, the paper's box is whole ({x})")
     ok(not errors, f"no error in the page ({errors})")
     ctx.close()
 

@@ -87,10 +87,12 @@ window.ubLang = function (r, v) {
 };
 // The translations a reader has ticked (settings.py `translations`, a list of
 // keys): the fold under every row of the text one of them has, its place there
-// before first paint (ub.css .tf), and on a phone with the index folded, a row's
-// entries and its translations on one line (Tigran, 2026-10-26): folded, not
-// turned off, which leaves `margin` as it was (settings.py `index`), and on the
-// screen, since a printed page is narrower than 62rem too (ub.css, print).
+// before first paint (ub.css .tf), and on a phone a row's entries' line and its
+// translations' on one line (Tigran, 2026-10-26), the boxes under it: with the
+// index folded until 2026-11-21, and since then open too, where each box keeps
+// its line, any of which opens or folds them all (ub.js); not with the index
+// turned off (settings.py `index`), and on the screen, since a printed page is
+// narrower than 62rem too (ub.css, print).
 // The line stands close under its paragraph, with the row's space after it,
 // as the entries' line does alone (Tigran, 2026-11-10: it stood nearer the
 // next paragraph, the boxes' margins, which place it, going with the boxes).
@@ -143,7 +145,7 @@ window.ubTr = function (tr, en) {
                    ':root:not(.ftxready) main.reader>article:has(.tf:is(' + pre + ')) :is(article>.papertop,section>.papertop)' +
                    '{visibility:hidden}' : '';
   var d = ks.map(function (k) { return '.divider[data-k="' + k + '"]'; }).join(),
-      r = ':root[data-margin="off"]:not(.compare, [data-index="off"]) .grid>.row:has(>:is(' + f + '))',
+      r = ':root:not(.compare, [data-index="off"]) .grid>.row:has(>:is(' + f + '))',
       sk = up > 0 ? all : ks, s = sk.map(function (k) { return '>[data-tr="' + k + '"]'; });
   st.textContent = hide + (f ? f + '{display:block}' +
     '@media screen and (max-width:62rem){' + r +
