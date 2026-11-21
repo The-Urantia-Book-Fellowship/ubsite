@@ -298,10 +298,13 @@ class Pages(unittest.TestCase):
         # Merritt Horn's stays under the book's own.
         self.assertEqual(json.loads(call("/offline/audio/mh.json")[2])["parts"][0]["title"],
                          "The Central and Superuniverses")
-        # Its files are served by their names in the list, and no others: the
-        # second encode of 75:7 is in the directory and not in the list.
+        # Its files are served by their names in the list, and no others: a
+        # second encode Merritt Horn's directory holds and its list leaves out
+        # (mh-overrides.tsv), and the second copy of 75:7 that Григорий
+        # Войнер's held until 2026-11-21.
         status, h, part = call("/audio/voyner/01-01.mp3", headers={"range": "bytes=0-99"})
         self.assertEqual((status, len(part), h["content-type"]), (206, 100, "audio/mpeg"))
+        self.assertEqual(call("/audio/mh/paper040/P040_11.mp3")[0], 404)
         self.assertEqual(call("/audio/voyner/7-07.mp3")[0], 404)
         self.assertEqual(call("/audio/mh/01-01.mp3")[0], 404)
 

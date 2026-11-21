@@ -11,7 +11,7 @@ recordings really have changed, and review the diff.
 Durations are ffprobe's, in milliseconds: what a player takes the file's
 length to be.  Where that is not its length -- a file with no Xing/Info frame
 whose frames are never padded, so that the bit rate they name overstates them,
-as in 1,358 of Григорий Войнер's 1,627 -- the duration listed is the frames',
+as in 1,356 of Григорий Войнер's 1,624 -- the duration listed is the frames',
 counted (build/mp3.py), and the file goes into data/audio/<key>-frames.tsv
 too: where its ID3v2 tag ends, how many frames there are, in how many bytes,
 and the first one's header, from which the build makes the Info frame the file is

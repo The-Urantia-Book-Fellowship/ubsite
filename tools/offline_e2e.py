@@ -723,6 +723,25 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_timeout(3000)
         n = len(tries.read_text().split()) if tries.exists() else 0
         ok(n == 1, f"a file that fails is asked for once, not again and again ({n} times in 3 s)")
+        # The worker tells every page its state on one road (tell(),
+        # Client.postMessage) and answers a message on another (its port),
+        # and the two keep no order between them: a state told just before
+        # the fetch failed, no error in it and nothing under way, can come
+        # after the answer that carries the error.  Shown, it set the page
+        # pumping again, and the worker fetched the file again: this check's
+        # "2 times in 3 s", now and then (2026-11-13, 2026-11-17).  Such a
+        # word, put to the page by hand: the worker fetches nothing, unless
+        # asked to try again (sw.js keepOne's `next`, 2026-11-21).
+        stale = pg.evaluate("""() => new Promise(done => { const ch = new MessageChannel();
+            ch.port1.onmessage = e => done(e.data);
+            navigator.serviceWorker.controller.postMessage({ cmd: 'state' }, [ch.port2]); })""")
+        ok(bool(stale.get("audio", {}).get("error")), f"the worker's state says why it stopped ({stale.get('audio', {}).get('error')!r})")
+        stale["audio"].update(error=None, words=None, busy=None)
+        pg.evaluate("s => navigator.serviceWorker.dispatchEvent(new MessageEvent('message', { data: { ubOffline: s } }))", stale)
+        pg.wait_for_timeout(1500)
+        n = len(tries.read_text().split()) if tries.exists() else 0
+        ok(n == 1, f"a word of the worker's from before the failure, come after it, does not have the file fetched again ({n} times)")
+        ok(pg.locator("dialog.settings .offrec .why .recagain").is_visible(), "and the tab still offers to try again")
         ok(en(pg, "dialog.settings .offrec .why").startswith("The download stopped: paper161/P161_02.mp3 could not be fetched (404). Try again"),
            f"and the tab says why, with Try again ({en(pg, 'dialog.settings .offrec .why')!r})")
         fail.unlink()

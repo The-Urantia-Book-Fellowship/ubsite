@@ -6,9 +6,12 @@ the tour built by script alone, and what the offline copy keeps.
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
+import shutil
 import sqlite3
+import subprocess
 import sys
 import unittest
 
@@ -99,6 +102,37 @@ class Static(unittest.TestCase):
         self.assertEqual(ours, theirs)
         keep = re.search(r"none: '<svg[^>]*><path d=\"([^\"]+)\"", listen).group(1)
         self.assertIn(f'd="{keep}"', CHROME)
+
+    @unittest.skipUnless(shutil.which("node"), "Node is not installed")
+    def test_the_players_screen_is_one_drawing(self):
+        """The time left on a phone's bar, as a watch's screen shows it
+        (2026-11-21): listen.js lcd() draws it, and _chrome.html lcd_svg for
+        Help's picture of the bar, the same for every time; and what is lit
+        reads as the time."""
+        listen = (STATIC / "listen.js").read_text(encoding="utf-8")
+        fn = re.search(r"  var SEG = \{[\s\S]*?\n  function lcd\(c\) \{[\s\S]*?\n  \}\n", listen)[0]
+        times = ["0:01", "4:06", "9:59", "10:00", "38:27", "59:59", "1:00:00", "1:09:08", "12:34:56"]
+        js = fn + "\nconsole.log(JSON.stringify(" + json.dumps(times) + ".map(lcd)));"
+        theirs = json.loads(subprocess.run(["node", "-"], input=js, capture_output=True, text=True, check=True).stdout)
+        from ubsite import app
+        macro = app.T.env.get_template("_chrome.html").module.lcd_svg
+        lit = dict(zip(re.findall(r"'(\w+)'", re.search(r"var LIT = \[(.*?)\];", listen)[1]), "0123456789"))
+        for t, svg in zip(times, theirs):
+            with self.subTest(t=t):
+                self.assertEqual(str(macro(t)), svg)
+                read = ""
+                for cell in re.findall(r'<g transform="translate[^>]*>(.*?)</g>|(<rect class="on"[^>]*y="4.7")', svg):
+                    if cell[1]:
+                        read += ":"
+                    else:
+                        on = "".join(re.findall(r'data-s="(\w)" class="on"', cell[0]))
+                        # Named by an attribute, never a class: `.a` is the
+                        # index's entries, hidden with the index folded.
+                        self.assertNotIn('class="a', cell[0])
+                        read += lit.get(on, " ") if on else " "
+                self.assertEqual(read.strip(), t)
+                # Under ten minutes a first digit all unlit, so the screen keeps its width.
+                self.assertEqual(svg.count("<polygon"), 7 * sum(c.isdigit() for c in t) + (7 if len(t) == 4 else 0))
 
     def test_the_offline_copy_keeps_it(self):
         from offline import pack

@@ -209,11 +209,11 @@ pace  = [1.0, 4.0]               # his median 2.4, 98% of paragraphs between 1.7
 
 [audio.voyner]
 measured_on = "2026-11-12"
-files = 1624                     # 1,627 in the directory: a file to a section but 19:0 and
-                                 # 50:0, which he did not record or which were lost, and three
-                                 # second copies left out by name in
-                                 # data/audio/voyner-overrides.tsv (7-07, 19-00, 50-00)
-hours = 154                      # 154.48, by the frames: 1,358 of the files say less of
+files = 1624                     # every file in the directory: a file to a section but 19:0
+                                 # and 50:0, which he did not record or which were lost; 1,627
+                                 # until three second copies (7-07, 19-00, 50-00), left out
+                                 # by name, were deleted on 2026-11-21
+hours = 154                      # 154.48, by the frames: 1,356 of the files say less of
                                  # themselves (build/mp3.py)
 pace  = [0.8, 3.0]               # his median 1.63 words of the translation a second, 97% of
                                  # paragraphs between 1.2 and 2.2, none outside 0.88-2.68

@@ -824,12 +824,16 @@
   // the page is online; the reply, shown, asks for the next.  Not after a file
   // that failed, until Try again (`again`) or the browser is online again: a
   // full phone, a 404 or a damaged file was fetched again at once, for ever,
-  // up to 27 MB a time, the screen held on (review of 2026-11-09).
+  // up to 27 MB a time, the screen held on (review of 2026-11-09).  And the
+  // worker holds to that too (`next`, sw.js keepOne): the state shown here can
+  // be one told before the failure and come after it, the worker's two roads
+  // to a page keeping no order, and the file was fetched a second time
+  // (offline_e2e, now and then, until 2026-11-21).
   function pump(s, again) {
     var a = s && s.audio;
     if (!a || !a.queue.length || a.busy || s.busy || !online() || pumping || (a.error && !again)) return;
     pumping = true;
-    ask('keep').then(function (r) { pumping = false; show(r); }, function () { pumping = false; });
+    ask('keep', again ? null : { next: true }).then(function (r) { pumping = false; show(r); }, function () { pumping = false; });
   }
   // A recording asked for, stopped or let go: a voice and its papers.  With no
   // copy kept, the copy comes first, as a translation's tick brings it.  A

@@ -1,6 +1,6 @@
 """A recording a player would take for shorter than it is (2026-11-12).
 
-1,358 of Григорий Войнер's files have no Xing/Info frame and frames that are
+1,356 of Григорий Войнер's files have no Xing/Info frame and frames that are
 never padded, so that a player dividing their bytes by the bit rate they name
 takes 2,180.8 s for 2,170.6 and plays, asked for a place, 0.47% past it.
 build/mp3.py counts the frames and makes the Info frame such a file is sent

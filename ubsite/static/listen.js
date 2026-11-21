@@ -267,10 +267,91 @@
       else place(p, i, T.tr('Listen from {r}', { r: s[0] }), i);
     });
   }
-  // A paragraph's time, m:ss, at the speed chosen: what it takes to hear.
+  // A paragraph's time, m:ss, at the speed chosen: what it takes to hear;
+  // an hour or more, h:mm:ss.
   function clock(ms) {
     var n = Math.max(1, Math.round(ms / rate() / 1000));
-    return Math.floor(n / 60) + ':' + ('0' + n % 60).slice(-2);
+    return (n >= 3600 ? Math.floor(n / 3600) + ':' + ('0' + Math.floor(n / 60) % 60).slice(-2)
+                      : Math.floor(n / 60)) + ':' + ('0' + n % 60).slice(-2);
+  }
+  // The time left to the end of the section heard, or of the paper on the
+  // whole paper's page, at the speed chosen, in the bar (Tigran, 2026-11-21:
+  // "on the phone the second line looks empty -- why don't we put the
+  // duration in there, to the left of the speed?").  A recording's alone:
+  // the browser's voice has no times.
+  function drawLeft() {
+    var el = bar && bar.querySelector('.tleft');
+    if (!el) return;
+    var ms = 0;
+    if (V && V.kind !== 'browser' && k >= 0) {
+      var s = V.segs[k], t = s[1] === file ? audio.currentTime * 1000 : s[2];
+      ms = s[3] - Math.max(s[2], Math.min(s[3], t));
+      for (var j = k + 1; j < V.segs.length; j++) ms += (V.segs[j][3] - V.segs[j][2]) || 0;
+    }
+    el.hidden = !(ms > 0);
+    if (el.hidden) return;
+    var c = clock(ms), wide = el.dataset.t && el.dataset.t.length !== c.length;
+    if (el.dataset.t !== c) { el.dataset.t = c; el.innerHTML = lcd(c) + '<span class="tnow">' + c + '</span>'; }
+    if (el.dataset.of !== (D.whole ? 'p' : 's')) {
+      el.dataset.of = D.whole ? 'p' : 's';
+      T.attr(el, 'title', D.whole ? T.k('Time left in this paper') : T.k('Time left in this section'));
+    }
+    if (wide || !el.dataset.fit) leftFit(el);
+  }
+  // The screen where the bar's row has room for it, else the time in plain
+  // figures, else none: measured, as the header's controls are (ub.js ctlFit,
+  // CLAUDE.md trap 68), what it needs growing with Interface text size and
+  // with an hour's digits; at 125% the screen fits a phone from 376 px.
+  // Again as the window or the sizes change, and as the digits grow or fall.
+  function leftFit(el) {
+    el = el || (bar && bar.querySelector('.tleft'));
+    if (!el || el.hidden) return;
+    // Over, where the first button or the last stands outside the bar's
+    // padding: the bar's own width, which overflow would show, takes the
+    // padding in, and the buttons came to its very edge.
+    var over = function () {
+      var r = bar.getBoundingClientRect(), cs = getComputedStyle(bar),
+          a = bar.querySelector('.prev').getBoundingClientRect(), z = bar.querySelector('.close').getBoundingClientRect();
+      return a.left < r.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft) - 1 ||
+             z.right > r.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight) + 1;
+    };
+    el.dataset.fit = 'lcd';
+    if (getComputedStyle(el).display === 'none' || !over()) return;
+    el.dataset.fit = 'plain';
+    if (over()) el.dataset.fit = 'none';
+  }
+  window.addEventListener('resize', function () { if (bar) leftFit(); });
+  // The time left as a watch's screen shows it (Tigran, 2026-11-21: "a nice
+  // background 'screen' ... and segmented 'digital' digits"): seven segments
+  // to a digit, slanted, those unlit drawn faint; under ten minutes the first
+  // digit all unlit, so that the screen keeps its width as the minutes fall.
+  // Each segment by its letter, a at the top, then clockwise, g the middle,
+  // an attribute and never a class: `.a` is the index's entries, hidden with
+  // the index folded on a phone, and every top segment with them (trap 58);
+  // Help draws the same (templates/_chrome.html lcd_svg, tests/test_help.py).
+  var SEG = { a: '1.25,1 2.25,0 7.75,0 8.75,1 7.75,2 2.25,2', b: '9,1.25 10,2.25 10,7.75 9,8.75 8,7.75 8,2.25',
+              c: '9,9.25 10,10.25 10,15.75 9,16.75 8,15.75 8,10.25', d: '1.25,17 2.25,16 7.75,16 8.75,17 7.75,18 2.25,18',
+              e: '1,9.25 2,10.25 2,15.75 1,16.75 0,15.75 0,10.25', f: '1,1.25 2,2.25 2,7.75 1,8.75 0,7.75 0,2.25',
+              g: '1.25,9 2.25,8 7.75,8 8.75,9 7.75,10 2.25,10' };
+  var LIT = ['abcdef', 'bc', 'abdeg', 'abcdg', 'bcfg', 'acdfg', 'acdefg', 'abc', 'abcdefg', 'abcdfg'];
+  function lcd(c) {
+    var s = /^\d:\d\d$/.test(c) ? ' ' + c : c, x = 2, out = '';
+    s.split('').forEach(function (ch) {
+      if (ch === ':') {
+        out += '<rect class="on" x="' + (x + 1).toFixed(1) + '" y="4.7" width="1.6" height="1.6"/>' +
+               '<rect class="on" x="' + (x + 1).toFixed(1) + '" y="11.7" width="1.6" height="1.6"/>';
+        x += 3.6;
+        return;
+      }
+      var lit = ch === ' ' ? '' : LIT[+ch];
+      out += '<g transform="translate(' + x.toFixed(1) + ' 0)">' + 'abcdefg'.split('').map(function (k) {
+        return '<polygon data-s="' + k + '"' + (lit.indexOf(k) >= 0 ? ' class="on"' : '') + ' points="' + SEG[k] + '"/>';
+      }).join('') + '</g>';
+      x += 12.2;
+    });
+    var w = (x - 1.8).toFixed(1);
+    return '<svg viewBox="0 0 ' + w + ' 18" width="' + w + '" height="18" aria-hidden="true" focusable="false">' +
+           '<g transform="skewX(-6)">' + out + '</g></svg>';
   }
   // A press on the page's own controls: what is heard becomes what the page
   // shows, in the page's voice, or with a translation's ▶ in that one, nv
@@ -309,8 +390,19 @@
     });
     return b;
   }
-  // The first texts' buttons with a time (trPlay), said again at another speed.
+  // The first texts' buttons with a time (trPlay), and the folds' (foldPlay),
+  // said again at another speed.
   var trTimes = [];
+  // A text's ▶ at its paragraph, given the time it takes to hear, as the
+  // English's ▶ has it, where a recording reads it: the English's in the
+  // page's voice (t 'up'), a translation's in its own (Григорий Войнер's of
+  // USGNY); drawn by the stylesheet from the attribute.
+  function timed(b, t, ref) {
+    var kk = t === 'up' ? pkey : trKey(P, t), ms = 0;
+    var nv = t === 'up' ? (PV && PV.kind !== 'browser' ? PV : null) : RECS[kk] ? voiceOf(P, kk) : null;
+    if (nv && nv.segs) nv.segs.forEach(function (s) { if (s[0] === ref) ms += (s[3] - s[2]) || 0; });
+    if (ms > 0) { b.dataset.ms = ms; b.dataset.t = clock(ms); trTimes.push(b); }
+  }
   // In Compare, in each of its cells (ub.js 'ub:cmp').  And where a
   // translation is a paragraph's first text, set where the English stood
   // (ub.js ftxPut; 2026-11-20), under its reference, as the English's is.
@@ -325,14 +417,9 @@
     });
     Array.prototype.forEach.call(root.querySelectorAll('p.t.rt[data-k][id], .rc[data-k] p.t.rt[data-ref]'), function (q) {
       var stk = q.querySelector(':scope > .stk'), num = stk && stk.querySelector(':scope > .num'),
-          b = stk && !stk.querySelector(':scope > .playp') && trButton(q.dataset.k, q), kk, nv, ms = 0;
+          b = stk && !stk.querySelector(':scope > .playp') && trButton(q.dataset.k, q);
       if (!b) return;
-      // The time it takes to hear, as the English's ▶ has it, where a
-      // recording reads it (Григорий Войнер's of USGNY).
-      kk = trKey(P, q.dataset.k);
-      nv = RECS[kk] ? voiceOf(P, kk) : null;
-      if (nv && nv.segs) nv.segs.forEach(function (s) { if (s[0] === q.dataset.ref) ms += (s[3] - s[2]) || 0; });
-      if (ms > 0) { b.dataset.ms = ms; b.dataset.t = clock(ms); trTimes.push(b); }
+      timed(b, q.dataset.k, q.dataset.ref);
       stk.insertBefore(b, num ? num.nextSibling : stk.firstChild);
     });
   }
@@ -346,11 +433,16 @@
   // script ran, a search's hit's, has its own now.
   // The English is folded too, where another text is a paragraph's first
   // (2026-11-20): its ▶ there reads it in its own voice, from that paragraph.
+  // With its time beside it, as a column's has (Tigran, 2026-11-21: "since we
+  // take a whole line for that triangle and USGNY anyway, why not show next
+  // to the triangle the duration of the current paragraph").
   function foldPlay(panel) {
     Array.prototype.forEach.call(panel.querySelectorAll('[data-play]'), function (at) {
       var t = at.dataset.play, line = panel.querySelector('p.rt[data-k="' + t + '"][data-ref]');
       var b = !at.querySelector(':scope > .playp') && (t === 'up' ? enButton(line) : trButton(t, line));
-      if (b) at.insertBefore(b, at.firstChild);
+      if (!b) return;
+      timed(b, t, line.dataset.ref);
+      at.insertBefore(b, at.firstChild);
     });
   }
   // The English's ▶ where it stands in a fold: in the page's voice, the
@@ -423,7 +515,12 @@
     nxt.addEventListener('click', forward);
     tog.addEventListener('click', toggle);
     x.addEventListener('click', close);
-    [prev, tog, nxt, mid, keepButton(), spd, on, x].forEach(function (e) { bar.appendChild(e); });
+    // The time left in what is heard, before the speed: shown on a phone,
+    // whose bar has a row of buttons with room to spare (ub.css).
+    var left = document.createElement('span');
+    left.className = 'tleft';
+    left.hidden = true;
+    [prev, tog, nxt, mid, keepButton(), left, spd, on, x].forEach(function (e) { bar.appendChild(e); });
     document.body.appendChild(bar);
     document.body.classList.add('listening');
     drawKeep();
@@ -702,6 +799,7 @@
       bar.querySelector('.who').innerHTML = trouble;
     }
     drawKeep();
+    drawLeft();
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = paused ? 'paused' : 'playing';
   }
 
@@ -970,7 +1068,7 @@
     var el = line && line.isConnected && line.getClientRects().length ? line : reading();
     if (!el) return visit(href(D), true, null, function () { var e = reading(); if (e) show(e); });
     var r = el.getBoundingClientRect();
-    if (always || r.top < 40 || r.bottom > innerHeight - 80) show(el);
+    if (always || r.top < 40 || r.bottom > innerHeight - clearOf()) show(el);
   }
   function close() {
     hush();
@@ -1027,6 +1125,7 @@
     if (k < 0 || !V) return;
     var i = locate();
     if (i !== k) { k = i; mark(); render(); }
+    else drawLeft();
     // Past the last paragraph a file holds: a recording may run on into
     // silence, or into a second reading of the next section.  Move on.
     var s = V.segs[k], nx = V.segs[k + 1];
@@ -1276,7 +1375,15 @@
   }
   function into(el) {
     var r = el.getBoundingClientRect();
-    if (r.top < 40 || r.bottom > innerHeight - 80) show(el);
+    if (r.top < 40 || r.bottom > innerHeight - clearOf()) show(el);
+  }
+  // How far above the window's foot what is read must end to be in view: the
+  // bar's top and a little more, and never less than 80 px, which it was
+  // until 2026-11-21, when a phone's bar went to two rows, up to 100 px
+  // from the foot (ub.css); and over the foot bar where that is up.
+  function clearOf() {
+    var b = bar && bar.isConnected && bar.getBoundingClientRect();
+    return b && b.height ? Math.max(80, innerHeight - b.top + 16) : 80;
   }
   // A paragraph taller than most of the screen is brought in by its first line;
   // centred, its beginning would be off the top.
@@ -1303,6 +1410,7 @@
 
   document.addEventListener('ub:settings', function (ev) {
     var what = ev.detail.key;
+    if (what === 'uisize' && bar) leftFit();
     if (what === 'rate') {
       audio.playbackRate = audio.defaultPlaybackRate = rate();
       if (said.on) speakFrom(said.n);             // the sentence again, at the new speed

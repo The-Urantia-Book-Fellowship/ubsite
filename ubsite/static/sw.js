@@ -375,14 +375,20 @@ function dequeue(q) {
 }
 // One file of the queue's first paper, fetched, checked and kept; the paper
 // out of the queue once it is whole.  Not while the copy downloads: the page
-// asks again after.  Two pages asking at once share the one file.
-function keepOne() {
+// asks again after.  Two pages asking at once share the one file.  Asked for
+// the `next` file, as a page's pump asks (offline.js), nothing after a file
+// that failed, until a page asks plainly (Try again, the browser online
+// again) or a paper is asked for: the page's own rule was not enough, its
+// word of the state coming by two roads in no order (sw.js tell(), and the
+// answer on the message's port), so that a state told before the failure
+// could come after it and set it pumping again (2026-11-21).
+function keepOne(next) {
   if (audioRunning) return audioRunning;
   if (running) return tell();
   var ctl = audioAbort = new AbortController(), q, paper, file, url, missing;
   audioRunning = readMeta().then(function (meta) {
     var queue = (meta.audio || {}).queue || [];
-    if (!queue.length) return null;
+    if (!queue.length || (next && meta.audio.error)) return null;
     q = queue[0];
     return Promise.all([audioList(q.v), audioHave(q.v)]).then(function (got) {
       paper = got[0].byPaper[q.n];
@@ -418,13 +424,18 @@ function keepOne() {
     audioBusy = audioRunning = audioAbort = null;
     return r === 'again' ? keepOne() : tell();
   }, function (err) {
-    audioBusy = audioRunning = audioAbort = null;
-    if (err && err.name === 'AbortError') return tell();
-    return updateMeta(function (meta) {
+    // Why it stopped written before the file is let go: until then a keep
+    // shares this one, and a state told says it is under way, never that
+    // the queue waits with nothing wrong.
+    var aborted = err && err.name === 'AbortError';
+    return (aborted ? Promise.resolve() : updateMeta(function (meta) {
       var a = meta.audio || (meta.audio = { queue: [] });
       a.error = String(err && err.message || err);
       a.words = err && err.words || null;
-    }).then(tell);
+    })).then(function () {
+      audioBusy = audioRunning = audioAbort = null;
+      return tell();
+    });
   });
   return audioRunning;
 }
@@ -899,7 +910,9 @@ function setAuto(on) {
 // only where they have changed.  There is no `remove` since 2026-11-10: the
 // copy is every browser's, let go only by the browser's own site data.
 // `keep` names a voice and its papers to keep, or nothing, to fetch the next
-// file of the queue; `unkeep` a voice and papers to let go.  A check's says
+// file of the queue, with `next` true for nothing after a file that failed
+// (since 2026-11-21; a page from before asks without it, as it always did);
+// `unkeep` a voice and papers to let go.  A check's says
 // too whether it reached the site: `reached` true or false, or none where it
 // did not ask, or failed otherwise (a 404: the site is there, with no copy).
 // `auto` turns the updating on or off (`on`).  A command keeps its name and
@@ -912,7 +925,7 @@ self.addEventListener('message', function (e) {
   ns = Array.isArray(ns) ? ns.map(Number).filter(function (n) { return Number.isInteger(n) && n >= 0; }) : [];
   var p = cmd === 'get' ? download(Array.isArray(tr) ? tr.filter(function (k) { return typeof k === 'string'; }) : undefined)
         : cmd === 'drop' ? drop(String(tr))
-        : cmd === 'keep' ? (voice ? keep(String(voice), ns) : keepOne()).then(state)
+        : cmd === 'keep' ? (voice ? keep(String(voice), ns) : keepOne(!!e.data.next)).then(state)
         : cmd === 'unkeep' ? unkeep(String(voice), ns).then(state)
         : cmd === 'stop' ? stopAudio(voice ? String(voice) : null, ns).then(state)
         : cmd === 'check' ? check(!!e.data.force).then(function (asked) {

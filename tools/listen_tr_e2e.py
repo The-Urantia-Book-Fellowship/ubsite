@@ -38,6 +38,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -222,6 +223,12 @@ def fold(b, whole: bool) -> None:
     ok(pg.get_attribute(play, "aria-label") == "Listen to USGNY from 1:1.2" and box == [True, True, True]
        and pg.evaluate("(q => document.querySelector(q).parentNode.firstChild === document.querySelector(q))(%s)" % json.dumps(play)),
        say + f"opened, the fold has the translation's ▶, before its name and on the screen ({box})")
+    # With the time the paragraph takes to hear in the recording, beside the
+    # triangle, as a column's ▶ has it (Tigran, 2026-11-21).
+    t = pg.get_attribute(play, "data-t") or ""
+    drawn = pg.evaluate("(q => getComputedStyle(document.querySelector(q), '::after').content)(%s)" % json.dumps(play))
+    ok(re.fullmatch(r"\d+:\d\d", t) is not None and drawn == f'"{t}"',
+       say + f"its ▶ has the paragraph's time beside it ({t!r}, drawn {drawn})")
     pg.click(play)
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.ref === '1:1.2'"),
        say + "its ▶ starts a reading there, the translation's line marked")
@@ -259,6 +266,9 @@ def tabs(b) -> None:
     first = "(q => (document.querySelector(q).firstChild.className))(%s)" % json.dumps(row + ".tf.open .trtabs")
     ok(pg.evaluate(labels) == ["Listen to USGNY from 1:1.2"] and pg.evaluate(first) == "playp",
        f"the tabs' row begins with the ▶ of the translation shown ({pg.evaluate(labels)})")
+    # Each ▶'s time, where a recording reads its translation: USGNY's alone.
+    times = "[...document.querySelectorAll(%s)].map(e => e.dataset.t || null)" % json.dumps(row + ".tf.open .playp")
+    ok(re.fullmatch(r"\d+:\d\d", pg.evaluate(times)[0] or "") is not None, f"with the paragraph's time ({pg.evaluate(times)})")
     pg.click(row + ".tf.open .trtabs > .playp")
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.k === 'urantia-ru'")
        and asks(pg, asked, "/audio/voyner/01-01.mp3"), f"which plays it ({sorted(set(asked))})")
@@ -267,14 +277,16 @@ def tabs(b) -> None:
        f"and is no tab: the tab chosen is as it was ({stored.get('trtab')!r})")
     pg.click(".player .close")
     pg.click(row + ".tf.open .trtabs button[data-tab='uf-ru']")
-    ok(until(pg, labels + "[0] === 'Listen to UF-RUS from 1:1.2'") and len(pg.evaluate(labels)) == 1,
-       f"another tab chosen, the ▶ is that translation's ({pg.evaluate(labels)})")
+    ok(until(pg, labels + "[0] === 'Listen to UF-RUS from 1:1.2'") and len(pg.evaluate(labels)) == 1
+       and pg.evaluate(times) == [None],
+       f"another tab chosen, the ▶ is that translation's, with no time, none reading it but the browser ({pg.evaluate(labels)})")
     pg.click(row + ".tf.open .trtabs button[data-tab='all']")
     ok(until(pg, labels + ".length === 3")
        and pg.evaluate(labels) == [f"Listen to {n} from 1:1.2" for n in ("Aivazian", "USGNY", "UF-RUS")]
        and pg.locator(row + ".tf.open .trtabs > .playp").count() == 0
-       and pg.locator(row + ".tf.open .who[data-play] > .playp").count() == 3,
-       f"with All, each translation has its own before its name, and the tabs' row none ({pg.evaluate(labels)})")
+       and pg.locator(row + ".tf.open .who[data-play] > .playp").count() == 3
+       and [x is not None for x in pg.evaluate(times)] == [False, True, False],
+       f"with All, each translation has its own before its name, USGNY's with its time, and the tabs' row none ({pg.evaluate(labels)}, {pg.evaluate(times)})")
     ok(not errors, "no script error: " + "; ".join(errors))
     ctx.close()
 
@@ -475,6 +487,207 @@ def lacking(b) -> None:
     ok("trvoices" not in stored, "with no voice stored: the reader chose none, the recording lacked a section")
     ok(not errors, "no script error: " + "; ".join(errors))
     ctx.close()
+
+
+# The bar on a phone's screen, each box [left, top, right, bottom], and the
+# voice's name as shown and as wide as it needs.
+GEO = """() => { const b = document.querySelector('.player'), q = s => { const e = s ? b.querySelector(s) : b;
+      if (!e || !e.getClientRects().length) return null; const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; },
+    n = b.querySelector('.voice span');
+  return { bar: q(''), mid: q('.mid'), prev: q('.prev'), toggle: q('.toggle'), close: q('.close'), onward: q('.onward'),
+           left: q('.tleft'), rate: q('.rate'), t: b.querySelector('.tleft').textContent, title: b.querySelector('.tleft').title,
+           shown: n.clientWidth, need: n.scrollWidth, on: b.querySelector('.onward').scrollWidth > b.querySelector('.onward').clientWidth + 1,
+           vw: innerWidth, vh: innerHeight, inner: (() => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
+             return [r.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft),
+                     r.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight)]; })() }; }"""
+
+
+# What the bar's screen shows, read from its drawing: each digit by the
+# segments lit, a digit all unlit a space, the colons by their upper dot.
+DRAWN = """() => { const LIT = {abcdef: '0', bc: '1', abdeg: '2', abcdg: '3', bcfg: '4', acdfg: '5', acdefg: '6',
+      abc: '7', abcdefg: '8', abcdfg: '9'}, g = document.querySelector('.player .tleft svg > g');
+  if (!g) return null;
+  let s = '';
+  for (const c of g.children) {
+    if (c.tagName === 'g') { const on = [...c.children].filter(p => p.classList.contains('on') && p.getBBox().height
+        && getComputedStyle(p).display !== 'none' && getComputedStyle(p).visibility !== 'hidden').map(p => p.dataset.s).join('');
+      s += on ? (LIT[on] || '?') : ' '; }
+    else if (c.getAttribute('y') === '4.7') s += ':';
+  }
+  return s.trim(); }"""
+FIT = "() => document.querySelector('.player .tleft').dataset.fit"
+
+
+def one_line(g: dict) -> bool:
+    """⏮, ⏵ and × centred on one line: under a short name the buttons once
+    wrapped into a third row."""
+    mid = lambda r: (r[1] + r[3]) / 2
+    if g["prev"][0] < g["inner"][0] - 1 or g["close"][2] > g["inner"][1] + 1:
+        return False                           # and inside the bar's padding
+    return all(abs(mid(g[x]) - mid(g["toggle"])) <= 2 for x in ("prev", "close", "rate") + (("left",) if g["left"] else ()))
+
+
+def secs(t: str) -> int:
+    n = 0
+    for x in t.split(":"):
+        n = n * 60 + int(x)
+    return n
+
+
+def phone_bar(b) -> None:
+    """On a phone the bar is two rows (Tigran, 2026-11-21): the reference and
+    the voice on a line over the buttons, the voice's name whole, where at
+    360 px "USGNY · Григорий Войнер" was "USG…"; at the end of a section
+    "Next" and the next one's name on that line, where beside the buttons it
+    ran past the bar and took the × with it; and Follow along keeps the line
+    being read clear of the bar by its height, 100 px from the foot at 125%,
+    where it kept 80 px whatever the bar."""
+    print("\nThe bar on a phone")
+    for lang in ("en", "ru"):
+        for ui in ("100", "112.5", "125"):
+            for w in (360, 412):
+                say = f"{lang} {ui}% {w} px: "
+                # In Russian with the index folded, as Tigran reads on his
+                # phone: the screen's top segments, classes once, were hidden
+                # with the index's entries (`.a`; trap 58).
+                st = {"translations": "urantia-ru", "lang": lang, "uisize": ui}
+                if lang == "ru":
+                    st["margin"] = "off"
+                ctx, pg, asked, errors = context(b, st, phone=True)
+                pg.set_viewport_size({"width": w, "height": 800})
+                pg.goto(BASE + "/1:1")
+                pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
+                row = ".row:has([id='1:1.2']) "
+                pg.click(row + ".trfold")
+                play = row + ".tf.open .who[data-play='urantia-ru'] > .playp"
+                pg.wait_for_selector(play, timeout=15000)
+                pg.click(play)
+                pg.wait_for_selector(".player .voice span", timeout=15000)
+                for voice in ("USGNY", "Merritt Horn"):
+                    if voice == "Merritt Horn":
+                        pg.click("[id='1:1.2'] .stk > .playp")
+                        until(pg, "(document.querySelector('p.t.now') || {}).id === '1:1.2'")
+                    pg.wait_for_timeout(150)
+                    g = pg.evaluate(GEO)
+                    name = pg.evaluate(VOICE)
+                    ok(g["need"] <= g["shown"] + 1 and name.startswith(voice),
+                       say + f"{name!r}, whole ({g['shown']} of {g['need']} px)")
+                    ok(g["mid"][3] <= g["toggle"][1] + 1 and g["bar"][0] >= 0 and g["bar"][2] <= g["vw"]
+                       and g["close"][2] <= g["bar"][2] and one_line(g),
+                       say + f"on a line over the buttons, which are one line, the bar in the window ({g['bar']}, {g['mid']}, {g['toggle']})")
+                    # The time left in the section, before the speed (Tigran,
+                    # 2026-11-21), counting down as the reading goes on.
+                    # As a watch's screen shows it, where the row has room,
+                    # its digits reading as the time; at 125% on 360 px
+                    # in plain figures (listen.js leftFit).
+                    fit, drawn = pg.evaluate(FIT), pg.evaluate(DRAWN)
+                    ok(g["left"] is not None and re.fullmatch(r"\d+:\d\d", g["t"] or "") is not None
+                       and g["left"][2] <= g["rate"][0] + 1
+                       and g["title"] == {"en": "Time left in this section", "ru": "Осталось до конца раздела"}[lang],
+                       say + f"the time left in the section, {g['t']!r}, before the speed")
+                    want = "plain" if (ui, w) == ("125", 360) else "lcd"
+                    ok(fit == want and (fit != "lcd" or drawn == g["t"]),
+                       say + f"on a screen of seven-segment digits where there is room, else plain ({fit}, drawn {drawn!r})")
+                    if lang == "en" and ui == "100" and w == 360:
+                        a = secs(pg.evaluate(GEO)["t"])
+                        pg.wait_for_timeout(2500)
+                        z = secs(pg.evaluate(GEO)["t"])
+                        ok(a - 4 <= z <= a - 1, say + f"and it counts down as the reading goes on ({a} s, then {z} s)")
+                if lang == "ru" and ui == "125" and w == 360:
+                    # The voices' list opens above the whole bar, in the window.
+                    pg.click(".player .voicebox .voice")
+                    v = pg.evaluate("""() => { const r = document.querySelector('.player .voices').getBoundingClientRect(),
+                        t = document.querySelector('.player').getBoundingClientRect(); return [r.left, r.right, r.bottom, t.top, innerWidth]; }""")
+                    ok(v[0] >= 0 and v[1] <= v[4] and v[2] <= v[3], say + f"the voices' list above the bar, in the window ({v})")
+                    pg.keyboard.press("Escape")
+                ok(not errors, say + "no script error: " + "; ".join(errors))
+                ctx.close()
+
+    # The end of a section: 108:6.9 takes Merritt Horn 2.7 s, and Carry on
+    # into the next section off, the bar says where to go on.
+    for lang in ("en", "ru"):
+        say = f"{lang} 125% 360 px: "
+        ctx, pg, asked, errors = context(b, {"lang": lang, "uisize": "125", "onward": False}, phone=True)
+        pg.set_viewport_size({"width": 360, "height": 800})
+        pg.goto(BASE + "/108:6")
+        pg.wait_for_selector("[id='108:6.9'] .stk > .playp", timeout=15000)
+        pg.click("[id='108:6.9'] .stk > .playp")
+        ok(until(pg, "!document.querySelector('.player .onward').hidden", 30), say + "the end of the section offers the next")
+        g = pg.evaluate(GEO)
+        ok(g["mid"] is None and g["onward"] and g["onward"][3] <= g["toggle"][1] + 1 and one_line(g) and g["left"] is None
+           and g["bar"][0] >= 0 and g["bar"][2] <= g["vw"] and g["close"][2] <= g["bar"][2],
+           say + f"\"Next\" on the line over the buttons, the × in the bar, no time left ({g['onward']}, {g['close']}, {g['bar']})")
+        ok(not errors, say + "no script error: " + "; ".join(errors))
+        ctx.close()
+
+    # A phone of 320 px: the row in the bar at every size, the time on its
+    # screen, or plain, or left out, as there is room.
+    for ui in ("100", "112.5", "125"):
+        ctx, pg, asked, errors = context(b, {"uisize": ui}, phone=True)
+        pg.set_viewport_size({"width": 320, "height": 700})
+        pg.goto(BASE + "/1:1")
+        pg.wait_for_selector("[id='1:1.2'] .stk > .playp", timeout=15000)
+        pg.click("[id='1:1.2'] .stk > .playp")
+        pg.wait_for_selector(".player .voice span", timeout=15000)
+        pg.wait_for_timeout(400)
+        g = pg.evaluate(GEO)
+        ok(g["bar"][0] >= 0 and g["bar"][2] <= g["vw"] and g["prev"][0] >= g["bar"][0] and g["close"][2] <= g["bar"][2]
+           and one_line(g) and pg.evaluate("document.querySelector('.player').scrollWidth <= document.querySelector('.player').clientWidth + 1"),
+           f"320 px at {ui}%: the buttons in the bar, the time {pg.evaluate(FIT)}")
+        ok(not errors, f"320 px at {ui}%: no script error: " + "; ".join(errors))
+        ctx.close()
+
+    # The whole paper's page: the time left in the paper, an hour and more
+    # of Paper 15 in h:mm:ss; and a desk's bar of one row has no time.
+    ctx, pg, asked, errors = context(b, {"whole": True}, phone=True)
+    pg.set_viewport_size({"width": 360, "height": 800})
+    pg.goto(BASE + "/15")
+    pg.wait_for_selector("[id='15:0.1'] .stk > .playp", timeout=15000)
+    pg.click("[id='15:0.1'] .stk > .playp")
+    ok(until(pg, "!document.querySelector('.player .tleft').hidden"), "whole paper: the time left shows")
+    g = pg.evaluate(GEO)
+    ok(re.fullmatch(r"1:0\d:\d\d", g["t"] or "") is not None and g["title"] == "Time left in this paper" and one_line(g)
+       and pg.evaluate(FIT) == "lcd" and pg.evaluate(DRAWN) == g["t"],
+       f"whole paper: the time left in the paper, over an hour as h:mm:ss, on the screen ({g['t']!r}, {g['title']!r}, drawn {pg.evaluate(DRAWN)!r})")
+    ok(not errors, "whole paper: no script error: " + "; ".join(errors))
+    ctx.close()
+    ctx, pg, asked, errors = context(b, {})
+    pg.goto(BASE + "/1:1")
+    pg.wait_for_selector("[id='1:1.2'] .stk > .playp", timeout=15000)
+    pg.click("[id='1:1.2'] .stk > .playp")
+    pg.wait_for_selector(".player .voice span", timeout=15000)
+    pg.wait_for_timeout(500)
+    ok(pg.evaluate("getComputedStyle(document.querySelector('.player .tleft')).display") == "none"
+       and pg.evaluate("document.querySelector('.player').getBoundingClientRect().height") < 60,
+       "on a desk the bar is one row, with no time left")
+    ok(not errors, "desk: no script error: " + "; ".join(errors))
+    ctx.close()
+
+    # Follow along: at 125% the bar's top stands 100 px above the window's
+    # foot.  A paragraph whose end is 90 px above it, started, is brought
+    # clear of the bar; with the margin of 80 px it was left under it.
+    for ui in ("100", "125"):
+        say = f"{ui}%: "
+        ctx, pg, asked, errors = context(b, {"uisize": ui, "follow": True}, phone=True)
+        pg.set_viewport_size({"width": 390, "height": 800})
+        pg.goto(BASE + "/1:1")
+        pg.wait_for_selector("[id='1:1.1'] .stk > .playp", timeout=15000)
+        pg.click("[id='1:1.1'] .stk > .playp")
+        pg.wait_for_selector(".player .voice span", timeout=15000)
+        target = "1:1.3"
+        pg.evaluate("""id => { const p = document.getElementById(id), r = p.getBoundingClientRect();
+            scrollTo(0, scrollY + r.bottom - (innerHeight - 90)); }""", target)
+        pg.wait_for_timeout(300)
+        before = pg.evaluate("id => innerHeight - document.getElementById(id).getBoundingClientRect().bottom", target)
+        pg.click(f"[id='{target}'] .stk > .playp")
+        until(pg, f"(document.querySelector('p.t.now') || {{}}).id === '{target}'")
+        pg.wait_for_timeout(1200)                     # the smooth scroll
+        g = pg.evaluate("""id => [document.getElementById(id).getBoundingClientRect().bottom,
+            document.querySelector('.player').getBoundingClientRect().top, innerHeight]""", target)
+        ok(abs(before - 90) <= 2 and g[0] <= g[1],
+           say + f"a paragraph ending {before:.0f} px above the foot, started, ends above the bar ({g[0]:.0f} <= {g[1]:.0f})")
+        ok(not errors, say + "no script error: " + "; ".join(errors))
+        ctx.close()
 
 
 def run() -> int:

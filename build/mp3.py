@@ -3,7 +3,7 @@
 A player that is asked for a file's length, or to start at minute 30 of it,
 does not read the file through: it takes the length from the Xing/Info frame
 at its head, and where there is none it divides the file's size by the bit
-rate the first frame names.  1,353 of Григорий Войнер's 1,627 files have no
+rate the first frame names.  1,356 of Григорий Войнер's 1,624 files have no
 such frame, and say 64 kbit/s in frames that are never padded: 208 bytes each
 where 64 kbit/s is 208.98, so 63.7 kbit/s in truth.  Chrome took 181-02.mp3,
 2,180.8 s long, for 2,170.6 s, and asked for 1,962.7 s it played from

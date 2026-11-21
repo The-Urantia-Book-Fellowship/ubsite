@@ -126,6 +126,32 @@
 {% macro player_svg(name) -%}
 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path{% if name == 'close' %} class="stroke"{% endif %} d="{{ player_paths[name] }}"/></svg>
 {%- endmacro %}
+{#- The player's time left on a phone, as a watch's screen shows it: drawn
+    by listen.js lcd() in the bar, and here, alike, for Help's picture of the
+    bar.  The segments and the digits' lit ones are the same table in both
+    (tests/test_help.py); `t` is m:ss, mm:ss or h:mm:ss. #}
+{% set lcd_segs = {'a': '1.25,1 2.25,0 7.75,0 8.75,1 7.75,2 2.25,2', 'b': '9,1.25 10,2.25 10,7.75 9,8.75 8,7.75 8,2.25',
+                   'c': '9,9.25 10,10.25 10,15.75 9,16.75 8,15.75 8,10.25', 'd': '1.25,17 2.25,16 7.75,16 8.75,17 7.75,18 2.25,18',
+                   'e': '1,9.25 2,10.25 2,15.75 1,16.75 0,15.75 0,10.25', 'f': '1,1.25 2,2.25 2,7.75 1,8.75 0,7.75 0,2.25',
+                   'g': '1.25,9 2.25,8 7.75,8 8.75,9 7.75,10 2.25,10'} %}
+{% set lcd_lit = ['abcdef', 'bc', 'abdeg', 'abcdg', 'bcfg', 'acdfg', 'acdefg', 'abc', 'abcdefg', 'abcdfg'] %}
+{% macro lcd_svg(t) -%}
+{%- set ns = namespace(x=2.0, out='') -%}
+{%- for ch in (' ' ~ t if t|length == 4 and t[1] == ':' else t) -%}
+{%- if ch == ':' -%}
+{%- set ns.out = ns.out ~ ('<rect class="on" x="%.1f" y="4.7" width="1.6" height="1.6"/><rect class="on" x="%.1f" y="11.7" width="1.6" height="1.6"/>'|format(ns.x + 1, ns.x + 1)) -%}
+{%- set ns.x = ns.x + 3.6 -%}
+{%- else -%}
+{%- set lit = '' if ch == ' ' else lcd_lit[ch|int] -%}
+{%- set ns.out = ns.out ~ ('<g transform="translate(%.1f 0)">'|format(ns.x)) -%}
+{%- for k in 'abcdefg' -%}{%- set ns.out = ns.out ~ '<polygon data-s="' ~ k ~ '"' ~ (' class="on"' if k in lit else '') ~ ' points="' ~ lcd_segs[k] ~ '"/>' -%}{%- endfor -%}
+{%- set ns.out = ns.out ~ '</g>' -%}
+{%- set ns.x = ns.x + 12.2 -%}
+{%- endif -%}
+{%- endfor -%}
+{%- set w = '%.1f'|format(ns.x - 1.8) -%}
+<svg viewBox="0 0 {{ w }} 18" width="{{ w }}" height="18" aria-hidden="true" focusable="false"><g transform="skewX(-6)">{{ ns.out|safe }}</g></svg>
+{%- endmacro %}
 {% macro keep_svg() -%}
 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v7.5M4.5 7.5L8 11l3.5-3.5M3.5 13.5h9"/></svg>
 {%- endmacro %}

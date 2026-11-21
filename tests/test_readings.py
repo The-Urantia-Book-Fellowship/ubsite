@@ -49,11 +49,11 @@ class Sources(unittest.TestCase):
 
     def test_the_lists_name_what_is_left_out(self):
         over = audio._optional(audio.DATA / "voyner-overrides.tsv")
-        # Three second copies under another section's name, none of them used.
-        self.assertEqual([(name, start) for name, start, _why in over],
-                         [("7-07.mp3", "-"), ("19-00.mp3", "-"), ("50-00.mp3", "-")])
-        # And the two sections the copies stand in for are on the record as
-        # unread, every paragraph of each.
+        # None: the three second copies under another section's name, none of
+        # them used, were deleted from the directory on 2026-11-21.
+        self.assertEqual(over, [])
+        # And the two sections they stood in for are on the record as unread,
+        # every paragraph of each.
         unread = set(audio.unread("voyner"))
         self.assertEqual(unread, {f"19:0.{n}" for n in range(1, 10)} | {"50:0.1", "50:0.2"})
         self.assertEqual({r[0] for r in audio._optional(audio.DATA / "mh-overrides.tsv")},
@@ -85,17 +85,23 @@ class Claims(unittest.TestCase):
                 self.assertEqual(len(got), len(sections) - len(missing) + extra)
 
     def test_a_file_no_rule_claims_fails_without_its_line(self):
-        # The same files under a key with no overrides: 7-07.mp3 is nobody's.
+        # A name the rule does not take, among the files and in no list of
+        # overrides: 7-07.mp3, as the directory had it until 2026-11-21.
         src = dict(config.audio()["voyner"])
         report = Report()
-        files = audio.files("voyner")
+        files = dict(audio.files("voyner"))
+        files["7-07.mp3"] = files["75-07.mp3"]
         audio.claims(self.con, "nobody", src, files, report)
         self.assertEqual([(p.code, p.where) for p in report.problems], [("audio-unclaimed", "7-07.mp3")])
 
     def test_two_files_for_one_place_fail(self):
+        # A rule loose enough to take 7-07.mp3, as the directory had it until
+        # 2026-11-21, for 7:7, which 07-07.mp3 reads.
         src = dict(config.audio()["voyner"], name=r"^0?(?P<paper>\d{1,3})-(?P<section>\d{2})(?:-(?P<with>\d{2}))?\.mp3$")
         report = Report()
-        audio.claims(self.con, "nobody", src, audio.files("voyner"), report)
+        files = dict(audio.files("voyner"))
+        files["7-07.mp3"] = files["75-07.mp3"]
+        audio.claims(self.con, "nobody", src, files, report)
         self.assertIn("audio-claimed-twice", {p.code for p in report.problems})
 
     def test_139_s_nine_and_ten_is_one_file_in_each(self):
@@ -131,16 +137,19 @@ class Pages(unittest.TestCase):
         self.assertEqual(trs["urantia-ru"]["voices"], [{"key": "voyner", "label": "Grigory Voyner"}])
         self.assertEqual((trs["ud"]["voices"], trs["uf-ru"]["voices"]), ([], []))
 
-    def test_the_second_encode_is_in_no_list_the_app_serves(self):
+    def test_every_file_listed_is_served_and_the_second_copies_are_gone(self):
         # /audio/<key>/<name> serves only a name of audio_file (test_offline
-        # asks it): 7-07.mp3 is in the directory and its list, and not there.
+        # asks it).  The three second copies were in the directory and its
+        # list, and not there, until 2026-11-21, when they were deleted: now
+        # every file the list names is used.
         con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
         names = {n for (n,) in con.execute("SELECT f.name FROM audio_file f JOIN audio_source s"
                                            " ON s.id = f.source_id WHERE s.key = 'voyner'")}
         for stray in ("7-07.mp3", "19-00.mp3", "50-00.mp3"):
-            self.assertIn(stray, audio.files("voyner"))
+            self.assertNotIn(stray, audio.files("voyner"))
             self.assertNotIn(stray, names)
         self.assertLessEqual({"07-07.mp3", "75-07.mp3", "139-09-10.mp3", "192-00.mp3", "50-04.mp3"}, names)
+        self.assertEqual(names, set(audio.files("voyner")))
         self.assertEqual(len(names), 1624)
 
     def test_settings_keep_it_from_the_english_text(self):

@@ -65,6 +65,12 @@ math { font-family: "Garamond Math", math; }
   /* The install banner's ground and what stands on it (.appban). */
   --gold: oklch(0.52 0.11 76); --on-gold: oklch(0.985 0.008 85);
   --wrong: oklch(0.52 0.13 40);
+  /* The player's screen on a phone (.tleft), a watch's LCD: a pale olive
+     glass, its segments lit near black and unlit faint, set into the bar by
+     a bezel dark above and light below; in the dark a backlit one, aqua. */
+  --lcd: oklch(0.86 0.045 118); --lcd-on: oklch(0.24 0.03 135); --lcd-off: oklch(0.24 0.03 135 / .08);
+  --lcd-hi: oklch(0.995 0.004 85); --lcd-lo: oklch(0.58 0.03 115); --lcd-in: oklch(0.25 0.03 120 / .35);
+  --lcd-glow: none;
   /* Goudy Old Style has a small x-height and long descenders, so it reads a
      full step smaller than its nominal size.  19px here looked like 16px of a
      modern face and wanted browser zoom to be comfortable.  The reading
@@ -127,6 +133,9 @@ math { font-family: "Garamond Math", math; }
     --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
     --right: oklch(0.76 0.11 150);  --wrong: oklch(0.74 0.11 45);
     --gold: oklch(0.47 0.10 76); --on-gold: oklch(0.97 0.010 85);
+    --lcd: oklch(0.22 0.03 200); --lcd-on: oklch(0.87 0.12 185); --lcd-off: oklch(0.87 0.12 185 / .07);
+    --lcd-hi: oklch(0.36 0.012 70); --lcd-lo: oklch(0.08 0.01 70); --lcd-in: oklch(0 0 0 / .7);
+    --lcd-glow: drop-shadow(0 0 1.2px oklch(0.87 0.12 185 / .55));
   }
 }
 :root[data-theme="dark"] {
@@ -139,6 +148,9 @@ math { font-family: "Garamond Math", math; }
   --card: oklch(0.235 0.010 70);  --shade: oklch(0 0 0 / .45);
   --right: oklch(0.76 0.11 150);  --wrong: oklch(0.74 0.11 45);
     --gold: oklch(0.47 0.10 76); --on-gold: oklch(0.97 0.010 85);
+  --lcd: oklch(0.22 0.03 200); --lcd-on: oklch(0.87 0.12 185); --lcd-off: oklch(0.87 0.12 185 / .07);
+  --lcd-hi: oklch(0.36 0.012 70); --lcd-lo: oklch(0.08 0.01 70); --lcd-in: oklch(0 0 0 / .7);
+  --lcd-glow: drop-shadow(0 0 1.2px oklch(0.87 0.12 185 / .55));
 }
 
 * { box-sizing: border-box; }
@@ -1770,6 +1782,15 @@ article.cmp .rc:has(.rt.now) > .playp svg { opacity: 1; }
    translation shown, the tabs' row, or its own name where all are shown or
    one alone is ticked. */
 .tf [data-play] > .playp { margin: -.125rem .175rem -.125rem -.525rem; }
+/* With the time the paragraph takes to hear after the triangle, where a
+   recording reads it (listen.js timed; Tigran, 2026-11-21), as a column's ▶
+   has it, in the same grey figures: the button as wide as both. */
+.tf [data-play] > .playp[data-t] { display: inline-flex; align-items: center; gap: .2rem; width: auto;
+  padding-right: .45rem; border-radius: .7rem; }
+.tf [data-play] > .playp[data-t]::after { content: attr(data-t); color: var(--faint); white-space: nowrap;
+  font-variant-numeric: lining-nums tabular-nums; }
+/* Beside a translation's name, on its baseline. */
+.tf .who > .playp[data-t]::after { position: relative; top: .125rem; }
 .tf .trtabs > .playp { align-self: center; margin-right: -.675rem; }
 .tf .who > .playp { display: inline-grid; vertical-align: -.3em; }
 .tf .tr:has(.rt.now) .playp svg { opacity: 1; }
@@ -1893,6 +1914,9 @@ main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
    set in the system face. */
 .player .rate { min-width: 2.9rem; border-radius: 3px; font: .8rem system-ui, sans-serif;
   color: var(--faint); }
+/* The time left in the section or the paper heard (listen.js drawLeft): a
+   phone's alone, in its row of buttons (below). */
+.player .tleft { display: none; }
 /* The voice being heard, after the reference: a tap opens the list of voices,
    as the speed's does (Tigran, 2026-10-18).  Its chevron, drawn as the fold
    buttons' are, points up to where the list opens, and down while it is open. */
@@ -2859,16 +2883,61 @@ h2.chap + .rh { margin-top: 1rem; }
 .fhead { display: flex; flex-direction: column; align-items: center; gap: .5rem; text-align: center; }
 .fhead .logo { flex: none; width: 4.5rem; height: 4.5rem; }
 @media (max-width: 34rem) {
-  /* At the end of a section, "Next" needs the room "End of the section" and
-     the voice had. */
+  /* On a phone the bar is two rows (Tigran, 2026-11-21): on the first what is
+     being read and by whom, the reference and the voice on one line, the
+     voice's name whole; on the second the buttons, their size kept.  From
+     2026-10-18 the voice stood smaller under the reference, beside the
+     buttons, and its name had 80 px at 360 px: "USGNY · Григорий Войнер", 157
+     px, was "USG…", and Merritt Horn's "Мерритт Хо…"; at 125% it had 21.
+     Two rows hold every name whole from 360 px at each Interface text size,
+     16 px taller (64 px at Standard).  Follow along keeps the line being read
+     clear of the bar by its height (listen.js clearOf).  A grid, not a
+     flex box that wraps: that is as wide as its widest item, and under a
+     short name ("Merritt Horn") the buttons wrapped into a third row.  The
+     buttons each a column of the second row, seven at most (⏮ ⏵ ⏭ ↓, the
+     time left, the speed, ×; no ↓ and no time for the browser's voice),
+     spaced by their margins, so that a column left empty takes no room,
+     and the line over them spanning them all, the bar as wide as the wider
+     of the two (max-content: placed at the window's middle, the bar sized
+     to fit had half the window to grow into, and a grid takes the least of
+     it, the buttons' row). */
+  .player { width: max-content; display: grid; grid-template-columns: repeat(7, auto); justify-content: center;
+    justify-items: center; column-gap: 0; row-gap: 0; border-radius: 1.3rem; padding: .2rem .45rem .3rem; }
+  .player > * { grid-row: 2; }
+  .player > :where(:not(.mid, .onward)) { margin-inline: .075rem; }
+  /* The time left, before the speed (Tigran, 2026-11-21: "the second line
+     looks empty"), on a small screen as a watch's or a calculator's, its
+     digits of seven segments (listen.js lcd), set into the bar by a bezel
+     of one pixel, dark above and to the left, light below and to the right,
+     and a shadow inside ("a tiny border, just enough to make it look 3D").
+     The digits' own drawing keeps the screen's width as they change; the
+     time as words is there for a screen reader, unseen (.tnow). */
+  .player .tleft { position: relative; display: flex; align-items: center; margin-inline: .15rem;
+    padding: .2rem .3rem .2rem .25rem; border-radius: .25rem; background: var(--lcd);
+    border: 1px solid; border-color: var(--lcd-lo) var(--lcd-hi) var(--lcd-hi) var(--lcd-lo);
+    box-shadow: inset 0 1px 2px var(--lcd-in); }
+  .player .tleft svg { display: block; width: auto; height: .95rem; overflow: visible; filter: var(--lcd-glow); }
+  .player .tleft :is(polygon, rect) { fill: var(--lcd-off); }
+  .player .tleft .on { fill: var(--lcd-on); }
+  .player .tleft .tnow { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+    white-space: nowrap; }
+  .player .tleft:is([hidden], [data-fit="none"]) { display: none; }
+  /* Where the row has no room for the screen, the time in the speed's plain
+     figures, as it stood before the screen (listen.js leftFit). */
+  .player .tleft[data-fit="plain"] { margin-inline: .1rem; padding: 0 .15rem; border: 0; background: none; box-shadow: none; }
+  .player .tleft[data-fit="plain"] svg { display: none; }
+  .player .tleft[data-fit="plain"] .tnow { position: static; width: auto; height: auto; clip-path: none;
+    font: .8rem system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--faint); }
+  .player .mid { grid-row: 1; grid-column: 1 / -1; justify-self: stretch; justify-content: center;
+    align-items: baseline; font-size: .85rem; line-height: 1.15; }
+  .player :is(.where, .voicebox) { flex: 0 1 auto; }
+  .player .voice { padding: .05rem .3rem .05rem .35rem; }
+  /* At the end of a section, "Next" and the next section's name in their
+     place, the line its own: beside the buttons it ran past the bar's edge
+     and took the × with it. */
   .player:has(.onward:not([hidden])) .mid { display: none; }
-  /* The voice under what is being read, smaller, so that neither is cut to a
-     few letters (Tigran, 2026-10-18). */
-  .player .mid { flex-direction: column; align-items: flex-start; line-height: 1.2; }
-  .player .where { max-width: 100%; }
-  .player .where::after { content: none; }
-  .player .voicebox { max-width: 100%; }
-  .player .voice { padding: .05rem .3rem .1rem .55rem; font-size: .8rem; }
+  .player .onward { grid-row: 1; grid-column: 1 / -1; justify-self: stretch; min-width: 0; overflow: hidden;
+    text-overflow: ellipsis; text-align: center; padding: .1rem .5rem; line-height: 1.15; font-size: .85rem; }
 }
 .front h1 { font-size: clamp(2.4rem, 1.7rem + 3vw, 3.6rem); margin: 0; letter-spacing: .01em; }
 .front h2 { margin: 2.8rem 0 .9rem; text-align: center; }

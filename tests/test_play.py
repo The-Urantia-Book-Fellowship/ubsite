@@ -41,15 +41,27 @@ class PlayButton(unittest.TestCase):
 
     def test_it_follows_the_speed(self):
         self.assertIn("var n = Math.max(1, Math.round(ms / rate() / 1000));", LISTEN)
-        self.assertIn("return Math.floor(n / 60) + ':' + ('0' + n % 60).slice(-2);", LISTEN)
+        self.assertIn("return (n >= 3600 ? Math.floor(n / 3600) + ':' + ('0' + Math.floor(n / 60) % 60).slice(-2)\n"
+                      "                      : Math.floor(n / 60)) + ':' + ('0' + n % 60).slice(-2);", LISTEN)
         rate = LISTEN[LISTEN.index("if (what === 'rate') {"):LISTEN.index("// A translation's voice changed while it is heard")]
+        # The bar's time left with it (drawLeft, by render; a phone's, 2026-11-21).
+        self.assertIn("render();", rate)
+        self.assertIn("    drawKeep();\n    drawLeft();\n", LISTEN[LISTEN.index("function render() {"):])
+        self.assertIn("var c = clock(ms), wide = ", LISTEN[LISTEN.index("function drawLeft() {"):])
         # The first text's too, where a recording reads it (trPlay, 2026-11-20).
         self.assertIn("controls.concat(trTimes).forEach(function (c) { if (c.dataset.ms) c.dataset.t = clock(+c.dataset.ms); });", rate)
 
     def test_a_translations_has_none(self):
-        tr = LISTEN[LISTEN.index("function trButton(t, line) {"):LISTEN.index("// In Compare, in each of its cells")]
+        # trButton makes the button alone: its time is timed()'s, given where
+        # it stands, in a column (trPlay) and in the fold (foldPlay, since
+        # 2026-11-21), and only where a recording reads the text.
+        tr = LISTEN[LISTEN.index("function trButton(t, line) {"):LISTEN.index("// The first texts' buttons with a time")]
         self.assertNotIn("dataset.t", tr)
         self.assertNotIn("clock(", tr)
+        timed = LISTEN[LISTEN.index("function timed(b, t, ref) {"):LISTEN.index("// In Compare, in each of its cells")]
+        self.assertIn("(PV && PV.kind !== 'browser' ? PV : null) : RECS[kk] ? voiceOf(P, kk) : null;", timed)
+        self.assertIn("timed(b, q.dataset.k, q.dataset.ref);", LISTEN[LISTEN.index("function trPlay(root) {"):])
+        self.assertIn("timed(b, t, line.dataset.ref);", LISTEN[LISTEN.index("function foldPlay(panel) {"):])
 
     def test_the_triangle_is_larger_and_alone_faint(self):
         self.assertIn(".playp svg { width: 1.1rem; height: 1.1rem; opacity: .45; transition: opacity .15s; }", CSS)

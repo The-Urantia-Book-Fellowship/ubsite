@@ -240,11 +240,11 @@ Every section can be heard in Merritt Horn's reading, and from any paragraph onc
 | file | what | made by |
 |---|---|---|
 | `mh-files.tsv` | every MP3, with its size, duration and SHA-256 | `.venv/bin/python -m tools.audio.manifest mh` |
-| `mh-overrides.tsv` | the three files that break the naming rule, and why (`voyner-overrides.tsv`: three second copies under another section's name, none used) | by hand |
+| `mh-overrides.tsv` | the three files that break the naming rule, and why (`voyner-overrides.tsv`: none since 2026-11-21, when the three second copies it named were deleted) | by hand |
 | `mh.tsv` | each paragraph's start and end in its file, and how much of it was heard | `make align` (`make align VOICE=voyner` for `voyner.tsv`, and so each alignment target) |
 | `mh-unread.tsv` | paragraphs the recording does not contain (`voyner-unread.tsv`: all of 19:0 and 50:0, which no file reads) | by hand, from the review |
 | `mh-low-match.tsv` | paragraphs where the reading and today's text differ (`voyner-low-match.tsv`: none) | by hand, from the review |
-| `voyner-frames.tsv` | the 1,358 files a player would take for shorter than they are, each with what its Info frame is made from and the SHA-256 of the file as sent (`build/mp3.py`); Merritt Horn's has none | the same run of `tools.audio.manifest` |
+| `voyner-frames.tsv` | the 1,356 files a player would take for shorter than they are, each with what its Info frame is made from and the SHA-256 of the file as sent (`build/mp3.py`); Merritt Horn's has none | the same run of `tools.audio.manifest` |
 
 The alignment needs a GPU and runs on this machine only, in its own venv in `~/Software/ml` (never in `requirements.txt`):
 

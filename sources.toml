@@ -206,13 +206,14 @@ name  = '^paper(?P<folder>\d{3})/P(?P<paper>\d{3})_(?P<section>\d{2})(?:-(?P<wit
 # here and on both hosts.  It reads the translation as it stood then, not as
 # the repository's HEAD has it (`edition`, below).
 # Flat, PP-SS.mp3, the paper in two digits or three; 139-09-10.mp3 is 139's
-# "9 and 10".  Three files are second copies under another section's name,
-# which data/audio/voyner-overrides.tsv leaves out: 7-07.mp3 (75:7 again),
-# 19-00.mp3 (192:0 again) and 50-00.mp3 (the start of 50:4 again); and no file
-# reads 19:0 or 50:0, the introductions to those papers, which are on the
-# record as unread (voyner-unread.tsv).  1,627 files, 1,624 used.
+# "9 and 10".  No file reads 19:0 or 50:0, the introductions to those papers,
+# which are on the record as unread (voyner-unread.tsv).  1,624 files, all
+# used.  Until 2026-11-21 there were 1,627: three were second copies under
+# another section's name, 7-07.mp3 (75:7 again), 19-00.mp3 (192:0 again) and
+# 50-00.mp3 (the start of 50:4 again), left out by name, and that day deleted,
+# here and on both hosts, at Tigran's word.
 # Mostly 64 kbps mono, 44.1 kHz; Paper 144 is stereo at 128 kbps, 129:0-4 are
-# at 48 kHz.  No file has a Xing/Info frame, and in 1,358 the frames are never
+# at 48 kHz.  No file has a Xing/Info frame, and in 1,356 the frames are never
 # padded, so that a player takes the file for shorter than it is and plays
 # past the place asked for: those are sent with an Info frame, the files
 # themselves untouched (build/mp3.py, data/audio/voyner-frames.tsv).
