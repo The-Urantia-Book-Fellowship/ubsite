@@ -1914,9 +1914,32 @@ main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
    set in the system face. */
 .player .rate { min-width: 2.9rem; border-radius: 3px; font: .8rem system-ui, sans-serif;
   color: var(--faint); }
-/* The time left in the section or the paper heard (listen.js drawLeft): a
-   phone's alone, in its row of buttons (below). */
-.player .tleft { display: none; }
+/* The time left, before the speed (Tigran, 2026-11-21: "the second line
+   looks empty", of a phone's bar; and the same day "I want it on all
+   platforms: tablet, computer, etc."), on a small screen as a watch's or a
+   calculator's, its digits of seven segments (listen.js lcd), set into the
+   bar by a bezel of one pixel, dark above and to the left, light below and
+   to the right, and a shadow inside ("a tiny border, just enough to make it
+   look 3D").  The digits' own drawing keeps the screen's width as they
+   change; the time as words is there for a screen reader, unseen (.tnow).
+   In a desk's one row it never takes room from the voice's name or the
+   reference: where it would, plain figures, else none (listen.js leftFit). */
+.player .tleft { position: relative; display: flex; align-items: center; margin-inline: .15rem;
+  padding: .2rem .3rem .2rem .25rem; border-radius: .25rem; background: var(--lcd);
+  border: 1px solid; border-color: var(--lcd-lo) var(--lcd-hi) var(--lcd-hi) var(--lcd-lo);
+  box-shadow: inset 0 1px 2px var(--lcd-in); }
+.player .tleft svg { display: block; width: auto; height: .95rem; overflow: visible; filter: var(--lcd-glow); }
+.player .tleft :is(polygon, rect) { fill: var(--lcd-off); }
+.player .tleft .on { fill: var(--lcd-on); }
+.player .tleft .tnow { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+  white-space: nowrap; }
+.player .tleft:is([hidden], [data-fit="none"]) { display: none; }
+/* Where the row has no room for the screen, the time in the speed's plain
+   figures, as it stood before the screen (listen.js leftFit). */
+.player .tleft[data-fit="plain"] { margin-inline: .1rem; padding: 0 .15rem; border: 0; background: none; box-shadow: none; }
+.player .tleft[data-fit="plain"] svg { display: none; }
+.player .tleft[data-fit="plain"] .tnow { position: static; width: auto; height: auto; clip-path: none;
+  font: .8rem system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--faint); }
 /* The voice being heard, after the reference: a tap opens the list of voices,
    as the speed's does (Tigran, 2026-10-18).  Its chevron, drawn as the fold
    buttons' are, points up to where the list opens, and down while it is open. */
@@ -2905,29 +2928,6 @@ h2.chap + .rh { margin-top: 1rem; }
     justify-items: center; column-gap: 0; row-gap: 0; border-radius: 1.3rem; padding: .2rem .45rem .3rem; }
   .player > * { grid-row: 2; }
   .player > :where(:not(.mid, .onward)) { margin-inline: .075rem; }
-  /* The time left, before the speed (Tigran, 2026-11-21: "the second line
-     looks empty"), on a small screen as a watch's or a calculator's, its
-     digits of seven segments (listen.js lcd), set into the bar by a bezel
-     of one pixel, dark above and to the left, light below and to the right,
-     and a shadow inside ("a tiny border, just enough to make it look 3D").
-     The digits' own drawing keeps the screen's width as they change; the
-     time as words is there for a screen reader, unseen (.tnow). */
-  .player .tleft { position: relative; display: flex; align-items: center; margin-inline: .15rem;
-    padding: .2rem .3rem .2rem .25rem; border-radius: .25rem; background: var(--lcd);
-    border: 1px solid; border-color: var(--lcd-lo) var(--lcd-hi) var(--lcd-hi) var(--lcd-lo);
-    box-shadow: inset 0 1px 2px var(--lcd-in); }
-  .player .tleft svg { display: block; width: auto; height: .95rem; overflow: visible; filter: var(--lcd-glow); }
-  .player .tleft :is(polygon, rect) { fill: var(--lcd-off); }
-  .player .tleft .on { fill: var(--lcd-on); }
-  .player .tleft .tnow { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
-    white-space: nowrap; }
-  .player .tleft:is([hidden], [data-fit="none"]) { display: none; }
-  /* Where the row has no room for the screen, the time in the speed's plain
-     figures, as it stood before the screen (listen.js leftFit). */
-  .player .tleft[data-fit="plain"] { margin-inline: .1rem; padding: 0 .15rem; border: 0; background: none; box-shadow: none; }
-  .player .tleft[data-fit="plain"] svg { display: none; }
-  .player .tleft[data-fit="plain"] .tnow { position: static; width: auto; height: auto; clip-path: none;
-    font: .8rem system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--faint); }
   .player .mid { grid-row: 1; grid-column: 1 / -1; justify-self: stretch; justify-content: center;
     align-items: baseline; font-size: .85rem; line-height: 1.15; }
   .player :is(.where, .voicebox) { flex: 0 1 auto; }

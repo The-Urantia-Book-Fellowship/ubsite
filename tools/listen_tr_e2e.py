@@ -23,7 +23,14 @@ chosen in the bar marks the translation's line in the fold.  And where the recor
 the browser's voice, and with Carry on into the next section on, a reading
 that comes to it from 18:7 goes on in the browser's voice and is the
 recording's again at 19:1 (the browser's speech a stand-in that is done at
-once, headless Chrome's own never ending an utterance).
+once, headless Chrome's own never ending an utterance).  And the bar itself
+(2026-11-21): on a phone two rows, the voice's name whole, at 320, 360 and 412
+px, three text sizes, both languages, the index folded in Russian; Next at a
+section's end; the time left before the speed, on a screen of seven-segment
+digits read back from what is drawn, else plain figures, else none, an hour
+and more as h:mm:ss; on a desk and a tablet one row, the screen never costing
+the voice's name or the reference; and Follow along keeping the line being
+read clear of the bar at 125%.
 
     .venv/bin/python tools/listen_tr_e2e.py        (after make data)
 
@@ -651,17 +658,49 @@ def phone_bar(b) -> None:
        f"whole paper: the time left in the paper, over an hour as h:mm:ss, on the screen ({g['t']!r}, {g['title']!r}, drawn {pg.evaluate(DRAWN)!r})")
     ok(not errors, "whole paper: no script error: " + "; ".join(errors))
     ctx.close()
-    ctx, pg, asked, errors = context(b, {})
-    pg.goto(BASE + "/1:1")
-    pg.wait_for_selector("[id='1:1.2'] .stk > .playp", timeout=15000)
-    pg.click("[id='1:1.2'] .stk > .playp")
-    pg.wait_for_selector(".player .voice span", timeout=15000)
-    pg.wait_for_timeout(500)
-    ok(pg.evaluate("getComputedStyle(document.querySelector('.player .tleft')).display") == "none"
-       and pg.evaluate("document.querySelector('.player').getBoundingClientRect().height") < 60,
-       "on a desk the bar is one row, with no time left")
-    ok(not errors, "desk: no script error: " + "; ".join(errors))
-    ctx.close()
+    # A desk's and a tablet's bar, one row: the screen too, since the same
+    # day (Tigran: "I want it on all platforms: tablet, computer, etc."),
+    # before the speed, and never at the cost of the voice's name or the
+    # reference, which stand beside it there (listen.js leftFit).
+    for lang in ("en", "ru"):
+        for ui in ("100", "125"):
+            for w in (1400, 768, 600):
+                say = f"desk {lang} {ui}% {w} px: "
+                ctx, pg, asked, errors = context(b, {"translations": "urantia-ru", "lang": lang, "uisize": ui})
+                pg.set_viewport_size({"width": w, "height": 900})
+                pg.goto(BASE + "/1:1")
+                pg.wait_for_selector("[id='1:1.2'] .playp", timeout=15000)
+                pg.wait_for_timeout(500)                   # the columns, where there is room
+                cell = ".rc[data-k='urantia-ru']:has(p.rt[data-ref='1:1.2']) .stk > .playp"
+                if pg.locator("article.cmp").count():
+                    pg.wait_for_selector(cell, timeout=15000)
+                    pg.click(cell)
+                else:
+                    row = ".row:has([id='1:1.2']) "
+                    pg.click(row + ".trfold")
+                    play = row + ".tf.open .who[data-play='urantia-ru'] > .playp"
+                    pg.wait_for_selector(play, timeout=15000)
+                    pg.click(play)
+                pg.wait_for_selector(".player .voice span", timeout=15000)
+                until(pg, "!document.querySelector('.player .tleft').hidden")
+                pg.wait_for_timeout(300)
+                g, fit, drawn = pg.evaluate(GEO), pg.evaluate(FIT), pg.evaluate(DRAWN)
+                mid = lambda r: (r[1] + r[3]) / 2
+                # What the name and the reference have, with the time as it is and with none.
+                cost = pg.evaluate("""() => { const t = document.querySelector('.player .tleft'), f = t.dataset.fit,
+                    n = document.querySelector('.player .voice span'), w = document.querySelector('.player .where'),
+                    a = [n.clientWidth, w.clientWidth]; t.dataset.fit = 'none'; const z = [n.clientWidth, w.clientWidth];
+                    t.dataset.fit = f; return [z[0] - a[0], z[1] - a[1]]; }""")
+                ok(abs(mid(g["mid"]) - mid(g["toggle"])) <= 3 and g["bar"][0] >= 0 and g["bar"][2] <= g["vw"]
+                   and g["close"][2] <= g["inner"][1] + 1 and g["prev"][0] >= g["inner"][0] - 1,
+                   say + f"one row, in the window ({g['bar']})")
+                ok(cost[0] <= 1 and cost[1] <= 1 and fit in ("lcd", "plain", "none")
+                   and (fit != "lcd" or (drawn == g["t"] and g["left"][2] <= g["rate"][0] + 1)),
+                   say + f"the time {fit}, before the speed, costing the name and the reference nothing ({cost}, drawn {drawn!r})")
+                if w == 1400:
+                    ok(fit == "lcd" and g["need"] <= g["shown"] + 1, say + f"a desk has the screen, and the name whole ({g['shown']} of {g['need']} px)")
+                ok(not errors, say + "no script error: " + "; ".join(errors))
+                ctx.close()
 
     # Follow along: at 125% the bar's top stands 100 px above the window's
     # foot.  A paragraph whose end is 90 px above it, started, is brought
@@ -702,6 +741,7 @@ def run() -> int:
         menus(b)
         bar(b)
         lacking(b)
+        phone_bar(b)
         b.close()
     return 1 if fails else 0
 

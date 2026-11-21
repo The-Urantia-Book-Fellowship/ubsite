@@ -301,19 +301,30 @@
   // The screen where the bar's row has room for it, else the time in plain
   // figures, else none: measured, as the header's controls are (ub.js ctlFit,
   // CLAUDE.md trap 68), what it needs growing with Interface text size and
-  // with an hour's digits; at 125% the screen fits a phone from 376 px.
-  // Again as the window or the sizes change, and as the digits grow or fall.
+  // with an hour's digits; at 125% the screen fits a phone from 376 px.  On
+  // every screen since the same day (Tigran: "I want it on all platforms"),
+  // and in a desk's one row, where the voice's name and the reference stand
+  // beside it, it never takes their room: the name was what this began with.
+  // Again as the window, the sizes or the language change, as a typeface
+  // comes, as the name or the reference changes, and as the digits grow or
+  // fall.
   function leftFit(el) {
     el = el || (bar && bar.querySelector('.tleft'));
     if (!el || el.hidden) return;
+    var name = bar.querySelector('.voice span'), where = bar.querySelector('.where');
+    var room = function () { return [name.clientWidth, where.clientWidth]; };
+    el.dataset.fit = 'none';
+    var had = room();
     // Over, where the first button or the last stands outside the bar's
-    // padding: the bar's own width, which overflow would show, takes the
-    // padding in, and the buttons came to its very edge.
+    // padding (the bar's own width, which overflow would show, takes the
+    // padding in, and the buttons came to its very edge), or where the name
+    // or the reference has less room than with no time at all.
     var over = function () {
-      var r = bar.getBoundingClientRect(), cs = getComputedStyle(bar),
+      var r = bar.getBoundingClientRect(), cs = getComputedStyle(bar), now = room(),
           a = bar.querySelector('.prev').getBoundingClientRect(), z = bar.querySelector('.close').getBoundingClientRect();
       return a.left < r.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft) - 1 ||
-             z.right > r.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight) + 1;
+             z.right > r.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight) + 1 ||
+             now[0] < had[0] - 1 || now[1] < had[1] - 1;
     };
     el.dataset.fit = 'lcd';
     if (getComputedStyle(el).display === 'none' || !over()) return;
@@ -321,6 +332,7 @@
     if (over()) el.dataset.fit = 'none';
   }
   window.addEventListener('resize', function () { if (bar) leftFit(); });
+  if (document.fonts) document.fonts.addEventListener('loadingdone', function () { if (bar) leftFit(); });
   // The time left as a watch's screen shows it (Tigran, 2026-11-21: "a nice
   // background 'screen' ... and segmented 'digital' digits"): seven segments
   // to a digit, slanted, those unlit drawn faint; under ten minutes the first
@@ -787,6 +799,10 @@
     if (s) at.textContent = s[0] || D.paper + ':' + D.section;
     bar.querySelector('.who').innerHTML = s ? '' : D.whole ? T('End of the paper') : T('End of the section');
     bar.querySelector('.voice span').innerHTML = T(vname());
+    // The name and the reference as they now stand: changed, the time's
+    // room is measured again (leftFit, by drawLeft below).
+    var tl = bar.querySelector('.tleft'), sig = bar.querySelector('.mid').textContent;
+    if (tl.dataset.sig !== sig) { tl.dataset.sig = sig; delete tl.dataset.fit; }
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
     // The next section's name, as app.py makes it in each language.
@@ -1410,7 +1426,7 @@
 
   document.addEventListener('ub:settings', function (ev) {
     var what = ev.detail.key;
-    if (what === 'uisize' && bar) leftFit();
+    if ((what === 'uisize' || what === 'lang') && bar) leftFit();
     if (what === 'rate') {
       audio.playbackRate = audio.defaultPlaybackRate = rate();
       if (said.on) speakFrom(said.n);             // the sentence again, at the new speed
