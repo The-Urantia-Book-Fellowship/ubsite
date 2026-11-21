@@ -1,0 +1,67 @@
+n	abbr	testament	name	ref_name	head	title	end
+1	Gen	OT	Genesis	Genesis	genesis	the first book of moses, \\ called \\ \bibtitlemain{genesis}	
+2	Exo	OT	Exodus	Exodus	exodus	the second book of moses, \\ called \\ \bibtitlemain{exodus}	
+3	Lev	OT	Leviticus	Leviticus	leviticus	the third book of moses, \\ called \\ \bibtitlemain{leviticus}	
+4	Num	OT	Numbers	Numbers	numbers	the fourth book of moses, \\ called \\ \bibtitlemain{numbers}	
+5	Deu	OT	Deuteronomy	Deuteronomy	deuteronomy	the fifth book of moses, \\ called \\ \bibtitlemain{deuteronomy}	
+6	Jos	OT	Joshua	Joshua	joshua	the book of \\ \bibtitlemain{joshua}	
+7	Jdg	OT	Judges	Judges	judges	the book of \\ \bibtitlemain{judges}	
+8	Rut	OT	Ruth	Ruth	ruth	the book of \\ \bibtitlemain{ruth}	
+9	1Sa	OT	I Samuel	1 Samuel	i. samuel	the first \\ \bibtitlemain{book of samuel,} \\ otherwise called, \\ the first book of the kings	
+10	2Sa	OT	II Samuel	2 Samuel	ii. samuel	the second \\ \bibtitlemain{book of samuel,} \\ otherwise called, \\ the second book of the kings	
+11	1Ki	OT	I Kings	1 Kings	i. kings	the first \\ \bibtitlemain{book of the kings,} \\ commonly called, \\ the third book of the kings	
+12	2Ki	OT	II Kings	2 Kings	ii. kings	the second \\ \bibtitlemain{book of the kings,} \\ commonly called, \\ the fourth book of the kings	
+13	1Ch	OT	I Chronicles	1 Chronicles	i. chronicles	the first book of the \\ \bibtitlemain{chronicles}	
+14	2Ch	OT	II Chronicles	2 Chronicles	ii. chronicles.	the second book of the \\ \bibtitlemain{chronicles}	
+15	Ezr	OT	Ezra	Ezra	ezra	\bibtitlemain{ezra}	
+16	Neh	OT	Nehemiah	Nehemiah	nehemiah	the \\ \bibtitlemain{book of nehemiah}	
+17	Est	OT	Esther	Esther	esther	the \\ \bibtitlemain{book of esther}	
+18	Job	OT	Job	Job	job	the \\ \bibtitlemain{book of job}	
+19	Psa	OT	Psalms	Psalms	psalms	the \\ \bibtitlemain{book of psalms}	
+20	Pro	OT	Proverbs	Proverbs	proverbs	\bibtitlemain{the proverbs}	
+21	Ecc	OT	Ecclesiastes	Ecclesiastes	ecclesiastes	\bibtitlemain{ecclesiastes;} \\ or, the preacher	
+22	Sol	OT	The Song of Solomon	Song of Solomon	the song of solomon	the \\ \bibtitlemain{song of solomon}	
+23	Isa	OT	Isaiah	Isaiah	isaiah	the book of the prophet \\ \bibtitlemain{isaiah}	
+24	Jer	OT	Jeremiah	Jeremiah	jeremiah	the book of the prophet \\ \bibtitlemain{jeremiah}	
+25	Lam	OT	Lamentations	Lamentations	lamentations	the lamentations of jeremiah	
+26	Eze	OT	Ezekiel	Ezekiel	ezekiel	the book of the prophet \\ \bibtitlemain{ezekiel}	
+27	Dan	OT	Daniel	Daniel	daniel	the book of \\ \bibtitlemain{daniel}	
+28	Hos	OT	Hosea	Hosea	hosea	\bibtitlemain{hosea}	
+29	Joe	OT	Joel	Joel	joel	\bibtitlemain{joel}	
+30	Amo	OT	Amos	Amos	amos	\bibtitlemain{amos}	
+31	Oba	OT	Obadiah	Obadiah	obadiah	\bibtitlemain{obadiah}	
+32	Jon	OT	Jonah	Jonah	jonah	\bibtitlemain{jonah}	
+33	Mic	OT	Micah	Micah	micah	\bibtitlemain{micah}	
+34	Nah	OT	Nahum	Nahum	nahum	\bibtitlemain{nahum}	
+35	Hab	OT	Habakkuk	Habakkuk	habakkuk	\bibtitlemain{habakkuk}	
+36	Zep	OT	Zephaniah	Zephaniah	zephaniah	\bibtitlemain{zephaniah}	
+37	Hag	OT	Haggai	Haggai	haggai	\bibtitlemain{haggai}	
+38	Zec	OT	Zechariah	Zechariah	zechariah	\bibtitlemain{zechariah}	
+39	Mal	OT	Malachi	Malachi	malachi	\bibtitlemain{malachi}	THE END OF THE PROPHETS.
+40	Mat	NT	Matthew	Matthew	st. matthew	the gospel according to \\ \bibtitlemain{st. matthew}	
+41	Mar	NT	Mark	Mark	st. mark	the gospel according to \\ \bibtitlemain{st. mark}	
+42	Luk	NT	Luke	Luke	st. luke	the gospel according to \\ \bibtitlemain{st. luke}	
+43	Joh	NT	John	John	st. john	the gospel according to \\ \bibtitlemain{st. john}	
+44	Act	NT	The Acts	Acts	the acts	the \\ \bibtitlemain{acts} \\ of the apostles	
+45	Rom	NT	Romans	Romans	romans	the epistle of paul the apostle \\ to the \\ \bibtitlemain{romans}	
+46	1Co	NT	I Corinthians	1 Corinthians	i. corinthians	the \\ first epistle of paul the apostle \\ to the \\ \bibtitlemain{corinthians}	
+47	2Co	NT	II Corinthians	2 Corinthians	ii. corinthians	the \\ second epistle of paul the apostle \\ to the \\ \bibtitlemain{corinthians}	
+48	Gal	NT	Galatians	Galatians	galatians	the epistle of paul the apostle \\ to the \\ \bibtitlemain{galatians}	
+49	Eph	NT	Ephesians	Ephesians	ephesians	the epistle of paul the apostle \\ to the \\ \bibtitlemain{ephesians}	
+50	Phi	NT	Philippians	Philippians	philippians	the epistle of paul the apostle \\ to the \\ \bibtitlemain{philippians}	
+51	Col	NT	Colossians	Colossians	colossians	the epistle of paul the apostle \\ to the \\ \bibtitlemain{colossians}	
+52	1Th	NT	I Thessalonians	1 Thessalonians	i. thessalonians	the \\ first epistle of paul the apostle \\ to the \\ \bibtitlemain{thessalonians}	
+53	2Th	NT	II Thessalonians	2 Thessalonians	ii. thessalonians	the \\ second epistle of paul the apostle \\ to the \\ \bibtitlemain{thessalonians}	
+54	1Ti	NT	I Timothy	1 Timothy	i. timothy	the \\ first epistle of paul the apostle \\ to \\ \bibtitlemain{timothy}	
+55	2Ti	NT	II Timothy	2 Timothy	ii. timothy	the \\ second epistle of paul the apostle \\ to \\ \bibtitlemain{timothy}	
+56	Tit	NT	Titus	Titus	titus	the epistle of paul to \\ \bibtitlemain{titus}	
+57	Phm	NT	Philemon	Philemon	philemon	the epistle of paul to \\ \bibtitlemain{philemon}	
+58	Heb	NT	Hebrews	Hebrews	hebrews	the epistle of paul the apostle \\ to the \\ \bibtitlemain{hebrews}	
+59	Jam	NT	James	James	james	the general epistle of \\ \bibtitlemain{james}	
+60	1Pe	NT	I Peter	1 Peter	i. peter	the first epistle general of \\ \bibtitlemain{peter}	
+61	2Pe	NT	II Peter	2 Peter	ii. peter	the second epistle general of \\ \bibtitlemain{peter}	
+62	1Jo	NT	I John	1 John	i. john	the first epistle general of \\ \bibtitlemain{john}	
+63	2Jo	NT	II John	2 John	ii. john	the second epistle of \\ \bibtitlemain{john}	
+64	3Jo	NT	III John	3 John	iii. john	the third epistle of \\ \bibtitlemain{john}	
+65	Jud	NT	Jude	Jude	jude	the general epistle of \\ \bibtitlemain{jude}	
+66	Rev	NT	Revelation	Revelation	revelation	\bibtitlemain{the revelation} \\ of \\ st. john the divine	THE END.

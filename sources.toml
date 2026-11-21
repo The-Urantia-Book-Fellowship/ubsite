@@ -170,6 +170,18 @@ sha256 = "cbf8b1a87a4a311e2aa9b5b2995f83b23159fbe0ca9ca517d3fd43b5911e925a"
 url    = "https://www.sbl-site.org/wp-content/themes/basket/fonts/bib-fonts/SBL_Hbrw.ttf"
 sha256 = "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99"
 
+# The witness the KJV's copy in data/kjv/ was set beside, for its slips
+# (tools/kjv/compare.py, 2026-11-21): eBible.org's King James Version, the 1769
+# text, public domain, as USFM, with the supplied words, the LORD, the psalms'
+# titles and the translators' marginal notes marked.  Its page is
+# https://ebible.org/find/details.php?id=eng-kjv.  Not read by the build, and
+# fetched only by `python -m tools.kjv.compare --fetch`, into var/kjv/witness/;
+# eBible makes the file again from time to time, so a fetch that finds another
+# digest stops, and the comparison is made again only on purpose.
+[kjv_witness]
+url    = "https://ebible.org/Scriptures/eng-kjv_usfm.zip"
+sha256 = "9d37aa78180ceefd5e4aeeaedceccf16f21484e5eb17d5662e8beff31bc3d8a5"
+
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
 # directory against that list.

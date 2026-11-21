@@ -64,8 +64,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology"):
-            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology()
+        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology", "kjv_witness"):
+            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology(); kjv_witness is tools/kjv/compare.py's
         if "zip" in cfg:
             repos[key] = _zip(key, cfg)
             continue
@@ -217,6 +217,15 @@ def sbl() -> dict[str, dict]:
         raw = tomllib.load(fh)
     return {k: {"key": k, "url": raw[k]["url"], "sha256": raw[k]["sha256"], "commit": raw[k]["sha256"]}
             for k in ("sbl_greek", "sbl_hebrew")}
+
+
+def kjv_witness() -> dict:
+    """{url, sha256} of the electronic KJV that data/kjv/ was set beside for
+    its slips (tools/kjv/compare.py): fetched only by that tool, never read by
+    the build."""
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["kjv_witness"]
+    return {"url": cfg["url"], "sha256": cfg["sha256"]}
 
 
 def block() -> dict:
