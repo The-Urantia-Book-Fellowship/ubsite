@@ -41,18 +41,23 @@
 
 {#- The interface's languages, each its flag (Tigran, 2026-10-25): the Union
     Jack and the Russian tricolour, drawn, never emoji, which Windows has none
-    of.  In the header's list of languages twice, closed and open (base.html
+    of.  Both 3:2, so that the list's closed flag is one width whichever
+    language is chosen, and the header does not move as it changes (Tigran,
+    2026-11-21: "the British flag is wider than Russian, so the whole top
+    panel jumps horizontally"); the Union Jack was 2:1 until then, and is
+    drawn at 3:2, its diagonals corner to corner, not cut from the 2:1.  In
+    the header's list of languages twice, closed and open (base.html
     .langmenu), so the Union Jack's clip is named by `id`, which each copy
     gives its own. -#}
 {% macro flag_svg(lang, id='a') -%}
 {%- if lang == 'en' -%}
-<svg class="flg" data-l="en" viewBox="0 0 60 30" aria-hidden="true" focusable="false">
-        <clipPath id="uk-{{ id }}"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath>
-        <path d="M0 0h60v30H0z" fill="#012169"/>
-        <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/>
-        <path d="M0 0l60 30m0-30L0 30" clip-path="url(#uk-{{ id }})" stroke="#c8102e" stroke-width="4"/>
-        <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
-        <path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6"/></svg>
+<svg class="flg" data-l="en" viewBox="0 0 45 30" aria-hidden="true" focusable="false">
+        <clipPath id="uk-{{ id }}"><path d="M22.5 15h22.5v15zv15H0zH0V0zV0h22.5z"/></clipPath>
+        <path d="M0 0h45v30H0z" fill="#012169"/>
+        <path d="M0 0l45 30m0-30L0 30" stroke="#fff" stroke-width="6"/>
+        <path d="M0 0l45 30m0-30L0 30" clip-path="url(#uk-{{ id }})" stroke="#c8102e" stroke-width="4"/>
+        <path d="M22.5 0v30M0 15h45" stroke="#fff" stroke-width="10"/>
+        <path d="M22.5 0v30M0 15h45" stroke="#c8102e" stroke-width="6"/></svg>
 {%- else -%}
 <svg class="flg" data-l="ru" viewBox="0 0 45 30" aria-hidden="true" focusable="false">
         <path d="M0 0h45v10H0z" fill="#fff"/><path d="M0 10h45v10H0z" fill="#0039a6"/>

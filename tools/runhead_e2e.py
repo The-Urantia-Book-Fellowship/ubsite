@@ -769,8 +769,10 @@ def run() -> int:
         # controls have a line of their own and everything is on it.
         # Measured on 2026-11-21, with the list of languages for the flags
         # and full screen beside the half-disc (two pixels at a time): the
-        # language fits from 360px at Standard in English, 404 at Larger and
-        # 448 at Largest, in Russian 332, 374 and 416; the half-disc from 324,
+        # language fits from 354px at Standard in English, 398 at Larger and
+        # 442 at Largest, in Russian 332, 374 and 416, both flags 3:2 and one
+        # width (the Union Jack 2:1 at first, 360, 404 and 448 in English);
+        # the half-disc from 324,
         # 364 and 404, in Russian 302, 340 and 378; full screen at Standard
         # down to 300 and less, from 338 at Larger and 374 at Largest, in
         # Russian 314 and 348; and the controls go to a line of their own
@@ -781,9 +783,9 @@ def run() -> int:
         for lang, size, w, want, half, full in (
                 ("en", "100", 400, True, True, True), ("en", "100", 372, True, True, True),
                 ("en", "100", 360, True, True, True),
-                ("en", "100", 356, False, True, True), ("en", "100", 330, False, True, True),
+                ("en", "100", 350, False, True, True), ("en", "100", 330, False, True, True),
                 ("en", "100", 316, False, False, True),
-                ("en", "112.5", 420, True, True, True), ("en", "112.5", 400, False, True, True),
+                ("en", "112.5", 420, True, True, True), ("en", "112.5", 392, False, True, True),
                 ("en", "112.5", 356, False, False, True), ("en", "112.5", 330, False, False, False),
                 ("en", "112.5", 304, True, True, True),
                 ("en", "125", 470, True, True, True), ("en", "125", 430, False, True, True),
@@ -824,7 +826,7 @@ def run() -> int:
             q.wait_for_timeout(150)
             seen.append(q.evaluate(FLAGS)["lang"])
         ok(seen == [True, False, True], f"a resize leaves the language out and brings it back ({seen})")
-        # At 430px and Largest the language fits from 448px in English and
+        # At 430px and Largest the language fits from 442px in English and
         # from 416 in Russian.
         q.set_viewport_size({"width": 430, "height": 700})
         q.wait_for_timeout(150)

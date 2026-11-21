@@ -237,6 +237,13 @@ class Pages(unittest.TestCase):
         self.assertIn(":root:not([data-lang]) .top .langmenu .fl[data-to=\"en\"],\n"
                       ":root[data-lang=\"ru\"] .top .langmenu .fl[data-to=\"ru\"] { display: block; }", css)
         self.assertNotIn(".top .langs", css)
+        # One width for every flag, so that the header does not move as the
+        # language changes (Tigran, 2026-11-21): each 3:2.
+        self.assertIn(".top .langmenu .flg { display: block; width: 1.23rem; height: .82rem;", css)
+        self.assertNotIn('.flg[data-l="en"] { width', css)
+        chrome = (ROOT / "ubsite" / "templates" / "_chrome.html").read_text(encoding="utf-8")
+        self.assertEqual(chrome.count('class="flg"'), 2)
+        self.assertEqual(chrome.count('viewBox="0 0 45 30"'), 2)
 
     def test_full_screen_beside_the_half_disc(self):
         # Full screen (Tigran, 2026-11-21): after the half-disc, before the
@@ -276,7 +283,7 @@ class Pages(unittest.TestCase):
         # Closer, and only on a phone.
         tight = css[css.index("@media (max-width: 40rem) {\n  .top.tight, .top.tight .ctl { column-gap: .35rem; }"):]
         tight = tight[:tight.index("}\n}") + 3]
-        for rule in (".top.tight .langmenu > summary .flg { height: .7rem; }",
+        for rule in (".top.tight .langmenu > summary .flg { width: 1.05rem; height: .7rem; }",
                      ".top.tight .acctmenu > summary :is(.acctphoto, .acctinit) { width: 1.25rem; height: 1.25rem;"):
             self.assertIn(rule, tight)
         self.assertIn("document.addEventListener('ub:settings', ctlFit);", js)

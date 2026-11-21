@@ -336,7 +336,7 @@ def run(tmp: pathlib.Path) -> int:
 
         print("A phone: everything on the name's line, the language always")
         # The list of languages and full screen, beside the half-disc, since
-        # 2026-11-21, where two flags stood: everything from 384px in English
+        # 2026-11-21, where two flags stood: everything from 378px in English
         # and 356 in Russian at Standard, signed out (from 380 and 360 with
         # the flags); signed in, the letter or the picture 1.6px wider.
         flags = "() => ['.top .langmenu', '.top .fscreen', '.top .theme'].filter(s => document.querySelector(s).getClientRects().length > 0).length"

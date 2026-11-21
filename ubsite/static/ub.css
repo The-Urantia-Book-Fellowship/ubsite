@@ -252,8 +252,10 @@ a:hover { text-decoration-thickness: 2px; }
    of the language in effect and a chevron, the flag chosen here by data-lang,
    which the head script sets before first paint; open, a menu as the ?'s is,
    each language its flag and its name in its own language, the one chosen
-   ticked.  Each flag in its own proportions, edged so that the white of the
-   tricolour shows on the paper.  A language to come is a line here. */
+   ticked.  Every flag 3:2, one width, so that nothing beside the closed
+   list moves as the language changes (Tigran, 2026-11-21; the Union Jack
+   was 2:1 until then), edged so that the white of the tricolour shows on
+   the paper.  A language to come is a line here. */
 .top .langmenu { position: relative; align-self: center; }
 .top .langmenu > summary { display: flex; align-items: center; gap: .22rem; list-style: none; line-height: 0;
   color: var(--faint); cursor: pointer; }
@@ -262,9 +264,7 @@ a:hover { text-decoration-thickness: 2px; }
 .top .langmenu .fl { display: none; }
 :root:not([data-lang]) .top .langmenu .fl[data-to="en"],
 :root[data-lang="ru"] .top .langmenu .fl[data-to="ru"] { display: block; }
-.top .langmenu .flg { display: block; height: .82rem; box-shadow: 0 0 0 1px var(--rule); }
-.top .langmenu .flg[data-l="en"] { width: 1.64rem; }
-.top .langmenu .flg[data-l="ru"] { width: 1.23rem; }
+.top .langmenu .flg { display: block; width: 1.23rem; height: .82rem; box-shadow: 0 0 0 1px var(--rule); }
 .top .langmenu .lchev { width: .5rem; height: .3rem; display: block; overflow: visible; }
 .top .langmenu :is(.lchev, .lcheck) path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round;
   stroke-linejoin: round; }
@@ -276,7 +276,6 @@ a:hover { text-decoration-thickness: 2px; }
   border: 0; color: var(--ink); font: inherit; font-size: .95rem; line-height: 1.3; text-align: left;
   white-space: nowrap; cursor: pointer; }
 .top .langitems button > span { flex: 1; }
-.top .langitems .flg[data-l="ru"] { margin-right: .41rem; }
 .top .langitems .lcheck { width: .9rem; height: .9rem; display: block; color: var(--link); visibility: hidden; }
 .top .langitems button[aria-pressed="true"] .lcheck { visibility: visible; }
 .top .langitems button:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
@@ -346,10 +345,10 @@ a:hover { text-decoration-thickness: 2px; }
    the name, the controls go all together to the line under it, everything
    with them, the ? and the account at its end.  Measured on 2026-11-21,
    with the list of languages for the two flags (Tigran, to make room for
-   full screen), on a host with no accounts: the language fits from 360px at
-   Standard in English (332 in Russian), 404 at Larger (374) and 448 at
-   Largest (416), where the flags fitted from 354 (334), 398 (374) and 442
-   (416); the half-disc from 324 (302), 364 (340) and 404 (378); full screen
+   full screen), on a host with no accounts: the language fits from 354px at
+   Standard in English (332 in Russian), 398 at Larger (374) and 442 at
+   Largest (416), where the flags fitted, as it happens, from 354 (334), 398
+   (374) and 442 (416); the half-disc from 324 (302), 364 (340) and 404 (378); full screen
    at Standard down to 300 and less, from 338 at Larger (314) and 374 at
    Largest (348); and the controls take a line of their own under 312px at
    Larger in English and 346 at Largest, 320 at Largest in Russian.  The flags came to a phone where they fitted on 2026-11-17
@@ -380,7 +379,7 @@ a:hover { text-decoration-thickness: 2px; }
    ub.js draws it closer only where it must, before anything is left out, so
    the line is the roomy one wherever that fits, and nothing comes back at a
    narrower width that was gone at a wider.  With it everything stands on
-   one line from 384px in English and 356 in Russian at Standard, signed out,
+   one line from 378px in English and 356 in Russian at Standard, signed out,
    and a pixel or two more signed in (the letter or the picture is wider than
    the sign): 390, as Tigran's window was, holds them all either way.  With
    the flags and no full screen the same was 380 and 360. */
@@ -389,9 +388,7 @@ a:hover { text-decoration-thickness: 2px; }
   .top.tight .brand { gap: .32em; }
   .top.tight .brand .logo { width: 1.85em; height: 1.85em; }
   .top.tight .langmenu > summary { gap: .1rem; }
-  .top.tight .langmenu > summary .flg { height: .7rem; }
-  .top.tight .langmenu > summary .flg[data-l="en"] { width: 1.4rem; }
-  .top.tight .langmenu > summary .flg[data-l="ru"] { width: 1.05rem; }
+  .top.tight .langmenu > summary .flg { width: 1.05rem; height: .7rem; }
   .top.tight .langmenu .lchev { width: .4rem; height: .25rem; }
   .top.tight .acctmenu > summary :is(.acctphoto, .acctinit) { width: 1.25rem; height: 1.25rem; margin-block: -.08rem; }
   .top.tight .acctmenu > summary .acctinit { font-size: .7rem; line-height: 1.25rem; }
