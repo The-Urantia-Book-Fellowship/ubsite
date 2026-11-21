@@ -213,7 +213,10 @@ class Pages(unittest.TestCase):
         self.assertEqual(re.findall(r'<details class="recvoice" data-key="([^"]+)">', fs.group(1)), ["mh", "voyner"])
         self.assertIn('<button type="button" class="keep" data-st="none" disabled></button>', fs.group(1))
         self.assertIn('<p class="state" aria-live="polite"></p>', fs.group(1))
-        self.assertEqual(fs.group(1).count('<li><label><input type="checkbox" value="'), 3)
+        # The three translations, and the King James Version, a list of its
+        # own (2026-11-21).
+        self.assertEqual(fs.group(1).count('<li><label><input type="checkbox" value="'), 4)
+        self.assertIn('<ul class="offtrs offkjv">', fs.group(1))
 
     def test_a_recordings_list_of_files_by_paper(self):
         # What Settings' Offline tab draws its tree from and the worker keeps
@@ -424,7 +427,8 @@ class Copy(unittest.TestCase):
 
     def test_deploy_keeps_every_chunk_the_manifest_names(self):
         # deploy.sh prunes on the hosts what neither manifest names: the
-        # translations' chunks, listed apart, must be among what it keeps.
+        # translations' chunks, listed apart, must be among what it keeps, and
+        # the King James Version's (2026-11-21).
         import subprocess
         code = re.search(r"local chunks='(.*)'", (ROOT / "deploy" / "deploy.sh").read_text()).group(1)
         text = (COPY / "manifest.json").read_text()
@@ -432,7 +436,8 @@ class Copy(unittest.TestCase):
         got = subprocess.run([sys.executable, "-c", code], input=text, capture_output=True, text=True,
                              check=True).stdout.split()
         want = [c["file"][2:] for c in m["chunks"]] + [c["file"][2:] for t in m["translations"] for c in t["chunks"]]
-        self.assertTrue(m["translations"])
+        want += [c["file"][2:] for c in m["kjv"]["chunks"]]
+        self.assertTrue(m["translations"] and m["kjv"]["chunks"])
         self.assertEqual(sorted(got), sorted(want))
 
     def test_it_holds_nothing_that_depends_on_the_host(self):

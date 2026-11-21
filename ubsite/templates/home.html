@@ -91,7 +91,8 @@
     {% endfor %}
   </ol>
 
-  {#- Six tiles, each a drawing (_chrome.html way_svg), a name as its page
+  {#- Seven tiles since 2026-11-21, the King James Version's the third (six
+      until then), each a drawing (_chrome.html way_svg), a name as its page
       titles itself, with no article, and a line of what is there (Tigran,
       2026-11-17).  No tile for listening, which is part of the reader.  The
       appendices are reached from the index, the three lists from Lists. #}
@@ -101,6 +102,12 @@
       <span class="sub">{{ t('home:t:contents', n=stats.papers) }}</span></a></li>
     <li class="ix"><a href="/index">{{ chrome.way_svg('index') }}<span class="lbl">{{ t('Index') }}</span>
       <span class="sub">{{ t('home:t:index', e=stats.az_entries, h=stats.headwords) }}</span></a></li>
+    {#- The King James Version (kjv.html), where it is built (Tigran, 2026-11-21:
+        "A tile on the home page"). #}
+    {%- if kjv_there() %}
+    <li><a href="/kjv">{{ chrome.way_svg('kjv') }}<span class="lbl">{{ t('King James Version') }}</span>
+      <span class="sub">{{ t('home:t:kjv', b=66, v=31102) }}</span></a></li>
+    {%- endif %}
     {#- The chart of the personalities (cosmology.html), where the build has one. #}
     {%- if stats.cosmo_persons %}
     <li><a href="/cosmology">{{ chrome.way_svg('chart') }}<span class="lbl">{{ t('Cosmology of Personalities') }}</span>

@@ -86,6 +86,17 @@ def main(argv: list[str]) -> int:
               f"{len(changed)} changed, {len(gone)} removed, {len(new)} added")
         return rc or (0 if ok else 1)
 
+    if cmd == "kjv":
+        # The King James Version, var/kjv.db, from data/kjv/ alone (build/kjv.py).
+        from . import kjv
+        from .problems import Report
+        report = Report()
+        stats = kjv.build(report)
+        if stats:
+            print(f"var/kjv.db: {stats['books']} books, {stats['chapters']:,} chapters, "
+                  f"{stats['verses']:,} verses, {stats['notes']:,} notes")
+        return report.emit()
+
     if cmd == "data":
         import time
 
@@ -114,6 +125,10 @@ def main(argv: list[str]) -> int:
         print(f"reading index at {at(ix)} ...")
         az = read_az(ix["tex"], report, rev=ix["at"])
         apps = read_appendices(ix["tex"], report, rev=ix["at"])
+        # The King James Version first (build/kjv.py): the study notes link
+        # their Bible references to it, and are held to it.
+        from . import kjv
+        kjv.ensure(report)
         # The study edition's notes, for each paper reviewed in data/study/:
         # onto the press text before it is rendered, so one render places them.
         from . import study
@@ -133,6 +148,9 @@ def main(argv: list[str]) -> int:
         print("loading ...")
         para_key = load.load_text(con, papers, parts, repos["press"], hyphenator, report)
         study.store(con, study_built)
+        # The verses those notes cite, for the KJV's pages (build/bibleref.py).
+        from . import bibleref
+        print(f"  {bibleref.store(con):,} links of the study notes to the King James Version")
         print("the Foundation's numbering ...")
         from . import foundation
         n_uf = foundation.load(con, repos["press"], report,
@@ -398,6 +416,9 @@ def main(argv: list[str]) -> int:
         print("\n== the chart of the personalities ==")
         from .checks.check_cosmo import run as cosmo_run
         rc |= cosmo_run(dbf) if dbf.exists() else absent("var/ub.db (make data)")
+        print("\n== the King James Version ==")
+        from .checks.check_kjv import run as kjv_run
+        rc |= kjv_run()
         print("\n== the passages of the moment ==")
         from .passage import check as passage_check
         rc |= passage_check(dbf) if dbf.exists() else absent("var/ub.db (make data)")

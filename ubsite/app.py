@@ -37,7 +37,7 @@ from markupsafe import Markup, escape  # noqa: E402
 from starlette.concurrency import run_in_threadpool  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import account, api, board, l10n, queries, settings, stats, visits  # noqa: E402
+from ubsite import account, api, board, kjv, l10n, queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 STATIC = ROOT / "ubsite" / "static"
@@ -178,7 +178,7 @@ RE_SEC = re.compile(r"([0-9]{1,18}):([0-9]{1,18})")
 # How many hits each list shows on the overview, and per page once a list is
 # opened on its own with ?in=index, ?in=text, ?in=notes, ?in=study, or a
 # translation's key, ?in=ud (build/translation.py SCOPES).
-OVERVIEW = {"index": 25, "text": 40, "notes": 10, "study": 10, "tr": 40}
+OVERVIEW = {"index": 25, "text": 40, "notes": 10, "study": 10, "tr": 40, "kjv": 10}
 PER_PAGE = 100
 
 
@@ -531,6 +531,9 @@ def translations() -> list[dict]:
 
 
 T.env.globals["translations"] = translations
+# Whether the King James Version is built (ubsite/kjv.py): Settings' Offline
+# tab offers it to keep, and the home page and /lists lead to it.
+T.env.globals["kjv_there"] = kjv.there
 # A translation's language, as Settings names it.
 LANGUAGES = {"ru": "Russian"}
 T.env.globals["LANGUAGES"] = LANGUAGES
@@ -1267,6 +1270,12 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
     """
     q = q.strip()
     con = db()
+    # A Bible address, "John 3:16", goes to the verse in the King James
+    # Version (ubsite/kjv.py jump), before the book's citations are tried: none
+    # of those reads a book's name.
+    to = kjv.jump(q) if q else None
+    if to:
+        return RedirectResponse(to, status_code=303)
     jump = cite.parse(q) if q and citable(q) else None
     if jump is not None:
         tg = list(jump.expand())
@@ -1282,14 +1291,14 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
                   + (f".{n}" if n is not None else ""))
             return RedirectResponse(to, status_code=303)
     trs = translations()
-    scope = scope if scope in ("index", "text", "notes", "study", *(x["key"] for x in trs)) else ""
+    scope = scope if scope in ("index", "text", "notes", "study", "kjv", *(x["key"] for x in trs)) else ""
     # Digits 0-9 alone, as offline-core.js reads them: "²".isdigit() is True,
     # and int("²") was a 500, as was a page of 5,000 digits, more than int()
     # reads; a number that long is past the last page, where it opens (_window).
     digits = page_no.lstrip("0") if re.fullmatch(r"[0-9]+", page_no) else ""
     number = (int(digits) if len(digits) <= 18 else 10**18) if digits else 1
     fq = fts_query(q)
-    heads, idx, txt, old, stu, found_tr = [], None, None, None, None, []
+    heads, idx, txt, old, stu, bib, found_tr = [], None, None, None, None, None, []
     if q and scope in ("", "index"):
         # An exact headword match must win.  Full-text rank cannot deliver that
         # -- bm25 scores term statistics and has no notion that the query names
@@ -1363,6 +1372,15 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
             con, f"f.id IN ({','.join('?' * len(hits))})", tuple(h["id"] for h in hits))}
         stu = _hits(n, off, [_study_hit(found[h["id"]], _snip(h["s"], h["text"], sups(h["html"])))
                              for h in hits])
+    if fq and scope in ("", "kjv") and kjv.there():
+        # The King James Version (Tigran, 2026-11-21), a verse to a line, what
+        # was found in its words and in its translators' note.  Always looked
+        # up, and on the overview shown only where it found something and
+        # while Settings shows it in search results (ub.css .bykjv).
+        n = kjv.hits(fq, 0, 0)[0]
+        size, off = _window(scope == "kjv", "kjv", number, n)
+        bib = _hits(n, off, [{**r, "s": r["s"] and _snip(r["s"]), "note": r["note"] and _snip(r["note"])}
+                             for r in kjv.hits(fq, size, off)[1]])
     # Each translation beside the text (Tigran, 2026-10-26), its paragraphs and
     # its translator's notes, ё as е.  Always looked up, every one of them, and
     # each list shown only for a translation Settings shows (base.html ubTr),
@@ -1408,9 +1426,10 @@ def search(request: Request, q: str = "", scope: str = Query("", alias="in"),
         request.state.hits = (len(heads) + (idx["n"] if idx else 0) + (txt["n"] if txt else 0)
                               + (old["n"] if old and scope == "notes" else 0)
                               + (stu["n"] if stu and scope == "study" else 0)
+                              + (bib["n"] if bib and scope == "kjv" else 0)
                               + sum(x["hits"]["n"] for x in found_tr if scope == x["key"]))
     return page(request, "search.html", q=q, scope=scope, idx=idx, txt=txt, old=old, stu=stu,
-                trs=found_tr, heads=heads, diagnose=cite.diagnose(q) if q and citable(q) else None)
+                bib=bib, trs=found_tr, heads=heads, diagnose=cite.diagnose(q) if q and citable(q) else None)
 
 
 def _study_hit(n: dict, s: Markup) -> dict:
@@ -1861,6 +1880,111 @@ def cosmology_page(request: Request):
     if chart is None:
         return missing(request, "There is no page at this address.")
     return page(request, "cosmology.html", c=chart)
+
+
+def kjv_cited(book: str | None = None) -> dict:
+    """What the study notes cite of the King James Version (ub.db kjv_cite,
+    build/bibleref.py store), read from the Bible's side (Tigran, 2026-11-21:
+    "see if Urantia Book is quoting a given Bible verse, i.e. by browsing from
+    the Bible side"): with no book, {book: verses cited} and the totals; with
+    one, {chapter: {verse: [paragraph refs]}}, a chapter cited whole under
+    verse 0, each list in the book's order."""
+    con = db()
+    if book is None:
+        per = {b: n for b, n in con.execute(
+            "SELECT book, COUNT(DISTINCT chapter || ':' || coalesce(verse, 0)) FROM kjv_cite GROUP BY book")}
+        papers = con.execute("SELECT COUNT(DISTINCT p.paper_n) FROM kjv_cite k"
+                             " JOIN paragraph p ON p.id = k.paragraph_id").fetchone()[0]
+        return {"books": per, "verses": sum(per.values()), "papers": papers}
+    out: dict[int, dict[int, list[str]]] = {}
+    for ref, c, v, w in con.execute(
+            "SELECT p.ref, k.chapter, k.verse, k.verse_end FROM kjv_cite k JOIN paragraph p ON p.id = k.paragraph_id"
+            " WHERE k.book = ? ORDER BY p.ord, k.footnote_id", (book,)):
+        for n in (range(v, w + 1) if v else (0,)):
+            refs = out.setdefault(c, {}).setdefault(n, [])
+            if ref not in refs:
+                refs.append(ref)
+    return out
+
+
+@app.get("/kjv", response_class=HTMLResponse)
+def kjv_contents(request: Request):
+    """The King James Version (build/kjv.py, ubsite/kjv.py): its 66 books, the
+    Old Testament's and the New's, each to its page (Tigran, 2026-11-21), a
+    book a study note cites marked."""
+    if not kjv.there():
+        return missing(request, "There is no page at this address.")
+    return page(request, "kjv.html", books=kjv.books(), cited=kjv_cited())
+
+
+def _kjv_book(request: Request, name: str, rest: str = ""):
+    """The book an address names, or the answer to give instead: a book
+    written in another case or by its name (/kjv/gen, /kjv/Genesis) sent on to
+    its address, which is the edition's abbreviation for ever; none, a page
+    that says so."""
+    if not kjv.there():
+        return None, missing(request, "There is no page at this address.")
+    b = kjv.book(name)
+    if b is not None:
+        return b, None
+    b = kjv.book_loosely(name)
+    if b is not None:
+        return None, RedirectResponse(kjv.href(b) + rest, status_code=301)
+    return None, missing(request, l10n.tr("The King James Version has no book {b}.", b=name))
+
+
+@app.get("/kjv/{name}", response_class=HTMLResponse)
+def kjv_book(request: Request, name: str):
+    """A book of the KJV: its title, as the KJV prints it, and its chapters."""
+    b, other = _kjv_book(request, name)
+    return other or page(request, "kjv_book.html", b=b, cited=kjv_cited(b["abbr"]))
+
+
+@app.get("/kjv/{name}/{at}", response_class=HTMLResponse)
+def kjv_chapter(request: Request, name: str, at: str):
+    """A chapter of the KJV, /kjv/Mat/5; and /kjv/Mat/5:48, /kjv/Psa/104:1-2,
+    the same chapter with those verses tinted and arrived at, as a paragraph's
+    address does in the book.  The verses named must be the chapter's and a
+    range must run forwards, or the page says so."""
+    b, other = _kjv_book(request, name, "/" + at)
+    if other:
+        return other
+    m = kjv.RE_AT.fullmatch(at)
+    if not m:
+        return missing(request, "There is no page at this address.")
+    c = int(m[1])
+    v = int(m[2]) if m[2] else None
+    w = int(m[3]) if m[3] else v
+    go = Markup('<a href="{0}">{1}</a>').format
+    if not 1 <= c <= b["chapters"]:
+        return missing(request, l10n.tr("{book} has no chapter {c}: its chapters run from {a} to {b}.",
+                                        book=b["ref_name"], c=c, a=go(kjv.href(b, 1), 1),
+                                        b=go(kjv.href(b, b["chapters"]), b["chapters"])))
+    ch = kjv.chapter(b, c)
+    n = len(ch["verses"])
+    if v is not None:
+        for k in (v, w):
+            if not 1 <= k <= n:
+                return missing(request, l10n.tr("{ch} has no verse {v}: its verses run from {a} to {b}.",
+                                                ch=kjv.name(b, c), v=k, a=go(kjv.href(b, c, 1), 1),
+                                                b=go(kjv.href(b, c, n), n)))
+        if w < v:
+            return missing(request, l10n.tr("A range runs forwards, in the order of the book: {a}, not {b}.",
+                                            a=go(kjv.href(b, c, w, v), f"{c}:{w}-{v}"), b=f"{c}:{v}-{w}"))
+    # The transport bar, as a section's (templates/_transport.html): ⏪ the
+    # book before, at its first chapter, ⏮ the chapter before, ⏭ the next, ⏩
+    # the next book; greyed at the Bible's ends.
+    at_ = lambda h, label: {"href": h, "label": label}
+    pv, nx = ch["prev"], ch["next"]
+    go_ = {"fb": ch["fb"] and at_(kjv.href(ch["fb"], 1), l10n.tr("Previous book: {b}", b=ch["fb"]["ref_name"])),
+           "prev": pv and at_(f"/kjv/{pv['abbr']}/{pv['chapter']}",
+                              l10n.tr("Previous chapter: {c}", c=f"{pv['ref_name']} {pv['chapter']}")),
+           "next": nx and at_(f"/kjv/{nx['abbr']}/{nx['chapter']}",
+                              l10n.tr("Next chapter: {c}", c=f"{nx['ref_name']} {nx['chapter']}")),
+           "ff": ch["ff"] and at_(kjv.href(ch["ff"], 1), l10n.tr("Next book: {b}", b=ch["ff"]["ref_name"]))}
+    return page(request, "kjv_chapter.html", b=b, c=c, ch=ch, focus=v, last=w, go=go_, books=kjv.books(),
+                here=kjv.name(b, c), first=c == 1, final=c == b["chapters"],
+                cited=kjv_cited(b["abbr"]).get(c, {}))
 
 
 @app.get("/quiz", response_class=HTMLResponse)

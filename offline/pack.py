@@ -82,7 +82,7 @@ def _build(entries: list[dict]) -> str:
 def build(con: sqlite3.Connection) -> dict:
     """Build the copy into var/offline/; return its manifest."""
     from ubsite import app as A
-    chunks, expect, counts, trs = pages.build(con)
+    chunks, expect, counts, trs, kjvc = pages.build(con)
     entries: list[dict] = []
     files: dict[str, bytes] = {}
 
@@ -116,6 +116,22 @@ def build(con: sqlite3.Connection) -> dict:
         translations.append({"key": key, "build": _build(mine), "bytes": sum(e["bytes"] for e in mine),
                              "raw": sum(e["raw"] for e in mine), "chunks": mine})
 
+    # The King James Version (Tigran, 2026-11-21): its pages a download of
+    # their own, as a translation is, listed apart from them, `kjv`, so that a
+    # worker or a page from before neither sees it nor takes it for a
+    # translation of the book; and its database for search in Base, the copy's
+    # own, which the worker attaches as `kjv`, so that every reader's search
+    # is the copy's, the KJV's list with it, as the server's is (his ruling,
+    # the same day, of three ways: "Search database in Base").
+    bible = None
+    if kjvc:
+        add("kjv.db", "db", searchdb.kjv_db())
+        mine = []
+        for name, obj in kjvc.items():
+            add(name, "tr", _json(obj), into=mine, tr="kjv")
+        bible = {"key": "kjv", "build": _build(mine), "bytes": sum(e["bytes"] for e in mine),
+                 "raw": sum(e["raw"] for e in mine), "chunks": mine}
+
     src = {r[0]: {"commit": r[1], "date": r[2]} for r in con.execute(
         "SELECT repo, commit_id, committed_at FROM build_source WHERE repo IN ('press', 'index')")}
     manifest = {
@@ -126,6 +142,8 @@ def build(con: sqlite3.Connection) -> dict:
         "bytes": sum(e["bytes"] for e in entries), "raw": sum(e["raw"] for e in entries),
         "counts": counts, "news": news.news(), "chunks": entries, "translations": translations,
     }
+    if bible:
+        manifest["kjv"] = bible
     write(files, json.dumps(manifest, ensure_ascii=False, indent=1).encode("utf-8"), _json(expect))
     return manifest
 

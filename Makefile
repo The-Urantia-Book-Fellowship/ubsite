@@ -12,7 +12,7 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot data check offline e2e test paranoid serve serve-bg stop accounts-prune ports geoip clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot kjv data check offline e2e test paranoid serve serve-bg stop accounts-prune ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
@@ -118,6 +118,10 @@ srt-snapshot:
 ## cosmo-snapshot  the chart of the personalities, from its author's repository into data/cosmology/ -- review the diff, then commit (needs Chrome)
 cosmo-snapshot:
 	@$(PY) -m tools.cosmo.snapshot
+
+## kjv           build var/kjv.db, the King James Version, from data/kjv/ alone (~6 s)
+kjv:
+	@$(PY) -m build kjv
 
 ## data          build var/ub.db from the three sources
 data: vendor-check

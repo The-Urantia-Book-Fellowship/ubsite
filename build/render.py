@@ -133,6 +133,12 @@ def _point(s, note_key: str) -> str:
             key, num = s.attr["key"], s.attr["n"]
             return (f'<a class="fn" href="#fn{key}" id="fnref{key}" data-k="tn"'
                     f' data-n="{num}" aria-label="Note {num}"></a>')
+        # A marginal note of the KJV (build/kjv.py): a small mark at its
+        # verse's end, drawn by CSS, opening the note as a card.
+        if kind == "kjv":
+            key = s.attr["key"]
+            return (f'<a class="fn" href="#fn{key}" id="fnref{key}" data-k="kjv"'
+                    f' aria-label="Translators’ note"></a>')
         if kind == "variant-1955":
             return (f'<a class="fn" href="#fn{k}" id="fnref{k}" data-k="1955"'
                     f' aria-label="1955 reading"></a>')

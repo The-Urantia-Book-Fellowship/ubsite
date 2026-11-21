@@ -944,13 +944,13 @@ p.t.head { text-align: center; }
 .a .at a { color: var(--faint); text-decoration: none; }
 .a .at a:hover { color: var(--ink); }
 /* Scrolled to on arrival (ub.js): a little of the paragraph before shows above it. */
-p.t.hit, p.t.now, .rt.hit, .rt.now, .tree li:target { scroll-margin-top: 3rem; }
-p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named { background: color-mix(in oklch, var(--link) 12%, transparent);
+p.t.hit, p.t.now, .rt.hit, .rt.now, .tree li:target, p.kv.hit { scroll-margin-top: 3rem; }
+p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, p.kv.hit, p.kv.named { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
 /* The paragraph arrived at, let go of by itself after seven seconds (ub.js
    hitLater): its tint fades, still .hit, so that a block's band, drawn
    before it, fades with it; then the script takes both classes off. */
-p.t.hit.hitgo, .rc p.rt.hit.hitgo { background-color: transparent; box-shadow: 0 0 0 .35rem transparent;
+p.t.hit.hitgo, .rc p.rt.hit.hitgo, p.kv.hit.hitgo { background-color: transparent; box-shadow: 0 0 0 .35rem transparent;
   transition: background-color .8s, box-shadow .8s; }
 .verse p.t.hit.hitgo::before { background-color: transparent; transition: background-color .8s; }
 /* The paragraph's full reference, so the reader always knows which one this is;
@@ -2542,6 +2542,10 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
 :root:not([data-studynotes="off"]):not([data-studysearch="off"]) .bystudy { display: block; }
 :root[data-indexsearch="off"] .results > .ix { display: none; }
 :root[data-trsearch="off"] .trhits { display: none; }
+/* The King James Version's list (search.html .bykjv), while Settings shows it. */
+:root[data-kjvsearch="off"] .bykjv { display: none; }
+.kjvh .kjvnote { display: block; margin: .15rem 0 0 1.2rem; font-size: .92em; }
+.kjvh .kjvnote .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint); margin-right: .3em; }
 .trhits { display: none; flex-direction: column; gap: 1.6rem; margin: 1.6rem 0; }
 .trhits > section { display: none; margin: 0; }
 /* A column's items keep their children's margins, which in the page's flow
@@ -3375,3 +3379,96 @@ main.cosmo { padding: .6rem 0 0; --cedge: color-mix(in oklch, var(--ink) 42%, va
   .ci.tall .cmore svg { transform: rotate(180deg); }
 }
 @media print { .ctools, .clegend > summary, .cmap { display: none; } .cview { height: auto; overflow: visible; } }
+
+/* ---- the King James Version (templates/kjv*.html, 2026-11-21) ----------- */
+/* Its contents, a book's title and chapters, and a chapter, set as the book's
+   text is: the reader's measure, justified, hyphenated by Knuth's patterns
+   (build/kjv.py).  A chapter is a reader's page, and the bar at the foot is
+   hidden there as on the book's: the running head's Home is the way out. */
+/* A chapter's page is a reader's (main.reader), the Bible's Contents at the
+   left (_kjvrail.html), its text the measure wide, with no margin for the
+   index: the rail, the gap, the measure and the padding.  Width: Full frees
+   it as it frees the book's text (the contents and a book's page are .prose,
+   which Full already frees).  The text's width by --textw, which columns
+   set, as the book's is, for the Synodal Bible beside it to come. */
+main.reader.kjv { max-width: calc(var(--textw, var(--measure)) + 20.8rem); }
+main.reader.kjv article > :is(.kjvtop, .kverses, .notes, .transport, .kend) { max-width: var(--measure); }
+:root[data-width="full"] main.reader.kjv,
+:root[data-width="full"] main.reader.kjv article > :is(.kjvtop, .kverses, .notes, .transport, .kend) { max-width: none; }
+/* The chapters of the book in the rail, a row of numbers, the one being read
+   on the rail's band, held close about it. */
+.kjvrail ol.kch { display: flex; flex-wrap: wrap; gap: .1rem .2rem; }
+.kjvrail ol.kch li { margin: 0; }
+.kjvrail ol.kch a { display: block; min-width: 1.8em; text-align: center; font-variant-numeric: lining-nums tabular-nums; }
+.kjvrail ol.kch li.here > a { box-shadow: 0 0 0 .12rem color-mix(in oklch, var(--link) 12%, transparent); }
+.kup { margin: 0 0 1.2rem; font-size: .85rem; font-variant-caps: small-caps; letter-spacing: .05em;
+       color: var(--faint); text-align: center; }
+.kup a { color: inherit; text-decoration: none; }
+@media (hover: hover) { .kup a:hover { color: var(--link); } }
+/* The book's title as the KJV prints it: its lines in small capitals, its
+   main line large and in capitals (ubook.sty \bibbook, \bibtitlemain). */
+.ktitle { display: flex; flex-direction: column; align-items: center; gap: .2rem; margin: 0 0 1.6rem;
+          text-align: center; font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
+          line-height: 1.2; color: var(--text); }
+.ktitle .tl { font-size: 1.05rem; }
+.ktitle .tm { font-size: 1.9rem; text-transform: uppercase; letter-spacing: .08em; }
+.kjvtop { text-align: center; }
+.kjvtop h1 { margin: 0 0 1.4rem; font-size: 1rem; font-weight: 400; letter-spacing: .14em;
+             text-transform: uppercase; color: var(--text); }
+.kverses { max-width: var(--measure); }
+/* A verse a paragraph (never p.t), its number drawn from data-n so that a
+   copy takes its words alone, and after it the 1769's paragraph mark. */
+p.kv { margin: 0 0 .3rem; color: var(--text); line-height: var(--lead); --line: var(--lead);
+       text-align: justify; hyphens: manual; -webkit-hyphens: manual;
+       hyphenate-character: "-"; -webkit-hyphenate-character: "-"; -webkit-hyphenate-limit-lines: 1; }
+p.kv .vn::before { content: attr(data-n); position: relative; top: -.4em; margin-right: .3em;
+                   font-size: .66em; font-variant-numeric: lining-nums; color: var(--faint); }
+p.kv.pil .vn::after { content: "\00b6"; margin-right: .3em; color: var(--faint); }
+/* A book opens as a paper does (p.t.opening, above): its first letter dropped
+   two lines, and its first verse's number, and mark, not shown, as a printed
+   Bible sets it, so that the letter is the line's first. */
+p.kv.opening::first-letter { -webkit-initial-letter: 2; initial-letter: 2; font-size-adjust: none;
+                             margin: 0 .06em -.3em 0; }
+p.kv.opening .vn { display: none; }
+p.kv.opening { margin-top: .4rem; }
+/* A psalm's title, small, as the KJV sets it; a letter of Psalm 119 a
+   heading; an epistle's subscription after its last verse, small. */
+p.kvh, p.kva { margin: .9rem 0 .5rem; font-size: .9em; font-style: italic; color: var(--text);
+               text-align: center; text-wrap: balance; }
+p.kvh .supplied, p.kva .supplied { font-style: normal; }
+h2.kvl { margin: 1.6rem 0 .5rem; font-size: .95rem; font-weight: 400; letter-spacing: .12em;
+         text-align: center; color: var(--text); }
+p.kend { margin: 2rem 0 0; text-align: center; font-size: .9rem; letter-spacing: .08em; color: var(--faint); }
+/* A verse's marginal note: an asterisk, raised, as the edition's \ts{*},
+   drawn like a study note's number, opening the note as a card (ub.js open). */
+a.fn[data-k="kjv"]::after { content: "\2060*"; font-size: .8em; top: -.45em; padding: 0 .12em; margin-left: .03em;
+                            border: 0; border-radius: .3em; }
+a.fn[data-k="kjv"].on::after { background: var(--link); color: var(--paper); }
+@media (hover: hover) { a.fn[data-k="kjv"]:hover::after { background: var(--link); color: var(--paper); } }
+/* The paragraphs whose study notes cite a verse (app.py kjv_cited), under
+   it, small; and a dot after a book or a chapter a note cites. */
+p.kvc { margin: -.1rem 0 .45rem; font-size: .82em; line-height: 1.3; color: var(--faint); }
+p.kvc .lbl { font-variant-caps: small-caps; letter-spacing: .04em; margin-right: .25em; }
+p.kvc a { color: var(--link); }
+.kjvtop p.kvc { text-align: center; margin: -.8rem 0 1.2rem; }
+.kbooks li.cited a::after, .kchaps li.cited a::after { content: ""; display: inline-block; width: .32em; height: .32em;
+  margin-left: .3em; border-radius: 50%; background: var(--flame); vertical-align: .35em; }
+.kchaps li.cited a::after { position: absolute; margin: 0; top: .35rem; right: .35rem; vertical-align: 0; }
+.kchaps a { position: relative; }
+.kjvcite { color: var(--faint); font-size: .95rem; }
+/* The contents: each testament's books in columns, each with its count of
+   chapters; a book's chapters as numbers to tap. */
+.kjvtoc h2 { font-size: 1.05rem; font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
+             margin: 1.6rem 0 .5rem; color: var(--faint); }
+.kbooks { list-style: none; padding: 0; margin: 0; columns: 3 11rem; column-gap: 2rem; }
+.kbooks li { display: flex; justify-content: space-between; gap: .6rem; break-inside: avoid; padding: .12rem 0; }
+.kbooks .nch { color: var(--faint); font-size: .85em; font-variant-numeric: lining-nums tabular-nums; }
+.kjvsrc { margin: 2.2rem 0 0; font-size: .9rem; color: var(--faint); }
+.kjvbook h2 { font-size: .95rem; font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
+              color: var(--faint); text-align: center; margin: 0 0 .8rem; }
+.kchaps { list-style: none; padding: 0; margin: 0 auto; display: grid; gap: .45rem;
+          grid-template-columns: repeat(auto-fill, minmax(2.8rem, 1fr)); }
+.kchaps a { display: grid; place-items: center; height: 2.6rem; border: 1px solid var(--rule); border-radius: 6px;
+            text-decoration: none; color: var(--link); background: var(--card);
+            font-variant-numeric: lining-nums; padding-top: var(--lift); }
+@media (hover: hover) { .kchaps a:hover { border-color: var(--link); } }

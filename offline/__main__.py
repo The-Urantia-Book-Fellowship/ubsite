@@ -31,6 +31,11 @@ def main() -> int:
         for x in m["translations"]:
             print(f"  translation {x['key']}: {len(x['chunks'])} chunks, {x['bytes'] / 1e6:.2f} MB to download"
                   f" and keep, {x['raw'] / 1e6:.2f} MB unpacked, if a reader chooses it")
+        if m.get("kjv"):
+            x = m["kjv"]
+            print(f"  the King James Version: {m['counts']['kjv_pages']:,} pages, {len(x['chunks'])} chunks,"
+                  f" {x['bytes'] / 1e6:.2f} MB to download and keep, {x['raw'] / 1e6:.2f} MB unpacked,"
+                  f" if a reader chooses it")
         return 0
     from . import check
     return check.run(A.db())

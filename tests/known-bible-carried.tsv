@@ -1,0 +1,23 @@
+# A study note's chapter and verse with no book named (build/bibleref.py): each
+# looked at in its note, and linked to the verse given here, or not at all
+# ("-").  Columns: the note's paragraph, the words as the note writes them
+# ("--" for its en dash), which time they stand in the note, the verse.  The
+# build fails on one a note makes that is not here, and on one here that no
+# note makes.  Checked 2026-11-21.
+8:4.2	4:16	1	1Jo 4:16
+8:6.4	12:11	1	1Co 12:11
+8:6.4	15:30	1	Rom 15:30
+10:7.1	48:12	1	Isa 48:12
+11:3.1	2:12	1	Zec 2:12
+11:8.1	1:23	1	Eph 1:23
+15:9.12	14:26	1	Joh 14:26
+15:9.12	16:7	1	Joh 16:7
+16:4.1	5:6	1	-
+16:4.1	1:4	1	Rev 1:4
+16:4.1	3:1	1	Rev 3:1
+16:4.1	4:5	1	Rev 4:5
+16:4.1	5:6	2	Rev 5:6
+16:4.1	4:5	2	Rev 4:5
+16:4.1	1:4	2	Rev 1:4
+16:7.9	2:14	1	2Co 2:14
+16:9.8	22:37--38	1	Mat 22:37-38

@@ -132,7 +132,8 @@ class Room(unittest.TestCase):
         js = (ROOT / "ubsite/static/ub.js").read_text()
         self.assertIn(":root.compare main.reader:has(> article:is(.cmp, .partpage)) {\n"
                       "  --textw: calc(var(--cols) * var(--measure) + (var(--cols) - 1) * 2rem); }", css)
-        self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 4)
+        # Four for the book's pages, and a chapter of the KJV's (2026-11-21).
+        self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 5)
         self.assertNotRegex(css, r"\.reader[^{]*\{[^}]*max-width: calc\(var\(--measure\)")
         self.assertIn("if (on) art.parentNode.style.setProperty('--cols', ks.length);", js)
         self.assertNotIn("art.style.setProperty('--cols'", js)
@@ -318,11 +319,11 @@ class SearchHit(unittest.TestCase):
 
     def test_every_letting_go_takes_either_mark(self):
         js = self.JS
-        self.assertIn("var HIT = 'p.t.hit, .rc p.rt.hit';", js)
+        self.assertIn("var HIT = 'p.t.hit, .rc p.rt.hit, p.kv.hit';", js)
         self.assertNotIn("querySelectorAll('p.t.hit'), function (p) { p.classList.remove('hit'); }", js)
         self.assertIn("querySelectorAll('p.t.hit, .rc p.rt.hit')", (ROOT / "ubsite/static/listen.js").read_text())
         css = (ROOT / "ubsite/static/ub.css").read_text()
-        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named {", css)
+        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, p.kv.hit, p.kv.named {", css)
 
     def test_placed_under_the_columns_names(self):
         self.assertIn("if (floor) scrollBy({ top: focus.getBoundingClientRect().top - floor - 12, behavior: 'instant' });", self.JS)

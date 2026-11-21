@@ -159,6 +159,9 @@ def page_kind(path: str) -> tuple[str, str]:
         return "quiz", path[6:]
     if path == "/help":
         return "help", ""
+    # The King James Version (ubsite/kjv.py, 2026-11-21): its pages by book.
+    if path == "/kjv" or path.startswith("/kjv/"):
+        return "kjv", path[5:]
     return "other", path
 
 
@@ -166,7 +169,7 @@ KIND_LABEL = {"section": "Sections of the text", "paper": "Whole papers", "conce
               "path": "Reading paths",
               "index": "The index, by letter", "appendix": "Appendices",
               "search": "Search", "home": "Home page", "contents": "Contents", "lists": "Lists",
-              "quiz": "The quiz", "help": "Help",
+              "quiz": "The quiz", "help": "Help", "kjv": "King James Version",
               "other": "Other"}
 
 

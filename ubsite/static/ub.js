@@ -697,7 +697,7 @@
   var arriveTouched = 0;
   // The paragraph marked as the place the page opened at: the English, or in
   // columns a translation's, where a search's hit in it opened the page (cmpHit).
-  var HIT = 'p.t.hit, .rc p.rt.hit';
+  var HIT = 'p.t.hit, .rc p.rt.hit, p.kv.hit';
   // And let go of by itself, seven seconds after it was arrived at, fading
   // (ub.css .hitgo) for most of one more (Tigran, 2026-11-19: "to unhighlight
   // it you have to tap it twice ... which is not very convenient.  On the
@@ -821,6 +821,28 @@
   // for on the document, capturing, because toggle does not bubble -- and so
   // it holds after listen.js swaps <main>.
   var railGot = {};
+  // A book of the King James Version's Contents (templates/_kjvrail.html)
+  // opens to its chapters, lifted from the book's own page, which the
+  // offline copy keeps with them; if that fails, the book's link is followed.
+  document.addEventListener('toggle', function (ev) {
+    var d = ev.target, li = d.parentNode, a, put;
+    if (d.tagName !== 'DETAILS' || !d.open || !li || !li.classList || !li.classList.contains('lazy') ||
+        d.querySelector('ol') || !li.closest('.kjvrail') || !(a = d.querySelector('summary a'))) return;
+    put = function (html) { if (!d.querySelector('ol')) d.insertAdjacentHTML('beforeend', html); };
+    if (railGot[a.pathname]) return put(railGot[a.pathname]);
+    fetch(a.pathname, { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (h) {
+        var got = new DOMParser().parseFromString(h, 'text/html').querySelectorAll('.kchaps a'), ol = '';
+        if (!got.length) throw new Error('no chapters');
+        Array.prototype.forEach.call(got, function (x) {
+          ol += '<li><a href="' + x.getAttribute('href') + '">' + x.textContent + '</a></li>';
+        });
+        railGot[a.pathname] = '<ol class="kch">' + ol + '</ol>';
+        put(railGot[a.pathname]);
+      })
+      .catch(function () { location.href = a.href; });
+  }, true);
   document.addEventListener('toggle', function (ev) {
     var d = ev.target, li = d.parentNode;
     if (d.tagName !== 'DETAILS' || !d.open || !li || !li.classList || !li.classList.contains('lazy') ||
@@ -2816,6 +2838,10 @@
   // there (Tigran, on his phone), and a reference once followed never showed
   // its preview under the pointer again.
   var PV = /^\/(\d+)(?::|#\1:)(\d+)\.(\d+)(?:-(\d+))?$/, pv = null, pvSeq = 0, pvTimer = 0, pvHide = 0, pvPages = {};
+  // A verse of the King James Version, or a run of them (build/bibleref.py
+  // makes a study note's references so, 2026-11-21): the verses in the card,
+  // from the chapter's page.  A chapter alone, /kjv/Psa/23, has none.
+  var PVK = /^\/kjv\/([1-3]?[A-Z][a-z]{1,2})\/(\d+):(\d+)(?:-(\d+))?$/;
   function pvOn() { return document.documentElement.dataset.preview === 'true'; }
   function pvLink(t) {
     var a = t && t.closest && t.closest('a[href]'), m, c;
@@ -2830,7 +2856,10 @@
     // reference is the way to the paragraph whose words are already shown.
     if (!a || a.closest('.pop.pv, .fbar, .fpass')) return null;
     m = PV.exec(a.getAttribute('href') || '');
-    if (!m) return null;
+    if (!m) {
+      m = PVK.exec(a.getAttribute('href') || '');
+      return m && { a: a, kjv: m[1], c: m[2], n: +m[3], last: m[4] ? +m[4] : +m[3], tr: '' };
+    }
     // In a translator's note's card, or a translation's cell: that translation's
     // paragraph (Tigran, 2026-11-07: a reader of a translation expects it).
     // The English, "up", where it is folded or listed among the texts
@@ -2840,8 +2869,11 @@
     return { a: a, p: m[1], s: m[2], n: +m[3], last: m[4] ? +m[4] : +m[3], tr: c === 'up' ? '' : c };
   }
   function pvPage(p, s) {
-    var url = '/' + p + ':' + s;
     if (document.getElementById(p + ':' + s + '.1')) return Promise.resolve(document);
+    return pvFetch('/' + p + ':' + s);
+  }
+  // A page, fetched once, parsed: offline the worker answers from the copy.
+  function pvFetch(url) {
     if (!pvPages[url]) pvPages[url] = fetch(url, { credentials: 'same-origin' }).then(function (r) {
       if (!r.ok) throw new Error(String(r.status));
       return r.text();
@@ -2864,6 +2896,22 @@
       out.push(p);
     }
     return out;
+  }
+  // A chapter's verses, from its page (templates/kjv_chapter.html): each
+  // p.kv, without its number and its note's mark; with the book's name as the
+  // page has it, for the card's head.
+  function pvVerses(doc, r) {
+    var out = [], n, p, book = doc.querySelector('.kup a[href^="/kjv/"]:last-child');
+    for (n = r.n; n <= r.last; n++) {
+      p = doc.getElementById('v' + n);
+      if (!p || !p.classList.contains('kv')) break;
+      p = p.cloneNode(true);
+      p.removeAttribute('id');
+      p.className = '';
+      Array.prototype.forEach.call(p.querySelectorAll('.vn, a.fn'), function (x) { x.remove(); });
+      out.push(p);
+    }
+    return { ps: out, tr: '', name: book ? book.textContent : r.kjv };
   }
   // A translation's words for the paragraphs, each with its language, as far
   // as it has them from the first; none where it lacks the first, and the
@@ -2910,16 +2958,20 @@
   }
   function pvOpen(r, byTouch) {
     pvShut();
-    var seq = pvSeq, ref = r.p + ':' + r.s + '.' + r.n + (r.last > r.n ? '-' + r.last : ''),
-        sec = document.querySelector('section[id="' + r.p + ':' + r.s + '"]'),
+    var seq = pvSeq, ref = r.kjv ? '' : r.p + ':' + r.s + '.' + r.n + (r.last > r.n ? '-' + r.last : ''),
+        href = r.kjv ? '/kjv/' + r.kjv + '/' + r.c + ':' + r.n + (r.last > r.n ? '-' + r.last : '') : '/' + ref,
+        sec = !r.kjv && document.querySelector('section[id="' + r.p + ':' + r.s + '"]'),
         words = r.tr && trBy[r.tr]
           ? trFetch(sec, r.p + ':' + r.s).then(function (got) { return pvTrParas(got, r); }, function () { return []; })
           : Promise.resolve([]);
-    words.then(function (ps) {
+    (r.kjv ? pvFetch('/kjv/' + r.kjv + '/' + r.c).then(function (doc) { return pvVerses(doc, r); })
+     : words.then(function (ps) {
       if (ps.length) return { ps: ps, tr: r.tr };
       return pvPage(r.p, r.s).then(function (doc) { return { ps: pvParas(doc, r), tr: '' }; });
-    }).then(function (got) {
+    })).then(function (got) {
       if (seq !== pvSeq || !document.contains(r.a)) return;
+      // A verse's reference as the KJV's page names its book: Isaiah 40:22.
+      if (r.kjv) ref = got.name + ' ' + r.c + ':' + r.n + (r.last > r.n ? '–' + r.last : '');
       var ps = pvNumber(got.ps, r), host, el, body;
       if (!ps.length) return;
       host = r.a.closest('article') || r.a.closest('main.results') || document.body;
@@ -2930,7 +2982,7 @@
       el.tabIndex = -1;
       el.innerHTML = '<span class="arrow"></span>' +
         '<button type="button" class="x" ' + T.a('aria-label', 'Close') + '>×</button>' +
-        '<div class="body"><p class="pvref"><a href="/' + ref + '">' + ref + '</a>' +
+        '<div class="body"><p class="pvref"><a href="' + href + '">' + ref + '</a>' +
         (got.tr ? ' <span class="pvtr">' + trBy[got.tr].label + '</span>' : '') + '</p></div>';
       body = el.querySelector('.body');
       ps.forEach(function (p) { body.appendChild(p); });
@@ -3031,7 +3083,7 @@
     return null;
   }
   function turn(dir) {
-    var col = document.querySelector('main p.t[id]'), pl = document.querySelector('.player'),
+    var col = document.querySelector('main :is(p.t, p.kv)[id]'), pl = document.querySelector('.player'),
         lo = EDGE, hi = innerHeight - EDGE, x, L, d;
     if (!col) return false;
     // Not under the player, while it is open.
@@ -3138,7 +3190,7 @@
   function paraOf(t, y, x) {
     var cell, row;
     if (!t.closest) return null;
-    return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt') ||
+    return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt, p.kv[id]') ||
            ((cell = t.closest('.rc')) && cell.querySelector('p.rt')) ||
            paraCol((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]'), x) || paraUnder(t, y, x);
   }
@@ -3147,7 +3199,7 @@
         own = sec && sec.querySelector('.rc[data-k="' + ch.dataset.k + '"] p.rt'), ps, i, r;
     if (own) return own;
     if (!(y >= 0)) return null;
-    ps = document.querySelectorAll('main p.t[id]');
+    ps = document.querySelectorAll('main :is(p.t, p.kv)[id]');
     for (i = 0; i < ps.length; i++) {
       r = ps[i].getBoundingClientRect();
       if (r.height && r.bottom > y) return paraCol(ps[i], x);
@@ -3180,7 +3232,7 @@
   }
   // The first paragraph on the screen: a verso's running head.
   function firstOnScreen() {
-    var ps = document.querySelectorAll('main p.t[id]'), r;
+    var ps = document.querySelectorAll('main :is(p.t, p.kv)[id]'), r;
     for (var i = 0; i < ps.length; i++) {
       r = ps[i].getBoundingClientRect();
       // Or the one before, its translations open at the window's top (foldOver).
@@ -3203,7 +3255,10 @@
   // alone), or on a reading path the running head before the paragraph, which
   // names the paper and its title and no author.
   function headOf(p) {
-    var top = document.querySelector('main article > header.papertop'), rhs, rh = null, i;
+    var top = document.querySelector('main article > header.papertop'), rhs, rh = null, i,
+        bible = p && p.classList && p.classList.contains('kv') && p.closest('article[data-book]');
+    // A verse of the King James Version: its book's name (templates/kjv_chapter.html).
+    if (bible) return { num: '', title: bible.dataset.book, author: '' };
     if (top && top.querySelector('h1')) {
       return { num: top.querySelector('.papernum') ? top.querySelector('.papernum').innerHTML : '',
                title: top.querySelector('h1').textContent,
@@ -3307,7 +3362,9 @@
     if (headP) headP.classList.remove('named');
     headP = p;
     p.classList.add('named');
-    head.querySelector('.ref').textContent = p.id || p.dataset.ref;
+    // A verse's reference, its chapter's and its own number: 1:4.
+    head.querySelector('.ref').textContent = p.classList.contains('kv') && p.closest('article[data-c]')
+      ? p.closest('article[data-c]').dataset.c + ':' + p.id.slice(1) : p.id || p.dataset.ref;
     if (p.dataset.k && p.dataset.k !== 'up' && p.dataset.ref) headTr(p); else headSay(headOf(p));
     head.hidden = false;
     headAt = clampY();
@@ -3317,8 +3374,9 @@
     // The Contents mark its section, on the whole paper's page (railMarkOf,
     // above).
     railMarkOf(p);
-    // And the bar at the foot, with Bookmark this paragraph (barUp, below).
-    barUp();
+    // And the bar at the foot, with Bookmark this paragraph (barUp, below),
+    // which a verse of the Bible is not.
+    if (!p.classList.contains('kv')) barUp();
   }
   function hideHead() {
     clearTimeout(headSoon);
@@ -3368,7 +3426,7 @@
     var t = ev.target, p;
     if (ev.button || (ev.detail > 1 && !touch) || selDown || !t.closest || !t.closest('main') || !getSelection().isCollapsed || inFold(t) ||
         t.closest('a, button, input, select, textarea, label, summary, nav, .rail, .a, .cites, .blanket, .marginhead, .player, .pop, dialog') ||
-        !document.querySelector('main p.t[id]')) return false;
+        !document.querySelector('main :is(p.t, p.kv)[id]')) return false;
     if (!touch && (!head || head.hidden)) {
       clearTimeout(headSoon);
       p = paraOf(t, ev.clientY, ev.clientX);

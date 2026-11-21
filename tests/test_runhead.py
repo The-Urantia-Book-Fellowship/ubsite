@@ -28,7 +28,7 @@ class RunningHead(unittest.TestCase):
         self.assertRegex(block, r"[^\n]*\.runhead[^\n]*display: none")
 
     def test_named_paragraph_is_tinted_as_a_hit(self):
-        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named {", CSS)
+        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, p.kv.hit, p.kv.named {", CSS)
 
     def test_the_paragraph_arrived_at_is_let_go_of_by_itself(self):
         # Tigran, 2026-11-19: the mark of the paragraph a link arrived at
@@ -36,7 +36,7 @@ class RunningHead(unittest.TestCase):
         # columns' second placing (arrive(true)) neither marks again nor
         # counts again, and arrive() as a listener is handed no event for it.
         self.assertIn("var HIT_HOLD = 7000,", JS)
-        self.assertIn("p.t.hit.hitgo, .rc p.rt.hit.hitgo { background-color: transparent;", CSS)
+        self.assertIn("p.t.hit.hitgo, .rc p.rt.hit.hitgo, p.kv.hit.hitgo { background-color: transparent;", CSS)
         self.assertIn(".verse p.t.hit.hitgo::before { background-color: transparent;", CSS)
         self.assertNotRegex(CSS, r"\.named[^{]*\.hitgo|\.hitgo[^{]*\.named")
         self.assertIn("if (!again) hitLater();", JS)
@@ -88,8 +88,9 @@ class RunningHead(unittest.TestCase):
     def test_a_translation_tapped_in_columns_is_named_alone(self):
         # Never the English beside it (Tigran, 2026-11-08): its own reference
         # in the head, and Back from the Contents kept by the row's English.
-        self.assertIn("return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt') ||", JS)
-        self.assertIn("head.querySelector('.ref').textContent = p.id || p.dataset.ref;", JS)
+        self.assertIn("return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt, p.kv[id]') ||", JS)
+        # A verse of the Bible names its chapter and its number (2026-11-21).
+        self.assertIn("? p.closest('article[data-c]').dataset.c + ':' + p.id.slice(1) : p.id || p.dataset.ref;", JS)
         self.assertIn("toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)), p && p.dataset.k || '');", JS)
 
     def test_a_tap_on_a_title_names_its_own_sections_first_paragraph(self):
@@ -221,7 +222,7 @@ class RunningHead(unittest.TestCase):
         self.assertIsNotNone(m)
         self.assertIn("background: " + tint, m.group(1))
         self.assertIn("box-shadow: 0 0 0 .3rem " + tint, m.group(1))
-        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named { background: " + tint, CSS)
+        self.assertIn("p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, p.kv.hit, p.kv.named { background: " + tint, CSS)
 
     def test_the_contents_open_in_the_paragraphs_translation(self):
         # From a translation's paragraph, as that translation gives its

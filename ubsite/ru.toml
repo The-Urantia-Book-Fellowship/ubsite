@@ -853,3 +853,34 @@
 "reset:account?" = { en = 'Restore every setting to its default? Those kept with your account are restored on every device where you are signed in.', ru = 'Вернуть все настройки к значениям по умолчанию? Те, что хранятся вместе с вашей учётной записью, будут возвращены на всех устройствах, где вы вошли.' }
 "sync:other?" = { en = 'This browser holds the settings, bookmarks and reading place of another account. Replace them with those of {name}? The other account keeps its own. Cancel signs you out and leaves this browser as it is.', ru = 'В этом браузере хранятся настройки, закладки и место чтения другой учётной записи. Заменить их теми, что хранит учётная запись {name}? У другой учётной записи всё своё останется. «Отмена» — выйти и оставить этот браузер как есть.' }
 "That did not work. Please try again in a moment." = "Не получилось. Пожалуйста, попробуйте ещё раз чуть позже."
+# The King James Version (ubsite/kjv.py, templates/kjv*.html, 2026-11-21): the
+# KJV's own words stay English, its book names and titles; what the pages say
+# of them is the interface's.
+"King James Version" = "Библия короля Якова"
+"The Old Testament" = "Ветхий Завет"
+"The New Testament" = "Новый Завет"
+"Chapter {n}" = "Глава {n}"
+"Psalm {n}" = "Псалом {n}"
+"Psalms" = "Псалмы"
+"The translators’ notes" = "Примечания переводчиков"
+"Books and chapters" = "Книги и главы"
+"Previous book: {b}" = "Предыдущая книга: {b}"
+"Next book: {b}" = "Следующая книга: {b}"
+"Previous chapter: {c}" = "Предыдущая глава: {c}"
+"Next chapter: {c}" = "Следующая глава: {c}"
+"The King James Version has no book {b}." = "В Библии короля Якова нет книги {b}."
+"{book} has no chapter {c}: its chapters run from {a} to {b}." = "В книге {book} нет главы {c}: в ней главы с {a} по {b}."
+"{ch} has no verse {v}: its verses run from {a} to {b}." = "В главе {ch} нет стиха {v}: в ней стихи с {a} по {b}."
+"kjv:source" = { en = 'The Authorized Version of 1611, in the standard text of 1769, with its translators’ marginal notes; in the public domain. The text and the notes are The British Study Edition’s copy, mended where it slipped; the paragraph marks, the psalms’ titles set apart and some of the notes are from <a href="https://ebible.org/eng-kjv/">eBible.org’s King James Version</a>, the CrossWire Bible Society’s and eBible.org’s.', ru = 'Авторизованная версия 1611 года в стандартном тексте 1769 года, с примечаниями переводчиков на полях; общественное достояние. Текст и примечания взяты из The British Study Edition, с исправленными опечатками; знаки абзацев, вынесенные надписания псалмов и часть примечаний — из <a href="https://ebible.org/eng-kjv/">King James Version на eBible.org</a>, подготовленной CrossWire Bible Society и eBible.org.' }
+"In the King James Version" = "В Библии короля Якова"
+"Translators’ note" = "Примечание переводчиков"
+"Show all {n:,} verses" = "Все стихи ({n:,})"
+"King James Version in search results" = "Библия короля Якова в результатах поиска"
+"its verses and its translators’ notes" = "её стихи и примечания переводчиков"
+"kjv:notkept" = { en = "The King James Version is not in the offline copy: Settings, in its Offline tab, downloads it.", ru = "Библии короля Якова нет в офлайн-копии: её можно загрузить в настройках, во вкладке „Офлайн“." }
+"home:t:kjv" = { en = "{b} books, {v:,} verses, with the translators’ notes", ru = "книг: {b}, стихов: {v:,}; с примечаниями переводчиков" }
+"lists:kjv" = { en = '<a href="/kjv">King James Version</a> — the Authorized Version, its 66 books, with the translators’ marginal notes; every Bible reference of the study notes leads to it.', ru = '<a href="/kjv">Библия короля Якова</a> — Авторизованная версия, её 66 книг, с примечаниями переводчиков на полях; к ней ведёт каждая ссылка на Библию в примечаниях.' }
+"help:kjv:1" = { en = 'The <a href="/kjv">King James Version</a> is here whole, a chapter to a page: <a href="/kjv/Gen/1">/kjv/Gen/1</a> is Genesis 1, and <a href="/kjv/Psa/104:1-2">/kjv/Psa/104:1-2</a> opens Psalm 104 with those verses tinted. Every Bible reference in a study note is a link to its verses, and with Paragraph previews on, shows them in a card. Typed into the search box, a reference such as John 3:16 goes straight to it; words are found in its verses and its notes too, in a list of their own, which Settings can leave out.', ru = '<a href="/kjv">Библия короля Якова</a> здесь целиком, по главе на страницу: <a href="/kjv/Gen/1">/kjv/Gen/1</a> — Бытие 1, а <a href="/kjv/Psa/104:1-2">/kjv/Psa/104:1-2</a> открывает Псалом 104 с выделенными стихами. Каждая ссылка на Библию в примечании ведёт к её стихам, а при включённом предпросмотре абзацев показывает их в карточке. Ссылка, набранная в поле поиска, например John 3:16, ведёт прямо к ней; слова ищутся и в её стихах и примечаниях, отдельным списком, который можно убрать в настройках.' }
+"help:kjv:2" = { en = 'A star after a verse is the translators’ marginal note: a click or a tap opens it. The words the translators supplied are in italic, as the KJV prints them, and its paragraph marks, ¶, are kept. Settings’ Offline tab keeps the King James Version on the device as a download of its own.', ru = 'Звёздочка после стиха — примечание переводчиков на полях: щелчок или касание открывает его. Слова, добавленные переводчиками, набраны курсивом, как в самой Библии короля Якова, и её знаки абзацев, ¶, сохранены. Во вкладке «Офлайн» в настройках Библию короля Якова можно сохранить на устройстве отдельной загрузкой.' }
+"Study notes at" = "Примечания к"
+"kjv:cited" = { en = "Under a verse stand the paragraphs of the book whose study notes cite it, and a dot marks a book or a chapter that has one: {v:,} verses so far, cited in {p} papers, growing as each paper’s notes are reviewed.", ru = "Под стихом указаны абзацы книги, примечания к которым его цитируют, а точкой отмечены книги и главы, где такие есть: пока стихов {v:,}, в {p} документах; их число растёт с каждым документом, примечания к которому проверены." }

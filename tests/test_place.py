@@ -181,7 +181,8 @@ class Bookmarks(unittest.TestCase):
         # the bar, and Escape shuts the list first.
         show = JS[JS.index("  function showHead(p) {"):JS.index("  function hideHead() {")]
         hide = JS[JS.index("  function hideHead() {"):JS.index("  // The tour's (help.js): the head shown")]
-        self.assertIn("    barUp();\n", show)
+        # Never for a verse of the Bible, which is no bookmark (2026-11-21).
+        self.assertIn("    if (!p.classList.contains('kv')) barUp();\n", show)
         self.assertIn("    barDown();\n", hide)
         self.assertIn("if (card) shut(true); else if (bmSheet && !bmSheet.hidden) bmShut(true); else hideHead();", JS)
         self.assertIn("document.addEventListener('ub:swap', bmPaint);", JS)

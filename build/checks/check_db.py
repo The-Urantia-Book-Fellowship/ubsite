@@ -668,10 +668,27 @@ def _study(con, places: set[str]) -> int:
           + ("" if not aoff else f"   {aoff} FAIL"))
     bad += bool(aoff)
     k = loff = 0
+    # A Bible reference's link, to a verse of the King James Version
+    # (build/bibleref.py), lands where var/kjv.db has the chapter and verses.
+    from .. import kjv as K
+    bible = K.verses_of() if K.OUT.exists() else {}
+
+    def verse(to: str) -> bool:
+        m = re.fullmatch(r"kjv/([1-3]?[A-Z][a-z]{1,2})/(\d+)(?::(\d+)(?:-(\d+))?)?", to)
+        chs = m and bible.get(m[1])
+        if not chs or int(m[2]) not in chs:
+            return False
+        v, w = int(m[3] or 1), int(m[4] or m[3] or 1)
+        return 1 <= v <= w <= chs[int(m[2])] and (m[4] is None or v < w)
     for (h,) in con.execute("SELECT f.html FROM footnote f WHERE f.kind = 'study'"
                             " UNION ALL SELECT html FROM study_source"):
         for to in re.findall(r'href="/([^"]*)"', h):
             k += 1
+            if to.startswith("kjv/"):
+                if not verse(to):
+                    loff += 1
+                    print(f"            study link to nowhere: /{to}")
+                continue
             m = re.fullmatch(r"(\d+:\d+)\.(\d+)-(\d+)", to)
             if not (to in places if m is None else
                     f"{m[1]}.{m[2]}" in places and f"{m[1]}.{m[3]}" in places

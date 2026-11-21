@@ -284,7 +284,7 @@
   // stays short as the Foundation's languages come (Tigran, 2026-11-04).  A
   // reader may still keep one it does not show.
   var trMain = trBox.querySelector('ul.offtrs'), trMore = trBox.querySelector('.offmore'),
-      trOrder = Array.prototype.slice.call(trBox.querySelectorAll('.offtrs li'));
+      trOrder = Array.prototype.slice.call(trBox.querySelectorAll('.offtrs:not(.offkjv) li'));
   function trFold() {
     var shown = window.ubSettings ? String(window.ubSettings.get().translations || '').split(' ') : [];
     var others = trOrder.filter(function (li) { return shown.indexOf(li.querySelector('input').value) < 0; });

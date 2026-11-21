@@ -67,8 +67,8 @@ Built (2026-10-12): each 1955 reading is a ring in the text whose card carries t
 **11. Two editions, diffed.**
 The press text is authoritative American; the British Study Edition is revised, metricated, Oxford-spelled and science-corrected. Both now hold at 14,586 paragraphs with identical numbering, so a paragraph-level diff is a join — and a genuinely novel scholarly object.
 
-**12. Bible parallels.**
-24,974 KJV verses in the same address space, plus 5,069 translators' marginal notes. The study footnotes already carry exact verse references, so "show me the scripture this paragraph is quoting" is a join, not a research project.
+**12. Bible parallels.** `[built 2026-11-21]`
+31,102 KJV verses in the same address space, plus 6,648 translators' marginal notes (24,974 and 5,069 were written here, never this tree's). The study footnotes already carry exact verse references, so "show me the scripture this paragraph is quoting" is a join, not a research project. Built: the whole KJV with its notes in a database of its own, `kjv.db`, from a copy converted once into `data/kjv/`; every Bible reference of a study note a link to its verses, in a card with previews on; a chapter to a page at `/kjv`; in search, and offline as a download of its own (`ARCHITECTURE.md`, The King James Version). And the reverse join: under a verse, the paragraphs whose notes cite it. Still to come: the Russian Synodal Bible beside it in columns (`../russian-synodal-bible`), and with it Tigran's Russian notes in ud, which cite the Synodal Bible, numbered otherwise.
 
 ---
 

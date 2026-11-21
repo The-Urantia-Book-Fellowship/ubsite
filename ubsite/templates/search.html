@@ -42,6 +42,15 @@
 <ul class="hits stl">{% for s in stu.rows %}{{ study_hit(s) }}{% endfor %}</ul>
 {{ more(stu, 'study', 'Show all {n:,} notes') }}
 </section>{% elif scope == 'study' %}<section><h2>{{ t('In the study notes') }} <span>(0)</span></h2><p class="none">{{ t('nothing') }}</p></section>{% endif %}
+{#- The King James Version (Tigran, 2026-11-21): a verse to a line, by its
+    reference, with what the search found in its words and, under them, in
+    its translators' note.  On the overview only when something matched, and
+    shown only while Settings shows it in search results (ub.css .bykjv);
+    opened whole, always. #}
+{% if bib and bib.rows %}<section data-kjv{% if not scope %} class="bykjv"{% endif %}><h2>{{ t('In the King James Version') }} {{ count(bib) }}</h2>
+<ul class="hits kjvh">{% for h in bib.rows %}<li><a href="{{ h.href }}">{{ h.ref }}</a>{% if h.s %} {{ h.s }}{% endif %}{% if h.note %}<span class="kjvnote"><span class="lbl">{{ t('Translators’ note') }}</span> {{ h.note }}</span>{% endif %}</li>{% endfor %}</ul>
+{{ more(bib, 'kjv', 'Show all {n:,} verses') }}
+</section>{% elif scope == 'kjv' %}<section data-kjv><h2>{{ t('In the King James Version') }} <span>(0)</span></h2><p class="none">{{ t('nothing') }}</p></section>{% endif %}
 {#- Each translation beside the text, a list of its own, named as Settings
     names it (Tigran, 2026-10-26): a line to a paragraph, by our reference,
     with what the search found in its words, and under them in its

@@ -15,8 +15,10 @@ const job = JSON.parse(fs.readFileSync(0, 'utf8'));
 
 const manifest = JSON.parse(fs.readFileSync(path.join(job.copy, 'manifest.json'), 'utf8'));
 const raw = {};
-// The translations' chunks too, each a download of its own (offline/pack.py).
-const trs = manifest.translations || [];
+// The translations' chunks too, each a download of its own (offline/pack.py),
+// and the King James Version's, which the manifest lists apart and the worker
+// keeps as it keeps a translation (sw.js downs), its database as "tr-kjv".
+const trs = (manifest.translations || []).concat(manifest.kjv ? [manifest.kjv] : []);
 for (const c of manifest.chunks.concat(...trs.map((t) => t.chunks))) {
   const data = zlib.gunzipSync(fs.readFileSync(path.join(job.copy, c.file)));
   const h = crypto.createHash('sha256').update(data).digest('hex').slice(0, 16);
@@ -51,8 +53,13 @@ const db = new sqlite3.oo1.DB(':memory:');
 open(db, 'main', raw['text.db']);
 db.exec("ATTACH ':memory:' AS ix");
 open(db, 'ix', raw['index.db']);
+// The King James Version's, the copy's own, as sw.js attaches it.
+if (raw['kjv.db']) {
+  db.exec("ATTACH ':memory:' AS kjv");
+  open(db, 'kjv', raw['kjv.db']);
+}
 // Every translation's database for search, as sw.js attaches those it keeps.
-for (const t of trs) {
+for (const t of trs.filter((t) => raw[`tr-${t.key}.db`])) {
   db.exec(`ATTACH ':memory:' AS "tr-${t.key}"`);
   open(db, `tr-${t.key}`, raw[`tr-${t.key}.db`]);
 }
@@ -154,6 +161,7 @@ const NOTKEPT = globalThis.ubT('tr:notkept');
 for (const x of job.extras.filter((x) => x.path === '/search' && x.status === 200 && x.body !== undefined)) {
   const q = new URLSearchParams(x.query), scope = q.get('in') || '';
   if (!(scope === '' || ALL.includes(scope)) || !/[\p{L}\p{N}]/u.test(q.get('q') || '')) continue;
+  if (x.body.indexOf('<main class="prose results">') < 0) continue;  // a jump, to a verse
   const want = lists(x.body);
   for (const kept of [[], ...ALL.map((k) => [k])]) {
     out.extras++;

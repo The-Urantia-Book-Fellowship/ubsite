@@ -105,6 +105,116 @@
 
   var RE_REF = /^(\d+):(\d+)(?:\.(\d+)(?:-(\d+))?)?$/;
 
+  // ---- The King James Version (app.py kjv_*, ubsite/kjv.py) ----------------
+  // A download of its own, as a translation is (Tigran, 2026-11-21): the
+  // shell names its books, [abbr, the name a reference writes, the KJV's
+  // name, the last verse of each chapter], or false where the build has none;
+  // a copy made before it has neither, and the network's failure stands.
+  // The pages are in the KJV's chunks, read where the copy keeps it, and said
+  // to be read online where it does not (`away`, which the worker answers only
+  // where the network has failed); redirects and the words of a not-found
+  // page need only the shell, as on the server.
+  function kjvLoose(books, name) {
+    var k = name.replace(/[\s_]+/g, '').toLowerCase();
+    return books.filter(function (b) {
+      return k === b[0].toLowerCase() || k === b[1].replace(/ /g, '').toLowerCase() ||
+             k === b[2].replace(/ /g, '').toLowerCase();
+    })[0] || null;
+  }
+  function kjvHref(b, c, v, w) {
+    return '/kjv/' + b[0] + (c != null ? '/' + c : '') + (v ? ':' + v + (w && w !== v ? '-' + w : '') : '');
+  }
+  function kjvGo(b, c, v, label) { return '<a href="' + esc(kjvHref(b, c, v)) + '">' + label + '</a>'; }
+  // A chapter's page with the verses v..w marked, as the server marks them
+  // (templates/kjv_chapter.html: " hit" ends the class, after " pil" and a
+  // book's " opening", and the id follows).
+  function kjvMark(page, v, w) {
+    for (var n = v; v && n <= w; n++)
+      page = page.replace(new RegExp('(<p class="kv(?: pil)?(?: opening)?)(" id="v' + n + '")'), '$1 hit$2');
+    return page;
+  }
+  function kjvPage(path, sh, origin, kept) {
+    var books = sh.kjv, m, b, mine = (kept || []).indexOf('kjv') >= 0;
+    if (books === undefined) return null;
+    if (books === false) return { res: missing(sh, T(NOPAGE), path) };
+    // With a slash after it the server sends on to it, by its whole address.
+    if ((m = /^(\/kjv(?:\/[^\/]+){0,2})\/$/.exec(path))) return { res: redirect(origin + m[1], 307) };
+    if (!(m = /^\/kjv(?:\/([^\/]+)(?:\/([^\/]+))?)?$/.exec(path))) return { res: missing(sh, T(NOPAGE), path) };
+    var gone = { res: away(sh, T('kjv:notkept')) };
+    if (m[1] === undefined) return mine ? { chunk: 'kjv-toc', make: function (d) {
+      return html(200, stored(sh, d.pages['/kjv']));
+    } } : gone;
+    b = books.filter(function (x) { return x[0] === m[1]; })[0];
+    if (!b) {
+      b = kjvLoose(books, m[1]);
+      if (b) return { res: redirect(kjvHref(b) + (m[2] !== undefined ? '/' + m[2] : ''), 301) };
+      return { res: missing(sh, T('The King James Version has no book {b}.', { b: m[1] }), path) };
+    }
+    if (m[2] === undefined) return mine ? { chunk: 'kjv-' + b[0], make: function (d) {
+      return html(200, stored(sh, d.pages['/kjv/' + b[0]]));
+    } } : gone;
+    var a = /^([0-9]{1,3})(?::([0-9]{1,3})(?:-([0-9]{1,3}))?)?$/.exec(m[2]);
+    if (!a) return { res: missing(sh, T(NOPAGE), path) };
+    var c = parseInt(a[1], 10), v = a[2] ? parseInt(a[2], 10) : null, w = a[3] ? parseInt(a[3], 10) : v,
+        lasts = b[3];
+    if (!(c >= 1 && c <= lasts.length))
+      return { res: missing(sh, T('{book} has no chapter {c}: its chapters run from {a} to {b}.', {
+        book: b[1], c: c, a: T.html(kjvGo(b, 1, null, 1)), b: T.html(kjvGo(b, lasts.length, null, lasts.length)) }), path) };
+    var n = lasts[c - 1];
+    if (v !== null) {
+      var ends = [v, w];
+      for (var i = 0; i < 2; i++)
+        if (!(ends[i] >= 1 && ends[i] <= n))
+          return { res: missing(sh, T('{ch} has no verse {v}: its verses run from {a} to {b}.', {
+            ch: b[1] + ' ' + c, v: ends[i], a: T.html(kjvGo(b, c, 1, 1)), b: T.html(kjvGo(b, c, n, n)) }), path) };
+      if (w < v)
+        return { res: missing(sh, T('A range runs forwards, in the order of the book: {a}, not {b}.', {
+          a: T.html('<a href="' + esc(kjvHref(b, c, w, v)) + '">' + c + ':' + w + '-' + v + '</a>'),
+          b: c + ':' + v + '-' + w }), path) };
+    }
+    if (!mine) return gone;
+    return { chunk: 'kjv-' + b[0], make: function (d) {
+      return html(200, kjvMark(stored(sh, d.pages['/kjv/' + b[0] + '/' + c]), v, w));
+    } };
+  }
+  // A Bible address typed in the search box (ubsite/kjv.py jump): the verse's
+  // address, or null where the words are no such address.
+  var RE_JUMP = /^\s*([1-3I]{0,3}\s*[A-Za-z][A-Za-z ]*?)\.?\s+([0-9]{1,3})(?::([0-9]{1,3})(?:\s*[-–]\s*([0-9]{1,3}))?)?\s*$/;
+  function kjvJump(sh, q) {
+    var m = sh.kjv ? RE_JUMP.exec(q) : null;
+    if (!m) return null;
+    var name = m[1].trim(), b = kjvLoose(sh.kjv, name.toLowerCase() === 'psalm' ? 'Psalms' : name);
+    if (!b) return null;
+    var c = parseInt(m[2], 10), v = m[3] ? parseInt(m[3], 10) : null, w = m[4] ? parseInt(m[4], 10) : null;
+    if (b[3].length === 1 && v === null) { v = c; c = 1; }
+    if (!(c >= 1 && c <= b[3].length)) return null;
+    return v ? kjvHref(b, c, v, w) : kjvHref(b, c);
+  }
+  // ubsite/kjv.py hits: the verses whose words, or whose translators' note,
+  // the search found, from the KJV's database, which is the copy's own,
+  // attached as `kjv` (offline/searchdb.py kjv_db).
+  function kjvHits(db, fq, whole, number) {
+    var S = 'kjv';
+    var hit = 'SELECT rowid AS vid FROM ' + S + '.kjv_verse_fts WHERE kjv_verse_fts MATCH ?' +
+              ' UNION SELECT rowid FROM ' + S + '.kjv_note_fts WHERE kjv_note_fts MATCH ?';
+    var n = count(db, 'SELECT COUNT(*) FROM (' + hit + ')', [fq, fq]), w = window_(whole, 'kjv', number, n);
+    var rs = rows(db, 'SELECT h.vid, b.abbr, b.ref_name, v.chapter, v.verse FROM (' + hit + ') h' +
+                      ' JOIN ' + S + '.kjv_verse v ON v.id = h.vid JOIN ' + S + '.kjv_book b ON b.id = v.book' +
+                      ' ORDER BY v.id LIMIT ? OFFSET ?', [fq, fq, w[0], w[1]]);
+    var ids = rs.map(function (r) { return r.vid; }), within = ids.map(function () { return '?'; }).join(','),
+        said = {}, noted = {};
+    rows(db, 'SELECT rowid AS id, snippet(kjv_verse_fts, 0, char(2), char(3), char(4), 24) AS s FROM ' + S +
+             '.kjv_verse_fts WHERE kjv_verse_fts MATCH ? AND rowid IN (' + within + ')', [fq].concat(ids))
+      .forEach(function (r) { said[r.id] = r.s; });
+    rows(db, 'SELECT rowid AS id, snippet(kjv_note_fts, 0, char(2), char(3), char(4), 24) AS s FROM ' + S +
+             '.kjv_note_fts WHERE kjv_note_fts MATCH ? AND rowid IN (' + within + ')', [fq].concat(ids))
+      .forEach(function (r) { noted[r.id] = r.s; });
+    return hits(n, w[1], rs.map(function (r) {
+      return { ref: r.ref_name + ' ' + r.chapter + ':' + r.verse, href: '/kjv/' + r.abbr + '/' + r.chapter + ':' + r.verse,
+               s: said[r.vid] != null ? snip(said[r.vid], '', '') : '', note: noted[r.vid] != null ? snip(noted[r.vid], '', '') : '' };
+    }));
+  }
+
   // What the copy answers for a GET of `path` (decoded, as the server routes
   // it), in app.py's order: {res} now, {chunk, make(data)} from a chunk,
   // {chunks, make(datas)} from several, {search}, or null where the copy has no
@@ -198,6 +308,7 @@
       if (!sh.cosmo) return null;
       return { chunk: 'cosmo', make: function (d) { return html(200, stored(sh, d.pages[path])); } };
     }
+    if (path === '/kjv' || path.indexOf('/kjv/') === 0) return kjvPage(path, sh, origin, kept);
     if ((m = /^\/quiz(?:\/(.*))?$/.exec(path))) {
       // The quiz (app.py quiz_page, quiz_paper_page), a chunk of its own: /quiz,
       // and each paper's questions by its number, as the server reads it, 01
@@ -411,7 +522,7 @@
   // (offline/searchdb.py).  mem() makes an empty in-memory database, for
   // marking the terms in what an index hit shows (app.py mark_terms).
   var RE_TERM = /"([^"]*)"?|(\S+)/g;
-  var OVERVIEW = { index: 25, text: 40, notes: 10, study: 10, tr: 40 }, PER_PAGE = 100;
+  var OVERVIEW = { index: 25, text: 40, notes: 10, study: 10, tr: 40, kjv: 10 }, PER_PAGE = 100;
   var TOKENIZE = 'unicode61 remove_diacritics 2';
   var APP_OWN = " OR (e.scope IN ('B','C','D','E','F') AND e.id NOT IN (SELECT entry_id FROM appendix_head))";
 
@@ -539,6 +650,8 @@
   function search(db, mem, sh, params, kept) {
     var lastOf = function (k, dflt) { var all = params.getAll(k); return all.length ? all[all.length - 1] : dflt; };
     var q = lastOf('q', '').trim(), scope = lastOf('in', ''), pageNo = lastOf('page', '1');
+    var to = q ? kjvJump(sh, q) : null;
+    if (to) return redirect(to, 303);
     var jump = q && citable(q) ? parse(q) : null;
     if (jump !== null) {
       var tg = expand(jump);
@@ -549,10 +662,10 @@
       }
     }
     var trs = (sh.tr && sh.tr.order) || [];
-    scope = (scope === 'index' || scope === 'text' || scope === 'notes' || scope === 'study' ||
+    scope = (scope === 'index' || scope === 'text' || scope === 'notes' || scope === 'study' || scope === 'kjv' ||
              trs.some(function (x) { return x.key === scope; })) ? scope : '';
     var number = /^[0-9]+$/.test(pageNo) && parseInt(pageNo, 10) > 0 ? parseInt(pageNo, 10) : 1;
-    var fq = ftsQuery(q), heads = [], idx = null, txt = null, old = null, stu = null, found = [], w, where;
+    var fq = ftsQuery(q), heads = [], idx = null, txt = null, old = null, stu = null, bib = null, found = [], w, where;
     if (q && (scope === '' || scope === 'index'))
       heads = rows(db,
         "SELECT e.id, e.slug, e.headword, e.headword_html, e.scope, e.anchor, a.title AS appendix," +
@@ -606,6 +719,8 @@
           return r.pre + snip(r.s, r.text, r.sups) + r.post;
         }));
     }
+    // The King James Version, from its database, the copy's own.
+    if (fq && (scope === '' || scope === 'kjv') && sh.kjv) bib = kjvHits(db, fq, scope === 'kjv', number);
     // Each translation, from its database where the copy keeps it; where it
     // does not, its list says so, opened whole or on the overview of any search
     // with words in it, and shows where the reader shows the translation
@@ -639,14 +754,14 @@
         return { line: line, card: r.card };
       }));
     }
-    var body = draw(q, scope, heads, idx, txt, old, stu, found, q && citable(q) ? suggest(q) : []);
+    var body = draw(q, scope, heads, idx, txt, old, stu, bib, found, q && citable(q) ? suggest(q) : []);
     // The title piece begins inside its tag (offline/pages.py cut): a search's
     // has no Russian of its own, being what was typed.
     return html(200, compose(sh, '>' + esc(q), sh.search.h, esc(q), body, sh.search.s));
   }
 
   // templates/search.html's body, whitespace and all.
-  function draw(q, scope, heads, idx, txt, old, stu, found, didyou) {
+  function draw(q, scope, heads, idx, txt, old, stu, bib, found, didyou) {
     var uq = quote(q);
     function count(h) {
       return '<span>' + (h.first > 1 || h.more
@@ -716,6 +831,16 @@
            '\n</section>';
     else if (scope === 'study')
       o += '<section><h2>' + T('In the study notes') + ' <span>(0)</span></h2><p class="none">' + T('nothing') + '</p></section>';
+    o += '\n';
+    // The King James Version's list, as search.html draws it.
+    if (bib && bib.rows.length)
+      o += '<section data-kjv' + (scope ? '' : ' class="bykjv"') + '><h2>' + T('In the King James Version') + ' ' + count(bib) + '</h2>\n' +
+           '<ul class="hits kjvh">' + bib.rows.map(function (h) {
+             return '<li><a href="' + esc(h.href) + '">' + esc(h.ref) + '</a>' + (h.s ? ' ' + h.s : '') +
+                    (h.note ? '<span class="kjvnote"><span class="lbl">' + T('Translators’ note') + '</span> ' + h.note + '</span>' : '') + '</li>';
+           }).join('') + '</ul>\n' + more(bib, 'kjv', T.k('Show all {n:,} verses')) + '\n</section>';
+    else if (scope === 'kjv')
+      o += '<section data-kjv><h2>' + T('In the King James Version') + ' <span>(0)</span></h2><p class="none">' + T('nothing') + '</p></section>';
     o += '\n\n';
     // A translation's list, as search.html's tr_list draws it, or, where the
     // copy does not keep the translation, its heading and a line saying so.

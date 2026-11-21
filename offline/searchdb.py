@@ -28,6 +28,10 @@ download (offline/pack.py): its paragraphs and its translator's notes, each
 note's line drawn around its snippet as a study note's is, and their full-text
 indexes, read through views that take ё as е, all declared as ub.db declares
 them.  The worker attaches each one the copy keeps, by its key.
+
+The King James Version's, from var/kjv.db, is a third of the copy's own,
+attached as `kjv` (kjv_db), so that every reader's search lists its verses,
+its pages being a download of their own.
 """
 
 from __future__ import annotations
@@ -157,6 +161,33 @@ def tr_db(con: sqlite3.Connection, key: str) -> bytes:
     for t in ("tr_paragraph_fts", "tr_note_fts"):
         out.execute(f"INSERT INTO {t}({t}) VALUES('rebuild')")
         out.execute(f"INSERT INTO {t}({t}) VALUES('optimize')")
+    return _done(out)
+
+
+def kjv_db() -> bytes:
+    """The King James Version as search reads it (ubsite/kjv.py hits): each
+    verse's place and its book's name, and the full-text indexes of the verses
+    and of the translators' notes, declared as var/kjv.db declares them, each
+    its own copy as there.  In Base (offline/pack.py), the KJV's pages being a
+    download of their own: the worker attaches it as `kjv`."""
+    from ubsite import kjv
+    out = sqlite3.connect(":memory:")
+    out.executescript("""
+        CREATE TABLE kjv_book (id INTEGER PRIMARY KEY, abbr TEXT NOT NULL, ref_name TEXT NOT NULL);
+        CREATE TABLE kjv_verse (id INTEGER PRIMARY KEY, book INTEGER NOT NULL,
+                                chapter INTEGER NOT NULL, verse INTEGER NOT NULL);
+    """)
+    with kjv.db() as k:
+        for name in ("kjv_verse_fts", "kjv_note_fts"):
+            out.execute(_declared(k, name))
+        out.executemany("INSERT INTO kjv_book VALUES (?,?,?)",
+                        k.execute("SELECT id, abbr, ref_name FROM kjv_book ORDER BY id"))
+        out.executemany("INSERT INTO kjv_verse VALUES (?,?,?,?)",
+                        k.execute("SELECT id, book, chapter, verse FROM kjv_verse ORDER BY id"))
+        for t in ("kjv_verse_fts", "kjv_note_fts"):
+            out.executemany(f"INSERT INTO {t} (rowid, text) VALUES (?, ?)",
+                            k.execute(f"SELECT rowid, text FROM {t} ORDER BY rowid"))
+            out.execute(f"INSERT INTO {t}({t}) VALUES('optimize')")
     return _done(out)
 
 

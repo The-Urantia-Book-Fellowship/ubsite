@@ -170,7 +170,7 @@ function copy() {
             c.byName[x.name] = x;
             if (x.kind === 'asset') c.byUrl[x.name] = x;
           });
-          (m.translations || []).forEach(function (t) {
+          downs(m).forEach(function (t) {
             t.chunks.forEach(function (x) { c.byName[x.name] = x; });
           });
           return chunk(c, 'shell').then(function (sh) { c.shell = sh; return c; });
@@ -181,16 +181,25 @@ function copy() {
   held.then(function (c) { if (!c) held = null; });
   return held;
 }
-// The translations a copy keeps: those meta names that its manifest lists, in
-// the manifest's order, which is Settings'.
+// What a manifest offers to keep beside the copy, each a download of its own:
+// the translations, in Settings' order, and the King James Version, which the
+// manifest lists apart (offline/pack.py `kjv`, 2026-11-21), so that a worker
+// from before neither sees it nor takes it for a translation: its pages, kept
+// as a translation is, by its key, `kjv`, in meta.tr; its database for search
+// is the copy's own (database()).
+function downs(m) {
+  return (m.translations || []).concat(m.kjv ? [m.kjv] : []);
+}
+// The translations a copy keeps, and the KJV: those meta names that its
+// manifest lists, in the manifest's order, which is Settings'.
 function kept(m, meta) {
   var tr = meta.tr || {};
-  return (m.translations || []).filter(function (t) { return tr[t.key]; }).map(function (t) { return t.key; });
+  return downs(m).filter(function (t) { return tr[t.key]; }).map(function (t) { return t.key; });
 }
 // The chunks a manifest holds for a copy keeping the translations `keys`: the
 // copy's own, and each of theirs.
 function wanted(m, keys) {
-  return (m.translations || []).filter(function (t) { return keys.indexOf(t.key) >= 0; })
+  return downs(m).filter(function (t) { return keys.indexOf(t.key) >= 0; })
     .reduce(function (all, t) { return all.concat(t.chunks); }, m.chunks);
 }
 function bytes(c, name) {
@@ -235,15 +244,16 @@ function sqlite() {
   engine.catch(function () { engine = null; });
   return engine;
 }
-// The copy's databases: the index's attached to the text's as `ix`, and each
+// The copy's databases: the index's attached to the text's as `ix`, the King
+// James Version's as `kjv` where the copy has it (since 2026-11-21), and each
 // translation's it keeps as "tr-<key>" (offline/searchdb.py).  A translation
 // kept by a copy made before 2026-10-26 has none, and search counts it as not
 // kept.
 function database(c) {
   if (c.db) return c.db;
-  var trs = c.kept.filter(function (k) { return c.byName['tr-' + k + '.db']; });
+  var trs = c.kept.filter(function (k) { return c.byName['tr-' + k + '.db']; }), bible = !!c.byName['kjv.db'];
   var read = function (name) { return bytes(c, name).then(function (r) { return r.arrayBuffer(); }); };
-  c.db = Promise.all([sqlite(), read('text.db'), read('index.db')].concat(trs.map(function (k) {
+  c.db = Promise.all([sqlite(), read('text.db'), read('index.db'), bible ? read('kjv.db') : null].concat(trs.map(function (k) {
     return read('tr-' + k + '.db');
   }))).then(function (got) {
     var s = got[0], db = new s.oo1.DB(':memory:');
@@ -256,9 +266,13 @@ function database(c) {
     open('main', got[1]);
     db.exec("ATTACH ':memory:' AS ix");
     open('ix', got[2]);
+    if (bible) {
+      db.exec("ATTACH ':memory:' AS kjv");
+      open('kjv', got[3]);
+    }
     trs.forEach(function (k, i) {
       db.exec("ATTACH ':memory:' AS \"tr-" + k + '"');
-      open('tr-' + k, got[3 + i]);
+      open('tr-' + k, got[4 + i]);
     });
     return { db: db, mem: function () { return new s.oo1.DB(':memory:'); }, kept: trs };
   });
@@ -679,7 +693,7 @@ function state() {
     var meta = got[0], c = got[1], m = c && c.manifest;
     return {
       have: m ? { build: m.build, made: m.made, text: m.text, index: m.index, bytes: m.bytes, raw: m.raw,
-                  tr: c.kept.slice(), trs: (m.translations || []).map(function (t) {
+                  tr: c.kept.slice(), trs: downs(m).map(function (t) {
                     return { key: t.key, bytes: t.bytes, raw: t.raw };
                   }) } : null,
       latest: meta.latest || null, checked: meta.checked || 0, sure: !!meta.sure, since: meta.since || null,
@@ -733,7 +747,7 @@ function check(force) {
           // Out of date where the copy is another build, or a translation kept
           // has a build of its own that is not the site's, or has gone.
           var tr = meta.tr || {}, by = {};
-          (m.translations || []).forEach(function (t) { by[t.key] = t.build; });
+          downs(m).forEach(function (t) { by[t.key] = t.build; });
           meta.checked = Date.now();
           meta.latest = meta.current !== m.build || Object.keys(tr).some(function (k) { return by[k] !== tr[k]; })
             ? latest : null;
@@ -770,7 +784,7 @@ function download(want) {
     return r.json();
   }).then(function (m) {
     if (m.format !== FORMAT) throw stopped(T.k('this browser has an older worker; reload the page and try again'));
-    var trs = (m.translations || []).filter(function (t) { return want.indexOf(t.key) >= 0; });
+    var trs = downs(m).filter(function (t) { return want.indexOf(t.key) >= 0; });
     var all = wanted(m, want), keep = {};
     all.forEach(function (x) { keep[x.hash] = true; });
     busy.adding = trs.filter(function (t) { return !had[t.key]; }).map(function (t) { return t.key; });
@@ -878,7 +892,7 @@ function drop(k) {
     }).then(function () {
       held = null;
       lists = {};
-      var t = c && (c.manifest.translations || []).filter(function (x) { return x.key === k; })[0];
+      var t = c && downs(c.manifest).filter(function (x) { return x.key === k; })[0];
       if (!t) return;
       var keep = {};
       wanted(c.manifest, c.kept.filter(function (x) { return x !== k; })).forEach(function (x) { keep[x.hash] = true; });

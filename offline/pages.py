@@ -211,8 +211,19 @@ def universe(con: sqlite3.Connection) -> dict:
     quiz = [n for (n,) in con.execute("SELECT paper_n FROM quiz_paper ORDER BY paper_n")]
     # The chart of the personalities (build/cosmo.py), where the build has one.
     cosmo = bool(con.execute("SELECT 1 FROM cosmo_meta LIMIT 1").fetchone())
+    # The King James Version (build/kjv.py, var/kjv.db beside ub.db), where it
+    # is built: its books, each with the last verse of every chapter.
+    from ubsite import kjv
+    bible = None
+    if kjv.there():
+        with kjv.db() as k:
+            last: dict[str, list[int]] = {}
+            for abbr, n in k.execute("SELECT b.abbr, max(v.verse) FROM kjv_verse v JOIN kjv_book b ON b.id = v.book"
+                                     " GROUP BY v.book, v.chapter ORDER BY v.book, v.chapter"):
+                last.setdefault(abbr, []).append(n)
+        bible = [[b["abbr"], b["ref_name"], b["name"], last[b["abbr"]]] for b in kjv.books()]
     return {"papers": papers, "letters": letters, "slugs": slugs, "paths": paths,
-            "lasts": lasts, "misc": misc, "quiz": quiz, "cosmo": cosmo}
+            "lasts": lasts, "misc": misc, "quiz": quiz, "cosmo": cosmo, "kjv": bible}
 
 
 def _request(path: str) -> Request:
@@ -415,6 +426,20 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     # does, or its words here.
     if u["cosmo"]:
         chunks["cosmo"] = {"pages": {"/cosmology": own("/cosmology", site.get("/cosmology"))}}
+    # The King James Version, a download of its own (Tigran, 2026-11-21), as
+    # a translation is: /kjv in a chunk of its own, and each book, its page and
+    # every chapter's, in another, kjv-<abbr>.  A verse's address is its
+    # chapter's page with the verses marked (offline-core.js), as a
+    # paragraph's is its section's.
+    kjvc: dict[str, dict] = {}
+    kjv_pages = 0
+    if u["kjv"]:
+        kjvc["kjv-toc"] = {"pages": {"/kjv": own("/kjv", site.get("/kjv"))}}
+        for abbr, _, _, lasts in u["kjv"]:
+            addrs = [f"/kjv/{abbr}"] + [f"/kjv/{abbr}/{c}" for c in range(1, len(lasts) + 1)]
+            kjvc[f"kjv-{abbr}"] = {"pages": {a: own(a, pg) for a, pg in
+                                              zip(addrs, site.get_many([(a, "") for a in addrs]))}}
+        kjv_pages = sum(len(c["pages"]) for c in kjvc.values())
     # /api, asked again at API_HOST: the page at HOST but for its address, or the
     # address is not all of it that depends on the host.  The gate holds what
     # the worker makes of it to the page at HOST.
@@ -457,6 +482,10 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         "papers": {str(p): secs for p, secs in u["papers"].items()},
         "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
         "misc": u["misc"], "quiz": u["quiz"], "cosmo": u["cosmo"],
+        # The King James Version's books, [abbr, the name a reference writes,
+        # the KJV's name, the last verse of each chapter], or false where the
+        # build has none: what /kjv's addresses are routed and explained by.
+        "kjv": u["kjv"] or False,
         # The voices whose lists the copy holds (audio-<key>), in Settings' order.
         "audio": voices,
         # What /tr/ is made of offline: the fragment's two ends, and each
@@ -472,6 +501,7 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
               "whole": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
               "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
-              "pages": len(expect) - spoken - fragments - tocs - tr_spoken - len(voices), "spoken": spoken,
+              "pages": len(expect) - spoken - fragments - tocs - tr_spoken - len(voices) - kjv_pages,
+              "spoken": spoken, "kjv_pages": kjv_pages,
               "fragments": fragments, "tr_spoken": tr_spoken, "recordings": len(voices)}
-    return chunks, expect, counts, {k: c for k, c in trs.items() if c}
+    return chunks, expect, counts, {k: c for k, c in trs.items() if c}, kjvc

@@ -71,7 +71,7 @@ import re
 import tomllib
 import urllib.parse
 
-from . import texmath
+from . import bibleref, texmath
 from .expand import Expander, Note, Span, _raw
 from .problems import Report
 from .readers import study as reader
@@ -229,6 +229,10 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
     paras = {q.ref: q for p in papers for q in p.paragraphs}
     order = {q.ref: i for i, q in enumerate(q for p in papers for q in p.paragraphs)}
     library = _library(block, report)
+    # The notes' Bible references, links to the King James Version (build/bibleref.py).
+    bible = bibleref.Recognizer.load()
+    if bible is None:
+        report.hard("study-bible-kjv", "var/kjv.db", "the KJV is not built, and the notes link to it (make kjv)")
     for n, cur in sorted(curated.items()):
         where = f"data/study/{cur.path.name}"
         orig = originals.get(n)
@@ -239,7 +243,7 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
         _account(cur, orig, where, report)
         dated = _chart(cur, block, where, report)
         sources = _sources(cur, paras, library, where, report)
-        notes = _notes(cur, paras, order, sources, orig, where, report, hyphenator)
+        notes = _notes(cur, paras, order, sources, orig, where, report, hyphenator, bible)
         built.papers.append({"paper_n": n, "file_sha256": cur.sha256, "study_commit": repo["at"],
                              "block_url": None if cur.chart == "none" else cur.chart,
                              "block_date": dated, "n_notes": len(notes),
@@ -248,6 +252,11 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
         built.sources.extend(sources.values())
         built.notes.extend(notes)
     one_work_one_key(built.sources, report)
+    # A reference listed as carried that no note makes any more: the list is
+    # exactly what the notes make, as tests/known-oracle-deltas.tsv is.
+    for at, words, k in bible.stale() if bible is not None and len(curated) > 1 else ():
+        report.hard("study-bible-carried", f"{bibleref.KNOWN.name}",
+                    f"{at} {words!r} ({k}) is listed, and no note there makes it")
     return built
 
 
@@ -386,7 +395,7 @@ def _sources(cur: Curated, paras, library: dict[str, str], where: str, report) -
 
 
 def _notes(cur: Curated, paras, order, sources, orig, where, report,
-           hyphenator=None) -> list[dict]:
+           hyphenator=None, bible=None) -> list[dict]:
     body_of = {x.origin: x.body for x in orig.notes}
     out: list[dict] = []
     last = None
@@ -394,12 +403,13 @@ def _notes(cur: Curated, paras, order, sources, orig, where, report,
     for i, nt in enumerate(cur.notes, 1):
         at = f"{where} note {i} ({nt['at']})"
         # Set first, so that what it cites is counted even if it cannot be placed.
-        text, html, cites = expand(nt["tex"], paras, sources, at, report)
+        text, html, cites = expand(nt["tex"], paras, sources, at, report, bible=bible, note_at=nt["at"])
         bare = RE_BARE_REF.search(RE_BIBREF.sub("", nt["tex"] + " " + nt.get("corrects", "")))
         if bare:
             report.hard("study-bare-ref", at, f"{bare[0]} is written bare, and links only as "
                         f"\\bibref[{bare[0]}]{{p… …}}")
-        html_hy = expand(nt["tex"], paras, sources, at, Report(), hyphenator)[1] if hyphenator else html
+        html_hy = (expand(nt["tex"], paras, sources, at, Report(), hyphenator, bible=bible, note_at=nt["at"])[1]
+                   if hyphenator else html)
         for c in cites:
             if c in sources:
                 sources[c]["cited"] += 1
@@ -421,7 +431,8 @@ def _notes(cur: Curated, paras, order, sources, orig, where, report,
         if "corrects" in nt:
             if credit != "block":
                 report.hard("study-corrects", at, "corrects Block's chart, and is not credited to it")
-            ctext, corrects, ccites = expand(nt["corrects"], paras, sources, at, report)
+            ctext, corrects, ccites = expand(nt["corrects"], paras, sources, at, report,
+                                             bible=bible, note_at=nt["at"], carry=False)
             if ccites or not ctext.strip():
                 report.hard("study-corrects", at, "`corrects` says what it gives for Block's, citing nothing")
         k = per_para[q.ref]
@@ -467,7 +478,8 @@ def _anchor(text: str, after: str, where: str, report) -> int | None:
 def expand(tex: str, paras, sources: dict, where: str, report,
            hyphenator=None, *, table: dict = TABLE, subs=SUBS, ref_of=None,
            textheb: bool = False, odd: list | None = None, calls: dict | None = None,
-           ties: bool = True) -> tuple[str, str, list[str]]:
+           ties: bool = True, bible=None, note_at: str = "",
+           carry: bool = True) -> tuple[str, str, list[str]]:
     """A note's or a source's TeX -> (text, html, the keys it cites, in order).
 
     `$...$` is taken out first, each replaced by one private-use character, and
@@ -488,6 +500,13 @@ def expand(tex: str, paras, sources: dict, where: str, report,
     and no `ties`, the warning of a long run of ties, which a study note's
     review mends and a translator's TeX is his to set.  Their defaults are the
     study notes'.
+
+    `bible`, a build/bibleref.py Recognizer, makes each Bible reference in the
+    text a link to the King James Version, over its own words; `note_at` is
+    the note's paragraph, by which its references with no book named are
+    listed, and `carry` False takes none of those (a note's `corrects`, whose
+    numbers are Block's slips).  A study note's, not a translator's: his cite
+    the Synodal Bible, numbered otherwise.
     """
     if any(SENTINEL <= ord(c) < SENTINEL + 0x1000 for c in tex):
         report.hard("study-private-use", where, "the TeX holds a private-use character")
@@ -592,6 +611,9 @@ def expand(tex: str, paras, sources: dict, where: str, report,
                           "figure": figure, **(calls or {})},
                    subs=subs, forbid_comments=True)
     ex = exp.run(src)
+    if bible is not None:
+        ex.spans += [Span(a, b, "link", {"href": h})
+                     for a, b, h in bible.find(ex.text, ex.spans, where, note_at, report, carry)]
     ex.spans += [Span(m.start(), m.end(), "nobreak") for m in RE_LEADING_HYPHEN.finditer(ex.text)]
     for m in RE_TIED.finditer(ex.text) if ties else ():
         run = m.group().strip("()[],.;:")

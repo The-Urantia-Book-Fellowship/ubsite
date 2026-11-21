@@ -99,12 +99,31 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               # Digits other than 0-9 (app.py RE_REF, 2026-11-09).  Not a newline
               # after an address, which both answer 404 (tests/test_addresses.py)
               # but name differently: Starlette's URL drops it.
-              "/１:１", "/١:١", "/１"]:
+              "/１:１", "/١:１", "/１"]:
         jobs.append((p, "", True))
+    # The King James Version (app.py kjv_*): its addresses written otherwise,
+    # sent on or explained, and a verse, a run of verses and every chapter's
+    # last verse marked, which the copy makes from the chapter's stored page.
+    if shell.get("kjv"):
+        for p in ["/kjv/", "/kjv/Gen/", "/kjv/Gen/1/", "/kjv/gen", "/kjv/GEN/1:1", "/kjv/Genesis",
+                  "/kjv/genesis/50", "/kjv/1samuel/3", "/kjv/IJohn/4:8", "/kjv/Song%20of%20Solomon",
+                  "/kjv/SongofSolomon/2:1", "/kjv/Xyz", "/kjv/Xyz/1", "/kjv/Gen/51", "/kjv/Gen/0",
+                  "/kjv/Gen/01", "/kjv/Gen/1:40", "/kjv/Gen/1:0", "/kjv/Gen/1:5-3", "/kjv/Gen/1:3-40",
+                  "/kjv/Gen/x", "/kjv/Gen/1:x", "/kjv/Gen/1/x", "/kjv/Gen/1:1-1", "/kjv/Gen/1:01",
+                  "/kjv/compare", "/kjv/Gen/compare", "/kjv/Jud/24", "/kjv/Psa/119:9-16", "/kjv/Psa/3:1",
+                  "/kjv/Rom/16:27", "/kjv/Exo/32:32", "/kjv/Gen/1:1", "/kjv/Mat/1:1-2", "/kjv/Gen/2:1"]:
+            jobs.append((p, "", True))
+        for abbr, _, _, lasts in shell["kjv"]:
+            for c, n in enumerate(lasts, 1):
+                jobs.append((f"/kjv/{abbr}/{c}:{n}", "", False))
+        for q in ("John 3:16", "john 3:16", "Gen 1:1", "Genesis 1", "psalm 23", "Psalms 104:1-2", "Jude 24",
+                  "1 John 4:8", "1John 4:8", "I John 4:8", "Song of Solomon 2:1", "Gen 99:1", "Gen 1:0",
+                  "Gen 1:5-3", "Mark 5", "Xyz 1:1", "Gen.  1:1", "Rev 22:21"):
+            jobs.append(("/search", urllib.parse.urlencode({"q": q}), True))
     # Every list a search has, by its `in`: each translation's too, by its key.
     keys = [t["key"] for t in shell["tr"]["order"]]
     for q in queries():
-        for scope in ("", "index", "text", "notes", "study", *keys):
+        for scope in ("", "index", "text", "notes", "study", "kjv", *keys):
             jobs.append(("/search", urllib.parse.urlencode({"q": q, **({"in": scope} if scope else {})}), True))
     for q in ("god", "prayer", "adjuster"):
         for scope, page in (("index", "2"), ("text", "3"), ("text", "999"), ("text", "0"), ("index", "x"),
@@ -128,8 +147,10 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
 
 
 def every(manifest: dict) -> list[dict]:
-    """Every chunk the manifest names: the copy's, and each translation's."""
-    return manifest["chunks"] + [c for t in manifest.get("translations", []) for c in t["chunks"]]
+    """Every chunk the manifest names: the copy's, each translation's, and the
+    King James Version's."""
+    return manifest["chunks"] + [c for t in manifest.get("translations", []) + (
+        [manifest["kjv"]] if "kjv" in manifest else []) for c in t["chunks"]]
 
 
 def consistent(copy: pathlib.Path, manifest: dict) -> list[str]:
@@ -220,6 +241,24 @@ def bands(manifest: dict, con: sqlite3.Connection) -> list[str]:
         lo, hi = want["download_mb"]
         if not lo <= t["bytes"] / 1e6 <= hi:
             bad.append(f"{key}: {t['bytes'] / 1e6:.2f} MB, expected {lo} to {hi}")
+    # The King James Version, its pages a download of their own: /kjv's chunk
+    # and a chunk to each book, counted apart from the copy's; its size in a
+    # band; and its database for search among the copy's own.
+    k, want = manifest.get("kjv"), exp.get("kjv")
+    if bool(k) != bool(want):
+        bad.append(f"kjv: {'in' if k else 'not in'} the manifest, and {'' if want else 'not '}expected")
+    elif k:
+        from ubsite import kjv as K
+        names = {"kjv-toc"} | {f"kjv-{b['abbr']}" for b in K.books()}
+        if {c["name"] for c in k["chunks"]} != names:
+            bad.append(f"kjv: {len(k['chunks'])} chunks, for {len(names) - 1} books and /kjv")
+        if not any(c["name"] == "kjv.db" for c in manifest["chunks"]):
+            bad.append("kjv: its database for search is not among the copy's own")
+        if manifest["counts"].get("kjv_pages") != want["pages"]:
+            bad.append(f"kjv: {manifest['counts'].get('kjv_pages')} pages, expected {want['pages']:,}")
+        lo, hi = want["download_mb"]
+        if not lo <= k["bytes"] / 1e6 <= hi:
+            bad.append(f"kjv: {k['bytes'] / 1e6:.2f} MB, expected {lo} to {hi}")
     return bad
 
 

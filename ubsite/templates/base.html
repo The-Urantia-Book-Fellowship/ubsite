@@ -605,6 +605,16 @@ window.ubUnit = function (where) {
           them, and a reader may still keep one it does not show. #}
       <details class="offmore" hidden><summary><span class="rfold"></span><span class="w"></span></summary>
       <ul class="offtrs"></ul></details>
+      {#- The King James Version, a download of its own as a translation is
+          (Tigran, 2026-11-21; sw.js downs), its tick a list of its own, which
+          the translations' fold leaves alone (offline.js trOrder). #}
+      {%- if kjv_there() %}
+      <ul class="offtrs offkjv">
+        <li><label><input type="checkbox" value="kjv" disabled>
+          <span class="w">{{ t('King James Version') }}</span>
+          <small class="st"></small></label></li>
+      </ul>
+      {%- endif %}
       <p class="why" hidden></p>
       </div>
       {#- The recordings a reader keeps for listening offline, a paper, a part or

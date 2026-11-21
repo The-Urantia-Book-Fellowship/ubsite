@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% set title = same(b.ref_name ~ ' — King James Version') %}
+{#- A book of the King James Version (app.py kjv_book): its title as the KJV
+    prints it, the lines in small capitals and the main one large, and its
+    chapters, a number to each, to the chapter's page, one a study note cites
+    marked (.cited, app.py kjv_cited). #}
+{% block body %}<main class="prose kjv kjvbook">
+<p class="kup"><a href="/kjv">{{ t('King James Version') }}</a></p>
+<h1 class="ktitle">
+  {%- for line, main in b.title_lines %}<span class="{{ 'tm' if main else 'tl' }}">{{ line }}</span>{% endfor -%}
+</h1>
+<h2>{{ t('Psalms') if b.abbr == 'Psa' else t('Chapters') }}</h2>
+<ol class="kchaps">
+  {%- for c in range(1, b.chapters + 1) %}
+  <li{% if cited[c] %} class="cited"{% endif %}><a href="/kjv/{{ b.abbr }}/{{ c }}">{{ c }}</a></li>
+  {%- endfor %}
+</ol>
+</main>{% endblock %}

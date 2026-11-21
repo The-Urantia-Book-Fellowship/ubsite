@@ -199,6 +199,12 @@ SHOW = [
     # 2026-10-28).  /search?in=ud still answers.
     ("trsearch", "switch", "Translations in search results", True, [],
      "those ticked under Translations, their words and their translators\u2019 notes"),
+    # The King James Version among the search results (ubsite/kjv.py hits),
+    # its verses and its translators' notes, a list of its own after the
+    # study notes'; on by default (Tigran, 2026-11-21: "In search").
+    # /search?in=kjv still answers.
+    ("kjvsearch", "switch", "King James Version in search results", True, [],
+     "its verses and its translators\u2019 notes"),
     # The British Study Edition's quiz (build/quiz.py): the invitation after
     # the last paragraph of each paper that has questions, and its line on the
     # home page.  /quiz and /quiz/N answer an address asked for, as the index's
@@ -384,7 +390,8 @@ DEVICE = ["uisize", "size", "lead", "width", "bvoice", "trvoices", "rail", "marg
 # follow later is named here with the next version, and V is raised with it.
 # `english`, the English's place among the texts, came at 3 (2026-11-20): a
 # script before it shows the English first whatever the account says.
-LATE = {"tropen": 2, "trtab": 2, "english": 3}
+# `kjvsearch`, the King James Version in search results, came at 4 (2026-11-21).
+LATE = {"tropen": 2, "trtab": 2, "english": 3, "kjvsearch": 4}
 
 
 # A site's own defaults, by the host a page is read at, where they differ from
