@@ -91,6 +91,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- A headword's page no longer repeats the headword as the first line of its list: the subentries start at the left, a step less indented, which a phone shows most; the headword's own citations stand under its heading, and its See or See also under Cross-references, which lists the headword's own first.
 - The two flags at the header's corner are one list of languages: closed, it shows the flag of the language in use; a tap opens it, each language named in its own words, which leaves room for full screen and for languages to come.
 - On a phone, a tap on any paragraph's line of index entries opens the entries under every paragraph, or folds them all, as the Index line at the top of the page does, and they stay so from page to page, Continue reading included; each box keeps its line, open or folded.
 - Where the translations are folded under the paragraphs, the paper's and the section's titles have a fold too, with the other texts' titles in it, opening and folding with the others and at the same tab.

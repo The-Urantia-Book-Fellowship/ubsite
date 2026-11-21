@@ -113,6 +113,13 @@ INVARIANTS = [
          AND text_html NOT LIKE '%<a class="hw" href="/i/%</a> <i>q.v.</i>'"""),
     ("every See and See also has its link",
      "SELECT COUNT(*) FROM xref WHERE kind IN ('see', 'seealso') AND href IS NULL"),
+    # A concept page leaves its headword's line out of the tree and sets the
+    # citations that line carries under the heading (derive.head_cites).
+    ("every citation on a headword's own line is under its heading",
+     """SELECT COUNT(*) FROM index_entry e WHERE e.scope = 'az' AND e.level = 1
+         AND (LENGTH(COALESCE(e.cites_html, ''))
+              - LENGTH(REPLACE(COALESCE(e.cites_html, ''), 'class="cit"', ''))) / 11
+             <> (SELECT COUNT(*) FROM citation c WHERE c.entry_id = e.id)"""),
     # Two headwords fold alike (trap 8), "Ammonites" the tribe and "ammonites"
     # the fossils; a reference written as one of them is that one, which until
     # 2026-11-09 the first by id was (build/heads.py).

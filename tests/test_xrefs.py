@@ -54,7 +54,10 @@ class Xrefs(unittest.TestCase):
 
     def test_linked_where_they_stand_and_listed(self):
         # body, human: one long See also; mind: a See into its own subentry;
-        # Master Spirits, Seven: the one range (Master Spirit #1 - #7).
+        # Master Spirits, Seven: the one range (Master Spirit #1 - #7).  A
+        # subentry's stand in the tree; the headword's line is not there
+        # (Tigran, 2026-11-21), so its own are in the list alone, which runs
+        # in the index's order, the headword's first.
         for slug in ("body-human", "mind", "master-spirits-seven", "reality"):
             with self.subTest(slug=slug):
                 (root,) = self.con.execute(
@@ -63,9 +66,9 @@ class Xrefs(unittest.TestCase):
                 self.assertTrue(xs)
                 tree, listed = self.page(slug)
                 self.assertTrue(in_order(tree, [f'<a class="hw" href="{h}">{t}</a>'
-                                                 for _, t, h in xs]))
-                for _, t, h in xs:
-                    self.assertIn(f'<a href="{h}">{escape(t)}</a>', listed)
+                                                 for e, t, h in xs if e != root]))
+                self.assertTrue(in_order(listed, [f'<a href="{h}">{escape(t)}</a>'
+                                                   for _, t, h in xs]))
 
     def test_the_longest_clause(self):
         # "named philosophies", under philosophy, when this was written: each

@@ -199,6 +199,7 @@ def main(argv: list[str]) -> int:
         derive.anchors(con, report)
         n_links = derive.links(con, report)
         print(f"  {n_links:,} entries name a headword, now linked")
+        print(f"  {derive.head_cites(con, report):,} headwords cite on their own line")
         n_pairs = derive.cocitation(con)
         derive.fts(con)
         if quiz_built:

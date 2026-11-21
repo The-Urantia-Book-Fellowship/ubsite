@@ -259,6 +259,49 @@ def links(con, report) -> int:
     return len(html)
 
 
+# A headword's own line, as `text_html` holds it once `links` has run: the
+# headword, its citations, and its See or See also clause, each with or
+# without a period between (`Adam (Papers 74–75) (165:0.1). See also Eve`,
+# `apes. (88:1.5) See also simians`, `chronoldeks See also frandalanks`:
+# the index's CLAUDE.md, the terminal period before a See clause).
+_HW_LINK = r'<a class="hw" href="[^"]*">(?:[^<]|<sup>[^<]*</sup>)*</a>'
+RE_HEAD_CLAUSE = re.compile(r'(?:\.? <i>See(?: also)?</i> ' + _HW_LINK
+                            + r'(?:; ' + _HW_LINK + r')*)+')
+RE_HEAD_CITES = re.compile(r'\.?((?: <a class="cit" href="[^"]*">[^<]*</a>)*)\.?')
+
+
+def head_cites(con, report) -> int:
+    """Each headword's citations, apart from its line, for its concept page.
+
+    The page leaves the headword's own line out of its tree (Tigran,
+    2026-11-21): the headword is its `<h1>`, and a See or See also there is
+    under Cross-references, the same words to the same link.  What the line
+    alone holds is its citations, `(Papers 74–75) (165:0.1)`, which the page
+    sets under the heading: `index_entry.cites_html`, NULL where it has none.
+    A line holding anything else fails the build, so that leaving it out can
+    never drop a word.
+    """
+    con.execute("ALTER TABLE index_entry ADD COLUMN cites_html TEXT")
+    rows = []
+    for eid, h, head, where, line in con.execute(
+            "SELECT id, text_html, headword_html, source_file, source_line FROM index_entry"
+            " WHERE scope = 'az' AND level = 1 ORDER BY id"):
+        rest = h[len(head):] if h.startswith(head) else None
+        m = None
+        if rest is not None:
+            c = RE_HEAD_CLAUSE.search(rest)
+            if c is None or c.end() == len(rest):
+                m = RE_HEAD_CITES.fullmatch(rest[:c.start()] if c else rest)
+        if m is None:
+            report.hard("headword-line-other", f"{where}:{line}",
+                        f"{h!r} is more than {head!r}, citations and a See clause")
+            continue
+        if m.group(1):
+            rows.append((m.group(1)[1:], eid))
+    con.executemany("UPDATE index_entry SET cites_html=? WHERE id=?", rows)
+    return len(rows)
+
+
 def cocitation(con, floor: int = 2) -> int:
     """Concept adjacency: two headwords that cite the same paragraphs.
 

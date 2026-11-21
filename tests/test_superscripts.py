@@ -54,7 +54,18 @@ class Superscripts(unittest.TestCase):
             "SELECT target_html, href FROM xref"
             " WHERE kind = 'see' AND target = 'mansion worlds: 1st'").fetchone()
         self.assertEqual(html, "mansion worlds: 1<sup>st</sup>")
+        # The headword's own line is not on its page (2026-11-21), so its See
+        # is under Cross-references alone; a subentry's stands in the tree too.
         body = self.page("/i/first-mansion-world")
+        tree, _, listed = body.partition("<h2>Cross-references</h2>")
+        self.assertNotIn(f'<a class="hw" href="{href}">{html}</a>', tree)
+        self.has(listed, f'<a href="{href}">{html}</a>')
+        html, href, slug = self.con.execute(
+            "SELECT x.target_html, x.href, r.slug FROM xref x"
+            " JOIN index_entry e ON e.id = x.entry_id JOIN index_entry r ON r.id = e.root_id"
+            " WHERE x.kind IN ('see', 'seealso') AND e.level > 1"
+            "   AND x.target_html LIKE '%<sup>%' ORDER BY x.id LIMIT 1").fetchone()
+        body = self.page(f"/i/{slug}")
         tree, _, listed = body.partition("<h2>Cross-references</h2>")
         self.has(tree, f'<a class="hw" href="{href}">{html}</a>')
         self.has(listed, f'<a href="{href}">{html}</a>')

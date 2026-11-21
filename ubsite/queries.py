@@ -416,12 +416,21 @@ def concept(con: sqlite3.Connection, root_id: int) -> dict:
         " LEFT JOIN entry_stats s ON s.entry_id=e.id"
         " WHERE e.root_id=? ORDER BY e.ord", (root_id,)).fetchall()
     # Every See, See also and q.v. is linked where it stands, in the tree; this
-    # list gathers the See and See also, each by the link it has there.
+    # list gathers the See and See also, each by the link it has there.  The
+    # reading path groups it by kind (path.html), as it always has.
     xrefs = con.execute(
         "SELECT x.kind, x.target_html, x.href FROM xref x"
         " WHERE x.entry_id IN (SELECT id FROM index_entry WHERE root_id=?)"
         "   AND x.kind IN ('see','seealso')"
         " ORDER BY x.kind, x.ord", (root_id,)).fetchall()
+    # The concept page's Cross-references, in the index's order: the
+    # headword's own first, whose line the page leaves out of its tree
+    # (derive.head_cites), then each subentry's as the tree runs.
+    crossrefs = con.execute(
+        "SELECT x.kind, x.target_html, x.href FROM xref x"
+        " JOIN index_entry e ON e.id = x.entry_id"
+        " WHERE e.root_id=? AND x.kind IN ('see','seealso')"
+        " ORDER BY e.ord, x.ord", (root_id,)).fetchall()
     # The appendices that list this headword: what kind of thing it is -- a
     # being, a person, a place -- and its line there.
     listed = con.execute(
@@ -438,7 +447,8 @@ def concept(con: sqlite3.Connection, root_id: int) -> dict:
         (root_id, root_id, root_id)).fetchall()
     # Its reading path, if it cites enough paragraphs to have one (derive.py).
     path = con.execute("SELECT * FROM reading_path WHERE root_id=?", (root_id,)).fetchone()
-    return {"tree": tree, "xrefs": xrefs, "listed": listed, "near": near, "path": path}
+    return {"tree": tree, "xrefs": xrefs, "crossrefs": crossrefs, "listed": listed,
+            "near": near, "path": path}
 
 
 # ---- reading paths -----------------------------------------------------------
