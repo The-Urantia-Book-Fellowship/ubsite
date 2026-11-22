@@ -3,7 +3,11 @@
 {#- Only this page uses these, so they live here rather than in ub.css, which
     every reader downloads. #}
 <style>
-.api pre { font-size: .8rem; line-height: 1.45; overflow-x: auto; padding: .7rem .9rem;
+/* Code grows with the page's text, which grows with the window (2026-11-22),
+   as far as In short's lines, some 75 characters, still fit the measure,
+   .56em, and is never smaller than it was, .8rem; a monospace face's tall
+   x-height reads larger than UB Goudy's at the same size.  The tables, .85em. */
+.api pre { font-size: max(.8rem, .56em); line-height: 1.45; overflow-x: auto; padding: .7rem .9rem;
   border: 1px solid var(--rule); border-radius: 3px;
   background: color-mix(in oklch, var(--rule) 30%, transparent); }
 .api code { font-size: .88em; }
@@ -12,7 +16,10 @@
 .api pre.json { white-space: pre-wrap; overflow-wrap: anywhere; }
 .api dt { font-weight: 600; margin-top: .5rem; }
 .api dd { margin: 0 0 0 1.4rem; }
-.api table { border-collapse: collapse; font-size: .9rem; }
+.api table { border-collapse: collapse; font-size: .85em; }
+/* On a phone a little smaller, and scrolling in itself where it must: at 320
+   px the page scrolled sideways by 22 px before 2026-11-22. */
+@media (max-width: 40rem) { .api table { font-size: .8em; display: block; overflow-x: auto; } }
 .api th, .api td { text-align: left; padding: .15rem 1rem .15rem 0; border-bottom: 1px solid var(--rule); }
 .api th { font-weight: 600; }
 .api td.fig { text-align: right; font-variant-numeric: tabular-nums; }

@@ -787,6 +787,13 @@ h2 { font-size: 1.3rem; font-weight: 400; margin: 1.6rem 0 .6rem;
 article.whole > section[id] { scroll-margin-top: 3rem; }
 article.whole > section > .papertop { margin: 2.6rem 0 1.2rem; }
 article.whole > section > .papertop h2 { margin-top: 0; }
+/* A section's page after the introduction (section.html `later`): its heads,
+   the English's and every text's, in front, in a column or in a title's fold,
+   carry the section's title alone, the paper's number, title and author over
+   §0 only (Tigran, 2026-11-22).  In the page still, for ub.js headOf and
+   listen.js, which read them. */
+article.later :is(header.papertop, .tfh) :is(.papernum, h1, .author) { display: none; }
+article.later :is(header.papertop, .tfh) h2 { margin-top: .2rem; }
 
 /* Each paragraph emits TWO grid cells -- text and apparatus.  The browser
    aligns them for free, a paragraph with nine chips simply makes its row
@@ -1509,13 +1516,16 @@ article.cmp.whole > section[id] ~ section[id] .cmphd h2 { margin: 0; }
   article.cmp > section[id] > .blanket { grid-column: -2; grid-row: 1; align-self: start; z-index: 1;
          max-width: none; margin: 1.2rem 0 1.6rem; }
   article.cmp > section[id] > .blanket ul { columns: 1; }
-  /* Level with the title: on the whole paper's page a later section's heads
-     are its title alone, with no room above (above); on a section's page the
-     title is the last line of the paper's head, and the box stands at the
-     head's foot.  A paper's first section has no title, and its box, what
-     the whole paper cites, stands at the head of the paper's. */
+  /* Level with the heads' top, as the heads' row starts: on the whole paper's
+     page a later section's heads are its title alone, with no room above
+     (above); on a section's own page the heads stand 1.2rem down, and so
+     does the box, its own margin.  Since 2026-11-22 a later section's page
+     has its title alone there too (section.html `later`), the paper's head
+     over §0 only; until then the title was the last line of the paper's
+     head, and the box stood at the head's foot.  A paper's first section has
+     no title, and its box, what the whole paper cites, stands at the head of
+     the paper's. */
   article.cmp.whole > section[id] ~ section[id] > .blanket { margin: 0 0 1.2rem; }
-  article.cmp:not(.whole) > section[id]:not([id$=":0"]) > .blanket { align-self: end; }
   /* A box of five lines or more (ub.js cmpDraw, .cmpfold) is folded to its
      own line, how many entries it holds, which opens it for this page, as a
      phone's every box is (.afold, .shown): the heads' row is as tall as the
@@ -1594,7 +1604,11 @@ article.cmp .row:has(> .verse) > .rc { margin-top: .6rem; }
                         border-radius: 2px; padding: 0 .1em; }
 :is(.note, .pop) .dec { font-variant-caps: small-caps; letter-spacing: .04em; }
 :is(.note, .pop) .why { font-size: .95em; }
-:is(.note, .pop) .src { font-family: var(--sans); font-size: .78rem; color: var(--faint); }
+/* A note's sources at .74 of its text, as a card's are (.pop .src, below): in
+   rem they stood at half the text of /lists/notes and of the notes under a
+   chapter of the Bible, where the text grows with the window (Tigran,
+   2026-11-22: the small text "relative to the text too"). */
+:is(.note, .pop) .src { font-family: var(--sans); font-size: .74em; color: var(--faint); }
 :is(.note, .pop) .src a { color: var(--faint); }
 /* The card: under the line, a pointer to the ring, scrolling with the text.
    Its × stands in a strip of its own above the words, which therefore take
@@ -2610,7 +2624,7 @@ main.results { position: relative; }
 .stl .snote p { margin: 0; }
 .stl .snote p + p { margin-top: .3rem; }
 .stl .cite { font-size: .9em; }
-.stl .src { font-family: var(--sans); font-size: .78rem; color: var(--faint); }
+.stl .src { font-family: var(--sans); font-size: .74em; color: var(--faint); }
 .stl .src a { color: var(--faint); }
 .stl .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint); margin: 0 .2em; }
 .stl .today { color: var(--faint); }
@@ -2623,7 +2637,7 @@ main.results { position: relative; }
 .bib p.lib { margin: .15rem 0 0 1.5em; font-size: .9em; }  /* its page in the library */
 
 /* ---- appendices -------------------------------------------------------- */
-.listed { color: var(--faint); font-size: 1.02rem; margin: -.2rem 0 .3rem; }
+.listed { color: var(--faint); font-size: .85em; margin: -.2rem 0 .3rem; }   /* as .hint, under which it stands */
 .listed a { color: inherit; text-decoration: none; }
 .listed a:hover { color: var(--link); text-decoration: underline; }
 .appnav { font-size: .9rem; color: var(--faint); margin: 0 0 1.2rem; }
@@ -2818,7 +2832,9 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   a { color: inherit; text-decoration: none; }
 }
 
-.hint { color: var(--faint); font-size: 1.02rem; margin: -.2rem 0 1.2rem; }
+/* A page's hint under its heading, at .85 of the text, which grows with the
+   window; 1.02rem until 2026-11-22, 16 px beside text of 24 at 1280 px. */
+.hint { color: var(--faint); font-size: .85em; margin: -.2rem 0 1.2rem; }
 .heads-hit a { font-size: 1.05rem; }
 .heads-hit span { color: var(--faint); font-size: .88rem; margin-left: .5rem; }
 .near span { cursor: help; }
@@ -3604,7 +3620,7 @@ p.kv.bstand::before { content: attr(data-who); content: attr(data-who) / ""; dis
 .bheads > .bhd[data-k="rsb"]:not(:only-child) { display: none; }
 :root[data-bible^="rsb"] .bheads > .bhd[data-k="kjv"]:not(:only-child) { display: none; }
 :root[data-bible^="rsb"] .bheads > .bhd[data-k="rsb"] { display: block; }
-.bnokjv, .bnote { color: var(--faint); font-size: .92rem; text-align: center; }
+.bnokjv, .bnote { color: var(--faint); font-size: .85em; text-align: center; }
 .bnote { text-align: left; margin: -.2rem 0 .6rem; }
 .bversions p { margin: .4rem 0; }
 .kjvrail ol.kch { display: flex; flex-wrap: wrap; gap: .1rem .2rem; }
@@ -3615,19 +3631,25 @@ p.kv.bstand::before { content: attr(data-who); content: attr(data-who) / ""; dis
 .kjvrail ol.kch li { margin: 0; }
 .kjvrail ol.kch a { display: block; min-width: 1.8em; text-align: center; font-variant-numeric: lining-nums tabular-nums; }
 .kjvrail ol.kch li.here > a { box-shadow: 0 0 0 .12rem color-mix(in oklch, var(--link) 12%, transparent); }
-.kup { margin: 0 0 1.2rem; font-size: .85rem; font-variant-caps: small-caps; letter-spacing: .05em;
+/* The Bible's heads grow with the text, which grows with the window, and are
+   never smaller than they were (Tigran, 2026-11-22: "don't you see that 'The
+   Bible' is tiny? And 'THE FIRST BOOK...' too"): the trail at .72em, a
+   title's lines .82em and its main line 1.45em, as they stood to each other,
+   CHAPTER N .72em, a contents' headings .8em. */
+.kup { margin: 0 0 1.2rem; font-size: max(.85rem, .72em); font-variant-caps: small-caps; letter-spacing: .05em;
        color: var(--faint); text-align: center; }
 .kup a { color: inherit; text-decoration: none; }
 @media (hover: hover) { .kup a:hover { color: var(--link); } }
 /* The book's title as the KJV prints it: its lines in small capitals, its
    main line large and in capitals (ubook.sty \bibbook, \bibtitlemain). */
 .ktitle { display: flex; flex-direction: column; align-items: center; gap: .2rem; margin: 0 0 1.6rem;
+          font-size: inherit;                /* an h1 on a book's page: its lines are sized from the text */
           text-align: center; font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
           line-height: 1.2; color: var(--text); }
-.ktitle .tl { font-size: 1.05rem; }
-.ktitle .tm { font-size: 1.9rem; text-transform: uppercase; letter-spacing: .08em; }
+.ktitle .tl { font-size: max(1.05rem, .82em); }
+.ktitle .tm { font-size: max(1.9rem, 1.45em); text-transform: uppercase; letter-spacing: .08em; }
 .kjvtop { text-align: center; }
-.kjvtop h1 { margin: 0 0 1.4rem; font-size: 1rem; font-weight: 400; letter-spacing: .14em;
+.kjvtop h1 { margin: 0 0 1.4rem; font-size: max(1rem, .72em); font-weight: 400; letter-spacing: .14em;
              text-transform: uppercase; color: var(--text); }
 /* A verse a paragraph (never p.t), its number drawn from data-n so that a
    copy takes its words alone, and after it the 1769's paragraph mark. */
@@ -3687,16 +3709,16 @@ p.kvc a { color: var(--link); }
   margin-left: .3em; border-radius: 50%; background: var(--flame); vertical-align: .35em; }
 .kchaps li.cited a::after { position: absolute; margin: 0; top: .35rem; right: .35rem; vertical-align: 0; }
 .kchaps a { position: relative; }
-.kjvcite { color: var(--faint); font-size: .95rem; }
+.kjvcite { color: var(--faint); font-size: .85em; }
 /* The contents: each testament's books in columns, each with its count of
    chapters; a book's chapters as numbers to tap. */
-.kjvtoc h2 { font-size: 1.05rem; font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
+.kjvtoc h2 { font-size: max(1.05rem, .8em); font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
              margin: 1.6rem 0 .5rem; color: var(--faint); }
 .kbooks { list-style: none; padding: 0; margin: 0; columns: 3 11rem; column-gap: 2rem; }
 .kbooks li { display: flex; justify-content: space-between; gap: .6rem; break-inside: avoid; padding: .12rem 0; }
 .kbooks .nch { color: var(--faint); font-size: .85em; font-variant-numeric: lining-nums tabular-nums; }
-.kjvsrc { margin: 2.2rem 0 0; font-size: .9rem; color: var(--faint); }
-.kjvbook h2 { font-size: .95rem; font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
+.kjvsrc { margin: 2.2rem 0 0; font-size: .8em; color: var(--faint); }
+.kjvbook h2 { font-size: max(.95rem, .8em); font-weight: 400; font-variant-caps: small-caps; letter-spacing: .05em;
               color: var(--faint); text-align: center; margin: 0 0 .8rem; }
 .kchaps { list-style: none; padding: 0; margin: 0 auto; display: grid; gap: .45rem;
           grid-template-columns: repeat(auto-fill, minmax(2.8rem, 1fr)); }

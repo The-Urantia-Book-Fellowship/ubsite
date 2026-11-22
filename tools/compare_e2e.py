@@ -668,8 +668,10 @@ def desktop(b, whole: bool) -> None:
         x = pg.evaluate(BOX, "15:1")
         ok(x["shown"] and x["left"] == x["margin"] and x["left"] > x["cols"],
            say + f"a section's box is in the margin's column, clear of the text's ({x})")
-        ok(abs(x["bottom"] - x["headBottom"]) < 1 and x["top"] > x["headTop"] and x["text"] >= x["bottom"],
-           say + "its foot level with the section's title, the last line of the head, and the first paragraph under both")
+        # The heads of a later section's page are its title alone (2026-11-22),
+        # as a later section's on the whole paper's page.
+        ok(abs(x["top"] - x["headTop"]) < 1 and x["text"] >= x["bottom"],
+           say + f"its top level with the section's title, the head's only line, and the first paragraph under both ({x})")
         link = pg.evaluate(LINK, "15:1")
         ok(link["met"], say + f"an entry in it is a link the pointer meets ({link})")
         # And a click on it goes to its headword's page.
@@ -753,13 +755,14 @@ def folds(b) -> None:
     ok(not errors, f"no error in the page ({errors})")
     ctx.close()
 
-    # On a section's own page, at the head's foot.
+    # On a section's own page, level with the head, its title alone since
+    # 2026-11-22 (the paper's over §0 only).
     ctx, pg, errors = context(b, {"translations": "urantia-ru"})
     pg.goto(BASE + "/193:1")
     drawn(pg)
     x, at = pg.evaluate(FOLD, "193:1"), pg.evaluate(BOX, "193:1")
-    ok(x["fold"] and not x["lists"] and x["line"] and abs(at["bottom"] - at["headBottom"]) < 1,
-       f"on a section's page its box of {x['lines']} lines is folded, at the foot of the head ({x})")
+    ok(x["fold"] and not x["lists"] and x["line"] and abs(at["top"] - at["headTop"]) < 1,
+       f"on a section's page its box of {x['lines']} lines is folded, level with the head ({x})")
     ok(not errors, f"no error in the page ({errors})")
     ctx.close()
 

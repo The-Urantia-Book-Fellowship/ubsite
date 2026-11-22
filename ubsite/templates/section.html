@@ -16,7 +16,15 @@
       at the start of each paragraph, and the text beside it is set that far in
       (ub.css .num).  On the article, so that the text's piece is the same on
       the whole paper's page, which takes the paper's longest. #}
-  <article style="--refw: {{ refw }}">
+  {#- After the introduction, the class `later`: the heads over a section's
+      text carry its title alone, the paper's number, title and author being
+      over §0 only, as the whole paper's page has them once (Tigran,
+      2026-11-22: "It should be done only above §0", as the Bible's chapter
+      page names its book over chapter 1 alone).  They stay in the page, hidden
+      (ub.css article.later), for the running head, a bookmark's title and the
+      player, which read them (ub.js headOf, listen.js), and so that a
+      translation's head, made from the English's, follows. #}
+  <article style="--refw: {{ refw }}"{% if section.n %} class="later"{% endif %}>
     {{ indexfold() }}
     <header class="papertop">
       {#- The Foreword is not a paper: the book heads it FOREWORD alone (Tigran,

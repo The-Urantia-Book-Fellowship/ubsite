@@ -94,6 +94,8 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- A section's page heads it with the section's title alone: the paper's number, title and author stand over its introduction only, as the whole paper's page has them once and a chapter of the Bible names its book over its first chapter alone; the Bible's own heads are larger too, its trail, a book's title and its chapters' headings.
+- More small text is larger, in proportion to the text at any width of the window: a note's sources in the List of study notes and under a chapter of the Bible, the line under a page's heading (on the lists, the appendices, a headword's page and search), the lines on the Bible's page, and the API page's tables and code.
 - The home page's tile for Cosmology of Personalities is now Charts, a page with a card for the chart and one for Unit conversions, each showing its chart in miniature.
 - In Help, the introduction, the list of chapters, the captions under the examples and the table of keys are larger, in proportion to the text at any width of the window.
 - The recordings, Merritt Horn's and Григорий Войнер's, come in a much smaller form, so they start sooner, use less data and take far less room kept offline: Merritt Horn's whole reading is 864 MB instead of 7 GB, Григорий Войнер's 981 MB instead of 4.5 GB. Papers you have already kept stay kept and play as before.
