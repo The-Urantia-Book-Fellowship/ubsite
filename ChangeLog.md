@@ -94,6 +94,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The index is revised from its reading of Paper 60, with nine entries more, among them the first true birds sprung from a reptilian group and not from the flying dinosaurs, the grasses second in importance only to the appearance of man, and the sea serpents' fifty-foot body; thirteen entries are reworded or have their citations put right, volcanoes among them.
 - A section's page heads it with the section's title alone: the paper's number, title and author stand over its introduction only, as the whole paper's page has them once and a chapter of the Bible names its book over its first chapter alone; the Bible's own heads are larger too, its trail, a book's title and its chapters' headings.
 - More small text is larger, in proportion to the text at any width of the window: a note's sources in the List of study notes and under a chapter of the Bible, the line under a page's heading (on the lists, the appendices, a headword's page and search), the lines on the Bible's page, and the API page's tables and code.
 - The home page's tile for Cosmology of Personalities is now Charts, a page with a card for the chart and one for Unit conversions, each showing its chart in miniature.
