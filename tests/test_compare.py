@@ -297,10 +297,18 @@ class Names(unittest.TestCase):
                      # Over the heads' row, which spans the margin's track too
                      # and would take the pointer from the box's links.
                      "  article.cmp > section[id] > .blanket { grid-column: -2; grid-row: 1; align-self: start; z-index: 1;",
+                     # Level with the heads' top, a section's own page 1.2rem
+                     # down as its heads are; the whole paper's later ones at
+                     # once, their heads a title alone.
+                     "         max-width: none; margin: 1.2rem 0 1.6rem; }",
                      "  article.cmp > section[id] > .blanket ul { columns: 1; }",
-                     "  article.cmp.whole > section[id] ~ section[id] > .blanket { margin: 0 0 1.2rem; }",
-                     '  article.cmp:not(.whole) > section[id]:not([id$=":0"]) > .blanket { align-self: end; }'):
+                     "  article.cmp.whole > section[id] ~ section[id] > .blanket { margin: 0 0 1.2rem; }"):
             self.assertIn(rule, block, rule)
+        # Not at the heads' foot, as until 59de553 (2026-11-22): a later
+        # section's page heads it with its title alone since then, the paper's
+        # lines over §0 only, and the box at the foot of a head they made tall
+        # had no reason left.
+        self.assertNotIn("> .blanket { align-self: end; }", block)
         # Every set of tracks is the section's too, the four of a wide
         # screen, with the margin or without, Measured or Full.
         self.assertEqual(css.count("article.cmp :is(.grid, section[id]) {"), 4)
