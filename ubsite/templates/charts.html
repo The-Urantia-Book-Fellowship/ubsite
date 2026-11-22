@@ -1,0 +1,69 @@
+{% extends "base.html" %}{% set title = 'Charts' %}
+{#- The charts (app.py charts; Tigran, 2026-11-22: the home page's tile "a
+    generic container Charts with Cosmology of Personalities its first
+    element"; then "Let's make images -- cards serving as links to those two
+    charts ... 'birds eye view'"): a card to each, its picture the chart in
+    miniature, drawn here from the data and not shot, so that it follows the
+    theme and the language and is never out of date (queries.charts_minis);
+    no words in the pictures but the calculator's numbers, written as the
+    reader's language writes them.  Under the chart's card its credit, as
+    ruled (DECISIONS.md, The chart of the personalities), outside the link,
+    since a link may not hold a link.  Every class begins with mini (CLAUDE.md
+    trap 58). #}
+{% block body %}<main class="prose charts"><h1>{{ t('Charts') }}</h1>
+<ul class="minis">
+  {%- if minis.cosmo %}{% set m = minis.cosmo %}
+  <li>
+    <a class="minicard" href="/cosmology">
+      <svg class="minipic cosmo" viewBox="0 0 {{ m.w }} {{ m.h }}" width="{{ m.w }}" height="{{ m.h }}" aria-hidden="true" focusable="false">
+        {%- for x in m.units %}
+        <rect class="miniu" x="{{ x.x }}" y="{{ x.y }}" width="{{ x.w }}" height="{{ x.h }}" rx="14" style="--c:{{ x.color }}"/>
+        {%- endfor %}
+        {%- for x in m.pairs %}
+        <rect class="minipair" x="{{ x.x }}" y="{{ x.y }}" width="{{ x.w }}" height="{{ x.h }}" rx="18"/>
+        {%- endfor %}
+        {%- for x in m.links %}
+        <path class="minie" data-t="{{ x.type }}" d="{{ x.d }}"/>
+        {%- endfor %}
+        {%- for x in m.cards %}
+        <g style="--c:{{ x.color }}"{% if x.ghost %} class="minighost"{% endif %}>
+          <rect class="minip" x="{{ x.x }}" y="{{ x.y }}" width="{{ m.card[0] }}" height="{{ m.card[1] }}" rx="10"/>
+          <rect class="minig" x="{{ x.x }}" y="{{ x.y }}" width="44" height="{{ m.card[1] }}" rx="10"/>
+          <circle class="minid" cx="{{ x.x + 22 }}" cy="{{ x.y + m.card[1] / 2 }}" r="10" style="--d:{{ x.glyph_color }}"/>
+          <rect class="minibar" x="{{ x.x + 54 }}" y="{{ x.y + 15 }}" width="96" height="8" rx="4"/>
+          <rect class="minibar" x="{{ x.x + 54 }}" y="{{ x.y + 29 }}" width="64" height="8" rx="4"/>
+        </g>
+        {%- endfor %}
+      </svg>
+      <span class="mininame">{{ t('Cosmology of Personalities') }}</span>
+      <span class="minisub">{{ t('charts:cosmo', p=stats.cosmo_persons, u=stats.cosmo_units) }}</span>
+    </a>
+    <p class="miniby">{{ t('cosmo:by', url=cosmo_meta.url, v=cosmo_meta.version) }}</p>
+  </li>
+  {%- endif %}
+  {%- if minis.units %}{% set m = minis.units %}
+  <li>
+    <a class="minicard" href="/units">
+      <svg class="minipic units" viewBox="0 0 {{ m.w }} {{ m.h }}" width="{{ m.w }}" height="{{ m.h }}" aria-hidden="true" focusable="false">
+        {%- for r in m.rows %}
+        {%- if r.band %}
+        <rect class="miniband" x="60" y="{{ r.y + 22 }}" width="300" height="16" rx="8"/>
+        {%- else %}
+        {%- if r.src %}<rect class="minisrc" x="36" y="{{ r.y - 14 }}" width="1528" height="112" rx="6"/>{% endif %}
+        <line class="minirule" x1="60" x2="1540" y1="{{ r.y - 14 }}" y2="{{ r.y - 14 }}"/>
+        <rect class="minif" x="60" y="{{ r.y }}" width="600" height="84" rx="16"/>
+        <text class="miniv en" x="632" y="{{ r.y + 58 }}">{{ r.en }}</text>
+        <text class="miniv ru" x="632" y="{{ r.y + 58 }}">{{ r.ru }}</text>
+        <rect class="minibold" x="700" y="{{ r.y + 10 }}" width="{{ r.name }}" height="28" rx="14"/>
+        <rect class="minibar" x="700" y="{{ r.y + 54 }}" width="{{ r.def }}" height="14" rx="7"/>
+        <rect class="minibar" x="700" y="{{ r.y + 76 }}" width="{{ r.short }}" height="14" rx="7"/>
+        {%- endif %}
+        {%- endfor %}
+      </svg>
+      <span class="mininame">{{ t('Unit conversions') }}</span>
+      <span class="minisub">{{ t('charts:units') }}</span>
+    </a>
+  </li>
+  {%- endif %}
+</ul>
+</main>{% endblock %}

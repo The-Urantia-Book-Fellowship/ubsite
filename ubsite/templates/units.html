@@ -1,0 +1,59 @@
+{% extends "base.html" %}{% set title = 'Unit conversions' %}
+{#- Unit conversions (app.py units_page, queries.units; build/units.py from
+    data/units.toml; Tigran, 2026-11-22).  A table to each kind of measure,
+    a row to each unit: its value, a field, then its name and where it comes
+    from, the papers' words with their paragraph, or a familiar unit's
+    standard (on a phone the name first, the field under it, at the width of
+    the page, the longest value having twenty characters).  Every row converts into all the others, whichever is typed in
+    (static/units.js, run again by ub.js for a <main> listen.js brings in).
+    The values are the server's for the table's opening unit, as English
+    writes a number, so that the page reads with scripts off (the script
+    writes them as the reader's language does); and what the script
+    needs is in the page, so that the offline copy holds it whole.  A row
+    has no id: an address names a unit and a value, #jday=3, and nothing
+    for ub.js arrive() to scroll to (CLAUDE.md trap 52). #}
+{% block body %}<main class="prose units" data-src="{{ asset('units.js') }}">
+<h1>{{ t('Unit conversions') }}</h1>
+<p class="lead">{{ t('units:lead') }}</p>
+<p class="uctoc">{% for g in u.groups %}{% if not loop.first %} · {% endif %}<a href="#{{ g.key }}">{{ t(g.name) }}</a>{% endfor %}</p>
+{%- for g in u.groups %}
+<section class="ucg" id="{{ g.key }}" data-g="{{ g.key }}">
+  <h2>{{ t(g.name) }}</h2>
+  <table class="uct">
+  {%- for it in g.rows %}
+    {%- if it.band %}
+    <tr class="ucb"><th colspan="3" scope="rowgroup">{{ t(it.band) }}</th></tr>
+    {%- else %}{% set x = it.unit %}
+    <tr data-u="{{ x.key }}">
+      <td class="ucv"><input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" value="{{ x.value }}" {{ ta('aria-label', x.name) }}></td>
+      <td class="ucn">{% if x.about %}<span class="ucab" {{ ta('title', 'units:about') }}>≈</span> {% endif %}{{ t(x.name) }}</td>
+      {%- if x.words %}
+      <td class="ucdef">{{ t(x.words) }} <a href="/{{ x.ref }}">{{ x.ref }}</a></td>
+      {%- else %}
+      <td class="ucdef">{{ t(x.def) }}</td>
+      {%- endif %}
+    </tr>
+    {%- endif %}
+  {%- endfor %}
+  </table>
+  {%- if g.key == 'time' %}
+  <p class="ucut" aria-live="polite"></p>
+  {%- endif %}
+  {%- if g.examples %}
+  <h3>{{ t('From the text') }}</h3>
+  <ul class="ucex">
+    {%- for x in g.examples %}
+    <li><a class="ucgo" href="{{ x.href }}"{% if x.to %} data-to="{{ x.to }}"{% endif %}>{{ t(x.words) }}</a> <a class="ucref" href="/{{ x.ref }}">{{ x.ref }}</a></li>
+    {%- endfor %}
+  </ul>
+  {%- endif %}
+  {%- if g.index %}
+  <p class="ucix">{{ t('units:index', href='/i/' ~ g.index[0], h=g.index[1]) }}</p>
+  {%- endif %}
+</section>
+{%- endfor %}
+<script type="application/json" class="ucdata">{{ u.data|tojson }}</script>
+</main>{% endblock %}
+{% block scripts %}
+<script src="{{ asset('units.js') }}" defer></script>
+{% endblock %}

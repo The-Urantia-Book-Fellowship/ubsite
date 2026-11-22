@@ -93,7 +93,7 @@ T.env.globals["asset"] = asset
 # server runs; named by a hash of what it sends, so a build that changes
 # nothing moves nothing (CLAUDE.md trap 29).
 L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js", "help.js", "cosmo.js",
-                "account.js")
+                "account.js", "units.js")
 L10N_JS = ROOT / "ubsite" / "l10n.js"
 
 
@@ -1684,6 +1684,41 @@ def appendix(request: Request, letter: str):
 def lists(request: Request):
     stats = dict(db().execute("SELECT key, value FROM stat").fetchall())
     return page(request, "lists.html", stats=stats)
+
+
+# The charts (Tigran, 2026-11-22: the home page's tile "a generic container
+# Charts with Cosmology of Personalities its first element", and Unit
+# conversions beside it), as /lists lists the lists.
+@app.get("/charts", response_class=HTMLResponse)
+def charts(request: Request):
+    con = db()
+    stats = dict(con.execute("SELECT key, value FROM stat").fetchall())
+    mtime = DB.stat().st_mtime_ns
+    chart = _cosmo(mtime, l10n.BILINGUAL)
+    return page(request, "charts.html", stats=stats, cosmo_meta=chart["meta"] if chart else {},
+                minis=_minis(mtime, l10n.BILINGUAL))
+
+
+@functools.lru_cache(maxsize=2)
+def _minis(mtime_ns: int, bilingual: bool) -> dict:
+    return queries.charts_minis(_cosmo(mtime_ns, bilingual), _units(mtime_ns, bilingual))
+
+
+@functools.lru_cache(maxsize=2)
+def _units(mtime_ns: int, bilingual: bool) -> dict | None:
+    return queries.units(db())
+
+
+@app.get("/units", response_class=HTMLResponse)
+def units_page(request: Request):
+    """Unit conversions (build/units.py, queries.units; templates/units.html):
+    the units of time, distance, speed, weight and temperature the papers
+    define or use, beside the familiar ones, a table to each, every row of
+    which converts into all the others (static/units.js)."""
+    u = _units(DB.stat().st_mtime_ns, l10n.BILINGUAL)
+    if u is None:
+        return missing(request, "There is no page at this address.")
+    return page(request, "units.html", u=u)
 
 
 @app.get("/lists/1955", response_class=HTMLResponse)

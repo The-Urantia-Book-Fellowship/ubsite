@@ -23,9 +23,13 @@
     every reader downloads (as api.html does).  The examples' frames, the
     keys, and what the site's own markup needs to stand still in a frame. #}
 <style>
-.helppage .lead { font-size: 1.12rem; }
+/* The list of chapters, an example's caption and the keys in em, of the page's text,
+   which grows with the window, and not in rem, which does not: at 1280 px
+   the text is 24 px, and they were 15 and 14 (Tigran, 2026-11-22: "the
+   difference between 'small' and 'normal' is far too much").  The lead is
+   the text's size (ub.css .prose > .lead). */
 .helppage .hnav { margin: 1.2rem 0 2rem; padding: 0; list-style: none; display: flex; flex-wrap: wrap;
-  gap: .35rem .9rem; font-size: .95rem; }
+  gap: .3em .8em; font-size: .85em; }
 .helppage .hnav a { color: var(--link); text-decoration: none; }
 .helppage .hnav a:hover { text-decoration: underline; }
 .helppage section { margin-top: 2.8rem; scroll-margin-top: 1rem; }
@@ -35,7 +39,7 @@
 .helppage .eg { margin: 1rem 0 1.2rem; padding: .9rem 1rem; border: 1px dashed var(--rule); border-radius: 6px;
   --measure: 100%; --refw: 6; overflow: hidden; }
 .helppage .eg > :first-child { margin-top: 0; }
-.helppage .eg .cap { margin: .6rem 0 0; font-size: .85rem; color: var(--faint); }
+.helppage .eg .cap { margin: .6rem 0 0; font-size: .8em; color: var(--faint); }
 .helppage .eg .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 18ch); gap: 0 1.2rem; }
 .helppage .eg .a { display: block; }
 .helppage .eg .afold { display: none; }
@@ -70,7 +74,7 @@
 .helppage .eg .egart { position: relative; }
 .helppage kbd { font: .85em/1 var(--sans); color: var(--ink); border: 1px solid var(--rule);
   border-bottom-width: 2px; border-radius: 4px; padding: .1em .4em; background: var(--paper); white-space: nowrap; }
-.helppage table.keys { border-collapse: collapse; width: 100%; font-size: .95rem; margin: .6rem 0 0; }
+.helppage table.keys { border-collapse: collapse; width: 100%; font-size: .85em; margin: .6rem 0 0; }
 .helppage table.keys td { padding: .35rem .6rem .35rem 0; border-top: 1px solid var(--rule); vertical-align: top; }
 .helppage table.keys td:first-child { white-space: nowrap; width: 1%; padding-right: 1.2rem; }
 .helppage table.keys tr:first-child td { border-top: 0; }
@@ -124,7 +128,7 @@
     <li><a href="#account">{{ t('Your account') }}</a></li>
     <li><a href="#offline">{{ t('Working offline, and the app') }}</a></li>
     <li><a href="#quiz">{{ t('The quiz|help') }}</a></li>
-    <li><a href="#chart">{{ t('The chart of personalities|help') }}</a></li>
+    <li><a href="#chart">{{ t('Charts') }}</a></li>
     <li><a href="#bible">{{ t('The Bible') }}</a></li>
     <li><a href="#russian">{{ t('The interface in Russian') }}</a></li>
     <li><a href="#keys">{{ t('Keys') }}</a></li>
@@ -281,9 +285,12 @@
     {%- endif %}
   </section>
 
+  {#- The charts (/charts), the chart of the personalities' paragraph and
+      Unit conversions'; its id the chart's, which links name. #}
   <section id="chart">
-    <h2>{{ t('The chart of personalities|help') }}</h2>
+    <h2>{{ t('Charts') }}</h2>
     <p>{{ t('help:chart:1') }}</p>
+    <p>{{ t('help:units:1') }}</p>
   </section>
 
   <section id="bible">

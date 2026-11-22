@@ -109,10 +109,12 @@
     <li><a href="/bible">{{ chrome.way_svg('bible') }}<span class="lbl">{{ t('The Bible') }}</span>
       <span class="sub">{{ t('home:t:bible') }}</span></a></li>
     {%- endif %}
-    {#- The chart of the personalities (cosmology.html), where the build has one. #}
-    {%- if stats.cosmo_persons %}
-    <li><a href="/cosmology">{{ chrome.way_svg('chart') }}<span class="lbl">{{ t('Cosmology of Personalities') }}</span>
-      <span class="sub">{{ t('home:cosmology', p=stats.cosmo_persons, u=stats.cosmo_units) }}</span></a></li>
+    {#- The charts (charts.html; Tigran, 2026-11-22: "a generic container
+        Charts with Cosmology of Personalities its first element"), the chart
+        of the personalities and Unit conversions; the chart's tile until then. #}
+    {%- if stats.cosmo_persons or stats.units %}
+    <li><a href="/charts">{{ chrome.way_svg('chart') }}<span class="lbl">{{ t('Charts') }}</span>
+      <span class="sub">{{ t('home:t:charts') }}</span></a></li>
     {%- endif %}
     {%- if stats.quiz_questions %}
     <li class="quizway"><a href="/quiz">{{ chrome.way_svg('quiz') }}<span class="lbl">{{ t('Quiz') }}</span>

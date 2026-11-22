@@ -1,0 +1,756 @@
+# Unit conversions (/units): the units of time, distance, speed, weight and
+# temperature the Urantia Papers define or use, beside the familiar ones
+# (Tigran, 2026-11-22: "a table-like conversion calculator for distances,
+# weights and time units, as described in the Urantia Papers ... in both
+# directions").  build/units.py reads this into var/ub.db, the tables unit_*,
+# and holds it to the text; DECISIONS.md, Unit conversions, has the rulings.
+#
+# [[group]]   a table of the page: its names, the unit and value it opens at,
+#             and the headword of the index that gathers its units, if any.
+# [[band]]    a heading inside a table: the realm a book's unit belongs to, or
+#             the system of the familiar ones.
+# [[unit]]    a row.  `size` is the unit in others: terms `number unit` joined
+#             by + and -, a number a decimal, an exponent (2e27) or a fraction
+#             (5/9), a term with no number one of the unit; the group's base
+#             has `size = "base"`.  `offset` is added before scaling (the
+#             temperatures: base = (value + offset) x size).
+#             A unit the book defines names its paragraph (`ref`) and its words
+#             there, exactly, once and whole (`words`), and the same words of
+#             the Foundation's Russian translation (`words_ru`, the paragraph
+#             of uf-ru; Tigran, 2026-11-22: the Foundation's terms).  `about`
+#             where the book says about, almost, a trifle: its figure is taken
+#             as written and the row is marked so, and so is every unit made
+#             from it.  A familiar unit has `def`, its standard, in each
+#             language.
+# [[example]] a figure of the text, under its table: the words (exactly, as
+#             for a unit), the value and unit they give, which a tap puts in
+#             the table.  `says` is where the book itself gives the figure in
+#             another unit: the build fails unless the table agrees within
+#             `within`, a fraction, which the book's own "about" sets.
+#
+# The Russian names are from uf-ru's wording of the defining paragraph, for
+# Tigran's review; «десятитысячелетие» is ours, uf-ru saying «десять
+# тысячелетий».
+
+# ---------------------------------------------------------------- time
+
+[[group]]
+key = "time"
+en = "Time"
+ru = "Время"
+index = "time"
+start = { unit = "phday", value = 1 }
+
+[[band]]
+group = "time"
+key = "paradise"
+en = "Paradise-Havona"
+ru = "Рай-Хавона"
+
+[[band]]
+group = "time"
+key = "orvonton"
+en = "Orvonton, the superuniverse"
+ru = "Орвонтон, сверхвселенная"
+
+[[band]]
+group = "time"
+key = "nebadon"
+en = "Nebadon, the local universe"
+ru = "Небадон, локальная вселенная"
+
+[[band]]
+group = "time"
+key = "satania"
+en = "Satania, the local system"
+ru = "Сатания, локальная система"
+
+[[band]]
+group = "time"
+key = "urantia"
+en = "Urantia"
+ru = "Урантия"
+
+[[unit]]
+key = "phday"
+group = "time"
+band = "paradise"
+en = "Paradise-Havona standard day"
+ru = "стандартный день системы Рай-Хавона"
+size = "1000 year - 7 minute - 3.125 second"
+ref = "14:1.12"
+words = "One Paradise-Havona day is just seven minutes, three and one-eighth seconds less than one thousand years of the present Urantia leap-year calendar."
+words_ru = "Один день системы Рай-Хавона всего на семь минут, три и одну восьмую долю секунды короче тысячелетия по современному урантийскому високосному календарю."
+
+[[unit]]
+key = "uvyear"
+group = "time"
+band = "orvonton"
+en = "Uversa year"
+ru = "уверсский год"
+size = "3000 day - 22 minute"
+ref = "15:7.2"
+words = "This Uversa year is standard in the seventh superuniverse, and it is twenty-two minutes short of three thousand days of Urantia time"
+words_ru = "Этот уверсский год является стандартом для седьмой сверхвселенной, будучи на двадцать две минуты короче, чем три тысячи дней на Урантии"
+
+[[unit]]
+key = "uvday"
+group = "time"
+band = "orvonton"
+en = "Orvonton standard day"
+ru = "стандартный день Орвонтона"
+size = "1/100 uvyear"
+ref = "15:7.2"
+words = "The standard day of the superuniverse of Orvonton is equal to almost thirty days of Urantia time, and the Orvonton year equals one hundred standard days."
+words_ru = "Стандартный день сверхвселенной Орвонтон равен почти тридцати урантийским дням, а год Орвонтона соответствует ста стандартным дням."
+
+[[unit]]
+key = "dekamil"
+group = "time"
+band = "nebadon"
+en = "dekamillennium"
+ru = "десятитысячелетие"
+size = "10000 nbyear"
+ref = "35:6.1"
+words = "one dekamillennium—10,000 standard years"
+words_ru = "десять тысячелетий – 10 000 стандартных лет"
+
+[[unit]]
+key = "nbyear"
+group = "time"
+band = "nebadon"
+en = "Nebadon year"
+ru = "небадонский год"
+size = "100 nbday"
+ref = "33:6.7"
+words = "is equal to one hundred days of standard universe time"
+words_ru = "соответствует ста дням стандартного вселенского времени"
+
+[[unit]]
+key = "nbday"
+group = "time"
+band = "nebadon"
+en = "Nebadon standard day"
+ru = "стандартный день Небадона"
+size = "18 day + 6 hour + 2.5 minute"
+ref = "33:6.7"
+words = "The standard day of Nebadon is equal to eighteen days and six hours of Urantia time, plus two and one-half minutes."
+words_ru = "Стандартный день Небадона равен восемнадцати дням, шести часам и двум с половиной минутам урантийского времени."
+
+[[unit]]
+key = "sysyear"
+group = "time"
+band = "satania"
+en = "system year"
+ru = "системный год"
+size = "100 jday"
+ref = "46:1.2"
+words = "The system year consists of one hundred Jerusem days."
+words_ru = "Системный год состоит из ста иерусемских дней."
+
+[[unit]]
+key = "jweek"
+group = "time"
+band = "satania"
+en = "Jerusem week"
+ru = "иерусемская неделя"
+size = "10 jday"
+ref = "45:2.5"
+words = "Once a week, every ten days on Jerusem"
+words_ru = "Раз в неделю – на Иерусеме каждые десять дней"
+
+[[unit]]
+key = "jday"
+group = "time"
+band = "satania"
+en = "Jerusem day"
+ru = "иерусемский день"
+size = "3 day - 1 hour - 4 minute - 15 second"
+ref = "46:1.2"
+words = "The Satania day equals three days of Urantia time, less one hour, four minutes, and fifteen seconds, that being the time of the axial revolution of Jerusem."
+words_ru = "Один день Сатании равен трем дням урантийского времени минус один час, четыре минуты и пятнадцать секунд, что соответствует времени обращения Иерусема вокруг своей оси."
+
+[[unit]]
+key = "year"
+group = "time"
+band = "urantia"
+en = "Urantia year"
+ru = "урантийский год"
+size = "365.25 day"
+ref = "57:0.1"
+words = "the present leap-year calendar of 365¼ days to the year"
+words_ru = "современный високосный календарь, в котором год делится на 365¼ дня"
+
+[[unit]]
+key = "day"
+group = "time"
+band = "urantia"
+en = "day"
+ru = "день"
+size = "24 hour"
+def = { en = "24 hours", ru = "24 часа" }
+
+[[unit]]
+key = "hour"
+group = "time"
+band = "urantia"
+en = "hour"
+ru = "час"
+size = "60 minute"
+def = { en = "60 minutes", ru = "60 минут" }
+
+[[unit]]
+key = "minute"
+group = "time"
+band = "urantia"
+en = "minute"
+ru = "минута"
+size = "60 second"
+def = { en = "60 seconds", ru = "60 секунд" }
+
+[[unit]]
+key = "second"
+group = "time"
+band = "urantia"
+en = "second"
+ru = "секунда"
+size = "base"
+def = { en = "the SI unit of time", ru = "единица времени в СИ" }
+
+# ---------------------------------------------------------------- distance
+
+[[group]]
+key = "distance"
+en = "Distance"
+ru = "Расстояние"
+index = "measures"
+start = { unit = "jmile", value = 1 }
+
+[[band]]
+group = "distance"
+key = "jerusem"
+en = "Jerusem"
+ru = "Иерусем"
+
+[[band]]
+group = "distance"
+key = "us"
+en = "American measures"
+ru = "Американские меры"
+
+[[band]]
+group = "distance"
+key = "metric"
+en = "Metric"
+ru = "Метрические"
+
+[[band]]
+group = "distance"
+key = "astro"
+en = "Astronomical"
+ru = "Астрономические"
+
+[[unit]]
+key = "jmile"
+group = "distance"
+band = "jerusem"
+en = "standard mile of Jerusem"
+ru = "стандартная иерусемская миля"
+size = "7 mile"
+about = true
+ref = "46:1.2"
+words = "The standard mile of Jerusem is equivalent to about seven Urantia miles."
+words_ru = "Стандартная иерусемская миля равна примерно семи урантийским милям."
+
+[[unit]]
+key = "mile"
+group = "distance"
+band = "us"
+en = "mile"
+ru = "миля"
+size = "5280 foot"
+def = { en = "5,280 feet: 1,609.344 metres", ru = "5280 футов: 1609,344 метра" }
+
+[[unit]]
+key = "foot"
+group = "distance"
+band = "us"
+en = "foot"
+ru = "фут"
+size = "12 inch"
+def = { en = "12 inches", ru = "12 дюймов" }
+
+[[unit]]
+key = "inch"
+group = "distance"
+band = "us"
+en = "inch"
+ru = "дюйм"
+size = "2.54 centimetre"
+def = { en = "2.54 centimetres, by the agreement of 1959", ru = "2,54 сантиметра, по соглашению 1959 года" }
+
+[[unit]]
+key = "kilometre"
+group = "distance"
+band = "metric"
+en = "kilometre"
+ru = "километр"
+size = "1000 metre"
+def = { en = "1,000 metres", ru = "1000 метров" }
+
+[[unit]]
+key = "metre"
+group = "distance"
+band = "metric"
+en = "metre"
+ru = "метр"
+size = "base"
+def = { en = "the SI unit of length", ru = "единица длины в СИ" }
+
+[[unit]]
+key = "centimetre"
+group = "distance"
+band = "metric"
+en = "centimetre"
+ru = "сантиметр"
+size = "1/100 metre"
+def = { en = "a hundredth of a metre", ru = "сотая доля метра" }
+
+[[unit]]
+key = "parsec"
+group = "distance"
+band = "astro"
+en = "parsec"
+ru = "парсек"
+# 648,000/π astronomical units (IAU 2015, resolution B2): π makes it the one
+# size that is no fraction, and build/units.py holds this to it.
+size = "30856775814913673 metre"
+def = { en = "648,000/π astronomical units (IAU, 2015)", ru = "648 000/π астрономических единиц (МАС, 2015)" }
+
+[[unit]]
+key = "lightyear"
+group = "distance"
+band = "astro"
+en = "light-year"
+ru = "световой год"
+# The velocity of light over a year of 365¼ days, 57:0.1's: 299,792,458 m/s
+# x 31,557,600 s, exactly.
+size = "31557600 lightsecond"
+def = { en = "the way light goes in 365¼ days: 9,460,730,472,580,800 metres (IAU)", ru = "путь света за 365¼ суток: 9 460 730 472 580 800 метров (МАС)" }
+
+[[unit]]
+key = "au"
+group = "distance"
+band = "astro"
+en = "astronomical unit"
+ru = "астрономическая единица"
+size = "149597870700 metre"
+def = { en = "149,597,870,700 metres, about the earth’s distance from the sun (IAU, 2012)", ru = "149 597 870 700 метров, около расстояния от Земли до солнца (МАС, 2012)" }
+
+[[unit]]
+key = "lightsecond"
+group = "distance"
+band = "astro"
+en = "light-second"
+ru = "световая секунда"
+size = "299792458 metre"
+def = { en = "the way light goes in a second: 299,792,458 metres", ru = "путь света за секунду: 299 792 458 метров" }
+
+# ---------------------------------------------------------------- speed
+
+[[group]]
+key = "speed"
+en = "Speed"
+ru = "Скорость"
+start = { unit = "vlimit", value = 1 }
+
+[[band]]
+group = "speed"
+key = "papers"
+en = "In the papers"
+ru = "В документах"
+
+[[band]]
+group = "speed"
+key = "us"
+en = "American measures"
+ru = "Американские меры"
+
+[[band]]
+group = "speed"
+key = "metric"
+en = "Metric"
+ru = "Метрические"
+
+[[unit]]
+key = "vsolitary"
+group = "speed"
+band = "papers"
+en = "a Solitary Messenger on a mission"
+ru = "Одиночный Посланник при выполнении поручения"
+size = "841621642000 mps"
+ref = "23:3.3"
+words = "on the journey to fulfill this mission my associate messenger proceeded at the rate of 841,621,642,000 of your miles per second of your time"
+words_ru = "при выполнении данного поручения мой ассоциированный посланник перемещался со скоростью 841 621 642 000 ваших миль за секунду вашего времени"
+
+[[unit]]
+key = "vtriple"
+group = "speed"
+band = "papers"
+en = "triple velocity, of the seraphim"
+ru = "тройная скорость серафимов"
+size = "558840 mps"
+about = true
+ref = "23:3.2"
+words = "the seraphim and others can traverse space at triple velocity, about 558,840 miles per second"
+words_ru = "серафимы и другие пересекают пространство с тройной скоростью – около 558 840 миль в секунду"
+
+[[unit]]
+key = "vdouble"
+group = "speed"
+band = "papers"
+en = "double velocity, of the midway creatures"
+ru = "двойная скорость промежуточных созданий"
+size = "372560 mps"
+ref = "23:3.2"
+words = "the midway creatures and certain others can, often do, attain double velocity—372,560 miles per second"
+words_ru = "промежуточные и некоторые другие создания способны достичь (и часто достигают) двойной скорости – 372 560 миль в секунду"
+
+[[unit]]
+key = "vlimit"
+group = "speed"
+band = "papers"
+en = "the limit of velocity for most nonenseraphimed beings"
+ru = "максимальная скорость большинства несерафимированных существ"
+size = "186280 mps"
+ref = "23:3.2"
+words = "The limit of velocity for most nonenseraphimed beings is 186,280 miles of your world per second of your time"
+words_ru = "Максимальная скорость большинства несерафимированных существ составляет 186 280 ваших миль за секунду вашего времени"
+
+[[unit]]
+key = "jmileps"
+group = "speed"
+band = "papers"
+en = "standard mile a second"
+ru = "стандартная миля в секунду"
+size = "1 jmile/second"
+def = { en = "a standard mile of Jerusem a second, as at 46:2.8", ru = "стандартная иерусемская миля в секунду, как в 46:2.8" }
+
+[[unit]]
+key = "mps"
+group = "speed"
+band = "us"
+en = "mile a second"
+ru = "миля в секунду"
+size = "1 mile/second"
+def = { en = "a mile a second", ru = "миля в секунду" }
+
+[[unit]]
+key = "mph"
+group = "speed"
+band = "us"
+en = "mile an hour"
+ru = "миля в час"
+size = "1 mile/hour"
+def = { en = "a mile an hour", ru = "миля в час" }
+
+[[unit]]
+key = "c"
+group = "speed"
+band = "metric"
+en = "velocity of light"
+ru = "скорость света"
+size = "299792458 mpers"
+def = { en = "299,792,458 metres a second, exactly", ru = "ровно 299 792 458 метров в секунду" }
+
+[[unit]]
+key = "kmps"
+group = "speed"
+band = "metric"
+en = "kilometre a second"
+ru = "километр в секунду"
+size = "1 kilometre/second"
+def = { en = "a kilometre a second", ru = "километр в секунду" }
+
+[[unit]]
+key = "kmph"
+group = "speed"
+band = "metric"
+en = "kilometre an hour"
+ru = "километр в час"
+size = "1 kilometre/hour"
+def = { en = "a kilometre an hour", ru = "километр в час" }
+
+[[unit]]
+key = "mpers"
+group = "speed"
+band = "metric"
+en = "metre a second"
+ru = "метр в секунду"
+size = "base"
+def = { en = "the SI unit of speed", ru = "единица скорости в СИ" }
+
+# ---------------------------------------------------------------- weight
+
+[[group]]
+key = "weight"
+en = "Weight"
+ru = "Вес"
+index = "weights"
+start = { unit = "gradant", value = 1 }
+
+[[band]]
+group = "weight"
+key = "jerusem"
+en = "Jerusem"
+ru = "Иерусем"
+
+[[band]]
+group = "weight"
+key = "us"
+en = "American measures"
+ru = "Американские меры"
+
+[[band]]
+group = "weight"
+key = "metric"
+en = "Metric"
+ru = "Метрические"
+
+[[unit]]
+key = "gradant"
+group = "weight"
+band = "jerusem"
+en = "gradant"
+ru = "градант"
+size = "10 ounce"
+about = true
+ref = "46:1.2"
+words = "The standard weight, the “gradant,” is built up through the decimal system from the mature ultimaton and represents almost exactly ten ounces of your weight."
+words_ru = "Стандартная единица веса, «градант», равная почти в точности десяти вашим унциям, является частью десятичной системы, построенной на основе сформировавшегося ультиматона."
+
+[[unit]]
+key = "ton"
+group = "weight"
+band = "us"
+en = "ton"
+ru = "короткая тонна"
+size = "2000 pound"
+def = { en = "2,000 pounds, the American short ton", ru = "2000 фунтов, американская короткая тонна" }
+
+[[unit]]
+key = "pound"
+group = "weight"
+band = "us"
+en = "pound"
+ru = "фунт"
+size = "0.45359237 kilogram"
+def = { en = "0.45359237 kilograms, by the agreement of 1959", ru = "0,45359237 килограмма, по соглашению 1959 года" }
+
+[[unit]]
+key = "ounce"
+group = "weight"
+band = "us"
+en = "ounce"
+ru = "унция"
+size = "1/16 pound"
+def = { en = "a sixteenth of a pound", ru = "шестнадцатая доля фунта" }
+
+[[unit]]
+key = "tonne"
+group = "weight"
+band = "metric"
+en = "tonne"
+ru = "тонна"
+size = "1000 kilogram"
+def = { en = "1,000 kilograms", ru = "1000 килограммов" }
+
+[[unit]]
+key = "kilogram"
+group = "weight"
+band = "metric"
+en = "kilogram"
+ru = "килограмм"
+size = "base"
+def = { en = "the SI unit of mass", ru = "единица массы в СИ" }
+
+[[unit]]
+key = "gram"
+group = "weight"
+band = "metric"
+en = "gram"
+ru = "грамм"
+size = "1/1000 kilogram"
+def = { en = "a thousandth of a kilogram", ru = "тысячная доля килограмма" }
+
+# ---------------------------------------------------------------- temperature
+
+[[group]]
+key = "temperature"
+en = "Temperature"
+ru = "Температура"
+start = { unit = "fahrenheit", value = 70 }
+
+[[unit]]
+key = "fahrenheit"
+group = "temperature"
+en = "degree Fahrenheit"
+ru = "градус Фаренгейта"
+size = "5/9 kelvin"
+offset = "459.67"
+ref = "41:7.2"
+words = "(All of these temperatures refer to your Fahrenheit scale.)"
+words_ru = "(Все температуры даны по вашей шкале Фаренгейта.)"
+
+[[unit]]
+key = "celsius"
+group = "temperature"
+en = "degree Celsius"
+ru = "градус Цельсия"
+size = "1 kelvin"
+offset = "273.15"
+def = { en = "water freezes at 0 and boils at 100; 32 and 212 °F", ru = "вода замерзает при 0 и кипит при 100; 32 и 212 °F" }
+
+[[unit]]
+key = "kelvin"
+group = "temperature"
+en = "kelvin"
+ru = "кельвин"
+size = "base"
+def = { en = "the SI unit of temperature, from absolute zero", ru = "единица температуры в СИ, от абсолютного нуля" }
+
+# ---------------------------------------------------------------- examples
+
+[[example]]
+group = "time"
+ref = "14:1.12"
+words = "it requires almost one thousand years for these spheres to complete their circuit"
+words_ru = "на полный оборот этих сфер уходит почти тысяча лет"
+value = 1
+unit = "phday"
+says = { value = 1000, unit = "year", within = 0.0001 }
+
+[[example]]
+group = "time"
+ref = "15:7.2"
+words = "about eight and one fifth of your years"
+words_ru = "около восьми и одной пятой ваших лет"
+value = 1
+unit = "uvyear"
+says = { value = 8.2, unit = "year", within = 0.01 }
+
+[[example]]
+group = "time"
+ref = "33:6.7"
+words = "about five years of Urantia time"
+words_ru = "примерно пяти урантийским годам"
+value = 1
+unit = "nbyear"
+says = { value = 5, unit = "year", within = 0.01 }
+
+[[example]]
+group = "time"
+ref = "43:3.2"
+words = "A Constellation Father reigns for ten thousand standard years (about 50,000 Urantia years)"
+words_ru = "Отец Созвездия правит в течение десяти тысяч стандартных лет (приблизительно 50 000 урантийских лет)"
+value = 10000
+unit = "nbyear"
+says = { value = 50000, unit = "year", within = 0.01 }
+
+[[example]]
+group = "time"
+ref = "35:6.1"
+words = "three dekamillenniums, about 150,000 Urantia years"
+words_ru = "тридцать тысячелетий – около 150 000 лет урантийского времени"
+value = 3
+unit = "dekamil"
+says = { value = 150000, unit = "year", within = 0.01 }
+
+[[example]]
+group = "time"
+ref = "54:6.6"
+words = "twenty-five thousand years of system time (twenty thousand years of Urantia time)"
+words_ru = "двадцати пяти тысяч лет системного времени (двадцати тысяч лет урантийского времени)"
+value = 25000
+unit = "sysyear"
+says = { value = 20000, unit = "year", within = 0.02 }
+
+[[example]]
+group = "distance"
+ref = "46:5.23"
+words = "five thousand standard miles in circumference"
+words_ru = "окружность которой составляет пять тысяч стандартных миль"
+value = 5000
+unit = "jmile"
+
+[[example]]
+group = "distance"
+ref = "46:2.8"
+words = "Mount Seraph is the highest elevation on Jerusem, almost fifteen thousand feet"
+words_ru = "Гора Серафим, достигающая в высоту почти пятнадцати тысяч футов"
+value = 15000
+unit = "foot"
+
+[[example]]
+group = "distance"
+ref = "32:2.11"
+words = "From Jerusem, the headquarters of Satania, it is over two hundred thousand light-years to the physical center of the superuniverse of Orvonton"
+words_ru = "Более двухсот тысяч световых лет отделяют Иерусем – столицу Сатании – от физического центра сверхвселенной Орвонтон"
+value = 200000
+unit = "lightyear"
+
+[[example]]
+group = "speed"
+ref = "46:2.8"
+words = "The transporters take off at about twenty-five standard miles per second of Urantia time"
+words_ru = "Транспортные серафимы стартуют со скоростью около двадцати пяти стандартных миль в секунду урантийского времени"
+value = 25
+unit = "jmileps"
+
+[[example]]
+group = "speed"
+ref = "23:2.22"
+words = "on a long journey the velocity will average about 550,000 miles per second"
+words_ru = "при продолжительных путешествиях средняя скорость составляет примерно 550 000 миль в секунду"
+value = 550000
+unit = "mps"
+
+[[example]]
+group = "weight"
+ref = "41:3.6"
+words = "one cubic inch of such a star, if on Urantia, would weigh six thousand pounds"
+words_ru = "один кубический дюйм такой звезды весил бы на Урантии шесть тысяч фунтов"
+value = 6000
+unit = "pound"
+
+[[example]]
+group = "weight"
+ref = "41:4.1"
+words = "who have reckoned it as about two octillion"
+words_ru = "по расчетам которых она составляет порядка двух октильонов"
+value = 2e27
+unit = "ton"
+
+[[example]]
+group = "temperature"
+ref = "46:1.3"
+words = "The full-light temperature is maintained at about 70 degrees Fahrenheit"
+words_ru = "При полном освещении температура поддерживается на уровне 70 градусов по Фаренгейту"
+value = 70
+unit = "fahrenheit"
+
+[[example]]
+group = "temperature"
+ref = "41:7.2"
+words = "The surface temperature of your sun is almost 6,000 degrees"
+words_ru = "Температура поверхности вашего солнца составляет почти 6 000 градусов"
+value = 6000
+unit = "fahrenheit"
+
+[[example]]
+group = "temperature"
+ref = "41:7.2"
+words = "about 35,000,000 degrees in the central regions"
+words_ru = "35 000 000 градусов в центральных регионах"
+value = 35000000
+unit = "fahrenheit"

@@ -358,6 +358,11 @@
     // Nor does one made before 2026-11-18 keep Privacy and Terms.
     if (path === '/privacy' || path === '/terms') return { res: away(sh, T('This page is read online.')) };
     if (path === '/stats') return { res: away(sh, T('This page is read online.')) };
+    // The charts and Unit conversions (app.py charts, units_page), pages of the
+    // misc chunk since 2026-11-22: a copy from before keeps neither.  With a
+    // slash after it the server sends on to it, as for the chart (below).
+    if (path === '/charts/' || path === '/units/') return { res: redirect(origin + path.slice(0, -1), 307) };
+    if (path === '/charts' || path === '/units') return { res: away(sh, T('This page is read online.')) };
     if (path === '/quiz/board') return { res: away(sh, T('The quiz board is read online.')) };
     // The chart of the personalities (app.py cosmology_page), a chunk of its
     // own.  A copy made before 2026-11-13 has none, and the network's failure

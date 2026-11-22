@@ -4054,7 +4054,10 @@
     for (i = 0; i < rhs.length; i++)
       if (rhs[i].compareDocumentPosition(p) & Node.DOCUMENT_POSITION_FOLLOWING) rh = rhs[i];
     a = rh && rh.querySelector('a');
-    return a && a.lastChild && a.lastChild.nodeType === 3 ? a.lastChild.data.replace(/^[\s\u00b7]+/, '').trim() : '';
+    // Its words after "Paper 101 \u00b7 ", one text since the line is the book's
+    // own words, "Paper", in either language (path.html, 2026-11-22).
+    return a && a.lastChild && a.lastChild.nodeType === 3
+      ? a.lastChild.data.replace(/^\s*(Paper \d+)?[\s\u00b7]+/, '').trim() : '';
   }
   // Its opening words, twelve, as Ctrl+X takes a selection's (clean, below):
   // without the reference, the play button and a card open in it.
@@ -4855,6 +4858,16 @@
     if (window.ubCosmo) return window.ubCosmo();
     js = document.createElement('script');
     js.src = chart.dataset.src;
+    document.head.appendChild(js);
+  });
+  // Unit conversions (units.html) the same way (static/units.js); listen.js,
+  // which every section's page names, is left alone (CLAUDE.md trap 51).
+  document.addEventListener('ub:swap', function () {
+    var page = document.querySelector('main.units'), js;
+    if (!page) return;
+    if (window.ubUnits) return window.ubUnits();
+    js = document.createElement('script');
+    js.src = page.dataset.src;
     document.head.appendChild(js);
   });
 

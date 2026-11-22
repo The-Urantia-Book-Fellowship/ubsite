@@ -232,6 +232,11 @@ def main(argv: list[str]) -> int:
         from . import passage
         n_passages = passage.load(con, report)
         print(f"  {n_passages} passages of the moment, from data/passages.tsv")
+        # Unit conversions (build/units.py), held to the text and to uf-ru's.
+        from . import units
+        unit_stats = units.load(con, report)
+        print(f"  unit conversions: {unit_stats['units']} units, {unit_stats['units_book']} of them the book's,"
+              f" and {unit_stats['unit_examples']} examples from the text, from data/units.toml")
         print("speech ...")
         from . import speech
         n_speech = speech.derive(con)
@@ -346,6 +351,7 @@ def main(argv: list[str]) -> int:
                         (k, con.execute(q).fetchone()[0]))
         con.executemany("INSERT INTO stat VALUES (?,?)", sorted(audio_stats.items()))
         con.executemany("INSERT INTO stat VALUES (?,?)", sorted(cosmo_stats.items()))
+        con.executemany("INSERT INTO stat VALUES (?,?)", sorted(unit_stats.items()))
         con.execute("INSERT INTO stat VALUES ('text_version', ?)", (text_version,))
         con.commit()
         con.execute("VACUUM")
@@ -424,6 +430,9 @@ def main(argv: list[str]) -> int:
         print("\n== the passages of the moment ==")
         from .passage import check as passage_check
         rc |= passage_check(dbf) if dbf.exists() else absent("var/ub.db (make data)")
+        print("\n== unit conversions ==")
+        from .units import check as units_check
+        rc |= units_check(dbf) if dbf.exists() else absent("var/ub.db (make data)")
         print("\n== italic spans vs press artifacts ==")
         from .checks.check_spans import load_press_italics, run as span_run
         if ital and ital.is_dir():

@@ -96,6 +96,8 @@ def extras(con: sqlite3.Connection, shell: dict) -> list[dict]:
               "/quiz/1/compare", "/quiz/1/x",
               # The chart of the personalities has one address.
               "/cosmology/", "/cosmology/x", "/cosmology/compare", "/Cosmology", "/cosmology/michael",
+              # The charts and Unit conversions, one address each.
+              "/charts/", "/charts/x", "/Charts", "/units/", "/units/x", "/units/time", "/Units",
               # Digits other than 0-9 (app.py RE_REF, 2026-11-09).  Not a newline
               # after an address, which both answer 404 (tests/test_addresses.py)
               # but name differently: Starlette's URL drops it.

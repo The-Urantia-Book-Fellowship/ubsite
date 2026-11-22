@@ -270,8 +270,15 @@ class Pages(unittest.TestCase):
 
     def test_the_ways_in(self):
         home = self.get("/")[2]
-        # Its tile among the home page's Other ways in: the drawing, then the name.
-        self.assertRegex(home, r'<li><a href="/cosmology"><svg [^>]*>.*?</svg><span class="lbl">(?:<x-en>)?Cosmology of Personalities')
+        # The home page's tile is the charts' since 2026-11-22 (Tigran: "a
+        # generic container Charts with Cosmology of Personalities its first
+        # element"): the drawing, then the name; and the chart the first line
+        # of /charts, with its credit.
+        self.assertRegex(home, r'<li><a href="/charts"><svg [^>]*>.*?</svg><span class="lbl">(?:<x-en>)?Charts')
+        self.assertNotIn('href="/cosmology"', home)
+        charts = self.get("/charts")[2]
+        self.assertRegex(charts, r'<ul class="minis">\s*<li>\s*<a class="minicard" href="/cosmology">')
+        self.assertIn('Data source by <a href="https://github.com/alyuev/', charts)
         slug = self.con.execute("SELECT slug FROM cosmo_head WHERE kind='person' AND key='michael'").fetchone()[0]
         concept = self.get(f"/i/{slug}")[2]
         self.assertIn('<a href="/cosmology#michael">', concept)
@@ -312,7 +319,7 @@ class Static(unittest.TestCase):
         "Author": "The Author of any part of ubsite is you and I"."""
         import tomllib
         cat = tomllib.loads((STATIC.parent / "ru.toml").read_text(encoding="utf-8"))
-        for key in ("cosmo:by", "home:cosmology"):
+        for key in ("cosmo:by",):
             self.assertIn("Data source by", cat[key]["en"], key)
             self.assertIn("Источник данных — ", cat[key]["ru"], key)
             self.assertNotIn("Автор", cat[key]["ru"], key)

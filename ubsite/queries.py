@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 import sqlite3
 
-from markupsafe import escape
+from markupsafe import Markup, escape
 
 from ubsite import l10n
 
@@ -1030,4 +1030,145 @@ def cosmo_marks(con: sqlite3.Connection, slugs: list[str]) -> dict[str, list[dic
         en = w["en"] or w["ru"]
         out.setdefault(r["slug"], []).append(
             {"id": r["key"], "name": l10n.L({lang: escape((w[lang] or en)[0]) for lang in l10n.LANGS})})
+    return out
+
+
+# ---- unit conversions (/units; build/units.py, data/units.toml) -----------
+
+def unit_number(x: float, lang: str) -> str:
+    """A value of the calculator as static/units.js writes it (fmt there, held
+    to this by tests/test_units.py): twelve significant digits, the zeros at
+    the end left off; grouped by thousands as the site groups a number (a
+    comma in English, a narrow space in Russian from five digits); a decimal
+    comma in Russian; and from 10^15, or under 10^-6, as 1.35 × 10^15, a
+    power written out (UB Goudy has no superscript digits but ¹²³)."""
+    if x == 0 or x != x or x in (float("inf"), float("-inf")):
+        return "0" if x == 0 else "–"
+    m, e = f"{abs(x):.11e}".split("e")
+    d, e = m.replace(".", ""), int(e)
+    sign = "−" if x < 0 else ""
+    point = "," if lang == "ru" else "."
+    if e >= 15 or e < -6:
+        d = d.rstrip("0")
+        mant = d[0] + (point + d[1:] if len(d) > 1 else "")
+        return f"{sign}{mant} × 10^{str(e).replace('-', '−')}"
+    if e >= 0:
+        whole, frac = (d + "0" * 15)[:e + 1], d[e + 1:]
+    else:
+        whole, frac = "0", "0" * (-e - 1) + d
+    frac = frac.rstrip("0")
+    if lang == "en" or len(whole) >= 5:
+        whole = re.sub(r"\B(?=(\d{3})+(?!\d))", "," if lang == "en" else " ", whole)
+    return sign + whole + (point + frac if frac else "")
+
+
+def _quoted(words: str) -> str:
+    """The book's words as the page quotes them: an ellipsis where they begin
+    or end inside a sentence."""
+    lead = "…" if words[:1].islower() else ""
+    tail = "" if words[-1:] in ".!?)" else "…"
+    return f"{lead}{words}{tail}"
+
+
+def _plain(v: float) -> str:
+    """A value as an address writes it: 25000, 2e+27."""
+    return str(int(v)) if v == int(v) and abs(v) < 1e15 else repr(v)
+
+
+def units(con: sqlite3.Connection) -> dict | None:
+    """The calculator's tables: each group with its rows, a band's heading or a
+    unit, in order, and its examples from the text; and what static/units.js
+    needs, every unit's scale and offset.  None where the build has none."""
+    try:
+        groups = con.execute("SELECT * FROM unit_group ORDER BY n").fetchall()
+    except sqlite3.Error:
+        return None
+    if not groups:
+        return None
+    bands = {(r["group_key"], r["key"]): r for r in con.execute("SELECT * FROM unit_band")}
+    rows = con.execute("SELECT * FROM unit ORDER BY group_key, n").fetchall()
+    size = {r["key"]: (r["scale"], r["offset"]) for r in rows}
+
+    def conv(v, a, b):
+        return (v + size[a][1]) * size[a][0] / size[b][0] - size[b][1]
+
+    def say(en, ru):
+        return l10n.L({"en": escape(en), "ru": escape(ru or en)})
+
+    def quote(en, ru):
+        return l10n.L({lang: Markup("<q>%s</q>") % _quoted(w)
+                       for lang, w in (("en", en), ("ru", ru or en))})
+
+    heads = dict(con.execute("SELECT slug, headword FROM index_entry WHERE level = 1 AND slug IN"
+                             " (SELECT index_slug FROM unit_group)"))
+
+    out = []
+    for g in groups:
+        k = g["key"]
+        items, band = [], None
+        for r in (r for r in rows if r["group_key"] == k):
+            if r["band_key"] != band:
+                band = r["band_key"]
+                b = bands[(k, band)]
+                items.append({"band": say(b["name_en"], b["name_ru"])})
+            v = conv(g["start_value"], g["start_unit"], r["key"])
+            items.append({"unit": {
+                "key": r["key"], "name": say(r["name_en"], r["name_ru"]), "about": bool(r["about"]),
+                "value": unit_number(v, "en"), "value_ru": unit_number(v, "ru"), "ref": r["ref"],
+                "len": len(r["name_en"]),
+                "words": quote(r["words"], r["words_ru"]) if r["ref"] else None,
+                "def": say(r["def_en"], r["def_ru"]) if r["def_en"] else None}})
+        examples = [{"ref": x["ref"], "unit": x["unit_key"], "value": x["value"], "to": x["says_unit"],
+                     "words": quote(x["words"], x["words_ru"]),
+                     "href": f"#{x['unit_key']}={_plain(x['value'])}"}
+                    for x in con.execute("SELECT * FROM unit_example WHERE group_key = ? ORDER BY n", (k,))]
+        out.append({"key": k, "name": say(g["name_en"], g["name_ru"]),
+                    "index": (g["index_slug"], heads[g["index_slug"]]) if g["index_slug"] in heads else None,
+                    "start": [g["start_unit"], g["start_value"]], "rows": items, "examples": examples})
+    return {"groups": out,
+            "data": {"units": {r["key"]: [r["group_key"], r["scale"], r["offset"]] for r in rows},
+                     "start": {g["key"]: [g["start_unit"], g["start_value"]] for g in groups}}}
+
+
+# ---- the charts' pictures (/charts; charts.html) ---------------------------
+
+RE_Y = re.compile(r"[\d.]+,([\d.]+)")
+
+
+def charts_minis(c: dict | None, u: dict | None) -> dict:
+    """The two charts in miniature, for their cards on /charts (Tigran,
+    2026-11-22: "cards serving as links ... 'birds eye view'"; drawn from the
+    data rather than shot, so that the theme and the language follow): the
+    chart of the personalities' top, its units, cards, pairs and lines as the
+    page draws them, no words; and the calculator's time table as it opens,
+    its first rows, the values as each language writes them and bars where
+    the words are."""
+    out = {}
+    if c:
+        w = c["w"]
+        h = round(w * 10 / 16)                  # 16:10, the cards' pictures
+        out["cosmo"] = {
+            "w": w, "h": h, "card": c["card"],
+            "units": [x for x in c["units"] if x["y"] < h],
+            "cards": [x for x in c["cards"] if x["y"] < h],
+            "pairs": [x for x in c["pairs"] if x["y"] < h],
+            "links": [{"type": x["type"], "d": x["d"]["en"]} for x in c["links"]
+                      if any(float(y) < h for y in RE_Y.findall(x["d"]["en"]))]}
+    if u:
+        rows, y = [], 56
+        for it in u["groups"][0]["rows"]:
+            if "band" in it:
+                if y > 860:
+                    break
+                rows.append({"band": True, "y": y})
+                y += 64
+            else:
+                x = it["unit"]
+                rows.append({"y": y, "en": x["value"], "ru": x["value_ru"], "src": len(rows) == 1,
+                             "name": min(160 + 22 * x["len"], 860), "def": 520 + (x["len"] * 37) % 300,
+                             "short": round(0.55 * (520 + (x["len"] * 37) % 300))})
+                y += 124
+            if y > 940:
+                break
+        out["units"] = {"w": 1600, "h": 1000, "rows": rows}
     return out

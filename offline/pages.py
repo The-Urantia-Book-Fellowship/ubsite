@@ -206,6 +206,8 @@ def universe(con: sqlite3.Connection) -> dict:
             + [f"/appendix/{r[0]}" for r in con.execute("SELECT letter FROM appendix ORDER BY letter")]
             + ["/lists", "/lists/1955", "/lists/notes", "/lists/bibliography", "/changelog", "/api", "/help",
                "/privacy", "/terms"]
+            # The charts and Unit conversions (2026-11-22), one page each.
+            + ["/charts"] + (["/units"] if con.execute("SELECT 1 FROM unit LIMIT 1").fetchone() else [])
             + [f"/part/{r[0]}" for r in con.execute("SELECT n FROM part ORDER BY n")])
     # The papers the quiz has questions on (build/quiz.py), each a page /quiz/N.
     quiz = [n for (n,) in con.execute("SELECT paper_n FROM quiz_paper ORDER BY paper_n")]

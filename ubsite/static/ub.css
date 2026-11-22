@@ -2368,6 +2368,10 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
 .prose { max-width: 62ch; margin: 0 auto; padding: 2rem 1rem 0; }
 .concept { max-width: 86ch; }
 .lead { font-size: 1.05rem; }
+/* A prose page's lead (Help, Privacy, Terms, Unit conversions) is the size of
+   its text, which grows with the window (body --size): at 1.05rem it was 17
+   px beside text of 24 at 1280 px (Tigran, 2026-11-22). */
+.prose > .lead { font-size: 1em; }
 /* The changelog (/changelog): ChangeLog.md as written, each entry in a
    version with its day, what is for developers folded where it stands. */
 .changelog h2 { margin-top: 2.2rem; }
@@ -3101,6 +3105,103 @@ h2.chap + .rh { margin-top: 1rem; }
 .ways { list-style: none; padding: 0; }
 .ways li { padding: .3rem 0; }
 .ways code { font-family: inherit; font-style: italic; color: var(--faint); }
+
+/* ---- the charts (/charts; charts.html) -----------------------------------
+   A card to each chart, its picture the chart in miniature, drawn from the
+   data (queries.charts_minis), in the page's colours, so that it follows the
+   theme: the chart of the personalities' top as the chart draws it, and the
+   calculator's time table as it opens.  Two to a row, one on a phone, sized
+   in em of the page's text.  Every class begins with mini (trap 58). */
+main.prose.charts { max-width: 92ch; }
+.minis { list-style: none; margin: 1.6em 0 0; padding: 0; display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.6em 1.4em; align-items: start; }
+@media (max-width: 40rem) { .minis { grid-template-columns: minmax(0, 1fr); } }
+.minicard { display: block; overflow: hidden; color: var(--ink); text-decoration: none; background: var(--card);
+  border: 1px solid var(--rule); border-radius: 10px; transition: border-color .2s, box-shadow .2s; }
+.minicard:hover, .minicard:focus-visible { border-color: var(--link); box-shadow: 0 3px 16px var(--shade); }
+.minicard:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.minipic { display: block; width: 100%; height: auto; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.minicard > .mininame { display: block; padding: .55em .8em 0; color: var(--link); line-height: 1.25; }
+.minicard:hover > .mininame { text-decoration: underline; }
+.minisub { display: block; padding: .3em .8em .8em; font-size: .8em; line-height: 1.4; color: var(--faint); }
+.miniby { margin: .5em .2em 0; font-size: .75em; color: var(--faint); }
+/* The chart's: as main.cosmo colours it (below). */
+.minipic.cosmo { --cedge: color-mix(in oklch, var(--ink) 42%, var(--paper)); --csvc: var(--right); --casc: oklch(0.55 0.16 300); }
+:root[data-theme="dark"] .minipic.cosmo { --casc: oklch(0.74 0.12 300); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .minipic.cosmo { --casc: oklch(0.74 0.12 300); } }
+.miniu { fill: color-mix(in oklch, var(--c) 7%, transparent); stroke: color-mix(in oklch, var(--c) 60%, transparent); stroke-width: 3; }
+.minipair { fill: none; stroke: oklch(0.6 0.13 305 / .7); stroke-width: 3; }
+.minie { fill: none; stroke-width: 3; stroke-linejoin: round; stroke: var(--cedge); }
+.minie[data-t="service"] { stroke: var(--csvc); stroke-dasharray: 10 7; }
+.minie[data-t="ascent"] { stroke: var(--casc); stroke-dasharray: 2 7; stroke-linecap: round; }
+.minip { fill: color-mix(in oklch, var(--c) 13%, var(--card)); stroke: color-mix(in oklch, var(--ink) 30%, transparent); stroke-width: 2; }
+.minig { fill: color-mix(in oklch, var(--c) 15%, transparent); }
+.minid { fill: var(--d); opacity: .8; }
+.minighost { opacity: .62; }
+.minighost .minip { stroke-dasharray: 8 5; }
+.minibar { fill: color-mix(in oklch, var(--ink) 28%, transparent); }
+/* The calculator's: as units.html draws its table (below). */
+.miniband { fill: color-mix(in oklch, var(--faint) 55%, transparent); }
+.minirule { stroke: var(--rule); stroke-width: 2; }
+.minisrc { fill: color-mix(in oklch, var(--link) 8%, transparent); }
+.minif { fill: var(--field); stroke: var(--field-edge); stroke-width: 2.5; }
+.miniv { fill: var(--ink); font-size: 46px; text-anchor: end; font-variant-numeric: tabular-nums lining-nums; }
+.minibold { fill: color-mix(in oklch, var(--ink) 70%, transparent); }
+.minipic.units .minibar { fill: color-mix(in oklch, var(--faint) 40%, transparent); }
+:root:not([data-lang="ru"]) .minipic .ru, :root[data-lang="ru"] .minipic .en { display: none; }
+
+/* ---- unit conversions (/units; units.html, units.js) ----------------------
+   A table to each measure, a row to each unit: a field for its value, then its
+   name over where it comes from, the papers' words (the book's text, black)
+   with their paragraph, or a familiar unit's standard.  Two columns at every
+   width, so that nothing moves to a row of its own on a phone.  The row typed
+   in is tinted; the one an example's figure is given in is lit a moment.
+   Sized in em, of the page's text, which grows with the window (body
+   --size), and not in rem, which does not: at 1280 px the text is 24 px and
+   a rem 16, and the papers' words at .86rem were 14 px, "microscopic"
+   (Tigran, 2026-11-22).  Every class begins with uc (CLAUDE.md trap 58). */
+.uctoc { margin: .2rem 0 0; color: var(--faint); font-size: .9em; }
+.ucg { margin-top: 2.2rem; }
+.uct, .uct tbody { display: block; }
+/* A row a grid: the field down the left, the name over where it comes from;
+   on a phone the name, the field under it at the page's width, then where
+   the unit comes from. */
+.uct tr[data-u] { display: grid; grid-template-columns: 12.5em minmax(0, 1fr); column-gap: .6em;
+  grid-template-areas: "v n" "v d"; align-items: start; padding: .45rem 0; border-top: 1px solid var(--rule); }
+.uct td { display: block; padding: 0; }
+.uct .ucb { display: block; }
+.uct .ucb th { display: block; padding: 1rem 0 .25rem; text-align: left; font-weight: 400; color: var(--faint);
+  font-variant-caps: all-small-caps; font-synthesis: small-caps; letter-spacing: .06em; }
+.uct .ucb:first-child th { padding-top: .2rem; }
+.ucv { grid-area: v; }
+.ucn { grid-area: n; padding-top: .15em !important; line-height: 1.3; }
+.ucdef { grid-area: d; }
+.ucv input { box-sizing: border-box; width: 100%; font: inherit; font-size: .85em; color: inherit; text-align: right;
+  font-variant-numeric: tabular-nums lining-nums; padding: calc(.28rem + var(--lift)) .55rem calc(.28rem - var(--lift));
+  background: var(--field); border: 1px solid var(--field-edge); border-radius: .45rem; }
+.ucv input:hover { border-color: var(--link); }
+.ucv input:focus { background: var(--paper); border-color: var(--link); outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--link) 22%, transparent); }
+.ucv input[aria-invalid] { border-color: var(--wrong); box-shadow: 0 0 0 2px color-mix(in oklch, var(--wrong) 30%, transparent); }
+.uct tr.ucsrc { background: color-mix(in oklch, var(--link) 8%, transparent); }
+.uct tr.ucto { background: color-mix(in oklch, var(--gold) 28%, transparent); transition: background .6s; }
+/* UB Goudy has no ≈: the system's face draws it (build/fonts.py ELSEWHERE). */
+.ucab { color: var(--faint); font-family: system-ui, sans-serif; }
+.ucdef { margin-top: .15em; font-size: .8em; line-height: 1.4; color: var(--faint); }
+.ucdef q, .ucex q { color: var(--text); }
+.ucdef a, .ucref { white-space: nowrap; }
+.ucut { margin: .7rem 0 0; }
+.ucut:empty { display: none; }
+.ucg h3 { margin: 1.2em 0 .2em; font-size: 1em; font-weight: 400; font-style: italic; }
+.ucex { list-style: none; margin: 0; padding: 0; }
+.ucex li { padding: .15em 0; font-size: .9em; line-height: 1.4; }
+.ucex .ucgo { color: inherit; text-decoration: none; }
+.ucex .ucgo:hover q { color: var(--link); text-decoration: underline; }
+.ucix { margin: .8em 0 0; font-size: .8em; color: var(--faint); }
+@media (max-width: 40rem) {
+  .uct tr[data-u] { grid-template-columns: minmax(0, 1fr); grid-template-areas: "n" "v" "d"; row-gap: .3rem; }
+  .ucn { padding-top: 0 !important; }
+}
 
 /* ---- the chart of the personalities (cosmology.html, cosmo.js) -----------
    Drawn here from Alexander Alyuev's data (build/cosmo.py).  A canvas of his

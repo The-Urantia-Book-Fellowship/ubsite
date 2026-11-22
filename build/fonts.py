@@ -71,6 +71,10 @@ def cyrillic(c: str) -> bool:
     return any(a <= ord(c) <= b for a, b in CYRILLIC)
 FORBIDDEN = "Goudy-Handtooled-BT.ttf"
 ASCII = "".join(map(chr, range(0x20, 0x7F)))
+# What a script writes that no template or word of ru.toml has: Unit
+# conversions' values (static/units.js, queries.unit_number), a minus, a
+# times sign and the narrow space Russian groups digits with.
+SCRIPTED = "−×\u202f"
 
 # Characters the site draws on purpose in another face, and where.  The gate
 # excuses these and nothing else.
@@ -85,6 +89,8 @@ ELSEWHERE = {
     "←": "the keys Help lists and the tour's cards name, set in the system UI face"
          " (help.html and ub.css kbd)",
     "→": "and the other arrow",
+    "≈": "Unit conversions' mark of a unit the papers give as about or almost"
+         " (units.html and units:lead .ucab), set in the system UI face",
     "\u2060": "the word joiner that holds a 1955 ring to its word (ub.css"
               " a.fn::before); it draws nothing",
 }
@@ -223,7 +229,7 @@ def build(con, srcdir: pathlib.Path, site: pathlib.Path, report) -> dict:
     # break is not drawn.
     # Every printable ASCII character too, used or not: a search draws back
     # whatever a reader typed, and | \ ` would otherwise come from another face.
-    wanted = {c for c in corpus_codepoints(con) | chrome_codepoints(site) | set(ASCII)
+    wanted = {c for c in corpus_codepoints(con) | chrome_codepoints(site) | set(ASCII) | set(SCRIPTED)
               if unicodedata.category(c) != "Cc" and c not in ELSEWHERE}
     # The Cyrillic goes to EB Garamond's faces, and ub.css must say so over
     # exactly the ranges they are subset to.
