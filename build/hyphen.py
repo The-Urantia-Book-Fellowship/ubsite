@@ -22,11 +22,11 @@ The rules, all TeX's:
   * a \\- in the source overrides all of that for its one occurrence: the
     word breaks there and nowhere else, minimums or not.  That is how the press
     divides `to pre-sent' from `the pres-ent age' (tools/verb_breaks.py);
-  * the text's last word is left whole, but for a \\- in it.  That rule is
-    ours, not TeX's (DECISIONS.md, The text on the page, 2026-10-31): a
-    browser fills its lines one at a time and has no \\finalhyphendemerits, so
-    wherever `Abso-' fitted the line before it left `lute.' as a paragraph's
-    last line.  The book itself does so in some 1,200 paragraphs.
+  * the text's last word breaks as any other, as the book's does (some 1,200
+    paragraphs of the press end so).  From 2026-10-31 to 2026-11-22 it was left
+    whole, a stub such as `lute.' never alone on a paragraph's last line; Tigran
+    undid that when a short verse, Neh 12:3, stretched two names across a
+    phone's line to keep "Meremoth," whole (DECISIONS.md, The text on the page).
 
 pyphen and the browsers' dictionaries do something else: pyphen's en_US,
 which is LibreOffice's and Firefox's, disagrees with 387 of the list's 523
@@ -163,21 +163,17 @@ class Hyphenator:
         `spans` are the paragraph's; its `shy` spans are the source's \\-.
         A letter run that is not all ASCII is left whole: TeX would read the
         accented letter into the word, and these patterns know no such word
-        (two in the book, `attachés' and `365¼').  So is the text's last run
-        of letters, the paragraph's last word, but for a \\- in it (the module's
-        head): the whole word drops to the last line, never its stub.
+        (two in the book, `attachés' and `365¼').
         """
         shy = sorted(s.start for s in spans if s.kind == "shy")
         # A note's Greek, \textgreek, is its own language (the module's head).
         greek = [(s.start, s.end) for s in spans
                  if s.kind == "lang" and (s.attr or {}).get("lang") == "grc"]
-        words = list((_WORD if self.lang.ascii_only else _RU_WORD).finditer(text))
-        last = words[-1].span() if words else None
         out = []
-        for m in words:
+        for m in (_WORD if self.lang.ascii_only else _RU_WORD).finditer(text):
             a, b = m.span()
             if any(x <= a and b <= y for x, y in greek):
-                if (a, b) != last and not _COMBINING.search(m.group()):
+                if not _COMBINING.search(m.group()):
                     out.extend(a + p for p in sorted(_greek().word(m.group())))
                 continue
             if self.lang.ascii_only and not _ASCII.fullmatch(m.group()):
@@ -187,7 +183,7 @@ class Hyphenator:
             own = [p for p in shy if a < p < b]
             if own:
                 out.extend(own)
-            elif (a, b) != last:
+            else:
                 out.extend(a + p for p in sorted(self.word(m.group())))
         return out
 

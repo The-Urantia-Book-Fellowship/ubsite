@@ -40,7 +40,7 @@ import re
 import sqlite3
 import tomllib
 
-from . import versify
+from . import kjvnotes, versify
 from .expand import Expander
 from .hyphen import ENGLISH, RUSSIAN, Hyphenator
 from .render import render, strip_tags
@@ -51,6 +51,7 @@ KJV = ROOT / "data" / "kjv"
 RSB = ROOT / "data" / "rsb"
 VERSIONS = ROOT / "data" / "bible.toml"
 TABLE_FILE = RSB / "versification.tsv"
+MARKS = KJV / "marks.tsv"
 OUT = ROOT / "var" / "bible.db"
 SCHEMA = ROOT / "build" / "schema_bible" / "bible.sql"
 
@@ -73,6 +74,7 @@ RSB_SUBS: list[tuple[str, str]] = []
 
 KJV_BOOK = ["n", "abbr", "testament", "name", "ref_name", "head", "title", "end"]
 KJV_VERSE = ["chapter", "verse", "pilcrow", "head", "text", "after", "note"]
+KJV_MARKS = ["book", "chapter", "verse", "lemma", "place", "why"]
 RSB_BOOK = ["n", "abbr", "group", "name", "ref", "title"]
 RSB_VERSE = ["chapter", "verse", "pilcrow", "head", "text"]
 RE_MAIN = re.compile(r"\\bibtitlemain\{([^{}]*)\}")
@@ -97,7 +99,7 @@ def books_of(data: pathlib.Path) -> list[str]:
 
 def files() -> list[pathlib.Path]:
     """What the database is built from, in the order its digest reads them."""
-    out = [VERSIONS, KJV / "books.tsv"] + [KJV / f"{a}.tsv" for a in books_of(KJV)]
+    out = [VERSIONS, KJV / "books.tsv"] + [KJV / f"{a}.tsv" for a in books_of(KJV)] + [MARKS]
     return out + [RSB / "books.tsv"] + [RSB / f"{a}.tsv" for a in books_of(RSB)] + [TABLE_FILE]
 
 
@@ -123,6 +125,21 @@ def _rows(path: pathlib.Path, fields: list[str], report) -> list[dict]:
                         f"{len(cells)} fields, not {len(fields)}")
             continue
         out.append(dict(zip(fields, cells), line=k))
+    return out
+
+
+def read_marks(report) -> dict[tuple, tuple[str, str]]:
+    """data/kjv/marks.tsv: {(abbr, chapter, verse, lemma): (place, why)}, the
+    place of each gloss that its lemma standing once does not give
+    (build/kjvnotes.py place())."""
+    out = {}
+    for r in _rows(MARKS, KJV_MARKS, report):
+        key = (r["book"], int(r["chapter"]), int(r["verse"]), r["lemma"])
+        if key in out:
+            report.hard("bible-format", f"kjv/marks.tsv:{r['line']}", f"a second line for {key}")
+        if not kjvnotes.places_ok(r["place"]) or not r["why"]:
+            report.hard("bible-format", f"kjv/marks.tsv:{r['line']}", f"place {r['place']!r}, or no reason")
+        out[key] = (r["place"], r["why"])
     return out
 
 
@@ -183,7 +200,8 @@ def title_lines(tex: str) -> tuple[list[list], str, int]:
 
 
 def verse_key(abbr: str, c: int, v: int) -> str:
-    """A KJV verse's note in a page's ids: fnGen1_4, its mark fnrefGen1_4."""
+    """A KJV verse's notes in a page's ids, a gloss's number after it:
+    fnGen1_4_1, its mark fnrefGen1_4_1; a psalm's title's verse 0, Psa4_0_1."""
     return f"{abbr}{c}_{v}"
 
 
@@ -240,6 +258,7 @@ def rows_of(abbr: str, kv: list[dict] | None, rv: list[dict] | None, rules, repo
 def build(report, out: pathlib.Path = OUT) -> dict:
     kb, kv, rb, rv, versions = read(report)
     rules = versify.read(TABLE_FILE)
+    ruled, used = read_marks(report), set()
     if report.blocking:
         return {}
     order = contents(kb, rb)
@@ -302,6 +321,18 @@ def build(report, out: pathlib.Path = OUT) -> dict:
                     after, aspans, _ = expand(r["after"], where + " (subscription)", report, table, subs)
                 text, spans, tnotes = expand(r["text"], where, report, table, subs)
                 title = version == "kjv" and r["head"] and not RE_LETTER.fullmatch(r["head"])
+                # The KJV's notes, a gloss at a time, each before the first word it
+                # glosses, in the verse or in its psalm's title (build/kjvnotes.py).
+                notes, tnotes_kjv = [], []
+                if version == "kjv" and r["note"]:
+                    ntext, nspans, _ = expand(r["note"], where + " (note)", report, table, subs)
+                    parts = ([("title", head)] if title else []) + [("text", text)]
+                    placed = kjv_glosses((abbr, c, v), ntext, nspans, parts, ruled, used, report, where)
+                    for part, off, g in placed:
+                        into, sp = (tnotes_kjv, hspans) if part == "title" else (notes, spans)
+                        key = f"{verse_key(abbr, c, 0 if part == 'title' else v)}_{len(into) + 1}"
+                        sp.append(Span(off, off, "fnref", {"kind": "kjv", "key": key}))
+                        into.append(("text", key, g.text, [Span(a, z, s.kind, s.attr) for s, a, z in g.spans]))
                 if title:                           # a KJV psalm's title: a row 0 of its own
                     vid += 1
                     con.execute("INSERT INTO bible_verse VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
@@ -310,19 +341,12 @@ def build(report, out: pathlib.Path = OUT) -> dict:
                                  "", ""))
                     insert_spans(con, vid, "text", hspans, stats, version)
                     con.execute(f"INSERT INTO bible_{version}_fts (rowid, text) VALUES (?, ?)", (vid, head))
+                    nid = insert_notes(con, vid, tnotes_kjv, nid, hy[version], stats, version, report, where)
                     stats[f"{version}_titles"] += 1
                     head, hspans = "", []
                 vid += 1
-                # The notes: the KJV's one at the verse's end; the Synodal's where they stand,
-                # its heading's first.
-                notes = []
-                if version == "kjv":
-                    if r["note"]:
-                        key = verse_key(abbr, c, v)
-                        spans.append(Span(len(text), len(text), "fnref", {"kind": "kjv", "key": key}))
-                        ntext, nspans, _ = expand(r["note"], where + " (note)", report, table, subs)
-                        notes.append(("text", key, ntext, nspans))
-                else:
+                # The Synodal's notes where they stand, its heading's first.
+                if version == "rsb":
                     for part, sp, ns in (("head", hspans, hnotes), ("text", spans, tnotes)):
                         marks = [s for s in sp if s.kind == "fnref"]
                         for s, note in zip(marks, ns):
@@ -344,20 +368,11 @@ def build(report, out: pathlib.Path = OUT) -> dict:
                 fts = " ".join(x for x in (head, text, after) if x)
                 con.execute(f"INSERT INTO bible_{version}_fts (rowid, text) VALUES (?, ?)",
                             (vid, fts.translate(YO)))
-                for n, (part, key, ntext, nspans) in enumerate(notes, 1):
-                    nid += 1
-                    nhtml = render(ntext, nspans)
-                    if strip_tags(nhtml) != ntext:
-                        report.hard("bible-roundtrip", where, "a note's HTML says otherwise than its text")
-                    con.execute("INSERT INTO bible_note VALUES (?,?,?,?,?,?,?,?)",
-                                (nid, vid, part, n, key, ntext, nhtml,
-                                 render(ntext, nspans, shy=hy[version].points(ntext, nspans))))
-                    insert_spans(con, vid, "note", nspans, stats, version)
-                    con.execute(f"INSERT INTO bible_{version}_note_fts (rowid, text) VALUES (?, ?)",
-                                (nid, ntext.translate(YO)))
-                    stats[f"{version}_notes"] += 1
+                nid = insert_notes(con, vid, notes, nid, hy[version], stats, version, report, where)
                 stats[f"{version}_verses"] += 1
                 stats[f"{version}_pilcrows"] += bool(r["pilcrow"])
+    for key in sorted(set(ruled) - used):
+        report.hard("bible-gloss", "kjv/marks.tsv", f"{key}: no gloss of that lemma in that verse")
     con.executemany("INSERT INTO bible_meta VALUES (?, ?)",
                     [("data", digest())] + [(k, str(v)) for k, v in stats.items()])
     con.commit()
@@ -369,6 +384,68 @@ def build(report, out: pathlib.Path = OUT) -> dict:
     con.close()
     tmp.replace(out)
     return stats
+
+
+def kjv_glosses(at: tuple, ntext: str, nspans, parts, marks: dict, used: set, report,
+                where: str) -> list[tuple[str, int, kjvnotes.Gloss]]:
+    """A KJV note's glosses, each with its place, (part, offset, gloss), in the
+    order they stand: by data/kjv/marks.tsv where it names the gloss's lemma in
+    that verse, its places in the note's order where two glosses share one;
+    else where the lemma stands once.  A gloss with neither fails."""
+    try:
+        gs = kjvnotes.glosses(ntext, nspans)
+    except ValueError as e:
+        report.hard("bible-gloss", where, str(e))
+        return []
+    group: dict[str, list] = {}
+    for g in gs:
+        group.setdefault(kjvnotes.lemma_key(g.lemma), []).append(g)
+    out = []
+    for lemma, same in group.items():
+        line = marks.get((*at, lemma))
+        if line is not None:
+            used.add((*at, lemma))
+            specs = line[0].split(", ")
+            if len(specs) != len(same):
+                report.hard("bible-gloss", where, f"data/kjv/marks.tsv names {len(specs)} places for "
+                            f"{len(same)} glosses of {lemma!r}")
+                continue
+            for g, spec in zip(same, specs):
+                found = kjvnotes.place(spec, g.lemma, parts)
+                if found is None:
+                    report.hard("bible-gloss", where, f"data/kjv/marks.tsv's place {spec!r} for {lemma!r} "
+                                "is not in the verse")
+                    continue
+                out.append((*found, g))
+            continue
+        for g in same:
+            occ = kjvnotes.occurrences(g.lemma, parts) if g.lemma else []
+            if len(occ) != 1 or len(same) > 1:
+                report.hard("bible-gloss", where, f"the gloss {lemma!r} stands {len(occ)} times in the verse"
+                            f"{' and its title' if len(parts) > 1 else ''}, and data/kjv/marks.tsv names "
+                            "no place for it")
+                continue
+            out.append((*occ[0], g))
+    order = [p for p, _ in parts]
+    return sorted(out, key=lambda x: (order.index(x[0]), x[1], gs.index(x[2])))
+
+
+def insert_notes(con, vid: int, notes: list, nid: int, hy, stats: dict, version: str, report,
+                 where: str) -> int:
+    """A line's notes, (part, key, text, spans) each, n in that order: their
+    rows, spans and search; the last note id."""
+    for n, (part, key, ntext, nspans) in enumerate(notes, 1):
+        nid += 1
+        nhtml = render(ntext, nspans)
+        if strip_tags(nhtml) != ntext:
+            report.hard("bible-roundtrip", where, "a note's HTML says otherwise than its text")
+        con.execute("INSERT INTO bible_note VALUES (?,?,?,?,?,?,?,?)",
+                    (nid, vid, part, n, key, ntext, nhtml, render(ntext, nspans, shy=hy.points(ntext, nspans))))
+        insert_spans(con, vid, "note", nspans, stats, version)
+        con.execute(f"INSERT INTO bible_{version}_note_fts (rowid, text) VALUES (?, ?)",
+                    (nid, ntext.translate(YO)))
+        stats[f"{version}_notes"] += 1
+    return nid
 
 
 def insert_spans(con, vid: int, part: str, spans, stats: dict, version: str) -> None:

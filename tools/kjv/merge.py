@@ -42,13 +42,16 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from build import kjvnotes                        # noqa: E402
 from tools.kjv import compare as C            # noqa: E402
 from tools.kjv import convert as V            # noqa: E402
 
 OUT = ROOT / "data" / "kjv" / "witness.tsv"
 # Notes the witness's words are not taken for, each with the reason.
 KEEP = {("2Sa", 23, 8): "the witness's third gloss is its own slip, "
-                        "\"1ch 11:11 he lift…: from whom he…: Heb. slain\""}
+                        "\"1ch 11:11 he lift…: from whom he…: Heb. slain\"",
+        ("Psa", 120, 3): "the witness's \"what shall is profit thee\" is the slip "
+                         "data/kjv/corrections.tsv mends (2026-11-22)"}
 FIELDS = ("book", "chapter", "verse", "field", "value", "why")
 
 
@@ -212,8 +215,9 @@ def merge() -> tuple[list[dict], list[str]]:
             # note repeated at the wrong verse (2Ch 6:29, "toward...: or, in
             # this place"): the copy's note stands, and the place is told.
             verse = C.ours_flat(r["text"])
-            had = set(C.lemmas(C.ours_flat(r["note"])))
-            astray = [x for x in C.lemmas(C.ours_flat(new)) if not C.lemma_in(x, verse) and x not in had]
+            lemmas = lambda note: [g.lemma for g in kjvnotes.glosses(C.ours_flat(note)) if g.lemma]
+            had = set(lemmas(r["note"]))
+            astray = [x for x in lemmas(new) if not C.lemma_in(x, verse) and x not in had]
             if astray:
                 odd.append(f"{where}: not taken, its lemma {astray[0]!r} is not in the verse: {new}")
                 continue

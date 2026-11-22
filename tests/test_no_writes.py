@@ -29,6 +29,7 @@ ALLOWED = {
     "tools/kjv/convert.py": "data/kjv/",           # the KJV's copy, converted once from the study edition
     "tools/kjv/compare.py": "var/kjv/",            # its witness, fetched, and the comparison with it
     "tools/kjv/merge.py": "data/kjv/witness.tsv",  # what the copy takes from the witness, by ruling
+    "tools/kjv/facsimile.py": "var/kjv/",          # the 1769 printing's OCR, fetched, and the review of the glosses' places
     "tools/rsb/convert.py": "data/rsb/",           # the Synodal's copy, converted once from Tigran's edition
     "tools/rsb/versify.py": "var/rsb/",            # SIL's files and the proposal; with --write, the table it was ruled into
     "build/cli.py": "var/",                        # ub.db, built as ub.db.tmp and swapped in

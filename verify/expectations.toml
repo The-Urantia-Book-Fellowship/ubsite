@@ -29,10 +29,10 @@ gap_before_flags     = 4208      # 4,188 \pc and 20 \pcman, its twin placed by h
                                  # reader holds each mark to its flag (press.py pc-dropped)
 # Hyphenation (build/hyphen.py), measured at press 806c7ac on 2026-10-12: Knuth's
 # hyphen.tex, hyphenmins 2/3, the 523 entries of tex/urantia-hyphen-en.tex, and \-.
-# Since 2026-10-31 a paragraph's last word carries none but its \- (DECISIONS.md,
-# The text on the page): 14,890 fewer than the 530,865 before, measured at press 911b96c (2026-10-24).
+# A paragraph's last word breaks as any other (DECISIONS.md, The text on the page,
+# 2026-11-22); from 2026-10-31 it carried none but its \-, 14,890 fewer, 515,975.
 discretionary_hyphens = 1392     # \- in the source, each a `shy` span; all inside \vs lines
-soft_hyphens         = 515975    # U+00AD in paragraph.html_hy, those 1,392 included
+soft_hyphens         = 530865    # U+00AD in paragraph.html_hy, those 1,392 included
 [srt]
 source_sha256 = "a5dd319ae58e7646a9099e34ef1ace1abe500b57e1e1a6b16046e29b4de85472"   # data/srt/considerations.html
 fetched       = "2026-10-11T22:46:57Z"
@@ -315,12 +315,13 @@ kjv_books     = 66
 kjv_chapters  = 1189
 kjv_verses    = 31102
 kjv_titles    = 116         # the psalms' titles, set apart, a row 0 each
-kjv_notes     = 6684        # the edition's 6,648, three moved, and 36 more of the 1769's
+kjv_notes     = 7852        # a gloss to each (build/kjvnotes.py): the 6,684 notes, the edition's 6,648, three moved, and 36 more of the 1769's, less a repeat at 1Ch 4:14 (2026-11-22)
 kjv_pilcrows  = 2970        # the 1769's, the last at Acts 20:36
 kjv_supplied  = 21528       # the translators' supplied words: 21,527 in the verses, one in a note
 kjv_sc        = 6624        # the LORD in small capitals: 6,563 in the verses, 61 in the notes
-kjv_corrections   = 56      # data/kjv/corrections.tsv
+kjv_corrections   = 67      # data/kjv/corrections.tsv: 56, and 11 found placing the notes' glosses (2026-11-22)
 kjv_witness_lines = 3231    # data/kjv/witness.tsv: 2,970 pilcrows, 138 heads, 14 subscriptions, 109 notes
+kjv_marks_lines   = 201     # data/kjv/marks.tsv: the glosses placed by reading, beside the 1769 printing (2026-11-22)
 rsb_books     = 77
 rsb_chapters  = 1362        # as it numbers them, chapter 0 (Est, Sir) not counted
 rsb_verses    = 37255       # with its titles, 3 Ezra's seventy bracketed and the prologues

@@ -68,10 +68,13 @@ class Greek(unittest.TestCase):
         spans2 = [Span(0, 5, "lang", {"lang": "grc"})]
         self.assertEqual([p for p in h.points(text2, spans2) if p < 6], [])
 
-    def test_the_last_word_of_a_note_is_left_whole_in_greek_too(self):
+    def test_the_last_word_breaks_as_any_other_greek_too(self):
+        # As the book's does (Tigran, 2026-11-22; left whole from 2026-10-31):
+        # Neh 12:3 may end "Mere-" over "moth,", a note "πνεύ-" over "ματα".
+        self.assertEqual(Hyphenator((), ENGLISH).points("Rehum, Meremoth,", []), [2, 10, 11])
         text = "the word πνεύματα"
         spans = [Span(9, 17, "lang", {"lang": "grc"})]
-        self.assertEqual(Hyphenator((), ENGLISH).points(text, spans), [])
+        self.assertEqual(Hyphenator((), ENGLISH).points(text, spans), [13])
 
     def test_a_russian_note_breaks_its_greek_the_same_way(self):
         text = "слово οὐρανός здесь"

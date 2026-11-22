@@ -18,7 +18,8 @@ pilcrows and Strong's numbers of the witness set aside):
   its verse 1, and an epistle's subscription after its last verse, where the
   edition has them;
   the notes, the edition's one \\fn to a verse against the witness's notes at
-  that verse, joined.
+  that verse, joined; and the glosses the build reads in each note
+  (build/kjvnotes.py) against the witness's notes, one to a gloss.
 
 Each difference is a line of var/kjv/compare.txt, by kind.  It decides nothing:
 a slip is mended by a line of data/kjv/corrections.tsv, with its witness.
@@ -51,8 +52,11 @@ USFM = dict(zip(
     "EPH PHP COL 1TH 2TH 1TI 2TI TIT PHM HEB JAS 1PE 2PE 1JN 2JN 3JN JUD REV".split()))
 
 
+sys.path.insert(0, str(ROOT))
+from build import kjvnotes                        # noqa: E402
+
+
 def config() -> dict:
-    sys.path.insert(0, str(ROOT))
     from build import config as cfg
     return cfg.kjv_witness()
 
@@ -185,26 +189,10 @@ def read_ours() -> tuple[list[dict], dict[str, list[dict]]]:
     return books, verses
 
 
-# A note is one or more glosses, each `lemma: gloss.`: the lemma the verse's
-# words it glosses, or their first words and "..." (`the light from...: Heb.
-# between ...`).  A lemma is found at the start of the note and after each
-# full stop, before the first colon that follows it.
-RE_LEMMA = re.compile(r"(?:^|(?<=\. ))([^:.]+?(?:\.\.\.)?): ")
-
-
-def lemmas(note: str) -> list[str]:
-    return [m[1] for m in RE_LEMMA.finditer(note)
-            if not re.fullmatch(r"(?:Heb|Gr|or|Chaldee|Syr|that is|i\.e)\b.*", m[1])]
-
-
 def lemma_in(lemma: str, verse: str) -> bool:
-    """Whether the lemma's words stand in the verse, the supplied words'
-    brackets aside, case aside, and a lemma ending "..." taken as a beginning."""
-    plain = lambda t: " ".join(re.sub(r"[^\w\s']", " ", t.replace("[", "").replace("]", "")).lower().split())
-    v = " " + plain(verse) + " "
-    if lemma.endswith("..."):
-        return (" " + plain(lemma[:-3]) + " ") in v or (" " + plain(lemma[:-3])) in v
-    return (" " + plain(lemma) + " ") in v
+    """Whether the lemma's words stand in the verse (build/kjvnotes.py, the
+    build's own reading of a note)."""
+    return bool(kjvnotes.occurrences(lemma, [("text", verse)]))
 
 
 def words_diff(a: str, b: str) -> str:
@@ -288,11 +276,18 @@ def main(argv: list[str]) -> int:
                                              if n_ours and n_wit else
                                              f"{abbr} {cv[0]}:{cv[1]}  {n_ours or n_wit}")
         for cv, r in sorted(mine.items()):
-            for lemma in lemmas(ours_flat(r["note"])):
-                if not lemma_in(lemma, ours_flat(whole(r))):
+            gs = kjvnotes.glosses(ours_flat(r["note"])) if r["note"] else []
+            for g in gs:
+                if g.lemma and not lemma_in(g.lemma, ours_flat(whole(r))):
                     counts["note lemma not in its verse"] += 1
                     out["note: lemma not in its verse"].append(
-                        f"{abbr} {cv[0]}:{cv[1]}  {lemma!r}  in  {r['note'][:120]}")
+                        f"{abbr} {cv[0]}:{cv[1]}  {g.lemma!r}  in  {r['note'][:120]}")
+            # The witness has a note to each gloss: the build's split of the
+            # copy's note into glosses, set beside it.
+            if gs and notes.get(cv) and len(gs) != len(notes[cv]):
+                counts["note glosses not the witness's notes"] += 1
+                out["note: glosses not the witness's notes"].append(
+                    f"{abbr} {cv[0]}:{cv[1]}  {len(gs)} glosses, {len(notes[cv])} notes  {r['note'][:120]}")
     VAR.mkdir(parents=True, exist_ok=True)
     report = VAR / "compare.txt"
     with report.open("w", encoding="utf-8") as fh:

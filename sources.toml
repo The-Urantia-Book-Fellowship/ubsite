@@ -182,6 +182,18 @@ sha256 = "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99"
 url    = "https://ebible.org/Scriptures/eng-kjv_usfm.zip"
 sha256 = "9d37aa78180ceefd5e4aeeaedceccf16f21484e5eb17d5662e8beff31bc3d8a5"
 
+# The 1769 Oxford printing itself, Benjamin Blayney's, in a facsimile on
+# archive.org (https://archive.org/details/kjv-1769-oxford-edition-full-bible,
+# the Public Domain Mark): its OCR text, tesseract's, noisy (the long s read as
+# f) but keeping the marks the printing set before the first word each
+# marginal note glosses, a dagger or a double bar, which no electronic KJV
+# keeps.  The witness of where each gloss of data/kjv/'s notes stands
+# (data/kjv/marks.tsv, 2026-11-22).  Not read by the build, and fetched only
+# by `python -m tools.kjv.facsimile --fetch`, into var/kjv/facsimile/.
+[kjv_1769]
+url    = "https://archive.org/download/kjv-1769-oxford-edition-full-bible/KJV%201769%20Oxford%20Edition%2C%20Full%20Bible_djvu.txt"
+sha256 = "1a8b518d804d3f5d907b902c5536080c7c9ad58a9749602cdf9ac07bb14aa05b"
+
 # The Russian Synodal Bible, Tigran's own edition (Bibles.org.uk, made with
 # Vladimir Volovich), shown beside the KJV (Tigran, 2026-11-21).  Converted ONCE
 # into data/rsb/ by `python -m tools.rsb.convert`, which alone reads it, at the

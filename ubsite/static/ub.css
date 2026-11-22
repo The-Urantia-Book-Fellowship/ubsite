@@ -819,9 +819,9 @@ p.t { margin: 0 0 .85rem; max-width: var(--measure); color: var(--text);
    "fied Absolute." (0:3.8; Tigran's screenshots, reproduced in headless
    Chrome, where it moved a word that fitted in 1 to 8 lines of each
    section).  Under Ragged right, below, it stays: there a line made short is
-   just short, and no word is hyphenated.  The build's half of the same
-   trouble, the stub of a paragraph's last word as its last line, "lute.", is
-   build/hyphen.py's: that word carries no soft hyphen. */
+   just short, and no word is hyphenated.  A paragraph's last word breaks as
+   any other (build/hyphen.py), its stub, "lute.", now and then a last line,
+   as in the book. */
 p.t { text-align: justify; hyphens: manual; -webkit-hyphens: manual;
       hyphenate-character: "-"; -webkit-hyphenate-character: "-";
       -webkit-hyphenate-limit-lines: 1; }
@@ -3556,9 +3556,14 @@ h2.kvl { margin: 1.6rem 0 .5rem; font-size: .95rem; font-weight: 400; letter-spa
          text-align: center; color: var(--text); }
 p.kend { margin: 2rem 0 0; text-align: center; font-size: .9rem; letter-spacing: .08em; color: var(--faint); }
 /* A verse's marginal note: an asterisk, raised, as the edition's \ts{*},
-   drawn like a study note's number, opening the note as a card (ub.js open). */
+   drawn like a study note's number, opening the note as a card (ub.js open).
+   The Synodal's stands after its word; the KJV's, a gloss's, before the first
+   word it glosses, as the 1769 printing set its dagger and double bar
+   (build/kjvnotes.py), held to that word by the joiner after it; a KJV book's
+   title note after its line, as the Synodal's. */
 a.fn:is([data-k="kjv"], [data-k="rsb"])::after { content: "\2060*"; font-size: .8em; top: -.45em; padding: 0 .12em;
                             margin-left: .03em; border: 0; border-radius: .3em; }
+a.fn[data-k="kjv"]:not(.ktitle a)::after { content: "*\2060"; margin: 0 .03em 0 0; }
 a.fn:is([data-k="kjv"], [data-k="rsb"]).on::after { background: var(--link); color: var(--paper); }
 @media (hover: hover) { a.fn:is([data-k="kjv"], [data-k="rsb"]):hover::after { background: var(--link); color: var(--paper); } }
 /* The paragraphs whose study notes cite a verse (app.py kjv_cited), under

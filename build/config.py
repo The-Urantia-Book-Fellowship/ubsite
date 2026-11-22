@@ -64,8 +64,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology", "kjv_witness", "rsb", "rsb_vrs"):
-            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology(); kjv_witness is tools/kjv/compare.py's, rsb and rsb_vrs tools/rsb/'s
+        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology", "kjv_witness", "kjv_1769", "rsb", "rsb_vrs"):
+            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology(); kjv_witness and kjv_1769 tools/kjv/'s, rsb and rsb_vrs tools/rsb/'s
         if "zip" in cfg:
             repos[key] = _zip(key, cfg)
             continue
@@ -225,6 +225,15 @@ def kjv_witness() -> dict:
     the build."""
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["kjv_witness"]
+    return {"url": cfg["url"], "sha256": cfg["sha256"]}
+
+
+def kjv_1769() -> dict:
+    """{url, sha256} of the 1769 printing's facsimile, its OCR text, the witness
+    of where each gloss of data/kjv/'s notes stands (tools/kjv/facsimile.py):
+    fetched only by that tool, never read by the build."""
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["kjv_1769"]
     return {"url": cfg["url"], "sha256": cfg["sha256"]}
 
 

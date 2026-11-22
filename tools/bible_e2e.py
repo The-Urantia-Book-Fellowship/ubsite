@@ -100,7 +100,7 @@ def marginal_notes(b) -> None:
         ctx = context(b, width, 800, {"lang": lang})
         pg = ctx.new_page()
         pg.goto(BASE + "/bible/Gen/1", wait_until="networkidle")
-        mark = pg.locator('a.fn[data-k="kjv"][href="#fnGen1_4"]')
+        mark = pg.locator('a.fn[data-k="kjv"][href="#fnGen1_4_1"]')
         mark.scroll_into_view_if_needed()
         if width < 600:
             mark.tap()
@@ -113,9 +113,36 @@ def marginal_notes(b) -> None:
         check("between the light and between the darkness" in words, f"Gen 1:4's note opens as a card, {width} px {lang}")
         check(bool(box) and box["x"] >= 0 and box["x"] + box["width"] <= width + 0.5,
               f"inside the window, {width} px {lang}")
+        # The mark stands before the first word it glosses, on its line, as
+        # the 1769 set it: the star's right edge at the word's left
+        # (build/kjvnotes.py), the link's padding, its tap's room, aside.
+        gap = pg.evaluate("""() => {
+            const a = document.querySelector('a.fn[href="#fnGen1_4_1"]'), r = document.createRange();
+            const t = a.nextSibling; r.setStart(t, 0); r.setEnd(t, 1);
+            const m = a.getBoundingClientRect(), w = r.getBoundingClientRect();
+            const star = m.right - parseFloat(getComputedStyle(a).paddingRight);
+            return [w.left - star, Math.abs(m.bottom - w.bottom) < w.height];
+        }""")
+        check(-0.5 <= gap[0] < 3 and gap[1], f"the mark just before \"the light\", {gap}, {width} px {lang}")
         wide = pg.evaluate("document.documentElement.scrollWidth")
         check(wide <= width, f"the chapter is no wider than the window ({wide} px), {width} px {lang}")
         ctx.close()
+    # A mark and a card to each gloss: Job 1:3's three.
+    ctx = context(b, 390, 800)
+    pg = ctx.new_page()
+    pg.goto(BASE + "/bible/Job/1", wait_until="networkidle")
+    for n, words in ((1, "substance: or, cattle."), (2, "household: or, husbandry."), (3, "men: Heb. sons.")):
+        mark = pg.locator(f'a.fn[data-k="kjv"][href="#fnJob1_3_{n}"]')
+        mark.scroll_into_view_if_needed()
+        mark.tap()
+        pg.wait_for_timeout(300)
+        card = pg.locator(".pop")
+        got = card.inner_text().replace("­", "") if card.count() else ""
+        others = [w for w in ("cattle", "husbandry", "sons") if w not in words]
+        check(words in got and not any(w in got for w in others), f"Job 1:3's mark {n} opens its own gloss, {got!r}")
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(200)
+    ctx.close()
 
 
 def home_and_contents(b) -> None:

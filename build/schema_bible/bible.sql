@@ -101,9 +101,11 @@ CREATE TABLE bible_span (
 );
 CREATE INDEX bible_span_verse ON bible_span(verse_id);
 
--- A note: the KJV's translators' marginal note, at most one to a verse, at
--- its end; the Synodal's, where it stands in its verse or its heading.  `key`
--- names it in a page's ids: fn<key> the card, fnref<key> its mark.
+-- A note: a gloss of the KJV's translators' marginal note, one to each, its
+-- mark before the first word it glosses, in its verse or its psalm's title row
+-- (build/kjvnotes.py, data/kjv/marks.tsv); the Synodal's, where it stands in its
+-- verse or its heading.  `key` names it in a page's ids: fn<key> the card,
+-- fnref<key> its mark (Gen1_4_1, Psa4_0_1, rMat3_12_1).
 CREATE TABLE bible_note (
   id       INTEGER PRIMARY KEY,
   verse_id INTEGER NOT NULL REFERENCES bible_verse(id),

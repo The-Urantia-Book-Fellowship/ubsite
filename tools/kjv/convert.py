@@ -302,7 +302,7 @@ def main(argv: list[str]) -> int:
         bad = [n for n, t in want.items()
                if not (OUT / n).exists() or (OUT / n).read_text(encoding="utf-8") != t]
         extra = sorted(p.name for p in OUT.glob("*.tsv")
-                       if p.name not in want and p.name not in ("corrections.tsv", "witness.tsv"))
+                       if p.name not in want and p.name not in ("corrections.tsv", "witness.tsv", "marks.tsv"))
         for n in bad:
             print(f"  data/kjv/{n} differs from the conversion")
         for n in extra:

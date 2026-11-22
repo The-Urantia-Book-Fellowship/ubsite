@@ -102,7 +102,10 @@ class Database(unittest.TestCase):
     def test_a_verse_sets_its_supplied_words_the_lord_and_its_notes_mark(self):
         h = self.verse("kjv", "Gen", 1, 4, "html_hy")
         self.assertIn('<span class="supplied">it was</span>', h)
-        self.assertIn('<a class="fn" href="#fnGen1_4" id="fnrefGen1_4" data-k="kjv"', h)
+        # A gloss's mark before the first word it glosses, as the 1769 set it
+        # (build/kjvnotes.py; Tigran, 2026-11-22, "Before, as 1769").
+        self.assertIn('vided <a class="fn" href="#fnGen1_4_1" id="fnrefGen1_4_1" data-k="kjv"'
+                      ' aria-label="Translators’ note"></a>the light from', h)
         self.assertIn("\u00ad", h)                       # hyphenated: di­vided
         self.assertEqual(strip_tags(h).replace("\u00ad", ""),
                          "And God saw the light, that it was good: and God divided the light from the darkness.")
@@ -119,8 +122,48 @@ class Database(unittest.TestCase):
     def test_a_note_ends_with_one_stop_and_its_ellipsis_is_one_character(self):
         self.assertEqual(self.one("SELECT COUNT(*) FROM bible_note n JOIN bible_verse v ON v.id = n.verse_id"
                                   " WHERE v.version = 'kjv' AND (n.text LIKE '%?.%' OR n.text LIKE '%etc..%')"), 0)
-        self.assertEqual(self.one("SELECT n.text FROM bible_note n WHERE n.key = 'Gen1_4'"),
+        self.assertEqual(self.one("SELECT n.text FROM bible_note n WHERE n.key = 'Gen1_4_1'"),
                          "the light from…: Heb. between the light and between the darkness.")
+
+    def mark_before(self, abbr: str, c: int, v: int, key: str, kind: str = "verse") -> str:
+        """The plain words after a KJV note's mark, to the line's end."""
+        h = self.verse("kjv", abbr, c, v, "html", kind)
+        at = h.index(f'id="fnref{key}"')
+        return strip_tags(h[h.index("</a>", at) + 4:])
+
+    def test_a_note_is_a_mark_and_a_card_to_each_gloss_before_its_first_word(self):
+        # Job 1:3, Tigran's example: three glosses, three marks, three cards.
+        self.assertEqual([self.one("SELECT text FROM bible_note WHERE key = ?", f"Job1_3_{n}") for n in (1, 2, 3)],
+                         ["substance: or, cattle.", "household: or, husbandry.", "men: Heb. sons."])
+        self.assertTrue(self.mark_before("Job", 1, 3, "Job1_3_1").startswith("substance also was"))
+        self.assertTrue(self.mark_before("Job", 1, 3, "Job1_3_2").startswith("household; so that"))
+        self.assertEqual(self.mark_before("Job", 1, 3, "Job1_3_3"), "men of the east.")
+        # Outside the supplied words' italic, which the lemma opens with.
+        self.assertIn('man <a class="fn" href="#fnGen2_7_1" id="fnrefGen2_7_1" data-k="kjv"'
+                      ' aria-label="Translators’ note"></a><span class="supplied">of</span>',
+                      self.verse("kjv", "Gen", 2, 7, "html"))
+
+    def test_a_gloss_whose_words_recur_stands_where_the_1769_marks_it(self):
+        # data/kjv/marks.tsv, each read beside the facsimile.
+        self.assertEqual(self.mark_before("Exo", 15, 23, "Exo15_23_1"), "Marah.")          # the third
+        self.assertTrue(self.mark_before("Gen", 27, 3, "Gen27_3_1").startswith("take me some"))
+        self.assertTrue(self.mark_before("1Sa", 3, 17, "1Sa3_17_2").startswith("thing from me"))
+        self.assertTrue(self.mark_before("Dan", 12, 5, "Dan12_5_1").startswith("bank of the river, and the other"))
+        self.assertEqual(self.mark_before("Dan", 12, 5, "Dan12_5_2"), "bank of the river.")
+        # Words not the verse's: the name the 1769 marks; the whole verse's note
+        # before its first word.
+        self.assertTrue(self.mark_before("Mat", 1, 11, "Mat1_11_1").startswith("Josias begat"))
+        self.assertTrue(self.mark_before("Luk", 17, 36, "Luk17_36_1").startswith("Two men"))
+        # A psalm's title has its own: Psalm 4's "chief…" in row 0, "have…" in verse 1.
+        self.assertTrue(self.mark_before("Psa", 4, 0, "Psa4_0_1", "title").startswith("chief Musician"))
+        self.assertTrue(self.mark_before("Psa", 4, 1, "Psa4_1_1").startswith("have mercy"))
+
+    def test_the_notes_the_placing_mended(self):
+        # Jer 8:12's note is 8:13's, 1Ch 4:14's third gloss 4:13's again
+        # (data/kjv/corrections.tsv).
+        n = lambda key: self.one("SELECT COUNT(*) FROM bible_note WHERE key GLOB ?", key + "_*")
+        self.assertEqual((n("Jer8_12"), n("Jer8_13"), n("1Ch4_13"), n("1Ch4_14")), (0, 1, 1, 2))
+        self.assertTrue(self.mark_before("Jer", 8, 13, "Jer8_13_1").startswith("I will surely consume"))
 
     def test_the_synodal_sets_its_stress_its_notes_where_they_stand_and_its_paragraphs(self):
         # \acc as the letter and U+0301; a note's mark at its place in the
@@ -294,7 +337,7 @@ class FromTheBiblesSide(unittest.TestCase):
         # An orange dot at the verse's end, a note's mark, its card the line
         # .ka, which scripts hide (Tigran, 2026-11-21: "even a small line
         # under each row is a waste"; "the orange dot").
-        self.assertIn('aria-label="Translators’ note"></a><a class="fn" data-k="kc" href="#kcv12"'
+        self.assertIn('ance?<a class="fn" data-k="kc" href="#kcv12"'
                       ' aria-label="Study notes at"></a></p>', row12)
         self.assertIn('<div class="ka" id="kcv12"><p class="kvc"><span class="lbl">Study notes at</span>'
                       ' <a href="/1:5.3">1:5.3</a>', row12)
@@ -388,7 +431,7 @@ class Pages(unittest.TestCase):
         self.assertEqual(rows.count('<div class="btf" data-has="rsb">'), 31)
         self.assertNotIn('<p class="t', rows)
         self.assertNotIn(" hit", rows)
-        self.assertIn('<aside class="note" id="fnGen1_4" data-k="kjv">', b)
+        self.assertIn('<aside class="note" id="fnGen1_4_1" data-k="kjv">', b)
         self.assertRegex(b, r'<article class="biblech" data-book="Genesis" data-book-ru="Бытие" data-c="1"\s+'
                             r'data-abbr="Gen" data-trv="[0-9a-f]{12}" data-has="rsb">')
 
