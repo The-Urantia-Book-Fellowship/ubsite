@@ -137,7 +137,18 @@ class Room(unittest.TestCase):
         # page with the margin's track, the book's frame (2026-11-21; the
         # KJV's had a fifth that morning, without it), its columns' --textw
         # its own rule (ub.css main.reader.bible:has(> article.bcmp)).
-        self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 4)
+        # And a fifth under 62rem, the measure and its padding, centred
+        # (Tigran, 2026-11-22): the frame took the window's width there, and
+        # the text stood at its left with the room at its right.  A reading
+        # path's frame the same.
+        self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 5)
+        phone = css[css.index("/* ---- phone "):css.index("/* ---- print ")]
+        self.assertIn("  .reader { grid-template-columns: 1fr; gap: 0; max-width: calc(var(--textw, var(--measure)) + 2.4rem); }",
+                      phone)
+        self.assertIn("  .path { padding: 1.4rem 1.2rem 0; max-width: calc(var(--measure) + 2.4rem); }", css)
+        # Full has no frame, and outranks both.
+        self.assertIn(':root[data-width="full"] .reader { max-width: none; }', css)
+        self.assertIn(':root[data-width="full"] .path { max-width: none; }', css)
         self.assertIn("main.reader.bible:has(> article.bcmp) { --textw: calc(var(--cols) * var(--measure)"
                       " + (var(--cols) - 1) * 2rem); }", css)
         self.assertNotRegex(css, r"\.reader[^{]*\{[^}]*max-width: calc\(var\(--measure\)")

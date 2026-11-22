@@ -378,6 +378,48 @@ def room(b) -> None:
         ok(abs(m[0] - m[1]) < 1, f"836 px, Width Full, {label}: the text has the window's width, as much at its right as at its left ({m})")
         ctx.close()
 
+    # Measured under 62rem the frame is the measure and its padding, centred,
+    # and the Contents' line as wide as the text: until then a window wider
+    # than the measure had the text at its left, the room all at its right
+    # (Tigran, 2026-11-22, a desktop window zoomed below 62rem).  A section,
+    # the whole paper, a reading path and a chapter of the Bible, which have
+    # the one rule or its twin (ub.css, the phone's block, .path).
+    edges = """sel => { const t = document.querySelector(sel), f = document.querySelector('.railfold');
+        const e = x => { const r = x.getBoundingClientRect(); return [Math.round(r.left * 10) / 10, Math.round((innerWidth - r.right) * 10) / 10]; };
+        return { text: e(t), rail: f && f.getClientRects().length ? e(f) : null,
+                 over: document.documentElement.scrollWidth - innerWidth }; }"""
+    for size, label, extra, wider in (((390, 844), "a phone", {}, False), ((836, 390), "a phone lying down", {}, True),
+                                      ((900, 1200), "a tablet upright, the index folded", {"margin": False}, True),
+                                      ((990, 800), "a narrow window, the index off", {"index": False}, True),
+                                      ((900, 1200), "a tablet upright, Whole paper on", {"whole": True}, True)):
+        ctx, pg, errors = context(b, extra, size=size, phone=size[0] < 900)
+        pages = ((("/0", "main .grid > .row > p.t[id]"),) if extra.get("whole") else
+                 (("/0:0", "main .grid > .row > p.t[id]"), ("/i/adam/read", ".path p.t[id]"), ("/bible/Gen/1", "main p.kv[id]")))
+        for path, sel in pages:
+            pg.goto(BASE + path)
+            pg.evaluate("document.fonts.ready")      # not settled(): a reading path has no article
+            pg.wait_for_timeout(500)
+            m = pg.evaluate(edges, sel)
+            what = f"{size[0]} px, Measured, {label}, {path}: "
+            ok(abs(m["text"][0] - m["text"][1]) < 1 and (m["text"][0] > 30) == wider,
+               what + f"the text centred, as much room at its right as at its left ({m['text']})")
+            if m["rail"] is not None:
+                ok(abs(m["rail"][0] - m["text"][0]) < 1 and abs(m["rail"][1] - m["text"][1]) < 1,
+                   what + f"the Contents' line as wide as the text ({m['rail']})")
+            ok(m["over"] <= 0, what + "the page is no wider than its window")
+        ok(not errors, f"{size[0]} px, Measured, {label}: no error in the page ({errors})")
+        ctx.close()
+    # The columns there still take the window's width: their frame is as wide
+    # as the columns at the measure each, wider than any window under 62rem.
+    ctx, pg, errors = context(b, {"translations": TR[1], "size": "112.5"}, size=(836, 300), phone=True)
+    pg.goto(BASE + "/0:0")
+    x = settled(pg)
+    m = pg.evaluate("""() => { const c = [...document.querySelectorAll('article.cmp .cmpnames .cn')].map(e => e.getBoundingClientRect());
+        return c.length ? [Math.round(c[0].left), Math.round(innerWidth - c[c.length - 1].right)] : null; }""")
+    ok(x["cmp"] and m is not None and abs(m[0] - m[1]) < 1 and m[0] < 30,
+       f"836 px, Larger, a translation ticked: the columns span the window ({m})")
+    ctx.close()
+
     # In place: a fold of the Contents, and of the index, turns the page into
     # columns and back, the letter at the window's top kept at its height,
     # and one that stood where the names now stand brought out from under

@@ -2691,7 +2691,15 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
 
 /* ---- phone ------------------------------------------------------------- */
 @media (max-width: 62rem) {
-  .reader { grid-template-columns: 1fr; gap: 0; }
+  /* Measured, the frame is the measure and its padding, centred, as on a
+     wide screen: so a window wider than the measure, a tablet upright or a
+     phone lying down, has its spare room at both sides of the text, and the
+     Contents' line and the index's are as wide as the text (Tigran,
+     2026-11-22).  Until then the frame took the window's width and the text
+     stood at its left, all the room at its right.  In columns --textw is
+     wider than any window here, and they fill it as before; Full has no
+     frame (above). */
+  .reader { grid-template-columns: 1fr; gap: 0; max-width: calc(var(--textw, var(--measure)) + 2.4rem); }
   .rail { position: static; max-height: none; border-bottom: 1px solid var(--rule);
           padding-bottom: .8rem; margin-bottom: 1.4rem; }
   /* Folded on every page, to its one line, a tap's height: opened, for that
@@ -2916,7 +2924,9 @@ h2.chap + .rh { margin-top: 1rem; }
 :root[data-width="full"] :is(.path .row, details.gap > summary, button.foldup) {
         grid-template-columns: minmax(0, 1fr) minmax(0, 26ch); }
 @media (max-width: 62rem) {
-  .path { padding: 1.4rem 1.2rem 0; }
+  /* Measured, the measure and its padding, centred, as a page of the text is
+     (the phone's block, above; Tigran, 2026-11-22). */
+  .path { padding: 1.4rem 1.2rem 0; max-width: calc(var(--measure) + 2.4rem); }
   .path .row, details.gap > summary, button.foldup { display: block; }
   .path .row > .cites { margin: 0 0 .3rem; font-size: .92rem; }
   .chapters ol { columns: 1; }

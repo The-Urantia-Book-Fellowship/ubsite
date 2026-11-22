@@ -203,6 +203,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- On a tablet upright, a phone lying down or a narrow window, where the Contents and the index are lines over the text, the text with Width Measured now stands in the middle of the window, no longer at its left with all the spare room at its right.
 - With the interface in Russian, the English text's head reads PAPER 103 again, not ДОКУМЕНТ 103, in a column of its own or alone, and so does the running head of an English paragraph; the heading 9 and 10 in Paper 139 and a reading path's lines of paper and section stay in English too, as the titles beside them are.
 - On a small tablet at the larger text sizes the player no longer cuts the voice's name: it takes two rows wherever one would cut it, as on a phone; and on a phone a message in the player, such as a recording not kept, is shown whole over the voice.
 - On a phone the player shows the voice's name whole, the paragraph's reference and the voice on a line over the buttons, where "USGNY · Григорий Войнер" was cut to "USG…"; at the end of a section "Next" stands on that line, where it ran past the player's edge and hid ×; and Follow along keeps the line being read clear of the player.
