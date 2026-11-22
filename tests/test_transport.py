@@ -3,10 +3,10 @@ on, ⏩ a paper on, in the order of the book and across papers' edges.
 
 Every section's four targets are held to its neighbours in the list of all
 sections, and a part's page has the one, ⏭ to its first paper's first
-section; a few pages are rendered through the app as ASGI, as
-test_appendix_pages does, for the bar itself and its greyed ends.  The
-Tooltips switch is a setting, on by default.  Skipped when var/ub.db has not
-been built.
+section, at its foot and again at its top; a few pages are rendered through
+the app as ASGI, as test_appendix_pages does, for the bar itself and its
+greyed ends.  The Tooltips switch is a setting, on by default.  Skipped
+when var/ub.db has not been built.
 """
 
 import re
@@ -17,6 +17,7 @@ from test_appendix_pages import DB, get
 from ubsite import settings
 
 RE_BAR = re.compile(r'<nav class="transport"[^>]*>(.*?)</nav>', re.S)
+RE_UPPER = re.compile(r'<nav class="transport upper"[^>]*>(.*?)</nav>', re.S)
 RE_LINK = re.compile(r'<a class="([\w ]+)" href="/([\d:]+)"(?: rel="\w+")? aria-label="([^"]+)" title="\3">')
 RE_OFF = re.compile(r'<span class="(\w+) off" aria-hidden="true">')
 
@@ -94,6 +95,18 @@ class Transport(unittest.TestCase):
             else:
                 self.assertEqual(links, {"next": (here, f"Next section: {here}")}, n)
             self.assertEqual(off, [], n)
+
+    def test_a_parts_page_has_its_next_at_the_top_too(self):
+        # The same links at the page's top, first in the article, before the
+        # dividers (Tigran, 2026-11-22); the head script's rule shows it
+        # where two dividers or more stand one under another.
+        for n, _ in self.parts:
+            body = get(f"/part/{n}")[2]
+            top, foot = RE_UPPER.search(body), RE_BAR.search(body)
+            self.assertTrue(top, n)
+            self.assertEqual(top.group(1), foot.group(1), n)
+            self.assertLess(top.start(), body.index('<div class="dividers">'), n)
+            self.assertRegex(body, r'<article class="partpage">\s*<nav class="transport upper"')
 
     def test_tooltips_are_on_by_default(self):
         self.assertIs(settings.defaults()["tips"], True)

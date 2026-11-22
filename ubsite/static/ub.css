@@ -719,6 +719,11 @@ article { min-width: 0; position: relative; }      /* the 1955 card's frame */
 .partpage .sponsor p { margin: 0; }
 .partpage .sponsor p + p { margin-top: .7rem; }
 .partpage .transport { justify-content: flex-end; max-width: none; margin-top: 3.5rem; }
+/* And its twin at the page's top right (part.html; Tigran, 2026-11-22), in
+   the page's top padding, so that whether it shows or not nothing moves:
+   hidden here, shown by the head script's rule where two dividers or more
+   stand one under another (base.html ubTr). */
+.partpage .transport.upper { display: none; position: absolute; top: .2rem; right: 0; margin: 0; }
 /* And each translation's divider (part.html; Tigran, 2026-11-07): every one is
    in the page, hidden until the head script's rule shows those ticked
    (base.html ubTr), under the English in the reader's order, each under its

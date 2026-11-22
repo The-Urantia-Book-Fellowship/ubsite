@@ -201,13 +201,32 @@ WHERE = """() => {
   return { y: Math.round(q.getClientRects()[0].top), floor: nm ? Math.round(nm.getBoundingClientRect().bottom) : 0,
            cmp: !!document.querySelector('article.cmp') };
 }"""
-# A part's page: the dividers shown, and where each stands.
+# A part's page: the dividers shown, and where each stands; and its ⏭ at the
+# top (Tigran, 2026-11-22), whether it is shown, its foot against the first
+# words of the first divider, its right edge against the foot's ⏭, and where
+# each of the two goes.
 PART = """() => {
-  const d = [...document.querySelectorAll('.partpage .divider')].filter(e => getComputedStyle(e).display !== 'none');
+  const vis = e => getComputedStyle(e).display !== 'none';
+  const d = [...document.querySelectorAll('.partpage .divider')].filter(vis);
+  const first = d.slice().sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+  const words = first ? [...first.children].filter(vis)[0].getBoundingClientRect().top : 0;
+  const top = document.querySelector('.partpage .transport.upper'), foot = document.querySelector('.partpage .transport:not(.upper)');
+  const go = n => [...n.querySelectorAll('a')].filter(vis);
   return { cls: document.documentElement.classList.contains('compare'), shown: d.length,
            lefts: d.map(e => Math.round(e.getBoundingClientRect().left)), widths: d.map(e => Math.round(e.getBoundingClientRect().width)),
-           over: document.documentElement.scrollWidth - innerWidth };
+           over: document.documentElement.scrollWidth - innerWidth,
+           top: vis(top), topfoot: Math.round(top.getBoundingClientRect().bottom), words: Math.round(words),
+           topright: go(top).map(a => Math.round(a.getBoundingClientRect().right)), footright: go(foot).map(a => Math.round(a.getBoundingClientRect().right)),
+           tophref: go(top).map(a => a.getAttribute('href')), foothref: go(foot).map(a => a.getAttribute('href')) };
 }"""
+# Where the top ⏭ should be, if anywhere: shown where two dividers or more
+# stand one under another, clear of the first one's words, over the foot's ⏭
+# and going where it goes.
+def part_top(x, want_top: bool) -> bool:
+    if not want_top:
+        return x["top"] is False
+    return (x["top"] is True and x["topfoot"] <= x["words"] and x["tophref"] == x["foothref"]
+            and len(x["tophref"]) == 1 and x["topright"] == x["footright"])
 TR = {1: "urantia-ru", 2: "urantia-ru uf-ru", 3: "ud urantia-ru uf-ru"}
 # A section's end in the middle of the window.
 TO = """(id) => { const s = document.getElementById(id); scrollTo(0, 0);
@@ -456,7 +475,24 @@ def room(b) -> None:
         side = len(set(x["lefts"])) == n + 1
         ok(x["shown"] == n + 1 and x["cls"] is want and side is want and x["over"] <= 0,
            f"a part's page, {size[0]} px, {n} ticked: " + ("a column each" if want else "each under the English") + f" ({x['lefts']})")
+        ok(part_top(x, not want), "and a ⏭ at its top " + ("as at its foot" if not want else "not shown, the foot in view")
+           + f" ({x['top']}, {x['topfoot']}/{x['words']}, {x['tophref']} {x['topright']}, {x['foothref']} {x['footright']})")
         ok(pg.evaluate("localStorage.getItem('ub_cols')") is None, "and it says nothing of the next page's first paint")
+        ok(not errors, f"no error in the page ({errors})")
+        ctx.close()
+
+    for size, st, n, want, go in (((1440, 900), {}, 1, False, "/0:0"),
+                                  ((390, 844), {"translations": "urantia-ru", "english": "off"}, 1, False, "/0:0"),
+                                  ((390, 844), {"translations": "urantia-ru uf-ru", "english": "off"}, 2, True, "/0:0"),
+                                  ((390, 844), {"translations": "ud urantia-ru", "foreword": False}, 3, True, "/1:0")):
+        ctx, pg, errors = context(b, st, size=size, phone=size[0] < 500)
+        pg.goto(BASE + "/part/1")
+        pg.evaluate("document.fonts.ready")
+        pg.wait_for_timeout(500)
+        x = pg.evaluate(PART)
+        ok(x["shown"] == n and not x["cls"] and part_top(x, want) and x["foothref"] == [go],
+           f"a part's page, {size[0]} px, {json.dumps(st)}: {n} divider(s), the ⏭ at its top " + ("shown" if want else "not shown")
+           + f", to {go} ({x['top']}, {x['topfoot']}/{x['words']}, {x['tophref']}, {x['foothref']})")
         ok(not errors, f"no error in the page ({errors})")
         ctx.close()
 

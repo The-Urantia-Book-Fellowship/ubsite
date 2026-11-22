@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- A part's title page with translations shown one under another has the button to its first section at the top too, so you need not scroll to the end to go on.
 - The Bible, at /bible: the King James Version with its notes and the Russian Synodal beside it, a verse to a row, in columns where there is room and folded under each verse where not; Settings, Texts, has two subtabs, The Urantia Book and The Bible. A study note's Bible reference leads to its verses, as does Ин 3:16 in the search box, and an orange dot at a verse's end opens the paragraphs whose notes cite it; the offline copy holds the KJV, the Synodal a download of its own.
 - A browser with no voice to read with now says so in the player, where it stood silent with the pause button shown.
 - The player shows the time left in the section being heard, or in the paper on the whole paper's page, before the speed, counting down at the speed chosen, on a little screen in digital digits, as on a watch.

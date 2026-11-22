@@ -2442,10 +2442,13 @@ def part_page(request: Request, n: int):
     if part is None:
         return missing(request, "There are four parts, I to IV.")
     # Its one way on is the transport bar's ⏭, to its first paper's first
-    # section (Tigran, 2026-10-14).  Part I's goes to the Foreword while
-    # Settings' Foreword in Part I is on (Tigran, 2026-11-07; to Paper 1
-    # either way until then): the page carries both links, .fwin and .fwout,
-    # and the CSS shows one, since no setting reaches the server.
+    # section (Tigran, 2026-10-14), at the page's foot and again at its top,
+    # shown there where two dividers or more stand one under another
+    # (Tigran, 2026-11-22; part.html, base.html ubTr).  Part I's goes to
+    # the Foreword while Settings' Foreword in Part I is on (Tigran,
+    # 2026-11-07; to Paper 1 either way until then): the page carries both
+    # links, .fwin and .fwout, and the CSS shows one, since no setting
+    # reaches the server.
     def on(paper: int) -> dict:
         first = con.execute("SELECT MIN(n) FROM section WHERE paper_n=?", (paper,)).fetchone()[0]
         return {"href": f"/{paper}:{first}", "label": l10n.tr("Next section: {s}", s=f"{paper}:{first}")}

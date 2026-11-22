@@ -17,6 +17,16 @@
   {{ rail(book(), none, none, part.n) }}
 
   <article class="partpage">
+    {#- On to the first paper: the transport bar's ⏭, alone, at the right.
+        Part I's to the Foreword while Settings' Foreword in Part I is on, and
+        to Paper 1 with it off: both links, the CSS showing one (ub.css .fwin).
+        Twice: at the page's foot, and at its top where two dividers or more
+        stand one under another, so that the way on is not at the end of a
+        long page alone (Tigran, 2026-11-22); the head script's rule shows it
+        (base.html ubTr), and in columns, or with one divider, the foot is in
+        view and it stays hidden. #}
+    {%- set onward %}{% if nxt_fw %}{{ step('next', nxt_fw, 'fwin') }}{{ step('next', nxt, 'fwout') }}{% else %}{{ step('next', nxt) }}{% endif %}{% endset %}
+    <nav class="transport upper" {{ ta('aria-label', 'Papers and sections') }}>{{ onward }}</nav>
     <div class="dividers">
       <header class="divider en" lang="en">
         <p class="who"><b>The Urantia Book</b> <span class="nobreak">(Uversa Press)</span></p>
@@ -33,11 +43,7 @@
       </header>
       {%- endfor %}
     </div>
-    {#- On to the first paper: the transport bar's ⏭, alone, at the right.
-        Part I's to the Foreword while Settings' Foreword in Part I is on, and
-        to Paper 1 with it off: both links, the CSS showing one (ub.css .fwin). #}
-    <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>
-      {%- if nxt_fw %}{{ step('next', nxt_fw, 'fwin') }}{{ step('next', nxt, 'fwout') }}{% else %}{{ step('next', nxt) }}{% endif %}</nav>
+    <nav class="transport" {{ ta('aria-label', 'Papers and sections') }}>{{ onward }}</nav>
   </article>
 </main>
 {% endblock %}

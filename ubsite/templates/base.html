@@ -146,7 +146,10 @@ window.ubTr = function (tr, en) {
                    '{visibility:hidden}' : '';
   var d = ks.map(function (k) { return '.divider[data-k="' + k + '"]'; }).join(),
       r = ':root:not(.compare, [data-index="off"]) .grid>.row:has(>:is(' + f + '))',
-      sk = up > 0 ? all : ks, s = sk.map(function (k) { return '>[data-tr="' + k + '"]'; });
+      sk = up > 0 ? all : ks, s = sk.map(function (k) { return '>[data-tr="' + k + '"]'; }),
+      dv = (up >= 0 ? ['.en'] : []).concat(ks.map(function (k) { return '[data-k="' + k + '"]'; })), two = [];
+  for (i = 0; i < dv.length; i++) for (j = i + 1; j < dv.length; j++)
+    two.push(':has(>.dividers>.divider' + dv[i] + '):has(>.dividers>.divider' + dv[j] + ')');
   st.textContent = hide + (f ? f + '{display:block}' +
     '@media screen and (max-width:62rem){' + r +
     '{flex-flow:row wrap;align-items:baseline;margin-bottom:1rem}' + r + '>:is(.a,.tf){display:contents}' +
@@ -168,7 +171,14 @@ window.ubTr = function (tr, en) {
     (up !== 0 ? '.partpage .dividers>.divider[data-k="' + all[0] + '"]{margin-top:0;padding-top:0;border-top:0}' : '') +
     (up > 0 ? '.partpage .dividers>.divider.en{margin-top:2.6rem;padding-top:1.8rem;border-top:1px solid var(--rule)}' +
               '.partpage .dividers>.divider.en>.who{display:block}' : '') +
-    ':root.compare .partpage .dividers>:is(' + d + '){display:grid}' : '') +
+    ':root.compare .partpage .dividers>:is(' + d + '){display:grid}' +
+    // And its ⏭ at the top too (part.html .transport.upper), where two of the
+    // dividers shown are in the page and stand one under another, so that the
+    // way on is not at the foot of a long page alone (Tigran, 2026-11-22);
+    // in columns, or with one, the foot is in view.
+    two.map(function (x) {
+      return ':root:not(.compare) .partpage' + x + '>.transport.upper{display:flex}';
+    }).join('') : '') +
     // Among the search results, the text's list, the English's, where it is
     // not first, is put among the translations' by ub.js (srOrder), in its
     // place; hidden, it goes, as a translation's does (Tigran, 2026-11-20:
