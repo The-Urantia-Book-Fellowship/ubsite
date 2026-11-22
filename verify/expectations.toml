@@ -224,7 +224,7 @@ compact_mb = 981                 # the compact copy, Opus at 14 kbps (2026-11-22
 
 [offline]
 measured_on = "2026-11-18"
-pages       = 10618      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,881 reading paths,
+pages       = 10619      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,882 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
                          # 197 more the same day: the whole paper's page, /N, joined from its
@@ -242,7 +242,8 @@ pages       = 10618      # 1,626 sections, 4,735 headwords, 27 index letters, 21
                          # and 59: dust and Wales have reading paths, in book order and by theme
                          # (10,614 then); and two more since 2026-11-18: /privacy and /terms;
                          # and two more since 2026-11-22: /charts and /units
-paths       = 3881       # 2,058 headwords in book order, 1,823 of them by theme too, since dust and Wales
+paths       = 3882       # 2,058 headwords in book order, 1,824 of them by theme too, since chalk cites a second
+                         # chapter at index e5c12fe (2026-11-22, its reading of Paper 60: 60:3.10); 1,823 since dust and Wales
                          # have paths at index 194519e (2026-11-16); 2,056 and 1,821 before; (2,057 and 1,822
                          # until 2026-11-16: Venus (planet) has no path since the index's reading of
                          # Paper 57 withdrew the entry that had it a planet of Angona's; 1,820 by theme until
