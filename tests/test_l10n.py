@@ -210,7 +210,10 @@ class Pages(unittest.TestCase):
         with drawn():
             body = get("/101:4", raw=True)[2]
             lists = get("/lists", raw=True)[2]
-        self.assertIn('<x-ru lang="ru">Документ 101</x-ru>', body)
+        self.assertIn('<x-en>Audio</x-en><x-ru lang="ru">Аудио</x-ru>', body)
+        # The book's own words are not the interface's: PAPER 101 over its
+        # English title stays English (2026-11-22).
+        self.assertIn('<p class="papernum">Paper 101</p>', body)
         self.assertIn('<details class="langmenu" hidden>', body)
         self.assertIn('<title data-ru="Списки">Lists</title>', lists)
 

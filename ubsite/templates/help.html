@@ -117,7 +117,7 @@
     <li><a href="#index">{{ t('The index beside the text') }}</a></li>
     <li><a href="#moving">{{ t('Moving about') }}</a></li>
     <li><a href="#search">{{ t('Search|help') }}</a></li>
-    <li><a href="#listening">{{ t('Listening|help') }}</a></li>
+    <li><a href="#listening">{{ t('Audio|help') }}</a></li>
     <li><a href="#notes">{{ t('Notes and 1955 readings') }}</a></li>
     <li><a href="#translations">{{ t('Translations') }}</a></li>
     <li><a href="#settings">{{ t('Settings|help') }}</a></li>
@@ -178,7 +178,7 @@
     <p>{{ t('help:moving:4') }}</p>
     <p>{{ t('help:moving:5') }}</p>
     <div class="eg">
-      <div class="runhead" role="region" {{ ta('aria-label', 'Running head') }}><span class="ref">{{ eg_text.p.ref }}</span><div class="mid"><p class="pn">{{ t('Paper {n}', n=eg.section.paper_n) }}<span class="tt">{{ paper.title }}</span></p><p class="au">{{ paper.author }}</p></div><span class="ctl"><span class="set">{{ gear_svg() }}</span><a class="home" href="/" {{ ta('aria-label', 'Home') }}>{{ mark }}</a></span></div>
+      <div class="runhead" role="region" {{ ta('aria-label', 'Running head') }}><span class="ref">{{ eg_text.p.ref }}</span><div class="mid"><p class="pn"><b>Paper {{ eg.section.paper_n }}</b><span class="tt">{{ paper.title }}</span></p><p class="au">{{ paper.author }}</p></div><span class="ctl"><span class="set">{{ gear_svg() }}</span><a class="home" href="/" {{ ta('aria-label', 'Home') }}>{{ mark }}</a></span></div>
       <p class="cap">{{ t('help:moving:cap') }}</p>
     </div>
     {{ showme('runhead') }}
@@ -200,7 +200,7 @@
   </section>
 
   <section id="listening">
-    <h2>{{ t('Listening|help') }}</h2>
+    <h2>{{ t('Audio|help') }}</h2>
     <p>{{ t('help:listening:1', play=playp(inline=True)) }}</p>
     <div class="eg">
       {#- The bar as listen.js makeBar() builds it, its buttons inert: an

@@ -92,6 +92,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- Settings' Listening tab and Help's chapter about listening are now called Audio, as their Russian, Аудио, always was.
 - A headword's page no longer repeats the headword as the first line of its list: the subentries start at the left, a step less indented, which a phone shows most; the headword's own citations stand under its heading, and its See or See also under Cross-references, which lists the headword's own first.
 - The two flags at the header's corner are one list of languages: closed, it shows the flag of the language in use; a tap opens it, each language named in its own words, which leaves room for full screen and for languages to come.
 - On a phone, a tap on any paragraph's line of index entries opens the entries under every paragraph, or folds them all, as the Index line at the top of the page does, and they stay so from page to page, Continue reading included; each box keeps its line, open or folded.
@@ -199,6 +200,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Fixed
 
+- With the interface in Russian, the English text's head reads PAPER 103 again, not ДОКУМЕНТ 103, in a column of its own or alone, and so does the running head of an English paragraph; the heading 9 and 10 in Paper 139 and a reading path's lines of paper and section stay in English too, as the titles beside them are.
 - On a small tablet at the larger text sizes the player no longer cuts the voice's name: it takes two rows wherever one would cut it, as on a phone; and on a phone a message in the player, such as a recording not kept, is shown whole over the voice.
 - On a phone the player shows the voice's name whole, the paragraph's reference and the voice on a line over the buttons, where "USGNY · Григорий Войнер" was cut to "USG…"; at the end of a section "Next" stands on that line, where it ran past the player's edge and hid ×; and Follow along keeps the line being read clear of the player.
 - On a phone, switching the interface to Russian could leave the language out of the header where it fits, until the next page.

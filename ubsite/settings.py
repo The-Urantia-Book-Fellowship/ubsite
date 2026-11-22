@@ -480,7 +480,7 @@ def groups(voices: list[dict], translations: list[dict] = ()) -> list[dict]:
     return [{"key": "reading", "legend": "Reading", "items": [_item(*s) for s in READING]},
             {"key": "show", "legend": "Show", "items": [_item(*s) for s in SHOW]},
             {"key": "translations", "legend": "Texts", "items": [_item(*s) for s in TRANSLATIONS]},
-            {"key": "listening", "legend": "Listening", "items": items},
+            {"key": "listening", "legend": "Audio", "items": items},
             {"key": "offline", "legend": "Offline", "items": [_item(*s) for s in OFFLINE], "cls": "offline"}]
 
 

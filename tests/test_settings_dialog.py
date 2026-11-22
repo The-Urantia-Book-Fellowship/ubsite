@@ -37,7 +37,7 @@ class Tabs(unittest.TestCase):
         # The third Texts since 2026-11-20, the English one of them (Tigran:
         # "Settings => Translations tab should probably be renamed Settings =>
         # Texts"); its key stays, and with it every id.
-        self.assertEqual([t[4] for t in tabs], ["Reading", "Show", "Texts", "Listening", "Offline"])
+        self.assertEqual([t[4] for t in tabs], ["Reading", "Show", "Texts", "Audio", "Offline"])
         # And the Texts tab's two subtabs, the book's texts and the Bible's, a
         # tablist of their own in its panel (Tigran, 2026-11-21).
         self.assertEqual(self.dialog.count('role="tab"'), len(groups) + 2)

@@ -188,7 +188,7 @@ def columns(b, whole: bool) -> None:
 
     # Settings' menu: the recording first, chosen.
     pg.click(".gear")
-    pg.click("dialog.settings [role=tab]:has-text('Listening')") if pg.locator("dialog.settings [role=tab]").count() else None
+    pg.click("dialog.settings [role=tab]:has-text('Audio')") if pg.locator("dialog.settings [role=tab]").count() else None
     sel = "dialog.settings label.set-bvoice[data-k='urantia-ru'] select"
     opts = pg.evaluate("[...document.querySelector(\"%s\").options].filter(o => !o.hidden).map(o => [o.value, o.text])" % sel)
     ok(pg.is_visible(sel) and opts[0] == ["", "Grigory Voyner"] and pg.input_value(sel) == "",
@@ -337,7 +337,7 @@ MENUS = """() => [...document.querySelectorAll('dialog.settings .setvoices label
 
 
 def menus(b) -> None:
-    """Settings' Listening tab (Tigran, 2026-11-13): a menu of voices against
+    """Settings' Audio tab, Listening until 2026-11-22 (Tigran, 2026-11-13): a menu of voices against
     each text, the English first, then the translations in the reader's
     order; a text's recording first in its menu, then the browser's voices in
     its language by name, each once, with no "Automatic" and no "Your
@@ -347,7 +347,7 @@ def menus(b) -> None:
     print("\nSettings' voices, in a browser that lists some")
     pg.goto(BASE + "/1:1")
     pg.click(".gear")
-    pg.click("dialog.settings [role=tab]:has-text('Listening')")
+    pg.click("dialog.settings [role=tab]:has-text('Audio')")
     got = pg.evaluate(MENUS)
     # The translations by language and short name, whatever their order
     # shown (Tigran, 2026-11-20): Aivazian before USGNY, ticked after it.
@@ -391,7 +391,7 @@ def menus(b) -> None:
     print("\nSettings' voices, in a browser that has listed none")
     pg.goto(BASE + "/1:1")
     pg.click(".gear")
-    pg.click("dialog.settings [role=tab]:has-text('Listening')")
+    pg.click("dialog.settings [role=tab]:has-text('Audio')")
     got = pg.evaluate(MENUS)
     ok(got == [["English text", ["Merritt Horn", "Your browser’s voice"], "Merritt Horn"],
                ["Aivazian", ["Your browser’s voice"], "Your browser’s voice"],

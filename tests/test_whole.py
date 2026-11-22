@@ -80,6 +80,23 @@ class WholePaper(unittest.TestCase):
         self.assertRegex(body, r'<section id="139:9"[^>]*><header class="papertop"><h2>9 and 10\. ')
         self.assertNotIn('id="139:10"', body)
 
+    def test_the_englishs_head_is_the_books_own_words(self):
+        # PAPER 103 and "9 and 10" are the book's, English in the Russian
+        # interface as the titles beside them are, and in a column of their own
+        # (2026-11-22: the English column was headed ДОКУМЕНТ 103).  Read as
+        # sent, both languages, which get() otherwise leaves the Russian out of.
+        for url, n in (("/103:0", 103), ("/103", 103), ("/139:9", 139), ("/139", 139)):
+            body = get(url, raw=True)[2]
+            self.assertIn(f'<p class="papernum">Paper {n}</p>', body, url)
+        for url in ("/139:9", "/139"):
+            self.assertRegex(get(url, raw=True)[2], r'<h2>9 and 10\. ', url)
+        body = get("/i/adam/read", raw=True)[2]
+        lines = re.findall(r'<p class="rh-(?:paper|sec)">.*?</p>', body)
+        self.assertTrue(lines)
+        for line in lines:
+            self.assertNotIn("<x-", line)
+            self.assertNotRegex(line, "[А-Яа-я]")
+
     def test_the_paper_buttons_alone_by_the_papers_own_addresses(self):
         links, off = bar("/15")
         self.assertEqual(links, {"fb": ("14", "Previous paper: 14"), "ff": ("16", "Next paper: 16")})

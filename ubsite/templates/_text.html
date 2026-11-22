@@ -39,7 +39,7 @@
     own: the paper's stands over it, and "0. Introduction" is the rail's name
     for it, not the book's. #}
 {% macro sectitle(section) -%}
-<h2>{% if section.combined_with %}{{ t('{a} and {b}', a=section.n, b=section.combined_with) }}{% else %}{{ section.n }}{% endif %}. {{ section.title_html|safe }}</h2>
+<h2>{% if section.combined_with %}{{ section.n }} and {{ section.combined_with }}{% else %}{{ section.n }}{% endif %}. {{ section.title_html|safe }}</h2>
 {%- endmacro %}
 
 {#- The box of what the whole paper or the whole section cites.  read_pack's

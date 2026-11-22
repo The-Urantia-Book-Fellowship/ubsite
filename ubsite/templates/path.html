@@ -17,9 +17,9 @@
 {% macro item(it) -%}
 {%- if it.kind == 'head' %}
 <div class="row rh">{% if it.why %}{{ afold(it.why|length) }}{{ cites(it.why) }}{% endif %}<div class="main">
-  <p class="rh-paper"><a href="/{{ it.paper }}:0">{% if it.paper %}{{ t('Paper {n}', n=it.paper) }} · {% endif %}{{ it.paper_title }}</a></p>
+  <p class="rh-paper"><a href="/{{ it.paper }}:0">{% if it.paper %}Paper {{ it.paper }} · {% endif %}{{ it.paper_title }}</a></p>
   {%- if it.section %}
-  <p class="rh-sec"><a href="/{{ it.paper }}:{{ it.section }}">{% if it.combined %}{{ t('{a} and {b}', a=it.section, b=it.combined) }}{% else %}{{ it.section }}{% endif %}. {{ it.title|safe }}</a></p>
+  <p class="rh-sec"><a href="/{{ it.paper }}:{{ it.section }}">{% if it.combined %}{{ it.section }} and {{ it.combined }}{% else %}{{ it.section }}{% endif %}. {{ it.title|safe }}</a></p>
   {%- endif %}
 </div></div>
 {%- elif it.kind == 'sign' %}

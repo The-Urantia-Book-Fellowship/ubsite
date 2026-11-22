@@ -3666,7 +3666,11 @@
     // (templates/bible_chapter.html).
     if (bible) return { num: '', title: p.dataset.k === 'rsb' && bible.dataset.bookRu || bible.dataset.book, author: '' };
     if (top && top.querySelector('h1')) {
-      return { num: top.querySelector('.papernum') ? top.querySelector('.papernum').innerHTML : '',
+      // The number in a <b>, as a translation's is (headTr): the dash before
+      // the title is drawn only after an element (ub.css .runhead .tt), and
+      // the book's PAPER 101 is words alone since it stopped being the
+      // interface's x-en and x-ru (2026-11-22).
+      return { num: top.querySelector('.papernum') ? '<b>' + top.querySelector('.papernum').innerHTML + '</b>' : '',
                title: top.querySelector('h1').textContent,
                author: top.querySelector('.author') ? top.querySelector('.author').textContent : '' };
     }
@@ -3755,9 +3759,9 @@
       var g = got.h[k];
       if (headP !== p) return;
       if (!g) return headSay(en);
-      // The number in an element of its own, as the English's is (x-en,
-      // x-ru): the dash before the title is drawn where one comes before it
-      // (ub.css .runhead .tt).
+      // The number in an element of its own, as the English's is (headOf):
+      // the dash before the title is drawn where one comes before it (ub.css
+      // .runhead .tt).
       headSay({ num: g.paper ? '<b>' + g.paper + '</b>' : '', title: text(g.title), author: text(g.author) },
               trBy[k] && trBy[k].lang);
     }, function () { if (headP === p) headSay(en); });

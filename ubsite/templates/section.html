@@ -20,9 +20,11 @@
     {{ indexfold() }}
     <header class="papertop">
       {#- The Foreword is not a paper: the book heads it FOREWORD alone (Tigran,
-          2026-10-20). #}
+          2026-10-20).  PAPER N is the book's own words, English whatever the
+          interface's language, as its title under it is: a translation's
+          head has its own (ub.js headInner). #}
       {%- if paper.n %}
-      <p class="papernum">{{ t('Paper {n}', n=paper.n) }}</p>
+      <p class="papernum">Paper {{ paper.n }}</p>
       {%- endif %}
       <h1>{{ paper.title }}</h1>
       {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}

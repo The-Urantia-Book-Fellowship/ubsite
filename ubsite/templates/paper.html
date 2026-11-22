@@ -28,7 +28,7 @@
     {{ indexfold() }}
     <header class="papertop">
       {%- if paper.n %}
-      <p class="papernum">{{ t('Paper {n}', n=paper.n) }}</p>
+      <p class="papernum">Paper {{ paper.n }}</p>
       {%- endif %}
       <h1>{{ paper.title }}</h1>
       {% if paper.author %}<p class="author">{{ paper.author }}</p>{% endif %}

@@ -246,7 +246,7 @@ paths       = 3881       # 2,058 headwords in book order, 1,823 of them by theme
 spoken      = 1626       # one to a section
 bible_pages = 2629       # the Bible's pages and the Synodal's fragments (2026-11-21): /bible, 77 books' pages and
                          # 1,362 chapters', 1,189 fragments of the Synodal's lines on the KJV's chapters
-chunks      = 500        # 433 until the evening of 2026-11-21, when the KJV's pages came into Base (Tigran: "Pages in Base, like the book"), /bible and a chunk to each of its 66 books; 432 until that morning, the King James Version's database for search (kjv.db) one more; 431 until 2026-11-19: one more among the assets, static/account.js, the
+chunks      = 497        # 500 until 2026-11-22, when a reading path's line of paper stopped carrying the interface's Russian beside Paper N (ДОКУМЕНТ 103 in the English's head), 3.15 MB fewer of the reading paths' 145, three chunks fewer of them; 433 until the evening of 2026-11-21, when the KJV's pages came into Base (Tigran: "Pages in Base, like the book"), /bible and a chunk to each of its 66 books; 432 until that morning, the King James Version's database for search (kjv.db) one more; 431 until 2026-11-19: one more among the assets, static/account.js, the
                          # script of what follows a reader's account, which only a reader signed
                          # in runs;
                          # 423 until 2026-11-18, when the home page's part cards took their pictures:
