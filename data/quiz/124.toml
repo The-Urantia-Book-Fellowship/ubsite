@@ -1,0 +1,19 @@
+# Paper 124, The Later Childhood of Jesus: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 124
+
+[[question]]
+id = 707
+v = 2
+q = 'What age was Jesus when a messenger from Salvington said to him “The hour has come. It is time that you began to be about your Father’s business”?'
+a = [
+  '10',
+  '13',
+  '16',
+  '21',
+  '33',
+]
+right = ['13']
+refs = ['124:6.16 «And so, even ere the heavy responsibilities of the Nazareth family descended upon his youthful shoulders, there now arrived the celestial messenger to remind this lad, not quite thirteen years of age, that the hour had come to begin the resumption of the responsibilities of a universe.»']

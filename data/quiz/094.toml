@@ -1,0 +1,49 @@
+# Paper 94, The Melchizedek Teachings in the Orient: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 94
+
+[[question]]
+id = 639
+q = 'Which of these is \bibemph{not} a member of Trimurti, the supreme trinity of Hinduism?'
+a = [
+  'Brahma',
+  'Siva',
+  'Vishnu',
+  'Indra',
+]
+right = ['Indra']
+refs = ['94:4.6 «Many of the ancient gods of the Aryans, such as Agni, Indra, and Soma, have persisted as secondary to the three members of the Trimurti.»']
+
+[[question]]
+id = 640
+q = 'The religion of Buddhism is based on the teachings of \ldots'
+a = [
+  'Lao-tse',
+  'Gautama Siddhartha',
+  'Confucius (Kung Fu-tze)',
+  'Ikhnaton',
+  'Krishna',
+]
+right = ['Gautama Siddhartha']
+refs = ['94:7.2 «Gautama formulated those theories which grew into the philosophy of Buddhism after six years of the futile practice of Yoga.»']
+
+[[question]]
+id = 641
+q = 'Which of these were the main commandments of Gautama Siddhartha?'
+a = [
+  'You shall not kill',
+  'You shall not steal',
+  'You shall not be unchaste',
+  'You shall not lie',
+  'You shall not drink intoxicating liquors',
+]
+right = [
+  'You shall not kill',
+  'You shall not steal',
+  'You shall not be unchaste',
+  'You shall not lie',
+  'You shall not drink intoxicating liquors',
+]
+refs = ['94:8.9-14']

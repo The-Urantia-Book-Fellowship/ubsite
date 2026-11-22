@@ -1,0 +1,17 @@
+# Paper 51, The Planetary Adams: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 51
+
+[[question]]
+id = 438
+q = 'When is the slavery abolished on a normal evolutionary sphere?'
+a = [
+  'upon arrival of Adam',
+  'upon arrival of Planetary Prince',
+  'in the age of Light and Life',
+  'persists forever',
+]
+right = ['upon arrival of Adam']
+refs = ['51:4.7 «But on all normal spheres this sort of primitive slavery is abolished soon after the arrival of the imported violet or Adamic race.»']

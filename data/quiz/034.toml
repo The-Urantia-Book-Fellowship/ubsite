@@ -1,0 +1,166 @@
+# Paper 34, The Local Universe Mother Spirit: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 34
+
+[[question]]
+id = 374
+q = 'Which of these has deprived human races of that superior type of physical nature which would have been more consonant with spiritual aspirations?'
+a = [
+  'Lucifer rebellion',
+  'Caligastia upheaval',
+  'Adamic default',
+]
+right = ['Adamic default']
+refs = ['34:7.4 «But even more disastrous was the Adamic default in that it deprived the races of that superior type of physical nature which would have been more consonant with spiritual aspirations.»']
+
+[[question]]
+id = 375
+q = 'What does the Bible refer to when it talks about “the seven spirits of God like lamps burning before the throne”?'
+a = [
+  'seven Absolutes',
+  'seven Master Spirits of the superuniverses',
+  'seven adjutant mind-spirits',
+]
+right = ['seven adjutant mind-spirits']
+refs = ['34:4.11 «These are the “seven spirits of God,” “like lamps burning before the throne,” which the prophet saw in the symbols of vision. But he did not see the seats of the four and twenty sentinels about these seven adjutant mind-spirits.»']
+
+[[question]]
+id = 376
+q = 'Are animals relevant to the intellectual and physical evolution of humans?'
+a = [
+  'Yes, because of the experiential growth of the first five adjutant mind-spirits',
+  'Not at all',
+  'Not anymore',
+]
+right = ['Yes, because of the experiential growth of the first five adjutant mind-spirits']
+refs = ['36:5.13 «This animal relationship makes the adjutants more practically effective as human mind; hence animals are to a certain extent indispensable to man’s intellectual as well as to his physical evolution.»']
+
+[[question]]
+id = 377
+q = 'How many adjutant mind-spirits are there?'
+a = [
+  '3',
+  '4',
+  '7',
+  '10',
+  '12',
+]
+right = ['7']
+refs = ['34:4.10 «The seven adjutants have been given the following names: the spirit of wisdom, the spirit of worship, the spirit of counsel, the spirit of knowledge, the spirit of courage, the spirit of understanding, the spirit of intuition—of quick perception.»']
+
+[[question]]
+id = 378
+q = 'Which of these is \bibemph{not} one of the seven adjutant mind-spirits?'
+a = [
+  'intuition',
+  'understanding',
+  'courage',
+  'knowledge',
+  'counsel',
+  'worship',
+  'wisdom',
+  'intellect',
+]
+right = ['intellect']
+refs = ['36:5.2 «The seven adjutant mind-spirits are called by names which are the equivalents of the following designations: intuition, understanding, courage, knowledge, counsel, worship, and wisdom.»']
+
+[[question]]
+id = 379
+q = 'How many adjutant mind-spirits are reachable by subhuman (animal) mind?'
+a = [
+  'all 7',
+  '5',
+  '4',
+  '1',
+  'none',
+  '3',
+]
+right = ['5']
+refs = ['42:10.4 «On this level material mind is experiencing: as subhuman (animal) intellect in the first five adjutants; as human (moral) intellect in the seven adjutants; as superhuman (midwayer) intellect in the last two adjutants.»']
+
+[[question]]
+id = 380
+q = 'Which of the adjutant mind-spirits can minister only to human or midwayer (super-animal) level of mind?'
+a = [
+  'worship and wisdom',
+  'intuition and understanding',
+  'courage and counsel',
+  'intuition and knowledge',
+]
+right = ['worship and wisdom']
+refs = ['34:5.3 «Mortal man first experiences the ministry of the Spirit in conjunction with mind when the purely animal mind of evolutionary creatures develops reception capacity for the adjutants of worship and of wisdom.»']
+
+[[question]]
+id = 381
+q = 'Which of the adjutant mind-spirits makes the most extensive contact with nonteachable (subhuman) levels of mind?'
+a = [
+  'intuition',
+  'courage',
+  'counsel',
+  'understanding',
+]
+right = ['intuition']
+refs = ['36:5.6 «the only one of the adjutants to function so largely in the lower orders of animal life and the only one to make extensive functional contact with the nonteachable levels of mechanical mind.»']
+
+[[question]]
+id = 382
+q = 'Which adjutant mind-spirit is responsible for spontaneous association of ideas and co-ordination of acquired knowledge?'
+a = [
+  'understanding',
+  'intuition',
+  'knowledge',
+  'wisdom',
+]
+right = ['understanding']
+refs = ['36:5.7 «The spirit of understanding—the impulse of co-ordination, the spontaneous and apparently automatic association of ideas.»']
+
+[[question]]
+id = 383
+q = 'Which adjutant mind-spirit is responsible for the ability of will creatures to harmonize with their fellows and the origin of the gregarious instinct among the more lowly creatures?'
+a = [
+  'counsel',
+  'intuition',
+  'understanding',
+  'worship',
+  'knowledge',
+]
+right = ['counsel']
+refs = ['36:5.10 «The spirit of counsel—the social urge, the endowment of species co-operation; the ability of will creatures to harmonize with their fellows; the origin of the gregarious instinct among the more lowly creatures.»']
+
+[[question]]
+id = 384
+q = 'How many adjutant mind-spirits minister to midwayer as well as human types of mind?'
+a = [
+  'all seven',
+  'three',
+  'two',
+  'four',
+]
+right = ['two']
+refs = ['42:10.4 «On this level material mind is experiencing: as subhuman (animal) intellect in the first five adjutants; as human (moral) intellect in the seven adjutants; as superhuman (midwayer) intellect in the last two adjutants.»']
+
+[[question]]
+id = 385
+q = 'Which adjutant mind-spirits minister to midwayer minds?'
+a = [
+  'worship and wisdom',
+  'intuition and wisdom',
+  'knowledge and understanding',
+  'counsel and wisdom',
+]
+right = ['worship and wisdom']
+refs = ['38:9.6 «and only the sixth and the seventh, the spirit of worship and the spirit of wisdom, are able to minister to the secondary group.»']
+
+[[question]]
+id = 386
+q = 'Receptivity to which of the seven adjutant mind-spirits serves as a badge for spiritual-ascension candidacy of mortals?'
+a = [
+  'wisdom',
+  'knowledge',
+  'worship',
+  'courage',
+]
+right = ['worship']
+refs = ['36:5.11 «Worship is the badge of spiritual-ascension candidacy.»']

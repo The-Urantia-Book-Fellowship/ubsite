@@ -1,0 +1,166 @@
+# Paper 136, Baptism and the Forty Days: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 136
+
+[[question]]
+id = 733
+q = 'Why did Jesus destroy all his writings and anything material associated with his life?'
+a = [
+  'To avoid superstitious relic worshiping',
+  'He didn’t produce any writings',
+  'He did leave writings which were destroyed by the priests',
+]
+right = ['To avoid superstitious relic worshiping']
+refs = ['120:3.7 «Leave no writings behind you on the planet. Refrain from all writing upon permanent materials; enjoin your associates to make no images or other likenesses of yourself in the flesh. See that nothing potentially idolatrous is left on the planet at the time of your departure.»']
+
+[[question]]
+id = 734
+q = 'How old was Jesus when he was baptized by John the Baptist?'
+a = [
+  '31 years',
+  '31½ years',
+  '32 years',
+  '32½ years',
+  '8 days',
+  '1 year',
+]
+right = ['31½ years']
+refs = ['136:2.8 «(Jesus was almost thirty-one and one-half years old when he was baptized.»']
+
+[[question]]
+id = 735
+q = 'What did Jesus see above his head at his baptism?'
+a = [
+  'a white dove',
+  'his Thought Adjuster',
+  'an angel',
+  'optical illusion',
+  'nothing',
+]
+right = ['his Thought Adjuster']
+refs = ['136:2.3 «Thus did Jesus observe his own former divine spirit descending on its return to him in personalized form.»']
+
+[[question]]
+id = 736
+q = 'Did Jesus fuse with his Thought Adjuster?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['136:2.3 «This ceremony was the final act of his purely human life on Urantia, and many superhuman observers expected to witness the fusion of the Adjuster with its indwelt mind, but they were all destined to suffer disappointment.»']
+
+[[question]]
+id = 737
+v = 2
+q = 'What happened to Jesus’ Adjuster at his baptism?'
+a = [
+  'He took leave of Jesus, as the perfected human soul becoming a son of God, returning as an exalted Personalized Adjuster existing apart from Jesus but in constant communion with him',
+  'He departed to indwell someone else',
+  'He left, because he was offended by Jesus’ participation in human rituals',
+]
+right = ['He took leave of Jesus, as the perfected human soul becoming a son of God, returning as an exalted Personalized Adjuster existing apart from Jesus but in constant communion with him']
+refs = ['136:2.3 «As John laid his hands upon Jesus to baptize him, the indwelling Adjuster took final leave of the perfected human soul of Joshua ben Joseph. And in a few moments this divine entity returned from Divinington as a Personalized Adjuster and chief of his kind throughout the entire local universe of Nebadon.»']
+
+[[question]]
+id = 738
+q = 'Where did Jesus go immediately after his baptism?'
+a = [
+  'To the Perean hills for 40 days of isolation in order to formulate plans of proclaiming the Kingdom of God',
+  'Returned to work',
+  'Returned to his family ',
+  'Started recruiting apostles',
+]
+right = ['To the Perean hills for 40 days of isolation in order to formulate plans of proclaiming the Kingdom of God']
+refs = ['136:3.1 «And this Prince of Urantia, so soon to be proclaimed supreme Sovereign of Nebadon, now went into forty days of retirement to formulate the plans and determine upon the technique of proclaiming the new kingdom of God in the hearts of men.»']
+
+[[question]]
+id = 739
+q = 'Who did Jesus encounter in the Perean hills post baptism?'
+a = [
+  'Gabriel \&\ the Constellation Father of Edentia',
+  'Lucifer',
+  'No-one --- he remained alone',
+  'Satan',
+  'Caligastia',
+]
+right = ['Gabriel \&\ the Constellation Father of Edentia']
+refs = ['136:3.5 «While he tarried on the mountain, talking with Gabriel, the Constellation Father of Edentia appeared to Jesus and Gabriel in person»']
+
+[[question]]
+id = 740
+q = 'What did Jesus achieve during his 6 week sojourn on Mount Hermon prior to baptism?'
+a = [
+  'Achieved the circles of mind-understanding and per\-so\-na\-li\-ty\hyp{}control',
+  'Wrestled in spirit with Satan (representing Lucifer), and Caligastia in “the great temptation”',
+  'Both of these',
+  'None of these',
+]
+right = ['Both of these']
+refs = [
+  '134:8.4',
+  '134:8.6 «During the last week on Mount Hermon the great temptation, the universe trial, occurred. Satan (representing Lucifer) and the rebellious Planetary Prince, Caligastia, were present with Jesus and were made fully visible to him.»',
+]
+
+[[question]]
+id = 741
+q = 'In which year did Jesus declare that “his time had come” and present himself for baptism?'
+a = [
+  'A.D.~26',
+  'A.D.~29',
+  'A.D.~30',
+  'A.D.~20',
+]
+right = ['A.D.~26']
+refs = ['134:9.8 «But Jesus worked on, making boats, until John had journeyed up the river to a point near Pella in the month of January of the next year, A.D. 26, when he laid down his tools, declaring, “My hour has come,” and presently presented himself to John for baptism.»']
+
+[[question]]
+id = 742
+q = 'How many passages from the Scriptures did the rabbis collect by the time of Jesus, erroneously thinking they were prophetic of the Messiah?'
+a = [
+  'Almost 500',
+  'Almost 300',
+  'Almost 100',
+  '72',
+  '12',
+]
+right = ['Almost 500']
+refs = ['136:1.3 «The rabbis had gathered together almost five hundred passages from the Scriptures which, notwithstanding their apparent contradictions, they averred were prophetic of the coming Messiah.»']
+
+[[question]]
+id = 743
+q = 'What were James and John of Zebedee doing during the 40 days after Jesus’ baptism?'
+a = [
+  'Working',
+  'Searching for Jesus',
+  'Waiting for Jesus together with John the Baptist',
+]
+right = ['Searching for Jesus']
+refs = ['136:3.7 «Throughout all of these forty days of isolation James and John the sons of Zebedee were engaged in searching for Jesus.»']
+
+[[question]]
+id = 744
+q = 'Who was baptized by John together with Jesus?'
+a = [
+  'James and John of Zebedee',
+  'James and Jude, Jesus’ brothers',
+  'No one, he was alone',
+  'Judas Iscariot',
+]
+right = ['James and Jude, Jesus’ brothers']
+refs = ['135:8.6 «Thus did John baptize Jesus and his two brothers James and Jude.»']
+
+[[question]]
+id = 745
+q = 'Thought Adjusters are nontime beings \ldots'
+a = [
+  'once they enter the domains of space and time',
+  'once they are personalized',
+  'once they fuse with their mortal hosts',
+  'always',
+  'never',
+]
+right = ['once they are personalized']
+refs = ['136:5.4 «And this limitation was dependent on the fact that Adjusters are nontime beings when once they are personalized.»']

@@ -1,0 +1,192 @@
+# Paper 77, The Midway Creatures: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 77
+gone = [595, 596, 599]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 597
+q = '12,000 years ago the Andites, the mixed races of the Nodites and Adamites, undertook to build a new temple on the ruins of the first Tower of Babel. What transpired?'
+a = [
+  'The Hebrews walked around it 7 times while blowing their trumpets until it collapsed',
+  'It fell under its own weight',
+  'It remained incomplete for the second time',
+  'Their languages were confused and they stopped building',
+]
+right = ['It fell under its own weight']
+refs = ['77:3.9 «The mixed races of the Andites (Nodites and Adamites) undertook to raise a new temple on the ruins of the first structure, but there was not sufficient support for the enterprise; it fell of its own pretentious weight.»']
+
+[[question]]
+id = 598
+q = 'The internal Nodite conflict over the tower of Babel greatly reduced the number of purer Nodites and was in many ways responsible for their failure to establish a great civilization. What happened after 120,000 years of decline of Nodite culture?'
+a = [
+  'It was upstepped by Adamic infusion',
+  'The Melchizedek receivers intervened',
+  'It completely vanished from the face of the earth',
+]
+right = ['It was upstepped by Adamic infusion']
+refs = ['77:4.1 «From this time on Nodite culture declined for over one hundred and twenty thousand years until it was upstepped by Adamic infusion.»']
+
+[[question]]
+id = 600
+q = 'After the submergence of Dalamatia 200,000 years ago, where did the Nodites move to found a new city as their racial and cultural headquarters?'
+a = [
+  'Dilmun',
+  'Egypt',
+  'Palestine',
+  'North Polar region',
+  'South Polar region',
+]
+right = ['Dilmun']
+refs = ['77:3.1 «After the submergence of Dalamatia the Nodites moved north and east, presently founding the new city of Dilmun as their racial and cultural headquarters.»']
+
+[[question]]
+id = 601
+q = 'The Nodites were divided as to the plans for the Tower of Babel. There were three differing views as to the purpose of building the tower. Which view is \bibemph{not} one of them?'
+a = [
+  'As a memorial of Nodite history and racial superiority',
+  'To commemorate the Dilmun culture which was foreseen as becoming a great center of commerce, art and manufacture',
+  'For the worship of the Father of all, and for making atonement for the folly of their progenitors in participating in the Caligastia rebellion. That the whole purpose of the new city should be to take the place of Dalamatia',
+  'As a memorial to Daligastia, in whose honor the city of Dalamatia was named',
+]
+right = ['As a memorial to Daligastia, in whose honor the city of Dalamatia was named']
+refs = ['77:3.4 «Three differing views were propounded as to the purpose of building the tower:»']
+
+[[question]]
+id = 602
+q = 'The differing Nodite views as to the purpose of the Tower of Babel grew so contentious that all building work stopped after 4.5 years. One of the groups, the religious group, dispersed after it was voted down. What happened to the remaining two groups?'
+a = [
+  'They fought until near obliteration',
+  'They joined forces and completed the building of the tower',
+  'They destroyed the tower',
+  'They stopped understanding each other’s language because God caused their confusion',
+]
+right = ['They fought until near obliteration']
+refs = ['77:3.8 «The religionists, the noncombatants, fled to their homes in the south, while their fellows fought until well-nigh obliterated.»']
+
+[[question]]
+id = 603
+v = 2
+q = 'Lake Van and Mount Ararat (the sacred mountain of northern Mesopotamia) is where many traditions originated. Which of these stories was woven into the later Jewish scriptures?'
+a = [
+  'Noah and the universal flood',
+  'Moses receiving the Law on mount Sinai',
+  'Eve eating the fruit of the forbidden tree',
+  'Jonah and the whale',
+]
+right = ['Noah and the universal flood']
+refs = ['77:4.12 «Mount Ararat was the sacred mountain of northern Mesopotamia, and since much of your tradition of these ancient times was acquired in connection with the Babylonian story of the flood, it is not surprising that Mount Ararat and its region were woven into the later Jewish story of Noah and the universal flood.»']
+
+[[question]]
+id = 604
+q = 'How many primary midwayers were produced by each pair of Caligastia’s corporeal staff of 100, and what was the total of midwayers which came into being?'
+a = [
+  '1,000/50,000',
+  '100/5,000',
+  '2,000/100,000',
+]
+right = ['1,000/50,000']
+refs = ['77:1.4-5']
+
+[[question]]
+id = 605
+q = 'What is the origin of primary midwayers?'
+a = [
+  'offspring of Caligastia 100',
+  'offspring of Adamson \&\ Ratta',
+  'offspring of Adam \&\ Eve',
+]
+right = ['offspring of Caligastia 100']
+refs = ['77:1.2 «A supermaterial (nonsexual) liaison of a male and a female member of the corporeal staff resulted in the appearance of the first-born of the primary midwayers.»']
+
+[[question]]
+id = 606
+q = 'How many primary midwayers were there originally?'
+a = [
+  '1,111',
+  '1,286',
+  '1,984',
+  '50,000',
+  '99,984',
+]
+right = ['50,000']
+refs = ['77:1.4 «This plan was carried out as long as the power to create continued, and the original corps of 50,000 was accordingly brought into being.»']
+
+[[question]]
+id = 607
+q = 'Who is the eldest Primary Midwayer?'
+a = [
+  '1-2-3 the First',
+  'the Father Midwayer',
+  'Adamson',
+  'Adam',
+]
+right = ['1-2-3 the First']
+refs = ['77:9.5 «1-2-3 the first, the eldest of the primary order, was released from immediate planetary duties shortly after Pentecost.»']
+
+[[question]]
+id = 608
+q = 'What or who is A-B-C the First?'
+a = [
+  'Primary Midwayer',
+  'Secondary Midwayer',
+  'Melchizedek',
+  'Seraphim',
+  'Cherubim',
+]
+right = ['Secondary Midwayer']
+refs = ['77:6.4 «There are eight subgroups of secondary midwayers. They are designated as A-B-C the first, second, third, and so on.»']
+
+[[question]]
+id = 609
+q = 'How many secondary midwayers were there originally?'
+a = [
+  '1,111',
+  '1,286',
+  '1,984',
+  '50,000',
+  '99,984',
+]
+right = ['1,984']
+refs = ['77:6.4 «Each of the eight couples eventually produced 248 midwayers, and thus did the original secondary corps—1,984 in number—come into existence.»']
+
+[[question]]
+id = 610
+q = 'What is the origin of the secondary midwayers?'
+a = [
+  'Salvington',
+  'Uversa',
+  'offspring of the 16 invisible children of Adamson and Ratta',
+  'offspring of Adam and Eve',
+  'offspring of primary midwayers',
+]
+right = ['offspring of the 16 invisible children of Adamson and Ratta']
+refs = ['77:6.2 «Among the children of Adamson there were just sixteen of the peculiar progenitors of the secondary midwayers.»']
+
+[[question]]
+id = 611
+q = 'Where can archaeological evidence be found of the later day descendants of the Nodites?'
+a = [
+  'The clay tablets listing Sumerian kings',
+  'In hieroglyphic records on Egyptian temples',
+  'In the ancient ruins of Knossos, Crete',
+  'Underneath the Western Wall in Jerusalem',
+  'On the mount Ararat',
+]
+right = ['The clay tablets listing Sumerian kings']
+refs = ['77:2.10 «When archaeologists dig up the clay-tablet records of the later-day Sumerian descendants of the Nodites, they discover lists of Sumerian kings running back for several thousand years»']
+
+[[question]]
+id = 612
+q = 'How many Andonites contributed their germ plasm to the members of Planetary Prince’s staff?'
+a = [
+  '7',
+  '12',
+  '100',
+  '5000',
+  '144,000',
+  '1 million',
+]
+right = ['100']
+refs = ['77:2.7 «It will be recalled that the one hundred Andonite germ plasm contributors were in turn made possessors of the organic complement of the tree of life so that the Satania life currents likewise invested their bodies.»']

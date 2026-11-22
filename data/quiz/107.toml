@@ -1,0 +1,17 @@
+# Paper 107, Origin and Nature of Thought Adjusters: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 107
+
+[[question]]
+id = 654
+q = 'What is the average age of receiving the Thought Adjuster on Urantia?'
+a = [
+  '6 years',
+  '7 years',
+  '20 years',
+  '40 years',
+]
+right = ['6 years']
+refs = ['108:2.1 «Adjusters reach their human subjects on Urantia, on the average, just prior to the sixth birthday.»']

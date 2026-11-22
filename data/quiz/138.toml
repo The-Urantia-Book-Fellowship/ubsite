@@ -1,0 +1,6 @@
+# Paper 138, Training the Kingdom’s Messengers: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 138
+gone = [751]       # deleted, their ids kept for ever (data/quiz/README.md)

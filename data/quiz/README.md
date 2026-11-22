@@ -1,68 +1,63 @@
 # The quiz, as the site asks it
 
-The British Study Edition's Cosmic Citizenship Quiz, `tex/quiz.tex` in `../urantia-study-edition`: 817 questions on 126 of the 197 papers, 51 of them with more than one right answer (819 and 53 until Tigran's mends of 2026-10-29). The site asks it one question at a time, at the end of each paper that has questions and at `/quiz` (Tigran, 2026-10-28). `build/quiz.py` reads it at the commit `sources.toml` pins and holds it to the files here; the edition itself is never written to. Its slips are mended there, by Tigran.
+The site's quiz, one question at a time, at the end of each paper that has questions and at `/quiz` (Tigran, 2026-10-28). Its questions are the files here, `NNN.toml`, a file to each paper that has a question, and `build/quiz.py` reads them alone.
 
-## `questions.tsv` and `references.tsv`, the ledgers
+They began as the British Study Edition's Cosmic Citizenship Quiz, `tex/quiz.tex` in `../urantia-study-edition`, which the build read from 2026-10-28, its spelling made American by a table, each question held to a ledger of ids and rulings kept here. On 2026-11-22 Tigran gave the edition up: "we don't need to import questions from that quiz.tex anymore, as I no longer wish to maintain the British Study Edition -- its essence will migrate into ubsite." So `tools/quiz/convert.py` converted it once, from quiz.tex at 0a1f055 and this directory's ledger at 0696b8d, as the KJV was converted into `data/kjv/`, and these files have been the master since: the edition is never read for the quiz again. Converted, its 817 questions gave the database's quiz tables row for row as quiz.tex had. The same day Paper 1, which had one question, was given 28 more, written for the site from a reading of the paper and its study notes.
 
-One line for each question in `questions.tsv`, and in `references.tsv` one line for each passage that answers it, both kept by `tools/quiz/apply.py`, never edited by hand:
+## A paper's file
 
-| column | |
+```toml
+paper = 1
+gone = [361]                 # only where an id was deleted: see below
+
+[[question]]
+id = 58
+q = 'What is man’s choicest (in fact, the only possible) gift to God?'
+a = [
+  'consecration of will',
+  'prayer',
+  'meditation',
+  'helping the poor',
+]
+right = ['consecration of will']
+refs = ['1:1.2 «The affectionate dedication of the human will ...»']
+```
+
+The file is named for its paper and says so, `paper = 1`; the paper's questions are asked in the file's order. Nothing else may stand in a file, nor in a question, and every refusal is the build's: a key it does not know, a right answer that is none of the answers, fewer than two answers or more than nine, two answers with the same words, an id given twice.
+
+| key | |
 |---|---|
-| `id` | given once, 1 to 819 in `quiz.tex`'s order to begin with, never reused or renumbered: the browser and the board keep answers by it, as a headword keeps its slug |
-| `paper` | the paper whose questions it is among; it never changes |
-| `origin` | 16 hex digits of the SHA-256 of the question as written (its `\qstart` to its `\qstop`, whitespace collapsed): a question edited upstream fails the build until its line is ruled on |
-| `v` | the layout of its answers, from 1: what an answer stored by position means. It moves on when the answers' number, order or rightness changes, and an answer given under the old layout is never marked against the new one |
-| `state` | what answers it: `-` not yet reviewed; `text` one or more passages of the text, in `references.tsv`; `note` a study note of the edition's; `none` neither; `drop` the question kept out; `gone` deleted upstream, its id kept |
+| `id` | given once and never reused, nor renumbered: the browser and the board keep answers by it, as a headword keeps its slug. A new question takes the next id after the highest of all the files, `gone` included |
+| `v` | the layout of its answers, 1 when absent: what an answer stored by position means. Raise it when the answers' number, their order or which are right changes, and an answer given under the old layout is never marked against the new. Mending an answer's words leaves it |
+| `q` | the question |
+| `a` | its answers, in the order shown |
+| `right` | the right answers, by their words; more than one makes the question a set, chosen together |
+| `refs` | what answers it: the passages of the text shown under it once answered, in order (below) |
+| `note` | or a study note answers it: its paragraph and its origin, `'32:2.12 8fbb4aa5e5c51c7f'` |
+| `state` | or `'none'`, nothing answers it, or `'drop'`, the question kept out. A question with none of `refs`, `note` and `state` is not yet reviewed, and is asked with nothing shown under it |
+| `shuffle` | `false` to show its answers as written each time, `true` to shuffle them, where the rule below would say otherwise; mostly absent |
+| `gone` | the paper's ids whose questions were deleted, kept so that they are never given again: 361, 373, 401, 596 and 790, deleted upstream; 750, the edition's question about the wedding at Cana asked a second time; and 33 of the 40 dropped in 2026-10 (below), all three deleted here on 2026-11-22 |
 
-And in `references.tsv`, for a `text` question one line per passage, in the order they are shown, and for a `note` one line, its paragraph:
+A paper's questions are asked in a new order each time, and each question's answers too (Tigran, 2026-11-22), but where their order means something: yes and no, three or more numbers that rise ("1 year, 2 years, 3 years, 5 years, 12 years", one answer such as "unknown" allowed), the days of the week, or an answer of three words at most that names the others ("Both", "All three", "All of them"). The build decides by that rule (`build/quiz.py fixed_order`), 193 of the 804 asked on 2026-11-22, and `shuffle` overrules it for a question. An answer is kept by its place in the file, whatever order it was shown in, so the shuffle changes nothing for `v`.
 
-| column | |
-|---|---|
-| `id` | the question's |
-| `n` | from 1, the order shown |
-| `ref` | the paragraph, `32:2.11`, or a run of one section's paragraphs shown whole, `0:3.2-8` |
-| `quote` | the paragraph's own words, as the text has them, which occur there once and are whole words; or `¶`: the paragraph, or the run, shown whole, as a list given an item to a paragraph is best shown (Tigran, 2026-10-29, of the seven Absolutes at 0:3.2-8); for a `note`, the note's origin, as `build/study.py` keys notes |
+`tests/test_quiz.py` holds the rules of `id` and `v` against the last commit: every id there is here, in the same paper, an id gone stays gone, and a question whose answers' layout changed has a higher `v`.
 
-A question may be answered by several passages, not adjoining, each quoted or whole (Tigran, 2026-10-29, ruling 13:1.1 and 13:2.7-8 for the spheres forever forbidden, and 13:1.5-6 for the secrets of Divinington). No length is refused: the build warns where over 1,000 characters would be shown under one question, so that a section ruled by a slip is noticed (his choice, the same day; until then a paragraph was held to 320 characters and a run to 640).
+The text is TeX in the book's own spelling and order of dates ("March 25, 7~B.C."), set with the study edition's macros (`build/quiz_macros.py`, a closed table held to what the questions use: `\hyp{}`, `\ldots`, `\ts{th}`, `\bibemph{}`, a few more, and `$\alpha$`, `$\tau$`, `$\infty$`) and its expander. Quotation marks and apostrophes are the characters themselves, “ ” ‘ ’, which keeps every string a plain TOML literal, `'...'`, in which a backslash is only a backslash; a string holding an ASCII `'` needs `"..."` or `'''...'''`, and TeX's `` '' `` and `'` would be set the same.
 
-Two questions with one origin are paired with lines in order: `quiz.tex` asks Paper 137's question about the bride at Cana twice, at its lines 5930 and 5940 (d6c3206), and those are ids 749 and 750.
+## What answers a question
 
-Seven questions are dropped until a figure is on the site: the Foreword's Q40–Q46 (ids 40–46) ask about the "Existential Flower", which is the edition's `images/Existential-Flower.jpg`, redrawn as `images/reality.pdf`, the figure it sets at 0:3.10, "The Seven Absolutes and the structure of reality" (Tigran, 2026-10-29). When it is, they are ruled again.
+`refs` is one or more passages, in the order shown, each as a ruling words it: `1:1.2 «quoted words»` quotes them, the paragraph's own words, which occur there once and are whole words; a reference alone, `1:2.9`, shows its paragraph whole, and so does a run of one section's paragraphs, `0:3.2-8`, as a list given an item to a paragraph is best shown (Tigran, 2026-10-29, of the seven Absolutes at 0:3.2-8). Several passages need not adjoin (his ruling of 13:1.1 and 13:2.7-8 for the spheres forever forbidden, the same day). No length is refused: the build warns where over 1,000 characters would be shown under one question, so that a section given by a slip is noticed.
 
-A question answered by a study note (the Excalibur question at 32, by the edition's note at 32:2.12) shows that note as the site shows it, once the paper's notes are reviewed into `data/study/NNN.toml`, whatever the reader's Notes setting, since it is the answer; until then it shows the paragraph and its reference, never a note not yet reviewed.
+A question answered by a study note (the Excalibur question, 370, by the note at 32:2.12; 829 by the note at 1:0.1 on Psalms 33:6) shows that note as the site shows it, once its paper's notes are reviewed into `data/study/NNN.toml`, whatever the reader's Notes setting, since it is the answer; until then it shows the paragraph and its reference, never a note not yet reviewed. The origin is the one `build/study.py` keys notes by, and the build finds the note by it in the study edition, where every note not yet reviewed still stands.
 
-When the edition changes, the build says which question has no line and which line no question:
+The Foreword's Q40–Q46 (ids 40–46) are dropped until a figure is on the site: they ask about the "Existential Flower", which is the edition's `images/Existential-Flower.jpg`, redrawn as `images/reality.pdf`, the figure it sets at 0:3.10, "The Seven Absolutes and the structure of reality" (Tigran, 2026-10-29). When it is, they are ruled again. They are the only questions dropped: the other 33 dropped in October, Tigran ruled on 2026-11-22, were deleted, their ids kept in their papers' `gone`. Eleven had every answer right, so nothing to choose (174, 195, 210, 211, 219, 245, 283, 362, 434, 568, 595); seven rested on what the book does not say (55, 237, 238, 663, 728, 751, 815); seven were ambiguous, or had a wrong answer partly true (111, 267, 599, 661, 755, 777, 794); five asked one fact, the sacred spheres' light, five ways (146–150); and three were answerable but ruled out (220, 284, 717). Paper 138, whose only question was 751, has no quiz.
 
-- `apply.py new`: the questions no line names get the next ids, unreviewed. It refuses while a line names a question the edition no longer has.
-- `apply.py same ID LINE`: line `ID` is the question now at `quiz.tex:LINE`, as edited; add `--answers` if its answers changed, which moves `v` on. It goes back to unreviewed.
-- `apply.py gone ID`: the question was deleted; its id stays taken.
+The edition's questions were reviewed in 2026-10, each given its passages from a draft that proposed candidates (Paper 32's on 10-28, the Foreword's and Papers 1–12's on 10-29, the other 114 papers' on 10-30 from one file of the questions in doubt), by tools retired with the conversion: `tools/quiz/draft.py`, `apply.py` and `doubt.py`, in the history before it. A question written here is written with its passages.
 
-## How a paper is reviewed
+## `words.tsv`
 
-1. `make data`, then `.venv/bin/python tools/quiz/draft.py N`. It writes `var/quiz/review-NNN.md`: each question as the site shows it, with the changes from `quiz.tex` marked, its right answers, its slips, up to three candidate paragraphs and the edition's notes, each with the sentence that matched, and one proposed. It never overwrites a review.
-2. Tigran writes his ruling on each question's `Ruling:` line: `yes`, a candidate's number or several (`6 and 1`; in words, "No, the correct candidate is 1"), the passages to show in order (`13:1.1 and 13:2.7-8`, `13:1.5 «words» and 13:1.6`, `text 0:3.2-8`; in words, "No, the correct reference is 0:3.2-8": a reference with «words» after it quotes them, one without is shown whole, and "or" is no ruling), `note 32:2.12`, `none` or `drop`, a reason after it if he likes. His lines are never overwritten.
-3. `.venv/bin/python tools/quiz/apply.py rule N` writes the rulings into the ledgers, or lists what it cannot read and writes nothing.
-4. `make data` holds each reference to its paragraph, and the paper is looked at on the dev server.
-5. It is committed only once Tigran has looked; `deploy.sh` refuses an uncommitted `data/quiz/`.
-
-### Many papers at once
-
-Ruling paper by paper was too slow for the 114 papers left after the Foreword, Papers 1–12 and 32: the vast majority of proposals are plainly right (Tigran, 2026-10-29). So the rest are ruled from one file, `var/quiz/doubtful.md`, which holds only the questions in doubt, and everything else is accepted as proposed:
-
-1. Every paper is drafted (step 1 above), each question with a `Checked:` line from a first reading saying why the proposal answers it.
-2. A second reading, independent of the first, grades every question of every paper not yet ruled into `var/quiz/grades/NNN.tsv` (`id`, `grade`, `alt`, `reason`): `A`, the passage plainly answers it; `B`, only by inference, in part, with a wrong answer supported too, or with a better passage found; `C`, not answered. `alt` is a better reference in the ruling vocabulary, a run of paragraphs where a list is given one to a paragraph. The second reading is trusted by `tools/quiz/doubt.py calibrate N…` on papers already ruled: a changed ruling must come out B or C.
-3. `.venv/bin/python tools/quiz/doubt.py make` writes `var/quiz/doubtful.md`: every question graded B, C or P, proposed by a note or by nothing, or named in `var/quiz/flags.md` §2, §3 or §5, as its review has it, with the second reading's grade and reason, its `alt` as one more candidate (and for a C or a P, the proposal), and `Why here:`. The rest are counted as plain; those the first reading hedged over are listed at its end, one line each. It never overwrites the file; `make --again` makes it anew from the grades as they stand, carrying every ruling in it over by id and keeping the old file as `doubtful.prev.md`, which is how the second reading's proposals of several passages (`P`) reached it on 2026-10-29.
-4. Tigran rules in `doubtful.md` alone, as in a review; a blank ruling accepts what `Proposed:` says.
-5. `.venv/bin/python tools/quiz/apply.py rule pending --accept --doubts` writes every paper with a line unreviewed: a question in `doubtful.md` as ruled there, every other as proposed. `apply.py check pending --doubts` holds it all to the build's rules first. Then `make data`, `make check`, a look, and the commit.
-
-Done on 2026-10-30: 122 of the 677 questions were in doubt, and Tigran accepted 88 as proposed, changed 3 and dropped 31, among them Paper 138's only question, which leaves 125 papers with a quiz. Every question is reviewed: 774 by the text, 3 by a study note, 40 dropped.
-
-## The text: `american.tsv` and `words.tsv`
-
-The quiz is British, and the text beside it the press's American. `american.tsv` rewrites the quiz's spelling into the book's own, word for word, case kept: `centre` is `center`, `coordinate` the book's `co-ordinate`. Each word it writes must be a word of the book, and an entry nothing uses fails the build. Dates are put in the book's order by `build/quiz.py` itself, with the no-break space the book sets beside the era: "25 March 7 B.C." is "March 25, 7 B.C.", "Tuesday 4 April 30 A.D." is "Tuesday, April 4, A.D. 30".
-
-Then every word the site shows must be a word of the book, as its search index sees it, or a word `words.tsv` allows and says why: a `name` (Excalibur, Fomalhaut), a word of ordinary `english` the book happens not to use (porridge), a `distractor` made up for a wrong answer (Avalonia), an `abbreviation` (NGC). An allowed word nothing uses fails, and so does one the book has after all.
+Every word the site shows must be a word of the book, as its search index sees it, or a word `words.tsv` allows and says why: a `name` (Excalibur, Fomalhaut), a word of ordinary `english` the book happens not to use (porridge), a `distractor` made up for a wrong answer (Avalonia), an `abbreviation` (NGC). An allowed word nothing uses fails, and so does one the book has after all. A misspelling is caught so.
 
 ## `tests/known-quiz-slips.tsv`
 
-What is neither is a slip of the edition's, and so is a metric unit where the press gives miles or inches (trap 31), a date left British, a time on the 24-hour clock, the "~" of "~135 million", and the duplicate. The build requires the list to be exactly what it finds: a new slip fails, and so does one mended upstream and still listed. A slip that is a matter of wording (the units, the times, "~") is put to Tigran in its paper's review; his rewrite, once ruled, goes in `american.tsv` as a phrase.
+What is neither is a slip, and so is a date in the British order, a "~" for about, and a question asked twice. The build requires the list to be exactly what it finds: a new slip fails, and so does one mended here and still listed. The edition's 63 came over with it and went the same day, by Tigran's ruling ("Keep metric units and 24h times and fix the rest"): 25 misspellings mended (mater, worls, Mezozoic, Boom of Psalms ...), the four dates of 703 put in the book's order, 479's "~135 million" made "about 135 million", and 750, the same question as 749, deleted; the 23 metric units where the press gives miles (trap 31) and the 9 times on the 24-hour clock stay as written, and are no slips since. The list is empty.

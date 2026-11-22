@@ -1,0 +1,64 @@
+# Paper 42, Energy—Mind and Matter: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 42
+
+[[question]]
+id = 414
+q = 'Can solar heat or pressure convert ultimatons back into puissant energy?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['42:4.8 «But no known solar heat or pressure can convert ultimatons back into puissant energy.»']
+
+[[question]]
+id = 415
+q = 'Can ultimatonic energies sometimes exhibit antigravity behavior?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['42:4.10 «Throughout all of this never-ending metamorphosis of energy and matter we must reckon with the influence of gravity pressure and with the antigravity behavior of the ultimatonic energies under certain conditions of temperature, velocity, and revolution.»']
+
+[[question]]
+id = 416
+q = 'What is the lowest density of matter-energy known in our local universe?'
+a = [
+  '100 ultimatons in 16.4 cm\ts{3}',
+  '10 ultimatons in 16.4 cm\ts{3}',
+  '1 ultimaton in 16.4 cm\ts{3}',
+  '0',
+]
+right = ['100 ultimatons in 16.4 cm\ts{3}']
+refs = ['42:4.6 «The most nearly empty space known in Nebadon would yield about one hundred ultimatons—the equivalent of one electron—in each cubic inch.»']
+
+[[question]]
+id = 417
+q = 'How many ultimatons make one electron?'
+a = [
+  '3',
+  '10',
+  '100',
+  '300',
+  '777',
+  '1000',
+  '70,000',
+]
+right = ['100']
+refs = ['42:6.5 «Mutual attraction holds one hundred ultimatons together in the constitution of the electron; and there are never more nor less than one hundred ultimatons in a typical electron.»']
+
+[[question]]
+id = 418
+q = 'By loss of one or more ultimatons how many modified forms of electron one may obtain?'
+a = [
+  '100',
+  '10',
+  '7',
+  '50',
+]
+right = ['10']
+refs = ['42:6.5 «The loss of one or more ultimatons destroys typical electronic identity, thus bringing into existence one of the ten modified forms of the electron.»']

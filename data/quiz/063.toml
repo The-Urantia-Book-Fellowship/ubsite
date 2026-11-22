@@ -1,0 +1,100 @@
+# Paper 63, The First Human Family: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 63
+
+[[question]]
+id = 497
+v = 2
+q = 'Which period of time is regarded as the golden age of primitive man of the pre-Planetary Prince days, when Adjusters and guardian seraphim first came in great numbers to Urantia?'
+a = [
+  'In the days of Andon \&\ Fonta 991,472 years ago',
+  'In the days of Onagar, about 983,300 years ago',
+  'When a better strain sprang from the Neanderthals, the Badonan tribes 500,000 years ago',
+]
+right = ['In the days of Onagar, about 983,300 years ago']
+refs = ['63:6.9 «Although both Andon and Fonta had received Thought Adjusters, as had many of their descendants, it was not until the days of Onagar that the Adjusters and guardian seraphim came in great numbers to Urantia. This was, indeed, the golden age of primitive man.»']
+
+[[question]]
+id = 498
+q = 'What names were bestowed upon the first human beings at the time of fusion?'
+a = [
+  'Adam and Eve',
+  'Cain and Abel',
+  'Sonta\hyp{}an and Sonta\hyp{}en',
+  'Andon and Fonta',
+  'Abraham and Sarah',
+]
+right = ['Andon and Fonta']
+refs = ['63:0.3 «Andon and Fonta never knew these names until they were bestowed upon them at the time of fusion with their Thought Adjusters.»']
+
+[[question]]
+id = 499
+q = 'What decision of Andon and Fonta constituted their first response to the adjutant mind-spirit of wisdom?'
+a = [
+  'worship God and him only',
+  'marry',
+  'flee home',
+  'eat only vegetables',
+]
+right = ['flee home']
+refs = ['62:6.5 «when, about a year later, they finally resolved, as a result of meditative thought and purposeful decision, to flee from home and journey north, then did the spirit of wisdom begin to function on Urantia and in these two now recognized human minds.»']
+
+[[question]]
+id = 500
+q = 'How many years did Andon and Fonta live?'
+a = [
+  '42',
+  '45',
+  '120',
+  '486',
+]
+right = ['42']
+refs = ['63:3.4 «They lived to the age of forty-two, when both were killed at the time of an earthquake by the falling of an overhanging rock.»']
+
+[[question]]
+id = 501
+q = 'How did Andon and Fonta die?'
+a = [
+  'rock fell on them during an earthquake',
+  'drowned',
+  'killed by gibbons',
+  'ate poison mushrooms',
+]
+right = ['rock fell on them during an earthquake']
+refs = ['63:3.4 «They lived to the age of forty-two, when both were killed at the time of an earthquake by the falling of an overhanging rock.»']
+
+[[question]]
+id = 502
+q = 'Which present-day group of people resembles the early Andonites most?'
+a = [
+  'negroes',
+  'Eskimo',
+  'native American indians',
+  'Australian aborigines',
+]
+right = ['Eskimo']
+refs = ['63:4.1 «In general appearance and skin color these early Andonites more nearly resembled the present-day Eskimo than any other type of living human beings.»']
+
+[[question]]
+id = 503
+q = 'Which of the first humans responded to the influence of the adjutant mind-spirit of worship first?'
+a = [
+  'Andon',
+  'Fonta',
+]
+right = ['Fonta']
+refs = ['62:6.5 «Imagine our joy one day—the twins were about ten years old—when the spirit of worship made its first contact with the mind of the female twin and shortly thereafter with the male.»']
+
+[[question]]
+id = 504
+q = 'Who were the Andonites?'
+a = [
+  'Descendants of Andon \&\ Fonta',
+  'Descendants of Adam \&\ Eve',
+  'Descendants of the Orange race',
+  'Descendants of Cain \&\ Remona',
+]
+right = ['Descendants of Andon \&\ Fonta']
+refs = ['63:5.6 «The Andonites were fearless and successful hunters and, with the exception of wild berries and certain fruits of the trees, lived exclusively on flesh. As Andon had invented the stone ax, so his descendants early discovered and made effective use of the throwing stick and the harpoon.»']

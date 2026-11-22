@@ -1,0 +1,29 @@
+# Paper 52, Planetary Mortal Epochs: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 52
+
+[[question]]
+id = 439
+q = 'Why was Moses not permitted to “go to the other side” (i.e. be resurrected on the mansion world)?'
+a = [
+  'because the fallen Planetary Prince Caligastia was contesting such a deliverance',
+  'because he was a secret sinner',
+  'because the resurrection hall on Mansonia One was not yet constructed',
+]
+right = ['because the fallen Planetary Prince Caligastia was contesting such a deliverance']
+refs = ['52:5.5 «Even Moses was not permitted to go over to the other side until the occasion of a special resurrection, the fallen Planetary Prince, Caligastia, contesting such a deliverance.»']
+
+[[question]]
+id = 440
+q = 'Since what event do the Urantia mortals may proceed directly to the morontia spheres after death?'
+a = [
+  'Pentecost',
+  'Jesus’ birth',
+  'Jesus’ crucifixion',
+  'Jesus’ resurrection',
+  'Jesus’ baptism',
+]
+right = ['Pentecost']
+refs = ['52:5.5 «But ever since the day of Pentecost, Urantia mortals again may proceed directly to the morontia spheres.»']

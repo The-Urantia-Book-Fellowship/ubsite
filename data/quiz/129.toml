@@ -1,0 +1,45 @@
+# Paper 129, The Later Adult Life of Jesus: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 129
+
+[[question]]
+id = 714
+v = 2
+q = 'How old was Jesus when he left his family home?'
+a = [
+  '16',
+  '18',
+  '21',
+  '26',
+  '27',
+  '30',
+  '33',
+]
+right = ['26']
+refs = ['129:1.1 «In January of this year, A.D. 21, on a rainy Sunday morning, Jesus took unceremonious leave of his family, only explaining that he was going over to Tiberias and then on a visit to other cities about the Sea of Galilee.»']
+
+[[question]]
+id = 715
+q = 'In what capacity did Jesus travel the Mediterranean with Gonod and Ganid?'
+a = [
+  'Guide',
+  'Interpreter and tutor',
+  'Spiritual Mentor',
+]
+right = ['Interpreter and tutor']
+refs = ['129:2.9 «These travelers hailed from India, and being on their way to visit Rome and various other points on the Mediterranean, they had arranged to arrive in Jerusalem during the Passover, hoping to find someone whom they could engage as interpreter for both and tutor for the son.»']
+
+[[question]]
+id = 716
+q = 'By whom was Jesus first called “the Master”?'
+a = [
+  'Simon, called Peter',
+  'John of Zebedee',
+  'the Alpheus twins',
+  'the employees of Zebedee',
+  'the fishermen of Capernaum',
+]
+right = ['the employees of Zebedee']
+refs = ['129:1.11 «Once a week Jesus held a meeting with the entire household, shop, and shore helpers, for Zebedee had many employees. And it was among these workers that Jesus was first called “the Master.”»']

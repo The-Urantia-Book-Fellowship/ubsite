@@ -1,0 +1,34 @@
+# Paper 127, The Adolescent Years: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 127
+
+[[question]]
+id = 712
+q = 'Who was the officer of the Galilean division of the party of Zealots?'
+a = [
+  'Jesus',
+  'Jesus’ uncle, Simon',
+  'Jesus’ sister, Ruth',
+  'Jesus’ father, Joseph',
+]
+right = ['Jesus’ uncle, Simon']
+refs = ['127:2.4 «One of Jesus’ uncles (Mary’s brother Simon) had already joined this group, subsequently becoming an officer in the Galilean division.»']
+
+[[question]]
+id = 713
+q = 'What was the reason for estrangement between Jesus and his uncle Simon?'
+a = [
+  'Jesus’ refusal to accept the title of Messiah',
+  'Simon’s refusal to accept Jesus’ leadership of the Zealots',
+  'Jesus’ refusal to join the party of Zealots',
+  'Jesus’ refusal to honor his uncle Simon in public',
+  'Simon’s refusal to learn Hebrew',
+]
+right = ['Jesus’ refusal to join the party of Zealots']
+refs = [
+  '127:2.1 «There was coming into existence a strong nationalist party, presently to be called the Zealots.»',
+  '127:2.2 «A group of organizers from Jerusalem arrived in Galilee and were making good headway until they reached Nazareth. When they came to see Jesus, he listened carefully to them and asked many questions but refused to join the party.»',
+  '127:2.4',
+]

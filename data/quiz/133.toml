@@ -1,0 +1,64 @@
+# Paper 133, The Return from Rome: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 133
+
+[[question]]
+id = 723
+q = 'Is self-consciousness the soul?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['133:6.5 «Self-consciousness, in and of itself, is not the soul.»']
+
+[[question]]
+id = 724
+q = 'In which of Jesus’ talks did he say “Matter and spirit and the state intervening between them are three interrelated and interassociated levels of the true unity of the real universe”?'
+a = [
+  'The Science Discourse',
+  'Discourse on Reality',
+  'Discourse on Time and Space',
+]
+right = ['The Science Discourse']
+refs = ['133:5.3 «Both the father and the son greatly enjoyed the discussion on science which Jesus had at their inn one evening with a Greek philosopher. After this pedant had talked for almost three hours, and when he had finished his discourse, Jesus, in terms of modern thought, said:»']
+
+[[question]]
+id = 725
+q = 'Who taught that “The human mind early begins to manifest qualities which are supermaterial and the truly reflective intellect is not altogether bound by the limits of time”?'
+a = [
+  'The Mystic Cults',
+  'Pythagoras',
+  'Jesus',
+  'Peter',
+  'Moses',
+]
+right = ['Jesus']
+refs = ['133:7.5 «The last week of their sojourn in the mountains Jesus and Ganid had a long talk on the functions of the human mind.»']
+
+[[question]]
+id = 726
+q = 'To what was Jesus referring when he said “they destroy unity and may terminate in mind disruption. Only a happy and unified mind is dedicated to the doing of the will of the Father”?'
+a = [
+  'Unresolved conflicts',
+  'Evil friends',
+  'Materialism',
+  'Differing opinions on religious matters',
+]
+right = ['Unresolved conflicts']
+refs = ['133:7.12 «Unresolved conflicts destroy unity and may terminate in mind disruption.»']
+
+[[question]]
+id = 727
+q = 'To whom was Jesus referring when he said “They cannot possess a time self-consciousness, only a sensation-recognition and memory, and cannot conclude intelligent and reflective interpretations”?'
+a = [
+  'children',
+  'idiots',
+  'animals',
+  'sinners',
+  'Jews',
+]
+right = ['animals']
+refs = ['133:7.8 «No mere animal could possess a time self-consciousness.»']

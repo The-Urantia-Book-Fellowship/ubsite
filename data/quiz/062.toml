@@ -1,0 +1,40 @@
+# Paper 62, The Dawn Races of Early Man: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 62
+
+[[question]]
+id = 494
+q = 'When did the first human beings appear on our planet?'
+a = [
+  '6,000 years ago',
+  '35,000 years ago',
+  '47,000 years ago',
+  '470,000 years ago',
+  '870,000 years ago',
+  '1 million years ago',
+]
+right = ['1 million years ago']
+refs = ['62:5.1 «From the year A.D. 1934 back to the birth of the first two human beings is just 993,419 years.»']
+
+[[question]]
+id = 495
+q = 'How did Andon and Fonta’s parents die?'
+a = [
+  'killed by gibbons',
+  'killed by saber-toothed cat Smilodon',
+  'died of old age',
+]
+right = ['killed by gibbons']
+refs = ['62:5.11 «so he wandered off into the forest, was set upon by hostile gibbons and beaten to death.»']
+
+[[question]]
+id = 496
+q = 'Is man an evolutionary descendant from apes?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['62:3.12 «And so it may be readily seen that man and the ape are related only in that they sprang from the mid-mammals»']

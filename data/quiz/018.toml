@@ -1,0 +1,258 @@
+# Paper 18, The Supreme Trinity Personalities: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 18
+gone = [284]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 285
+q = 'The number of Supreme Trinity Personalities is \ldots'
+a = [
+  'increasing',
+  'fixed',
+  'decreasing',
+]
+right = ['fixed']
+refs = ['18:0.9 «These beings of administrative perfection are of definite and final numbers.»']
+
+[[question]]
+id = 286
+q = 'How many Trinitized Secrets of Supremacy supervise each of the seven sacred worlds of the Father?'
+a = [
+  '10',
+  '7',
+  '3',
+  '1',
+  '70',
+]
+right = ['10']
+refs = ['18:1.1 «There are seven worlds in the innermost circuit of the Paradise satellites, and each of these exalted worlds is presided over by a corps of ten Trinitized Secrets of Supremacy.»']
+
+[[question]]
+id = 287
+q = 'How many Eternals of Days are in existence?'
+a = [
+  '1 billion',
+  '7 billion',
+  '70',
+  '21',
+  '7',
+]
+right = ['1 billion']
+refs = ['18:2.1 «These rulers are known as the Eternals of Days, and they number exactly one billion, one for each of the Havona spheres.»']
+
+[[question]]
+id = 288
+q = 'How many Eternals of Days rule each of one billion perfect worlds of Havona?'
+a = [
+  '1',
+  '3',
+  '7',
+  '10',
+]
+right = ['1']
+refs = ['18:2.1 «These rulers are known as the Eternals of Days, and they number exactly one billion, one for each of the Havona spheres.»']
+
+[[question]]
+id = 289
+q = 'How many Trinitized Secrets of Supremacy are in existence?'
+a = [
+  '70',
+  '7 billion',
+  '7',
+  '21',
+  '77',
+  '1 billion',
+]
+right = ['70']
+refs = ['18:1.1 «The conduct of the affairs of these seven fraternal spheres is wholly committed to this corps of seventy supreme directors.»']
+
+[[question]]
+id = 290
+q = 'Are there any records of the origin of the Eternals of Days in existence?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['18:2.1 «They are the offspring of the Paradise Trinity, but like the Secrets of Supremacy there are no records of their origin.»']
+
+[[question]]
+id = 291
+q = 'Are there any records of the origin of the Trinitized Secrets of Supremacy in existence?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['18:2.1 «They are the offspring of the Paradise Trinity, but like the Secrets of Supremacy there are no records of their origin.»']
+
+[[question]]
+id = 292
+q = 'Are the Eternals of Days visible to all will creatures dwelling in their domains?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['18:2.2 «The Eternals of Days are visible to all will creatures dwelling in their domains.»']
+
+[[question]]
+id = 293
+q = 'Can an Eternal of Days be absent from his Havona sphere?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['18:2.2 «When an Eternal of Days is absent from his sphere, his world is directed by a Trinity Teacher Son.»']
+
+[[question]]
+id = 294
+q = 'Who directs the Havona sphere during the absence of its Eternal of Days?'
+a = [
+  'a Trinity Teacher Son',
+  'an Avonal Son',
+  'a Daynal Son',
+  'a Michael Son',
+  'an Ancient of Days',
+]
+right = ['a Trinity Teacher Son']
+refs = ['18:2.2 «When an Eternal of Days is absent from his sphere, his world is directed by a Trinity Teacher Son.»']
+
+[[question]]
+id = 295
+q = 'Are there any records of the origin (trinitization) of the Ancients of Days in existence?'
+a = [
+  'yes, on Paradise',
+  'no',
+]
+right = ['yes, on Paradise']
+refs = ['18:3.4 «When you reach Paradise and search the written records of the beginning of things, you will find that the first entry appearing in the personality section is the recital of the trinitization of these twenty-one Ancients of Days.»']
+
+[[question]]
+id = 296
+q = 'How many Perfections of Days are there in existence?'
+a = [
+  '21',
+  '210',
+  '7',
+  '70',
+  '1 billion',
+  '7 billion',
+]
+right = ['210']
+refs = ['18:4.1 «There are just two hundred and ten Perfections of Days, and they preside over the governments of the ten major sectors of each superuniverse.»']
+
+[[question]]
+id = 297
+q = 'Is it necessary that all three Perfections of Days be present on the capital of their major sector?'
+a = [
+  'yes',
+  'no, one may be absent',
+  'no, one or two may be absent',
+  'no, all three may be absent',
+]
+right = ['no, one may be absent']
+refs = ['18:4.2 «Three Perfections of Days are assigned to each major sector capital, but unlike the Ancients of Days, it is not necessary that all three be present at all times. From time to time one of this trio may absent himself to confer in person with the Ancients of Days concerning the welfare of his realm.»']
+
+[[question]]
+id = 298
+q = 'Will the mortals of Urantia see the Perfections of Days when they advance to the headquarters of Splandon?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['18:4.7 «You will early see the Perfections of Days when you advance to the headquarters of Splandon after your sojourn on the worlds of your minor sector, for these exalted rulers are closely associated with the seventy major sector worlds of higher training for the ascendant creatures of time.»']
+
+[[question]]
+id = 299
+q = 'How many of the ten major sectors of our superuniverse will the mortals of Urantia pass during their ascent?'
+a = [
+  'only one, Splandon',
+  'all ten',
+  'three',
+  'four',
+  'two',
+]
+right = ['all ten']
+refs = ['18:4.9 «Although you are entered only upon the registry of the major sector of Splandon, which embraces the local universe of your origin, you will have to pass through every one of the ten major divisions of our superuniverse.»']
+
+[[question]]
+id = 300
+q = 'How many of the Orvonton Perfections of Days will the mortals of Urantia see before they reach Uversa?'
+a = [
+  'all 30',
+  '3',
+  '7',
+  '70',
+  '1',
+]
+right = ['all 30']
+refs = ['18:4.9 «You will see all thirty of the Orvonton Perfections of Days before you reach Uversa.»']
+
+[[question]]
+id = 301
+q = 'How many Recents of Days are there in existence?'
+a = [
+  '21000',
+  '210',
+  '7',
+  '70',
+  '1 billion',
+  '21',
+]
+right = ['21000']
+refs = ['18:5.1 «There are just twenty-one thousand of these personally glorious and divinely efficient Trinity personalities.»']
+
+[[question]]
+id = 302
+q = 'How many Unions of Days are there in existence?'
+a = [
+  '700000',
+  '21000',
+  '700',
+  '70',
+  '1 billion',
+  '21',
+]
+right = ['700000']
+refs = ['21:1.4 «Now, we know that there are exactly seven hundred thousand Unions of Days and no more are being created.»']
+
+[[question]]
+id = 303
+q = 'How many Faithfuls of Days are there in existence?'
+a = [
+  '70000000',
+  '21000',
+  '7000000',
+  '70',
+  '1 billion',
+  '21',
+]
+right = ['70000000']
+refs = ['18:7.1 «There are seventy million Faithfuls of Days, and like the Unions of Days, not all are in service.»']
+
+[[question]]
+id = 304
+q = 'How many of the three Recents of Days are always on duty at the headquarters of their minor sector?'
+a = [
+  'all three',
+  'at least one',
+  'at least two',
+]
+right = ['at least one']
+refs = ['18:5.4 «But at least one of these rulers always remains on duty at the headquarters of a minor sector.»']
+
+[[question]]
+id = 305
+q = 'How many minor sectors will the mortals of Urantia have to traverse on their ascent to Uversa?'
+a = [
+  'only one, Ensa',
+  'all 100 minor sectors of their major sector of Splandon',
+  'all 1000 minor sectors of their superuniverse of Orvonton',
+]
+right = ['only one, Ensa']
+refs = ['18:5.5 «You will all sometime know the three Recents of Days in charge of Ensa, your minor sector, since you must pass through their hands on your way inward to the training worlds of the major sectors. In ascending to Uversa, you will pass through only one group of minor sector training spheres.»']

@@ -1,144 +1,114 @@
-"""The quiz (build/quiz.py, build/readers/quiz.py, tools/quiz/).
+"""The quiz (build/quiz.py, data/quiz/, tools/quiz/convert.py).
 
-The reader on made-up files, so each refusal is seen to refuse; the rewrites
-of spelling and dates on the forms quiz.tex has; the ledger, whose ids are
-kept for ever; and a ruling read from a review as tools/quiz/apply.py reads it.
+Its files on made-up examples, so each refusal is seen to refuse; the ids and
+the layouts of the answers, kept for ever, against the last commit; the
+conversion from the study edition's quiz.tex, and the rewrites it made; and
+the pages.
 """
 
 import pathlib
 import subprocess
 import sys
+import tempfile
+import tomllib
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "tools" / "quiz"))
 
 from build import quiz  # noqa: E402
 from build.problems import Report  # noqa: E402
-from build.readers import quiz as reader  # noqa: E402
+from tools.quiz import convert  # noqa: E402
 
-import apply  # noqa: E402
-
-
-def quiz_tex(body: dict[int, str] | None = None) -> str:
-    """A quiz.tex with every paper, and `body[n]` after paper n's \\qpaper."""
-    body = body or {}
-    return "\\quizheader\n\n" + "".join(f"\\qpaper{{{n}}}{{Title}}\n\n{body.get(n, '')}"
-                                       for n in range(197))
-
-
-ONE = "\\qstart{What is the name of our own world?}\n{Mars}{0}\n{Urantia}{1}\n\\qstop\n\n"
+ONE = """
+[[question]]
+id = 1
+q = 'What is the name of our own world?'
+a = ['Mars', 'Urantia']
+right = ['Urantia']
+refs = ['0:0.1 «Urantia»']
+"""
 
 
-def codes(src: str) -> list[str]:
-    r = Report()
-    reader.parse(src, r)
-    return [p.code for p in r.problems]
-
-
-class Reader(unittest.TestCase):
-    def test_a_good_file(self):
+def load(files: dict[str, str]):
+    """data/quiz/ made of these files, loaded: (problems' codes, questions, gone)."""
+    with tempfile.TemporaryDirectory() as d:
+        for name, text in files.items():
+            (pathlib.Path(d) / name).write_text(text, encoding="utf-8")
         r = Report()
-        qs = reader.parse(quiz_tex({0: ONE, 32: ONE + ONE}), r)
-        self.assertEqual(r.problems, [])
-        self.assertEqual([(q.paper, q.ord) for q in qs], [(0, 1), (32, 1), (32, 2)])
-        self.assertEqual(qs[0].answers, (("Mars", False), ("Urantia", True)))
-        self.assertEqual(qs[0].mask, 0b10)
-        self.assertEqual(qs[1].origin, qs[2].origin)
+        qs, gone = quiz.load(r, pathlib.Path(d))
+    return [p.code for p in r.problems], qs, gone
+
+
+def paper(n: int, body: str = ONE, head: str = "") -> dict[str, str]:
+    return {f"{n:03d}.toml": f"paper = {n}\n{head}{body}"}
+
+
+class Files(unittest.TestCase):
+    def test_a_good_file(self):
+        codes, qs, gone = load(paper(0, ONE + ONE.replace("id = 1", "id = 2"), "gone = [3]\n"))
+        self.assertEqual(codes, [])
+        self.assertEqual([(q.id, q.paper, q.ord, q.v) for q in qs], [(1, 0, 1, 1), (2, 0, 2, 1)])
+        self.assertEqual(qs[0].answers, [("Mars", False), ("Urantia", True)])
+        self.assertEqual((qs[0].state, qs[0].refs), ("text", [("0:0.1", "Urantia")]))
+        self.assertEqual(gone, [3])
 
     def test_refusals(self):
-        self.assertIn("quiz-no-right", codes(quiz_tex({0: ONE.replace("{1}", "{0}")})))
-        self.assertIn("quiz-answers", codes(quiz_tex({0: "\\qstart{Q?}\n{only}{1}\n\\qstop\n"})))
-        self.assertIn("quiz-comment", codes(quiz_tex({0: ONE.replace("Mars", "Mars % red")})))
-        self.assertIn("quiz-stray", codes(quiz_tex({0: ONE + "a line nothing claims\n"})))
-        self.assertIn("quiz-answer", codes(quiz_tex({0: ONE.replace("{Mars}{0}", "{Mars}{2}")})))
-        self.assertIn("quiz-unclosed", codes(quiz_tex({0: ONE.replace("\\qstop\n", "")})))
-        self.assertIn("quiz-papers", codes(quiz_tex().replace("\\qpaper{196}{Title}\n", "")))
-        self.assertIn("quiz-header", codes(quiz_tex().replace("\\quizheader\n", "")))
+        def refused(body, code, head=""):
+            self.assertIn(code, load(paper(0, body, head))[0], body)
+        refused(ONE.replace("right = ['Urantia']", "right = ['Earth']"), "quiz-right")
+        refused(ONE.replace("right = ['Urantia']", "right = []"), "quiz-right")
+        refused(ONE.replace("a = ['Mars', 'Urantia']", "a = ['Urantia']"), "quiz-answers")
+        refused(ONE.replace("a = ['Mars', 'Urantia']", "a = ['Urantia', 'Urantia']"), "quiz-answers")
+        refused(ONE.replace("id = 1", "id = 1\ncolour = 'red'"), "quiz-question")
+        refused(ONE.replace("id = 1", "id = 1\nstate = 'none'"), "quiz-question")
+        refused(ONE.replace("id = 1", "id = 1\nstate = 'maybe'").replace("refs = ['0:0.1 «Urantia»']", ""),
+                "quiz-question")
+        refused(ONE.replace("id = 1", "id = 1\nv = 0"), "quiz-question")
+        refused(ONE.replace("«Urantia»", "Urantia"), "quiz-refs")
+        refused(ONE.replace("0:0.1 «Urantia»", "0:3.2-8 «The First»"), "quiz-refs")
+        refused(ONE.replace("0:0.1 «Urantia»", "0:3.8-2"), "quiz-refs")
+        refused(ONE.replace("refs = ['0:0.1 «Urantia»']", "note = '32:2.12'"), "quiz-note")
+        refused(ONE, "quiz-ids", "gone = [1]\n")
+        self.assertIn("quiz-ids", load({**paper(0), **paper(1)})[0])
+        self.assertIn("quiz-file", load({"000.toml": f"paper = 1\n{ONE}"})[0])
+        self.assertIn("quiz-file", load({"0.toml": f"paper = 0\n{ONE}"})[0])
+        self.assertIn("quiz-file", load({"000.toml": f"paper = 0\ntitle = 'x'\n{ONE}"})[0])
 
-    def test_braces_are_counted(self):
-        r = Report()
-        qs = reader.parse(quiz_tex({1: "\\qstart{Is \\bibemph{this} it?}\n{a {b} c}{1}\n{d}{0}\n\\qstop\n"}), r)
-        self.assertEqual(r.problems, [])
-        self.assertEqual((qs[0].tex, qs[0].answers[0][0]), ("Is \\bibemph{this} it?", "a {b} c"))
+    def test_what_answers_a_question(self):
+        """Several passages in the order shown (Tigran, 2026-10-29: 13:1.1 and
+        13:2.7-8), a run of paragraphs shown whole, a note, nothing, or not yet."""
+        refs = "refs = ['13:1.1', '13:2.7-8', '13:1.5 «The secrets»']"
+        codes, qs, _ = load(paper(13, ONE.replace("refs = ['0:0.1 «Urantia»']", refs)))
+        self.assertEqual(codes, [])
+        self.assertEqual(qs[0].refs, [("13:1.1", "¶"), ("13:2.7-8", "¶"), ("13:1.5", "The secrets")])
+        for line, state, rs in (("note = '32:2.12 8fbb4aa5e5c51c7f'", "note", [("32:2.12", "8fbb4aa5e5c51c7f")]),
+                                ("state = 'none'", "none", []), ("state = 'drop'", "drop", []), ("", "-", [])):
+            codes, qs, _ = load(paper(0, ONE.replace("refs = ['0:0.1 «Urantia»']", line)))
+            self.assertEqual((codes, qs[0].state, qs[0].refs), ([], state, rs), line)
 
-    def test_the_edition_at_its_pinned_commit(self):
-        from build import config
-        st = config.load()["study"]
-        r = Report()
-        qs = reader.read(st["tex"], st["at"], r)
-        self.assertEqual(r.problems, [])
-        self.assertEqual(len(qs), 817)
-        self.assertEqual(sum(bin(q.mask).count("1") > 1 for q in qs), 51)
-
-
-class Text(unittest.TestCase):
-    def test_dates_in_the_books_order(self):
-        for tex, want in [
-                ("25 March 7 B.C.", "March 25, 7~B.C."),
-                ("Midnight, Tuesday 4 April 30 A.D.", "Midnight, Tuesday, April 4, A.D.~30"),
-                ("11\\ts{th} February, 2\\,B.C.", "February 11, 2~B.C."),
-                ("76\\,A.D.", "A.D.~76"),
-                ("37,000 B.C.", "37,000~B.C."),
-                ("by 19,000 B.C.?", "by 19,000~B.C.?"),
-                # A slip of the edition's stays as it is, for the gate to find.
-                ("21 August 7.~B.C.", "21 August 7.~B.C.")]:
-            self.assertEqual(quiz.dates(tex), want, tex)
-
-    def test_american_spelling(self):
-        used = set()
-        table = {"centre": "center", "manmade": "man-made"}
-        got = quiz.americanize("Centre, centres, \\centre{x}, CENTRE, manmade", table, used)
-        self.assertEqual(got, "Center, centres, \\centre{x}, CENTER, man-made")
-        self.assertEqual(used, {"centre", "manmade"})
-
-
-class Ledger(unittest.TestCase):
-    def test_ids_are_kept_since_the_last_commit(self):
-        """A question's id and paper never change: the board keeps answers by
-        id.  Lines may be added, and a line's other fields ruled on."""
-        old = subprocess.run(["git", "-C", str(ROOT), "show", "HEAD:data/quiz/questions.tsv"],
-                             capture_output=True, text=True)
-        if old.returncode != 0:
-            self.skipTest("not committed yet")
-        def ids(text):
-            return [tuple(line.split("\t")[:2]) for line in text.splitlines()
-                    if line and not line.startswith(("#", "id\t"))]
-        now = ids((ROOT / "data" / "quiz" / "questions.tsv").read_text(encoding="utf-8"))
-        then = ids(old.stdout)
-        self.assertEqual(now[:len(then)], then)
-
-    def load(self, state, refs):
-        """A ledger of one question with these references, loaded."""
-        import tempfile
-        with tempfile.TemporaryDirectory() as d:
-            path = pathlib.Path(d) / "questions.tsv"
-            path.write_text(f"id\tpaper\torigin\tv\tstate\n1\t0\t{'a' * 16}\t1\t{state}\n", encoding="utf-8")
-            (path.with_name("references.tsv")).write_text(
-                "id\tn\tref\tquote\n" + "".join(f"1\t{n}\t{ref}\t{q}\n" for n, (ref, q) in enumerate(refs, 1)),
-                encoding="utf-8")
-            r = Report()
-            lines = quiz.load_ledger(r, path)
-        return r.problems, lines
-
-    def test_a_run_of_paragraphs_is_shown_whole(self):
-        for ref, quote, ok in (("0:3.2-8", quiz.WHOLE, True), ("0:3.2", quiz.WHOLE, True),
-                               ("0:3.2-8", "The First Source", False), ("0:3.8-2", quiz.WHOLE, False),
-                               ("0:3", "The First Source", False)):
-            problems, _ = self.load("text", [(ref, quote)])
-            self.assertEqual(problems == [], ok, (ref, quote, problems))
-
-    def test_several_passages(self):
-        """A question may be answered by several passages, in the order ruled
-        (Tigran, 2026-10-29: 13:1.1 and 13:2.7-8); a note by one."""
-        problems, lines = self.load("text", [("13:1.1", quiz.WHOLE), ("13:2.7-8", quiz.WHOLE), ("13:1.5", "The secrets")])
-        self.assertEqual(problems, [])
-        self.assertEqual(lines[0].refs, [("13:1.1", "¶"), ("13:2.7-8", "¶"), ("13:1.5", "The secrets")])
-        self.assertNotEqual(self.load("note", [("13:1.1", "a" * 16), ("13:1.2", "b" * 16)])[0], [])
-        self.assertNotEqual(self.load("text", [])[0], [])
-        self.assertNotEqual(self.load("none", [("13:1.1", quiz.WHOLE)])[0], [])
-        self.assertEqual(self.load("none", [])[0], [])
+    def test_which_answers_keep_their_order(self):
+        """Shuffled each time they are asked, but yes and no, rising numbers,
+        the days, and an answer that names the others (Tigran, 2026-11-22)."""
+        fixed = quiz.fixed_order
+        self.assertTrue(fixed(["yes", "no"]))
+        self.assertTrue(fixed(["no, never", "yes, during every trip to Paradise"]))
+        self.assertTrue(fixed(["1 year", "2 years", "3 years", "5 years", "12 years"]))
+        self.assertTrue(fixed(["about 135 million years ago", "about 200 million years ago", "about 300 million years ago"]))
+        self.assertTrue(fixed(["3", "4", "7", "12", "Infinitely many"]))
+        self.assertTrue(fixed(["36,000 km/s", "100,000 km/s", "299,792 km/s", "unlimited"]))
+        self.assertTrue(fixed(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]))
+        self.assertTrue(fixed(["Spirit of Truth", "Return to the world himself", "Both"]))
+        self.assertTrue(fixed(["At the time of Adam", "At the mortal transit of Jesus", "All three"]))
+        self.assertFalse(fixed(["3", "7", "12", "24", "4"]))                 # numbers, not in order
+        self.assertFalse(fixed(["Mars", "Venus", "Urantia"]))
+        self.assertFalse(fixed(["both teach that there are many gods", "both deny that matter is real"]))
+        self.assertFalse(fixed(["100,000 ly", "200,000 ly"]))                 # two numbers are no scale
+        # Its file overrules the rule, either way.
+        for line, f in (("shuffle = false", 1), ("shuffle = true", 0)):
+            codes, qs, _ = load(paper(0, ONE.replace("id = 1", f"id = 1\n{line}")))
+            self.assertEqual((codes, qs[0].shuffle), ([], f == 0))
+        self.assertIn("quiz-question", load(paper(0, ONE.replace("id = 1", "id = 1\nshuffle = 'yes'")))[0])
 
     def test_no_length_is_refused(self):
         """Since 13:1.5-6, about 850 characters (Tigran, 2026-10-29): the
@@ -150,174 +120,131 @@ class Ledger(unittest.TestCase):
         self.assertIsNone(quiz._whole({**texts, "1:1.3": "c"}, "1:1.1-4", "w", r))
         self.assertEqual([p.code for p in r.problems], ["quiz-ref"])
         self.assertEqual(quiz.SHOWN_WARN, 1000)
-
-    def test_reconcile_pairs_duplicates_in_order(self):
-        qs = reader.parse(quiz_tex({5: ONE + ONE}), Report())
-        lines = [quiz.Line(1, 5, qs[0].origin, 1, "-", [], 1),
-                 quiz.Line(2, 5, qs[0].origin, 1, "-", [], 2)]
-        r = Report()
-        got = quiz.reconcile(qs, lines, r)
-        self.assertEqual([x.id for x in got], [1, 2])
-        self.assertEqual(r.problems, [])
-        r = Report()
-        quiz.reconcile(qs[:1], lines, r)
-        self.assertEqual([p.code for p in r.problems], ["quiz-ledger-gone"])
-
-
-class Ruling(unittest.TestCase):
-    ITEM = {"q": 1, "proposed": "1", "ruling": None,
-            "candidates": {"1": "text 32:2.11 «From Jerusem»", "2": "note 32:2.12 8fbb4aa5e5c51c7f",
-                           "3": "text 0:3.2-8", "4": "text 0:3.2", "5": "text 13:1.1 «The words» and 13:2.7-8"}}
-    W = quiz.WHOLE
-
-    def rule(self, ruling, notes=("8fbb4aa5e5c51c7f",), **kw):
-        return apply.decide({**self.ITEM, **kw, "ruling": ruling}, lambda ref: list(notes))
-
-    def test_rulings(self):
-        one = ("text", [("32:2.11", "From Jerusem")])
-        self.assertEqual(self.rule("yes"), one)
-        self.assertEqual(self.rule("Yes."), one)
-        self.assertEqual(self.rule("2"), ("note", [("32:2.12", "8fbb4aa5e5c51c7f")]))
-        self.assertEqual(self.rule("none"), ("none", []))
-        self.assertEqual(self.rule("drop"), ("drop", []))
-        self.assertEqual(self.rule("text 32:2.9 «At the last registry»"), ("text", [("32:2.9", "At the last registry")]))
-        self.assertEqual(self.rule("note 32:2.12"), ("note", [("32:2.12", "8fbb4aa5e5c51c7f")]))
-        self.assertEqual(self.rule("drop until we include the Existential-Flower illustration"), ("drop", []))
-        # Tigran's ruling on 6 Q1, 2026-10-29.
-        self.assertEqual(self.rule("No, the correct candidate is 1, quite obviously."), one)
-        self.assertEqual(self.rule("candidate 2"), ("note", [("32:2.12", "8fbb4aa5e5c51c7f")]))
-
-    def test_a_reference_alone_is_shown_whole(self):
-        # Tigran's ruling on the Foreword's seven Absolutes, 2026-10-29.
-        for r in ("No, the correct reference is 0:3.2-8", "text 0:3.2-8", "0:3.2-8", "no: 0:3.2–8."):
-            self.assertEqual(self.rule(r), ("text", [("0:3.2-8", self.W)]), r)
-        self.assertEqual(self.rule("text 0:3.2"), ("text", [("0:3.2", self.W)]))
-        # His ruling on 12 Q8, 2026-10-29.
-        self.assertEqual(self.rule("The correct reference is 12:5.6-9"), ("text", [("12:5.6-9", self.W)]))
-        self.assertEqual(self.rule("No, it is 32:2.9 «At the last registry»"), ("text", [("32:2.9", "At the last registry")]))
         self.assertEqual(quiz.paragraphs("0:3.2-4"), ["0:3.2", "0:3.3", "0:3.4"])
         self.assertEqual(quiz.paragraphs("32:2.11"), ["32:2.11"])
 
-    def test_several_passages(self):
-        """His rulings on 13 Q1 and Q10, 2026-10-29: several passages, in order."""
-        two = ("text", [("13:1.1", self.W), ("13:2.7-8", self.W)])
-        self.assertEqual(self.rule("13:1.1 and 13:2.7-8"), two)
-        self.assertEqual(self.rule("No, the correct references are 13:1.1 and 13:2.7-8"), two)
-        self.assertEqual(self.rule("text 13:1.1, 13:2.7-8"), two)
-        self.assertEqual(self.rule("13:1.5-6"), ("text", [("13:1.5-6", self.W)]))
-        self.assertEqual(self.rule("13:1.5 «The secrets of Divinington» and 13:1.6 and 13:2.7 «closed»"),
-                         ("text", [("13:1.5", "The secrets of Divinington"), ("13:1.6", self.W), ("13:2.7", "closed")]))
-        self.assertEqual(self.rule("5"), ("text", [("13:1.1", "The words"), ("13:2.7-8", self.W)]))
-        self.assertEqual(self.rule("yes", proposed="5"), ("text", [("13:1.1", "The words"), ("13:2.7-8", self.W)]))
-        self.assertEqual(self.rule("4 and 1"), ("text", [("0:3.2", self.W), ("32:2.11", "From Jerusem")]))
-        self.assertEqual(self.rule("1, 3"), ("text", [("32:2.11", "From Jerusem"), ("0:3.2-8", self.W)]))
-        self.assertEqual(apply.references("1:1.1 «see 2:2.2 there» and 3:3.3"),
-                         [("1:1.1", "see 2:2.2 there"), ("3:3.3", self.W)])
+    def test_the_files(self):
+        r = Report()
+        qs, gone = quiz.load(r)
+        self.assertEqual(r.problems, [])
+        self.assertEqual((len(qs), len({q.paper for q in qs}), len(gone)), (811, 125, 39))
+        self.assertEqual(sum(sum(right for _, right in q.answers) > 1 for q in qs), 37)
+        self.assertEqual(sorted(q.id for q in qs if q.state == "drop"), list(range(40, 47)))
 
-    def test_a_candidate_shown_whole(self):
-        """A second reading proposes a run as a candidate, "3. text 0:3.2-8",
-        and a ruling names it by number, or says yes to it."""
-        self.assertEqual(self.rule("3"), ("text", [("0:3.2-8", self.W)]))
-        self.assertEqual(self.rule("4"), ("text", [("0:3.2", self.W)]))
-        self.assertEqual(self.rule("yes", proposed="3"), ("text", [("0:3.2-8", self.W)]))
-        self.assertEqual(self.rule("No, the correct candidate is 3"), ("text", [("0:3.2-8", self.W)]))
 
-    def test_what_is_not_a_ruling(self):
-        for bad in ("", "maybe 32:2.11", "No, it is 0:3.2 or 0:3.3", "No", "No, the correct candidate is 7",
-                    "text 0:3.2-8 «The First Source»", "2 and 1", "«words» 13:1.1", "13:1.1 «a» «b»"):
-            self.assertIsInstance(self.rule(bad), str, bad)
-        self.assertIsInstance(self.rule("note 32:2.12", notes=("a" * 16, "b" * 16)), str)
-        self.assertIsInstance(self.rule("yes", proposed="none"), str)
+def layouts(files: dict[str, str]) -> dict[int, tuple]:
+    """{id: (paper, v, answers, mask)} of a data/quiz/, and {id: (paper, None ...)} for one gone."""
+    out = {}
+    for name, text in files.items():
+        d = tomllib.loads(text)
+        for i in d.get("gone", []):
+            out[i] = (d["paper"], None, None, None)
+        for q in d.get("question", []):
+            mask = sum(1 << n for n, a in enumerate(q["a"]) if a in q["right"])
+            out[q["id"]] = (d["paper"], q.get("v", 1), tuple(q["a"]), mask)
+    return out
 
-    def test_a_blank_ruling_accepts(self):
-        self.assertEqual(apply.accepted(self.ITEM)["ruling"], "yes")
-        self.assertEqual(apply.accepted({**self.ITEM, "ruling": "  "})["ruling"], "yes")
-        self.assertEqual(apply.accepted({**self.ITEM, "proposed": "none"})["ruling"], "none")
-        self.assertEqual(apply.accepted({**self.ITEM, "ruling": "2"})["ruling"], "2")
 
-    def test_hold(self):
-        text = {"9:1.1": "The words.", "9:1.2": "Other words.", "9:1.3": "x" * 1200}
-        self.assertEqual(apply.hold(text, "text", [("9:1.1", "The words.")], "w"), ([], []))
-        self.assertEqual(apply.hold(text, "text", [("9:1.1", "The words."), ("9:1.2", quiz.WHOLE)], "w"), ([], []))
-        self.assertEqual(len(apply.hold(text, "text", [("9:1.1", "Other")], "w")[0]), 1)
-        self.assertEqual(apply.hold(text, "text", [("9:1.1-3", quiz.WHOLE)], "w")[0], [])
-        self.assertEqual(len(apply.hold(text, "text", [("9:1.1-3", quiz.WHOLE)], "w")[1]), 1)    # over 1,000: warned
-        self.assertEqual(len(apply.hold(text, "text", [("9:1.1-4", quiz.WHOLE)], "w")[0]), 1)
-        self.assertEqual(apply.hold({}, "note", [("9:1.1", "a" * 16)], "w"), ([], []))
+def git(*args) -> str | None:
+    r = subprocess.run(["git", "-C", str(ROOT), *args], capture_output=True, text=True, encoding="utf-8")
+    return r.stdout if r.returncode == 0 else None
 
-    def test_doubtful_md_overrides_a_review(self):
-        """A question in var/quiz/doubtful.md is read from there whole: its
-        candidates (one more than the review's), its proposal and its ruling."""
-        import tempfile
-        review = """# Paper 9, for review
 
-## Q1 (id 80, quiz.tex:600)
+class Kept(unittest.TestCase):
+    """A question's id and paper never change, nor an id come back once gone:
+    the browser and the board keep answers by id.  And an answer is kept by
+    its position under the layout v names, so a change to the answers' number,
+    their order or which are right raises v (data/quiz/README.md)."""
 
-Q?
+    def now(self):
+        return layouts({p.name: p.read_text(encoding="utf-8") for p in (ROOT / "data" / "quiz").glob("*.toml")})
 
-- ✓ a
+    def test_against_the_last_commit(self):
+        names = (git("ls-tree", "--name-only", "HEAD", "data/quiz/") or "").split()
+        tomls = [n for n in names if n.endswith(".toml")]
+        now = self.now()
+        if tomls:
+            then = layouts({n: git("show", f"HEAD:{n}") for n in tomls})
+            for i, (p, v, answers, mask) in then.items():
+                self.assertIn(i, now, f"id {i} is in no file: an id stays, in its paper's gone if deleted")
+                p2, v2, answers2, mask2 = now[i]
+                self.assertEqual(p2, p, f"id {i} stays in Paper {p}")
+                if v is None:
+                    self.assertIsNone(v2, f"id {i} is gone, and never given again")
+                elif v2 is not None and (len(answers2), mask2) != (len(answers), mask) or \
+                        v2 is not None and sorted(answers2) == sorted(answers) and answers2 != answers:
+                    self.assertGreater(v2, v, f"id {i}: its answers' layout changed, so v is raised")
+                elif v2 is not None:
+                    self.assertGreaterEqual(v2, v, f"id {i}: v never goes back")
+        else:
+            # The commit before the conversion: its ledger, data/quiz/questions.tsv.
+            ledger = git("show", "HEAD:data/quiz/questions.tsv")
+            if ledger is None:
+                self.skipTest("no quiz at the last commit")
+            for line in ledger.splitlines():
+                if not line or line.startswith(("#", "id\t")):
+                    continue
+                i, p, _, v, state = line.split("\t")
+                self.assertIn(int(i), now, f"id {i}")
+                self.assertEqual(now[int(i)][0], int(p), f"id {i}")
+                if state == "gone":
+                    self.assertIsNone(now[int(i)][1], f"id {i} is gone, and never given again")
+                elif now[int(i)][1] is not None:              # or deleted since, its id kept
+                    self.assertEqual(now[int(i)][1], int(v), f"id {i}")
 
-Candidates:
-1. text 9:1.1 «The words.»
-   score 10
+    def test_the_rule_is_seen_to_hold(self):
+        """What the test above calls a change of layout."""
+        a = layouts(paper(0))[1]
+        for body, changed in ((ONE.replace("'Mars', 'Urantia'", "'Urantia', 'Mars'"), True),
+                              (ONE.replace("'Mars'", "'Mars', 'Venus'"), True),
+                              (ONE.replace("right = ['Urantia']", "right = ['Urantia', 'Mars']"), True),
+                              (ONE.replace("'Mars'", "'Marss'"), False)):
+            b = layouts(paper(0, body))[1]
+            self.assertEqual((len(a[2]), a[3]) != (len(b[2]), b[3])
+                             or (sorted(a[2]) == sorted(b[2]) and a[2] != b[2]), changed, body)
 
-Checked: fine.
-Proposed: 1
 
-Ruling: 
+class Converted(unittest.TestCase):
+    """tools/quiz/convert.py, which made data/quiz/ from quiz.tex once."""
 
-## Q2 (id 81, quiz.tex:610)
+    def test_dates_in_the_books_order(self):
+        for tex, want in [
+                ("25 March 7 B.C.", "March 25, 7~B.C."),
+                ("Midnight, Tuesday 4 April 30 A.D.", "Midnight, Tuesday, April 4, A.D.~30"),
+                ("11\\ts{th} February, 2\\,B.C.", "February 11, 2~B.C."),
+                ("76\\,A.D.", "A.D.~76"),
+                ("37,000 B.C.", "37,000~B.C."),
+                ("by 19,000 B.C.?", "by 19,000~B.C.?"),
+                # A slip of the edition's stays as it is, for the gate to find.
+                ("21 August 7.~B.C.", "21 August 7.~B.C.")]:
+            self.assertEqual(convert.dates(tex), want, tex)
 
-Q?
+    def test_american_spelling(self):
+        used = set()
+        table = {"centre": "center", "manmade": "man-made"}
+        got = convert.americanize("Centre, centres, \\centre{x}, CENTRE, manmade", table, used)
+        self.assertEqual(got, "Center, centres, \\centre{x}, CENTER, man-made")
+        self.assertEqual(used, {"centre", "manmade"})
 
-Candidates:
-1. text 9:1.2 «Other words.»
-   score 10
+    def test_quotation_marks(self):
+        self.assertEqual(convert.curly("``Father'' and man's `own' $f'(x)$"), "“Father” and man’s ‘own’ $f'(x)$")
+        self.assertEqual(convert.lit("man’s"), "'man’s'")
+        self.assertEqual(tomllib.loads("x = " + convert.lit("it's \\hyp{}"))["x"], "it's \\hyp{}")
 
-Proposed: 1
-
-Ruling: yes
-"""
-        doubtful = """# The doubtful ones
-
-# Paper 9, Title
-
-## Q1 (id 80, quiz.tex:600)
-
-Q?
-
-- ✓ a
-
-Candidates:
-1. text 9:1.1 «The words.»
-   score 10
-2. text 9:1.1 and 9:2.1-3
-
-Checked: fine.
-Second reading: P — a list, one item to a paragraph.
-Why here: P
-Proposed: 2 (was 1)
-
-Ruling: 
-"""
+    def test_it_comes_out_the_same(self):
+        """Run again, it gives the 817 questions and the five ids gone, each
+        string expanding as quiz.tex's did (the conversion checks that itself),
+        and every question it made is in data/quiz/ under its id and paper."""
+        from build import config
+        if not pathlib.Path(config.load()["study"]["tex"]).exists():
+            self.skipTest("no study edition here")
         with tempfile.TemporaryDirectory() as d:
-            root = pathlib.Path(d)
-            (root / "review-009.md").write_text(review, encoding="utf-8")
-            (root / "doubtful.md").write_text(doubtful, encoding="utf-8")
-            old = apply.REVIEWS, apply.DOUBTS
-            apply.REVIEWS, apply.DOUBTS = root, root / "doubtful.md"
-            try:
-                got = {qid: item for n, qid, item in apply.reviewed([9], apply.doubts())}
-                plain = {qid: item for n, qid, item in apply.reviewed([9], None)}
-            finally:
-                apply.REVIEWS, apply.DOUBTS = old
-        self.assertEqual(got[80]["proposed"], "2")
-        self.assertEqual(got[80]["candidates"]["2"], "text 9:1.1 and 9:2.1-3")
-        self.assertEqual(apply.decide(apply.accepted(got[80]), lambda ref: []),
-                         ("text", [("9:1.1", quiz.WHOLE), ("9:2.1-3", quiz.WHOLE)]))
-        self.assertEqual(apply.decide(apply.accepted(plain[80]), lambda ref: []), ("text", [("9:1.1", "The words.")]))
-        self.assertEqual(got[81], plain[81])
-        self.assertEqual(got[81]["ruling"], "yes")
+            self.assertEqual(convert.main(["--out", d]), 0)
+            made = layouts({p.name: p.read_text(encoding="utf-8") for p in pathlib.Path(d).glob("*.toml")})
+        self.assertEqual((len(made), sum(v[1] is None for v in made.values())), (822, 5))
+        now = Kept().now()
+        for i, (p, *_) in made.items():
+            self.assertEqual(now[i][0], p, f"id {i}")
 
 
 class Pages(unittest.TestCase):
@@ -347,11 +274,33 @@ class Pages(unittest.TestCase):
         self.assertIn('src="/static/quiz.js', body)
         self.assertEqual(body.count('<li>\n      <p class="qq">'), 6)   # listed without scripts
 
+    def test_paper_1(self):
+        """The edition's one question on Paper 1 and the 28 written for the site
+        on 2026-11-22, in the order of the text; one answered by a study note."""
+        st, _, body = self.get("/quiz/1")
+        self.assertEqual(st, 200)
+        d = self.data(body)
+        ids = [q["id"] for q in d["q"]]
+        self.assertEqual(ids, [823, 824, 58, *range(825, 851)])
+        q = {x["id"]: x for x in d["q"]}
+        self.assertEqual((q[829]["s"]["k"], q[829]["s"]["ref"]), ("note", "1:0.1"))
+        self.assertIn("Psalms", q[829]["s"]["h"])
+        self.assertEqual(q[828]["m"], 0b101)                    # two right of five
+        self.assertEqual(q[823]["s"]["p"][0]["ref"], "1:0.5")
+        self.assertIn("God-consciousness", q[823]["s"]["p"][0]["h"])
+        self.assertNotIn("f", q[823])                           # its answers shuffled
+        js = (ROOT / "ubsite" / "static" / "quiz.js").read_text()
+        self.assertIn("start(shuffle(D.q.slice()), D.paper)", js)      # the questions, each time
+        self.assertIn("if (!q.f) shuffle(R.order);", js)               # and the answers, but `f`
+        self.assertIn("choose(R.order[k])", js)                        # a key the place as shown
+        d0 = self.data(self.get("/quiz/0")[2])
+        self.assertEqual({x["id"]: x.get("f") for x in d0["q"]}[49], 1)   # yes | no, as written
+
     def test_the_quiz_page_has_every_question(self):
         st, _, body = self.get("/quiz")
         self.assertEqual(st, 200)
         d = self.data(body)
-        self.assertEqual((len(d["q"]), len(d["papers"])), (777, 125))     # 40 dropped: Paper 0's 8, 11 Q20, and 31 ruled 2026-10-30,
+        self.assertEqual((len(d["q"]), len(d["papers"])), (804, 125))     # 40 dropped: Paper 0's 8, 11 Q20, and 31 ruled 2026-10-30,
         self.assertEqual(body.count('<li data-n="'), 125)                   # Paper 138's one question among them
         # The Foreword's row twice, on its own and in Part I, for Settings'
         # Foreword in Part I (quiz.html; 2026-11-04); its choice in the list

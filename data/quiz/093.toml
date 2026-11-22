@@ -1,0 +1,72 @@
+# Paper 93, Machiventa Melchizedek: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 93
+
+[[question]]
+id = 634
+q = 'Whom did Melchizedek invite to his school in Salem?'
+a = [
+  'Abraham',
+  'Terah and his whole family',
+  'Nahor',
+  'Abraham and Nahor',
+]
+right = ['Abraham and Nahor']
+refs = ['93:5.5 «A few weeks after the death of Abraham’s father, Terah, Melchizedek sent one of his students, Jaram the Hittite, to extend this invitation to both Abraham and Nahor: “Come to Salem, where you shall hear our teachings of the truth of the eternal Creator»']
+
+[[question]]
+id = 635
+q = 'Which of these was the teacher of Abraham?'
+a = [
+  'Lutentia',
+  'Lucifer',
+  'Satan',
+  'Tabamantia',
+  'Machiventa Melchizedek',
+  'Mantutia Melchizedek',
+  'The Father Melchizedek',
+  'Yahweh, the God of Israel',
+]
+right = ['Machiventa Melchizedek']
+refs = [
+  '93:4.16',
+  '96:5.3 «Without the teaching of Machiventa to Abraham and his contemporaries, the Hebrews would have come out of Egypt in hopeless darkness.»',
+]
+
+[[question]]
+id = 636
+q = 'Who introduced the tithing system into the schools of Melchizedek?'
+a = [
+  'Melchizedek',
+  'Abraham',
+  'Lot',
+  'Sarah',
+]
+right = ['Abraham']
+refs = ['93:3.1 «Even the idea of a tithing system, which was introduced by his later convert Abraham, was also derived from the lingering traditions of the methods of the ancient Sethites.»']
+
+[[question]]
+id = 637
+q = 'The original records that served as a base for the Old Testament were based on the teachings of Melchizedek and were full and replete. Where were they edited en masse to almost completely obliterate all traces of Melchizedek teachings and turned into the confusing and self-contradictory body we have today?'
+a = [
+  'In Babylon',
+  'After return from Babylon',
+  'Prior to Babylon Captivity',
+  'In medieval times',
+  'Jews continue to edit them today',
+]
+right = ['In Babylon']
+refs = ['93:9.6 «The teaching of Melchizedek was full and replete, but the records of these days seemed impossible and fantastic to the later Hebrew priests, although many had some understanding of these transactions, at least up to the times of the en masse editing of the Old Testament records in Babylon.»']
+
+[[question]]
+id = 638
+q = 'Why so few of the Jews recognized and received the Son of God when he was born as Jesus of Nazareth?'
+a = [
+  'Because their fathers in Babylon distorted and corrupted the teachings of Melchizedek (when writing what we know today as “Old Testament”) and edited out all the references to his promise of the coming bestowal Son',
+  'Because it is in their nature to be distrusting and suspicious',
+  'Because the Priests and Pharisees didn’t recognize him',
+]
+right = ['Because their fathers in Babylon distorted and corrupted the teachings of Melchizedek (when writing what we know today as “Old Testament”) and edited out all the references to his promise of the coming bestowal Son']
+refs = ['93:9.9-10']

@@ -1,0 +1,67 @@
+# Paper 58, Life Establishment on Urantia: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 58
+
+[[question]]
+id = 456
+q = 'What is the cause of earthquakes on our planet?'
+a = [
+  'volcanoes',
+  'God’s wrath',
+  'sliding and shifting of the solid outer crust',
+  'angels',
+  'evil spirits',
+  'demons',
+  'man-made technologies',
+]
+right = ['sliding and shifting of the solid outer crust']
+refs = ['58:5.4 «Earthquakes are caused by sliding and shifting of the solid outer crust and not by volcanoes.»']
+
+[[question]]
+id = 457
+q = 'When was the life implanted on our planet?'
+a = [
+  '6000 years ago, on the third day of creation by God',
+  '1 million years ago',
+  '150 million years ago',
+  '550 million years ago',
+  '1 billion years ago',
+]
+right = ['550 million years ago']
+refs = ['58:4.2 «550,000,000 years ago the Life Carrier corps returned to Urantia. In co-operation with spiritual powers and superphysical forces we organized and initiated the original life patterns of this world and planted them in the hospitable waters of the realm.»']
+
+[[question]]
+id = 458
+q = 'When did the transition from vegetable to animal life on our planet occur?'
+a = [
+  '6000 years ago, on the fourth day of creation by God',
+  '85 million years ago',
+  '170 million years ago',
+  '450 million years ago',
+  '1 billion years ago',
+]
+right = ['450 million years ago']
+refs = ['58:6.1 «450,000,000 years ago the transition from vegetable to animal life occurred.»']
+
+[[question]]
+id = 459
+q = 'Does human mind depend on the brain capacity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['58:6.7 «The physiologic equipment and the anatomic structure of all new orders of life are in response to the action of physical law, but the subsequent endowment of mind is a bestowal of the adjutant mind-spirits in accordance with innate brain capacity.»']
+
+[[question]]
+id = 460
+q = 'How do the new species arise?'
+a = [
+  'as the result of the gradual accumulation of small variations',
+  'suddenly, as full\hyp{}fledged and new orders of life',
+  'by the direct act of Deity',
+]
+right = ['suddenly, as full\hyp{}fledged and new orders of life']
+refs = ['58:6.3 «They do not evolve as the result of the gradual accumulation of small variations; they appear as full-fledged and new orders of life, and they appear suddenly.»']

@@ -1,0 +1,88 @@
+# Paper 45, The Local System Administration: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 45
+
+[[question]]
+id = 423
+q = 'What type of being serves as a local System Sovereign?'
+a = [
+  'Lanonandek Son',
+  'Melchizedek',
+  'Seraphim',
+  'Omniaphim',
+  'Seconaphim',
+  'Ancient of Days',
+]
+right = ['Lanonandek Son']
+refs = ['45:2.1 «The chief executive of a local system of inhabited worlds is a primary Lanonandek Son, the System Sovereign.»']
+
+[[question]]
+id = 424
+q = 'What is the registration number of our planet (Urantia) in the local system of Satania?'
+a = [
+  '1',
+  '777',
+  '666',
+  '606',
+  'unknown',
+  '37,011',
+]
+right = ['606']
+refs = ['15:14.5 «Your world is called Urantia, and it is number 606 in the planetary group, or system, of Satania.»']
+
+[[question]]
+id = 425
+q = 'How many inhabited worlds are in our local system of Satania?'
+a = [
+  '1',
+  '777',
+  '666',
+  '619',
+  'unknown',
+  'thousands',
+  'millions',
+  '37,001',
+]
+right = ['619']
+refs = ['49:0.3 «Satania itself is an unfinished system containing only 619 inhabited worlds.»']
+
+[[question]]
+id = 426
+q = 'Who is the current System Sovereign?'
+a = [
+  'Lucifer',
+  'Lanaforge',
+  'Machiventa Melchizedek',
+  'Jesus of Nazareth',
+  'Enoch the Scribe',
+]
+right = ['Lanaforge']
+refs = ['45:3.2 «The System Sovereign—Lanaforge, number 2,709 of the primary order and successor to the apostate Lucifer.»']
+
+[[question]]
+id = 427
+q = 'How many seats on the Urantia Advisory Council of 24 do Adam and Eve occupy?'
+a = [
+  'two seats, \#9 and \#10',
+  'one shared seat',
+  'none, they are not members',
+]
+right = ['two seats, \#9 and \#10']
+refs = [
+  '45:4.2 «This Urantia advisory council is made up of the following members:»',
+  '45:4.11-12',
+]
+
+[[question]]
+id = 428
+q = 'How many seats of the Four and Twenty Counselors are not permanently occupied?'
+a = [
+  '8',
+  '4',
+  '0',
+  '1',
+]
+right = ['8']
+refs = ['45:4.20-21']

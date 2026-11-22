@@ -1,0 +1,157 @@
+# Paper 22, The Trinitized Sons of God: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 22
+
+[[question]]
+id = 325
+q = 'Which orders of personalities can aspire to become Trinitized Custodians?'
+a = [
+  'ascendant mortals',
+  'ascendant seraphim',
+  'translated midway creatures',
+  'Melchizedeks',
+  'Havona natives',
+]
+right = [
+  'ascendant seraphim',
+  'translated midway creatures',
+]
+refs = ['22:5.2 «Trinitized Custodians are ascendant seraphim and translated midway creatures who have passed through Havona and have attained Paradise and the Corps of the Finality.»']
+
+[[question]]
+id = 326
+q = 'How many of Those without Name and Number are of record on Uversa?'
+a = [
+  '777',
+  '12 thousand',
+  '1 million',
+  '100 million',
+]
+right = ['100 million']
+refs = ['22:4.2 «There are of record on Uversa over one hundred million of these sons commissioned in Orvonton.»']
+
+[[question]]
+id = 327
+q = 'Which of these orders of personalities are known as the Trinity-Embraced Sons?'
+a = [
+  'Mighty Messengers',
+  'Those High in Authority',
+  'Celestial Guardians',
+  'Melchizedeks',
+  'Vorondadek Sons',
+  'Lanonandek Sons',
+  'High Son Assistants',
+]
+right = [
+  'Mighty Messengers',
+  'Those High in Authority',
+  'Celestial Guardians',
+  'High Son Assistants',
+]
+refs = ['22:1.1-8']
+
+[[question]]
+id = 328
+q = 'Are there any pilgrims from the local universe of Nebadon among the Mighty Messengers?'
+a = [
+  'no, the universe of Nebadon is too young',
+  'yes',
+]
+right = ['yes']
+refs = ['22:2.4 «And the last group of this order to qualify on Paradise embraced ascendant pilgrims from the local universe of Nebadon.»']
+
+[[question]]
+id = 329
+q = 'How many Mighty Messengers are commissioned on Uversa?'
+a = [
+  '21 thousand',
+  '144 thousand',
+  '7 million',
+  '1 billion',
+  '1 trillion',
+]
+right = ['1 trillion']
+refs = ['22:2.5 «Almost one trillion Mighty Messengers are commissioned on Uversa, and there is every reason to believe that the number serving in each of the seven superuniverses is exactly the same.»']
+
+[[question]]
+id = 330
+q = 'Does the number of Mighty Messengers differ from superuniverse to superuniverse?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['22:2.5 «Almost one trillion Mighty Messengers are commissioned on Uversa, and there is every reason to believe that the number serving in each of the seven superuniverses is exactly the same.»']
+
+[[question]]
+id = 331
+q = 'How many Trinitized Ambassadors are registered on Uversa?'
+a = [
+  '500 thousand',
+  '1 million',
+  '500 million',
+  '1 billion',
+  '7 billion',
+  '144 billion',
+  '1 trillion',
+]
+right = ['500 million']
+refs = ['22:6.1 «Almost one-half billion are registered on Uversa.»']
+
+[[question]]
+id = 332
+q = 'Who issues the orders authorizing the trinitization attempt by the ascendant Adjuster-fused mortal-finaliters?'
+a = [
+  'Master Spirit Number Seven',
+  'Master Spirit Number One',
+  'Master Spirit of the superuniverse of the creature’s origin',
+  'Ancients of Days of the superuniverse of the creature’s origin',
+  'Universal Father',
+  'Infinite Spirit',
+  'Eternal Son',
+]
+right = ['Master Spirit Number Seven']
+refs = ['22:7.5 «if they report that they have singly and jointly elected to make the paradisiacal effort to spiritualize, idealize, and actualize a selected and original concept which has not theretofore been trinitized, then does Master Spirit Number Seven issue orders authorizing such an extraordinary undertaking»']
+
+[[question]]
+id = 333
+q = 'How many Trinitized Custodians are in service in the superuniverse of Orvonton?'
+a = [
+  '144 thousand',
+  '1 thousand',
+  '1 million',
+  '10 million',
+  '1 billion',
+  '1 trillion',
+]
+right = ['10 million']
+refs = ['22:5.5 «There are now in the service of Orvonton slightly over ten million of these trusted and high Custodians.»']
+
+[[question]]
+id = 334
+q = 'Which of these beings can aspire to become Those High in Authority?'
+a = [
+  'Adjuster-fused beings of mortal origin',
+  'ascendant seraphim',
+  'translated midway creatures',
+  'any order of being',
+  'only Trinity-origin beings',
+]
+right = ['Adjuster-fused beings of mortal origin']
+refs = ['22:3.1 «Those High in Authority, the second group of the Trinitized Sons of Attainment, are all Adjuster-fused beings of mortal origin.»']
+
+[[question]]
+id = 335
+q = 'How many of Those High in Authority are commissioned in the superuniverse of Orvonton?'
+a = [
+  '1 thousand',
+  '1 million',
+  '1 billion',
+  '7 billion',
+  '>10 billion',
+  '1 trillion',
+]
+right = ['>10 billion']
+refs = ['22:3.2 «There are now commissioned in Orvonton more than ten billion of these skillful administrators.»']

@@ -1,0 +1,222 @@
+# Paper 59, The Marine-Life Era on Urantia: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 59
+
+[[question]]
+id = 461
+q = 'When does the history of our planet officially begin?'
+a = [
+  '1 billion years ago',
+  '100 million years ago',
+  '1 million years ago',
+  '6000 years ago',
+]
+right = ['1 billion years ago']
+refs = ['59:0.1 «We reckon the history of Urantia as beginning about one billion years ago and extending through five major eras:»']
+
+[[question]]
+id = 462
+q = 'Into how many geologic eras is the history of our planet divided?'
+a = [
+  '3',
+  '5',
+  '7',
+  '10',
+  '12',
+]
+right = ['5']
+refs = ['59:0.1 «We reckon the history of Urantia as beginning about one billion years ago and extending through five major eras»']
+
+[[question]]
+id = 463
+q = 'When was the Archeozoic (prelife) era?'
+a = [
+  '1 billion to 550 million years ago',
+  '500 to 400 million years ago',
+  '100 to 50 million years ago',
+]
+right = ['1 billion to 550 million years ago']
+refs = [
+  '59:0.1-2',
+  '58:4.2 «550,000,000 years ago the Life Carrier corps returned to Urantia. In co-operation with spiritual powers and superphysical forces we organized and initiated the original life patterns of this world and planted them in the hospitable waters of the realm.»',
+]
+
+[[question]]
+id = 464
+q = 'When was the Proterozoic (life dawn) era?'
+a = [
+  '10 to 5 million years ago',
+  '400 to 300 million years ago',
+  '550 to 400 million years ago',
+]
+right = ['550 to 400 million years ago']
+refs = ['59:0.3 «The life-dawn era extends over the next one hundred and fifty million years.»']
+
+[[question]]
+id = 465
+q = 'When was the Paleozoic (marine-life) era?'
+a = [
+  '200 to 50 million years ago',
+  '400 to 150 million years ago',
+  '541 to 252 million years ago',
+]
+right = ['400 to 150 million years ago']
+refs = ['59:0.4 «The marine-life era covers the next two hundred and fifty million years and is best known to you as the Paleozoic.»']
+
+[[question]]
+id = 466
+q = 'When was the Mesozoic (early land-life) era?'
+a = [
+  '10 to 5 million years ago',
+  '50 to 10 million years ago',
+  '150 to 50 million years ago',
+]
+right = ['150 to 50 million years ago']
+refs = ['59:0.5 «The early land-life era extends over the next one hundred million years and is known as the Mesozoic.»']
+
+[[question]]
+id = 467
+q = 'When was the Cenozoic (mammalian) era?'
+a = [
+  '6000 years ago to the present',
+  '5 million years ago to the present',
+  '50 million years ago to the present',
+  '150 million years ago to the present',
+]
+right = ['50 million years ago to the present']
+refs = ['59:0.6 «The mammalian era occupies the last fifty million years.»']
+
+[[question]]
+id = 468
+q = 'Into how many geologic ages is the Paleozoic era divided?'
+a = [
+  '3',
+  '5',
+  '6',
+  '7',
+  '12',
+]
+right = ['6']
+refs = ['59:0.7 «The marine-life era thus covers about one quarter of your planetary history. It may be subdivided into six long periods»']
+
+[[question]]
+id = 469
+q = 'When was the Cambrian (trilobite) age, the first age of the Paleozoic era?'
+a = [
+  '50 to 15 million years ago',
+  '400 to 225 million years ago',
+  '400 to 350 million years ago',
+  '540 to 480 million years ago',
+]
+right = ['400 to 350 million years ago']
+refs = ['59:1.20 «This was the biogeologic picture of Urantia at the end of that long period of the world’s history, embracing fifty million years, designated by your geologists as the Cambrian.»']
+
+[[question]]
+id = 470
+q = 'When was the Ordovician (invertebrate-animal) age, the second age of the Paleozoic era?'
+a = [
+  '50 to 25 million years ago',
+  '485 to 443 million years ago',
+  '350 to 300 million years ago',
+  '410 to 100 million years ago',
+]
+right = ['350 to 300 million years ago']
+refs = ['59:2.2 «350,000,000 years ago saw the beginning of the great flood period of all the continents except central Asia.»']
+
+[[question]]
+id = 471
+q = 'When was the Silurian (coral and brachiopod) age, the third age of the Paleozoic era?'
+a = [
+  '145 to 130 million years ago',
+  '300 to 270 million years ago',
+  '300 to 100 million years ago',
+  '440 to 400 million years ago',
+]
+right = ['300 to 270 million years ago']
+refs = ['59:3.12 «These developments terminate the third marine-life period, covering twenty-five million years and known to your researchers as the Silurian.»']
+
+[[question]]
+id = 472
+q = 'When was the Devonian (plant life, fishes) age, the fourth age of the Paleozoic era?'
+a = [
+  '30 to 15 million years ago',
+  '200 to 175 million years ago',
+  '270 to 220 million years ago',
+  '419 to 358 million years ago',
+]
+right = ['270 to 220 million years ago']
+refs = ['59:4.18 «This period of the world’s history lasted almost fifty million years; it has become known to your researchers as the Devonian.»']
+
+[[question]]
+id = 473
+q = 'When was the Carboniferous (fern forests, frogs) age, the fifth age of the Paleozoic era?'
+a = [
+  '35 to 29 million years ago',
+  '100 to 70 million years ago',
+  '220 to 180 million years ago',
+  '359 to 299 million years ago',
+]
+right = ['220 to 180 million years ago']
+refs = ['59:5.20 «180,000,000 years ago brought the close of the Carboniferous period»']
+
+[[question]]
+id = 474
+q = 'When was the Permian (seed-plants; biologic tribulation) age, the sixth and the last age of the Paleozoic era?'
+a = [
+  '25 to 11 million years ago',
+  '110 to 60 million years ago',
+  '170 to 150 million years ago',
+  '290 to 250 million years ago',
+]
+right = ['170 to 150 million years ago']
+refs = ['59:6.11 «The ending of this period of biologic tribulation, known to your students as the Permian, also marks the end of the long Paleozoic era, which covers one quarter of the planetary history, two hundred and fifty million years.»']
+
+[[question]]
+id = 475
+q = 'Into how many geologic ages is the Mesozoic (early land-life) era divided?'
+a = [
+  '3',
+  '4',
+  '5',
+  '7',
+]
+right = ['3']
+refs = ['60:4.6 «This, the Cretaceous age, covers fifty million years and brings to a close the premammalian era of land life, which extends over a period of one hundred million years and is known as the Mesozoic.»']
+
+[[question]]
+id = 476
+q = 'When was the Triassic (early-reptilian) age, the first age of the Mesozoic era?'
+a = [
+  '75 to 40 million years ago',
+  '150 to 125 million years ago',
+  '200 to 100 million years ago',
+  '250 to 200 million years ago',
+]
+right = ['150 to 125 million years ago']
+refs = ['60:1.14 «This period extended over twenty-five million years and is known as the Triassic.»']
+
+[[question]]
+id = 477
+q = 'When was the Jurassic (later-reptilian) age, the second age of the Mesozoic era?'
+a = [
+  '60 to 35 million years ago',
+  '150 to 50 million years ago',
+  '125 to 100 million years ago',
+  '200 to 145 million years ago',
+]
+right = ['125 to 100 million years ago']
+refs = ['60:2.15 «This period, embracing the height and the beginning decline of the reptiles, extended nearly twenty-five million years and is known as the Jurassic.»']
+
+[[question]]
+id = 478
+q = 'When was the Cretaceous (flowering plants, birds) age, the third and the last age of the Mesozoic era?'
+a = [
+  '5 million years ago to the present',
+  '80 to 25 million years ago',
+  '100 to 50 million years ago',
+  '145 to 66 million years ago',
+]
+right = ['100 to 50 million years ago']
+refs = ['60:4.6 «This, the Cretaceous age, covers fifty million years and brings to a close the premammalian era of land life, which extends over a period of one hundred million years and is known as the Mesozoic.»']

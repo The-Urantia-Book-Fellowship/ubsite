@@ -1,0 +1,39 @@
+# Paper 8, The Infinite Spirit: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 8
+
+[[question]]
+id = 74
+q = 'Which of the Paradise Deities is the first to be attained by the ascending pilgrims?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+]
+right = ['Infinite Spirit']
+refs = ['8:3.8 «At the center of all things the Infinite Spirit is the first of the Paradise Deities to be attained by the ascending pilgrims.»']
+
+[[question]]
+id = 75
+q = 'God is love, the Son is mercy, the Spirit is \ldots'
+a = [
+  'law',
+  'obedience',
+  'peace',
+  'ministry',
+]
+right = ['ministry']
+refs = ['8:4.2 «God is love, the Son is mercy, the Spirit is ministry—the ministry of divine love and endless mercy to all intelligent creation.»']
+
+[[question]]
+id = 76
+q = 'Is the Conjoint Creator omnipotent?'
+a = [
+  'yes',
+  'no',
+  'only in the domain of mind',
+]
+right = ['only in the domain of mind']
+refs = ['9:1.5 «The Conjoint Creator manifests certain phases of the omnipotence of the Universal Father but is actually omnipotent only in the domain of mind.»']

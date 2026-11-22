@@ -1,0 +1,31 @@
+# Paper 68, The Dawn of Civilization: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 68
+
+[[question]]
+id = 531
+q = 'How many children in Madagascar are destroyed because of being born on “unlucky” days?'
+a = [
+  'none',
+  '2\%',
+  '15\%',
+  '25\%',
+  '50\%',
+  '100\%',
+]
+right = ['25\%']
+refs = ['68:6.10 «In Madagascar some tribes still destroy all children born on certain unlucky days, resulting in the death of about twenty-five per cent of all babies.»']
+
+[[question]]
+id = 532
+q = 'Which ancient people never had a taboo on twins?'
+a = [
+  'Andonites',
+  'red',
+  'yellow',
+  'orange',
+]
+right = ['Andonites']
+refs = ['68:6.8 «While these taboos on twins were once well-nigh universal, they were never a part of the Andonite mores; these peoples always regarded twins as omens of good luck.»']

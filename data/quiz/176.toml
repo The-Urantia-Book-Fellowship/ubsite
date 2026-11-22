@@ -1,0 +1,41 @@
+# Paper 176, Tuesday Evening on Mount Olivet: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 176
+
+[[question]]
+id = 766
+q = 'When was the covenant between Israel and God abrogated and the plan to make the children of Abraham the light-bearers for the whole world shattered?'
+a = [
+  'Midnight, Tuesday, April 4, A.D.~30',
+  '15:30, Thursday, April 6, A.D.~30',
+  'Noon, Tuesday, April 4, A.D.~30',
+  '18:00, Wednesday, April 5, A.D.~30',
+]
+right = ['Midnight, Tuesday, April 4, A.D.~30']
+refs = ['175:3.1 «It was just before midnight on this Tuesday, April 4, A.D. 30, that the Sanhedrin, as then constituted, officially and unanimously voted to impose the death sentence upon both Jesus and Lazarus.»']
+
+[[question]]
+id = 767
+q = 'What percentage of the Sanhedrin voted to put to death both the Son of God and Lazarus?'
+a = [
+  '100\%',
+  '95\%',
+  '60\%',
+  '80\%',
+  '25\%',
+]
+right = ['100\%']
+refs = ['175:3.1 «It was just before midnight on this Tuesday, April 4, A.D. 30, that the Sanhedrin, as then constituted, officially and unanimously voted to impose the death sentence upon both Jesus and Lazarus.»']
+
+[[question]]
+id = 768
+q = 'What did Jesus promise to send to mankind after his ascension to the Father?'
+a = [
+  'Spirit of Truth',
+  'Return to the world himself',
+  'Both',
+]
+right = ['Both']
+refs = ['176:4.3 «He promised, first, to send into the world, and in his stead, another teacher, the Spirit of Truth; and this he did on the day of Pentecost. Second, he most certainly promised his followers that he would sometime personally return to this world.»']

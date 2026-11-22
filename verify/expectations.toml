@@ -61,46 +61,60 @@ study_footnotes      = 404       # \fnst, in 119 papers; 307 at 8af25c5
 human_sources        = 60        # \bibitem, across 19 papers; 54 at 8af25c5
 bibrefs              = 116       # all inside notes; 86 at 8af25c5
 study_notes_with_math = 39       # inline $...$ only, 118 of them (tests/fixtures/study-math.tsv)
-quiz_questions       = 819       # on 126 papers, at 2474116; 817 at d6c3206, the [quiz] section below
-quiz_correct_flags   = 966       # 53 questions have more than one; 1002 and 83 were
-                                 # written here until 2026-10-28, never measured at 2474116
+# The quiz: no longer read from here, but converted once into data/quiz/ (2026-11-22),
+# and counted under [quiz] below; 819 questions and 966 right answers stood here,
+# measured at 2474116, 817 and 962 at d6c3206.
 # The KJV: no longer read from here, but converted once into data/kjv/ (2026-11-21),
 # and counted under [kjv] below; 24974 and 5069 stood here, never this tree's.
 figures              = 84
 figures_private      = 58
 figures_free         = 26
 
-# The quiz (build/quiz.py), the study edition's tex/quiz.tex, read at HEAD.
-# build/checks/check_db.py asserts these; the slips the build finds in it are
-# tests/known-quiz-slips.tsv, exactly, and move as Tigran mends them upstream.
+# The quiz (build/quiz.py), data/quiz/NNN.toml since 2026-11-22, when the study
+# edition's tex/quiz.tex, read at HEAD until then, was converted once
+# (tools/quiz/convert.py) and the edition given up.  build/checks/check_db.py
+# asserts these; the slips the build finds are tests/known-quiz-slips.tsv, exactly.
 [quiz]
-# 819 questions at 2474116 (2026-10-28), 3,689 answers, 966 right, 53 with
-# more than one; Tigran mended 30 of them on 2026-10-29 (0992882 to d6c3206),
-# from the checking of every question (var/quiz/flags.md): three deleted, one
-# moved to another paper, two new.
-# 0a1f055 since 2026-11-18: one question's wording mended there by Tigran, id 94
-# ("spare respiration" for space), its line of the ledger moved to the question
-# as edited (apply.py same) and ruled again from his review; every count as at d6c3206.
-source_commit = "0a1f055"
-measured_on   = "2026-10-30"
-questions            = 817
-papers               = 126       # of the 197; 29 of them have one question, Paper 0 57; 125 have one
-                                 # asked (quiz_paper), since Paper 138's only question was dropped (2026-10-30)
-multi_answer         = 51        # more than one answer right: a set, not a choice
-answers              = 3686
-right_answers        = 962
-duplicate_questions  = 1         # 137: quiz.tex 5930 and 5940, two ids
-slips                = 63        # 25 words, 23 units, 4 dates, 9 times, the "~", the duplicate
-american_rewrites    = 28        # data/quiz/american.tsv
-allowed_words        = 129       # data/quiz/words.tsv
-reviewed             = 817       # data/quiz/questions.tsv, state other than '-': every question since
-                                 # 2026-10-30.  Paper 32's 6 were ruled 2026-10-28; the Foreword's 57 and
-                                 # Papers 1-12's 77 on 2026-10-29 (3 and 5 have none); the other 114 papers'
-                                 # 677 on 2026-10-30, from var/quiz/doubtful.md (data/quiz/README.md, Many
-                                 # papers at once).  774 by the text, 24 of them by more than one passage
-                                 # and 18 by a run of paragraphs shown whole; 3 by a study note; 40 dropped
-asked                = 777       # not dropped: the Foreword's Q40-Q46, until its figure, its Q55, 11 Q20,
-                                 # and 31 more ruled 2026-10-30, Paper 138's one question among them
+# The edition's quiz: 819 questions at 2474116 (2026-10-28), 3,689 answers, 966
+# right, 53 with more than one; Tigran mended 30 of them on 2026-10-29 (0992882 to
+# d6c3206), from the checking of every question (var/quiz/flags.md): three deleted,
+# one moved to another paper, two new; and one more's wording on 2026-11-18
+# (0a1f055, id 94), the commit converted.  Converted, its 817 questions gave the
+# database's quiz tables row for row as quiz.tex had.  Then Paper 1's 28, written
+# for the site the same day (ids 823-850; the edition had one question on it); and
+# its 63 slips gone, by Tigran's ruling: 31 mended (25 misspellings, id 703's four
+# British dates, id 479's "~", and 750, the question asked twice, deleted), and the
+# 23 metric units and 9 times on the 24-hour clock kept, no slips since.
+# And 33 of the 40 dropped in 2026-10 deleted the same day, by his ruling, their ids
+# kept in gone; the Foreword's seven on the Existential Flower stay dropped.
+source_commit = "0696b8d"       # this repository's, the last to read quiz.tex
+measured_on   = "2026-11-22"
+questions            = 811       # 817 converted, less 750, the duplicate, and 33 dropped ones
+                                 # deleted; 28 written for the site
+papers               = 125       # of the 197, every one asked (quiz_paper); 30 have one question, Paper 0
+                                 # 56 (49 asked), Paper 1 29.  Paper 138's only question, dropped on
+                                 # 2026-10-30, deleted
+multi_answer         = 37        # more than one answer right: a set, not a choice; 51 converted,
+                                 # 15 deleted among the dropped (every answer right in 11 of them)
+answers              = 3621      # 3,686 converted, less 750's 7 and the deleted ones' 171; 113 new
+right_answers        = 891       # 962 converted, less 750's one and the deleted ones' 99; 29 new
+duplicate_questions  = 0         # 137's question about Cana asked twice, ids 749 and 750, until 2026-11-22
+gone                 = 39        # ids deleted, kept for ever: 361, 373, 401, 596, 790 upstream; 750,
+                                 # and 33 dropped ones here (data/quiz/README.md)
+slips                = 0         # 63 converted: 25 words, 23 units, 4 dates, 9 times, the "~", the duplicate
+allowed_words        = 127       # data/quiz/words.tsv: hieroglyphic and Pythagoras, spelt right, the book's
+                                 # not, in; bluish, isn, jordanian, nabataeans, the deleted ones', out
+reviewed             = 811       # with refs, a note or a state: every question.  The edition's were
+                                 # ruled in 2026-10: Paper 32's 6 on 10-28; the Foreword's 57 and
+                                 # Papers 1-12's 77 on 10-29 (3 and 5 have none); the other 114
+                                 # papers' 677 on 10-30, from var/quiz/doubtful.md.  774 by the text,
+                                 # 24 of them by more than one passage and 18 by a run of paragraphs
+                                 # shown whole; 3 by a study note; 40 dropped, 33 of them deleted
+                                 # since.  Paper 1's 28: 27 by the text, 1 by a study note (F1, 1:0.1)
+asked                = 804       # every question but the Foreword's Q40-Q46, until its figure
+fixed_order          = 193       # of those asked, their answers shown as written, not shuffled:
+                                 # yes and no, rising numbers, the days, one naming the others
+                                 # (build/quiz.py fixed_order; Tigran, 2026-11-22)
 
 # The translations beside the text (build/translation.py), each joined to our
 # numbering.  Reported bands, as the index's are: ud is being written, and its

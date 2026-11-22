@@ -1,0 +1,38 @@
+# Paper 184, Before the Sanhedrin Court: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 184
+
+[[question]]
+id = 783
+q = 'Why Judas Iscariot could not be used by the Sanhedrists as a witness in the “trial” of the Master?'
+a = [
+  'Judas already killed himself',
+  'Judas could not be found at the time of trial',
+  'Jewish law specifically forbade the testimony of a traitor',
+]
+right = ['Jewish law specifically forbade the testimony of a traitor']
+refs = ['184:3.6 «Judas could not be used as a witness against Jesus because the Jewish law specifically forbade the testimony of a traitor.»']
+
+[[question]]
+id = 784
+q = 'How could the cock crow when Peter denied Jesus if it was against the law to keep poultry in the city of Jerusalem?'
+a = [
+  'Peter’s entire experience occurred in the courtyard of the palace of Annas on Mount Olivet. He did not follow Jesus to the palace of the high priest, Caiaphas.',
+  'It wasn’t a cock crowing.',
+]
+right = ['Peter’s entire experience occurred in the courtyard of the palace of Annas on Mount Olivet. He did not follow Jesus to the palace of the high priest, Caiaphas.']
+refs = ['184:2.10 «Peter’s entire experience occurred in the courtyard of the palace of Annas on Mount Olivet. He did not follow Jesus to the palace of the high priest, Caiaphas.»']
+
+[[question]]
+id = 785
+q = 'Why did Annas make up his mind to murder Jesus even before his so-called “trial” by the Sanhedrin?'
+a = [
+  'Jesus challenged the Jewish priests’ authority',
+  'His revenues were threatened by Jesus driving the money changers and commercial traders out of the temple',
+  'He regarded Jesus as a blasphemer for claiming to be the Son of God',
+  'He envied Jesus being treated as a prophet by the common people',
+]
+right = ['His revenues were threatened by Jesus driving the money changers and commercial traders out of the temple']
+refs = ['184:1.3 «When Jesus was young, Annas had taken a great interest in him, but now his revenues were threatened by what Jesus had so recently done in driving the money-changers and other commercial traders out of the temple.»']

@@ -1,0 +1,65 @@
+# Paper 80, Andite Expansion in the Occident: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 80
+
+[[question]]
+id = 617
+q = 'Who was the leader of 375 most beautiful men since the days of the first Eden which settled in Greece about 10,000~B.C.?'
+a = [
+  'Sato, a direct descendant of Adamson and Ratta',
+  'Hercules',
+  'Zeus',
+  'Alexander the Great',
+]
+right = ['Sato, a direct descendant of Adamson and Ratta']
+refs = ['80:7.3 «These progenitors of the Greeks were led westward by Sato, a direct descendant of Adamson and Ratta.»']
+
+[[question]]
+id = 618
+q = 'What happened to the remnants of Neanderthal races?'
+a = [
+  'exterminated by the Adamites',
+  'became extinct',
+  'exterminated by the Nodites',
+]
+right = ['exterminated by the Adamites']
+refs = ['80:1.7 «Slowly these migrating sons of Eden united with the higher types of the blue race, invigorating their cultural practices while ruthlessly exterminating the lingering strains of Neanderthal stock.»']
+
+[[question]]
+id = 619
+v = 2
+q = 'When were sheep, goats, cows and elephants domesticated?'
+a = [
+  'By 5000~B.C.',
+  'By 2000~B.C.',
+  'By 600~B.C.',
+  'About 25,000~B.C.',
+]
+right = ['By 5000~B.C.']
+refs = ['81:2.12 «By 5000 B.C. the Mesopotamian, Turkestan, and Chinese farmers had begun the raising of sheep, goats, cows, camels, horses, fowls, and elephants.»']
+
+[[question]]
+id = 620
+q = 'When did the Andites disappear from Mesopotamia?'
+a = [
+  '2000~B.C.',
+  '3000~B.C.',
+  '12,000~B.C.',
+  'A.D.~640',
+]
+right = ['2000~B.C.']
+refs = ['78:0.2 «to form the Andite peoples and on to its final disappearance from the Mesopotamian homelands, about 2000 B.C.»']
+
+[[question]]
+id = 621
+q = 'Who were the ancestors of the so\hyp{}called Nordic races, the forefathers of the Scandinavian, German, and Anglo-Saxon peoples?'
+a = [
+  'Nodites',
+  'Andonites',
+  'Andites',
+  'green men',
+]
+right = ['Andites']
+refs = ['80:4.5']

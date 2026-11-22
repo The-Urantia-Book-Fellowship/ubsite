@@ -1,0 +1,27 @@
+# Paper 191, Appearances to the Apostles and Other Leaders: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 191
+
+[[question]]
+id = 812
+q = 'Was Abner present at any of post-resurrection appearances of Jesus?'
+a = [
+  'yes, the 10\ts{th} appearance',
+  'no',
+]
+right = ['yes, the 10\ts{th} appearance']
+refs = ['191:4.1 «The tenth morontia manifestation of Jesus to mortal recognition occurred a short time after eight o’clock on Tuesday, April 11, at Philadelphia, where he showed himself to Abner and Lazarus and some one hundred and fifty of their associates, including more than fifty of the evangelistic corps of the seventy.»']
+
+[[question]]
+id = 813
+q = 'Throughout Jesus’ trials and crucifixion which two brothers played a leading role in relaying messages to Jesus’ family, apostles and chief disciples?'
+a = [
+  'Andrew \&\ Peter',
+  'James \&\ Judas Alpheus',
+  'James \&\ John Zebedee',
+  'John \&\ David Zebedee',
+]
+right = ['John \&\ David Zebedee']
+refs = ['183:4.5 «Until the very end of the crucifixion, John Zebedee remained, as Jesus had directed him, always near at hand, and it was he who supplied David’s messengers with information from hour to hour which they carried to David at the garden camp, and which was then relayed to the hiding apostles and to Jesus’ family.»']

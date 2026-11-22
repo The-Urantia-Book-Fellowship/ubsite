@@ -1,0 +1,22 @@
+# Paper 33, Administration of the Local Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 33
+gone = [373]       # deleted, their ids kept for ever
+
+[[question]]
+id = 372
+q = 'What is the name of the Trinity Ambassador of our local universe of Nebadon?'
+a = [
+  'Gabriel',
+  'Michael',
+  'Satanael',
+  'Uriel',
+  'Raphael',
+  'Zachariel',
+  'Barachiel',
+  'Immanuel',
+]
+right = ['Immanuel']
+refs = ['33:5.1 «At the head of this Paradise group in Nebadon is the ambassador of the Paradise Trinity—Immanuel of Salvington—the Union of Days assigned to the local universe of Nebadon.»']

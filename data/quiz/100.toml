@@ -1,0 +1,38 @@
+# Paper 100, Religion in Human Experience: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 100
+
+[[question]]
+id = 651
+q = 'What state of mind virtually thwarts the work of the Thought Adjuster?'
+a = [
+  'fear and anxiety',
+  'too much joy',
+  'deep contemplation',
+]
+right = ['fear and anxiety']
+refs = ['108:6.2 «The indwelling Adjusters are particularly tormented by those thoughts which are purely sordid and selfish; they are distressed by irreverence for that which is beautiful and divine, and they are virtually thwarted in their work by many of man’s foolish animal fears and childish anxieties.»']
+
+[[question]]
+id = 652
+q = 'What is the result of elevating purely personal evaluations to the levels of absolutes?'
+a = [
+  'sin',
+  'evil',
+  'good',
+  'iniquity',
+]
+right = ['evil']
+refs = ['100:1.1 «While religion produces growth of meanings and enhancement of values, evil always results when purely personal evaluations are elevated to the levels of absolutes.»']
+
+[[question]]
+id = 653
+q = 'Should the trancelike state of visionary consciousness be cultivated as a religious experience?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['100:5.8 «Under no circumstances should the trancelike state of visionary consciousness be cultivated as a religious experience.»']

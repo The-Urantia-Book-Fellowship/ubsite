@@ -1,0 +1,56 @@
+# Paper 132, The Sojourn at Rome: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 132
+
+[[question]]
+id = 719
+q = 'In which city did Jesus seek out and teach the religious leaders of the Mystery Cults, Stoics, \&\ Cynics?'
+a = [
+  'Babylon',
+  'Alexandria',
+  'Rome',
+  'Jerusalem',
+]
+right = ['Rome']
+refs = ['132:0.4 «Before the end of the first week in Rome Jesus had sought out, and had made the acquaintance of, the worth-while leaders of the Cynics, the Stoics, and the mystery cults, in particular the Mithraic group.»']
+
+[[question]]
+id = 720
+q = 'Who said that “the spiritually blind individual who logically follows scientific dictation, social usage, and religious dogma \ldots\ is destined to become an intellectual parrot, a social automaton, and a slave to religious authority”?'
+a = [
+  'Confucius',
+  'Jesus of Nazareth',
+  'Simon Peter',
+  'Judas Iscariot',
+  'Matthew Levi',
+  'John Zebedee',
+]
+right = ['Jesus of Nazareth']
+refs = ['132:2.1 «Among the more important discussions with Mardus was the one designed to answer this sincere Cynic’s question about good and evil. In substance, and in twentieth-century phraseology, Jesus said:»']
+
+[[question]]
+id = 721
+q = 'To whom did Jesus say “\ldots\ the revelations of God flash upon earth in the lives of the men who reveal God to their fellows”'
+a = [
+  'Ganid',
+  'Gonod',
+  'Simon Peter',
+  'Judas Iscariot',
+  'Matthew Levi',
+]
+right = ['Ganid']
+refs = ['132:7.6 «And Jesus replied: “Ganid, religions are not made. The religions of men grow up over long periods of time, while the revelations of God flash upon earth in the lives of the men who reveal God to their fellows.”»']
+
+[[question]]
+id = 722
+q = 'Who taught that the ability to entertain error or experience evil will not be fully lost until the ascending human soul achieves final spirit levels?'
+a = [
+  'Jesus of Nazareth',
+  'stoics',
+  'Pharisees',
+  'Sadducees',
+]
+right = ['Jesus of Nazareth']
+refs = ['132:2.1 «Among the more important discussions with Mardus was the one designed to answer this sincere Cynic’s question about good and evil. In substance, and in twentieth-century phraseology, Jesus said:»']

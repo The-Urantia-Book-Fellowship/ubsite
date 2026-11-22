@@ -1,0 +1,178 @@
+# Paper 17, The Seven Supreme Spirit Groups: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 17
+gone = [283]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 268
+q = 'What is the domain of work of the Seven Spirits of the Circuits?'
+a = [
+  'Paradise',
+  'Havona',
+  'seven superuniverses',
+  'four outer space levels',
+  'master universe',
+  'grand universe',
+]
+right = ['Havona']
+refs = ['17:5.2 «Their work is wholly confined to Havona.»']
+
+[[question]]
+id = 269
+q = 'Do Thought Adjusters participate in the operation of the universal reflectivity system?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['17:3.9 «While Thought Adjusters do not participate in the operation of the universal reflectivity system, we have every reason to believe that all Father fragments are fully cognizant of these transactions and are able to avail themselves of their content.»']
+
+[[question]]
+id = 270
+q = 'Is the reflective focus of each superuniverse identical with the point of spiritual polarity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['17:3.1 «These groups of seven dissimilar Reflective Spirits maintain headquarters on the capitals of the superuniverses at the reflective focus of each realm, and this is not identical with the point of spiritual polarity.»']
+
+[[question]]
+id = 271
+q = 'Are all Father fragments cognizant of the transactions of the universal reflectivity system?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['17:3.9 «While Thought Adjusters do not participate in the operation of the universal reflectivity system, we have every reason to believe that all Father fragments are fully cognizant of these transactions and are able to avail themselves of their content.»']
+
+[[question]]
+id = 272
+q = 'What is the space range limit of the extra-Paradise reflectivity service in the present universe age?'
+a = [
+  'periphery of the seven superuniverses',
+  'periphery of the first outer space level',
+  'periphery of the fourth outer space level',
+  'periphery of Havona',
+]
+right = ['periphery of the seven superuniverses']
+refs = ['17:3.10 «During the present universe age the space range of the extra-Paradise reflectivity service seems to be limited by the periphery of the seven superuniverses.»']
+
+[[question]]
+id = 273
+v = 2
+q = 'How many Reflective Spirits did the Paradise Trinity create with the Seven Master Spirits, seven at a time?'
+a = [
+  '7',
+  '12',
+  '49',
+  '343',
+]
+right = ['49']
+refs = ['17:3.1 «The forty-nine Reflective Spirits are of Trinity origin, but each of the seven creative episodes attendant upon their appearance was productive of a type of being in nature resembling the characteristics of the coancestral Master Spirit.»']
+
+[[question]]
+id = 274
+q = 'How many Reflective Image Aids are there?'
+a = [
+  '7',
+  '3',
+  '49',
+  '50',
+  '144000',
+]
+right = ['49']
+refs = ['17:4.1 «The forty-nine Reflective Image Aids were created by the Reflective Spirits, and there are just seven Aids on the headquarters of each superuniverse.»']
+
+[[question]]
+id = 275
+q = 'How many Reflective Image Aids are on the headquarters of each superuniverse?'
+a = [
+  '7',
+  '3',
+  '49',
+  '50',
+  '12000',
+  '1',
+]
+right = ['7']
+refs = ['17:4.1 «The forty-nine Reflective Image Aids were created by the Reflective Spirits, and there are just seven Aids on the headquarters of each superuniverse.»']
+
+[[question]]
+id = 276
+q = 'Who are the creators of the Reflective Image Aids?'
+a = [
+  'Reflective Spirits',
+  'Paradise Trinity',
+  'Paradise Trinity in functional liaison with the Deity Absolute',
+  'Paradise Trinity in unrevealed association with the Unqualified Absolute',
+  'The Father Reflective Image Aid \#1',
+]
+right = ['Reflective Spirits']
+refs = ['17:3.4 «The Reflective Spirits of each superuniverse are the creators of their Reflective Image Aids, their personal voices to the courts of the Ancients of Days.»']
+
+[[question]]
+id = 277
+q = 'Do the Reflective Image Aids possess the attribute of reflectivity, like their creators — the Reflective Spirits?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['17:4.1 «The Image Aids are, in certain attributes and characteristics, perfect reproductions of their Reflective Mother Spirits; they are virtual duplications minus the attribute of reflectivity.»']
+
+[[question]]
+id = 278
+q = 'Do the Reflective Image Aids function directly in connection with the training worlds of ascending mortals?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['17:4.3 «The Image Aids do not directly function in connection with the training worlds of ascending mortals.»']
+
+[[question]]
+id = 279
+q = 'Will the mortals of Urantia come in personal contact with the Reflective Image Aids during the sojourn in the Uversa schools?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['17:4.3 «They are closely associated with the intelligence service of the universal scheme of mortal progression, but you will not personally come in contact with them when you sojourn in the Uversa schools because these seemingly personal beings are devoid of will; they do not exercise the power of choice.»']
+
+[[question]]
+id = 280
+q = 'Do ascending mortals, as a class, contact intimately with reflectivity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['17:4.3 «As a class, ascending mortals do not intimately contact with reflectivity.»']
+
+[[question]]
+id = 281
+q = 'Are ascendant pilgrims from evolutionary spheres able to hold personal communion with the Seven Spirits of the Circuits?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['17:5.4 «As you advance from circuit to circuit in Havona, you will learn of the Spirits of the Circuits, but you will not be able to hold personal communion with them, even though you may personally enjoy, and recognize the impersonal presence of, their spiritual influence.»']
+
+[[question]]
+id = 282
+q = 'Which of these divine personalities were created by the Supreme Being in functional liaison with the Deity Absolute?'
+a = [
+  'Majeston',
+  'Seven Executive Spirits',
+  'Trinity Teacher Sons',
+  'Supreme Circuit Supervisor',
+  'Trinitized Secrets of Supremacy',
+]
+right = ['Majeston']
+refs = ['17:2.4 «Majeston is not included in our catalogue of Paradise personalities because he is the only existing personality of divinity created by the Supreme Being in functional liaison with the Deity Absolute.»']

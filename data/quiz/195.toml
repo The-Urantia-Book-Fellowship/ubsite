@@ -1,0 +1,25 @@
+# Paper 195, After Pentecost: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 195
+
+[[question]]
+id = 818
+q = 'Which version of Jesus’ message was more true to his teachings?'
+a = [
+  'Eastern',
+  'Western (Hellenized)',
+]
+right = ['Eastern']
+refs = ['195:1.11 «The Eastern version of the message of Jesus, notwithstanding that it remained more true to his teachings, continued to follow the uncompromising attitude of Abner.»']
+
+[[question]]
+id = 819
+q = 'Which version of Jesus’ message was eventually lost in the Islamic movement?'
+a = [
+  'Eastern (Abner)',
+  'Western',
+]
+right = ['Eastern (Abner)']
+refs = ['195:1.11']

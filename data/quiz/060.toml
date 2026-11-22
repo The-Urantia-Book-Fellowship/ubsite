@@ -1,0 +1,156 @@
+# Paper 60, Urantia During the Early Land-Life Era: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 60
+
+[[question]]
+id = 479
+q = 'When did the first (nonplacental) mammals appear on our planet?'
+a = [
+  'about 135 million years ago',
+  'about 200 million years ago',
+  'about 100 million years ago',
+  'about 50 million years ago',
+  'about 10 million years ago',
+]
+right = ['about 135 million years ago']
+refs = ['60:1.11 «Several million years later the first mammals appeared.»']
+
+[[question]]
+id = 480
+q = 'When did the first oaks appear on our planet?'
+a = [
+  '1 million year ago',
+  '65 million years ago',
+  '276 million years ago',
+  '500 million years ago',
+  '1 billion year ago',
+  '1.5 billion years ago',
+  '6000 years ago, on the 3rd day of creation',
+]
+right = ['65 million years ago']
+refs = [
+  '60:3.16 «65,000,000 years ago there occurred one of the greatest lava flows of all time.»',
+  '60:3.19 «Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.»',
+]
+
+[[question]]
+id = 481
+q = 'When did the first birch trees appear on our planet?'
+a = [
+  '65 million years ago',
+  '1 million year ago',
+  '1 billion year ago',
+  '500 million years ago',
+  '276 million years ago',
+  '1.5 billion years ago',
+  '6000 years ago, on the 3rd day of creation',
+]
+right = ['65 million years ago']
+refs = [
+  '60:3.16 «65,000,000 years ago there occurred one of the greatest lava flows of all time.»',
+  '60:3.19 «Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.»',
+]
+
+[[question]]
+id = 482
+q = 'When did the first beech trees appear on our planet?'
+a = [
+  '65 million years ago',
+  '1 million year ago',
+  '1 billion year ago',
+  '500 million years ago',
+  '276 million years ago',
+  '1.5 billion years ago',
+  '6000 years ago, on the 3rd day of creation',
+]
+right = ['65 million years ago']
+refs = [
+  '60:3.16 «65,000,000 years ago there occurred one of the greatest lava flows of all time.»',
+  '60:3.19 «Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.»',
+]
+
+[[question]]
+id = 483
+q = 'When did the first walnut trees appear on our planet?'
+a = [
+  '65 million years ago',
+  '1 million year ago',
+  '1 billion year ago',
+  '500 million years ago',
+  '276 million years ago',
+  '1.5 billion years ago',
+  '6000 years ago, on the 3rd day of creation',
+]
+right = ['65 million years ago']
+refs = [
+  '60:3.16 «65,000,000 years ago there occurred one of the greatest lava flows of all time.»',
+  '60:3.19 «Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.»',
+]
+
+[[question]]
+id = 484
+q = 'When did the first sycamore trees appear on our planet?'
+a = [
+  '65 million years ago',
+  '1 million year ago',
+  '1 billion year ago',
+  '500 million years ago',
+  '276 million years ago',
+  '1.5 billion years ago',
+  '6000 years ago, on the 3rd day of creation',
+]
+right = ['65 million years ago']
+refs = [
+  '60:3.16 «65,000,000 years ago there occurred one of the greatest lava flows of all time.»',
+  '60:3.19 «Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.»',
+]
+
+[[question]]
+id = 485
+v = 2
+q = 'When did the first palm trees appear on our planet?'
+a = [
+  '90 million years ago',
+  '1 million year ago',
+  '1 billion year ago',
+  '500 million years ago',
+  '276 million years ago',
+  '1.5 billion years ago',
+  '6000 years ago, on the 3rd day of creation',
+]
+right = ['90 million years ago']
+refs = ['60:3.7 «90,000,000 years ago the angiosperms emerged from these early Cretaceous seas and soon overran the continents. These land plants suddenly appeared along with fig trees, magnolias, and tulip trees. Soon after this time fig trees, breadfruit trees, and palms overspread Europe and the western plains of North America.»']
+
+[[question]]
+id = 486
+q = 'When did the first maple trees appear on our planet?'
+a = [
+  '65 million years ago',
+  '1 million year ago',
+  '1 billion year ago',
+  '500 million years ago',
+  '276 million years ago',
+  '1.5 billion years ago',
+  '6000 years ago, on the 3rd day of creation',
+]
+right = ['65 million years ago']
+refs = [
+  '60:3.16 «65,000,000 years ago there occurred one of the greatest lava flows of all time.»',
+  '60:3.19 «Great plant-life evolution was taking place. Among the land plants the angiosperms predominated, and many present-day trees first appeared, including beech, birch, oak, walnut, sycamore, maple, and modern palms.»',
+]
+
+[[question]]
+id = 487
+q = 'When did the first true birds appear on our planet?'
+a = [
+  '55 million years ago',
+  '125 million years ago',
+  '2 billion years ago',
+  '388 million years ago',
+  '1 million years ago',
+  '6000 years ago, on the 5\ts{th} day of creation',
+]
+right = ['55 million years ago']
+refs = ['60:3.22 «55,000,000 years ago the evolutionary march was marked by the sudden appearance of the first of the true birds, a small pigeonlike creature which was the ancestor of all bird life.»']

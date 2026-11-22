@@ -1,0 +1,54 @@
+# Paper 97, Evolution of the God Concept Among the Hebrews: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 97
+
+[[question]]
+id = 647
+q = 'How many of David’s soldiers were Baalites?'
+a = [
+  'None',
+  '25\%',
+  '50\%',
+  '80\%',
+  '100\%',
+]
+right = ['80\%']
+refs = ['97:9.12 «And they did this because eighty per cent of David’s soldiers were Baalites.»']
+
+[[question]]
+id = 648
+q = 'What was Micah prophesying about when he said: “But every man shall sit under his own vine, and no one shall make him afraid, for all people will live, each one according to his understanding of God.” '
+a = [
+  'the end of priestcraft and superstition',
+  'the times of Jewish rule over the whole world',
+  'the day of the Jewish Messiah coming to rule the nations',
+  'the material plenty throughout the whole world',
+]
+right = ['the end of priestcraft and superstition']
+refs = ['97:5.5 «He taught of a day of freedom from superstition and priestcraft, saying: “But every man shall sit under his own vine, and no one shall make him afraid, for all people will live, each one according to his understanding of God.”»']
+
+[[question]]
+id = 649
+q = 'How did Solomon son of David bankrupt the nation?'
+a = [
+  'by his lavish court and elaborate building program',
+  'by waging wars',
+  'by his idleness',
+]
+right = ['by his lavish court and elaborate building program']
+refs = ['97:9.16 «Solomon bankrupted the nation by his lavish court and by his elaborate building program: There was the house of Lebanon, the palace of Pharaoh’s daughter, the temple of Yahweh, the king’s palace, and the restoration of the walls of many cities.»']
+
+[[question]]
+id = 650
+q = 'What prevented the overthrow of the whole bloody ceremonial of the Hebrew ritual of worship by the fearless prophets Isaiah, Micah and Obadiah?'
+a = [
+  'The stubborn resistance of the priests',
+  'The “Lord God of Israel” who supposedly instituted these bloody rituals and sacrifices',
+  'The common people',
+  'The orders of the King of Israel who ruled then',
+  'The “Most Highs” who supposedly “rule in the kingdoms of men”',
+]
+right = ['The stubborn resistance of the priests']
+refs = ['97:5.6 «And but for the stubborn resistance of the priests, these teachers would have overthrown the whole bloody ceremonial of the Hebrew ritual of worship.»']

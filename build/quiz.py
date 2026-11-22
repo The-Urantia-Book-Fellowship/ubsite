@@ -1,48 +1,51 @@
-"""The British Study Edition's quiz, its 819 questions, in the database.
+"""The quiz: its questions, data/quiz/NNN.toml, in the database.
 
-`tex/quiz.tex` is the Cosmic Citizenship Quiz the edition's PDF sets at its end
-(build/readers/quiz.py reads it).  The site asks it one question at a time, at
-the end of each paper that has questions and at /quiz (Tigran, 2026-10-28).
-This module makes the rows those pages read, and holds them to the edition and
-to the reviews:
+The questions began as The British Study Edition's Cosmic Citizenship Quiz,
+its tex/quiz.tex, which the build read from 2026-10-28.  On 2026-11-22 Tigran
+gave the edition up ("its essence will migrate into ubsite"), and the quiz was
+converted once into data/quiz/ (tools/quiz/convert.py), the master since.  The
+site asks it one question at a time, at the end of each paper that has
+questions and at /quiz (Tigran, 2026-10-28).  This module reads the files,
+makes the rows those pages read, and holds them (data/quiz/README.md):
 
-  * Each question has an id for ever, its line in data/quiz/questions.tsv,
-    given once and never reused, as a headword keeps its slug: the browser
-    and the board remember answers by it.  A line names its question by
-    `origin`, 16 hex digits of the SHA-256 of the question as written, so a
-    question edited upstream fails the build until the ledger says what it is
-    now (data/quiz/README.md).  Questions with the same origin are paired with
-    lines in order: quiz.tex asks one question twice (137, its lines 5932 and
-    5942), and that is two questions.
-  * `v` is the layout of a question's answers, which the browser and the board
-    store by position: a ruling that the answers changed moves it, and an
-    answer given under the old one is never marked against the new.
-  * The text is the edition's, British, set beside the press's American:
-    data/quiz/american.tsv rewrites its spelling, word for word and closed,
-    and a date is put in the book's order ("25 March 7 B.C." is "March 25,
-    7 B.C.", "4 April 30 A.D." is "April 4, A.D. 30"), with the no-break space
-    the book sets beside the era.  Both act on the TeX, before it is expanded.
-  * The word gate: every word the site shows, after both, is a word of the
-    book (its search index), or a word data/quiz/words.tsv allows and says
-    why.  What is neither is a slip of the edition's, and so is a metric unit
-    where the press gives miles (trap 31), a date left British, a time on the
-    24-hour clock, the duplicate: tests/known-quiz-slips.tsv lists those not
-    yet mended upstream, and must list exactly those.  A table entry nothing
-    uses fails, and so does an allowed word the book has after all.
-  * A reviewed question names what answers it: one or more passages of the
-    text (`text`), in the order ruled, each a paragraph and the words quoted
-    from it, which occur there once and are whole words, or a paragraph or a
-    run of one section's paragraphs shown whole (data/quiz/references.tsv;
-    Tigran, 2026-10-29, ruling 13:1.1 and 13:2.7-8 for the forbidden spheres);
-    or a study note (`note`), by the origin build/study.py keys notes by,
-    which the quiz shows once its paper's notes are reviewed and the
-    paragraph until then, never an unreviewed note; or nothing (`none`).
-    `drop` keeps a question out; `gone` keeps the id of one deleted upstream.
-    No length is refused: over SHOWN_WARN characters shown under one question
-    the build warns, so that a section ruled by a slip is noticed.
-
-Nothing here is the press's: the quiz is the study edition's lineage, set with
-its macros (build/quiz_macros.py, trap 1) and its expander (build/study.py).
+  * A file to each paper that has questions, each question with its id for
+    ever, given once and never reused, as a headword keeps its slug: the
+    browser and the board remember answers by it.  An id taken out stays in
+    its paper's `gone`.  The paper's questions are asked in the file's order.
+  * `v` is the layout of a question's answers, 1 unless the file says: the
+    browser and the board store an answer by its position, so when the
+    answers' number, order or rightness changes, v is raised, and an answer
+    given under the old layout is never marked against the new.
+    tests/test_quiz.py holds both against the last commit.
+  * A question's answers are shown in a new order each time it is asked
+    (Tigran, 2026-11-22: "why not also shuffle the answers of each
+    question?"), but where their order means something: yes and no, numbers
+    that rise, the days of the week, or an answer that names the others,
+    "Both", "All three" (fixed_order(); `fixed` in the database).  `shuffle =
+    true` or `false` in a question's file overrules that.  An answer is kept
+    by its place in the file whatever order it was shown in.
+  * The text is TeX in the book's own spelling, set with the study edition's
+    macros (build/quiz_macros.py, trap 1) and its expander (build/study.py);
+    the right answers are named by their words.
+  * The word gate: every word the site shows is a word of the book (its
+    search index), or a word data/quiz/words.tsv allows and says why.  What is
+    neither is a slip, and so is a date in the British order, a "~" for about,
+    a question asked twice: tests/known-quiz-slips.tsv lists those not yet
+    mended, and must list exactly those.  An allowed word nothing uses fails,
+    and so does one the book has after all.  A metric unit where the press
+    gives miles (trap 31) and a time on the 24-hour clock are no slips: Tigran
+    kept them (2026-11-22), and the units' words pass the gate (UNIT_WORDS).
+  * What answers a question: one or more passages of the text, `refs`, in the
+    order shown, each a paragraph and words quoted from it, which occur there
+    once and are whole words, or a paragraph or a run of one section's
+    paragraphs shown whole (Tigran, 2026-10-29, of 13:1.1 and 13:2.7-8); or
+    a study note, `note`, by the origin build/study.py keys notes by, which the
+    quiz shows once its paper's notes are reviewed and the paragraph until
+    then, never an unreviewed note; or nothing, `state = 'none'`.  `state =
+    'drop'` keeps a question out, and a question with none of these is not
+    yet reviewed.  No length is refused: over SHOWN_WARN characters shown
+    under one question the build warns, so that a section given by a slip is
+    noticed.
 """
 
 from __future__ import annotations
@@ -52,31 +55,36 @@ import dataclasses
 import pathlib
 import re
 import sqlite3
+import tomllib
 
 from . import quiz_macros, study
-from .readers import quiz as reader
 from .readers import study as study_reader
+from .readers.study import digest
 from .render import render, strip_tags
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "quiz"
-LEDGER = DATA / "questions.tsv"
-REFERENCES = DATA / "references.tsv"
-AMERICAN = DATA / "american.tsv"
 WORDS = DATA / "words.tsv"
 SLIPS = ROOT / "tests" / "known-quiz-slips.tsv"
 
-COLUMNS = ("id", "paper", "origin", "v", "state")
-REF_COLUMNS = ("id", "n", "ref", "quote")
-STATES = ("-", "text", "note", "none", "drop", "gone")
+# The states a question's row may have: '-' not yet reviewed, and the rest as
+# its file says (`refs` is 'text', `note` 'note').
+STATES = ("-", "text", "note", "none", "drop")
 WHY = ("name", "english", "distractor", "abbreviation")
-SLIP_KINDS = ("word", "unit", "date", "time", "tilde", "duplicate")
-RE_REF = re.compile(r"(\d+):(\d+)\.(\d+)")
+SLIP_KINDS = ("word", "date", "tilde", "duplicate")
+TOP_KEYS = frozenset({"paper", "gone", "question"})
+KEYS = frozenset({"id", "v", "q", "a", "right", "refs", "note", "state", "shuffle"})
+ANSWERS = range(2, 10)
+RE_FILE = re.compile(r"(\d{3})\.toml")
 # A paragraph, or a run of one section's paragraphs, "0:3.2-8", as the site's
 # addresses write it: a list given an item to a paragraph answers as a whole.
 RE_PARAS = re.compile(r"(\d+):(\d+)\.(\d+)(?:-(\d+))?")
-RE_HEX = re.compile(r"[0-9a-f]{16}")
-# A `quote` that shows the paragraph, or the run of them, whole (Tigran,
+# A passage as a ruling words it: "1:1.2 «quoted words»", or a reference alone,
+# shown whole.
+RE_PASSAGE = re.compile(r"(\d+:\d+\.\d+(?:-\d+)?)(?: «(.+)»)?")
+# A study note: its paragraph and its origin.
+RE_NOTE = re.compile(r"(\d+:\d+\.\d+) ([0-9a-f]{16})")
+# What `refs` holds for a paragraph, or a run of them, shown whole (Tigran,
 # 2026-10-29, of 0:3.2-8's seven Absolutes).  No length is refused since his
 # ruling of 13:1.5-6, about 850 characters, the same day: over SHOWN_WARN
 # characters shown under one question, the build warns.
@@ -88,48 +96,47 @@ QUOTE_KINDS = frozenset({"em", "redletter", "supplied", "sup", "sc", "ul", "nobr
 
 MONTHS = ("January|February|March|April|May|June|July|August|September|October"
           "|November|December")
-WEEKDAY = r"(?:Sun|Mon|Tues|Wednes|Thurs|Fri|Satur)day"
-_SEP = r"(?:\\,|~| )"
-_ORD = r"(\d{1,2})(?:\\ts\{(?:st|nd|rd|th)\})?"
-# A day, its month and a year, with the era: "25 March 7 B.C.", "Tuesday 4
-# April 30 A.D.", "11\ts{th} February, 2\,B.C.".
-# A year, its thousands set off by commas: "37,000".
-_YEAR = r"(\d{1,3}(?:,\d{3})+|\d+)"
-RE_DAY_DATE = re.compile(rf"(?:({WEEKDAY}),? )?{_ORD} ({MONTHS}),? {_YEAR}{_SEP}(B\.C\.|A\.D\.)")
-# A year alone: "300 A.D.", "76\,A.D.", "37,000 B.C.".
-RE_YEAR = re.compile(rf"(?<![\d,]){_YEAR}{_SEP}(B\.C\.|A\.D\.)")
-# What the site may not show once the rewrites are done.
-RE_BRITISH_DATE = re.compile(rf"\b\d{{1,2}}(?:st|nd|rd|th)? (?:{MONTHS})\b|\d[ \u00a0\u202f]?A\.D\.")
-RE_TIME = re.compile(r"(?<![\d:])(?:[01]\d|2[0-3]):(?:00|15|30|45)(?![\d:])")
-RE_UNIT = re.compile(r"\d[\d,.]*[\s\u00a0\u202f]?(km/s|km|cm|mm|m|ly|kg|kilometres?|metres?|centimetres?)"
-                     r"(?![A-Za-z])")
+# What the site may not show.
+RE_BRITISH_DATE = re.compile(rf"\b\d{{1,2}}(?:st|nd|rd|th)? (?:{MONTHS})\b|\d[   ]?A\.D\.")
+# The metric units' words, which the word gate lets pass (Tigran, 2026-11-22:
+# "Keep metric units and 24h times").
+# What keeps a question's answers in their written order (fixed_order): an
+# answer of a few words that names the others; a number an answer begins with,
+# perhaps after "about" or the like; the days of the week.
+RE_OTHERS = re.compile(r"(?:both|neither|all three|all four|all five|all of them|all of these|none of these"
+                       r"|none of them|all the others)\b", re.I)
+RE_LEADING = re.compile(r"(?:(?:about|over|under|nearly|almost|more than|less than|at least|some|~|≈)\s*)?"
+                        r"(\d[\d,]*(?:\.\d+)?)", re.I)
+DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 UNIT_WORDS = frozenset({"km", "cm", "mm", "m", "ly", "kg", "kilometre", "kilometres",
                         "metre", "metres", "centimetre", "centimetres", "s"})
 
 
 @dataclasses.dataclass(slots=True)
-class Line:
-    """A line of data/quiz/questions.tsv."""
+class Question:
+    """A question of data/quiz/, as its file has it."""
     id: int
     paper: int
-    origin: str
+    ord: int                       # its place in its paper's file, from 1
     v: int
+    tex: str
+    answers: list[tuple[str, bool]]      # (TeX, right), in the order shown
     state: str
-    refs: list                   # [(ref, quote)]: each passage, its words or WHOLE; a note's paragraph and origin
-    lineno: int
+    refs: list                     # [(ref, quote)]: each passage, its words or WHOLE; a note's paragraph and origin
+    where: str                     # "data/quiz/001.toml id 58", for a message
+    shuffle: bool | None = None    # its file's `shuffle`, overruling fixed_order(); None where it says nothing
 
 
 @dataclasses.dataclass(slots=True)
 class Built:
-    """What build() made from the edition: the rows store() writes, once the
+    """What build() made of data/quiz/: the rows store() writes, once the
     text and its search index are loaded."""
-    repo: dict
+    repo: dict                                 # the study edition, for a note's origin
     questions: list[dict]
     answers: list[dict]
     slips: list[tuple[str, int, str]]          # (kind, id, what), as found
-    american: dict[str, str]                   # data/quiz/american.tsv: british -> american
-    american_used: set[str]
     words: dict[str, str]                      # data/quiz/words.tsv: word -> why
+    gone: list[int]
 
 
 # -- the data files ------------------------------------------------------------
@@ -148,79 +155,96 @@ def _rows(path: pathlib.Path):
         yield n, raw.split("\t")
 
 
-def load_ledger(report, path: pathlib.Path = LEDGER, refs_path: pathlib.Path | None = None) -> list[Line]:
-    """The lines of data/quiz/questions.tsv, each with its references from
-    data/quiz/references.tsv (beside it, unless `refs_path` says where)."""
-    out: list[Line] = []
-    where = f"data/quiz/{path.name}"
-    if not path.exists():
-        report.hard("quiz-ledger", where, "absent: tools/quiz/apply.py new makes it")
+def passages(refs, where: str, report) -> list[tuple[str, str]]:
+    """`refs` as (ref, quote) pairs, each quote the words or WHOLE."""
+    out = []
+    if not isinstance(refs, list) or not refs or not all(isinstance(r, str) for r in refs):
+        report.hard("quiz-refs", where, "refs: a list of passages, '1:1.2 «quoted words»' or '0:3.2-8'")
         return out
-    refs_path = refs_path or path.with_name("references.tsv")
-    refs: dict[int, list[tuple[int, str, str, int]]] = collections.defaultdict(list)
-    rwhere = f"data/quiz/{refs_path.name}"
-    for n, f in _rows(refs_path):
-        at = f"{rwhere}:{n}"
-        if len(f) != len(REF_COLUMNS) or not f[0].isdigit() or not f[1].isdigit():
-            report.hard("quiz-ledger", at, f"{'/'.join(REF_COLUMNS)}, id and n numbers")
-            continue
-        refs[int(f[0])].append((int(f[1]), f[2], f[3], n))
-    for n, f in _rows(path):
-        at = f"{where}:{n}"
-        if len(f) != len(COLUMNS):
-            report.hard("quiz-ledger", at, f"{len(f)} fields, not {len(COLUMNS)}: {'/'.join(COLUMNS)}")
+    for r in refs:
+        m = RE_PASSAGE.fullmatch(r)
+        run = m and RE_PARAS.fullmatch(m[1])
+        if not m:
+            report.hard("quiz-refs", where, f"{r[:60]!r}: '1:1.2 «quoted words»', or a reference alone, shown whole")
+        elif run[4] and (m[2] is not None or int(run[4]) <= int(run[3])):
+            report.hard("quiz-refs", where, f"a run of paragraphs, {m[1]}, is shown whole, its last after its first")
+        else:
+            out.append((m[1], WHOLE if m[2] is None else m[2]))
+    return out
+
+
+def load(report, data: pathlib.Path = DATA) -> tuple[list[Question], list[int]]:
+    """Every question of data/quiz/, paper by paper, and the ids gone."""
+    out: list[Question] = []
+    gone: list[int] = []
+    for path in sorted(data.glob("*.toml")):
+        m = RE_FILE.fullmatch(path.name)
+        at = f"data/quiz/{path.name}"
+        if not m:
+            report.hard("quiz-file", at, "a paper's file is named NNN.toml")
             continue
         try:
-            line = Line(int(f[0]), int(f[1]), f[2], int(f[3]), f[4], [], n)
-        except ValueError:
-            report.hard("quiz-ledger", at, "id, paper and v are numbers")
+            d = tomllib.loads(path.read_text(encoding="utf-8"))
+        except tomllib.TOMLDecodeError as e:
+            report.hard("quiz-file", at, str(e))
             continue
-        if line.state not in STATES:
-            report.hard("quiz-ledger", at, f"state {line.state!r}: one of {', '.join(STATES)}")
-        if not RE_HEX.fullmatch(line.origin):
-            report.hard("quiz-ledger", at, f"origin {line.origin!r}: 16 hex digits")
-        if line.v < 1:
-            report.hard("quiz-ledger", at, "v counts from 1")
-        rows = sorted(refs.pop(line.id, []))
-        if [k for k, *_ in rows] != list(range(1, len(rows) + 1)):
-            report.hard("quiz-ledger", f"{rwhere}", f"id {line.id}: its references are numbered 1, 2, 3 ... in order")
-        want = line.state in ("text", "note")
-        if want != bool(rows):
-            report.hard("quiz-ledger", at, f"state {line.state} {'needs' if want else 'takes no'}"
-                                           f" references in {rwhere}")
-        if line.state == "note" and len(rows) != 1:
-            report.hard("quiz-ledger", at, "a note is one reference: its paragraph, and its origin in `quote`")
-        for k, ref, quote, rn in rows:
-            rat = f"{rwhere}:{rn}"
-            m = RE_PARAS.fullmatch(ref)
-            if not m:
-                report.hard("quiz-ledger", rat, f"ref {ref!r}: a paragraph, 32:2.11, or a run of them, 0:3.2-8")
-            elif line.state == "note" and not RE_HEX.fullmatch(quote):
-                report.hard("quiz-ledger", rat, "a note is named by its origin, 16 hex digits, in `quote`")
-            elif m[4] and (line.state != "text" or quote != WHOLE or int(m[4]) <= int(m[3])):
-                report.hard("quiz-ledger", rat, f"a run of paragraphs, {ref}, is text shown whole ({WHOLE}),"
-                                                " its last after its first")
-            elif not quote:
-                report.hard("quiz-ledger", rat, f"{ref}: the words quoted, or {WHOLE} for the paragraph whole")
-            line.refs.append((ref, quote))
-        out.append(line)
-    for qid, rows in refs.items():
-        report.hard("quiz-ledger", f"{rwhere}:{rows[0][3]}", f"id {qid} is no line of {where}")
-    ids = [x.id for x in out]
-    if ids != list(range(1, len(ids) + 1)):
-        report.hard("quiz-ledger-ids", where, "ids run 1, 2, 3 ... in order, none twice, none missing")
-    return out
-
-
-def load_american(report, path: pathlib.Path = AMERICAN) -> dict[str, str]:
-    out: dict[str, str] = {}
-    for n, f in _rows(path):
-        at = f"data/quiz/{path.name}:{n}"
-        if len(f) != 2 or not all(f) or f[0] != f[0].lower() or f[0] in out:
-            report.hard("quiz-american", at, "british<TAB>american, the British in lower case, once")
+        paper = int(m[1])
+        if set(d) - TOP_KEYS or d.get("paper") != paper:
+            report.hard("quiz-file", at, f"paper = {paper}, gone and [[question]], nothing else")
             continue
-        out[f[0]] = f[1]
-    return out
+        g = d.get("gone", [])
+        if not isinstance(g, list) or not all(isinstance(i, int) and i > 0 for i in g):
+            report.hard("quiz-file", at, "gone: a list of ids")
+        else:
+            gone += g
+        for n, x in enumerate(d.get("question", []), 1):
+            qid = x.get("id")
+            where = f"{at} id {qid}"
+            if not isinstance(qid, int) or qid < 1 or set(x) - KEYS:
+                report.hard("quiz-question", where, f"its keys are {', '.join(sorted(KEYS))}: {sorted(set(x) - KEYS)}")
+                continue
+            v, tex, answers, right = x.get("v", 1), x.get("q"), x.get("a"), x.get("right")
+            if not isinstance(v, int) or v < 1:
+                report.hard("quiz-question", where, "v counts from 1")
+            if not isinstance(tex, str) or not tex.strip():
+                report.hard("quiz-question", where, "q, the question")
+                continue
+            if not isinstance(answers, list) or not all(isinstance(a, str) and a.strip() for a in answers) \
+                    or len(answers) not in ANSWERS or len(set(answers)) != len(answers):
+                report.hard("quiz-answers", where, f"a: {ANSWERS.start} to {ANSWERS.stop - 1} answers, none twice")
+                continue
+            if not isinstance(right, list) or not right or len(set(right)) != len(right) \
+                    or not set(right) <= set(answers):
+                report.hard("quiz-right", where, "right: one or more of its answers, word for word")
+                continue
+            kinds = [k for k in ("refs", "note", "state") if k in x]
+            state, refs = "-", []
+            if len(kinds) > 1:
+                report.hard("quiz-question", where, f"refs, note or state, one of them: {', '.join(kinds)}")
+            elif kinds == ["refs"]:
+                state, refs = "text", passages(x["refs"], where, report)
+            elif kinds == ["note"]:
+                mn = RE_NOTE.fullmatch(x["note"]) if isinstance(x["note"], str) else None
+                if not mn:
+                    report.hard("quiz-note", where, "note: its paragraph and its origin, '32:2.12 8fbb4aa5e5c51c7f'")
+                else:
+                    state, refs = "note", [(mn[1], mn[2])]
+            elif kinds == ["state"]:
+                if x["state"] not in ("none", "drop"):
+                    report.hard("quiz-question", where, "state: 'none' or 'drop'")
+                else:
+                    state = x["state"]
+            shuffle = x.get("shuffle")
+            if shuffle is not None and not isinstance(shuffle, bool):
+                report.hard("quiz-question", where, "shuffle: true or false")
+                shuffle = None
+            out.append(Question(qid, paper, n, v, tex, [(a, a in right) for a in answers], state, refs, where,
+                                shuffle))
+    ids = [q.id for q in out] + gone
+    twice = sorted(i for i, c in collections.Counter(ids).items() if c > 1)
+    if twice:
+        report.hard("quiz-ids", "data/quiz/", f"ids given twice: {twice}")
+    return out, gone
 
 
 def load_words(report, path: pathlib.Path = WORDS) -> dict[str, str]:
@@ -247,39 +271,6 @@ def load_slips(report, path: pathlib.Path = SLIPS) -> set[tuple[str, int, str]]:
 
 # -- the text --------------------------------------------------------------------
 
-def americanize(tex: str, table: dict[str, str], used: set[str]) -> str:
-    """Each British word or phrase of the table, whole, in any case, the case
-    kept: Centre is Center.  Never a command's name: \\centre is not a word."""
-    for brit, am in table.items():
-        rx = re.compile(r"(?<![\\A-Za-z])" + re.escape(brit).replace(r"\ ", "[ ~]") + r"(?![A-Za-z])",
-                        re.IGNORECASE)
-
-        def sub(m, am=am, brit=brit):
-            used.add(brit)
-            w = m.group()
-            if w.isupper() and len(w) > 1:
-                return am.upper()
-            if w[0].isupper():
-                return am[0].upper() + am[1:]
-            return am
-        tex = rx.sub(sub, tex)
-    return tex
-
-
-def dates(tex: str) -> str:
-    """A date in the book's order, its era beside the year with a tie, as the
-    book sets it (122:8.1 "August 21, 7 B.C.", 124:6.1 "April 9, A.D. 7")."""
-    def day(m):
-        weekday, d, month, year, era = m.groups()
-        when = f"{year}~B.C." if era == "B.C." else f"A.D.~{year}"
-        return (f"{weekday}, " if weekday else "") + f"{month} {int(d)}, {when}"
-
-    def year(m):
-        y, era = m.groups()
-        return f"{y}~B.C." if era == "B.C." else f"A.D.~{y}"
-    return RE_YEAR.sub(year, RE_DAY_DATE.sub(day, tex))
-
-
 def expand(tex: str, where: str, report) -> tuple[str, str]:
     text, html, _ = study.expand(tex, {}, {}, where, report, table=quiz_macros.TABLE,
                                  subs=quiz_macros.SUBS, ties=False)
@@ -295,74 +286,58 @@ def macros_used(questions) -> set[str]:
     return out
 
 
+def fixed_order(answers: list[str]) -> bool:
+    """Whether answers, as shown, keep their written order: yes and no; three
+    or more numbers that rise, one answer at most without (\"unknown\"); the
+    days of the week in order; or an answer of three words at most that names
+    the others ("Both", "All three", "All of them")."""
+    a = [x.strip() for x in answers]
+    if all(re.match(r"(?:yes|no)\b", x, re.I) for x in a):
+        return True
+    nums = [m and float(m[1].replace(",", "")) for m in (RE_LEADING.match(x) for x in a)]
+    known = [n for n in nums if n is not None]
+    if len(known) >= 3 and len(known) >= len(a) - 1 and known == sorted(known):
+        return True
+    if [x.lower() for x in a] == list(DAYS[:len(a)]):
+        return True
+    return any(RE_OTHERS.match(x) and len(x.split()) <= 3 for x in a)
+
+
 # -- the build -----------------------------------------------------------------------
 
-def reconcile(questions, ledger: list[Line], report) -> list[Line | None]:
-    """The ledger's line for each question, by origin, in order of occurrence."""
-    live = collections.defaultdict(collections.deque)
-    for x in ledger:
-        if x.state != "gone":
-            live[x.origin].append(x)
-    out: list[Line | None] = []
-    for q in questions:
-        at = f"quiz.tex:{q.line}"
-        x = live[q.origin].popleft() if live[q.origin] else None
-        if x is None:
-            report.hard("quiz-unledgered", at,
-                        f"Paper {q.paper}'s question {q.ord} ({q.origin}) is in no line of"
-                        " data/quiz/questions.tsv: new, or edited upstream (tools/quiz/apply.py new)")
-        elif x.paper != q.paper:
-            report.hard("quiz-ledger-paper", at, f"line {x.lineno} (id {x.id}) says Paper {x.paper}")
-        out.append(x)
-    for xs in live.values():
-        for x in xs:
-            report.hard("quiz-ledger-gone", f"data/quiz/questions.tsv:{x.lineno}",
-                        f"id {x.id} ({x.origin}) is no question of the edition now:"
-                        " mark it gone, or give it the origin of its question as edited")
-    return out
-
-
-def build(repo: dict, report) -> Built | None:
-    """The quiz as the edition has it at the commit config pins, expanded,
-    each question with its ledger line.  None if the edition has no quiz."""
-    questions = reader.read(repo["tex"], repo["at"], report)
-    if questions is None:
-        report.hard("quiz-absent", "quiz.tex", f"the study edition has none at {repo['at'][:7]}")
+def build(report, repo: dict) -> Built | None:
+    """The quiz as data/quiz/ has it, expanded; `repo` is the study edition,
+    where a question answered by a note not yet reviewed finds its note."""
+    questions, gone = load(report)
+    if not questions:
+        report.hard("quiz-absent", "data/quiz/", "no question")
         return None
     used = macros_used(questions)
-    known = set(quiz_macros.TABLE) | quiz_macros.STRUCTURE | quiz_macros.MATH
+    known = set(quiz_macros.TABLE) | quiz_macros.MATH
     for name in sorted(used - known):
-        report.hard("quiz-macro-unknown", "quiz.tex", f"\\{name}: not in build/quiz_macros.py")
+        report.hard("quiz-macro-unknown", "data/quiz/", f"\\{name}: not in build/quiz_macros.py")
     for name in sorted(set(quiz_macros.TABLE) - used):
-        report.hard("quiz-macro-unused", "build/quiz_macros.py", f"\\{name}: quiz.tex uses it no more")
-    ledger = load_ledger(report)
-    american = load_american(report)
-    words = load_words(report)
-    lines = reconcile(questions, ledger, report)
-    built = Built(repo, [], [], [], american, set(), words)
+        report.hard("quiz-macro-unused", "build/quiz_macros.py", f"\\{name}: no question uses it")
+    built = Built(repo, [], [], [], load_words(report), gone)
     seen: dict[str, int] = {}
-    for q, x in zip(questions, lines):
-        if x is None:
-            continue
-        where = f"quiz.tex:{q.line}"
-
-        def setting(tex):
-            return expand(dates(americanize(tex, american, built.american_used)), where, report)
-        text, html = setting(q.tex)
-        mask = q.mask
-        built.questions.append({
-            "id": x.id, "paper_n": q.paper, "ord": q.ord, "line": q.line, "origin": q.origin,
-            "v": x.v, "mask": mask, "multi": int(bin(mask).count("1") > 1),
-            "text": text, "html": html, "state": x.state, "refs": x.refs, "lineno": x.lineno})
+    for q in questions:
+        text, html = expand(q.tex, q.where, report)
+        mask = sum(1 << i for i, (_, r) in enumerate(q.answers) if r)
+        shown = []
         for n, (tex, right) in enumerate(q.answers):
-            at, ah = setting(tex)
-            built.answers.append({"question_id": x.id, "n": n, "text": at, "html": ah,
+            at, ah = expand(tex, q.where, report)
+            shown.append(at)
+            built.answers.append({"question_id": q.id, "n": n, "text": at, "html": ah,
                                   "right": int(right)})
-        if q.origin in seen:
-            built.slips.append(("duplicate", x.id, str(seen[q.origin])))
-        seen.setdefault(q.origin, x.id)
-    for brit in sorted(set(american) - built.american_used):
-        report.hard("quiz-american-unused", "data/quiz/american.tsv", f"{brit!r}: no question has it")
+        fixed = fixed_order(shown) if q.shuffle is None else not q.shuffle
+        built.questions.append({
+            "id": q.id, "paper_n": q.paper, "ord": q.ord, "v": q.v, "mask": mask,
+            "multi": int(bin(mask).count("1") > 1), "fixed": int(fixed), "text": text, "html": html,
+            "state": q.state, "refs": q.refs, "where": q.where})
+        same = digest(" ".join([q.tex, *(f"{a} {int(r)}" for a, r in q.answers)]))
+        if same in seen:
+            built.slips.append(("duplicate", q.id, str(seen[same])))
+        seen.setdefault(same, q.id)
     _gates(built)
     return built
 
@@ -375,12 +350,8 @@ def _gates(built: Built) -> None:
         by_q[a["question_id"]].append(a["text"])
     for q in built.questions:
         for shown in [q["text"], *by_q[q["id"]]]:
-            for m in RE_UNIT.finditer(shown):
-                built.slips.append(("unit", q["id"], _plain(m.group())))
             for m in RE_BRITISH_DATE.finditer(shown):
                 built.slips.append(("date", q["id"], _plain(m.group())))
-            for m in RE_TIME.finditer(shown):
-                built.slips.append(("time", q["id"], m.group()))
             if "~" in shown:
                 built.slips.append(("tilde", q["id"], "~"))
 
@@ -438,23 +409,15 @@ def word_gate(con, built: Built, report) -> None:
             built.slips.append(("word", qid, t))
     for w in sorted(set(built.words) - used_allowed):
         report.hard("quiz-words-unused", "data/quiz/words.tsv", f"{w!r}: no question has it")
-    # What the table writes is the book's own spelling, which is its point.
-    am = sorted(set(built.american.values()))
-    for i, toks in _tokens(con, dict(enumerate(am, 1))).items():
-        for t in toks:
-            if t not in vocab and not any(c.isdigit() for c in t):
-                report.hard("quiz-american", "data/quiz/american.tsv",
-                            f"{am[i - 1]!r}: {t!r} is no word of the book")
 
 
 def check_slips(built: Built, report, path: pathlib.Path = SLIPS) -> None:
     known = load_slips(report, path)
     found = set(built.slips)
-    line_of = {q["id"]: q["line"] for q in built.questions}
+    where = {q["id"]: q["where"] for q in built.questions}
     for kind, qid, what in sorted(found - known):
-        report.hard(f"quiz-slip-{kind}", f"quiz.tex:{line_of.get(qid, '?')}",
-                    f"id {qid}: {what!r}, new; mend it upstream, or rule it"
-                    f" (data/quiz/README.md), or list it in tests/{path.name}")
+        report.hard(f"quiz-slip-{kind}", where.get(qid, f"id {qid}"),
+                    f"{what!r}, new: mend it (data/quiz/README.md), or list it in tests/{path.name}")
     for kind, qid, what in sorted(known - found):
         report.hard("quiz-slip-mended", f"tests/{path.name}",
                     f"{kind} {qid} {what!r} is no longer there: take its line out")
@@ -529,7 +492,7 @@ def store(con: sqlite3.Connection, built: Built, report) -> None:
     originals = _note_origins(built, report)
     texts = {r: t for r, (_, t, _) in para.items()}
     for q in built.questions:
-        where = f"data/quiz/questions.tsv:{q['lineno']}"
+        where = q["where"]
         fid = None
         rows = []                                  # quiz_ref: (n, pid, last, quote, at, qh)
         if q["state"] == "text":
@@ -569,9 +532,9 @@ def store(con: sqlite3.Connection, built: Built, report) -> None:
         shown = sum(len(r[3]) for r in rows)
         if shown > SHOWN_WARN:
             report.warn("quiz-long", where, f"{shown} characters shown under the question, over {SHOWN_WARN}")
-        con.execute("INSERT INTO quiz_question VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                    (q["id"], q["paper_n"], q["ord"], q["line"], q["origin"], q["v"], q["mask"],
-                     q["multi"], q["text"], q["html"], q["state"], fid))
+        con.execute("INSERT INTO quiz_question VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                    (q["id"], q["paper_n"], q["ord"], q["v"], q["mask"],
+                     q["multi"], q["fixed"], q["text"], q["html"], q["state"], fid))
         con.executemany("INSERT INTO quiz_ref VALUES (?,?,?,?,?,?,?)",
                         [(q["id"], n, pid, last, quote, at, qh) for n, pid, last, quote, at, qh in rows])
     con.executemany("INSERT INTO quiz_answer VALUES (:question_id, :n, :text, :html, :right)",
@@ -582,7 +545,7 @@ def store(con: sqlite3.Connection, built: Built, report) -> None:
 
 def _note_origins(built: Built, report) -> dict[str, str]:
     """{origin: ref} of every note of the edition, reviewed or not, for the
-    lines that name one; read only when a line does."""
+    questions that name one; read only when a question does."""
     if not any(q["state"] == "note" for q in built.questions):
         return {}
     papers = study_reader.read(built.repo["tex"], built.repo["at"], range(0, 197), report)

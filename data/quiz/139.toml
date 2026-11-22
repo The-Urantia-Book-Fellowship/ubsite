@@ -1,0 +1,47 @@
+# Paper 139, The Twelve Apostles: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 139
+gone = [755]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 752
+q = 'How many of his Apostles did Jesus personally select?'
+a = [
+  '6',
+  'all 12',
+  'only Judas Iscariot',
+  '7',
+  'only Peter and Andrew',
+]
+right = ['6']
+refs = ['137:2.8 «Jesus had now assembled one half of his future corps of intimate associates, five who had for some time known him and one stranger, Nathaniel.»']
+
+[[question]]
+id = 753
+q = 'Which of the Twelve Apostles of Jesus were Judeans?'
+a = [
+  'Peter and Andrew',
+  'Matthew, John, James and Peter',
+  'Matthew and Bartholomew',
+  'Only Judas Iscariot',
+  'All of them',
+]
+right = ['Only Judas Iscariot']
+refs = ['139:12.2 «He was probably the best-educated man among the twelve and the only Judean in the Master’s apostolic family.»']
+
+[[question]]
+id = 754
+q = 'Which of these Apostles did Jesus \bibemph{not} personally select?'
+a = [
+  'Andrew',
+  'Peter',
+  'James',
+  'John',
+  'Philip',
+  'Nathaniel',
+  'Thomas',
+]
+right = ['Thomas']
+refs = ['139:8.1 «Thomas was the eighth apostle, and he was chosen by Philip.»']

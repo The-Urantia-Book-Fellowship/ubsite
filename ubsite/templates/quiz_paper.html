@@ -1,15 +1,17 @@
 {% extends "base.html" %}
-{#- A paper's questions of the British Study Edition's quiz (build/quiz.py,
-    app.py quiz_paper_page).  quiz.js asks them one at a time, from #ub-quiz
-    below, into .quizrun; without it, and in print, they are listed, each
-    question's answer under a fold.  The questions are the edition's, in
-    English, as the book is; the words around them are the interface's. #}
+{#- A paper's questions in the quiz (build/quiz.py, data/quiz/, app.py
+    quiz_paper_page).  quiz.js asks them one at a time, from #ub-quiz below,
+    into .quizrun, its "Question 1 of 29" all the count there is (Tigran,
+    2026-11-22, of the line that said "29 questions, from The British Study
+    Edition", which Paper 1's 28 written for the site are not: "Just get rid
+    of the line"); without it, and in print, they are listed, each question's
+    answer under a fold.  The questions are in English, as the book is; the
+    words around them are the interface's. #}
 {% if paper.n %}{% set title = tr('The quiz on Paper {n}', n=paper.n) %}{% else %}{% set title = 'The quiz on the Foreword' %}{% endif %}
 {% block body %}
 <main class="prose quiz" data-paper="{{ paper.n }}">
   <p class="quizof"><a href="/{{ paper.n }}">{% if paper.n %}{{ t('Paper {n}', n=paper.n) }}. {% endif %}{{ paper.title }}</a></p>
   <h1>{{ t('Cosmic Citizenship Quiz') }}</h1>
-  <p class="lede">{{ t('quiz:paper', n=questions|length) }}</p>
   <div class="quizrun" aria-live="polite"></div>
   <ol class="quizlist">
     {%- for q in questions %}

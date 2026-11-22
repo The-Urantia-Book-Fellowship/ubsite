@@ -1,0 +1,77 @@
+# Paper 41, Physical Aspects of the Local Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 41
+
+[[question]]
+id = 408
+q = 'For how long will our Sun continue to shine at its present efficiency?'
+a = [
+  '100 million years',
+  '5 billion years',
+  '25 billion years',
+  'unknown',
+  'indefinitely',
+]
+right = ['25 billion years']
+refs = ['41:9.5 «It will shine on as of present efficiency for more than twenty-five billion years.»']
+
+[[question]]
+id = 409
+q = 'When do the Supreme Power Centers rest?'
+a = [
+  'about 10\% of their time',
+  'about 50\% of their time',
+  'about 1\% of their time',
+  'about 95\% of their time',
+  'never, they are always on duty',
+]
+right = ['never, they are always on duty']
+refs = ['29:3.5 «They are always on duty; there is no provision in the universal scheme for the interruption of the physical lines of energy; never for a fraction of a second can these beings relinquish their direct supervision of the energy circuits of time and space.»']
+
+[[question]]
+id = 410
+q = 'Do the Supreme Power Centers have a sense of humor?'
+a = [
+  'no, because they have no ascendant past to revert to and laugh at',
+  'yes, but nobody understands their jokes',
+  'yes, their jokes are the best in the grand universe',
+  'unrevealed',
+]
+right = ['no, because they have no ascendant past to revert to and laugh at']
+refs = ['29:3.5 «Having no ascendant past to revert to in memory, power centers and physical controllers never play; they are thoroughly businesslike in all their actions.»']
+
+[[question]]
+id = 411
+q = 'Can the Supreme Power Centers function on the ordinary (evolutionary) suns or planets?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['29:3.9 «They could not so function on an ordinary evolutionary sun or planet.»']
+
+[[question]]
+id = 412
+q = 'How many stars are in our local system of Satania?'
+a = [
+  '2000+',
+  '1000+',
+  '100000',
+  '1000000',
+]
+right = ['2000+']
+refs = ['41:3.1 «There are upward of two thousand brilliant suns pouring forth light and energy in Satania»']
+
+[[question]]
+id = 413
+q = 'What is the largest star in our universe?'
+a = [
+  '$\alpha$ Piscis Austrini (Fomalhaut)',
+  '$\alpha$ Centauri',
+  '$\alpha$ Scorpii (Antares)',
+  '$\tau$ Ceti',
+]
+right = ['$\alpha$ Scorpii (Antares)']
+refs = ['41:3.2 «The largest star in the universe, the stellar cloud Antares, is four hundred and fifty times the diameter of your sun and is sixty million times its volume.»']

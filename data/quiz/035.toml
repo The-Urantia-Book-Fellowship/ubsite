@@ -1,0 +1,82 @@
+# Paper 35, The Local Universe Sons of God: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 35
+
+[[question]]
+id = 387
+q = 'How many Lanonandek Sons are there in the local universe of Nebadon?'
+a = [
+  '144',
+  '7,000',
+  '12,000',
+  '1,000,000',
+  '12,000,000',
+]
+right = ['12,000,000']
+refs = ['35:8.3 «The universe of Nebadon began its existence with exactly twelve million Lanonandeks»']
+
+[[question]]
+id = 388
+q = 'How many primary Lanonandek Sons are there in the local universe of Nebadon?'
+a = [
+  '12,000',
+  '22,363',
+  '70,041',
+  '270,005',
+  '709,841',
+  '1,720,025',
+]
+right = ['709,841']
+refs = ['35:8.4 «Primary Lanonandeks. Of the highest rank there were 709,841.»']
+
+[[question]]
+id = 389
+q = 'How many secondary Lanonandek Sons are there in the local universe of Nebadon?'
+a = [
+  '22,365',
+  '709,841',
+  '1,200,056',
+  '8,720,025',
+  '10,234,601',
+]
+right = ['10,234,601']
+refs = ['35:8.5 «Secondary Lanonandeks. Of this order emerging from Melchizedek there were 10,234,601.»']
+
+[[question]]
+id = 390
+q = 'How many tertiary Lanonandek Sons are there in the local universe of Nebadon?'
+a = [
+  '22,365',
+  '1,055,558',
+  '10,234,601',
+]
+right = ['1,055,558']
+refs = ['35:8.6 «Tertiary Lanonandeks. This group contained 1,055,558.»']
+
+[[question]]
+id = 391
+q = 'How many Magisterial Sons (Avonals) are there in the local universe of Nebadon?'
+a = [
+  '1,062',
+  '223,650',
+  '1,023,460',
+  '1 billion',
+]
+right = ['1,062']
+refs = ['35:0.1 «Of the second order of Paradise sonship, the Avonal or Magisterial Sons, Nebadon has its full quota—1,062.»']
+
+[[question]]
+id = 392
+q = 'How many Vorondadek Sons are there in the local universe of Nebadon?'
+a = [
+  '12',
+  '1024',
+  '22,365',
+  '144,000',
+  '1 million',
+  '1 billion',
+]
+right = ['1 million']
+refs = ['35:5.2 «The number of Vorondadeks varies in each local universe, just one million being the recorded number in Nebadon.»']

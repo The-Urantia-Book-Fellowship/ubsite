@@ -1,0 +1,21 @@
+# Paper 164, At the Feast of Dedication: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 164
+
+[[question]]
+id = 764
+q = 'Which of these were the friends and secret supporters of Jesus?'
+a = [
+  'Nicodemus',
+  'Joseph of Arimathea',
+  'Annas',
+  'Caiaphas',
+  'Judas Iscariot',
+]
+right = [
+  'Nicodemus',
+  'Joseph of Arimathea',
+]
+refs = ['188:1.2 «Joseph really believed that Jesus would rise from the dead, but Nicodemus was very doubtful. These former members of the Sanhedrin had kept their faith in Jesus more or less of a secret, although their fellow Sanhedrists had long suspected them, even before they withdrew from the council.»']

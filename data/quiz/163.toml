@@ -1,0 +1,27 @@
+# Paper 163, Ordination of the Seventy at Magadan: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 163
+
+[[question]]
+id = 762
+q = 'Who were the women’s evangelistic corps?'
+a = [
+  '10 (later 12) women selected and commissioned by Jesus to teach the gospel of the kingdom and to minister to the sick',
+  '24 specially selected members of the apostles’ families',
+  '12 wives of the 12 apostles',
+]
+right = ['10 (later 12) women selected and commissioned by Jesus to teach the gospel of the kingdom and to minister to the sick']
+refs = ['150:1.1 «These women had all listened to the instruction given the young evangelists, but it had never occurred to either themselves or their teachers that Jesus would dare to commission women to teach the gospel of the kingdom and minister to the sick.»']
+
+[[question]]
+id = 763
+q = 'From whom did Jesus require to give up their worldly goods?'
+a = [
+  'The 12 Apostles and the 70 specially trained gospel preachers',
+  'All his disciples',
+  'He left the decision to the individual',
+]
+right = ['The 12 Apostles and the 70 specially trained gospel preachers']
+refs = ['163:2.11 «He required only the twelve and the seventy to dedicate all of their worldly possessions to the common cause.»']

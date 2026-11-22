@@ -1,0 +1,15 @@
+# Paper 145, Four Eventful Days at Capernaum: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 145
+
+[[question]]
+id = 760
+q = 'Can demoniacal possession occur since the day of Pentecost?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['77:7.8 «Since the day of Pentecost there never again can be such a thing as demoniacal possession.»']

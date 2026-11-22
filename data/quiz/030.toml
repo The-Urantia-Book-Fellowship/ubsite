@@ -1,0 +1,25 @@
+# Paper 30, Personalities of the Grand Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 30
+gone = [362]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 363
+q = 'Which of the seven Supreme Spirit groups are classified as children of the Paradise Trinity?'
+a = [
+  'The Seven Master Spirits',
+  'The Seven Supreme Executives',
+  'The Reflective Spirits',
+  'The Reflective Image Aids',
+  'The Seven Spirits of the Circuits',
+  'The Local Universe Creative Spirits',
+  'The Adjutant Mind-Spirits',
+]
+right = [
+  'The Seven Master Spirits',
+  'The Seven Supreme Executives',
+  'The Reflective Spirits',
+]
+refs = ['17:0.1-4']

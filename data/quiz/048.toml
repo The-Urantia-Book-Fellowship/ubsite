@@ -1,0 +1,67 @@
+# Paper 48, The Morontia Life: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 48
+gone = [434]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 432
+q = 'When do the 570 morontia transformations occur for the progressing ascenders?'
+a = [
+  '8 in the system, 71 in the constellation, and 491 during the sojourn on the spheres of Salvington',
+  '70 in the system, and 500 on the spheres of Salvington',
+  '370 in the superuniverse levels and 200 on Paradise and Havona',
+]
+right = ['8 in the system, 71 in the constellation, and 491 during the sojourn on the spheres of Salvington']
+refs = ['48:1.5 «Eight of these occur in the system, seventy-one in the constellation, and 491 during the sojourn on the spheres of Salvington.»']
+
+[[question]]
+id = 433
+q = 'How many morontia bodies are the ascending sons of God provided with on their progressive journey from material to spiritual life?'
+a = [
+  '570',
+  '1000',
+  '300',
+  '777',
+  '3',
+  '1',
+]
+right = ['570']
+refs = ['48:1.5 «When you traverse the morontia life of Nebadon, these same patient and skillful Morontia Power Supervisors will successively provide you with 570 morontia bodies, each one a phase of your progressive transformation.»']
+
+[[question]]
+id = 435
+q = 'What are mansion worlds?'
+a = [
+  'The 7 satellites of the Finaliter World (world number 1), with the resurrection halls being on satellite number 1',
+  'The Home of the Father',
+  'The Home of angels',
+]
+right = ['The 7 satellites of the Finaliter World (world number 1), with the resurrection halls being on satellite number 1']
+refs = ['48:1.2 «Only the seven worlds surrounding the finaliters’ sphere of the local systems are called mansion worlds»']
+
+[[question]]
+id = 436
+v = 2
+q = 'What are morontia worlds?'
+a = [
+  'A billion perfect worlds of Havona',
+  'In our local system of Satania, the morontia worlds are the 7 transitional worlds encircling Jerusem (the HQ of Satania), and the 7 satellites of each these worlds, totaling 56 worlds',
+  'The worlds where Lucifer and Satan are incarcerated',
+]
+right = ['In our local system of Satania, the morontia worlds are the 7 transitional worlds encircling Jerusem (the HQ of Satania), and the 7 satellites of each these worlds, totaling 56 worlds']
+refs = ['48:1.2 «Only the seven worlds surrounding the finaliters’ sphere of the local systems are called mansion worlds, but all fifty-six of the system transition abodes, in common with the higher spheres around the constellations and the universe headquarters, are called morontia worlds.»']
+
+[[question]]
+id = 437
+v = 2
+q = 'Is the morontia form spiritual or material?'
+a = [
+  'neither',
+  'spiritual',
+  'material',
+  'combination of both',
+]
+right = ['combination of both']
+refs = ['0:5.12 «Morontia is a term designating a vast level intervening between the material and the spiritual. It may designate personal or impersonal realities, living or nonliving energies. The warp of morontia is spiritual; its woof is physical.»']

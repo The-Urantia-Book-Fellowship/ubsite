@@ -1,0 +1,53 @@
+# Paper 182, In Gethsemane: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 182
+gone = [777]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 774
+q = 'Prior to Jesus’ arrest and in response to Jesus’ prayers in the garden of Gethsemane a \ldots\ came down by his side and, speaking to him, touched him and strengthened him.'
+a = [
+  'secondary midwayer',
+  'primary midwayer',
+  'mighty angel',
+  'Melchizedek',
+]
+right = ['mighty angel']
+refs = ['182:3.2 «And when he had thus prayed, a mighty angel came down by his side and, speaking to him, touched him and strengthened him.»']
+
+[[question]]
+id = 775
+q = 'Which 3 apostles did Jesus ask to stay with him while he prayed in the garden of Gethsemane?'
+a = [
+  'Peter, James \&\ John',
+  'Peter, John \&\ Andrew',
+  'Matthew Levi, Thomas \&\ Nathaniel',
+  'James, John \&\ Judas Iscariot',
+  'Judas Iscariot \&\ Alpheus twins',
+]
+right = ['Peter, James \&\ John']
+refs = ['182:3.1 «After all was still and quiet about the camp, Jesus, taking Peter, James, and John, went a short way up a near-by ravine where he had often before gone to pray and commune.»']
+
+[[question]]
+id = 776
+q = 'In his prayer in the garden of Gethsemane, Jesus said “If this cup may not pass, then would I drink it. Not my will, but yours, be done”. Why did God desire Jesus to “drink this cup”?'
+a = [
+  'To have the mortal experience from birth to natural death and the resurrection of the morontia',
+  'To be an example to mankind on how to live and die',
+  'To fulfill that which is written in the Hebrew Scriptures',
+]
+right = ['To have the mortal experience from birth to natural death and the resurrection of the morontia']
+refs = ['183:1.1 «It was, indeed and in truth, the will of the Father that his Son should drink to the full the cup of mortal experience, from birth to death»']
+
+[[question]]
+id = 778
+q = 'What made Jesus say that the spirit is willing, but the flesh is weak?'
+a = [
+  'Finding Peter,James \&\ John asleep at his most trying time in the Garden of Gethsemane',
+  'Peter’s habit of speaking without thinking',
+  'Seeing his apostles vying for the seats closest to him at the Last Supper',
+]
+right = ['Finding Peter,James \&\ John asleep at his most trying time in the Garden of Gethsemane']
+refs = ['182:3.4 «And then, for a third time, the Master withdrew and prayed: “Father, you see my sleeping apostles; have mercy upon them. The spirit is indeed willing, but the flesh is weak.»']

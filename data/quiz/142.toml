@@ -1,0 +1,16 @@
+# Paper 142, The Passover at Jerusalem: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 142
+
+[[question]]
+id = 758
+q = 'In 1 Chronicles 21:1 it is said that Satan provoked David to number Israel, whereas in 2 Samuel 24:1 it is said that Lord (Yahweh) did this. How can this be?'
+a = [
+  'Satan and the Lord Yahweh are the same being',
+  '1 Chronicles was written after 2 Samuel and the later author did not dare to attribute evil to Yahweh, so he edited it to say “Satan” instead',
+  'We cannot understand this apparent “contradiction”, but we must dogmatically assert (contrary to fact or truth) that Bible is “the perfect and infallible Word of God”. As long as we abide by this dogma, we should be “okay”.',
+]
+right = ['1 Chronicles was written after 2 Samuel and the later author did not dare to attribute evil to Yahweh, so he edited it to say “Satan” instead']
+refs = ['142:3.9 «But when a later writer narrated these events, subsequent to the enlargement of the Jewish concept of the nature of God, he did not dare attribute evil to Yahweh; therefore he said: ‘And Satan stood up against Israel and provoked David to number Israel.’»']

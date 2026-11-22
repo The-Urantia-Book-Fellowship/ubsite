@@ -1,0 +1,194 @@
+# Paper 119, The Bestowals of Christ Michael: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 119
+
+[[question]]
+id = 674
+q = 'Who was left in charge of the celestial forces during Michael’s third bestowal?'
+a = [
+  'Gabriel of Salvington',
+  'The Father Melchizedek',
+  'Immanuel',
+  'no one',
+]
+right = ['Gabriel of Salvington']
+refs = ['119:3.2 «Michael proceeded to place universe direction in the hands of Immanuel, while he intrusted command of the celestial forces to Gabriel»']
+
+[[question]]
+id = 675
+q = 'Did the methods of universe administration improve after each of Michael’s bestowal?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['119:3.8 «Each of these missions was followed by an age of increasing service and loyalty among all celestial intelligences of universe origin, while each succeeding bestowal age was characterized by advancement and improvement in all methods of universe administration and in all techniques of government.»']
+
+[[question]]
+id = 676
+q = 'When was the first bestowal of Michael of Nebadon?'
+a = [
+  '20 million years ago',
+  '120 million years ago',
+  '800 million years ago',
+  '1 billion years ago',
+  '4 billion years ago',
+  '10 billion years ago',
+]
+right = ['1 billion years ago']
+refs = ['119:0.7 «Michael made ready for his first bestowal adventure about the time Urantia was taking on its present form, one billion years ago.»']
+
+[[question]]
+id = 677
+q = 'What was the time interval between two bestowals of Michael of Nebadon?'
+a = [
+  '500 million years',
+  '150 million years',
+  '10 million years',
+  '100,000 years',
+  '500,000 years',
+]
+right = ['150 million years']
+refs = ['119:0.7 «His bestowals have occurred about one hundred and fifty million years apart, the last taking place on Urantia nineteen hundred years ago.»']
+
+[[question]]
+id = 678
+q = 'At what time of day did Michael appear on the planet of his bestowal as a Melchizedek?'
+a = [
+  'early morning',
+  'noon',
+  'late evening',
+  'midnight',
+  'unknown',
+]
+right = ['noon']
+refs = ['119:1.3 «At noon today there appeared on the receiving field of this world a strange Melchizedek Son, not of our number but wholly like our order.»']
+
+[[question]]
+id = 679
+q = 'How many Melchizedeks witnessed the disappearance of Michael at the end of his bestowal as a Melchizedek?'
+a = [
+  '0',
+  '1',
+  '3',
+  '4',
+  '7',
+  'thousands',
+]
+right = ['3']
+refs = ['119:1.5 «And at noon on this day, without previous announcement and witnessed by only three of our brotherhood, this visiting Son of our order disappeared from our world as he came»']
+
+[[question]]
+id = 680
+q = 'At what time of day did Michael disappear from the planet of his bestowal as a Melchizedek?'
+a = [
+  'early morning',
+  'noon',
+  'late evening',
+  'midnight',
+  'unknown',
+]
+right = ['noon']
+refs = ['119:1.5 «And at noon on this day, without previous announcement and witnessed by only three of our brotherhood, this visiting Son of our order disappeared from our world as he came»']
+
+[[question]]
+id = 681
+q = 'What was the name of system 11 in constellation 37?'
+a = [
+  'Polonia',
+  'Palonia',
+  'Abbadonia',
+  'Avalonia',
+  'Panoptia',
+]
+right = ['Palonia']
+refs = ['119:2.5 «But millions of his misguided and deluded followers accepted the forgiveness of this new ruler, known in that age as the Savior Sovereign of the system of Palonia.»']
+
+[[question]]
+id = 682
+q = 'Which position did Michael of Nebadon fill during his second bestowal?'
+a = [
+  'Acting System Sovereign',
+  'Acting Executioner of the Ancients of Days',
+  'Acting Supreme Judge of the System',
+  'Observer',
+  'Recorder',
+  'Teacher',
+]
+right = ['Acting System Sovereign']
+refs = ['119:2.4 «directing that this new Son be assigned to system 11 of constellation 37 as the successor of the deposed Lutentia and with full authority as acting System Sovereign pending the appointment of a new sovereign.»']
+
+[[question]]
+id = 683
+q = 'What was the name of the rebel System Sovereign of Palonia?'
+a = [
+  'Lucifer',
+  'Lutentia',
+  'Balantia',
+  'Tabamantia',
+  'Serapatatia',
+  'Gavalia',
+]
+right = ['Lutentia']
+refs = ['119:2.2 «This rebel System Sovereign, Lutentia, reigned supreme on his headquarters planet for more than twenty years of standard Nebadon time»']
+
+[[question]]
+id = 684
+q = 'Did Lutentia accept Michael’s offer of mercy?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['119:2.5 «But Lutentia spurned these overtures of mercy, well knowing that this new and strange System Sovereign was none other than Michael, the very universe ruler whom he had so recently defied.»']
+
+[[question]]
+id = 685
+q = 'At what time of day did Michael appear on the planet of his bestowal as a Lanonandek?'
+a = [
+  'early morning',
+  'noon',
+  'late evening',
+  'midnight',
+  'unknown',
+]
+right = ['noon']
+refs = ['119:2.4 «This new Son appeared at noon, unannounced and accompanied by a lone tertiaphim who bore credentials from the Uversa Ancients of Days, certified by Immanuel of Salvington»']
+
+[[question]]
+id = 686
+q = 'Who requested a Material Son for the inhabited planet 217 of system 87 in constellation 61 700 million years ago?'
+a = [
+  'Life Carriers',
+  'Melchizedeks',
+  'Planetary Prince',
+  'Chief of Seraphim',
+  'Mortal inhabitants of that planet',
+]
+right = ['Life Carriers']
+refs = ['119:3.1 «The supreme council on Salvington had just finished the consideration of the call of the Life Carriers on planet 217 in system 87 in constellation 61 for the dispatch to their assistance of a Material Son.»']
+
+[[question]]
+id = 687
+q = 'Was there a Material Daughter assigned to assist Michael during his bestowal as a Material Son?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['119:3.4 «Thus did this unique Material Son begin his difficult career on a quarantined world of secession and rebellion, located in a beleaguered system without any direct communication with the outside universe, working alone for one whole generation of planetary time.»']
+
+[[question]]
+id = 688
+q = 'At what time of day did Michael disappear from the planet of his bestowal as a Material Son?'
+a = [
+  'early morning',
+  'noon',
+  'late evening',
+  'midnight',
+  'unknown',
+]
+right = ['noon']
+refs = ['119:3.4 «In due time a Material Son and Daughter arrived on this rejuvenated and redeemed world, and when they had been duly installed as visible planetary rulers, the transitory or emergency Planetary Prince took formal leave, disappearing at noon one day.»']

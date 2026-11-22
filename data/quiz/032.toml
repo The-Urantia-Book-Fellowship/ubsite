@@ -1,0 +1,93 @@
+# Paper 32, The Evolution of Local Universes: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 32
+
+[[question]]
+id = 366
+q = 'How far is Jerusem, the headquarters of Satania, from the physical center of the superuniverse of Orvonton?'
+a = [
+  '100,000 ly',
+  '200,000 ly',
+  '1 billion ly',
+  '1 million ly',
+]
+right = ['200,000 ly']
+refs = ['32:2.11 «From Jerusem, the headquarters of Satania, it is over two hundred thousand light-years to the physical center of the superuniverse of Orvonton, far, far away in the dense diameter of the Milky Way.»']
+
+[[question]]
+id = 367
+q = 'Which of these are our neighboring local universes?'
+a = [
+  'Avalon',
+  'Henselon',
+  'Sanselon',
+  'Majeston',
+  'Salvington',
+  'Spironga',
+  'Usatia',
+]
+right = [
+  'Avalon',
+  'Henselon',
+  'Sanselon',
+]
+refs = ['32:2.12 «The nearest neighboring universes are: Avalon, Henselon, Sanselon, Portalon, Wolvering, Fanoving, and Alvoring.»']
+
+[[question]]
+id = 368
+q = 'Why do most human beings die?'
+a = [
+  'Because of the “original sin” of Adam and Eve',
+  'Because it is appointed for all men to die once and then stand in judgment',
+  'Because their bodies wear out eventually',
+  'Because they fail to achieve the spirit level of the fusion with the indwelling Thought Adjuster',
+  'Because of many diseases',
+  'Because of some unrevealed mysterious reason',
+]
+right = ['Because they fail to achieve the spirit level of the fusion with the indwelling Thought Adjuster']
+refs = ['32:5.4 «Most human beings die because, having failed to achieve the spirit level of Adjuster fusion, the metamorphosis of death constitutes the only possible procedure whereby they may escape the fetters of time and the bonds of material creation»']
+
+[[question]]
+id = 369
+q = 'How far is the outermost system of inhabited worlds from the center of the superuniverse of Orvonton?'
+a = [
+  '51,000 ly',
+  '100,000 ly',
+  '250,000 ly',
+  '1 million ly',
+  '1 billion ly',
+]
+right = ['250,000 ly']
+refs = ['32:2.11 «From the outermost system of inhabited worlds to the center of the superuniverse is a trifle less than two hundred and fifty thousand light-years.»']
+
+[[question]]
+id = 370
+q = 'Where was King Arthur’s sword Excalibur (Caliburnus) forged?'
+a = [
+  'Henselon',
+  'Avalon',
+  'Sanselon',
+  'Portalon',
+  'Wolvering',
+  'Fanoving',
+  'Alvoring',
+]
+right = ['Avalon']
+note = '32:2.12 8fbb4aa5e5c51c7f'
+
+[[question]]
+id = 371
+q = 'How many inhabited worlds are there in our local universe of Nebadon?'
+a = [
+  '227',
+  '606',
+  '619',
+  '666',
+  '100,987',
+  '3,840,101',
+  '12,878,111',
+]
+right = ['3,840,101']
+refs = ['32:2.9 «At the last registry there were 3,840,101 inhabited planets in Nebadon, and Satania, the local system of your world, is fairly typical of other systems.»']

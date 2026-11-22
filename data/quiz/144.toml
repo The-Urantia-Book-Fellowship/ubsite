@@ -1,0 +1,18 @@
+# Paper 144, At Gilboa and in the Decapolis: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 144
+
+[[question]]
+id = 759
+q = 'Why did Peter, James and John who so often accompanied Jesus on his long night vigils, never heard Jesus pray?'
+a = [
+  'Jesus never prayed',
+  'Jesus never prayed aloud, only in the spirit and in his heart, silently',
+  'Jesus prayed in a “strange tongue” that they did not understand',
+  'Jesus always told them to leave when he was about to pray',
+  'they didn’t listen carefully',
+]
+right = ['Jesus never prayed aloud, only in the spirit and in his heart, silently']
+refs = ['144:4.10 «One of the reasons why Peter, James, and John, who so often accompanied Jesus on his long night vigils, never heard Jesus pray, was because their Master so rarely uttered his prayers as spoken words.»']

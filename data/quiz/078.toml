@@ -1,0 +1,41 @@
+# Paper 78, The Violet Race After the Days of Adam: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 78
+
+[[question]]
+id = 613
+q = 'The violet race consisted of \ldots'
+a = [
+  'pure Adamites only',
+  'Adamites and Adamsonites',
+  'Andites and Andonites',
+  'mixture of blue and red races',
+]
+right = ['Adamites and Adamsonites']
+refs = ['78:1.3 «The violet race—Adamites and Adamsonites.»']
+
+[[question]]
+id = 614
+q = 'How many Adamites were living on Urantia by 19,000~B.C.?'
+a = [
+  '1 million',
+  '4.5 million',
+  '25 millions',
+  '100 millions',
+]
+right = ['4.5 million']
+refs = ['78:2.5 «But the Adamites were a real nation around 19,000 B.C., numbering four and a half million, and already they had poured forth millions of their progeny into the surrounding peoples.»']
+
+[[question]]
+id = 615
+q = 'When did Adamites cease to exist as a race upon Urantia?'
+a = [
+  '15,000~B.C.',
+  '6,000~B.C.',
+  '600~B.C.',
+  'A.D.~300',
+]
+right = ['15,000~B.C.']
+refs = ['78:0.2 «This paper depicts the planetary history of the violet race, beginning soon after the default of Adam, about 35,000 B.C., and extending down through its amalgamation with the Nodite and Sangik races, about 15,000 B.C., to form the Andite peoples»']

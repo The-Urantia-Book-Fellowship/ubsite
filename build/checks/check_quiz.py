@@ -1,9 +1,9 @@
-"""What the quiz's review has done, and what the edition still has to mend.
+"""What the quiz's review has done, and what is still to mend in data/quiz/.
 
-Reported, not asserted: the build holds the quiz to its ledger and to
+Reported, not asserted: the build holds the quiz to its files and to
 tests/known-quiz-slips.tsv (build/quiz.py), so a database that exists passed
-both.  This says where the review stands, paper by paper, and lists the slips
-for Tigran to mend in the study edition, with their lines.
+both.  This says where the review stands, paper by paper, and counts the slips
+still to mend.
 """
 
 from __future__ import annotations
@@ -35,8 +35,8 @@ def run(db) -> int:
     print(f"  papers reviewed whole: {', '.join(map(str, done)) or 'none yet'}"
           + (f"; in part: {', '.join(map(str, part))}" if part else ""))
     slips = collections.Counter(k for k, _, _ in quiz.load_slips(_Quiet()))
-    print("  slips still to mend upstream (tests/known-quiz-slips.tsv): "
-          + ", ".join(f"{k} {slips[k]}" for k in quiz.SLIP_KINDS if slips[k]))
+    print("  slips still to mend in data/quiz/ (tests/known-quiz-slips.tsv): "
+          + (", ".join(f"{k} {slips[k]}" for k in quiz.SLIP_KINDS if slips[k]) or "none"))
     return 0
 
 

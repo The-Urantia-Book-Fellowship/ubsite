@@ -1,0 +1,19 @@
+# Paper 38, Ministering Spirits of the Local Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 38
+
+[[question]]
+id = 407
+q = 'What was the name of the seraphim that did not allow John Zebedee to worship him?'
+a = [
+  'Salsatia',
+  'Susatia',
+  'Malavatia',
+  'Loyalatia',
+  'Uzziel',
+  'Raphael',
+]
+right = ['Loyalatia']
+refs = ['38:2.5 «The great seraphim, Loyalatia, when your seer “fell down to worship before the feet of the angel,” said: “See that you do it not; I am a fellow servant with you and with your races, who are all enjoined to worship God.”»']

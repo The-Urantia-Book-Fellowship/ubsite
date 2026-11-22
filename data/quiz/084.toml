@@ -1,0 +1,31 @@
+# Paper 84, Marriage and Family Life: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 84
+
+[[question]]
+id = 623
+q = 'What is the effect of shifting parental responsibility to state or church on the welfare and advancement of civilization?'
+a = [
+  'no effect',
+  'beneficial',
+  'suicidal',
+]
+right = ['suicidal']
+refs = ['84:7.27 «And any attempt to shift parental responsibility to state or church will prove suicidal to the welfare and advancement of civilization.»']
+
+[[question]]
+id = 624
+q = 'Modern problems of child culture are rendered increasingly difficult by:'
+a = [
+  'The large degree of race mixture',
+  'Artificial and superficial education',
+  'Inability of the child to gain culture by imitating parents --- the parents are absent from the family picture so much of the time',
+]
+right = [
+  'The large degree of race mixture',
+  'Artificial and superficial education',
+  'Inability of the child to gain culture by imitating parents --- the parents are absent from the family picture so much of the time',
+]
+refs = ['84:7.21-24']

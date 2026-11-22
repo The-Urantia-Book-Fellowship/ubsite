@@ -1,0 +1,46 @@
+# Paper 135, John the Baptist: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 135
+
+[[question]]
+id = 730
+q = 'Who was the leader of the Engedi colony of Nazarites?'
+a = [
+  'John the Baptist',
+  'John Zebedee',
+  'Jesus of Nazareth',
+  'Abner',
+]
+right = ['Abner']
+refs = ['135:2.4 «But he was very fond of Abner, the acknowledged leader and head of the Engedi colony.»']
+
+[[question]]
+id = 731
+q = 'How long did the ministry of John the Baptist last?'
+a = [
+  '12 months',
+  '15 months',
+  '24 months',
+  '36 months',
+  '3 months',
+  '40 months',
+]
+right = ['15 months']
+refs = ['135:6.4 «Only fifteen months intervened between the time John began to preach and baptize and his arrest and imprisonment at the instigation of Herod Antipas, but in this short time he baptized considerably over one hundred thousand penitents.»']
+
+[[question]]
+id = 732
+q = 'How many penitents did John the Baptist baptize?'
+a = [
+  '100',
+  '1,000',
+  '12,000',
+  '36,500',
+  '100,000',
+  '200,000',
+  '300,000',
+]
+right = ['100,000']
+refs = ['135:6.4 «Only fifteen months intervened between the time John began to preach and baptize and his arrest and imprisonment at the instigation of Herod Antipas, but in this short time he baptized considerably over one hundred thousand penitents.»']

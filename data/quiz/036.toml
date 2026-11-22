@@ -1,0 +1,133 @@
+# Paper 36, The Life Carriers: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 36
+gone = [401]       # deleted, their ids kept for ever
+
+[[question]]
+id = 393
+q = 'How many Life Carriers are there in the local universe of Nebadon?'
+a = [
+  '144,000',
+  '223,650',
+  '10,234,601',
+  '100 million',
+  '1 billion',
+]
+right = ['100 million']
+refs = ['36:1.2 «In the universe of Nebadon we have on record the creation of one hundred million Life Carriers.»']
+
+[[question]]
+id = 394
+q = 'How many midsonite worlds are in each local system of the universe of Nebadon?'
+a = [
+  '1',
+  '2',
+  '3',
+  '7',
+  '10',
+  '12',
+  '30',
+  '619',
+]
+right = ['1']
+refs = ['36:4.1 «In every local system of inhabited worlds throughout Nebadon there is a single sphere whereon the Melchizedeks have functioned as life carriers.»']
+
+[[question]]
+id = 395
+v = 2
+q = 'Which of these beings initiate life on the midsonite worlds?'
+a = [
+  'Avonals',
+  'Melchizedeks',
+  'Seraphim',
+  'Supernaphim',
+  'Solitary Messengers',
+  'Creator Sons',
+  'Material Sons and Daughters of God',
+]
+right = ['Melchizedeks']
+refs = ['36:4.1 «In every local system of inhabited worlds throughout Nebadon there is a single sphere whereon the Melchizedeks have functioned as life carriers.»']
+
+[[question]]
+id = 396
+q = 'Do midsoniters reproduce?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['36:4.3 «The midsonite creatures live and function as reproducing beings on their magnificent worlds until they are one thousand standard years of age»']
+
+[[question]]
+id = 397
+q = 'Do midsoniters reproduce after being enseraphimed?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['36:4.3 «Midsoniters are nonreproducing beings thereafter because the technique of dematerialization which they pass through in preparation for enseraphiming forever deprives them of reproductive prerogatives.»']
+
+[[question]]
+id = 398
+q = 'What is the maximum length of time given to Life Carriers to establish life on a new world?'
+a = [
+  '100,000 years',
+  '500,000 years',
+  '10 million years',
+  '1 billion years',
+  '4 billion years',
+]
+right = ['500,000 years']
+refs = ['36:3.6 «The Life Carriers of a planetary corps are given a certain period in which to establish life on a new world, approximately one-half million years of the time of that planet.»']
+
+[[question]]
+id = 399
+q = 'Do the seven adjutant mind-spirits ever become personal?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['36:5.13 «The adjutant mind-spirits experientially grow, but they never become personal.»']
+
+[[question]]
+id = 400
+q = 'Which number is inherent in the physical organization of energy and matter, but not in the spiritual?'
+a = [
+  '10',
+  '7',
+  '12',
+  '24',
+]
+right = ['10']
+refs = ['36:2.11 «The number ten—the decimal system—is inherent in the physical universe but not in the spiritual.»']
+
+[[question]]
+id = 820
+q = 'How many architectural fundamental types of life design are there?'
+a = [
+  '7',
+  '12',
+  '46',
+  '48',
+  'Infinitely many',
+]
+right = ['7']
+refs = ['36:2.11 «There are also seven architectural types of life design, fundamental arrangements of the reproducing configurations of living matter.»']
+
+[[question]]
+id = 821
+q = 'How many units of pattern control---trait determiners---are there in the sex cells of human reproduction?'
+a = [
+  '48',
+  '46',
+  '24',
+  '12',
+  '7',
+  '2',
+]
+right = ['48']
+refs = ['36:2.11 «On Urantia there are forty-eight units of pattern control—trait determiners—in the sex cells of human reproduction.»']

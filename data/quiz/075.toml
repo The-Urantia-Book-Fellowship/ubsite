@@ -1,0 +1,141 @@
+# Paper 75, The Default of Adam and Eve: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 75
+gone = [568]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 567
+q = 'Do the divine plans require that Adam \&\ Eve themselves should mate with the planetary mortals?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['52:3.5 «Neither is it the divine plan for the Planetary Adam or Eve to mate, personally, with the evolutionary peoples.»']
+
+[[question]]
+id = 569
+q = 'How did the inhabitants of the garden react on finding out what happened to Eve?'
+a = [
+  'Were very understanding of Cano and Serapatatia’s motives',
+  'Declared war on a nearby Nodite settlement utterly destroying them, including Cano',
+  'Banished her from the garden and chose a new leader and mate for Adam',
+  'Punished her with forty stripes save one and then considered the matter closed',
+]
+right = ['Declared war on a nearby Nodite settlement utterly destroying them, including Cano']
+refs = ['75:5.3 «When they learned what had happened to Eve, the infuriated inhabitants of the Garden became unmanageable; they declared war on the near-by Nodite settlement.»']
+
+[[question]]
+id = 570
+q = 'The more superior stocks of Urantia now contain inheritance factors derived from four separate sources. Name them.'
+a = [
+  'Sangik',
+  'Adamic',
+  'Orange',
+  'Green',
+  'Nodite',
+  'Indigo',
+  'Andonite',
+]
+right = [
+  'Sangik',
+  'Adamic',
+  'Nodite',
+  'Andonite',
+]
+refs = ['75:8.2 «The more superior stocks of Urantia now contain inheritance factors derived from as many as four separate sources: Andonite, Sangik, Nodite, and Adamic.»']
+
+[[question]]
+id = 571
+q = 'Under normal conditions the first work of a Planetary Adam and Eve would be the co-ordination and blending of the races. But on Urantia such a project seemed just about hopeless. Why?'
+a = [
+  'The races had never been purged of their retarded and defective strains',
+  'Urantia was an experimental, and rebellion seared world',
+  'Because of wide-spread cannibalism',
+]
+right = [
+  'The races had never been purged of their retarded and defective strains',
+  'Urantia was an experimental, and rebellion seared world',
+]
+refs = [
+  '75:1.1 «The Adamic mission on experimental, rebellion-seared, and isolated Urantia was a formidable undertaking.»',
+  '75:1.2',
+]
+
+[[question]]
+id = 572
+q = 'In our ascent to Paradise, at which point would it be advisable to attempt short cuts or circumventions to the established and divine plan?'
+a = [
+  'Never',
+  'Whenever it is deemed appropriate',
+  'Onward in our ascension from Jerusem',
+  'During the sojourn on the perfect spheres of Havona',
+  'During the studies in the universities of the minor sector',
+]
+right = ['Never']
+refs = ['75:8.5 «Never, in all your ascent to Paradise, will you gain anything by impatiently attempting to circumvent the established and divine plan by short cuts, personal inventions, or other devices for improving on the way of perfection, to perfection, and for eternal perfection.»']
+
+[[question]]
+id = 573
+q = 'What was the cause of the Adamic default?'
+a = [
+  'Eve ate the apple from the tree of knowledge of good and evil',
+  'Eve fell into Caligastia’s trap by embarking on a plan to accelerate world improvement, thereby modifying the divine plans',
+]
+right = ['Eve fell into Caligastia’s trap by embarking on a plan to accelerate world improvement, thereby modifying the divine plans']
+refs = ['75:4.1 «And now, for the first time, Adam heard the entire story of the long-nourished plan for accelerating world improvement by operating simultaneously in two directions: the prosecution of the divine plan concomitantly with the execution of the Serapatatia enterprise.»']
+
+[[question]]
+id = 574
+q = 'Which of these was the father of Cain?'
+a = [
+  'Adam',
+  'Cano',
+  'Andon',
+  'Satan',
+  'Abraham',
+  'Lucifer',
+]
+right = ['Cano']
+refs = ['75:5.3 «And Cano, the father of Cain yet unborn, also perished.»']
+
+[[question]]
+id = 575
+q = 'Until what age were Adamic children considered incapable of making independent decisions (“prechoice age”)?'
+a = [
+  '12 years',
+  '18 years',
+  '20 years',
+  '30 years',
+  '40 years',
+]
+right = ['20 years']
+refs = ['75:6.3 «While the transports stood by, those children who had arrived at the age of choice (twenty years) were given the option of remaining on Urantia with their parents or of becoming wards of the Most Highs of Norlatiadek.»']
+
+[[question]]
+id = 576
+q = 'How did the members of Adam’s family cook their food?'
+a = [
+  'roasted on open fire',
+  'baked in stone ovens',
+  'didn’t cook at all --- ate it raw',
+  'boiled in the water',
+]
+right = ['didn’t cook at all --- ate it raw']
+refs = ['74:6.4 «While cooking was universally employed outside of the immediate Adamic sector of Eden, there was no cooking in Adam’s household.»']
+
+[[question]]
+id = 577
+q = 'Following the default, what did the Melchizedeks advise Adam to do?'
+a = [
+  'They refused to advise him as they had been forbidden to interfere with the personal plans of Adam and Eve',
+  'They advised Adam and Eve to return to Jerusem immediately',
+  'They promised their friendly co-operation',
+]
+right = [
+  'They refused to advise him as they had been forbidden to interfere with the personal plans of Adam and Eve',
+  'They promised their friendly co-operation',
+]
+refs = ['75:6.1 «When Adam learned that the Nodites were on the march, he sought the counsel of the Melchizedeks, but they refused to advise him, only telling him to do as he thought best and promising their friendly co-operation, as far as possible, in any course he might decide upon.»']

@@ -1,0 +1,32 @@
+# Paper 31, The Corps of the Finality: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 31
+
+[[question]]
+id = 364
+q = 'How many Architects of the Master Universe are there?'
+a = [
+  '1',
+  '7',
+  '12',
+  '7000',
+  '28,011',
+  '28,012',
+]
+right = ['28,011']
+refs = ['31:9.10 «These seven groups of Master Architects total 28,011 universe planners.»']
+
+[[question]]
+id = 365
+q = 'At which eventuation level the quality of absonity equivalates to the level of the Universal and attains the value of the Absolute?'
+a = [
+  '28,012\ts{th}',
+  '28,011\ts{th}',
+  '7,000\ts{th}',
+  '7\ts{th}',
+  '1\ts{st}',
+]
+right = ['28,012\ts{th}']
+refs = ['31:9.10 «In other words, at the 28,012th eventuation level the quality of absonity equivalated to the level of the Universal and attained the value of the Absolute.»']

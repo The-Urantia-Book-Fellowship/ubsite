@@ -1,0 +1,120 @@
+# Paper 122, Birth and Infancy of Jesus: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 122
+
+[[question]]
+id = 695
+q = 'Who chose the race of Hebrews for Michael’s bestowal?'
+a = [
+  'Abraham',
+  'Melchizedek',
+  'Michael himself',
+  'Gabriel of Salvington',
+  'Gabriel of Avalon',
+  'Chief of Seraphim',
+]
+right = ['Gabriel of Salvington']
+refs = ['122:0.2 «as a result of his study of human groups and his survey of the spiritual, intellectual, racial, and geographic features of the world and its peoples, he decided that the Hebrews possessed those relative advantages which warranted their selection as the bestowal race.»']
+
+[[question]]
+id = 696
+q = 'Who chose the family of Joseph for Michael’s bestowal?'
+a = [
+  'Abraham',
+  'Gabriel of Avalon',
+  'Gabriel of Salvington',
+  'Melchizedek',
+  'Chief of Seraphim',
+  'Michael himself',
+]
+right = ['Gabriel of Salvington']
+refs = ['122:0.3 «From the three couples nominated, Gabriel made the personal choice of Joseph and Mary»']
+
+[[question]]
+id = 697
+q = 'Why was the family of Joseph chosen by Gabriel rather than Michael?'
+a = [
+  'They flipped the coin and it fell on Gabriel',
+  'Immanuel asked Gabriel to do this',
+  'Michael asked Gabriel to do this',
+  'So that Jesus might be born like all babies, having nothing to do with selecting his parents',
+  'Because Michael was too busy preparing for the incarnation',
+]
+right = ['So that Jesus might be born like all babies, having nothing to do with selecting his parents']
+refs = ['128:0.1 «Jesus came into this world just as other children come; he had nothing to do with selecting his parents.»']
+
+[[question]]
+id = 698
+q = 'Was Joseph a descendant of David \&\ Solomon?'
+a = [
+  'yes ',
+  'no',
+]
+right = ['no']
+refs = ['122:1.1 «David and Solomon were not in the direct line of Joseph’s ancestry, neither did Joseph’s lineage go directly back to Adam.»']
+
+[[question]]
+id = 699
+q = 'Did Joseph descend from Andon \&\ Fonta, Nodites, Sumerians through Abraham?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['122:1.1 «The ancestry of the father of Jesus went back to the days of Abraham and through this venerable patriarch to the earlier lines of inheritance leading to the Sumerians and Nodites and, through the southern tribes of the ancient blue man, to Andon and Fonta.»']
+
+[[question]]
+id = 700
+q = 'When was John the Baptist born?'
+a = [
+  'March 25, 7~B.C.',
+  'September 13, 6~B.C.',
+  'January 1, 4~B.C.',
+  'April 1, A.D.~1',
+]
+right = ['March 25, 7~B.C.']
+refs = ['122:2.7 «John was born in the City of Judah, March 25, 7 B.C.»']
+
+[[question]]
+id = 701
+q = 'Where was John the Baptist born?'
+a = [
+  'Jericho',
+  'Bethlehem',
+  'City of Judah',
+  'Alexandria',
+  'Zaphon',
+  'Philadelphia',
+  'Gilead',
+]
+right = ['City of Judah']
+refs = ['122:2.7 «John was born in the City of Judah, March 25, 7 B.C.»']
+
+[[question]]
+id = 702
+q = 'What was the “Star of Bethlehem”?'
+a = [
+  'a brilliant evening star',
+  'a sign from God',
+  'Venus',
+  'Mars',
+  'a conjunction of Jupiter and Saturn',
+]
+right = ['a conjunction of Jupiter and Saturn']
+refs = ['122:8.7 «These wise men saw no star to guide them to Bethlehem. The beautiful legend of the star of Bethlehem originated in this way: Jesus was born August 21 at noon, 7 B.C. On May 29, 7 B.C., there occurred an extraordinary conjunction of Jupiter and Saturn in the constellation of Pisces. And it is a remarkable astronomic fact that similar conjunctions occurred on September 29 and December 5 of the same year. Upon the basis of these extraordinary but wholly natural events the well-meaning zealots of the succeeding generation constructed the appealing legend of the star of Bethlehem and the adoring Magi led thereby to the manger, where they beheld and worshiped the newborn babe.»']
+
+[[question]]
+id = 703
+q = 'When was Jesus of Nazareth born?'
+a = [
+  'August 21, 7~B.C.',
+  'December 25, 6~B.C.',
+  'December 25, 4~B.C.',
+  'January 1, A.D.~1',
+  'September 18, 6~B.C.',
+  'unknown',
+]
+right = ['August 21, 7~B.C.']
+refs = ['122:8.1 «By the break of day the pangs of childbirth were well in evidence, and at noon, August 21, 7 B.C., with the help and kind ministrations of women fellow travelers, Mary was delivered of a male child.»']

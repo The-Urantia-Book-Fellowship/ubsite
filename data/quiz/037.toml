@@ -1,0 +1,73 @@
+# Paper 37, Personalities of the Local Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 37
+
+[[question]]
+id = 402
+q = 'What is the keynote of the whole educational system of the Universe?'
+a = [
+  'power augmented by knowledge',
+  'character acquired by enlightened experience',
+  'control of mind over energy and over weaker minds',
+  'infinite diversity in infinite combinations',
+  'equal opportunities for all races and types of creatures',
+]
+right = ['character acquired by enlightened experience']
+refs = ['37:6.3 «The methods employed in many of the higher schools are beyond the human concept of the art of teaching truth, but this is the keynote of the whole educational system: character acquired by enlightened experience.»']
+
+[[question]]
+id = 403
+q = 'What are abandonters doing at present?'
+a = [
+  'administering the routine affairs of their world',
+  'helping midwayers',
+  'teaching morontia progressors',
+  'tending the gardens of Edentia',
+]
+right = ['administering the routine affairs of their world']
+refs = ['37:9.12 «These residential citizens on Uversa are at present administering the routine affairs of their world under the immediate supervision of the Uversa corps of the Son-fused mortals.»']
+
+[[question]]
+id = 404
+q = 'What is the name of the Bright and Morning Star of our local universe of Nebadon?'
+a = [
+  'Michael',
+  'Gabriel',
+  'Satanael',
+  'Uriel',
+  'Raphael',
+  'Zachariel',
+  'Barachiel',
+  'Immanuel',
+]
+right = ['Gabriel']
+refs = ['37:1.9 «The Bright and Morning Star of our universe is known as Gabriel of Salvington.»']
+
+[[question]]
+id = 405
+q = 'How many Bright and Morning Stars are brought forth in each local universe?'
+a = [
+  '1',
+  '3',
+  '7',
+  '10',
+  '24',
+]
+right = ['1']
+refs = ['37:1.9 «Of the first order of Universe Aids, the Bright and Morning Stars, there is just one in each local universe, and he is the first-born of all creatures native to a local universe.»']
+
+[[question]]
+id = 406
+q = 'How many architectural spheres are there in our local universe of Nebadon?'
+a = [
+  '9,910',
+  '11,255',
+  '144,000',
+  '647,591',
+  '1,000,000',
+  '10,000,000',
+]
+right = ['647,591']
+refs = ['37:10.1 «The various Nebadon types of life are much too numerous to be catalogued in this paper, but there are two unusual orders that function extensively on the 647,591 architectural spheres of the local universe, that may be mentioned.»']

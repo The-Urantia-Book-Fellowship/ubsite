@@ -1,0 +1,66 @@
+# Paper 7, Relation of the Eternal Son to the Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 7
+
+[[question]]
+id = 68
+q = 'Can the Eternal Son contact directly with human beings as the Father does through the gift of the prepersonal Thought Adjusters?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['7:5.2 «The Eternal Son cannot contact directly with human beings as does the Father through the gift of the prepersonal Thought Adjusters»']
+
+[[question]]
+id = 69
+q = 'Did the bestowals of the Eternal Son in Havona add to the supposed experiential capacity of his existential nature?'
+a = [
+  'yes',
+  'no',
+  'we do not know, because this would fall within the bestowal mystery of the Paradise Sons',
+]
+right = ['we do not know, because this would fall within the bestowal mystery of the Paradise Sons']
+refs = ['7:5.7 «He added to the experience of all Havona then and subsequently, but we do not know whether he added to the supposed experiential capacity of his existential nature. That would fall within the bestowal mystery of the Paradise Sons.»']
+
+[[question]]
+id = 70
+q = 'Does the Eternal Son fully comprehend the eternal plan of the Universal Father for the universe of universes?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['7:0.1 «We do not fully comprehend this eternal plan, but the Paradise Son undoubtedly does.»']
+
+[[question]]
+id = 71
+q = 'Does spirit gravity suffer time delays?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['7:1.2 «Spirit gravity never suffers time delays, nor does it undergo space diminution.»']
+
+[[question]]
+id = 72
+q = 'Does spirit gravity undergo space diminution?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['7:1.2 «Spirit gravity never suffers time delays, nor does it undergo space diminution.»']
+
+[[question]]
+id = 73
+q = 'The transcendence of time and space by pure spirit energies is \ldots'
+a = [
+  'due to the interposition of the antigravity forces of the Third Source and Center',
+  'inherent in the absoluteness of the Eternal Son',
+]
+right = ['inherent in the absoluteness of the Eternal Son']
+refs = ['7:1.2 «And this transcendence of time and space by pure spirit energies is inherent in the absoluteness of the Son; it is not due to the interposition of the antigravity forces of the Third Source and Center.»']

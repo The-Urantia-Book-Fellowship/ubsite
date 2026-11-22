@@ -1,0 +1,44 @@
+# Paper 109, Relation of Adjusters to Universe Creatures: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 109
+
+[[question]]
+id = 656
+q = 'Upon attainment of which of the seven cosmic circles of intellectuality and spirituality the human is assigned a personal seraphic guardian?'
+a = [
+  'first',
+  'second',
+  'third',
+  'fourth',
+  'fifth',
+  'sixth',
+  'seventh',
+]
+right = ['third']
+refs = ['109:2.3 «Has acquired the balance of spiritual power in a human who has made the third psychic circle and has had assigned to him a personal seraphic guardian.»']
+
+[[question]]
+id = 657
+q = 'Did Jesus have a Thought Adjuster?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['109:6.4 «The activities of Adjusters in your local universe are directed by the Personalized Adjuster of Michael of Nebadon, that very Monitor who guided him step by step when he lived his human life in the flesh of Joshua ben Joseph.»']
+
+[[question]]
+id = 658
+q = 'Who did Jesus’ Thought Adjuster previously indwell?'
+a = [
+  'Machiventa Melchizedek',
+  'Abraham',
+  'No-one',
+  'Enoch',
+  'Elijah',
+  'Isaiah',
+]
+right = ['Machiventa Melchizedek']
+refs = ['109:6.4 «This Adjuster had previously served with Machiventa Melchizedek in the days of Abraham and had engaged in tremendous exploits both previous to this indwelling and between these bestowal experiences.»']

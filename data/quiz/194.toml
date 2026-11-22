@@ -1,0 +1,39 @@
+# Paper 194, Bestowal of the Spirit of Truth: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 194
+gone = [815]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 814
+q = 'When was the Spirit of Truth bestowed upon Urantia?'
+a = [
+  'May 16, A.D.~30',
+  'May 18, A.D.~30',
+  'May 28, A.D.~30',
+]
+right = ['May 28, A.D.~30']
+note = '193:6.1 d4353d82387e8ba0'
+
+[[question]]
+id = 816
+q = 'No special gift was bestowed upon the members of Jesus’ earthly family. Pentecost marked the end of special priesthoods and all belief in sacred families. TRUE or FALSE?'
+a = [
+  'FALSE',
+  'TRUE',
+]
+right = ['TRUE']
+refs = ['194:3.15 «No special gift was bestowed upon the members of Jesus’ earthly family. Pentecost marked the end of special priesthoods and all belief in sacred families.»']
+
+[[question]]
+id = 817
+q = 'When was Jesus of Nazareth resurrected?'
+a = [
+  'April 9, A.D.~30',
+  'April 10, A.D.~30',
+  'April 18, A.D.~33',
+  'April 20, A.D.~33',
+]
+right = ['April 9, A.D.~30']
+refs = ['189:1.1 «At ten minutes before three, intense vibrations of commingled material and morontia activities began to issue from Joseph’s new tomb, and at two minutes past three o’clock, this Sunday morning, April 9, A.D. 30, the resurrected morontia form and personality of Jesus of Nazareth came forth from the tomb.»']

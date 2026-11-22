@@ -22,9 +22,7 @@ ALLOWED = {
     "build/fonts.py": "ubsite/static/fonts/",      # the UB Goudy subset (fontTools)
     "offline/pack.py": "var/offline/",             # the offline copy, by way of a .tmp
     "tools/study/draft.py": "var/study/",          # a paper's notes drafted for review
-    "tools/quiz/draft.py": "var/quiz/",            # a paper's quiz drafted for review
-    "tools/quiz/apply.py": "data/quiz/questions.tsv",  # the quiz's ledger, by ruling
-    "tools/quiz/doubt.py": "var/quiz/",            # the references in doubt, for ruling
+    "tools/quiz/convert.py": "data/quiz/",         # the quiz's copy, converted once from the study edition
     "tools/cosmo/snapshot.py": "data/cosmology/chart.json",   # the chart's snapshot, of its author's repository
     "tools/kjv/convert.py": "data/kjv/",           # the KJV's copy, converted once from the study edition
     "tools/kjv/compare.py": "var/kjv/",            # its witness, fetched, and the comparison with it
@@ -98,7 +96,7 @@ class NoWrites(unittest.TestCase):
         # build/ reads the masters; offline/ only the database, and is held
         # to the same rule so that it never grows a reason to.
         # tools/study/ reads the study edition and Block's charts, tools/quiz/
-        # the edition's quiz, tools/cosmo/ the repository of the chart of the
+        # the edition's quiz, once, tools/cosmo/ the repository of the chart of the
         # personalities, tools/kjv/ the study edition's KJV, once, tools/rsb/
         # the Synodal's edition, once, tools/audio/ the recordings.
         for d in ("build", "offline", "tools/study", "tools/quiz", "tools/cosmo", "tools/kjv", "tools/rsb",
@@ -193,24 +191,17 @@ class NoWrites(unittest.TestCase):
         self.assertEqual(block.count("subprocess.run("), 1)
 
     def test_quiz_tools_write_only_their_own(self):
-        """The quiz's draft goes to var/quiz/ and never overwrites a review,
-        which holds Tigran's rulings; the ledger is written by apply.py alone,
-        by way of a .tmp, and nothing in tools/quiz/ deletes."""
+        """The conversion writes data/quiz/, or the directory it is given, and
+        never over a file there: data/quiz/ is the master since, edited by
+        hand.  Nothing in tools/quiz/ deletes, and nothing else there writes."""
         for rel, src in self._sources():
             if not rel.startswith("tools/quiz/"):
                 continue
             self.assertNotRegex(src, r"\.unlink\(|shutil\.|os\.remove", f"{rel} must not delete")
-            if rel == "tools/quiz/draft.py":
-                self.assertIn('OUT = ROOT / "var" / "quiz"', src)
-                self.assertIn("if out.exists():", src)
-                self.assertNotIn('"data"', src)
-            elif rel == "tools/quiz/apply.py":
-                self.assertIn('LEDGER = ROOT / "data" / "quiz" / "questions.tsv"', src)
-                self.assertEqual(len(WRITE_OPEN.findall(src)), 1, "apply.py writes the ledger once")
-            elif rel == "tools/quiz/doubt.py":
-                self.assertIn('OUT = ROOT / "var" / "quiz"', src)
-                self.assertIn("if out.exists():", src)
-                self.assertNotIn('"data"', src)
+            if rel == "tools/quiz/convert.py":
+                self.assertIn('OUT = ROOT / "data" / "quiz"', src)
+                self.assertIn("there = [n for n in files if (args.out / n).exists()]", src)
+                self.assertEqual(src.count(".write_text("), 1, "convert.py writes each file once")
             else:
                 self.assertEqual(WRITE_OPEN.findall(src), [], f"{rel} must not write")
 

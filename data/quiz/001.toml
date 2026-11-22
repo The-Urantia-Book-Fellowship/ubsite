@@ -1,0 +1,363 @@
+# Paper 1, The Universal Father: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 1
+
+# Ids 823 to 850 written for the site on 2026-11-22, from a reading of the paper and its
+# study notes, in the order of the text; 58, at 1:1.2, is the edition's.
+
+[[question]]
+id = 823
+q = 'Mortals can hardly hope to be perfect in the infinite sense. What, then, does the command “Be you perfect, even as I am perfect” ask of them?'
+a = [
+  'to become as perfect as God himself, in the infinite sense',
+  'to become as perfect in their own finite sphere as God is in his sphere of infinity',
+  'to strive for an ideal that no mortal ever reaches, here or hereafter',
+  'to become flawless in body and in intellectual grasp before death',
+]
+right = ['to become as perfect in their own finite sphere as God is in his sphere of infinity']
+refs = ['1:0.5 «Such perfection may not be universal in the material sense, unlimited in intellectual grasp, or final in spiritual experience, but it is final and complete in all finite aspects of divinity of will, perfection of personality motivation, and God-consciousness.»']
+
+[[question]]
+id = 824
+q = 'Why do we call the First Source and Center “Father”?'
+a = [
+  'it is the name he revealed for himself',
+  'it is his name throughout all the universes',
+  'the prophets of old gave him that name',
+  'it is a name of our own choosing, from our personal relationship with him',
+]
+right = ['it is a name of our own choosing, from our personal relationship with him']
+refs = ['1:1.1 «The First Source and Universe Center has never revealed himself by name, only by nature. If we believe that we are the children of this Creator, it is only natural that we should eventually call him Father. But this is the name of our own choosing, and it grows out of the recognition of our personal relationship with the First Source and Center.»']
+
+[[question]]
+id = 58
+q = 'What is man’s choicest (in fact, the only possible) gift to God?'
+a = [
+  'consecration of will',
+  'prayer',
+  'meditation',
+  'helping the poor',
+]
+right = ['consecration of will']
+refs = ['1:1.2 «The affectionate dedication of the human will to the doing of the Father’s will is man’s choicest gift to God; in fact, such a consecration of creature will constitutes man’s only possible gift of true value to the Paradise Father.»']
+
+[[question]]
+id = 825
+q = 'Paper 1 names many ideas of God: reality idealized, the universe personalized, natural law personified, “the noblest work of man”. What does it say of them?'
+a = [
+  'they are all false, and must be given up',
+  'together they make up the full definition of God',
+  'he may be any or all of these in the minds of men, but he is more',
+  'they are true of God in time and space, but not on Paradise',
+]
+right = ['he may be any or all of these in the minds of men, but he is more']
+refs = ['1:2.2 «God may be any or all of these concepts in the minds of men, but he is more. He is a saving person and a loving Father to all who enjoy spiritual peace on earth, and who crave to experience personality survival in death.»']
+
+[[question]]
+id = 826
+q = 'The existence of God can never be proved by the pure reason of logical deduction. What does Paper 1 say of the true concept of the reality of God in relation to logic?'
+a = [
+  'it is contrary to logic, and is believed in spite of it',
+  'it can be proved by logic to any sincere mind',
+  'it has nothing to do with logic at all',
+  'it is reasonable to logic',
+]
+right = ['it is reasonable to logic']
+refs = ['1:2.7']
+
+[[question]]
+id = 827
+q = 'What is the only positive proof of the existence of the living God which one human being can offer to another?'
+a = [
+  'the personal experience of those who know God',
+  'a sound argument from the order of the universe',
+  'the miracles recorded in the scriptures',
+  'the agreement of all the religions of the world',
+]
+right = ['the personal experience of those who know God']
+refs = ['1:2.8 «Those who know God have experienced the fact of his presence; such God-knowing mortals hold in their personal experience the only positive proof of the existence of the living God which one human being can offer to another.»']
+
+[[question]]
+id = 828
+q = 'Of which of these is the Universal Father the personal creator?'
+a = [
+  'Paradise and the central universe of perfection',
+  'our local universe of Nebadon',
+  'all the other personal universe Creators, with the Eternal Son',
+  'the evolutionary universes of time and space',
+  'the world Urantia',
+]
+right = [
+  'Paradise and the central universe of perfection',
+  'all the other personal universe Creators, with the Eternal Son',
+]
+refs = ['1:2.9']
+
+[[question]]
+id = 829
+q = 'The prophet quoted at the opening of Paper 1 says “By the Sons of God were the universes made”, where Psalms 33:6 has “By the word of the Lord were the heavens made”. Which teaching of the paper does the change agree with?'
+a = [
+  'that the Sons of God are the angels',
+  'that the universe made itself, by evolution alone',
+  'that the universes of time and space are made by the Creator Sons',
+  'that the earth was made before the heavens',
+]
+right = ['that the universes of time and space are made by the Creator Sons']
+note = '1:0.1 5243af2f44047c31'
+
+[[question]]
+id = 830
+q = 'We are said to be created “in his image”. In what sense?'
+a = [
+  'in being indwelt by Mystery Monitors sent from his presence',
+  'in form and physique',
+  'in having power to create, as he creates',
+  'in being made of the substance of Paradise',
+]
+right = ['in being indwelt by Mystery Monitors sent from his presence']
+refs = ['1:3.1 «Even though you are “the offspring of God,” you ought not to think that the Father is like yourselves in form and physique because you are said to be created “in his image”—indwelt by Mystery Monitors dispatched from the central abode of his eternal presence.»']
+
+[[question]]
+id = 831
+q = 'Why is the Universal Father invisible to us?'
+a = [
+  'he hides himself from the lowly creatures of time',
+  'he withdrew from the universe once it was made',
+  'no material man could behold the spirit God and live',
+  'he exists only as an idea in our minds',
+]
+right = ['no material man could behold the spirit God and live']
+refs = ['1:3.3']
+
+[[question]]
+id = 832
+q = 'Material\hyp{}linked minds cannot survive mortal death. What becomes of mind yielded to spirit?'
+a = [
+  'it perishes with the body all the same',
+  'it becomes increasingly spiritual, and attains survival in oneness with the divine spirit',
+  'it is absorbed into the Infinite Spirit, its personality lost',
+  'it becomes increasingly material, and its personality is extinguished',
+]
+right = ['it becomes increasingly spiritual, and attains survival in oneness with the divine spirit']
+refs = ['1:3.7 «Mortal mind subservient to matter is destined to become increasingly material and consequently to suffer eventual personality extinction; mind yielded to spirit is destined to become increasingly spiritual and ultimately to achieve oneness with the surviving and guiding divine spirit and in this way to attain survival and eternity of personality existence.»']
+
+[[question]]
+id = 833
+q = 'A fragment of God sojourns within each moral being of this planet. In what sense is it yours?'
+a = [
+  'it is yours now, a part of your human nature, given at birth with your body',
+  'it is yours only for as long as you believe in it',
+  'it is not yet yours by right of possession, but is meant to be one with you if you survive',
+  'it is never yours: whatever you do, it returns to God who gave it',
+]
+right = ['it is not yet yours by right of possession, but is meant to be one with you if you survive']
+refs = ['1:4.3 «There sojourns within each moral being of this planet a fragment of God, a part and parcel of divinity. It is not yet yours by right of possession, but it is designedly intended to be one with you if you survive the mortal existence.»']
+
+[[question]]
+id = 834
+q = 'What limits the divine presence which any child of the universe enjoys at any given moment?'
+a = [
+  'the rank God has given to that creature',
+  'only the creature’s own capacity to receive and discern spirit actualities',
+  'how near to Paradise that creature lives',
+  'the merit the creature has earned by good works',
+]
+right = ['only the creature’s own capacity to receive and discern spirit actualities']
+refs = ['1:4.6 «God is no respecter of persons, either spiritual or material. The divine presence which any child of the universe enjoys at any given moment is limited only by the capacity of such a creature to receive and to discern the spirit actualities of the supermaterial world.»']
+
+[[question]]
+id = 835
+q = 'Is God a mystery to man?'
+a = [
+  'yes, wholly: a finite mind can never know him at all',
+  'no: a sincere mind can understand all there is of God',
+  'not in spiritual experience; mystery appears in explaining the spirit world to material minds',
+  'only to those who have not yet read his revelation',
+]
+right = ['not in spiritual experience; mystery appears in explaining the spirit world to material minds']
+refs = ['1:4.7']
+
+[[question]]
+id = 836
+q = 'To deny the personality of God leaves one only the choice of materialism or pantheism. What error does Paper 1 find in both?'
+a = [
+  'both teach that there are many gods',
+  'both deny that matter is real',
+  'both trust reason too little and feeling too much',
+  'both tie personality to a material body',
+]
+right = ['both tie personality to a material body']
+refs = ['1:5.12']
+
+[[question]]
+id = 837
+q = 'Primitive religion had many personal gods. Why was that no sign of religious maturity?'
+a = [
+  'a personal God is a primitive idea, which a mature religion leaves behind',
+  'their gods were fashioned in the image of animals',
+  'a personal Deity measures maturity only after religion has grasped the unity of God',
+  'the gods of primitive religion had no names',
+]
+right = ['a personal Deity measures maturity only after religion has grasped the unity of God']
+refs = [
+  '1:5.10 «The idea of a personal Deity becomes, then, the measure of religious maturity after religion has first formulated the concept of the unity of God.»',
+  '1:5.11 «Primitive religion had many personal gods, and they were fashioned in the image of man.»',
+]
+
+[[question]]
+id = 838
+q = 'God does not grow in knowledge nor increase in wisdom. What saves him from “the awful limitations of unqualified finality of perfectness”?'
+a = [
+  'he takes part in the struggle of every imperfect soul who seeks to ascend',
+  'he creates new universes without end',
+  'the perfection of Havona, which mirrors his own',
+  'the worship of the beings of Paradise',
+]
+right = ['he takes part in the struggle of every imperfect soul who seeks to ascend']
+refs = ['1:5.15']
+
+[[question]]
+id = 839
+q = 'Human personality is “the time\hyp{}space image\hyp{}shadow cast by the divine Creator personality”. What follows?'
+a = [
+  'our own personality is the key to understanding his adequately',
+  'the shadow is to be understood from the substance, not the substance from the shadow',
+  'human personality is unreal, a shadow without worth',
+  'his personality is the shadow of ours, cast large',
+]
+right = ['the shadow is to be understood from the substance, not the substance from the shadow']
+refs = ['1:6.1']
+
+[[question]]
+id = 840
+q = 'Why did the better concepts of the divine personality have to wait?'
+a = [
+  'for science to learn the size of the universe',
+  'for man to give up thinking of God as a person',
+  'for the revelation of the Paradise Trinity',
+  'for better ideas of human personality, above all in Michael’s bestowal life',
+]
+right = ['for better ideas of human personality, above all in Michael’s bestowal life']
+refs = ['1:6.3 «Therefore did the better concepts of the divine personality have patiently to await the appearance of improved ideas of human personality, especially the enhanced revelation of both human and divine personality in the Urantian bestowal life of Michael, the Creator Son.»']
+
+[[question]]
+id = 841
+q = 'Why does the God\hyp{}knowing man describe his spiritual experiences?'
+a = [
+  'to convince unbelievers',
+  'to prove the existence of God by argument',
+  'for the edification and mutual satisfaction of believers',
+  'because he is commanded to',
+]
+right = ['for the edification and mutual satisfaction of believers']
+refs = ['1:6.6 «The God-knowing man describes his spiritual experiences, not to convince unbelievers, but for the edification and mutual satisfaction of believers.»']
+
+[[question]]
+id = 842
+q = 'What do we assume when we assume that the universe can be known, that it is intelligible?'
+a = [
+  'that it is mind made and personality managed',
+  'that it came about by chance',
+  'that matter alone is real',
+  'that man is its center',
+]
+right = ['that it is mind made and personality managed']
+refs = ['1:6.7 «To assume that the universe can be known, that it is intelligible, is to assume that the universe is mind made and personality managed.»']
+
+[[question]]
+id = 843
+q = 'God is spirit, spirit personality. What is man?'
+a = [
+  'a material being, with no spirit of his own',
+  'a spirit too: a potential spirit personality',
+  'a fragment of the Infinite Spirit',
+  'a spirit personality already, equal to God',
+]
+right = ['a spirit too: a potential spirit personality']
+refs = ['1:6.8 «God is spirit—spirit personality; man is also a spirit—potential spirit personality. Jesus of Nazareth attained the full realization of this potential of spirit personality in human experience»']
+
+[[question]]
+id = 844
+q = 'Only personalities can commune with each other. What part has the Thought Adjuster, an impersonal entity, in man’s communion with God?'
+a = [
+  'none, since only personalities can commune',
+  'it takes the place of the human personality',
+  'it may greatly facilitate that personal communion',
+  'it is itself the person with whom man communes',
+]
+right = ['it may greatly facilitate that personal communion']
+refs = ['1:7.1 «Only personalities can commune with each other, albeit this personal communion may be greatly facilitated by the presence of just such an impersonal entity as the Thought Adjuster.»']
+
+[[question]]
+id = 845
+q = 'How does man attain union with God?'
+a = [
+  'by personality intercourse with the personal God, in progressive reciprocal communion',
+  'as a drop of water finds unity with the ocean',
+  'by the extinction of every desire of the self',
+  'by knowing all that can be known of him',
+]
+right = ['by personality intercourse with the personal God, in progressive reciprocal communion']
+refs = ['1:7.2']
+
+[[question]]
+id = 846
+q = 'Truth and beauty might be conceived apart from personality. Which concept is understandable only in relation to personality?'
+a = [
+  'law',
+  'power',
+  'order',
+  'divine goodness',
+]
+right = ['divine goodness']
+refs = ['1:7.3 «The concept of truth might possibly be entertained apart from personality, the concept of beauty may exist without personality, but the concept of divine goodness is understandable only in relation to personality.»']
+
+[[question]]
+id = 847
+q = 'We cannot fully understand how God can be changeless and perfect in an ever\hyp{}changing, evolving universe. How can we nevertheless know such a truth?'
+a = [
+  'by mathematics and logic',
+  'in our own experience of keeping one identity amid constant change',
+  'by the testimony of the prophets',
+  'we cannot know it, only believe it',
+]
+right = ['in our own experience of keeping one identity amid constant change']
+refs = ['1:7.4']
+
+[[question]]
+id = 848
+q = 'God’s personality is indivisible. How then can he bestow his spirit to live in the hearts of mortal men? What does Paper 1 compare it with?'
+a = [
+  'a flame that lights other flames and loses nothing',
+  'the sun, whose light falls on all the worlds',
+  'the ocean, whose water fills many cups',
+  'a human father, whose indivisible personality does not prevent his having children',
+]
+right = ['a human father, whose indivisible personality does not prevent his having children']
+refs = ['1:7.6 «Indivisibility of personality does not interfere with God’s bestowing his spirit to live in the hearts of mortal men. Indivisibility of a human father’s personality does not prevent the reproduction of mortal sons and daughters.»']
+
+[[question]]
+id = 849
+q = 'What does the Divine Counselor who presents Paper 1 admit about the truths of Deity it sets out?'
+a = [
+  'that they are wholly clear to every being of Paradise',
+  'that mortals will never understand them, even on Paradise',
+  'that not all of them are wholly clear even to the high personalities of his own group',
+  'that he gives them as symbols only, not as truth',
+]
+right = ['that not all of them are wholly clear even to the high personalities of his own group']
+refs = ['1:7.8 «I am fully aware that I have at my command no language adequate to make clear to the mortal mind how these universe problems appear to us. But you should not become discouraged; not all of these things are wholly clear to even the high personalities belonging to my group of Paradise beings.»']
+
+[[question]]
+id = 850
+q = 'Why was Paper 1 presented by a Divine Counselor, a being from beyond our local universe?'
+a = [
+  'the nature of God concerns affairs beyond our local universe, and he is the highest source of information on it',
+  'Uversa is the headquarters of our local universe',
+  'the Universal Father dwells on Uversa',
+  'no being of Nebadon has ever seen the Father',
+]
+right = ['the nature of God concerns affairs beyond our local universe, and he is the highest source of information on it']
+refs = ['1:7.9']

@@ -1,0 +1,36 @@
+# Paper 112, Personality Survival: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 112
+gone = [663]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 664
+q = 'Can the personality identity survive independently from the survival of the morontia soul?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['16:9.3 «The survival of identity is dependent on the survival of the immortal soul of morontia status and increasingly divine value. Personality identity survives in and by the survival of the soul.»']
+
+[[question]]
+id = 665
+q = 'Are those resurrected on the mansion worlds permitted to send messages to their loved ones here?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['112:3.7 «Those who go to the mansion worlds are not permitted to send messages back to their loved ones.»']
+
+[[question]]
+id = 666
+q = 'Does the guardian seraphim abandon a living person in the event of spiritual death (departure of Thought Adjuster)?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['112:3.2 «But this release of the Adjuster in no way affects the duties of the personal or group seraphim concerned with that Adjuster-abandoned individual.»']

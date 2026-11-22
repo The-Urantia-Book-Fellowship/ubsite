@@ -1,0 +1,76 @@
+# Paper 113, Seraphic Guardians of Destiny: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 113
+
+[[question]]
+id = 667
+q = 'When one of the seraphic pair is recharging with the life energy, who does the duty of recording?'
+a = [
+  'nobody',
+  'the other seraphim of the pair',
+  'the assisting cherubim',
+]
+right = ['the assisting cherubim']
+refs = ['113:2.10 «For purposes of rest and recharging with the life energy of the universe circuits, the guardian is periodically relieved by her complement, and during her absence the associated cherubim functions as the recorder, as is also the case when the complemental seraphim is similarly absent.»']
+
+[[question]]
+id = 668
+q = 'Do individual seraphim have names or only numbers?'
+a = [
+  'no, only numbers',
+  'yes, they have personal names',
+]
+right = ['yes, they have personal names']
+refs = ['113:2.6 «All seraphim have individual names, but in the records of assignment to world service they are frequently designated by their planetary numbers.»']
+
+[[question]]
+id = 669
+q = 'Prior to the last bestowal of Michael (Jesus of Nazareth) what was the criteria for assignment of seraphic guardians to mortals?'
+a = [
+  'race',
+  'intellect',
+  'spirituality',
+  'attainment of cosmic circles',
+  'to the Jew first, and then to the Gentiles',
+]
+right = ['race']
+refs = ['113:1.2 «Originally, the seraphim were definitely assigned to the separate Urantia races.»']
+
+[[question]]
+id = 670
+v = 2
+q = 'Subsequent to the last bestowal of Michael (as Jesus of Nazareth) what was the criteria for assignment of seraphic guardians to mortals?'
+a = [
+  'race',
+  'intellect',
+  'spirituality',
+  'human intelligence, spirituality, and destiny',
+  'to the Jew first, and then to the Gentiles',
+]
+right = ['human intelligence, spirituality, and destiny']
+refs = ['113:1.2 «But since the bestowal of Michael, they are assigned in accordance with human intelligence, spirituality, and destiny.»']
+
+[[question]]
+id = 671
+q = 'What is the first assignment of a resurrected mortal?'
+a = [
+  'Learning Satanian language',
+  'Assisting seraphim',
+  'Learning the tongue of Uversa',
+  'Observing the stars',
+  'Sending a message back to the relatives on Earth',
+]
+right = ['Assisting seraphim']
+refs = ['113:7.3 «Therefore will your first assignment of the morontia life be as assistants to the seraphim in the immediate work awaiting at the time you attain personality consciousness subsequent to your liberation from the bonds of the flesh.»']
+
+[[question]]
+id = 672
+q = 'Are all seraphic guardians called destiny guardians?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['113:2.1 «Seraphim are not known as guardians of destiny until such time as they are assigned to the association of a human soul who has realized one or more of three achievements: has made a supreme decision to become Godlike, has entered the third circle, or has been mustered into one of the reserve corps of destiny.»']

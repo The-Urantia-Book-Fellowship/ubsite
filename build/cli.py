@@ -140,11 +140,11 @@ def main(argv: list[str]) -> int:
             print(f"study notes of {len(curated)} paper{'s' * (len(curated) > 1)},"
                   f" the edition at {at(repos['study'])} ...")
         study_built = study.attach(papers, curated, repos["study"], block, report, hyphenator)
-        # The edition's quiz (build/quiz.py), read and set now; stored once the
-        # text, the study notes and the search index are, which it is held to.
+        # The quiz (build/quiz.py), data/quiz/, read and set now; stored once
+        # the text, the study notes and the search index are, which it is held to.
         from . import quiz
-        print(f"the quiz, the edition at {at(repos['study'])} ...")
-        quiz_built = quiz.build(repos["study"], report)
+        print("the quiz, data/quiz/ ...")
+        quiz_built = quiz.build(report, repos["study"])
 
         con = db.create(tmp)
         print("loading ...")
@@ -276,8 +276,9 @@ def main(argv: list[str]) -> int:
         con.executemany("INSERT INTO build_source VALUES (?,?,?,?,?,?)",
                         [(b.key, repos[b.key]["commit"], int(repos[b.key]["dirty"]), repos[b.key]["rev"],
                           b.date or repos[b.key]["date"], repos[b.key]["commit_url"]) for b in tr_built])
-        # The study edition, which the quiz is read from (build/quiz.py) and a
-        # reviewed paper's notes; and Block's charts by their manifest's SHA-256,
+        # The study edition, which a reviewed paper's notes are read from, and
+        # where a question answered by a note finds it (build/quiz.py); and
+        # Block's charts by their manifest's SHA-256,
         # once a paper's notes are on the site: until then the build reads none.
         if study_built.papers or quiz_built:
             st = repos["study"]

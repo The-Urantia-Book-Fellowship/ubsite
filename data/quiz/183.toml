@@ -1,0 +1,52 @@
+# Paper 183, The Betrayal and Arrest of Jesus: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 183
+
+[[question]]
+id = 779
+q = 'Why was John Zebedee permitted to remain near Jesus all the way through his trying experiences?'
+a = [
+  'Roman law allowed prisoners to have a friend stand with him before the judgment bar',
+  'A working of God',
+  'Because he was a friend of high priest',
+  'Because he was a relative of Annas',
+]
+right = ['Roman law allowed prisoners to have a friend stand with him before the judgment bar']
+refs = ['183:5.3 «The Roman law allows that any prisoner may have at least one friend to stand with him before the judgment bar, and this man shall not be prevented from standing by the side of his Master, the prisoner.”»']
+
+[[question]]
+id = 780
+q = 'Was the torture and murder of Jesus by the Jews part of the Father’s will?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['183:1.1 «These inhuman and shocking experiences which Jesus was called upon to endure in the final hours of his mortal life were not in any sense a part of the divine will of the Father»']
+
+[[question]]
+id = 781
+q = 'Who was behind the plan of Jesus’ torture and murder?'
+a = [
+  'Lucifer',
+  'The Romans',
+  'Jewish priests',
+  'Satan',
+  'Caligastia',
+  'Judas Iscariot',
+]
+right = ['Jewish priests']
+refs = ['182:2.6 «The Son of Man will be put to death at the instigation of his enemies, the chief priests and the rulers of the Jews»']
+
+[[question]]
+id = 782
+q = 'To whom did Jesus say “They who take the sword shall perish by the sword”?'
+a = [
+  'a Roman soldier',
+  'Peter',
+  'a zealot',
+]
+right = ['Peter']
+refs = ['183:3.7 «Jesus raised a forbidding hand to Peter and, speaking sternly, said: “Peter, put up your sword. They who take the sword shall perish by the sword.»']

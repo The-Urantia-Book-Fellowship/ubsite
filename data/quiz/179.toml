@@ -1,0 +1,49 @@
+# Paper 179, The Last Supper: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 179
+
+[[question]]
+id = 769
+q = 'Was the Last Supper the only ceremony which Jesus established?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['179:5.4 «In the establishment of the only ceremony or sacrament associated with his whole life mission, Jesus took great pains to suggest his meanings rather than to commit himself to precise definitions.»']
+
+[[question]]
+id = 770
+q = 'Did the Last Supper replace the Passover remembrance of the emergence of the Hebrews from racial slavery with the emergence of the enslaved individual from the bondage of ceremonialism?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['179:5.2 «The old Passover commemorated the emergence of their fathers from a state of racial slavery into individual freedom; now the Master was instituting a new remembrance supper as a symbol of the new dispensation wherein the enslaved individual emerges from the bondage of ceremonialism and selfishness»']
+
+[[question]]
+id = 771
+q = 'At the Last Supper, which seat did Judas Iscariot take?'
+a = [
+  'the seat of honor on the left of Jesus',
+  'the seat of honor on the right of Jesus',
+  'the seat furthest from Jesus',
+  'a spare seat without any preference',
+]
+right = ['the seat of honor on the left of Jesus']
+refs = ['179:1.4 «While they hesitated, Judas stepped over to the seat of honor, at the left of the host, and signified that he intended there to recline as the preferred guest.»']
+
+[[question]]
+id = 772
+q = 'At the Last Supper, which seat did John Zebedee take?'
+a = [
+  'the seat of honor on the left of Jesus',
+  'the seat of honor on the right of Jesus',
+  'the seat furthest from Jesus',
+  'a spare seat without any preference',
+]
+right = ['the seat of honor on the right of Jesus']
+refs = ['179:1.4 «Judas had no sooner seized the seat of honor than John Zebedee laid claim to the next preferred seat, the one on the right of the host.»']

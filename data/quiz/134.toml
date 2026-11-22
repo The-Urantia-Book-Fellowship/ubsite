@@ -1,0 +1,17 @@
+# Paper 134, The Transition Years: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 134
+gone = [728]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 729
+q = 'Did Jesus ever give formal lectures?'
+a = [
+  'yes (12 lectures in the city of Alexandria)',
+  'yes (24 lectures in the city of Urmia)',
+  'no',
+]
+right = ['yes (24 lectures in the city of Urmia)']
+refs = ['134:3.5 «In accordance with this arrangement, Jesus stopped off on the return trip and delivered these lectures. This was the most systematic and formal of all the Master’s teaching on Urantia.»']

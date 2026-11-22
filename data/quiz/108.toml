@@ -1,0 +1,15 @@
+# Paper 108, Mission and Ministry of Thought Adjusters: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 108
+
+[[question]]
+id = 655
+q = 'Prior to the day of Pentecost, Thought Adjusters have been universally bestowed upon all normal minds of mortal status on Urantia. TRUE or FALSE?'
+a = [
+  'TRUE',
+  'FALSE',
+]
+right = ['FALSE']
+refs = ['108:2.3 «Therefore have the divine Adjusters been universally bestowed upon all normal minds of moral status on Urantia ever since the day of Pentecost.»']

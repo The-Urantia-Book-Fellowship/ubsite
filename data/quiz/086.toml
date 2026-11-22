@@ -1,0 +1,17 @@
+# Paper 86, Early Evolution of Religion: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 86
+
+[[question]]
+id = 625
+q = 'What is the natural state of the savage mind?'
+a = [
+  'anxiety',
+  'anger',
+  'joy',
+  'stillness',
+]
+right = ['anxiety']
+refs = ['86:2.1 «Anxiety was a natural state of the savage mind.»']

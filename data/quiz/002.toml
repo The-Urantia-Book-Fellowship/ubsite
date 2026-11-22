@@ -1,0 +1,21 @@
+# Paper 2, The Nature of God: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 2
+
+[[question]]
+id = 59
+q = 'Truth is \ldots'
+a = [
+  'living and flexible',
+  'best known by its spiritual flavor',
+  'coherent, beauty attractive, goodness stabilizing',
+  'alive, free, thrilling, and always moving',
+]
+right = [
+  'living and flexible',
+  'best known by its spiritual flavor',
+  'coherent, beauty attractive, goodness stabilizing',
+]
+refs = ['2:7.12 «Truth is coherent, beauty attractive, goodness stabilizing.»']

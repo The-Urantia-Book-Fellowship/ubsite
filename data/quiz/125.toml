@@ -1,0 +1,16 @@
+# Paper 125, Jesus at Jerusalem: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 125
+
+[[question]]
+id = 708
+q = 'What was Jesus’ attitude towards the doctrine of the wrath of God?'
+a = [
+  'accepted it wholeheartedly',
+  'accepted reluctantly',
+  'refused to accept',
+]
+right = ['refused to accept']
+refs = ['125:0.6 «Jesus simply would not accept explanations of worship and religious devotion which involved belief in the wrath of God or the anger of the Almighty.»']

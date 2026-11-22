@@ -738,7 +738,8 @@ def quiz(con: sqlite3.Connection, paper: int | None = None) -> list[dict]:
 
     Each: its id and the layout of its answers (v), by which the browser keeps
     an answer; `m`, the right answers as bits, for the browser to mark them,
-    offline too; the question and its answers as HTML; and what answers it,
+    offline too; `f`, 1 where its answers are shown as written and not
+    shuffled (build/quiz.py fixed_order), absent elsewhere; the question and its answers as HTML; and what answers it,
     where the review has said (`s`): the passages of the text (`k` "text"),
     `p`, each a paragraph's words or a run of paragraphs whole, its `ref` then
     "0:3.2-8", in the order ruled, with `ref` the first's; a study note
@@ -749,7 +750,7 @@ def quiz(con: sqlite3.Connection, paper: int | None = None) -> list[dict]:
     where, args = ("WHERE q.paper_n = ?", (paper,)) if paper is not None else ("", ())
     try:
         rows = con.execute(
-            "SELECT q.id, q.paper_n, q.ord, q.v, q.mask, q.html, q.state, f.html AS note_html"
+            "SELECT q.id, q.paper_n, q.ord, q.v, q.mask, q.fixed, q.html, q.state, f.html AS note_html"
             f" FROM quiz_question q LEFT JOIN footnote f ON f.id = q.footnote_id {where}"
             " ORDER BY q.paper_n, q.ord", args).fetchall()
         passages: dict[int, list[dict]] = {}
@@ -780,7 +781,7 @@ def quiz(con: sqlite3.Connection, paper: int | None = None) -> list[dict]:
         elif r["state"] == "note" and ps:
             s = {"k": "para", "ref": ps[0]["ref"], "h": ps[0]["h"]}
         out.append({"id": r["id"], "p": r["paper_n"], "v": r["v"], "m": r["mask"],
-                    "q": r["html"], "a": answers.get(r["id"], []), "s": s})
+                    "q": r["html"], "a": answers.get(r["id"], []), "s": s, **({"f": 1} if r["fixed"] else {})})
     return out
 
 

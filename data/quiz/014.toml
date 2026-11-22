@@ -1,0 +1,428 @@
+# Paper 14, The Central and Divine Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 14
+gone = [174, 195]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 171
+q = 'Our material bodies have five physical senses, how many senses does a morontia body have, in potential?'
+a = [
+  '7',
+  '10',
+  '36',
+  '70',
+  '77',
+  '100',
+]
+right = ['70']
+refs = ['14:2.3 «The morontia senses are seventy, and the higher spiritual orders of reaction response vary in different types of beings from seventy to two hundred and ten.»']
+
+[[question]]
+id = 172
+q = 'What is the number of elements on the architectural spheres compared to those on the evolutionary planets?'
+a = [
+  'half as many',
+  'twice as many',
+  'the same number',
+]
+right = ['twice as many']
+refs = ['48:1.3 «All of these worlds are architectural spheres, and they have just double the number of elements of the evolved planets.»']
+
+[[question]]
+id = 173
+q = 'How many perfect spheres does Havona consist of?'
+a = [
+  '100 billion',
+  '500 million',
+  '1 billion',
+  '144000',
+  '7',
+  '12',
+]
+right = ['1 billion']
+refs = ['14:0.1 «It is of enormous dimensions and almost unbelievable mass and consists of one billion spheres of unimagined beauty and superb grandeur, but the true magnitude of this vast creation is really beyond the understanding grasp of the human mind.»']
+
+[[question]]
+id = 175
+q = 'How many circuits are the billion worlds of Havona arranged in?'
+a = [
+  '12',
+  '3',
+  '4',
+  '1000',
+  '1024',
+  '7',
+]
+right = ['7']
+refs = ['14:1.9 «The billion worlds of Havona are arranged in seven concentric circuits immediately surrounding the three circuits of Paradise satellites.»']
+
+[[question]]
+id = 176
+q = 'How many worlds are in the innermost circuit of Havona?'
+a = [
+  '245 million+',
+  '25 million+',
+  '1 million+',
+  '35 million+',
+  '365',
+]
+right = ['35 million+']
+refs = ['14:1.9 «There are upwards of thirty-five million worlds in the innermost Havona circuit and over two hundred and forty-five million in the outermost, with proportionate numbers intervening.»']
+
+[[question]]
+id = 177
+q = 'How many worlds are in the outermost circuit of Havona?'
+a = [
+  '35 million+',
+  '25 million+',
+  '245 million+',
+  '1 million+',
+  '365',
+]
+right = ['245 million+']
+refs = ['14:1.9 «There are upwards of thirty-five million worlds in the innermost Havona circuit and over two hundred and forty-five million in the outermost, with proportionate numbers intervening.»']
+
+[[question]]
+id = 178
+q = 'Are the Havona planetary circuits superimposed?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['14:1.10 «The Havona planetary circuits are not superimposed; their worlds follow each other in an orderly linear procession.»']
+
+[[question]]
+id = 179
+q = 'Does perception of time exist on the Havona circuits?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['14:1.11 «But time is germane to the Havona circuits and to numerous beings of both celestial and terrestrial origin sojourning thereon.»']
+
+[[question]]
+id = 180
+q = 'Is the length of year the same on all the worlds of a given Havona circuit?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['14:1.11 «All worlds in a given circuit have the same length of year since they uniformly swing around Paradise, and the length of these planetary years decreases from the outermost to the innermost circuit.»']
+
+[[question]]
+id = 181
+q = 'How does the length of year change from circuit to circuit in Havona?'
+a = [
+  'increases from the outermost to the innermost circuit',
+  'stays the same',
+  'decreases from the outermost to the innermost circuit',
+]
+right = ['decreases from the outermost to the innermost circuit']
+refs = ['14:1.11 «All worlds in a given circuit have the same length of year since they uniformly swing around Paradise, and the length of these planetary years decreases from the outermost to the innermost circuit.»']
+
+[[question]]
+id = 182
+q = 'Where is the length of Paradise-Havona day decided and broadcast from?'
+a = [
+  'the seven sacred spheres of the Universal Father',
+  'on one of the billion perfect spheres of Havona',
+  'the seven sacred spheres of the Infinite Spirit',
+  'Isle of Paradise',
+  'the seven sacred spheres of the Eternal Son',
+]
+right = ['the seven sacred spheres of the Infinite Spirit']
+refs = ['14:1.12 «Besides Havona-circuit time, there is the Paradise-Havona standard day and other time designations which are determined on, and are sent out from, the seven Paradise satellites of the Infinite Spirit.»']
+
+[[question]]
+id = 183
+q = 'How many planes do the three circuits of Paradise satellites and the seven circuits of Havona worlds move in?'
+a = [
+  'seven',
+  'ten',
+  'one',
+  'three',
+]
+right = ['one']
+refs = ['14:1.10 «The central universe whirls around the stationary Isle of Paradise in one vast plane, consisting of ten concentric stabilized units—the three circuits of Paradise spheres and the seven circuits of Havona worlds.»']
+
+[[question]]
+id = 184
+q = 'Based on what periodic movement is the standard Paradise-Havona day defined?'
+a = [
+  'revolution of the outer Havona circuit around the Isle of Paradise',
+  'average revolution of all Havona circuits around the Isle of Paradise',
+  'arbitrarily decided by the Paradise Deities',
+  'space respiration',
+  'revolution of the inner Havona circuit around the Isle of Paradise',
+]
+right = ['revolution of the inner Havona circuit around the Isle of Paradise']
+refs = ['14:1.12 «The Paradise-Havona standard day is based on the length of time required for the planetary abodes of the first or inner Havona circuit to complete one revolution around the Isle of Paradise»']
+
+[[question]]
+id = 185
+q = 'One Paradise-Havona day is equivalent to how much Urantia time?'
+a = [
+  '100 years',
+  '30 days',
+  '1000 years',
+  '15 days',
+  '1 day',
+]
+right = ['1000 years']
+refs = ['14:1.12 «One Paradise-Havona day is just seven minutes, three and one-eighth seconds less than one thousand years of the present Urantia leap-year calendar.»']
+
+[[question]]
+id = 186
+q = 'Where do the spirit beings dwell?'
+a = [
+  'in nebulous space',
+  'on ethereal spirit worlds',
+  'on material spheres',
+]
+right = ['on material spheres']
+refs = ['14:2.1 «Spirit beings do not dwell in nebulous space; they do not inhabit ethereal worlds; they are domiciled on actual spheres of a material nature, worlds just as real as those on which mortals live.»']
+
+[[question]]
+id = 187
+q = 'How many basic chemical elements does the material of Havona consist of?'
+a = [
+  '100',
+  '256',
+  '512',
+  '1000',
+  '1024',
+  '1000000',
+]
+right = ['1000']
+refs = ['14:2.3 «The material of Havona consists of the organization of exactly one thousand basic chemical elements and the balanced function of the seven forms of Havona energy.»']
+
+[[question]]
+id = 188
+q = 'How many forms of energy exist in Havona?'
+a = [
+  '12',
+  '49',
+  '7',
+  '100',
+  '10',
+]
+right = ['7']
+refs = ['14:2.3 «The material of Havona consists of the organization of exactly one thousand basic chemical elements and the balanced function of the seven forms of Havona energy.»']
+
+[[question]]
+id = 189
+q = 'How many phases of excitation does each of the basic forms of energy in Havona manifest?'
+a = [
+  '7',
+  '49',
+  '3',
+  '1000',
+  '4',
+]
+right = ['7']
+refs = ['14:2.3 «Each of these basic energies manifests seven phases of excitation, so that the Havona natives respond to forty-nine differing sensation stimuli.»']
+
+[[question]]
+id = 190
+q = 'How many different sensation stimuli do Havona natives respond to?'
+a = [
+  '7',
+  '3',
+  '1000',
+  '4',
+  '49',
+]
+right = ['49']
+refs = ['14:2.3 «Each of these basic energies manifests seven phases of excitation, so that the Havona natives respond to forty-nine differing sensation stimuli.»']
+
+[[question]]
+id = 191
+q = 'How many of the 49 physical stimuli of Havona worlds would excite a reaction in Urantia mortals?'
+a = [
+  '49',
+  '7',
+  '0',
+  '5',
+  '4',
+  '47',
+]
+right = ['0']
+refs = ['14:2.4 «Neither would any of the physical stimuli of those faraway worlds excite a reaction in your gross sense organs.»']
+
+[[question]]
+id = 192
+q = 'Why are the Havona forms of energy threefold whereas the superuniverse forms of energy are twofold?'
+a = [
+  'because the creation of Havona is threefold (Trinity) whereas the creation of local universes is twofold (Creator Son and Creative Mother Spirit)',
+  'for unknown or unrevealed reason',
+]
+right = ['because the creation of Havona is threefold (Trinity) whereas the creation of local universes is twofold (Creator Son and Creative Mother Spirit)']
+refs = ['14:2.2 «The creation of the central universe is threefold (Trinity); the creation of a local universe (directly) is twofold, by a Creator Son and a Creative Spirit.»']
+
+[[question]]
+id = 193
+q = 'What type of government exists on the perfect worlds of Havona?'
+a = [
+  'none (perfection makes government unnecessary)',
+  'democracy',
+  'anarchy',
+  'theocracy',
+  'aristocracy',
+]
+right = ['none (perfection makes government unnecessary)']
+refs = ['14:3.1 «Concerning the government of the central universe, there is none.»']
+
+[[question]]
+id = 194
+q = 'Who directs each of the billion worlds of the central universe?'
+a = [
+  'one Eternal of Days',
+  'three Eternals of Days',
+  'three Ancients of Days',
+  'one Creator Son and one Creative Mother Spirit',
+]
+right = ['one Eternal of Days']
+refs = ['14:3.3 «It is chiefly planetary and is vested in the resident Eternal of Days, each Havona sphere being directed by one of these Trinity-origin personalities.»']
+
+[[question]]
+id = 196
+q = 'Are decay and death a part of the cycle of life on the Havona worlds?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['14:4.9 «Decay and death are not a part of the cycle of life on the Havona worlds.»']
+
+[[question]]
+id = 197
+q = 'Are Havona natives reproducing beings?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['14:4.10 «They are without creature parents, and they are nonreproducing beings.»']
+
+[[question]]
+id = 198
+q = 'Which circuit of Havona are the new arrivals domiciled on?'
+a = [
+  '4',
+  '5',
+  '2',
+  '3',
+  '7',
+  '1',
+  '6',
+]
+right = ['7']
+refs = ['14:5.4 «When intelligent beings first attain the central universe, they are received and domiciled on the pilot world of the seventh Havona circuit.»']
+
+[[question]]
+id = 199
+q = 'Which circuit of Havona are the pilgrims transferred to when they attain identity comprehension of their superuniverse Master Spirit?'
+a = [
+  '5',
+  '3',
+  '4',
+  '6',
+  '2',
+  '7',
+  '1',
+]
+right = ['6']
+refs = ['14:5.4 «As the new arrivals progress spiritually, attain identity comprehension of their superuniverse Master Spirit, they are transferred to the sixth circle.»']
+
+[[question]]
+id = 200
+q = 'Which circuit of Havona are the pilgrims transferred to when they attain realization of Supremacy?'
+a = [
+  '2',
+  '1',
+  '3',
+  '6',
+  '7',
+  '4',
+  '5',
+]
+right = ['5']
+refs = ['14:5.4 «After ascenders have attained a realization of Supremacy and are thereby prepared for the Deity adventure, they are taken to the fifth circuit; and after attaining the Infinite Spirit, they are transferred to the fourth.»']
+
+[[question]]
+id = 201
+q = 'Which circuit of Havona are the pilgrims transferred to when they attain the Infinite Spirit?'
+a = [
+  '4',
+  '7',
+  '3',
+  '5',
+  '1',
+  '2',
+  '6',
+]
+right = ['4']
+refs = ['14:5.4 «After ascenders have attained a realization of Supremacy and are thereby prepared for the Deity adventure, they are taken to the fifth circuit; and after attaining the Infinite Spirit, they are transferred to the fourth.»']
+
+[[question]]
+id = 202
+q = 'Which circuit of Havona are the pilgrims transferred to when they attain the Eternal Son?'
+a = [
+  '4',
+  '7',
+  '6',
+  '2',
+  '1',
+  '3',
+  '5',
+]
+right = ['3']
+refs = ['14:5.4 «Following the attainment of the Eternal Son, they are removed to the third; and when they have recognized the Universal Father, they go to sojourn on the second circuit of worlds, where they become more familiar with the Paradise hosts.»']
+
+[[question]]
+id = 203
+q = 'Which circuit of Havona are the pilgrims transferred to when they have recognized the Universal Father?'
+a = [
+  '3',
+  '1',
+  '2',
+  '6',
+  '4',
+  '7',
+  '5',
+]
+right = ['2']
+refs = ['14:5.4 «Following the attainment of the Eternal Son, they are removed to the third; and when they have recognized the Universal Father, they go to sojourn on the second circuit of worlds, where they become more familiar with the Paradise hosts.»']
+
+[[question]]
+id = 204
+q = 'Which circuit of Havona are the pilgrims transferred to when they have been accepted into the service of Paradise?'
+a = [
+  '7',
+  '2',
+  '5',
+  '1',
+  '4',
+  '6',
+  '3',
+]
+right = ['1']
+refs = ['14:5.4 «Arrival on the first circuit of Havona signifies the acceptance of the candidates of time into the service of Paradise.»']
+
+[[question]]
+id = 205
+v = 2
+q = 'Which of the Havona worlds can a pilgrim of ascent visit without the need to be ensupernaphimed?'
+a = [
+  'all worlds of all circuits',
+  'all worlds of the circuit of current assignment',
+  'all worlds of the circuits already traversed and those of the circuit of current assignment',
+  'none of them',
+]
+right = ['all worlds of the circuits already traversed and those of the circuit of current assignment']
+refs = ['14:5.5 «you will be allowed to visit freely among the worlds of the circuit of your assignment. You will also be permitted to go back to the planets of those circuits you have previously traversed. And all this is possible to those who sojourn on the circles of Havona without the necessity of being ensupernaphimed.»']

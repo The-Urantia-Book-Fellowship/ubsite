@@ -1,0 +1,29 @@
+# Paper 4, God’s Relation to the Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 4
+
+[[question]]
+id = 60
+q = 'The atonement doctrine is a \ldots'
+a = [
+  'divinely inspired and true doctrine',
+  'affront and insult to God',
+]
+right = ['affront and insult to God']
+refs = ['4:5.4 «It is an affront to God to believe, hold, or teach that innocent blood must be shed in order to win his favor or to divert the fictitious divine wrath.»']
+
+[[question]]
+id = 61
+q = 'Who forbade the Hebrews to perform the human sacrifices?'
+a = [
+  'Abraham',
+  'Moses',
+  'Joshua',
+  'Jesus',
+  'Paul',
+  'Peter',
+]
+right = ['Moses']
+refs = ['4:5.5 «They had not found deliverance from the old and pagan idea that the Gods could not be appeased except by the sight of blood, though Moses did make a distinct advance when he forbade human sacrifices and substituted therefor, in the primitive minds of his childlike Bedouin followers, the ceremonial sacrifice of animals.»']

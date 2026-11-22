@@ -1,0 +1,234 @@
+# Paper 12, The Universe of Universes: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 12
+
+[[question]]
+id = 116
+q = 'Why is there no universal time unit based on motion?'
+a = [
+  'because the totality of space respiration destroys the local value of Paradise-Havona standard day as a time source',
+  'because time is relative, depending on the moving observer’s frame of reference',
+]
+right = ['because the totality of space respiration destroys the local value of Paradise-Havona standard day as a time source']
+refs = ['12:5.1 «From a practical viewpoint, motion is essential to time, but there is no universal time unit based on motion except in so far as the Paradise-Havona standard day is arbitrarily so recognized. The totality of space respiration destroys its local value as a time source.»']
+
+[[question]]
+id = 117
+q = 'As the mind of any personality in the universe becomes more spiritual, how is its response to material gravity affected?'
+a = [
+  'becomes more responsive',
+  'is not affected',
+  'becomes less responsive',
+]
+right = ['becomes less responsive']
+refs = ['12:8.5 «As the mind of any personality in the universe becomes more spiritual—Godlike—it becomes less responsive to material gravity.»']
+
+[[question]]
+id = 118
+q = 'What is the only reality in the universe that can interassociate the physical forces and energies of the material level with the spiritual powers and beings of the spirit level?'
+a = [
+  'morontia',
+  'spirit',
+  'mind',
+  'space',
+  'matter',
+]
+right = ['mind']
+refs = ['12:6.3 «Mind alone can interassociate the physical forces and energies of the material level with the spiritual powers and beings of the spirit level.»']
+
+[[question]]
+id = 119
+q = 'Do the beings arriving on Paradise have to become unconscious during the transit through the motionless midspace zones separating pervaded space from unpervaded?'
+a = [
+  'yes, during every trip to Paradise',
+  'no, never',
+  'yes, but only if the transit is to culminate in Paradise citizenship (as opposed to mere visitors who remain creatures of time)',
+]
+right = ['yes, but only if the transit is to culminate in Paradise citizenship (as opposed to mere visitors who remain creatures of time)']
+refs = ['12:5.4 «The relatively motionless midspace zones impinging on Paradise and separating pervaded from unpervaded space are the transition zones from time to eternity, hence the necessity of Paradise pilgrims becoming unconscious during this transit when it is to culminate in Paradise citizenship.»']
+
+[[question]]
+id = 120
+q = 'Does consciousness of time exist without motion in space?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['12:5.5 «Relationships to time do not exist without motion in space, but consciousness of time does.»']
+
+[[question]]
+id = 121
+q = 'Is time itself a genetic quality of mind?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['12:5.5 «But time itself is not genetically a quality of mind.»']
+
+[[question]]
+id = 122
+q = 'Does time come by virtue of motion or because mind is inherently aware of sequentiality?'
+a = [
+  'by virtue of motion',
+  'because mind is inherently aware of sequentiality',
+  'both',
+]
+right = ['both']
+refs = ['12:5.1 «Time comes by virtue of motion and because mind is inherently aware of sequentiality.»']
+
+[[question]]
+id = 123
+q = 'Which of these are the three levels of time cognizance?'
+a = [
+  'Mind-perceived time --- consciousness of sequence, motion, and a sense of duration',
+  'Spirit-perceived time --- insight into motion Godward and the awareness of the motion of ascent to levels of increasing divinity',
+  'Personality sense of time created out of insight into Reality plus a consciousness of presence and an awareness of duration',
+  'Co-ordinate time as measured by the clock attached to a given moving observer’s frame of reference',
+]
+right = [
+  'Mind-perceived time --- consciousness of sequence, motion, and a sense of duration',
+  'Spirit-perceived time --- insight into motion Godward and the awareness of the motion of ascent to levels of increasing divinity',
+  'Personality sense of time created out of insight into Reality plus a consciousness of presence and an awareness of duration',
+]
+refs = ['12:5.6-9']
+
+[[question]]
+id = 124
+q = 'Is the Andromeda Galaxy (M31) inside or outside the inhabited superuniverse of Orvonton?'
+a = [
+  'inside',
+  'outside',
+  'exactly on the border',
+]
+right = ['outside']
+refs = ['15:4.7 «There are not many sun-forming nebulae active in Orvonton at the present time, though Andromeda, which is outside the inhabited superuniverse, is very active.»']
+
+[[question]]
+id = 125
+q = 'The absolute of time is eternity and the absolute of space is \ldots'
+a = [
+  'unknown',
+  'infinite and unlimited space',
+]
+right = ['unknown']
+refs = ['12:5.2 «We do not know the absolute limits of space, but we do know that the absolute of time is eternity.»']
+
+[[question]]
+id = 126
+q = 'Are time and space inseparable?'
+a = [
+  'yes, everywhere',
+  'only in the seven superuniverses',
+]
+right = ['only in the seven superuniverses']
+refs = ['12:5.3 «Time and space are inseparable only in the time-space creations, the seven superuniverses.»']
+
+[[question]]
+id = 127
+q = 'Which types of space motion are absolute?'
+a = [
+  'alternate directional swings of the successive space levels',
+  'space respiration',
+  'compensatory or correlating movement',
+]
+right = [
+  'alternate directional swings of the successive space levels',
+  'space respiration',
+]
+refs = ['12:4.10 «Primary and secondary motions are absolute, motion in relation to unmoving Paradise.»']
+
+[[question]]
+id = 128
+q = 'Is personality gravity computable?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['12:3.12 «Personality Gravity is noncomputable.»']
+
+[[question]]
+id = 129
+q = 'How much of the mind gravity is focused in the existing grand universe?'
+a = [
+  '1\%',
+  '10\%',
+  '50\%',
+  '60\%',
+  '85\%',
+  '95\%',
+]
+right = ['85\%']
+refs = ['12:3.10 «These investigators deduce that about eighty-five per cent of the mind-gravity response to the intellectual drawing of the Conjoint Actor takes origin in the existing grand universe.»']
+
+[[question]]
+id = 130
+q = 'How much of the mind gravity is focused in the creations of the outer space levels?'
+a = [
+  '1\%',
+  '10\%',
+  '15\%',
+  '25\%',
+  '60\%',
+  '80\%',
+]
+right = ['15\%']
+refs = ['12:3.10 «These investigators deduce that about eighty-five per cent of the mind-gravity response to the intellectual drawing of the Conjoint Actor takes origin in the existing grand universe.»']
+
+[[question]]
+id = 131
+q = 'How much of the cosmic-gravity action of the Isle of Paradise is engaged in controlling material systems beyond the borders of the present organized universes?'
+a = [
+  '95\%',
+  '1\%',
+  '50\%',
+  '25\%',
+  '85\%',
+]
+right = ['95\%']
+refs = ['12:3.8 «In other words: At the present moment about ninety-five per cent of the active cosmic-gravity action of the Isle of Paradise, computed on this totality theory, is engaged in controlling material systems beyond the borders of the present organized universes.»']
+
+[[question]]
+id = 132
+q = 'Which of these are the absolute gravity circuits in the master universe?'
+a = [
+  'The Personality Gravity of the Universal Father',
+  'The Spirit Gravity of the Eternal Son',
+  'The Mind Gravity of the Conjoint Actor',
+  'The Cosmic Gravity of the Isle of Paradise',
+  'The Linear Gravity of the electronic stage of matter organization',
+]
+right = [
+  'The Personality Gravity of the Universal Father',
+  'The Spirit Gravity of the Eternal Son',
+  'The Mind Gravity of the Conjoint Actor',
+  'The Cosmic Gravity of the Isle of Paradise',
+]
+refs = ['15:9.1 «These presence circuits are: the personality gravity of the Universal Father, the spiritual gravity of the Eternal Son, the mind gravity of the Conjoint Actor, and the material gravity of the eternal Isle.»']
+
+[[question]]
+id = 133
+q = 'Are the four absolute gravity circuits independent of time and space?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['12:3.6 «They are absolute presence circuits and like God are independent of time and space.»']
+
+[[question]]
+id = 134
+q = 'How much of the spirit gravity is functioning in the grand universe?'
+a = [
+  '100\%',
+  '50\%',
+  '25\%',
+  '95\%',
+  '75\%',
+]
+right = ['100\%']
+refs = ['12:3.9 «In other words: At the present time practically the entire spirit gravity of the Eternal Son, computed on this theory of totality, is observable as functioning in the grand universe.»']

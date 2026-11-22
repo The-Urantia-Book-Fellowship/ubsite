@@ -1,0 +1,29 @@
+# Paper 190, Morontia Appearances of Jesus: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 190
+
+[[question]]
+id = 810
+q = 'How many appearances to mortals in total did Jesus make in morontia form?'
+a = [
+  '0',
+  '3',
+  '7',
+  '12',
+  '19',
+  '144',
+]
+right = ['19']
+refs = ['190:2.1 «From the time of the morontia resurrection until the hour of his spirit ascension on high, Jesus made nineteen separate appearances in visible form to his believers on earth.»']
+
+[[question]]
+id = 811
+q = 'Does the morontia body have circulating blood and partake of ordinary material food?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['190:0.3 «These bodies do not have circulating blood, and such beings do not partake of ordinary material food; nevertheless, these morontia forms are real.»']

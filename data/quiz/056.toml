@@ -1,0 +1,15 @@
+# Paper 56, Universal Unity: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 56
+
+[[question]]
+id = 453
+q = 'Did the Absolute (the three Absolutes as one in infinity) exist before the Trinity?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['56:9.4 «On first thought, a concept of the Absolute as ancestor to all things—even the Trinity—seems to afford transitory satisfaction of consistency gratification and philosophic unification, but any such conclusion is invalidated by the actuality of the eternity of the Paradise Trinity.»']

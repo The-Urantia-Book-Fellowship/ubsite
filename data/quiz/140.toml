@@ -1,0 +1,19 @@
+# Paper 140, The Ordination of the Twelve: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 140
+
+[[question]]
+id = 756
+q = 'Who was the first of the 12 Apostles ordained for public ministry?'
+a = [
+  'Andrew',
+  'Peter',
+  'Judas Iscariot',
+  'John Zebedee',
+  'Nathaniel',
+  'Thomas',
+]
+right = ['Judas Iscariot']
+refs = ['140:2.1 «Then the Master placed his hands upon the head of each apostle, beginning with Judas Iscariot and ending with Andrew.»']

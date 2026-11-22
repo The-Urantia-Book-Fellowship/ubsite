@@ -1,0 +1,66 @@
+# Paper 137, Tarrying Time in Galilee: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 137
+gone = [750]       # the same question as 749, asked twice in quiz.tex; deleted 2026-11-22
+
+[[question]]
+id = 746
+q = 'What was the name of the bride of the wedding in Cana?'
+a = [
+  'Miriam',
+  'Delilah',
+  'Naomi',
+  'Anahit',
+  'Elisabeth',
+  'Rebecca',
+]
+right = ['Naomi']
+refs = ['137:3.6 «On the next day, Tuesday, they all journeyed over to Cana for the wedding of Naomi, which was to take place on the following day.»']
+
+[[question]]
+id = 747
+q = 'How many guests were bidden to the wedding in Cana?'
+a = [
+  '12',
+  '48',
+  '72',
+  '100',
+  '250',
+  '500',
+  '1000',
+]
+right = ['250']
+refs = ['137:4.1 «By noon on Wednesday almost a thousand guests had arrived in Cana, more than four times the number bidden to the wedding feast.»']
+
+[[question]]
+id = 748
+q = 'How many guests turned up at to the wedding in Cana?'
+a = [
+  '12',
+  '48',
+  '72',
+  '100',
+  '250',
+  '500',
+  '1000',
+]
+right = ['1000']
+refs = ['137:4.1 «By noon on Wednesday almost a thousand guests had arrived in Cana, more than four times the number bidden to the wedding feast.»']
+
+[[question]]
+id = 749
+q = 'On what day of the week did the wedding in Cana occur?'
+a = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+]
+right = ['Wednesday']
+refs = ['137:4.1 «It was a Jewish custom to celebrate weddings on Wednesday, and the invitations had been sent abroad for the wedding one month previously.»']
+

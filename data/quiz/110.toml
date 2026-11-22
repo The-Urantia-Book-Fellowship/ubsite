@@ -1,0 +1,38 @@
+# Paper 110, Relation of Adjusters to Individual Mortals: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 110
+gone = [661]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 659
+q = 'If a mortal member of the Reserve Corps of Destiny is assigned a personal seraphic guardian does he stay with that human until death or can he leave him for some misdeed?'
+a = [
+  'stays until death',
+  'can leave him if the mortal chooses not to do the Father’s will anymore',
+]
+right = ['stays until death']
+refs = ['113:1.5 «if such an individual becomes enrolled in any of the several reserve corps of destiny, right then and there, personal seraphim are assigned, and from that time until the earthly career is finished, that mortal will enjoy the continuous ministry and unceasing watchcare of a guardian angel.»']
+
+[[question]]
+id = 660
+q = 'What happens to the human’s material body upon fusion with the indwelling Thought Adjuster?'
+a = [
+  'It glows',
+  'It is consumed',
+  'There are no visible signs',
+  'It becomes invisible',
+]
+right = ['It is consumed']
+refs = ['110:7.2 «This fusion during physical life instantly consumes the material body; the human beings who might witness such a spectacle would only observe the translating mortal disappear “in chariots of fire.”»']
+
+[[question]]
+id = 662
+q = 'Do the adjutant mind-spirits continue to function on the mansion worlds?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['112:6.10 «When a creature leaves his native planet, he leaves the adjutant ministry behind and becomes solely dependent on morontia intellect.»']

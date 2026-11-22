@@ -1,0 +1,32 @@
+# Paper 57, The Origin of Urantia: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 57
+
+[[question]]
+id = 454
+q = 'Our planet is known locally as \ldots'
+a = [
+  'the world of the cross',
+  'the kingdom of the stupid',
+  'the blue marble',
+  'planet of the apes',
+  'the world of Jesus Christ',
+  'the little world with a big problem',
+]
+right = ['the world of the cross']
+refs = ['57:8.6 «would participate in those experiences which have since caused Urantia to become locally known as the “world of the cross.”»']
+
+[[question]]
+id = 455
+q = 'How long ago was our Sun born?'
+a = [
+  '6,000 years',
+  '4.6 billion years',
+  '6 billion years',
+  '9 billion years',
+  '10 billion years',
+]
+right = ['6 billion years']
+refs = ['57:4.8 «6,000,000,000 years ago marks the end of the terminal breakup and the birth of your sun»']

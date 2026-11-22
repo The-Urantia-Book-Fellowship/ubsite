@@ -1,0 +1,19 @@
+# Paper 158, The Mount of Transfiguration: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 158
+
+[[question]]
+id = 761
+q = 'Who or what did Peter, James \&\ John see on the Mount of Transfiguration?'
+a = [
+  'Jesus talking to Lucifer and Caligastia',
+  'Jesus talking to Gabriel and the Father Melchizedek',
+  'Jesus meditating',
+  'Jesus talking to Moses and Elijah',
+  'Jesus talking to Enoch and Elijah',
+  'Jesus talking to aliens',
+]
+right = ['Jesus talking to Gabriel and the Father Melchizedek']
+refs = ['158:1.8 «These three conversed in a strange language, but from certain things said, Peter erroneously conjectured that the beings with Jesus were Moses and Elijah; in reality, they were Gabriel and the Father Melchizedek.»']

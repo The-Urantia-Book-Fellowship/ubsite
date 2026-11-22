@@ -1,0 +1,151 @@
+# Paper 187, The Crucifixion: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 187
+gone = [790, 794]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 787
+q = 'Which event is described here: “All of Golgotha was covered by thousands upon thousands of crosses upon which day by day there perished the flower of the Jewish race. A terrible harvest of the seed-sowing of this day [of Jesus’ crucifixion]”?'
+a = [
+  'The Roman siege of Jerusalem 40 years after crucifixion',
+  'The Babylonian siege leading to the Jews captivity',
+]
+right = ['The Roman siege of Jerusalem 40 years after crucifixion']
+refs = ['187:1.5 «During the siege of Jerusalem, just forty years after the crucifixion of Jesus, all of Golgotha was covered by thousands upon thousands of crosses upon which, from day to day, there perished the flower of the Jewish race.»']
+
+[[question]]
+id = 788
+q = 'Why did the sky darken from midday on the day of Jesus’ crucifixion?'
+a = [
+  'God’s anger',
+  'A hot wind sandstorm from Arabian desert was coming',
+  'solar eclipse',
+]
+right = ['A hot wind sandstorm from Arabian desert was coming']
+refs = ['187:5.1 «The people of Jerusalem knew that this meant the coming of one of those hot-wind sandstorms from the Arabian Desert.»']
+
+[[question]]
+id = 789
+q = 'Why did Jesus say, while on the cross, “My God, my God, why have you forsaken me”?'
+a = [
+  'He felt abandoned',
+  'In his vanishing consciousness he was reciting Psalm 22',
+]
+right = ['In his vanishing consciousness he was reciting Psalm 22']
+refs = ['187:5.2 «He did not feel that the Father had forsaken him; he was merely reciting in his vanishing consciousness many Scriptures, among them this twenty-second Psalm, which begins with “My God, my God, why have you forsaken me?”»']
+
+[[question]]
+id = 791
+q = 'How old was Jesus when he was crucified?'
+a = [
+  '30 years',
+  '33 years',
+  '35 years',
+  '36 years',
+  '40 years',
+]
+right = ['35 years']
+refs = ['189:1.2 «After the resurrected Jesus emerged from his burial tomb, the body of flesh in which he had lived and wrought on earth for almost thirty-six years was still lying there in the sepulchre niche»']
+
+[[question]]
+id = 792
+q = 'How far from the ground were the Master’s feet while on the cross?'
+a = [
+  '0.56m',
+  '1m',
+  '2m',
+  '3m',
+]
+right = ['1m']
+refs = ['187:2.1 «The cross was not high, the Master’s feet being only about three feet from the ground.»']
+
+[[question]]
+id = 793
+q = 'Give the time of Jesus’ crucifixion and the time at which he died'
+a = [
+  '09:00 and 15:00',
+  '12:00 and 18:00',
+  '09:00 and 21:00',
+  '10:00 and 11:00',
+]
+right = ['09:00 and 15:00']
+refs = [
+  '187:1.11',
+  '187:5.5 «It was just before three o’clock when Jesus, with a loud voice, cried out, “It is finished! Father, into your hands I commend my spirit.” And when he had thus spoken, he bowed his head and gave up the life struggle.»',
+]
+
+[[question]]
+id = 795
+q = 'From whom did the Greeks and Romans learn of crucifixion as a method of execution?'
+a = [
+  'The Phoenicians',
+  'The Jews',
+  'The Armenians',
+]
+right = ['The Phoenicians']
+refs = ['187:1.5 «Both the Greeks and the Romans learned this method of execution from the Phoenicians.»']
+
+[[question]]
+id = 796
+q = 'Who wrote the small white board to go above the head of Jesus on the cross and what did it say?'
+a = [
+  'Pilate. “Jesus of Nazareth --- the King of the Jews”. In Latin, Greek \&\ Aramaic',
+  'Pilate. “Traitor”. In Latin',
+  'Annas \&\ Caiaphas. “He said he is the King of the Jews”. In Hebrew',
+]
+right = ['Pilate. “Jesus of Nazareth --- the King of the Jews”. In Latin, Greek \&\ Aramaic']
+refs = ['187:1.2 «The legend which the centurion carried to put on the cross of Jesus had been written by Pilate himself in Latin, Greek, and Aramaic, and it read: “Jesus of Nazareth—the King of the Jews.”»']
+
+[[question]]
+id = 797
+q = 'Which of these were at the foot of Jesus’ cross during crucifixion?'
+a = [
+  'Jude, Jesus’ brother',
+  'Ruth, Jesus’ sister',
+  'Mary Magdalene',
+  'Rebecca',
+  'John',
+  'Peter',
+  'Thomas',
+  'James',
+]
+right = [
+  'Jude, Jesus’ brother',
+  'Ruth, Jesus’ sister',
+  'Mary Magdalene',
+  'Rebecca',
+  'John',
+]
+refs = ['187:5.4 «When the Master finally breathed his last, there were present at the foot of his cross John Zebedee, his brother Jude, his sister Ruth, Mary Magdalene, and Rebecca, onetime of Sepphoris.»']
+
+[[question]]
+id = 798
+q = 'Who carried Jesus’ body for burial?'
+a = [
+  'Joseph of Arimathea',
+  'Nicodemus',
+  'John Zebedee',
+  'A Roman centurion',
+]
+right = [
+  'Joseph of Arimathea',
+  'Nicodemus',
+  'John Zebedee',
+  'A Roman centurion',
+]
+refs = ['188:1.3 «The mortals who bore the material body of Jesus to the tomb were: Joseph, Nicodemus, John, and the Roman centurion.»']
+
+[[question]]
+id = 799
+q = 'What was the last conscious thought of the human Jesus dying on the cross?'
+a = [
+  'repetition of a portion of the Book of Psalms now known as Psalms \#20, \#21 and \#22',
+  'memories of his mother Mary',
+  'memories of his brothers',
+  'anxiety and fear about the future of Christianity',
+  'fear about the future of the apostles',
+]
+right = ['repetition of a portion of the Book of Psalms now known as Psalms \#20, \#21 and \#22']
+refs = ['187:5.2 «The last conscious thought of the human Jesus was concerned with the repetition in his mind of a portion of the Book of Psalms now known as the twentieth, twenty-first, and twenty-second Psalms.»']

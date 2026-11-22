@@ -1,0 +1,46 @@
+# Paper 123, The Early Childhood of Jesus: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 123
+
+[[question]]
+id = 704
+q = 'How old was Jesus when he received his Thought Adjuster?'
+a = [
+  '6 months',
+  '3 years',
+  '4 years',
+  '5 years',
+  '10 years',
+  '18 years',
+]
+right = ['4 years']
+refs = [
+  '122:8.1 «at noon, August 21, 7 B.C., with the help and kind ministrations of women fellow travelers, Mary was delivered of a male child.»',
+  '123:2.1 «In something more than a year after the return to Nazareth the boy Jesus arrived at the age of his first personal and wholehearted moral decision; and there came to abide with him a Thought Adjuster, a divine gift of the Paradise Father, which had aforetime served with Machiventa Melchizedek, thus gaining the experience of functioning in connection with the incarnation of a supermortal being living in the likeness of mortal flesh. This event occurred on February 11, 2 B.C.»',
+]
+
+[[question]]
+id = 705
+q = 'When did Jesus receive his Thought Adjuster?'
+a = [
+  'January 1, 1~B.C.',
+  'February 10, 1~B.C.',
+  'February 11, 2~B.C.',
+  'August 21, 1~B.C.',
+  'August 21, 3~B.C.',
+]
+right = ['February 11, 2~B.C.']
+refs = ['123:2.1 «This event occurred on February 11, 2 B.C.»']
+
+[[question]]
+id = 706
+q = 'Which languages did Jesus speak?'
+a = [
+  'Hebrew',
+  'Hebrew \&\ Aramaic',
+  'Hebrew, Aramaic \&\ Greek',
+]
+right = ['Hebrew, Aramaic \&\ Greek']
+refs = ['123:2.14 «She also provided on the roof of the house (the summer bedroom) shallow boxes of sand in which Jesus worked out maps and did much of his early practice at writing Aramaic, Greek, and later on, Hebrew, for in time he learned to read, write, and speak, fluently, all three languages.»']

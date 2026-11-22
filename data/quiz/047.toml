@@ -1,0 +1,20 @@
+# Paper 47, The Seven Mansion Worlds: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 47
+
+[[question]]
+id = 431
+q = 'On which of the mansion worlds is the first resurrection hall located?'
+a = [
+  '\# 1',
+  '\# 2',
+  '\# 3',
+  '\# 4',
+  '\# 5',
+  '\# 6',
+  '\# 7',
+]
+right = ['\# 1']
+refs = ['47:3.2 «The very center of all activities on the first mansion world is the resurrection hall, the enormous temple of personality assembly.»']

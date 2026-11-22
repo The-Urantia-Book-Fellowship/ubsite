@@ -1,0 +1,40 @@
+# Paper 88, Fetishes, Charms, and Magic: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 88
+
+[[question]]
+id = 626
+q = 'What was mankind’s first toy?'
+a = [
+  'mammoth bone',
+  'preserved umbilical cord',
+  'fish bone',
+  'preserved skull',
+  'fish eyes',
+]
+right = ['preserved umbilical cord']
+refs = ['88:1.8 «Mankind’s first toy was a preserved umbilical cord.»']
+
+[[question]]
+id = 627
+q = 'What was mankind’s first necklace?'
+a = [
+  'rope set with fish eyes',
+  'mammoth sinew set with precious stones',
+  'umbilical cord set with pearls',
+]
+right = ['umbilical cord set with pearls']
+refs = ['88:1.8 «Mankind’s first toy was a preserved umbilical cord. Set with pearls, as was often done, it was man’s first necklace.»']
+
+[[question]]
+id = 628
+q = 'Moses’ injunction against fetishes became \ldots'
+a = [
+  'the Law of God',
+  'the Word of God',
+  'the supreme fetish',
+]
+right = ['the supreme fetish']
+refs = ['88:2.6 «Moses’ very effort against fetishes became a supreme fetish; his commandment was later used to stultify art and to retard the enjoyment and adoration of the beautiful.»']

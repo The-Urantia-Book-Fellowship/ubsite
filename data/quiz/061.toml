@@ -1,0 +1,91 @@
+# Paper 61, The Mammalian Era on Urantia: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 61
+
+[[question]]
+id = 488
+q = 'What are the present geologic age and period called?'
+a = [
+  'Holocene period of Cenozoic era',
+  'Pleistocene period of Cenozoic era',
+  'Miocene period of Cenozoic era',
+  'Jurassic period of Mesozoic era',
+  'Devonian period of Paleozoic era',
+  'Ordovician period of Paleozoic era',
+  'Cretaceous period of Mesozoic era',
+  'Oligocene period of Cenozoic era',
+]
+right = ['Holocene period of Cenozoic era']
+refs = ['61:7.17-19']
+
+[[question]]
+id = 489
+q = 'Which animal is surpassed in intelligence only by human?'
+a = [
+  'horse',
+  'octopus',
+  'elephant',
+  'dog',
+  'cat',
+  'saber-toothed tiger',
+  'dolphin',
+  'whale',
+  'scorpion',
+]
+right = ['elephant']
+refs = ['61:3.6 «In intelligence and adaptation the elephant is approached only by the horse and is surpassed only by man himself.»']
+
+[[question]]
+id = 490
+v = 2
+q = 'When was the last great ice age terminated?'
+a = [
+  '42,000 years ago',
+  '35,000 years ago',
+  '38,000 years ago',
+  '12,000 years ago',
+]
+right = ['35,000 years ago']
+refs = ['61:7.18 «35,000 years ago marks the termination of the great ice age excepting in the polar regions of the planet.»']
+
+[[question]]
+id = 491
+q = 'When did the horse (as it now exists) evolve?'
+a = [
+  '5 million years ago',
+  '3 million years ago',
+  '1 million years ago',
+  '350,000 years ago',
+]
+right = ['5 million years ago']
+refs = ['61:4.5 «5,000,000 years ago the horse evolved as it now is and from North America migrated to all the world.»']
+
+[[question]]
+id = 492
+q = 'Where did the horse (as it now exists) evolve?'
+a = [
+  'North America',
+  'South America',
+  'Africa',
+  'Eurasia',
+  'Australia',
+]
+right = ['North America']
+refs = ['61:4.5 «5,000,000 years ago the horse evolved as it now is and from North America migrated to all the world.»']
+
+[[question]]
+id = 493
+q = 'How old were Andon and Fonta (the first humans) when our world was registered as inhabited?'
+a = [
+  '0 (i.e. registered at birth)',
+  '5 years',
+  '11 years',
+  '16 years',
+  '18 years',
+  '30 years',
+  '40 years',
+]
+right = ['11 years']
+refs = ['63:0.1 «Urantia was registered as an inhabited world when the first two human beings—the twins—were eleven years old, and before they had become the parents of the first-born of the second generation of actual human beings.»']

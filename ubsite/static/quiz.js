@@ -6,11 +6,18 @@
 // HTML, and what answers it (s), where the review has said.  Everything is in
 // the page, so it works offline as the rest of the site does.
 //
-// A question with one right answer is answered by a tap on it; one with more
-// says so, and is answered with Check, right only if the answers chosen are
-// exactly the right ones (Tigran, 2026-10-28).  After each, the right answers
-// are marked, and below them the paragraph or the study note that answers it.
-// At the end, the score, and what to read again.
+// A paper's questions are asked in a new order each time (Tigran, 2026-11-22:
+// "Yes, it would be nice to shuffle"), and each question's answers too ("why
+// not also shuffle the answers of each question?"), but where their order
+// means something, yes and no, rising numbers, the days, an answer naming the
+// others (`f`, build/quiz.py fixed_order).  An answer is kept by the question's
+// id and its place as written, `data-k`, so neither order is anything to it;
+// ① ② ③ and the keys 1 to 9 are the places as shown (R.order).  A question with
+// one right answer is answered by a tap on it; one with more says so, and is
+// answered with Check, right only if the answers chosen are exactly the right
+// ones (Tigran, 2026-10-28).  After each, the right answers are marked, and
+// below them the paragraph or the study note that answers it.  At the end, the
+// score, and what to read again, in the order the page lists the questions.
 //
 // The browser keeps, under ub_quiz beside the settings and apart from them, so
 // that ↺ never clears it: the first answer it gave each question, by id and
@@ -67,7 +74,8 @@
 
   // ---- a run: the questions asked, one at a time -------------------------------
   // R: {qs, i, res: [true|false], chosen: mask, done: answered, paper: n or
-  // null for ten at random}.
+  // null for ten at random, order: the answers' places as written, in the
+  // order shown}.
   var R = null;
 
   function start(qs, paper) {
@@ -97,8 +105,10 @@
     run.appendChild(qq);
     if (multi) run.appendChild(el('p', 'qhint', T('Choose every right answer, then Check.')));
     var ol = el('ol', 'qopts');
-    q.a.forEach(function (a, k) {
-      var b = el('button', 'qopt', '<span class="qn">' + CIRC[k] + '</span><span class="tx">' + a +
+    R.order = q.a.map(function (a, k) { return k; });
+    if (!q.f) shuffle(R.order);
+    R.order.forEach(function (k, n) {
+      var b = el('button', 'qopt', '<span class="qn">' + CIRC[n] + '</span><span class="tx">' + q.a[k] +
                  '</span><span class="mk" aria-hidden="true"></span>');
       b.type = 'button';
       b.dataset.k = k;
@@ -199,7 +209,12 @@
     R.res.forEach(function (x) { marks.appendChild(el('span', x ? 'r' : 'w', x ? '✓' : '✗')); });
     sc.appendChild(marks);
     run.appendChild(sc);
-    var missed = R.qs.filter(function (q, k) { return !R.res[k]; });
+    // What to read again in the page's own order, the paper's file's (for
+    // Paper 1, the text's), not the order the questions came in.
+    var at = {};
+    D.q.forEach(function (q, k) { at[q.id] = k; });
+    var missed = R.qs.filter(function (q, k) { return !R.res[k]; })
+                     .sort(function (a, b) { return at[a.id] - at[b.id]; });
     if (!missed.length) run.appendChild(el('p', 'qall', T('Every one right.')));
     else {
       run.appendChild(el('h2', null, T('To read again')));
@@ -364,6 +379,8 @@
   }
 
   // ---- ten at random, and each paper's best (/quiz) -------------------------------
+  // In place, every order as likely (Fisher-Yates): ten at random, and a
+  // paper's questions at each run.
   function shuffle(a) {
     for (var i = a.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1)), t = a[i];
@@ -416,14 +433,14 @@
     if (b.classList.contains('qopt')) choose(+b.dataset.k);
     else if (b.classList.contains('qcheck')) { if (R.chosen) judge(); }
     else if (b.classList.contains('qnext')) next();
-    else if (b.classList.contains('qagain')) start(R.paper === null ? draw() : D.q, R.paper);
+    else if (b.classList.contains('qagain')) start(R.paper === null ? draw() : shuffle(D.q.slice()), R.paper);
   });
   // 1 to 9 choose an answer; Enter checks, or goes on.
   document.addEventListener('keydown', function (ev) {
     if (!R || ev.ctrlKey || ev.metaKey || ev.altKey || /^(INPUT|SELECT|TEXTAREA)$/.test(ev.target.tagName) ||
         ev.target.closest('dialog')) return;
     var k = '123456789'.indexOf(ev.key);
-    if (k >= 0 && !R.done && R.qs[R.i] && k < R.qs[R.i].a.length) { ev.preventDefault(); choose(k); }
+    if (k >= 0 && !R.done && R.qs[R.i] && k < R.qs[R.i].a.length) { ev.preventDefault(); choose(R.order[k]); }
     else if (ev.key === 'Enter' && ev.target.tagName !== 'A' && ev.target.tagName !== 'BUTTON') {
       if (!R.done && R.chosen && R.qs[R.i] && bits(R.qs[R.i].m) > 1) { ev.preventDefault(); judge(); }
       else if (R.done && run.querySelector('.qnext')) { ev.preventDefault(); next(); }
@@ -432,7 +449,7 @@
 
   if (main.classList.contains('quizboard')) { drawBoard(); return; }
   if (!D) return;
-  if ('paper' in D) start(D.q, D.paper);
+  if ('paper' in D) start(shuffle(D.q.slice()), D.paper);
   else {
     progress();
     main.querySelector('#quizrnd').addEventListener('submit', function (ev) {

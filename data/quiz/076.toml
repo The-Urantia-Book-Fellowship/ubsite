@@ -1,0 +1,221 @@
+# Paper 76, The Second Garden: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 76
+
+[[question]]
+id = 578
+q = 'The transgression of Adam and Eve was \ldots'
+a = [
+  'an error of judgment',
+  'the sin of conscious and deliberate rebellion',
+]
+right = ['an error of judgment']
+refs = ['76:5.1 «Their transgression had been an error of judgment and not the sin of conscious and deliberate rebellion.»']
+
+[[question]]
+id = 579
+q = 'Were Adam and Eve able to see midwayers, angels, Melchizedeks and Caligastia after the default?'
+a = [
+  'yes, but only for 100 years',
+  'yes, for as long as they lived',
+  'no',
+]
+right = ['yes, but only for 100 years']
+refs = ['76:4.5 «They retained the ability to see these celestial beings for over one hundred years after the default.»']
+
+[[question]]
+id = 580
+q = 'Adam and Eve were indwelt by Thought Adjusters \ldots'
+a = [
+  'when they were citizens of Jerusem',
+  'during their life in the first garden prior to the default',
+  'after they were reduced to mortal status subsequent to the default',
+]
+right = ['after they were reduced to mortal status subsequent to the default']
+refs = ['76:5.2 «But shortly after their reduction to mortal status they became conscious of a new presence within them and awakened to the realization that human status coupled with sincere repentance had made it possible for Adjusters to indwell them.»']
+
+[[question]]
+id = 581
+q = 'The name of the first child of Adam and Eve to be born in the second garden was \ldots'
+a = [
+  'Cain',
+  'Abel',
+  'Seth',
+  'Sansa',
+  'Adamson',
+]
+right = ['Abel']
+refs = ['76:2.1 «Less than two years after Cain’s birth, Abel was born, the first child of Adam and Eve to be born in the second garden.»']
+
+[[question]]
+id = 582
+q = 'In which year did Cain slay Abel?'
+a = [
+  '35,776~B.C.',
+  '3,600~B.C.',
+  'no record of the date',
+  '27,561~B.C.',
+]
+right = ['35,776~B.C.']
+refs = ['76:2.5 «The boys were respectively eighteen and twenty years of age when the tension between them was finally resolved, one day, when Abel’s taunts so infuriated his bellicose brother that Cain turned upon him in wrath and slew him.»']
+
+[[question]]
+id = 583
+q = 'How old were Cain and Abel when the tension between them was finally resolved?'
+a = [
+  '18 and 20',
+  '20 and 18',
+  '36 and 30',
+  '36 and 34',
+  '136 and 134',
+  '16 and 14',
+]
+right = ['20 and 18']
+refs = [
+  '76:2.1 «Less than two years after Cain’s birth, Abel was born, the first child of Adam and Eve to be born in the second garden.»',
+  '76:2.5',
+]
+
+[[question]]
+id = 584
+q = 'How did Adam and Eve find out about the death of Abel?'
+a = [
+  'telepathically',
+  'dogs brought the flocks back without their master',
+  'Cain told them',
+  'Cain sent the message by a servant',
+  'by a Secondary Midwayer',
+]
+right = ['dogs brought the flocks back without their master']
+refs = ['76:2.7 «The death of Abel became known to his parents when his dogs brought the flocks home without their master.»']
+
+[[question]]
+id = 585
+q = 'What was the name of Cain’s wife?'
+a = [
+  'Remona',
+  'Ratta',
+  'Melpomena',
+  'Muzzah',
+]
+right = ['Remona']
+refs = ['76:2.9 «Cain married Remona, his distant cousin, and their first son, Enoch, became the head of the Elamite Nodites.»']
+
+[[question]]
+id = 586
+q = 'What was the “mark” which Cain received?'
+a = [
+  'Tattoo',
+  'Thought Adjuster',
+  'Ear-ring',
+  'Burn on the forehead',
+]
+right = ['Thought Adjuster']
+refs = ['76:2.8']
+
+[[question]]
+id = 587
+q = 'Who were Andites?'
+a = [
+  'a separate Sangik race',
+  'offspring of Andonites',
+  'same as Andonites',
+  'result of the union of Adamites and Sangik races',
+  'result of the union of Adamites and Nodites',
+]
+right = ['result of the union of Adamites and Nodites']
+refs = ['78:5.1 «The massive waves of civilization which later spread over Eurasia immediately followed the great renaissance of the Garden consequent upon the extensive union of the Adamites with the surrounding mixed Nodites to form the Andites.»']
+
+[[question]]
+id = 588
+q = 'How old was Adam when he died?'
+a = [
+  '930',
+  '730',
+  '530',
+  '130',
+  '86',
+  '40',
+]
+right = ['530']
+refs = ['76:5.5 «Adam lived for 530 years; he died of what might be termed old age.»']
+
+[[question]]
+id = 589
+q = 'What was the cause of Adam’s death?'
+a = [
+  'weakened heart',
+  'kidneys failure',
+  'poisoning',
+  'earthquake',
+  'killed by his own son',
+  'old age',
+]
+right = ['old age']
+refs = ['76:5.5 «Adam lived for 530 years; he died of what might be termed old age.»']
+
+[[question]]
+id = 590
+q = 'How old was Eve when she died?'
+a = [
+  '930',
+  '730',
+  '511',
+  '130',
+  '86',
+  '40',
+]
+right = ['511']
+refs = ['76:5.5 «Adam lived for 530 years; he died of what might be termed old age. His physical mechanism simply wore out; the process of disintegration gradually gained on the process of repair, and the inevitable end came. Eve had died nineteen years previously of a weakened heart.»']
+
+[[question]]
+id = 591
+q = 'What was the cause of Eve’s death?'
+a = [
+  'poisoning',
+  'old age',
+  'weakened heart',
+  'earthquake',
+  'kidneys failure',
+  'killed by his own son',
+]
+right = ['weakened heart']
+refs = ['76:5.5 «Eve had died nineteen years previously of a weakened heart.»']
+
+[[question]]
+id = 592
+q = 'Who was Laotta?'
+a = [
+  'mother of Adam’s child',
+  'wife of Lot',
+  'daughter of Abraham and Sarah',
+  'mother of Cain',
+]
+right = ['mother of Adam’s child']
+refs = ['75:5.2 «It was in the despair of the realization of failure that Adam, the day after Eve’s misstep, sought out Laotta, the brilliant Nodite woman who was head of the western schools of the Garden, and with premeditation committed the folly of Eve.»']
+
+[[question]]
+id = 593
+q = 'What did Adam do after committing default?'
+a = [
+  'committed suicide',
+  'wandered in solitude for 30 days',
+  'killed Eve and married Laotta',
+  'killed Laotta and begged Eve’s forgiveness',
+]
+right = ['wandered in solitude for 30 days']
+refs = ['75:5.5 «The children of Adam sought to comfort their distracted mother while their father wandered in solitude for thirty days.»']
+
+[[question]]
+id = 594
+q = 'What happened to Laotta, the mother of Sansa?'
+a = [
+  'died while giving birth to Sansa',
+  'died of old age',
+  'was killed by the Nodites',
+  'committed suicide',
+]
+right = ['died while giving birth to Sansa']
+refs = ['76:0.2 «Laotta, the mother of Sansa, perished at the birth of her daughter; Eve suffered much but survived, owing to superior strength.»']

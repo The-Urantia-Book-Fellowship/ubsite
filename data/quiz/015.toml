@@ -1,0 +1,654 @@
+# Paper 15, The Seven Superuniverses: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 15
+gone = [210, 211, 219, 220, 237, 238, 245]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 206
+v = 2
+q = 'How many Reflective Spirits are there on the headquarters of each superuniverse?'
+a = [
+  '7',
+  '3',
+  '50',
+  '49',
+  '144,000',
+]
+right = ['7']
+refs = ['17:3.1 «For this reason it is necessary to have seven of these Reflective Spirits on the headquarters of each superuniverse.»']
+
+[[question]]
+id = 207
+q = 'Who is the chief of the Reflective Spirits?'
+a = [
+  'Father Melchizedek',
+  'Gabriel',
+  'Michael of Nebadon',
+  'Infinite Spirit',
+  'Majeston',
+  'Father Reflective Spirit \#1',
+]
+right = ['Majeston']
+refs = ['17:1.10 «This eventful occasion takes place in the immediate presence of Majeston, the chief of all reflective spirit groups.»']
+
+[[question]]
+id = 208
+q = 'How long is the standard (Uversa) day?'
+a = [
+  '1 Urantia day',
+  '1 Urantia year',
+  '30 Urantia days',
+  '1000 Urantia years',
+]
+right = ['30 Urantia days']
+refs = ['15:7.2 «The standard day of the superuniverse of Orvonton is equal to almost thirty days of Urantia time»']
+
+[[question]]
+id = 209
+q = 'How long is the standard (Uversa) year?'
+a = [
+  '365 Urantia days',
+  '10 Urantia years',
+  '1000 Urantia years',
+  '3000 Urantia days',
+]
+right = ['3000 Urantia days']
+refs = ['15:7.2 «This Uversa year is standard in the seventh superuniverse, and it is twenty-two minutes short of three thousand days of Urantia time, about eight and one fifth of your years.»']
+
+[[question]]
+id = 212
+q = 'What are the requisites for admission of a local universe to the councils of the Ancients of Days?'
+a = [
+  'Not a single loss of Lanonandek Sons',
+  'Physical Stability',
+  'Spiritual Loyalty',
+  'Reach 10,000,000 inhabited worlds',
+]
+right = [
+  'Physical Stability',
+  'Spiritual Loyalty',
+]
+refs = [
+  '15:9.15 «The requisites for admission to the councils of the Ancients of Days, membership in the superuniverse confederation, are:»',
+  '15:9.16-17',
+]
+
+[[question]]
+id = 213
+q = 'Is our local universe of Nebadon admitted to the councils of the Ancients of Days?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['15:9.18 «Your local universe is not even reckoned as belonging to the settled physical order of the superuniverse, much less as holding membership in the recognized spiritual family of the supergovernment.»']
+
+[[question]]
+id = 214
+q = 'Is our local universe’s physical order settled?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['15:9.18 «Your local universe is not even reckoned as belonging to the settled physical order of the superuniverse, much less as holding membership in the recognized spiritual family of the supergovernment.»']
+
+[[question]]
+id = 215
+q = 'How many Perfectors of Wisdom are assisting the three Ancients of Days?'
+a = [
+  '1000',
+  '1 million',
+  '1 billion',
+  '7',
+  '70',
+]
+right = ['1 billion']
+refs = ['15:10.11 «The three Ancients of Days are immediately assisted by a corps of one billion Perfectors of Wisdom, with whom are associated three billion Divine Counselors.»']
+
+[[question]]
+id = 216
+q = 'Does the executive branch of the superuniverse government include glorified ascendant mortals?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['15:10.12 «Thus was the executive branch of the superuniverse government enlarged to include the glorified and perfected children of the evolutionary worlds.»']
+
+[[question]]
+id = 217
+q = 'Which of these beings serve as ambassadors of one superuniverse in another?'
+a = [
+  'Solitary Messengers',
+  'Mighty Messengers',
+  'Those High in Authority',
+  'none, the superuniverses are completely isolated from each other',
+  'Those Without Name and Number',
+]
+right = ['none, the superuniverses are completely isolated from each other']
+refs = ['15:10.23 «The superuniverses do not maintain any sort of ambassadorial representation; they are completely isolated from each other.»']
+
+[[question]]
+id = 218
+q = 'What is the registry number of Urantia in the catalogue of inhabited worlds on Uversa and Paradise?'
+a = [
+  '619',
+  '666,666,666,666',
+  '666',
+  '606',
+  '5,342,482,337,666',
+  '5,287,480,037,666',
+]
+right = ['5,342,482,337,666']
+refs = ['15:14.8 «The grand universe number of your world, Urantia, is 5,342,482,337,666. That is the registry number on Uversa and on Paradise, your number in the catalogue of the inhabited worlds.»']
+
+[[question]]
+id = 221
+q = 'When was the sevenfold scheme of the superuniverse organization and government formulated?'
+a = [
+  'early in the materialization of the universal creation',
+  'in the eternal past',
+  'it was never planned, the superuniverses just evolved that way spontaneously, by chance',
+]
+right = ['early in the materialization of the universal creation']
+refs = ['15:0.2 «Early in the materialization of the universal creation the sevenfold scheme of the superuniverse organization and government was formulated.»']
+
+[[question]]
+id = 222
+q = 'Who are the rulers of the seven evolutionary superuniverses?'
+a = [
+  'Eternals of Days',
+  'Ancients of Days',
+  'Perfections of Days',
+  'Recents of Days',
+  'Faithfuls of Days',
+  'Unions of Days',
+]
+right = ['Ancients of Days']
+refs = ['15:0.2 «The present scheme of administration has existed from near eternity, and the rulers of these seven superuniverses are rightly called Ancients of Days.»']
+
+[[question]]
+id = 223
+q = 'Which curve do the seven superuniverses traverse in space?'
+a = [
+  'Circle',
+  'Cardioid',
+  'Archimedean Spiral',
+  'Ellipse',
+  'Lemniscate',
+  'Epicycloid',
+  'Hypocycloid',
+  'Astroid',
+]
+right = ['Ellipse']
+refs = ['15:1.2 «We have long since discovered that the seven superuniverses traverse a great ellipse, a gigantic and elongated circle.»']
+
+[[question]]
+id = 224
+q = 'Who knows the location and name of every inhabited world in space?'
+a = [
+  'Ancients of Days',
+  'Architects of the Master Universe',
+  'Paradise Creator Sons',
+  'Universal Father',
+  'Universal Censors',
+]
+right = ['Universal Father']
+refs = ['15:2.1 «Only the Universal Father knows the location and actual number of inhabited worlds in space; he calls them all by name and number.»']
+
+[[question]]
+id = 225
+q = 'Each inhabited planet is presided over by \ldots'
+a = [
+  'Governor General',
+  'Planetary Prince',
+  'Chief Archangel',
+  'God',
+  'Jesus Christ',
+  'System Sovereign',
+]
+right = ['Planetary Prince']
+refs = ['15:2.3 «Each inhabited planet is presided over by a Planetary Prince, and each local system has an architectural sphere as its headquarters and is ruled by a System Sovereign.»']
+
+[[question]]
+id = 226
+q = 'Each local system has an architectural sphere as its headquarters and is ruled by \ldots'
+a = [
+  'an Ancient of Days',
+  'three Recents of Days',
+  'one of the Seven Master Spirits',
+  'Creator Son and Creative Mother Spirit',
+  'a System Sovereign',
+  'three Vorondadek Sons, the Most Highs',
+]
+right = ['a System Sovereign']
+refs = ['15:2.3 «Each inhabited planet is presided over by a Planetary Prince, and each local system has an architectural sphere as its headquarters and is ruled by a System Sovereign.»']
+
+[[question]]
+id = 227
+q = 'Each constellation has an architectural sphere as its headquarters and is ruled by \ldots'
+a = [
+  'Constellation Sovereign',
+  'Ancients of Days',
+  'Recents of Days',
+  'Seven Master Spirits',
+  'three Vorondadek Sons, the Most Highs',
+  'Creator Son and Creative Mother Spirit',
+]
+right = ['three Vorondadek Sons, the Most Highs']
+refs = ['15:2.4 «Each constellation has an architectural headquarters sphere and is presided over by three Vorondadek Sons, the Most Highs.»']
+
+[[question]]
+id = 228
+q = 'Who serves as an ambassador of the Paradise Trinity and an observer on each constellation?'
+a = [
+  'three Faithfuls of Days',
+  'a Faithful of Days',
+  'a Recent of Days',
+  'seven Recents of Days',
+]
+right = ['a Faithful of Days']
+refs = ['15:2.4 «Each constellation also has a Faithful of Days in observation, an ambassador of the Paradise Trinity.»']
+
+[[question]]
+id = 229
+q = 'Each local universe has a magnificent architectural sphere as its headquarters and is ruled by \ldots'
+a = [
+  'a Union of Days',
+  'a Recent of Days',
+  'one of the Seven Master Spirits',
+  'a Paradise Creator Son',
+  'three Vorondadek Sons, the Most Highs',
+]
+right = ['a Paradise Creator Son']
+refs = ['15:2.5 «Each local universe has a magnificent architectural headquarters world and is ruled by one of the co-ordinate Creator Sons of God of the order of Michael.»']
+
+[[question]]
+id = 230
+q = 'Who serves as a representative of the Paradise Trinity on each local universe?'
+a = [
+  'three Faithfuls of Days',
+  'a Recent of Days',
+  'seven Recents of Days',
+  'a Faithful of Days',
+  'a Union of Days',
+]
+right = ['a Union of Days']
+refs = ['15:2.5 «Each universe is blessed by the presence of a Union of Days, a representative of the Paradise Trinity.»']
+
+[[question]]
+id = 231
+q = 'How many local universes constitute a minor sector?'
+a = [
+  '10',
+  '24',
+  '100000',
+  '70',
+  '100',
+]
+right = ['100']
+refs = ['15:2.6 «One hundred local universes (about 1,000,000,000 inhabitable planets) constitute a minor sector of the superuniverse government; it has a wonderful headquarters world, wherefrom its rulers, the Recents of Days, administer the affairs of the minor sector.»']
+
+[[question]]
+id = 232
+q = 'How many inhabited worlds can there be in a minor sector?'
+a = [
+  '1 billion',
+  '10 billion',
+  '100 million',
+  '1 trillion',
+  '700 million',
+]
+right = ['1 billion']
+refs = ['15:13.4 «Each minor sector embraces as many as one hundred local universes, ten thousand constellations, one million systems, or about one billion inhabitable worlds.»']
+
+[[question]]
+id = 233
+q = 'Each minor sector has a wonderful architectural sphere as its headquarters and is ruled by \ldots'
+a = [
+  'Paradise Creator Son',
+  'three Unions of Days',
+  'three Recents of Days',
+  'one of the Seven Master Spirits',
+  'three Vorondadek Sons, the Most Highs',
+]
+right = ['three Recents of Days']
+refs = ['15:2.6 «There are three Recents of Days, Supreme Trinity Personalities, on each minor sector headquarters.»']
+
+[[question]]
+id = 234
+q = 'How many minor sectors constitute a major sector?'
+a = [
+  '10',
+  '24',
+  '100000',
+  '70',
+  '100',
+]
+right = ['100']
+refs = ['15:2.7 «One hundred minor sectors (about 100,000,000,000 inhabitable worlds) make one major sector.»']
+
+[[question]]
+id = 235
+q = 'How many inhabited worlds can there be in a major sector?'
+a = [
+  '1 billion',
+  '1 trillion',
+  '100 billion',
+  '700 million',
+  '100 million',
+]
+right = ['100 billion']
+refs = ['15:13.1 «A major sector comprises about one tenth of a superuniverse and consists of one hundred minor sectors, ten thousand local universes, about one hundred billion inhabitable worlds.»']
+
+[[question]]
+id = 236
+q = 'Each major sector has a superb architectural sphere as its headquarters and is ruled by \ldots'
+a = [
+  'Paradise Creator Son',
+  'three Unions of Days',
+  'three Recents of Days',
+  'three Perfections of Days',
+  'three Vorondadek Sons, the Most Highs',
+]
+right = ['three Perfections of Days']
+refs = ['15:2.7 «Each major sector is provided with a superb headquarters and is presided over by three Perfections of Days, Supreme Trinity Personalities.»']
+
+[[question]]
+id = 239
+q = 'How many major sectors constitute a superuniverse?'
+a = [
+  '100',
+  '24',
+  '100000',
+  '70',
+  '10',
+]
+right = ['10']
+refs = ['15:2.8 «Ten major sectors (about 1,000,000,000,000 inhabitable planets) constitute a superuniverse.»']
+
+[[question]]
+id = 240
+q = 'Each superuniverse has an enormous and glorious architectural sphere as its headquarters and is ruled by \ldots'
+a = [
+  'Paradise Creator Son',
+  'three Unions of Days',
+  'three Recents of Days',
+  'three Perfections of Days',
+  'three Ancients of Days',
+  'three Vorondadek Sons, the Most Highs',
+]
+right = ['three Ancients of Days']
+refs = ['15:2.8 «Each superuniverse is provided with an enormous and glorious headquarters world and is ruled by three Ancients of Days.»']
+
+[[question]]
+id = 241
+q = 'How many inhabited worlds can there be in a superuniverse?'
+a = [
+  '100 billion',
+  '1 billion',
+  '1 trillion',
+  '100 trillion',
+  '700 billion',
+]
+right = ['1 trillion']
+refs = ['15:2.8 «Ten major sectors (about 1,000,000,000,000 inhabitable planets) constitute a superuniverse.»']
+
+[[question]]
+id = 242
+q = 'Is the Milky Way galaxy related to the superuniverse of Orvonton in any way?'
+a = [
+  'no, Milky Way is just an illusion of materialistic so-called “scientists”',
+  'yes, Milky Way represents the central nucleus of Orvonton',
+  'no, they are two distinct and unrelated astronomical objects',
+]
+right = ['yes, Milky Way represents the central nucleus of Orvonton']
+refs = ['15:3.1 «The vast Milky Way starry system represents the central nucleus of Orvonton, being largely beyond the borders of your local universe.»']
+
+[[question]]
+id = 243
+q = 'How many of the 10 major sectors of Orvonton have been roughly identified by Urantian astronomers?'
+a = [
+  'all 10',
+  '7',
+  '8',
+  '1',
+  '4',
+  '6',
+  '3',
+]
+right = ['8']
+refs = ['15:3.4 «Of the ten major divisions of Orvonton, eight have been roughly identified by Urantian astronomers.»']
+
+[[question]]
+id = 244
+q = 'Where is the rotational center of our minor sector situated?'
+a = [
+  'in the star cloud of Sagittarius',
+  'in the star cluster M5 of Serpens Caput',
+  'in the star cluster M13 of Hercules',
+  'in the star cluster M71 of Sagitta',
+  'in the star cluster NGC 5139 (Omega Centauri)',
+]
+right = ['in the star cloud of Sagittarius']
+refs = ['15:3.5 «The rotational center of your minor sector is situated far away in the enormous and dense star cloud of Sagittarius, around which your local universe and its associated creations all move»']
+
+[[question]]
+id = 246
+q = 'Which of these motions are genetic, i.e. inherent in their origin?'
+a = [
+  'The revolution of Urantia around its sun',
+  'The circuit of our solar system about the nucleus of the former Andronover nebula',
+  'The rotation of the Andronover stellar family and the associated clusters about the composite rotation-gravity center of the star cloud of Nebadon',
+  'The swing of the local star cloud of Nebadon and its associated creations around the Sagittarius center of their minor sector',
+  'The rotation of the one hundred minor sectors, including Sagittarius, about their major sector',
+  'The whirl of the ten major sectors, the so-called star drifts, about the Uversa headquarters of Orvonton',
+  'The movement of Orvonton and six associated superuniverses around Paradise and Havona, the counterclockwise processional of the superuniverse space level',
+]
+right = [
+  'The revolution of Urantia around its sun',
+  'The circuit of our solar system about the nucleus of the former Andronover nebula',
+  'The movement of Orvonton and six associated superuniverses around Paradise and Havona, the counterclockwise processional of the superuniverse space level',
+]
+refs = ['15:3.15 «These multiple motions are of several orders: The space paths of your planet and your solar system are genetic, inherent in origin. The absolute counterclockwise motion of Orvonton is also genetic, inherent in the architectural plans of the master universe.»']
+
+[[question]]
+id = 247
+q = 'Which of these motions are composite, i.e. partly produced by the intelligent and purposeful action of the Paradise force organizers?'
+a = [
+  'The revolution of Urantia around its sun',
+  'The circuit of our solar system about the nucleus of the former Andronover nebula',
+  'The rotation of the Andronover stellar family and the associated clusters about the composite rotation-gravity center of the star cloud of Nebadon',
+  'The swing of the local star cloud of Nebadon and its associated creations around the Sagittarius center of their minor sector',
+  'The rotation of the one hundred minor sectors, including Sagittarius, about their major sector',
+  'The whirl of the ten major sectors, the so-called star drifts, about the Uversa headquarters of Orvonton',
+  'The movement of Orvonton and six associated superuniverses around Paradise and Havona, the counterclockwise processional of the superuniverse space level',
+]
+right = [
+  'The rotation of the Andronover stellar family and the associated clusters about the composite rotation-gravity center of the star cloud of Nebadon',
+  'The swing of the local star cloud of Nebadon and its associated creations around the Sagittarius center of their minor sector',
+  'The rotation of the one hundred minor sectors, including Sagittarius, about their major sector',
+  'The whirl of the ten major sectors, the so-called star drifts, about the Uversa headquarters of Orvonton',
+]
+refs = ['15:3.15 «But the intervening motions are of composite origin, being derived in part from the constitutive segmentation of matter-energy into the superuniverses and in part produced by the intelligent and purposeful action of the Paradise force organizers.»']
+
+[[question]]
+id = 248
+v = 2
+q = 'How many architectural worlds there would be in the seven superuniverses if all the projected local universes and their component parts were established?'
+a = [
+  '453,313,764,407',
+  '600 billion',
+  '7 trillion',
+  '7 billion',
+  '5 billion',
+  '5 billion + 1',
+]
+right = ['453,313,764,407']
+note = '15:7.12 60744f30ed9ba26e'
+
+[[question]]
+id = 249
+q = 'How many inhabited planets constitute a system?'
+a = [
+  '1024',
+  '1000',
+  '500',
+  '777',
+  '1000000',
+]
+right = ['1000']
+refs = ['15:2.3 «The System. The basic unit of the supergovernment consists of about one thousand inhabited or inhabitable worlds.»']
+
+[[question]]
+id = 250
+q = 'How many systems constitute a constellation?'
+a = [
+  '10',
+  '24',
+  '100000',
+  '100',
+  '70',
+]
+right = ['100']
+refs = ['15:2.4 «One hundred systems (about 100,000 inhabitable planets) make up a constellation.»']
+
+[[question]]
+id = 251
+q = 'How many inhabited worlds can there be in a single constellation?'
+a = [
+  '1000',
+  '1000000',
+  '100000',
+  '777',
+]
+right = ['100000']
+refs = ['15:2.4 «One hundred systems (about 100,000 inhabitable planets) make up a constellation.»']
+
+[[question]]
+id = 252
+q = 'How many constellations constitute a local universe?'
+a = [
+  '10',
+  '24',
+  '100',
+  '100000',
+  '70',
+]
+right = ['100']
+refs = ['15:2.5 «One hundred constellations (about 10,000,000 inhabitable planets) constitute a local universe.»']
+
+[[question]]
+id = 253
+q = 'How many inhabited worlds can there be in a local universe?'
+a = [
+  '100000',
+  '1000',
+  '10000000',
+  '777777',
+  '700000',
+]
+right = ['10000000']
+refs = ['15:2.5 «One hundred constellations (about 10,000,000 inhabitable planets) constitute a local universe.»']
+
+[[question]]
+id = 254
+q = 'How many stars are there in the superuniverse of Orvonton?'
+a = [
+  '70 trillion',
+  '10 trillion',
+  '1 trillion',
+  '700 million',
+  '70 million',
+]
+right = ['10 trillion']
+refs = ['15:6.10 «The superuniverse of Orvonton is illuminated and warmed by more than ten trillion blazing suns.»']
+
+[[question]]
+id = 255
+q = 'How many planets in our solar system are at present suited to harbor life?'
+a = [
+  'one (Urantia)',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+]
+right = ['three']
+refs = ['15:6.15 «In your solar system only three planets are at present suited to harbor life.»']
+
+[[question]]
+id = 256
+q = 'How many of the cool planets in our superuniverse are habitable by beings of our order?'
+a = [
+  'fewer than 1 in 5',
+  'fewer than 1 in 10',
+  'fewer than 1 in 40',
+  'fewer than 1 in 100',
+  'fewer than 1 in 1,000',
+  'fewer than 1 in 1,000,000',
+]
+right = ['fewer than 1 in 40']
+refs = ['15:6.15 «In your superuniverse not one cool planet in forty is habitable by beings of your order.»']
+
+[[question]]
+id = 257
+q = 'Which of these space bodies have had an evolutionary origin?'
+a = [
+  'The dark islands of space',
+  'The suns',
+  'Comets, meteors, and planetesimals',
+  'Planets (including inhabited)',
+  'Architectural spheres',
+]
+right = [
+  'The dark islands of space',
+  'The suns',
+  'Comets, meteors, and planetesimals',
+  'Planets (including inhabited)',
+]
+refs = ['15:6.7 «With the exception of the architectural spheres, all space bodies have had an evolutionary origin»']
+
+[[question]]
+id = 258
+q = 'Are there stars which emit light not accompanied by heat?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['15:6.8 «You are familiar with suns that emit light accompanied by heat; but there are also suns which shine without heat.»']
+
+[[question]]
+id = 259
+q = 'Which of these is the capital of our local system?'
+a = [
+  'Salvington',
+  'Edentia',
+  'Uversa',
+  'Jerusem',
+]
+right = ['Jerusem']
+refs = [
+  '15:14.5 «Your world is called Urantia, and it is number 606 in the planetary group, or system, of Satania.»',
+  '46:0.1 «Jerusem, the headquarters of Satania, is an average capital of a local system»',
+]
+
+[[question]]
+id = 260
+q = 'Which of these is the headquarters of our constellation?'
+a = [
+  'Salvington',
+  'Edentia',
+  'Uversa',
+  'Jerusem',
+]
+right = ['Edentia']
+refs = ['15:14.6 «Your constellation, Norlatiadek, consists of one hundred local systems and has a headquarters world called Edentia.»']

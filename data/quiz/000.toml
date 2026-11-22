@@ -1,0 +1,735 @@
+# Paper 0, Foreword: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 0
+gone = [55]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 1
+q = 'What is the name of our own world?'
+a = [
+  'Mars',
+  'Venus',
+  'Urantia',
+  'Planet of the Apes',
+  'The World of the Cross',
+]
+right = ['Urantia']
+refs = ['0:0.1 «In the minds of the mortals of Urantia—that being the name of your world—there exists great confusion respecting the meaning of such terms as God, divinity, and deity.»']
+
+[[question]]
+id = 2
+q = 'The purpose of the Fifth Epochal Revelation is'
+a = [
+  'to expand cosmic consciousness and enhance spiritual perception',
+  'to overthrow all existing religions',
+  'to make progress faster',
+  'to make people righteous',
+  'to satisfy people’s curiosity about life after death',
+]
+right = ['to expand cosmic consciousness and enhance spiritual perception']
+refs = ['0:0.2 «It is exceedingly difficult to present enlarged concepts and advanced truth, in our endeavor to expand cosmic consciousness and enhance spiritual perception, when we are restricted to the use of a circumscribed language of the realm.»']
+
+[[question]]
+id = 3
+q = 'The Fifth Epochal Revelation (Urantia Papers) was revealed in \ldots'
+a = [
+  'Armenian',
+  'Russian',
+  'English',
+  'German',
+  'Italian',
+  'Mandarin',
+  'Nuumte Oote',
+]
+right = ['English']
+refs = ['0:0.1 «I have been directed to formulate this introductory statement in explanation of the meanings which should be attached to certain word symbols as they may be hereinafter used in those papers which the Orvonton corps of truth revealers have been authorized to translate into the English language of Urantia.»']
+
+[[question]]
+id = 4
+q = 'Where do all personal beings derive their personality from?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'God the Sevenfold',
+  'Paradise Creator Sons',
+]
+right = ['Universal Father']
+refs = ['6:7.1 «Every personal being derives personality from the Universal Father just as the Original Son eternally derives his personality from the Paradise Father.»']
+
+[[question]]
+id = 5
+q = 'What is the name of our local Universe?'
+a = [
+  'Orvonton',
+  'Nebadon',
+  'Uversa',
+  'Salvington',
+]
+right = ['Nebadon']
+refs = ['0:0.5 «Your world, Urantia, is one of many similar inhabited planets which comprise the local universe of Nebadon.»']
+
+[[question]]
+id = 6
+q = 'What is the name of our superuniverse?'
+a = [
+  'Orvonton',
+  'Nebadon',
+  'Uversa',
+  'Salvington',
+]
+right = ['Orvonton']
+refs = ['0:0.5 «This universe, together with similar creations, makes up the superuniverse of Orvonton, from whose capital, Uversa, our commission hails.»']
+
+[[question]]
+id = 7
+q = 'What is the capital of our superuniverse?'
+a = [
+  'Orvonton',
+  'Nebadon',
+  'Uversa',
+  'Salvington',
+]
+right = ['Uversa']
+refs = ['0:0.5 «This universe, together with similar creations, makes up the superuniverse of Orvonton, from whose capital, Uversa, our commission hails.»']
+
+[[question]]
+id = 8
+q = 'How many inhabited superuniverses are in the grand universe?'
+a = [
+  '7',
+  '1',
+  '1000',
+  'billions',
+  'unknown',
+]
+right = ['7']
+refs = ['0:0.6 «The seven evolving superuniverses in association with the central and divine universe, we commonly refer to as the grand universe; these are the now organized and inhabited creations.»']
+
+[[question]]
+id = 9
+q = 'How is the central universe of divine perfection called?'
+a = [
+  'Paradise',
+  'Heavens',
+  'Havona',
+  'Divinington',
+  'Urantia',
+]
+right = ['Havona']
+refs = ['0:0.5 «Orvonton is one of the seven evolutionary superuniverses of time and space which circle the never-beginning, never-ending creation of divine perfection—the central universe of Havona.»']
+
+[[question]]
+id = 10
+q = 'The seven superuniverses in association with the central universe are known as \ldots'
+a = [
+  'grand universe',
+  'master universe',
+  'total universe',
+  'Paradise',
+]
+right = ['grand universe']
+refs = ['0:0.6 «The seven evolving superuniverses in association with the central and divine universe, we commonly refer to as the grand universe; these are the now organized and inhabited creations.»']
+
+[[question]]
+id = 11
+q = 'Uninhabited universes of outer space are part of \ldots'
+a = [
+  'grand universe',
+  'master universe',
+  'total universe',
+  'Paradise',
+]
+right = ['master universe']
+refs = ['0:0.6 «They are all a part of the master universe, which also embraces the uninhabited but mobilizing universes of outer space.»']
+
+[[question]]
+id = 12
+q = 'The unifying characterizing quality of Deity is best comprehended by creatures as \ldots'
+a = [
+  'perfection',
+  'intelligence',
+  'wisdom',
+  'divinity',
+  'beauty',
+  'truth',
+  'power',
+]
+right = ['divinity']
+refs = ['0:1.2 «Deity is characterized by the quality of unity—actual or potential—on all supermaterial levels of reality; and this unifying quality is best comprehended by creatures as divinity.»']
+
+[[question]]
+id = 13
+q = 'Divinity is creature comprehensible as \ldots'
+a = [
+  'mind, spirit, and matter',
+  'love, mercy, and ministry',
+  'time, space, and energy',
+  'truth, beauty, and goodness',
+  'justice, power, and sovereignty',
+]
+right = ['truth, beauty, and goodness']
+refs = ['0:1.17 «Divinity is creature comprehensible as truth, beauty, and goodness; correlated in personality as love, mercy, and ministry; disclosed on impersonal levels as justice, power, and sovereignty.»']
+
+[[question]]
+id = 14
+q = 'Divinity is correlated in personality as \ldots'
+a = [
+  'love, mercy, and ministry',
+  'mind, spirit, and matter',
+  'truth, beauty, and goodness',
+  'time, space, and energy',
+  'justice, power, and sovereignty',
+]
+right = ['love, mercy, and ministry']
+refs = ['0:1.17 «Divinity is creature comprehensible as truth, beauty, and goodness; correlated in personality as love, mercy, and ministry; disclosed on impersonal levels as justice, power, and sovereignty.»']
+
+[[question]]
+id = 15
+q = 'Divinity is disclosed on impersonal levels as \ldots'
+a = [
+  'mind, spirit, and matter',
+  'love, mercy, and ministry',
+  'truth, beauty, and goodness',
+  'justice, power, and sovereignty',
+  'time, space, and energy',
+]
+right = ['justice, power, and sovereignty']
+refs = ['0:1.17 «Divinity is creature comprehensible as truth, beauty, and goodness; correlated in personality as love, mercy, and ministry; disclosed on impersonal levels as justice, power, and sovereignty.»']
+
+[[question]]
+id = 16
+q = 'Which of these functional levels corresponds to self\hyp{}expansive and creature\hyp{}identified Deity?'
+a = [
+  'Static',
+  'Potential',
+  'Associative',
+  'Creative',
+  'Evolutional',
+  'Supreme',
+  'Ultimate',
+]
+right = ['Evolutional']
+refs = ['0:1.8 «Evolutional—self-expansive and creature-identified Deity.»']
+
+[[question]]
+id = 17
+q = 'Which of these functional levels corresponds to self\hyp{}willed and self\hyp{}purposive Deity?'
+a = [
+  'Static',
+  'Potential',
+  'Associative',
+  'Creative',
+  'Evolutional',
+  'Supreme',
+  'Ultimate',
+]
+right = ['Potential']
+refs = ['0:1.5 «Potential—self-willed and self-purposive Deity.»']
+
+[[question]]
+id = 18
+q = 'Which of these functional levels corresponds to self\hyp{}experiential and creature\hyp{}Creator\hyp{}unifying Deity?'
+a = [
+  'Static',
+  'Potential',
+  'Associative',
+  'Creative',
+  'Evolutional',
+  'Supreme',
+  'Ultimate',
+]
+right = ['Supreme']
+refs = ['0:1.9 «Supreme—self-experiential and creature-Creator-unifying Deity.»']
+
+[[question]]
+id = 19
+q = 'Which of these functional levels corresponds to self\hyp{}personalized and divinely fraternal Deity?'
+a = [
+  'Static',
+  'Potential',
+  'Associative',
+  'Creative',
+  'Evolutional',
+  'Supreme',
+  'Ultimate',
+]
+right = ['Associative']
+refs = ['0:1.6 «Associative—self-personalized and divinely fraternal Deity.»']
+
+[[question]]
+id = 20
+q = 'Which of these functional levels corresponds to self\hyp{}contained and self\hyp{}existent Deity?'
+a = [
+  'Static',
+  'Potential',
+  'Associative',
+  'Creative',
+  'Evolutional',
+  'Supreme',
+  'Ultimate',
+]
+right = ['Static']
+refs = ['0:1.4 «Static—self-contained and self-existent Deity.»']
+
+[[question]]
+id = 21
+q = 'Which of these functional levels corresponds to self\hyp{}projected and time\hyp{}space\hyp{}transcending Deity?'
+a = [
+  'Static',
+  'Potential',
+  'Associative',
+  'Creative',
+  'Evolutional',
+  'Supreme',
+  'Ultimate',
+]
+right = ['Ultimate']
+refs = ['0:1.10 «Ultimate—self-projected and time-space-transcending Deity.»']
+
+[[question]]
+id = 22
+q = 'Which of these functional levels corresponds to self\hyp{}distributive and divinely revealed Deity?'
+a = [
+  'Static',
+  'Potential',
+  'Associative',
+  'Creative',
+  'Evolutional',
+  'Supreme',
+  'Ultimate',
+]
+right = ['Creative']
+refs = ['0:1.7 «Creative—self-distributive and divinely revealed Deity.»']
+
+[[question]]
+id = 23
+q = 'Deity functioning on the first creature\hyp{}identificational level as time\hyp{}space overcontrollers of the grand universe is called \ldots'
+a = [
+  'the Ultimacy of Deity',
+  'the Supremacy of Deity',
+]
+right = ['the Supremacy of Deity']
+refs = ['0:1.9 «Deity functioning on the first creature-identificational level as time-space overcontrollers of the grand universe, sometimes designated the Supremacy of Deity.»']
+
+[[question]]
+id = 24
+q = 'Deity functioning on the second level of unifying divinity expression as effective overcontrollers and absonite upholders of the master universe is called \ldots'
+a = [
+  'the Ultimacy of Deity',
+  'the Supremacy of Deity',
+]
+right = ['the Ultimacy of Deity']
+refs = ['0:1.10 «As compared with the ministry of the Deities to the grand universe, this absonite function in the master universe is tantamount to universal overcontrol and supersustenance, sometimes called the Ultimacy of Deity.»']
+
+[[question]]
+id = 25
+q = 'Which of these levels of reality is characterized by creature life and time\hyp{}space limitations?'
+a = [
+  'finite',
+  'absonite',
+  'absolute',
+]
+right = ['finite']
+refs = ['0:1.11 «The finite level of reality is characterized by creature life and time-space limitations.»']
+
+[[question]]
+id = 26
+q = 'Which of these levels of reality is characterized by things and beings without beginnings or endings and by the transcendence of time and space?'
+a = [
+  'finite',
+  'absonite',
+  'absolute',
+]
+right = ['absonite']
+refs = ['0:1.12 «The absonite level of reality is characterized by things and beings without beginnings or endings and by the transcendence of time and space.»']
+
+[[question]]
+id = 27
+q = 'Which of these levels of reality is beginningless, endless, timeless, and spaceless?'
+a = [
+  'finite',
+  'absonite',
+  'absolute',
+]
+right = ['absolute']
+refs = ['0:1.13 «The absolute level is beginningless, endless, timeless, and spaceless.»']
+
+[[question]]
+id = 28
+q = 'Deity is the source of all that which is divine. True or False?'
+a = [
+  'True',
+  'False',
+]
+right = ['True']
+refs = ['0:1.15 «Deity is the source of all that which is divine.»']
+
+[[question]]
+id = 29
+q = 'All that which is divine is necessarily Deity. True or False?'
+a = [
+  'True',
+  'False',
+]
+right = ['False']
+refs = ['0:1.15 «Deity is characteristically and invariably divine, but all that which is divine is not necessarily Deity»']
+
+[[question]]
+id = 30
+q = 'All that which is divine tends towards some phase of unity with Deity. True or False?'
+a = [
+  'True',
+  'False',
+]
+right = ['True']
+refs = ['0:1.15 «Deity is characteristically and invariably divine, but all that which is divine is not necessarily Deity, though it will be co-ordinated with Deity and will tend towards some phase of unity with Deity—spiritual, mindal, or personal.»']
+
+[[question]]
+id = 31
+q = 'Deities of eternal existence, past, present, and future are known as \ldots'
+a = [
+  'experiential',
+  'existential',
+]
+right = ['existential']
+refs = ['0:7.3 «Existential—beings of eternal existence, past, present, and future.»']
+
+[[question]]
+id = 32
+q = 'Deities actualizing in the post\hyp{}Havona present but of unending existence throughout all future eternity are known as \ldots'
+a = [
+  'experiential',
+  'existential',
+]
+right = ['experiential']
+refs = ['0:7.4 «Experiential—beings actualizing in the post-Havona present but of unending existence throughout all future eternity.»']
+
+[[question]]
+id = 33
+q = 'On which level of reality the Paradise values and meanings are manifest?'
+a = [
+  'finite',
+  'absonite',
+  'absolute',
+]
+right = ['absolute']
+refs = ['0:1.13 «Whenever, wherever, and however the absolute level of Deity functions, Paradise-absolute values and meanings are manifest.»']
+
+[[question]]
+id = 34
+q = 'Which of these are the three levels of reality?'
+a = [
+  'finite',
+  'absonite',
+  'absolute',
+  'sublime',
+  'celestial',
+  'spiritual',
+  'material',
+  'morontia',
+]
+right = [
+  'finite',
+  'absonite',
+  'absolute',
+]
+refs = ['115:1.3 «In order to facilitate mortal comprehension of the universe of universes, the diverse levels of cosmic reality have been designated as finite, absonite, and absolute.»']
+
+[[question]]
+id = 35
+q = 'Which of these is \bibemph{not} one of the Seven Absolutes of Infinity?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Isle of Paradise',
+  'Supreme Being',
+]
+right = ['Supreme Being']
+refs = ['0:3.2-8']
+
+[[question]]
+id = 36
+q = 'Which of the Seven Absolutes is known as “the absolute of Absolutes”?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Universal Father']
+refs = ['104:4.1 «The Universal Father is the personal cause of the Absolutes; he is the absolute of Absolutes.»']
+
+[[question]]
+id = 37
+q = 'Which of the Seven Absolutes discloses the absolute and infinite personality?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Eternal Son']
+refs = ['0:5.5 «The Eternal Son is the absolute personality, the secret of spiritual energy, morontia spirits, and perfected spirits.»']
+
+[[question]]
+id = 38
+q = 'In which of the Seven Absolutes is the personality potentialized?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Deity Absolute']
+refs = ['104:3.13 «He is personality unqualified in the Son but personality potentialized in the Deity Absolute.»']
+
+[[question]]
+id = 39
+q = 'Which of the Seven Absolutes corresponds to the unpersonalizable potential reality?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Unqualified Absolute']
+refs = ['105:3.7 «The Unqualified Absolute. Static, reactive, and abeyant; the unrevealed cosmic infinity of the I AM; totality of nondeified reality and finality of all nonpersonal potential.»']
+
+[[question]]
+# Dropped until the figure it asks about, 0:3.10's, is on the site.
+id = 40
+q = 'What lies in the actual (upper) half of the axis of mind in the Existential Flower?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Infinite Spirit']
+state = 'drop'
+
+[[question]]
+# Dropped until the figure it asks about, 0:3.10's, is on the site.
+id = 41
+q = 'What lies in the potential (lower) half of the axis of mind in the Existential Flower?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Universal Absolute']
+state = 'drop'
+
+[[question]]
+# Dropped until the figure it asks about, 0:3.10's, is on the site.
+id = 42
+q = 'What lies in the actual (upper) half of the axis of spirit in the Existential Flower?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Eternal Son']
+state = 'drop'
+
+[[question]]
+# Dropped until the figure it asks about, 0:3.10's, is on the site.
+id = 43
+q = 'What lies in the potential (lower) half of the axis of spirit in the Existential Flower?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Deity Absolute']
+state = 'drop'
+
+[[question]]
+# Dropped until the figure it asks about, 0:3.10's, is on the site.
+id = 44
+q = 'What lies in the actual (upper) half of the axis of matter in the Existential Flower?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Isle of Paradise']
+state = 'drop'
+
+[[question]]
+# Dropped until the figure it asks about, 0:3.10's, is on the site.
+id = 45
+q = 'What lies in the potential (lower) half of the axis of matter in the Existential Flower?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Unqualified Absolute']
+state = 'drop'
+
+[[question]]
+# Dropped until the figure it asks about, 0:3.10's, is on the site.
+id = 46
+q = 'What lies at the center of the Existential Flower?'
+a = [
+  'Universal Father',
+  'Eternal Son',
+  'Infinite Spirit',
+  'Isle of Paradise',
+  'Deity Absolute',
+  'Universal Absolute',
+  'Unqualified Absolute',
+]
+right = ['Universal Father']
+state = 'drop'
+
+[[question]]
+id = 47
+q = 'When in doubt it is best to refer the word God to the person of \ldots'
+a = [
+  'the Universal Father',
+  'the Eternal Son',
+  'the Infinite Spirit',
+]
+right = ['the Universal Father']
+refs = ['0:2.9 «When in doubt as to the exact interpretation of the word God, it would be advisable to refer it to the person of the Universal Father.»']
+
+[[question]]
+id = 48
+q = 'Thought Adjusters are \ldots'
+a = [
+  'personal',
+  'prepersonal',
+  'superpersonal',
+  'subpersonal',
+]
+right = ['prepersonal']
+refs = ['0:2.3 «Prepersonal—as in the ministry of the Father fragments, such as the Thought Adjusters.»']
+
+[[question]]
+id = 49
+q = 'Can spiritual gravity be measured?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['7:1.8 «In accordance with well-known laws, we can and do measure spiritual gravity just as man attempts to compute the workings of finite physical gravity.»']
+
+[[question]]
+id = 50
+q = 'What things are called personal?'
+a = [
+  'responding to the personality circuit of the Father',
+  'exhibiting intelligent behavior',
+  'possessing self-consciousness',
+]
+right = ['responding to the personality circuit of the Father']
+refs = ['0:6.1 «Any and all things responding to the personality circuit of the Father, we call personal.»']
+
+[[question]]
+id = 51
+q = 'What things we call spirit?'
+a = [
+  'responding to the spirit circuit of the Eternal Son',
+  'originating in the Infinite Spirit',
+  'endowed with eternal life',
+  'invisible to mortal eyes',
+]
+right = ['responding to the spirit circuit of the Eternal Son']
+refs = ['0:6.1 «Any and all things responding to the spirit circuit of the Son, we call spirit.»']
+
+[[question]]
+id = 52
+q = 'What things do we call matter?'
+a = [
+  'responding to the material-gravity circuit centering in nether Paradise',
+  'visible to mortal eyes',
+  'that can perish with time',
+]
+right = ['responding to the material-gravity circuit centering in nether Paradise']
+refs = ['0:6.1 «Any and all that responds to the material-gravity circuit centering in nether Paradise, we call matter—energy-matter in all its metamorphic states.»']
+
+[[question]]
+id = 53
+q = 'Where do the lines of spirit gravity lead back to?'
+a = [
+  'Eternal Son',
+  'Universal Father',
+  'Infinite Spirit',
+]
+right = ['Eternal Son']
+refs = ['7:1.1 «The pure and universal spirit gravity of all creation, this exclusively spiritual circuit, leads directly back to the person of the Second Source and Center on Paradise.»']
+
+[[question]]
+id = 54
+q = 'When was Havona (the central universe) created?'
+a = [
+  '500 billion years ago',
+  '6,000 years ago, on the first day of creation',
+  'never, it existed from eternity',
+  '9 billion years ago, at Big Bang',
+]
+right = ['never, it existed from eternity']
+refs = ['12:1.10 «Havona, the central universe, is not a time creation; it is an eternal existence.»']
+
+[[question]]
+id = 56
+q = 'Is the soul of man distinct from the divine spirit which dwells within the mind?'
+a = [
+  'yes, although one can’t exist without the other',
+  'no',
+]
+right = ['yes, although one can’t exist without the other']
+refs = ['133:6.5 «But the soul of man is distinct from the divine spirit which dwells within the mind.»']
+
+[[question]]
+id = 57
+q = 'What intervenes in the domain of actuality between matter and spirit?'
+a = [
+  'mind',
+  'God',
+  'Thought Adjuster',
+  'angels',
+]
+right = ['mind']
+refs = ['0:6.8 «In personality, mind ever intervenes between spirit and matter; therefore is the universe illuminated by three kinds of light: material light, intellectual insight, and spirit luminosity.»']

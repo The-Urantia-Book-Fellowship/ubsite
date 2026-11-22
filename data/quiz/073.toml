@@ -1,0 +1,147 @@
+# Paper 73, The Garden of Eden: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 73
+
+[[question]]
+id = 535
+q = 'Who prepared the Garden of Eden before the arrival of Adam \&\ Eve?'
+a = [
+  'volunteers',
+  'hirelings',
+]
+right = ['volunteers']
+refs = ['73:4.4 «In the preparation of the Garden only volunteer laborers were employed; no hirelings were ever used.»']
+
+[[question]]
+id = 536
+q = 'What happened to the first garden of Eden 4,000 years after Adam \&\ Eve left?'
+a = [
+  'Sank in the Mediterranean',
+  'Became desert land due to climate changes',
+  'Became part of north Africa due to geological changes',
+  'Was destroyed by the seraphim',
+  'Was destroyed by Satan',
+]
+right = ['Sank in the Mediterranean']
+refs = ['73:7.1 «The peninsula had been overrun by these lower-grade Nodites for almost four thousand years after Adam left the Garden when, in connection with the violent activity of the surrounding volcanoes and the submergence of the Sicilian land bridge to Africa, the eastern floor of the Mediterranean Sea sank»']
+
+[[question]]
+id = 537
+q = 'What is the minimal size of Adamic family required for initiating racial uplifting of human races?'
+a = [
+  '500,000 persons',
+  '100 persons',
+  '1,000,000 persons',
+  '40 persons',
+]
+right = ['500,000 persons']
+refs = ['73:7.3 «The Melchizedeks counseled Adam not to initiate the program of racial uplift and blending until his own family had numbered one-half million.»']
+
+[[question]]
+id = 538
+q = 'Who sent the tree of life to Urantia?'
+a = [
+  'Most Highs of Edentia',
+  'Ancients of Days',
+  'Melchizedeks',
+  'Michael of Nebadon',
+  'There was no such tree, it was a biblical myth',
+  'Chief of Seraphim',
+]
+right = ['Most Highs of Edentia']
+refs = ['73:6.3 «When the Most Highs of Edentia approved the commission of Caligastia as Planetary Prince of Urantia and those of the one hundred Jerusem citizens as his administrative staff, they sent to the planet, by the Melchizedeks, a shrub of Edentia, and this plant grew to be the tree of life on Urantia.»']
+
+[[question]]
+id = 539
+q = 'Who brought the tree of life to Urantia?'
+a = [
+  'Most Highs of Edentia',
+  'Ancients of Days',
+  'Melchizedeks',
+  'Michael of Nebadon',
+  'There was no such tree, it was a biblical myth',
+  'Chief of Seraphim',
+]
+right = ['Melchizedeks']
+refs = ['73:6.3 «When the Most Highs of Edentia approved the commission of Caligastia as Planetary Prince of Urantia and those of the one hundred Jerusem citizens as his administrative staff, they sent to the planet, by the Melchizedeks, a shrub of Edentia, and this plant grew to be the tree of life on Urantia.»']
+
+[[question]]
+id = 540
+q = 'Who sent the tree of knowledge of good and evil to Urantia?'
+a = [
+  'Most Highs of Edentia',
+  'Ancients of Days',
+  'Melchizedeks',
+  'Michael of Nebadon',
+  'There was no such tree, it was a biblical myth',
+  'Chief of Seraphim',
+  'it grew locally',
+]
+right = ['There was no such tree, it was a biblical myth']
+refs = ['73:6.3 «The “tree of the knowledge of good and evil” may be a figure of speech, a symbolic designation covering a multitude of human experiences, but the “tree of life” was not a myth; it was real and for a long time was present on Urantia.»']
+
+[[question]]
+id = 541
+q = 'Who brought the tree of knowledge of good and evil to Urantia?'
+a = [
+  'Most Highs of Edentia',
+  'Ancients of Days',
+  'Melchizedeks',
+  'Michael of Nebadon',
+  'There was no such tree, it was a biblical myth',
+  'Chief of Seraphim',
+  'it grew locally',
+]
+right = ['There was no such tree, it was a biblical myth']
+refs = ['73:6.3 «The “tree of the knowledge of good and evil” may be a figure of speech, a symbolic designation covering a multitude of human experiences, but the “tree of life” was not a myth; it was real and for a long time was present on Urantia.»']
+
+[[question]]
+id = 542
+q = 'Who guarded the tree of life in the garden of Eden after Adam and Eve left it?'
+a = [
+  'seraphim with a sword',
+  'cherubim with a flaming sword turning every way',
+  'primary midwayers',
+  'secondary midwayers',
+  'no one',
+]
+right = ['no one']
+refs = ['73:6.7 «Much to their surprise they found it unguarded.»']
+
+[[question]]
+id = 543
+q = 'What happened to the tree of life after Nodites invaded Eden?'
+a = [
+  'destroyed by fire',
+  'chopped into pieces and swallowed',
+  'ground to dust',
+  'sold for thirty pieces of silver',
+]
+right = ['destroyed by fire']
+refs = ['73:6.7 «They became enraged at their inability to benefit from the tree of life, and in connection with one of their internal wars, the temple and the tree were both destroyed by fire; only the stone wall stood until the Garden was subsequently submerged.»']
+
+[[question]]
+id = 544
+q = 'What happened to the Nodites after they ate of the tree of life?'
+a = [
+  'nothing',
+  'it poisoned them',
+  'lightning struck them dead',
+  'they developed stomach cancer within 7 days',
+]
+right = ['nothing']
+refs = ['73:6.7 «They ate freely of the fruit for years, but it did nothing for them; they were all material mortals of the realm; they lacked that endowment which acted as a complement to the fruit of the tree.»']
+
+[[question]]
+id = 545
+q = 'What does the Biblical expression “eating of the tree of the knowledge of good and evil” really mean?'
+a = [
+  'literally eating of some forbidden tree, as the Bible says so',
+  'combining good and evil',
+  'knowing one another intimately',
+  'learning to distinguish between good and evil',
+]
+right = ['combining good and evil']
+refs = ['75:4.4 «Every time the Garden pair had partaken of the fruit of the tree of life, they had been warned by the archangel custodian to refrain from yielding to the suggestions of Caligastia to combine good and evil.»']

@@ -1,0 +1,19 @@
+# Paper 79, Andite Expansion in the Orient: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 79
+
+[[question]]
+id = 616
+q = 'When did the main body of the yellow race enter China?'
+a = [
+  '600,000 years ago',
+  '300,000 years ago',
+  '200,000 years ago',
+  '80,000 years ago',
+  '3,000 years ago',
+  '1,500 years ago',
+]
+right = ['300,000 years ago']
+refs = ['79:5.3 «More than three hundred thousand years ago the main body of the yellow race entered China from the south as coastwise migrants.»']

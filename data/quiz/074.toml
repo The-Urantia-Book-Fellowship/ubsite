@@ -1,0 +1,284 @@
+# Paper 74, Adam and Eve: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 74
+
+[[question]]
+id = 546
+q = 'Could Adam \&\ Eve communicate with each other and their immediate children over a distance of 80 kilometres?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['74:6.6 «Adam and Eve could communicate with each other and with their immediate children over a distance of about fifty miles.»']
+
+[[question]]
+id = 547
+q = 'What was the serial number of Adam and Eve of Urantia?'
+a = [
+  '10,311',
+  '14,311',
+  '18,311',
+  '20,311',
+  '6,666',
+  '66,666',
+]
+right = ['14,311']
+refs = ['74:1.1 «The Planetary Adam and Eve of Urantia were members of the senior corps of Material Sons on Jerusem, being jointly number 14,311.»']
+
+[[question]]
+id = 548
+v = 2
+q = 'When did Adam and Eve appear?'
+a = [
+  'on the sixth day of creation, about 6,000 years ago',
+  '35,915~B.C.',
+  '35,914~B.C.',
+  '335,437,011~B.C.',
+  '4,559~B.C.',
+  '236,992~B.C.',
+  'Unknown',
+]
+right = ['35,915~B.C.']
+refs = ['74:0.1 «Adam and Eve arrived on Urantia, from the year A.D. 1934, 37,848 years ago.»']
+
+[[question]]
+id = 549
+q = 'How long did it take to rematerialize the bodies of Adam and Eve after they arrived from Jerusem on seraphic transport?'
+a = [
+  '1 day',
+  '7 days',
+  '10 days',
+  '12 days',
+  '40 days',
+]
+right = ['10 days']
+refs = ['74:0.1 «And from the time of their arrival ten days passed before they were re-created in dual human form for presentation as the world’s new rulers.»']
+
+[[question]]
+id = 550
+q = 'At rematerialization of Adam and Eve, who regained consciousness first?'
+a = [
+  'Adam',
+  'Eve',
+  'both simultaneously',
+]
+right = ['both simultaneously']
+refs = ['74:0.1 «They regained consciousness simultaneously.»']
+
+[[question]]
+id = 551
+q = 'What was the height of Adam and Eve?'
+a = [
+  '1.65\,m',
+  '1.8\,m',
+  '2.2\,m',
+  '2.4\,m',
+  '2.8\,m',
+  '3.1\,m',
+  '3.5\,m',
+]
+right = ['2.4\,m']
+refs = ['74:1.1 «They belonged to the third physical series and were a little more than eight feet in height.»']
+
+[[question]]
+id = 552
+q = 'What form of government did Adam and Eve find upon their arrival on Urantia?'
+a = [
+  'democracy',
+  'theocracy',
+  'oligarchy',
+  'no government worthy of a name',
+]
+right = ['no government worthy of a name']
+refs = ['74:5.7 «Adam and Eve had come to institute representative government in the place of monarchial, but they found no government worthy of the name on the face of the whole earth.»']
+
+[[question]]
+id = 553
+q = 'How many children did Adam \&\ Eve bear on this planet in total, aside from Cain and Sansa?'
+a = [
+  '42',
+  '64',
+  '105',
+  '501',
+  '998',
+  '12,000',
+]
+right = ['105']
+refs = ['74:6.2 «She bore sixty-three children, thirty-two daughters and thirty-one sons, before the default. When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants. They had forty-two children after leaving the Garden besides the two offspring of joint parentage with the mortal stock of earth.»']
+
+[[question]]
+id = 554
+q = 'Adam \&\ Eve fathered 105 children. After 4 generations, what did this number increase to in pure line descendants?'
+a = [
+  '1,647',
+  '12,547',
+  '58,012',
+  '187,022',
+]
+right = ['1,647']
+refs = ['74:6.2 «When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants.»']
+
+[[question]]
+id = 555
+q = 'What was the name of the first-born son of Adam and Eve born on this planet?'
+a = [
+  'Cain',
+  'Abel',
+  'Adamson',
+  'Eveson',
+  'Seth',
+]
+right = ['Adamson']
+refs = ['74:6.2 «Adamson was the first-born of the violet race of Urantia, being followed by his sister and Eveson, the second son of Adam and Eve.»']
+
+[[question]]
+id = 556
+q = 'What was the name of the second son of Adam and Eve born on this planet?'
+a = [
+  'Cain',
+  'Abel',
+  'Adamson',
+  'Eveson',
+  'Seth',
+]
+right = ['Eveson']
+refs = ['74:6.2 «Adamson was the first-born of the violet race of Urantia, being followed by his sister and Eveson, the second son of Adam and Eve.»']
+
+[[question]]
+id = 557
+q = 'At what age did Adamic children cease to nurse the mother’s breast?'
+a = [
+  'eight months',
+  'nine months',
+  'one year',
+  'one and a half years',
+  'two years',
+  'three years',
+]
+right = ['one year']
+refs = ['74:6.3 «The Adamic children did not take milk from animals when they ceased to nurse the mother’s breast at one year of age.»']
+
+[[question]]
+id = 558
+q = 'How many times a day did the members of Adam’s family eat?'
+a = [
+  'once, shortly after noontime',
+  'twice, morning and evening',
+  'three times',
+  'five times',
+  'six times (like Hobbits)',
+]
+right = ['once, shortly after noontime']
+refs = ['74:6.4 «They ate once a day, shortly after noontime.»']
+
+[[question]]
+id = 559
+q = 'How did Eve nourish her children after they ceased to take the mother’s breast before they grew teeth?'
+a = [
+  'by milk of animals',
+  'by milk of nuts and fruit juice',
+  'by cooked porridge',
+]
+right = ['by milk of nuts and fruit juice']
+refs = ['74:6.3 «Eve had access to the milk of a great variety of nuts and to the juices of many fruits, and knowing full well the chemistry and energy of these foods, she suitably combined them for the nourishment of her children until the appearance of teeth.»']
+
+[[question]]
+id = 560
+q = 'Adamic children attended school until they were \ldots'
+a = [
+  '10',
+  '12',
+  '14',
+  '16',
+  '18',
+  '22',
+  '26',
+]
+right = ['16']
+refs = ['74:6.7 «The Adamic children attended their own schools until they were sixteen, the younger being taught by the elder.»']
+
+[[question]]
+id = 561
+q = 'At what age did Adamic children become eligible for marriage?'
+a = [
+  '14',
+  '16',
+  '18',
+  '20',
+  '25',
+  '30',
+]
+right = ['20']
+refs = ['74:6.8 «At twenty they were eligible for marriage; and after marriage they began their lifework or entered upon special preparation therefor.»']
+
+[[question]]
+id = 562
+q = 'Who taught the younger children of Adam at school?'
+a = [
+  'they taught themselves',
+  'the elder children',
+  'specially appointed instructors',
+  'morontia visitors',
+  'seraphic guardians',
+  'Secondary Midwayers',
+  'Primary Midwayers',
+]
+right = ['the elder children']
+refs = ['74:6.7 «The Adamic children attended their own schools until they were sixteen, the younger being taught by the elder.»']
+
+[[question]]
+id = 563
+q = 'When Adam and Eve left the Garden, their family consisted of \ldots'
+a = [
+  '1 generation',
+  '2 generations',
+  '3 generations',
+  '4 generations',
+  '5 generations',
+  '6 generations',
+]
+right = ['4 generations']
+refs = ['74:6.2 «When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants.»']
+
+[[question]]
+id = 564
+q = 'When Adam and Eve left the Garden, their family consisted of \ldots'
+a = [
+  '989 pure\hyp{}line descendants',
+  '689 pure\hyp{}line descendants',
+  '2,011 pure\hyp{}line descendants',
+  '1,647 pure\hyp{}line descendants',
+  '2,912 pure\hyp{}line descendants',
+]
+right = ['1,647 pure\hyp{}line descendants']
+refs = ['74:6.2 «When Adam and Eve left the Garden, their family consisted of four generations numbering 1,647 pure-line descendants.»']
+
+[[question]]
+id = 565
+q = 'How long did Adam and Eve live in the Garden before the default?'
+a = [
+  '66 days',
+  '6 months',
+  '7 years',
+  '37 years',
+  '117 years',
+  '122 years',
+  '666 years',
+]
+right = ['117 years']
+refs = ['74:8.14 «Adam and Eve carried on in the Garden for one hundred and seventeen years when, through the impatience of Eve and the errors of judgment of Adam, they presumed to turn aside from the ordained way, speedily bringing disaster upon themselves and ruinous retardation upon the developmental progression of all Urantia.»']
+
+[[question]]
+id = 566
+q = 'How many children did Adam and Eve have before coming to this planet?'
+a = [
+  '12',
+  '100',
+  'none',
+  '3',
+]
+right = ['100']
+refs = ['74:1.5 «This Jerusem pair left behind them on the capital of Satania and elsewhere, one hundred offspring—fifty sons and fifty daughters»']

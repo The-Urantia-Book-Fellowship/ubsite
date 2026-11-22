@@ -1,0 +1,19 @@
+# Paper 23, The Solitary Messengers: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 23
+
+[[question]]
+id = 336
+q = 'What is the maximum velocity of an enseraphimed being?'
+a = [
+  '36,000 km/s',
+  '100,000 km/s',
+  '299,792 km/s',
+  '899,366 km/s',
+  '1,000,000 km/s',
+  'unlimited',
+]
+right = ['899,366 km/s']
+refs = ['23:2.22 «An enseraphimed being cannot possibly exceed the velocity of 558,840 Urantia miles in one second of your time.»']

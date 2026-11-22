@@ -1,0 +1,19 @@
+# Paper 130, On the Way to Rome: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 130
+gone = [717]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 718
+q = 'Why did Jesus not stop to say comforting words to a beggar in Naples?'
+a = [
+  'Because his parents were sinners',
+  'Because he was a great sinner',
+  'Because he was evil',
+  'Because he wasn’t interested',
+  'Because he was not of normal mind',
+]
+right = ['Because he was not of normal mind']
+refs = ['130:8.4 «What Jesus meant was that the man was not of normal mind; that he lacked the ability to respond to spirit leading.»']

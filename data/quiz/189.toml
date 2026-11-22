@@ -1,0 +1,97 @@
+# Paper 189, The Resurrection: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 189
+
+[[question]]
+id = 803
+q = 'What happened to the body of Jesus after his resurrection?'
+a = [
+  'removed from the planet by the angels',
+  'taken by the Jews and thrown into the pit for criminals',
+  'dissolved by the technique of dematerialization by the angels',
+  'stolen by the Apostles and buried privately',
+  'dissolved by the process of accelerated time by the angels',
+  'moved to Echmiadzin where it is now kept secretly',
+]
+right = ['dissolved by the process of accelerated time by the angels']
+refs = ['189:2.1 «We do not propose to employ our technique of dematerialization; we merely wish to invoke the process of accelerated time.»']
+
+[[question]]
+id = 804
+q = 'What was left in the tomb after the resurrection of Jesus?'
+a = [
+  'Nothing, it was empty',
+  'Linen sheet',
+  'Napkin, bandages, and a linen sheet',
+]
+right = ['Napkin, bandages, and a linen sheet']
+refs = ['189:4.6 «In the recess of stone where they had laid Jesus, Mary saw only the folded napkin where his head had rested and the bandages wherewith he had been wrapped lying intact and as they had rested on the stone before the celestial hosts removed the body. The covering sheet lay at the foot of the burial niche.»']
+
+[[question]]
+id = 805
+q = 'When did Urantia’s complete (planetary) dispensational roll calls (resurrections) take place?'
+a = [
+  'At the arrival of the Planetary Prince',
+  'At the time of Adam',
+  'At the mortal transit of Jesus',
+  'All three',
+]
+right = ['All three']
+refs = ['189:3.3 «The first occurred at the time of the arrival of the Planetary Prince, the second during the time of Adam, and this, the third, signalized the morontia resurrection, the mortal transit, of Jesus of Nazareth.»']
+
+[[question]]
+id = 806
+q = 'Which of these women returned to Jesus’ tomb after Sabbath to properly embalm him?'
+a = [
+  'Mary Magdalene',
+  'Mary Alpheus',
+  'Salome Zebedee',
+  'Joanna',
+  'Susanna',
+  'Mary the mother of Jesus',
+]
+right = [
+  'Mary Magdalene',
+  'Mary Alpheus',
+  'Salome Zebedee',
+  'Joanna',
+  'Susanna',
+]
+refs = ['189:4.4 «The women who went on this mission of anointing Jesus’ body were: Mary Magdalene, Mary the mother of the Alpheus twins, Salome the mother of the Zebedee brothers, Joanna the wife of Chuza, and Susanna the daughter of Ezra of Alexandria.»']
+
+[[question]]
+id = 807
+q = 'Who rolled away Jesus’ tombstone?'
+a = [
+  'Secondary Midwayers',
+  'The resurrected Jesus',
+  'Seraphim',
+  'Primary Midwayers',
+  'Melchizedeks',
+]
+right = ['Secondary Midwayers']
+refs = ['189:2.4 «As they made ready to remove the body of Jesus from the tomb preparatory to according it the dignified and reverent disposal of near-instantaneous dissolution, it was assigned the secondary Urantia midwayers to roll away the stones from the entrance of the tomb.»']
+
+[[question]]
+id = 808
+q = 'What did the guards see immediately after Jesus resurrected? '
+a = [
+  'Nothing but the stone moving by itself',
+  'Jesus walking out of the tomb',
+  'Mighty angels moving the stone away',
+]
+right = ['Nothing but the stone moving by itself']
+refs = ['189:2.4 «When the watching Jewish guards and the Roman soldiers, in the dim light of the morning, saw this huge stone begin to roll away from the entrance of the tomb, apparently of its own accord—without any visible means to account for such motion—they were seized with fear and panic, and they fled in haste from the scene.»']
+
+[[question]]
+id = 809
+q = 'Who else was resurrected at the time of Jesus’ resurrection?'
+a = [
+  'The two thieves crucified with him',
+  'The survivors of the human races since the days of Adam',
+  'One of the two thieves crucified with him',
+]
+right = ['The survivors of the human races since the days of Adam']
+refs = ['189:3.2 «Then all the survivors of the human races of Urantia who had fallen asleep since the days of Adam, and who had not already gone on to judgment, appeared in the resurrection halls of mansonia in readiness for morontia investiture.»']

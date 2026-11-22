@@ -1,0 +1,15 @@
+# Paper 91, The Evolution of Prayer: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 91
+
+[[question]]
+id = 630
+q = 'Which of these two came first?'
+a = [
+  'prayers',
+  'belief in spirits',
+]
+right = ['prayers']
+refs = ['91:0.3 «As an illustration of this, among certain Australian tribes primitive religious prayers antedated their belief in spirits and superhuman personalities.»']

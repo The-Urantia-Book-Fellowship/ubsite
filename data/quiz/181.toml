@@ -1,0 +1,18 @@
+# Paper 181, Final Admonitions and Warnings: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 181
+
+[[question]]
+id = 773
+q = 'Which disciple did Jesus instruct to remain close at hand from his arrest until the very end of the crucifixion?'
+a = [
+  'Peter',
+  'John Zebedee',
+  'James',
+  'Matthew',
+  'Thomas',
+]
+right = ['John Zebedee']
+refs = ['183:4.5 «Until the very end of the crucifixion, John Zebedee remained, as Jesus had directed him, always near at hand, and it was he who supplied David’s messengers with information from hour to hour which they carried to David at the garden camp, and which was then relayed to the hiding apostles and to Jesus’ family.»']

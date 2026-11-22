@@ -1,0 +1,91 @@
+# Paper 26, Ministering Spirits of the Central Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 26
+
+[[question]]
+id = 353
+v = 2
+q = 'How many subjects do the ascendant mortals study during the “elementary course” on the seventh circle of Havona under the pilgrim helpers?'
+a = [
+  '648',
+  '9,200',
+  '10,000',
+  '100,000',
+  '100,000,000',
+  '17,640,000',
+  'infinitely many',
+]
+right = ['17,640,000']
+refs = ['26:5.2 «These pilgrim helpers, functioning on the seventh circle of Havona worlds, conduct their work for the ascending mortals in three major divisions: first, the supreme understanding of the Paradise Trinity; second, the spiritual comprehension of the Father-Son partnership; and third, the intellectual recognition of the Infinite Spirit. Each of these phases of instruction is divided into seven branches of twelve minor divisions of seventy subsidiary groups; and each of these seventy subsidiary groupings of instruction is presented in one thousand classifications.»']
+
+[[question]]
+id = 354
+q = 'On which of the seven circles of Havona do the supremacy guides operate?'
+a = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+]
+right = ['6']
+refs = ['26:6.1 «Ascenders of space are designated “spiritual graduates” when translated from the seventh to the sixth circle and are placed under the immediate supervision of the supremacy guides.»']
+
+[[question]]
+id = 355
+q = 'On which of the seven circles of Havona do the Trinity guides operate?'
+a = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+]
+right = ['5']
+refs = ['26:7.1 «Trinity guides are the tireless ministers of the fifth circle of the Havona training of the advancing pilgrims of time and space.»']
+
+[[question]]
+id = 356
+q = 'On which of the seven circles of Havona do the Son finders operate?'
+a = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+]
+right = ['4']
+refs = ['26:7.6 «Seldom does the quest for the Infinite Spirit fail of consummation, and when their subjects have succeeded in this phase of the Deity adventure, the Trinity guides prepare to transfer them to the ministry of the Son finders on the fourth circle of Havona.»']
+
+[[question]]
+id = 357
+q = 'Do the candidates who failed the Deity adventure return to the superuniverse of their nativity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['26:8.5 «They never return to the superuniverse of their nativity, always to that supercreation most propitious for their retraining in preparation for the second Deity adventure.»']
+
+[[question]]
+id = 358
+q = 'On which of the seven circles of Havona do the Father guides operate?'
+a = [
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+]
+right = ['3']
+refs = ['26:9.1 «When the pilgrim soul attains the third circle of Havona, he comes under the tutelage of the Father guides, the older, highly skilled, and most experienced of the superaphic ministers.»']

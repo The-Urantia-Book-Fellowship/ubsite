@@ -1,0 +1,68 @@
+# Paper 6, The Eternal Son: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 6
+
+[[question]]
+id = 62
+q = 'Which of these is the capital of our local universe?'
+a = [
+  'Salvington',
+  'Edentia',
+  'Uversa',
+  'Jerusem',
+]
+right = ['Salvington']
+refs = ['15:7.7 «Salvington, the capital of Nebadon, your local universe, is surrounded by ten university clusters of forty-nine spheres each.»']
+
+[[question]]
+id = 63
+q = 'Does the Eternal Son fragmentize his nature like the Universal Father?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['6:5.5 «The Eternal Son, as an infinite and exclusively personal being, cannot fragmentize his nature, cannot distribute and bestow individualized portions of his selfhood upon other entities or persons as do the Universal Father and the Infinite Spirit.»']
+
+[[question]]
+id = 64
+q = 'Does the Eternal Son bestow personality?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['6:5.3 «The Eternal Son is thus a cocreator of personalities, but he bestows personality upon no being and of himself, alone, never creates personal beings.»']
+
+[[question]]
+id = 65
+q = 'Is the Eternal Son omnipotent?'
+a = [
+  'only in the spiritual realm',
+  'only in the physical realm',
+  'yes, in both physical and spiritual realms',
+]
+right = ['only in the spiritual realm']
+refs = ['6:4.2 «The Son is omnipotent only in the spiritual realm.»']
+
+[[question]]
+id = 66
+q = 'Is the Eternal Son omniscient (all-knowing)?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['6:4.7 «In the realms of knowledge, omniscience, we cannot distinguish between the First and Second Sources; like the Father, the Son knows all»']
+
+[[question]]
+id = 67
+q = 'Can the Creator Sons transmit the prerogatives of creatorship?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['6:5.4 «Therefore, when the Father and the Son unite to personalize a Creator Son, they achieve their purpose; but the Creator Son thus brought into existence is never able to transmit or delegate the prerogatives of creatorship to the various orders of Sons which he may subsequently create»']

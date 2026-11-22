@@ -1,0 +1,44 @@
+# Paper 188, The Time of the Tomb: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 188
+
+[[question]]
+id = 800
+q = 'Why was Jesus buried in haste?'
+a = [
+  'Because it was the Sabbath and preparations were on for the week of Passover',
+  'It was the Jewish custom',
+  'It was dark',
+  'It was the Roman custom',
+]
+right = ['Because it was the Sabbath and preparations were on for the week of Passover']
+refs = ['188:1.6 «There was considerable hurry and haste about the burial of Jesus because this was preparation day and the Sabbath was drawing on apace.»']
+
+[[question]]
+id = 801
+q = 'How many stones were set in front of Jesus’ tomb to stop his followers taking his body?'
+a = [
+  '2',
+  '7',
+  '10',
+  '12',
+  '24',
+]
+right = ['2']
+refs = ['188:2.3 «These men rolled yet another stone before the tomb and set the seal of Pilate on and around these stones, lest they be disturbed without their knowledge.»']
+
+[[question]]
+id = 802
+q = 'How many guards were placed around Jesus’ tomb?'
+a = [
+  '8 Roman guards',
+  '5 Roman guards and 3 Jewish guards',
+  'a Roman cohort',
+  'a Roman legion',
+  '10 Roman soldiers and 10 Jewish guards',
+  '12 Roman soldiers and 7 Jewish guards',
+]
+right = ['10 Roman soldiers and 10 Jewish guards']
+refs = ['188:2.3 «They went back to the temple, secured ten of their own guards, and then marched out to Joseph’s tomb with these ten Jewish guards and ten Roman soldiers, even on this Sabbath morning, to set them as watchmen before the tomb.»']

@@ -1,0 +1,89 @@
+# Paper 95, The Melchizedek Teachings in the Levant: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 95
+
+[[question]]
+id = 642
+q = 'In 6,000 years only \ldots\ great prophets arose among the Egyptians.'
+a = [
+  '2',
+  '3',
+  '4',
+  '5',
+  '10',
+  '12',
+  '28',
+]
+right = ['4']
+refs = ['95:3.5 «In six thousand years only four great prophets arose among the Egyptians.»']
+
+[[question]]
+id = 643
+q = 'The four great prophets that appeared in Egypt are \ldots'
+a = [
+  'Moses',
+  'Amenemope',
+  'Ikhnaton',
+  'Okhban',
+  'Onagar',
+  'Joseph',
+  'Abraham',
+  'Jeremiah',
+]
+right = [
+  'Moses',
+  'Amenemope',
+  'Ikhnaton',
+  'Okhban',
+]
+refs = ['95:3.5 «Amenemope they followed for a season; Okhban they murdered; Ikhnaton they accepted but halfheartedly for one short generation; Moses they rejected.»']
+
+[[question]]
+id = 644
+q = 'Which evolutionary religion perpetuated the teaching of Dalamatia and Eden about the Seven Master Spirits?'
+a = [
+  'Zoroastrianism',
+  'Judaism',
+  'Christianity',
+  'Islam',
+  'Buddhism',
+  'Hinduism',
+  'Jainism',
+  'Sikhism',
+]
+right = ['Zoroastrianism']
+refs = ['95:6.5 «Zoroastrianism is the only Urantian creed that perpetuates the Dalamatian and Edenic teachings about the Seven Master Spirits.»']
+
+[[question]]
+id = 645
+q = 'How many psalms (credited to Hebrew authorship) were written by the Egyptian prophet-king Ikhnaton?'
+a = [
+  'all of them',
+  'none',
+  '1',
+  '2',
+  '4',
+  '5',
+  '12',
+  '16',
+  '28',
+]
+right = ['12']
+refs = ['95:5.7 «Ikhnaton also wrote one hundred and thirty-seven hymns, twelve of which are now preserved in the Old Testament Book of Psalms, credited to Hebrew authorship.»']
+
+[[question]]
+id = 646
+q = 'Who is the author of chapters 15,17,20,22:17-24:22 of the “Hebrew” book of Proverbs?'
+a = [
+  'Amenemope the Egyptian',
+  'Ikhnaton the Egyptian',
+  'Okhban the Egyptian',
+  'Solomon',
+  'David',
+  'Moses',
+  'Isaiah',
+]
+right = ['Amenemope the Egyptian']
+refs = ['95:4.5 «In the Book of Hebrew Proverbs, chapters fifteen, seventeen, twenty, and chapter twenty-two, verse seventeen, to chapter twenty-four, verse twenty-two, are taken almost verbatim from Amenemope’s Book of Wisdom.»']

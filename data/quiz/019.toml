@@ -1,0 +1,179 @@
+# Paper 19, The Co-ordinate Trinity-Origin Beings: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 19
+
+[[question]]
+id = 306
+q = 'Trinity Teacher Sons are devoted to \ldots'
+a = [
+  'conscious enlightenment of universe creatures',
+  'subconscious enlightenment of universe creatures',
+  'superconscious enlightenment of universe creatures',
+]
+right = ['conscious enlightenment of universe creatures']
+refs = ['19:5.9 «We know that the Trinity Teacher Sons are devoted to the conscious enlightenment of universe creatures.»']
+
+[[question]]
+id = 307
+q = 'Inspired Trinity Spirits are devoted to \ldots'
+a = [
+  'conscious enlightenment of universe creatures',
+  'subconscious enlightenment of universe creatures',
+  'superconscious enlightenment of universe creatures',
+]
+right = ['superconscious enlightenment of universe creatures']
+refs = ['19:5.9 «I have arrived at the settled conclusion that the Inspired Trinity Spirits, by superconscious techniques, are also functioning as teachers of the realms.»']
+
+[[question]]
+id = 308
+q = 'How many Universal Censors are there in existence?'
+a = [
+  '8 billion',
+  '7 billion',
+  '1 billion',
+  '800000',
+  '700000',
+]
+right = ['8 billion']
+refs = ['19:4.1 «There are exactly eight billion Universal Censors in existence.»']
+
+[[question]]
+id = 309
+q = 'How many Universal Censors are assigned to each of the seven superuniverses?'
+a = [
+  '1 billion',
+  '3',
+  '3 billion',
+  '1',
+]
+right = ['1 billion']
+refs = ['19:4.3 «One billion Censors are assigned to each of the seven superuniverses.»']
+
+[[question]]
+id = 310
+q = 'How many Universal Censors are assigned to the central universe?'
+a = [
+  '1 billion',
+  '3',
+  '3 billion',
+  '1',
+  'none',
+]
+right = ['1 billion']
+refs = ['19:4.2 «One Censor is commissioned on each of the billion worlds of the central universe, being attached to the planetary administration of the resident Eternal of Days.»']
+
+[[question]]
+id = 311
+q = 'How many Perfectors of Wisdom are there in existence?'
+a = [
+  '7 billion',
+  '8 billion',
+  '1 billion',
+  '800000',
+  '700000',
+]
+right = ['7 billion']
+refs = ['19:2.1 «There are exactly seven billion of these beings in existence, and one billion are assigned to each of the seven superuniverses.»']
+
+[[question]]
+id = 312
+q = 'How many Perfectors of Wisdom are assigned to each of the seven superuniverses?'
+a = [
+  '1 billion',
+  '3',
+  '3 billion',
+  '1',
+]
+right = ['1 billion']
+refs = ['19:2.1 «There are exactly seven billion of these beings in existence, and one billion are assigned to each of the seven superuniverses.»']
+
+[[question]]
+id = 313
+q = 'How many Perfectors of Wisdom are assigned to the central universe?'
+a = [
+  '1 billion',
+  '3',
+  '3 billion',
+  '1',
+  'none',
+]
+right = ['none']
+refs = ['19:4.2 «Neither Perfectors of Wisdom nor Divine Counselors are thus permanently attached to the Havona administrations, nor do we altogether understand why Universal Censors are stationed in the central universe.»']
+
+[[question]]
+id = 314
+q = 'How many Universal Censors are commissioned on each of the billion worlds of the central universe?'
+a = [
+  '1',
+  '3',
+  '7',
+  '10',
+  '1000',
+  '21',
+]
+right = ['1']
+refs = ['19:4.2 «One Censor is commissioned on each of the billion worlds of the central universe, being attached to the planetary administration of the resident Eternal of Days.»']
+
+[[question]]
+id = 315
+q = 'How many Divine Counselors are there in existence?'
+a = [
+  '21 billion',
+  '8 billion',
+  '1 billion',
+  '800000',
+  '700000',
+]
+right = ['21 billion']
+refs = ['19:3.1 «There are twenty-one billion Counselors in service, and three billion are assigned to each superuniverse.»']
+
+[[question]]
+id = 316
+q = 'How many Divine Counselors are assigned to each of the seven superuniverses?'
+a = [
+  '3 billion',
+  '3',
+  '1 billion',
+  '1',
+]
+right = ['3 billion']
+refs = ['19:3.1 «There are twenty-one billion Counselors in service, and three billion are assigned to each superuniverse.»']
+
+[[question]]
+id = 317
+q = 'Which of these are known as the Stationary Sons of the Trinity?'
+a = [
+  'Universal Censors',
+  'Perfectors of Wisdom',
+  'Divine Counselors',
+  'Ancients of Days',
+  'Trinity Teacher Sons',
+  'Inspired Trinity Spirits',
+  'Trinitized Custodians',
+  'Trinitized Sons of Perfection',
+]
+right = [
+  'Universal Censors',
+  'Perfectors of Wisdom',
+  'Divine Counselors',
+  'Ancients of Days',
+]
+refs = [
+  '19:4.8 «Perfectors of Wisdom, Divine Counselors, and Universal Censors, together with the seven orders of Supreme Trinity Personalities, constitute those ten groups which have been sometimes designated Stationary Sons of the Trinity.»',
+  '30:1.7-17',
+]
+
+[[question]]
+id = 318
+q = 'How many Stationary Sons of the Trinity are there in existence?'
+a = [
+  'over 37 billion',
+  'about 1 billion',
+  'about 7 billion',
+  'over 1 trillion',
+  'over 70 trillion',
+]
+right = ['over 37 billion']
+refs = ['19:4.8 «Their numbers slightly exceed thirty-seven billion.»']

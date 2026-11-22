@@ -1,0 +1,47 @@
+# Paper 126, The Two Crucial Years: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 126
+
+[[question]]
+id = 709
+q = 'How many siblings did Jesus have (including Amos, who died at an early age)?'
+a = [
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+]
+right = ['8']
+refs = ['127:2.8 «He adhered to the terms of his original plea, maintaining that his first duty was to his family, that a widowed mother and eight brothers and sisters needed something more than mere money could buy»']
+
+[[question]]
+id = 710
+q = 'Which book influenced Jesus to adopt as his inaugural title “the Son of Man”?'
+a = [
+  'Book of Enoch',
+  'Daniel',
+  'Ezekiel',
+]
+right = ['Book of Enoch']
+refs = ['126:3.6 «In the course of this year Jesus found a passage in the so-called Book of Enoch which influenced him in the later adoption of the term “Son of Man” as a designation for his bestowal mission on Urantia.»']
+
+[[question]]
+id = 711
+q = 'How old was Jesus when he assumed family responsibility following the death of his father?'
+a = [
+  '13',
+  '14',
+  '17',
+  '18',
+  '20',
+  '30',
+]
+right = ['14']
+refs = ['126:2.2 «This carpenter lad, now just past fourteen years of age, awakened to the realization that he had not only to fulfill the commission of his heavenly Father to reveal the divine nature on earth and in the flesh, but that his young human nature must also shoulder the responsibility of caring for his widowed mother»']

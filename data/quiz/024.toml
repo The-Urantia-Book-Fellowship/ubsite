@@ -1,0 +1,183 @@
+# Paper 24, Higher Personalities of the Infinite Spirit: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 24
+
+[[question]]
+id = 337
+q = 'Do the Census Directors function on Paradise?'
+a = [
+  'Yes, they keep track of all will creatures present on Paradise',
+  'No, because on Paradise knowledge is inherent --- the Deities know all things',
+  'Yes, they keep track of all will creatures present on Paradise and Havona worlds',
+]
+right = ['No, because on Paradise knowledge is inherent --- the Deities know all things']
+refs = ['24:2.2 «But they do not function on Paradise; there is no need for them there. On Paradise knowledge is inherent; the Deities know all things.»']
+
+[[question]]
+id = 338
+q = 'Do the Census Directors function in Havona?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['24:2.3 «Seven Census Directors operate in Havona, one being stationed on the pilot world of each Havona circuit.»']
+
+[[question]]
+id = 339
+q = 'How many Census Directors are stationed in Havona?'
+a = [
+  'seven',
+  'twelve',
+  'ten',
+  'one billion',
+  'seven billion',
+]
+right = ['seven']
+refs = ['24:2.3 «Seven Census Directors operate in Havona, one being stationed on the pilot world of each Havona circuit.»']
+
+[[question]]
+id = 340
+q = 'Who or what is Malvorian?'
+a = [
+  'Name of a geological era of Urantia',
+  'Name of the first Graduate Guide',
+  'Name of the Chief of the order of Graduate Guides',
+  'Name of the first pilgrim of time who reached Havona',
+  'Name of the Graduate Guide who accompanied the first pilgrim of time who reached Havona',
+]
+right = [
+  'Name of the first Graduate Guide',
+  'Name of the Chief of the order of Graduate Guides',
+  'Name of the Graduate Guide who accompanied the first pilgrim of time who reached Havona',
+]
+refs = ['24:6.4 «The instant he arrived on the pilot world of the outer circuit, he was met with friendly greetings by Malvorian, the first of the Graduate Guides and now the chief of their supreme council and the director of their vast educational organization.»']
+
+[[question]]
+id = 341
+q = 'Which of these was the first pilgrim of time who attained Havona?'
+a = [
+  'Orvonon',
+  'Onamonalonton',
+  'Onagar',
+  'Moses',
+  'Orlandof',
+  'Porshunta',
+  'Grandfanda',
+  'Jesus of Nazareth',
+]
+right = ['Grandfanda']
+refs = ['24:6.8 «The name of this pilgrim discoverer of Havona is Grandfanda, and he hailed from planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one.»']
+
+[[question]]
+id = 342
+q = 'From which superuniverse was the first pilgrim of time?'
+a = [
+  'number one',
+  'number two',
+  'number three',
+  'number four',
+  'number five',
+  'number six',
+  'number seven',
+]
+right = ['number one']
+refs = ['24:6.8 «The name of this pilgrim discoverer of Havona is Grandfanda, and he hailed from planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one.»']
+
+[[question]]
+id = 343
+q = 'What was the native planet of Grandfanda?'
+a = [
+  'planet 1, system 1, constellation 1, local universe 1, superuniverse 1',
+  'planet 341, system 84, constellation 62, local universe 1,131, superuniverse 1',
+  'planet 40, system 24, constellation 299, local universe 3,123, superuniverse 1',
+  'planet 340, system 4, constellation 2, local universe 1,312, superuniverse 2',
+  'planet 12, system 11, constellation 85, local universe 17, superuniverse 7',
+  'Mars',
+  'Venus',
+  'Urantia',
+]
+right = ['planet 341, system 84, constellation 62, local universe 1,131, superuniverse 1']
+refs = ['24:6.8 «The name of this pilgrim discoverer of Havona is Grandfanda, and he hailed from planet 341 of system 84 in constellation 62 of local universe 1,131 situated in superuniverse number one.»']
+
+[[question]]
+id = 344
+q = 'Which of these beings are endowed with antigravity?'
+a = [
+  'Solitary Messengers',
+  'Census Directors',
+  'Universe Circuit Supervisors',
+  'Associate Inspectors',
+  'Supreme Power Centers',
+  'Personal Aids of the Infinite Spirit',
+]
+right = [
+  'Solitary Messengers',
+  'Census Directors',
+  'Universe Circuit Supervisors',
+  'Supreme Power Centers',
+  'Personal Aids of the Infinite Spirit',
+]
+refs = [
+  '24:0.10 «Solitary Messengers, Circuit Supervisors, Census Directors, and the Personal Aids are characterized by the possession of tremendous endowments of antigravity.»',
+  '42:4.4',
+]
+
+[[question]]
+id = 345
+q = 'Does the Infinite Spirit transmit the power of antigravity to other personalities?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['9:3.2 «And this unique attribute is transmissible to certain of the higher personalities of the Infinite Spirit.»']
+
+[[question]]
+id = 346
+q = 'When do the Census Directors register the existence of a new will creature?'
+a = [
+  'at the age of 5 years',
+  'at the first act of will',
+  'at the age of 7 years',
+  'at birth',
+  'at conception',
+  'just before death',
+]
+right = ['at the first act of will']
+refs = ['24:2.8 «Census Directors register the existence of a new will creature when the first act of will is performed; they indicate the death of a will creature when the last act of will takes place.»']
+
+[[question]]
+id = 347
+q = 'Do the Census Directors register an act of partial emergence of will in the higher animals?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['24:2.8 «The partial emergence of will observed in the reactions of certain of the higher animals does not belong to the domain of the Census Directors.»']
+
+[[question]]
+id = 348
+q = 'Who is the chief of all Orvonton Census Directors?'
+a = [
+  'Usatia',
+  'Univitatia',
+  'The Father Census Director',
+  'Master Spirit Number Seven',
+  'one of the Ancients of Days',
+]
+right = ['Usatia']
+refs = ['24:2.5 «And this number consists entirely of those assignable to local universes; it does not include the personal staff of Usatia, the superuniverse chief of all Orvonton directors.»']
+
+[[question]]
+id = 349
+q = 'Is Usatia directly attuned to the registration of intelligent will of all creatures in Orvonton?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['24:2.5 «Usatia, like the other superuniverse chiefs, is not directly attuned to the registration of intelligent will.»']

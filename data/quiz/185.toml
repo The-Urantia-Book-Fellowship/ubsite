@@ -1,0 +1,17 @@
+# Paper 185, The Trial Before Pilate: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 185
+
+[[question]]
+id = 786
+q = 'When was Jesus of Nazareth murdered by the Jews?'
+a = [
+  'April 1, A.D.~30',
+  'April 7, A.D.~30',
+  'April 15, A.D.~33',
+  'April 14, A.D.~30',
+]
+right = ['April 7, A.D.~30']
+refs = ['185:0.1 «Shortly after six o’clock on this Friday morning, April 7, A.D. 30, Jesus was brought before Pilate, the Roman procurator who governed Judea, Samaria, and Idumea under the immediate supervision of the legatus of Syria.»']

@@ -1,0 +1,17 @@
+# Paper 117, God the Supreme: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 117
+
+[[question]]
+id = 673
+q = 'Love is \ldots'
+a = [
+  'living and flexible',
+  'best known by its spiritual flavor',
+  'coherent, beauty attractive, goodness stabilizing',
+  'alive, free, thrilling, and always moving',
+]
+right = ['alive, free, thrilling, and always moving']
+refs = ['117:6.10 «Love is dynamic. It can never be captured; it is alive, free, thrilling, and always moving.»']

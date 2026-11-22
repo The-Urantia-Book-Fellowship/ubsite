@@ -1,0 +1,28 @@
+# Paper 43, The Constellations: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 43
+
+[[question]]
+id = 419
+q = 'Who was the “Most High”, which Melchizedek is said to be the priest of?'
+a = [
+  'Yahweh, the Lord God of Israel',
+  'Father Melchizedek',
+  'Vorondadek observer',
+  'Michael of Nebadon',
+]
+right = ['Vorondadek observer']
+refs = ['43:5.17']
+
+[[question]]
+id = 420
+q = 'At which point in our ascension will we be evolving from a morontia being (more material than spiritual) to the status of a true spirit?'
+a = [
+  'From Mansion world no. 7',
+  'From the Finaliter’s world',
+  'From the Salvington spheres',
+]
+right = ['From the Salvington spheres']
+refs = ['43:9.2 «On the Salvington spheres you will be evolving from a morontia being to the status of a true spirit; you will be more spiritual than material.»']

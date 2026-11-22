@@ -1,0 +1,35 @@
+# Paper 44, The Celestial Artisans: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 44
+
+[[question]]
+id = 421
+q = 'How many basic symbols are there in the alphabet of the local universe of Nebadon?'
+a = [
+  '22',
+  '24',
+  '48',
+  '70',
+  '1000',
+  '1024',
+  '100,000',
+]
+right = ['48']
+refs = ['44:4.4 «The language of Nebadon is not quite so elaborate, the basic symbols, or alphabet, being forty-eight in number.»']
+
+[[question]]
+id = 422
+q = 'How many basic symbols are there in the alphabet of the superuniverse of Orvonton?'
+a = [
+  '22',
+  '24',
+  '48',
+  '70',
+  '1000',
+  '1024',
+  '100,000',
+]
+right = ['70']
+refs = ['44:4.4 «The concept symbols of Uversa embrace more than a billion characters, although the basic alphabet contains only seventy symbols.»']

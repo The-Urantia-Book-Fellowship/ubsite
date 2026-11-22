@@ -1,0 +1,50 @@
+# Paper 92, The Later Evolution of Religion: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 92
+
+[[question]]
+id = 631
+q = 'Which is the most recent of all evolutionary (man-made) religions?'
+a = [
+  'Buddhism',
+  'Christianity',
+  'Islam',
+  'Sikhism',
+  'Zoroastrianism',
+  'Shinto',
+  'Jainism',
+  'Judaism',
+  'Hinduism',
+]
+right = ['Sikhism']
+refs = ['92:6.13 «Sikhism—the most recent.»']
+
+[[question]]
+id = 632
+q = 'Which is the most ancient of all evolutionary (man-made) religions?'
+a = [
+  'Buddhism',
+  'Christianity',
+  'Islam',
+  'Sikhism',
+  'Zoroastrianism',
+  'Shinto',
+  'Jainism',
+  'Judaism',
+  'Hinduism',
+]
+right = ['Hinduism']
+refs = ['92:6.3 «Hinduism—the most ancient.»']
+
+[[question]]
+id = 633
+q = 'The combined teachings of which religions were synthesized by Nanak and his followers into Sikhism?'
+a = [
+  'Islam, Hinduism, and Buddhism',
+  'Islam, Hinduism, and Christianity',
+  'Islam, Zoroastrianism, and Mithraism',
+]
+right = ['Islam, Hinduism, and Buddhism']
+refs = ['92:5.15 «In the Orient the combined teachings of Islam, Hinduism, and Buddhism were synthesized by Nanak and his followers into Sikhism, one of the most advanced religions of Asia.»']

@@ -36,15 +36,17 @@ QUERIES = [
     ("SRT changes considered", "SELECT COUNT(*) FROM srt_item", 319),
     ("  1955 notes with their reason",
      "SELECT COUNT(*) FROM footnote WHERE srt_item_id IS NOT NULL", 167),
-    # The British Study Edition's quiz (build/quiz.py), at study d6c3206: 51 of
-    # its questions have more than one right answer, which a quiz that took one
-    # answer would mark wrong when right.  126 papers have questions; 125 have
-    # one asked, since Paper 138's only question was dropped (Tigran, 2026-10-30).
-    ("quiz questions",      "SELECT COUNT(*) FROM quiz_question", 817),
+    # The quiz (build/quiz.py), data/quiz/: the British Study Edition's 817
+    # questions, converted on 2026-11-22, less the one it asked twice (750)
+    # and 33 of the 40 dropped in 2026-10, deleted that day; and Paper 1's 28,
+    # written for the site.  37 have more than one right answer, which a quiz
+    # that took one answer would mark wrong when right.  125 papers have
+    # questions, every one asked but the Foreword's seven waiting for a figure.
+    ("quiz questions",      "SELECT COUNT(*) FROM quiz_question", 811),
     ("  on papers",         "SELECT COUNT(*) FROM quiz_paper", 125),
-    ("  more than one right", "SELECT COUNT(*) FROM quiz_question WHERE multi", 51),
-    ("  answers",           "SELECT COUNT(*) FROM quiz_answer", 3686),
-    ("    right",           "SELECT COUNT(*) FROM quiz_answer WHERE right", 962),
+    ("  more than one right", "SELECT COUNT(*) FROM quiz_question WHERE multi", 37),
+    ("  answers",           "SELECT COUNT(*) FROM quiz_answer", 3621),
+    ("    right",           "SELECT COUNT(*) FROM quiz_answer WHERE right", 891),
     ("  reviewed",          "SELECT COUNT(*) FROM quiz_question WHERE state <> '-'", None),
     ("index entries",       "SELECT COUNT(*) FROM index_entry", None),
     ("citations",           "SELECT COUNT(*) FROM citation", None),
@@ -197,7 +199,7 @@ INVARIANTS = [
     ("no backslash in the quiz",
      """SELECT (SELECT COUNT(*) FROM quiz_question WHERE text GLOB '*\\*')
              + (SELECT COUNT(*) FROM quiz_answer WHERE text GLOB '*\\*')"""),
-    ("the study edition's commit recorded, where the quiz is read (missing)",
+    ("the study edition's commit recorded, where a quiz question's note is found (missing)",
      """SELECT (SELECT COUNT(*) > 0 FROM quiz_question)
              - (SELECT COUNT(*) FROM build_source WHERE repo = 'study')"""),
     # The footer and /healthz name these commits; a build that cannot is not shipped.

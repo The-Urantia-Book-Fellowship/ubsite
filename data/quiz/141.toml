@@ -1,0 +1,17 @@
+# Paper 141, Beginning the Public Work: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 141
+
+[[question]]
+id = 757
+q = 'After which event did Jesus say that “evil spirits shall no more molest men”?'
+a = [
+  'At Pentecost after the pouring out of his Spirit of Truth',
+  'After the temptation on Mount Hermon',
+  'He didn’t say it',
+  'At his baptism',
+]
+right = ['At Pentecost after the pouring out of his Spirit of Truth']
+refs = ['141:4.8 «But he many times said to them, alluding to these evil spirits: “They shall no more molest men when I shall have ascended to my Father in heaven, and after I shall have poured out my spirit upon all flesh in those times when the kingdom will come in great power and spiritual glory.”»']

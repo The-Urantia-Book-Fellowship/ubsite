@@ -1,0 +1,113 @@
+# Paper 66, The Planetary Prince of Urantia: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 66
+
+[[question]]
+id = 521
+q = 'What was the name of the city of the Planetary Prince Caligastia?'
+a = [
+  'Babylon the Great',
+  'Akkad',
+  'Dalamatia',
+  'Jerusalem',
+  'Eden',
+]
+right = ['Dalamatia']
+refs = ['66:3.3 «This world center of culture was named Dalamatia in honor of Daligastia.»']
+
+[[question]]
+id = 522
+q = 'Where was the city of Dalamatia located?'
+a = [
+  'Egypt',
+  'Turkey',
+  'Armenia',
+  'Russia',
+  'Africa',
+  'Mesopotamia',
+  'North America',
+  'Australia',
+]
+right = ['Mesopotamia']
+refs = ['66:3.1 «The headquarters of the Planetary Prince was situated in the Persian Gulf region of those days, in the district corresponding to later Mesopotamia.»']
+
+[[question]]
+id = 523
+q = 'What or who is a fandor?'
+a = [
+  'A kind of fish',
+  'A kind of bird',
+  'A kind of lizard',
+  'A kind of snake',
+  'A kind of angel',
+]
+right = ['A kind of bird']
+refs = ['66:5.6 «Bon’s group were successful in training the great fandors as passenger birds, but they became extinct more than thirty thousand years ago.»']
+
+[[question]]
+id = 524
+q = 'Which of these were employed as passenger birds?'
+a = [
+  'ostriches',
+  'fandors',
+  'eagles',
+  'pigeons',
+  'crows',
+]
+right = ['fandors']
+refs = ['66:5.6 «Bon’s group were successful in training the great fandors as passenger birds, but they became extinct more than thirty thousand years ago.»']
+
+[[question]]
+id = 525
+q = 'When did fandors become extinct?'
+a = [
+  '30,000+ years ago',
+  '50,000+ years ago',
+  '150,000+ years ago',
+  '250,000+ years ago',
+  '1,000,000+ years ago',
+]
+right = ['30,000+ years ago']
+refs = ['66:5.6 «Bon’s group were successful in training the great fandors as passenger birds, but they became extinct more than thirty thousand years ago.»']
+
+[[question]]
+id = 526
+q = 'How long did it take to spread the news of the arrival of the Planetary Prince Caligastia around the world?'
+a = [
+  '1000 years',
+  '100 years',
+  '500 years',
+  '50,000 years',
+  '25 years',
+]
+right = ['1000 years']
+refs = ['66:4.1 «While it required almost a thousand years for the news to spread abroad, those tribes near the Mesopotamian headquarters were tremendously influenced by the teachings and conduct of the one hundred new sojourners on Urantia.»']
+
+[[question]]
+id = 527
+q = 'What is the origin of the custom of nonflesh diet?'
+a = [
+  'Caligastia 100',
+  'Adam and Eve',
+  'Moses',
+  'the Egyptians',
+  'the Babylonians',
+]
+right = ['Caligastia 100']
+refs = ['66:4.7 «The practice of subsisting on a nonflesh diet dates from the times of the Caligastia one hundred, for this custom spread near and far to affect the eating habits of many surrounding tribes, groups of origin in the once exclusively meat-eating evolutionary races.»']
+
+[[question]]
+id = 528
+v = 2
+q = 'At what age did the graduates of Dalamatia school become eligible for marriage?'
+a = [
+  '13--15',
+  '16--18',
+  '19--21',
+  '22--25',
+  '26--30',
+]
+right = ['16--18']
+refs = ['66:7.5 «They were favored with the discipline and training of these superparents; and then, after three years in the schools of the Prince (they entered from thirteen to fifteen), they were eligible for marriage and ready to receive their commissions as emissaries of the Prince to the needy tribes of their respective races.»']

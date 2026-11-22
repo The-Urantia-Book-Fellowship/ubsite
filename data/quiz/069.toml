@@ -1,0 +1,30 @@
+# Paper 69, Primitive Human Institutions: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 69
+
+[[question]]
+id = 533
+q = 'When did the aborigines of Australia abolish slavery?'
+a = [
+  'XV century',
+  'XIX century',
+  'XX century',
+  'never had slaves',
+]
+right = ['never had slaves']
+refs = ['69:8.7 «The backward tribes of ancient times, like the native Australians of today, never had slaves.»']
+
+[[question]]
+id = 534
+q = 'Who was the first slave on our planet?'
+a = [
+  'woman',
+  'black man',
+  'white man',
+  'yellow man',
+  'red man',
+]
+right = ['woman']
+refs = ['69:8.1 «Woman was the first slave, a family slave.»']

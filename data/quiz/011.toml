@@ -1,0 +1,273 @@
+# Paper 11, The Eternal Isle of Paradise: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 11
+gone = [111]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 92
+q = 'How many outer space levels are there?'
+a = [
+  '3',
+  '4',
+  '7',
+  '12',
+  '1',
+]
+right = ['4']
+refs = ['12:1.16 «The central universe is the creation of eternity; the seven superuniverses are the creations of time; the four outer space levels are undoubtedly destined to eventuate-evolve the ultimacy of creation.»']
+
+[[question]]
+id = 93
+q = 'Which area of the upper Paradise does the Father reside in?'
+a = [
+  'Deity presence',
+  'Most Holy Sphere',
+  'Holy Area',
+]
+right = ['Deity presence']
+refs = ['11:1.1 «The personal presence of the Universal Father is resident at the very center of the upper surface of this well-nigh circular, but not spherical, abode of the Deities.»']
+
+[[question]]
+id = 94
+q = 'How long is the complete cycle of space respiration?'
+a = [
+  '2 billion years',
+  '1 billion years',
+  '100 billion years',
+  '500 million years',
+  '6000 years',
+]
+right = ['2 billion years']
+refs = ['11:6.5 «It thus requires a little over two billion Urantia years to complete the entire expansion-contraction cycle.»']
+
+[[question]]
+id = 95
+q = 'Which of these are the three planes or domains of activity in Paradise?'
+a = [
+  'Upper Paradise',
+  'Nether Paradise',
+  'Peripheral Paradise',
+  'Central Paradise',
+  'Inner Paradise',
+]
+right = [
+  'Upper Paradise',
+  'Nether Paradise',
+  'Peripheral Paradise',
+]
+refs = ['11:2.8 «We speak of that surface of Paradise which is occupied with personality activities as the upper side, and the opposite surface as the nether side. The periphery of Paradise provides for activities that are not strictly personal or nonpersonal.»']
+
+[[question]]
+id = 96
+q = 'Which plane of Paradise is dominated by the Trinity?'
+a = [
+  'Upper',
+  'Nether',
+  'Peripheral',
+]
+right = ['Upper']
+refs = ['11:2.8 «The Trinity seems to dominate the personal or upper plane, the Unqualified Absolute the nether or impersonal plane.»']
+
+[[question]]
+id = 97
+q = 'How many grand spheres of activity are on upper Paradise?'
+a = [
+  '3',
+  '7',
+  '12',
+  '24',
+  '4',
+]
+right = ['3']
+refs = ['11:3.1 «On upper Paradise there are three grand spheres of activity, the Deity presence, the Most Holy Sphere, and the Holy Area.»']
+
+[[question]]
+id = 98
+q = 'How many planes or domains of activity are there in Paradise?'
+a = [
+  '3',
+  '4',
+  '7',
+  '12',
+  'Infinitely many',
+]
+right = ['3']
+refs = ['11:2.4 «The central Isle is geographically divided into three domains of activity»']
+
+[[question]]
+id = 99
+q = 'Which of these are the grand spheres of activity on upper Paradise?'
+a = [
+  'Most Holy Sphere',
+  'Holy Area',
+  'Deity presence',
+  'Trinity Center',
+]
+right = [
+  'Most Holy Sphere',
+  'Holy Area',
+  'Deity presence',
+]
+refs = ['11:3.1 «On upper Paradise there are three grand spheres of activity, the Deity presence, the Most Holy Sphere, and the Holy Area.»']
+
+[[question]]
+id = 100
+q = 'Is the Most Holy Sphere of Paradise \ldots'
+a = [
+  'wholly spiritual',
+  'wholly material',
+  'partly spiritual and partly material',
+  'neither spiritual nor material',
+]
+right = ['wholly spiritual']
+refs = ['11:3.1 «This realm is wholly spiritual, and you are almost wholly material.»']
+
+[[question]]
+id = 101
+q = 'Is it possible to establish absolute direction in the master universe?'
+a = [
+  'No, it is isotropic',
+  'Yes, using the out-pressure of force-energy at the north end of the Isle of Paradise',
+  'Unknown',
+]
+right = ['Yes, using the out-pressure of force-energy at the north end of the Isle of Paradise']
+refs = ['11:2.3 «These differences in dimensions, taken in connection with its stationary status and the greater out-pressure of force-energy at the north end of the Isle, make it possible to establish absolute direction in the master universe.»']
+
+[[question]]
+id = 102
+q = 'Where does space seemingly originate?'
+a = [
+  'just below nether Paradise',
+  'just above upper Paradise',
+  'around peripheral Paradise',
+]
+right = ['just below nether Paradise']
+refs = ['11:2.11 «Roughly: space seemingly originates just below nether Paradise; time just above upper Paradise.»']
+
+[[question]]
+id = 103
+q = 'Is motion inherent or volitional on Paradise?'
+a = [
+  'inherent',
+  'volitional',
+]
+right = ['volitional']
+refs = ['11:2.11 «Motion is not inherent on Paradise; it is volitional.»']
+
+[[question]]
+id = 104
+q = 'Can the concept of distance be applied to locations on Paradise?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['11:2.11 «But the concept of distance, even absolute distance, has very much meaning as it may be applied to relative locations on Paradise.»']
+
+[[question]]
+id = 105
+q = 'Can the concept of space be applied to locations on Paradise?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['11:2.11 «Paradise is nonspatial; hence its areas are absolute and therefore serviceable in many ways beyond the concept of mortal mind.»']
+
+[[question]]
+id = 106
+q = 'Is time (as mortals understand it) a feature of Paradise existence?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['11:2.11 «Time, as you understand it, is not a feature of Paradise existence, though the citizens of the central Isle are fully conscious of nontime sequence of events.»']
+
+[[question]]
+id = 107
+q = 'Do personalities sojourn on nether Paradise?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['11:5.1 «Concerning nether Paradise, we know only that which is revealed; personalities do not sojourn there.»']
+
+[[question]]
+id = 108
+q = 'What presence dominates on nether Paradise?'
+a = [
+  'Unqualified Absolute',
+  'Deity Absolute',
+  'Universal Absolute',
+  'God the Sevenfold',
+  'God the Supreme',
+]
+right = ['Unqualified Absolute']
+refs = ['11:2.8 «The Trinity seems to dominate the personal or upper plane, the Unqualified Absolute the nether or impersonal plane.»']
+
+[[question]]
+id = 109
+q = 'What is the relation between Paradise and space-time?'
+a = [
+  'Paradise exists without time and has no location in space',
+  'Paradise exists at a definite location in space, but has no time',
+  'Paradise exists at a definite location in space and has time',
+  'Paradise has no location in space, but has time',
+]
+right = ['Paradise exists without time and has no location in space']
+refs = ['11:2.10 «Paradise exists without time and has no location in space.»']
+
+[[question]]
+id = 110
+q = 'Does cosmic force respond to mind?'
+a = [
+  'no',
+  'yes',
+]
+right = ['yes']
+refs = ['9:4.5 «Cosmic force responds to mind even as cosmic mind responds to spirit.»']
+
+[[question]]
+id = 112
+q = 'Is Paradise substance (absoluta) dead or alive?'
+a = [
+  'Dead',
+  'Alive',
+  'Neither dead nor alive',
+]
+right = ['Neither dead nor alive']
+refs = ['11:2.9 «This Paradise source material is neither dead nor alive; it is the original nonspiritual expression of the First Source and Center; it is Paradise, and Paradise is without duplicate.»']
+
+[[question]]
+id = 113
+q = 'Does space respond to gravity?'
+a = [
+  'no',
+  'yes',
+]
+right = ['no']
+refs = ['11:8.3 «Space is nonresponsive to gravity, but it acts as an equilibrant on gravity.»']
+
+[[question]]
+id = 114
+q = 'Can pervaded space neutralize linear gravity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['11:8.3 «Pervaded space also exerts an antigravity influence upon physical or linear gravity; space can actually neutralize such gravity action even though it cannot delay it.»']
+
+[[question]]
+id = 115
+q = 'Can pervaded space delay linear gravity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['11:8.3 «Pervaded space also exerts an antigravity influence upon physical or linear gravity; space can actually neutralize such gravity action even though it cannot delay it.»']

@@ -1,0 +1,446 @@
+# Paper 13, The Sacred Spheres of Paradise: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 13
+gone = [146, 147, 148, 149, 150]       # deleted, their ids kept for ever (data/quiz/README.md)
+
+[[question]]
+id = 135
+q = 'Which of these are forever forbidden to us?'
+a = [
+  'Divinington',
+  'nether Paradise',
+  'the seven sacred Paradise satellites of the Son',
+  'Paradise',
+  'Uversa',
+  'Sonarington',
+  'Ascendington',
+]
+right = [
+  'Divinington',
+  'nether Paradise',
+  'the seven sacred Paradise satellites of the Son',
+]
+refs = [
+  '13:1.1',
+  '13:2.7-8',
+]
+
+[[question]]
+id = 136
+q = 'What are the executive-headquarters of the Seven Master Spirits?'
+a = [
+  'seven sacred spheres of the Infinite Spirit',
+  'seven sacred spheres of the Universal Father',
+  'seven sacred spheres of the Eternal Son',
+  'Urantia, Mercury, Venus, Mars, and Pluto',
+]
+right = ['seven sacred spheres of the Infinite Spirit']
+refs = ['13:0.1 «The innermost circuit consists of the seven secret spheres of the Universal Father; the second group is composed of the seven luminous worlds of the Eternal Son; in the outermost are the seven immense spheres of the Infinite Spirit, the executive-headquarters worlds of the Seven Master Spirits.»']
+
+[[question]]
+id = 137
+q = 'Which material is used in the physical construction of the 21 sacred spheres of Paradise?'
+a = [
+  'unrevealed',
+  'mostly gold, iron, and some carbon in crystallized state',
+  'morontia materials',
+  'spirit',
+]
+right = ['unrevealed']
+refs = ['13:0.2 «Even their material or physical construction is of an order unrevealed to you.»']
+
+[[question]]
+id = 138
+q = 'Where is the record of the origin of the 21 sacred spheres of Paradise stored?'
+a = [
+  'in the Most Holy area of upper Paradise',
+  'in the nether Paradise',
+  'on one of the billion perfect worlds of Havona',
+  'nowhere, it doesn’t exist',
+]
+right = ['nowhere, it doesn’t exist']
+refs = ['13:0.2 «There exists neither record nor tradition of their origin.»']
+
+[[question]]
+id = 139
+q = 'Which of the 21 sacred spheres of Paradise are alike in physical constitution?'
+a = [
+  'the seven worlds of the Son',
+  'the seven worlds of the Father',
+  'the seven worlds of the Spirit',
+]
+right = ['the seven worlds of the Son']
+refs = ['13:0.2 «Each circuit is diverse in material, and each world of each circuit is different excepting the seven worlds of the Son, which are alike in physical constitution.»']
+
+[[question]]
+id = 140
+q = 'What kind of personal beings may sojourn on the seven sacred spheres of the Eternal Son?'
+a = [
+  'none',
+  'Seven Master Spirits',
+  'Architects of the Master Universe',
+  'only beings endowed with antigravity power',
+]
+right = ['none']
+refs = ['13:0.4 «No personal being may sojourn on any of these seven shining realms.»']
+
+[[question]]
+id = 141
+q = 'When are you granted clearance for Ascendington?'
+a = [
+  'upon attaining Havona',
+  'upon attaining Uversa',
+  'upon graduation from the Melchizedek schools',
+  'upon resurrection from the dead',
+  'upon fusion with the Thought Adjuster',
+]
+right = ['upon attaining Havona']
+refs = ['13:2.6 «For example: When you mortals attain Havona, you are granted clearance for Ascendington, where you are most welcome, but you are not permitted to visit the other six sacred worlds.»']
+
+[[question]]
+id = 142
+q = 'Which of the sacred spheres of the Father is the Paradise rendezvous of the Thought Adjusters?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+  'Ascendington',
+]
+right = ['Divinington']
+refs = ['13:1.4 «Divinington is the Paradise rendezvous of the Thought Adjusters, but it is also the home of numerous other entities, personalities, and other beings taking origin in the Universal Father.»']
+
+[[question]]
+id = 143
+q = 'What kind of beings function on Divinington?'
+a = [
+  'Father fragments (such as Thought Adjusters) and other beings of direct origin in the Universal Father',
+  'beings of unrevealed order',
+  'Architects of the Master Universe',
+  'Seven Master Spirits',
+  'Paradise Creator Sons',
+]
+right = ['Father fragments (such as Thought Adjusters) and other beings of direct origin in the Universal Father']
+refs = ['13:1.4 «Only the Father fragments and those personalities and other beings of direct and exclusive origin in the Universal Father fraternize and function on this abode.»']
+
+[[question]]
+id = 144
+q = 'Which of these are among the secrets of Divinington?'
+a = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+  'secret of the incarnation of the divine Sons',
+  'mysteries of reflectivity',
+  'secrets of trinitization',
+  'mystery of seraphic transport',
+]
+right = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+]
+refs = ['13:1.5-6']
+
+[[question]]
+id = 145
+q = 'When were the 21 sacred spheres of Paradise created?'
+a = [
+  '1 trillion years ago',
+  '9 billion years ago',
+  '250 billion years ago',
+  'never, they are eternal',
+]
+right = ['never, they are eternal']
+refs = ['13:0.2 «As far as we know they have always been; like Paradise they are eternal.»']
+
+[[question]]
+id = 151
+q = 'Who directs the seven Paradise sacred spheres of the Father?'
+a = [
+  'Trinitized Secrets of Supremacy',
+  'Seven Master Spirits',
+  'Trinity Teacher Sons',
+  'Melchizedeks',
+  'Ancients of Days',
+]
+right = ['Trinitized Secrets of Supremacy']
+refs = ['13:1.2 «The Paradise worlds of the Father are directed by the highest order of the Stationary Sons of the Trinity, the Trinitized Secrets of Supremacy.»']
+
+[[question]]
+id = 152
+q = 'Which of the sacred spheres of the Father can be called “the bosom of the Father”?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Divinington']
+refs = ['13:2.7 «Nor will you be permitted to land on the shores of Divinington, the “bosom of the Father,” though you shall surely stand repeatedly at the “right hand of the Father.”»']
+
+[[question]]
+id = 153
+q = 'Which of the sacred spheres of the Father can be called “the bosom of the Son”?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Sonarington']
+refs = ['13:1.7 «SONARINGTON. This sphere is the “bosom of the Son,” the personal receiving world of the Eternal Son.»']
+
+[[question]]
+id = 154
+q = 'Which of the sacred spheres of the Father can be called “the bosom of the Spirit”?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Spiritington']
+refs = ['13:1.9 «SPIRITINGTON. This world is the “bosom of the Spirit,” the Paradise home of the high beings that exclusively represent the Infinite Spirit.»']
+
+[[question]]
+id = 155
+q = 'Which of the sacred spheres of the Father can be called “the bosom of the Father and the Son”?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Vicegerington']
+refs = ['13:1.11 «VICEGERINGTON. This planet is the “bosom of the Father and the Son” and is the secret sphere of certain unrevealed beings who take origin by the acts of the Father and the Son.»']
+
+[[question]]
+id = 156
+q = 'Which of the sacred spheres of the Father can be called “the bosom of the Father and the Spirit”?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Solitarington']
+refs = ['13:1.15 «SOLITARINGTON. This world is the “bosom of the Father and the Spirit” and is the rendezvous of a magnificent host of unrevealed beings of origin in the conjoint acts of the Universal Father and the Infinite Spirit»']
+
+[[question]]
+id = 157
+q = 'Which of the sacred spheres of the Father can be called “the bosom of the Father, Son, and Spirit”?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Ascendington']
+refs = ['13:2.4 «They often appear on Ascendington, the “bosom of the Father-Son-Spirit,” where they fraternize with their brethren who have come up from the lowly worlds of space.»']
+
+[[question]]
+id = 158
+q = 'Which of the sacred spheres of the Father can be called “the bosom of the Son and the Spirit”?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Seraphington']
+refs = ['13:1.19 «SERAPHINGTON. This sphere is the “bosom of the Son and the Spirit” and is the home world of the vast hosts of unrevealed beings created by the Son and the Spirit.»']
+
+[[question]]
+id = 159
+q = 'Which of these are among the secrets of Sonarington?'
+a = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+  'secret of the incarnation of the divine Sons',
+  'mysteries of reflectivity',
+  'secrets of trinitization',
+  'mystery of seraphic transport',
+]
+right = ['secret of the incarnation of the divine Sons']
+refs = ['13:1.8 «The secrets of Sonarington include the secret of the incarnation of the divine Sons.»']
+
+[[question]]
+id = 160
+q = 'Which of these are among the secrets of Seraphington?'
+a = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+  'secret of the incarnation of the divine Sons',
+  'mysteries of reflectivity',
+  'secrets of trinitization',
+  'mystery of seraphic transport',
+]
+right = ['mystery of seraphic transport']
+refs = ['13:1.20 «The secrets of Seraphington involve a threefold mystery, only one of which I may mention—the mystery of seraphic transport.»']
+
+[[question]]
+id = 161
+q = 'Which sector of Sonarington is the secret of incarnation locked in?'
+a = [
+  'seventh',
+  'first',
+  'third',
+  'fifth',
+]
+right = ['seventh']
+refs = ['13:1.8 «The incarnation of the divine Sons is a mystery of God the Son; it is a secret locked up in the seventh sector of Sonarington, a realm penetrated by none save those who have personally passed through this unique experience.»']
+
+[[question]]
+id = 162
+q = 'Which of these are among the secrets of Spiritington?'
+a = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+  'secret of the incarnation of the divine Sons',
+  'mysteries of reflectivity',
+  'secrets of trinitization',
+  'mystery of seraphic transport',
+]
+right = ['mysteries of reflectivity']
+refs = ['13:1.10 «The secrets of Spiritington involve the impenetrable mysteries of reflectivity.»']
+
+[[question]]
+id = 163
+q = 'Which of these are among the secrets of Vicegerington?'
+a = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+  'secret of the incarnation of the divine Sons',
+  'mysteries of reflectivity',
+  'secrets of trinitization',
+  'mystery of seraphic transport',
+]
+right = ['secrets of trinitization']
+refs = ['13:1.12 «The secrets of Vicegerington include the secrets of trinitization, and trinitization constitutes the secret of authority to represent the Trinity, to act as vicegerents of the Gods.»']
+
+[[question]]
+id = 164
+q = 'Which of the sacred spheres of the Father is the home of Solitary Messengers?'
+a = [
+  'Solitarington',
+  'Vicegerington',
+  'Sonarington',
+  'Seraphington',
+  'Ascendington',
+]
+right = ['Solitarington']
+refs = [
+  '13:1.15',
+  '13:1.16 «This is also the home of the Solitary Messengers and of other personalities of the superangelic orders.»',
+]
+
+[[question]]
+id = 165
+q = 'Which of the sacred spheres of the Father is the status sphere of the Universe Power Directors during the present universe age?'
+a = [
+  'Solitarington',
+  'Vicegerington',
+  'Sonarington',
+  'Seraphington',
+  'Ascendington',
+]
+right = ['Solitarington']
+refs = [
+  '13:1.15',
+  '13:1.16 «During the present universe age this is also the status sphere of the Universe Power Directors.»',
+]
+
+[[question]]
+id = 166
+q = 'Which of these are among the secrets of Solitarington?'
+a = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+  'secret of the incarnation of the divine Sons',
+  'mysteries of reflectivity',
+  'secrets of trinitization',
+  'the secrets of the personal relation of the Infinite Spirit with certain of the higher offspring of the Third Source and Center',
+]
+right = [
+  'secrets of trinitization',
+  'the secrets of the personal relation of the Infinite Spirit with certain of the higher offspring of the Third Source and Center',
+]
+refs = ['13:1.18 «Besides certain secrets of trinitization, this world holds the secrets of the personal relation of the Infinite Spirit with certain of the higher offspring of the Third Source and Center.»']
+
+[[question]]
+id = 167
+q = 'Which of these are among the secrets of Ascendington?'
+a = [
+  'secret of the bestowal and mission of Thought Adjusters',
+  'nature and purpose of the Gravity Messengers',
+  'secret of the incarnation of the divine Sons',
+  'mysteries of reflectivity',
+  'secrets of trinitization',
+  'mystery of the evolution of an immortal soul within the mind of a mortal and material creature',
+]
+right = ['mystery of the evolution of an immortal soul within the mind of a mortal and material creature']
+refs = ['13:1.22 «This phenomenon constitutes one of the most perplexing mysteries of the universes—the evolution of an immortal soul within the mind of a mortal and material creature.»']
+
+[[question]]
+id = 168
+q = 'Which of the seven sacred spheres of the Father will become fully open to our inspection?'
+a = [
+  'Divinington',
+  'Sonarington',
+  'Spiritington',
+  'Ascendington',
+  'Vicegerington',
+  'Solitarington',
+  'Seraphington',
+]
+right = ['Ascendington']
+refs = ['13:2.3 «Ascendington is the only sacred sphere that will be unreservedly open to your inspection as a Paradise arrival.»']
+
+[[question]]
+id = 169
+q = 'How many Trinitized Secrets of Supremacy direct Ascendington?'
+a = [
+  '10',
+  '12',
+  '7',
+  '3',
+]
+right = ['10']
+refs = ['13:2.9 «After you attain Paradise, you will know and ardently love the ten Secrets of Supremacy who direct Ascendington.»']
+
+[[question]]
+id = 170
+q = 'Who knows all the secrets of all seven Paradise sacred spheres of the Father?'
+a = [
+  'Trinitized Secrets of Supremacy',
+  'Seven Master Spirits',
+  'Trinity Teacher Sons',
+  'Melchizedeks',
+  'Ancients of Days',
+]
+right = ['Trinitized Secrets of Supremacy']
+refs = ['13:2.9 «All these secrets are supposedly known to the collective body of the Trinitized Secrets of Supremacy.»']

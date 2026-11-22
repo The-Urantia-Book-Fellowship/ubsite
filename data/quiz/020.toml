@@ -1,0 +1,80 @@
+# Paper 20, The Paradise Sons of God: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 20
+
+[[question]]
+id = 319
+q = 'When does a bestowal Son begin his planetary mission to enlighten the minds and to inspire the souls of his brethren in the flesh?'
+a = [
+  'after perfect attunement with his indwelling Thought Adjuster',
+  'after reaching the age of 30',
+  'after receiving explicit instruction from his superiors',
+  'at the earliest opportunity to do so, no restrictions',
+]
+right = ['after perfect attunement with his indwelling Thought Adjuster']
+refs = ['20:6.4 «When a bestowal Son has mastered the experience of living the mortal life, when he has achieved perfection of attunement with his indwelling Adjuster, thereupon he begins that part of his planetary mission designed to illuminate the minds and to inspire the souls of his brethren in the flesh.»']
+
+[[question]]
+id = 320
+q = 'For how long do the Trinity Teachers Sons usually remain on the planet of their visitation?'
+a = [
+  '1000 years',
+  '100 years',
+  '40 years',
+  '40 days',
+  '1 year',
+  '7 days',
+]
+right = ['1000 years']
+refs = ['20:9.3 «The Teacher Sons usually remain on their visitation planets for one thousand years of planetary time.»']
+
+[[question]]
+id = 321
+q = 'Are Trinity Teacher Sons (Daynals) visible to mortal inhabitants of the planet of their visitation?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['20:9.3 «The Daynals do not incarnate or otherwise so materialize themselves as to be visible to mortal beings; therefore is contact with the world of visitation maintained through the activities of the Brilliant Evening Stars, local universe personalities who are associated with the Trinity Teacher Sons.»']
+
+[[question]]
+id = 322
+q = 'Which orders of the Paradise bestowal Sons are exempt from the restriction prohibiting them to beget children on the worlds of their bestowal?'
+a = [
+  'Michaels',
+  'Daynals',
+  'Avonals',
+  'none',
+]
+right = ['none']
+refs = ['20:6.2 «From a material viewpoint, these human-divine Sons live ordinary lives with just one exception: They do not beget offspring on the worlds of their sojourn; that is a universal restriction imposed on all orders of the Paradise bestowal Sons.»']
+
+[[question]]
+id = 323
+q = 'Which of these orders of the Paradise Sons re-appear on the third day after they enter the portals of death?'
+a = [
+  'Creator Sons',
+  'Magisterial Sons',
+  'Trinity Teacher Sons',
+]
+right = [
+  'Creator Sons',
+  'Magisterial Sons',
+]
+refs = ['20:6.6 «When the bestowal Sons, Creator or Magisterial, enter the portals of death, they reappear on the third day.»']
+
+[[question]]
+id = 324
+q = 'How many Magisterial Sons are there in the grand universe?'
+a = [
+  '1 billion',
+  '7 billion',
+  '21 billion',
+  '7000',
+  '7',
+]
+right = ['1 billion']
+refs = ['20:2.2 «We have reasons for believing that the total number of Magisterial Sons in the grand universe is about one billion.»']

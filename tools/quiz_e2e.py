@@ -76,11 +76,29 @@ def fresh(b, seed: str = "", **kw):
     return ctx, asked
 
 
-def take(pg, base: str, paper: int, wrong: int = 0) -> None:
-    """A paper's quiz, answered to its score: right, but the first `wrong`."""
-    pg.goto(f"{base}/quiz/{paper}")
+# Which of the page's questions is asked now: a paper's come in a new order
+# each time (quiz.js shuffle), so it is found by its words.
+NOW = """() => { const qs = JSON.parse(document.getElementById('ub-quiz').textContent).q,
+  t = document.querySelector('.quizrun .qq').textContent, d = document.createElement('div');
+  return qs.findIndex(q => { d.innerHTML = q.q; return d.textContent === t; }); }"""
+
+
+# Each question's answers as last shown, by their places as written (data-k).
+SEEN: dict[int, list[int]] = {}
+
+
+def take(pg, base: str, paper: int, wrong: int = 0, go: bool = True) -> list[int]:
+    """A paper's quiz, answered to its score: right, but the first `wrong`
+    asked.  The ids in the order asked."""
+    if go:
+        pg.goto(f"{base}/quiz/{paper}")
     qs = pg.evaluate("() => JSON.parse(document.getElementById('ub-quiz').textContent).q")
-    for i, q in enumerate(qs):
+    order = []
+    for i in range(len(qs)):
+        k = pg.evaluate(NOW)
+        q = qs[k]
+        order.append(q["id"])
+        SEEN[q["id"]] = pg.evaluate("() => [...document.querySelectorAll('.quizrun .qopt')].map(b => +b.dataset.k)")
         mask = q["m"]
         if i < wrong:                       # one answer that is not the set
             mask = next(1 << k for k in range(len(q["a"])) if 1 << k != q["m"])
@@ -92,6 +110,7 @@ def take(pg, base: str, paper: int, wrong: int = 0) -> None:
             pg.click(".quizrun .qcheck")
         pg.click(".quizrun .qnext")
     pg.wait_for_selector(".quizrun .qbig")
+    return order
 
 
 def board_asks(asked: list[str]) -> list[str]:
@@ -202,6 +221,39 @@ def run(tmp: pathlib.Path) -> int:
         pg.click(".qjoin button[type=submit]")
         ok(until(pg, "!!document.querySelector('.qjoin .qmsg').textContent") and
            pg.evaluate(SAID, ".qjoin .qmsg") == "That name is taken: choose another.", "a name taken on this board is refused")
+        ctx.close()
+
+        print("a paper's questions in a new order each time")
+        ctx, asked = fresh(b, "localStorage.setItem('ub_settings', JSON.stringify({quiz: false}));")
+        pg = ctx.new_page()
+        first = take(pg, A, 1, wrong=3)
+        page = [q["id"] for q in pg.evaluate("() => JSON.parse(document.getElementById('ub-quiz').textContent).q")]
+        ok(sorted(first) == sorted(page) and len(first) == 29, "Paper 1's 29 questions, each asked once")
+        ok(first != page, "not in the page's order")
+        missed = pg.evaluate("() => [...document.querySelectorAll('.qmissed li span')].map(s => s.textContent)")
+        texts = pg.evaluate("""(ids) => { const qs = JSON.parse(document.getElementById('ub-quiz').textContent).q,
+          d = document.createElement('div');
+          return ids.map(i => { d.innerHTML = qs.find(q => q.id === i).q; return d.textContent; }); }""",
+                            [i for i in page if i in first[:3]])
+        ok(missed == texts, "the three missed, to read again in the page's order, not the order asked")
+        pg.click(".quizrun .qagain")
+        second = take(pg, A, 1, go=False)
+        ok(sorted(second) == sorted(page) and second != first, "Again: the same questions, in another order")
+        shuffled = [i for i in page if SEEN[i] != sorted(SEEN[i])]
+        ok(len(shuffled) >= 20, f"and their answers shuffled: {len(shuffled)} of 29 shown out of their written order")
+        ok(all(sorted(SEEN[i]) == list(range(len(SEEN[i]))) for i in page), "each answer shown once")
+        take(pg, A, 0)
+        qs0 = pg.evaluate("() => JSON.parse(document.getElementById('ub-quiz').textContent).q")
+        fixed = [q["id"] for q in qs0 if q.get("f")]
+        ok(fixed and all(SEEN[i] == list(range(len(SEEN[i]))) for i in fixed),
+           f"the Foreword's {len(fixed)} whose order means something (yes and no, rising numbers) as written")
+        pg.click(".quizrun .qagain")
+        q = qs0[pg.evaluate(NOW)]
+        first_shown = pg.evaluate("() => +document.querySelector('.quizrun .qopt').dataset.k")
+        pg.keyboard.press("1")
+        got = pg.evaluate("""() => { const b = document.querySelector('.quizrun .qopt');
+          return b.getAttribute('aria-pressed') === 'true' || b.classList.contains('ok') || b.classList.contains('bad'); }""")
+        ok(got, f"the key 1 chooses the first answer shown, its place as written {first_shown}")
         ctx.close()
 
         print("Quiz off")

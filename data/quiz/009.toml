@@ -1,0 +1,115 @@
+# Paper 9, Relation of the Infinite Spirit to the Universe: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 9
+
+[[question]]
+id = 77
+q = 'Who or what is the apparent ancestor of motion, change, and relationship?'
+a = [
+  'Paradise',
+  'Havona',
+  'Eternal Son',
+  'God of Action (The Third Source and Center)',
+]
+right = ['God of Action (The Third Source and Center)']
+refs = ['9:1.1 «As the God of Action, he is the apparent ancestor of motion, change, and relationship.»']
+
+[[question]]
+id = 78
+q = 'Is the power of antigravity observably present in either the Universal Father or the Eternal Son?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['9:3.2 «This power is not functionally (observably) present in either the Father or the Son.»']
+
+[[question]]
+id = 79
+q = 'Is the gravity-resistant phenomenon of a gyroscope of value to illustrate the effect of antigravity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['yes']
+refs = ['9:3.3 «The gravity-resistant phenomenon of a gyroscope is a fair illustration of the effect of antigravity but of no value to illustrate the cause of antigravity.»']
+
+[[question]]
+id = 80
+q = 'Is the gravity-resistant phenomenon of a gyroscope of value to illustrate the cause of antigravity?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['9:3.3 «The gravity-resistant phenomenon of a gyroscope is a fair illustration of the effect of antigravity but of no value to illustrate the cause of antigravity.»']
+
+[[question]]
+id = 81
+q = 'Which of these is a typical use of antigravity in the grand universe?'
+a = [
+  'establish physical equilibrium of the matter and energies',
+  'transport',
+  'overriding natural course of events on the worlds',
+  'amusement of the Deities',
+]
+right = ['establish physical equilibrium of the matter and energies']
+refs = ['9:3.6 «These unique creatures of physical function all possess varying attributes of power control, such as antigravity, which they utilize in their efforts to establish the physical equilibrium of the matter and energies of the grand universe.»']
+
+[[question]]
+id = 82
+q = 'Is mind inherent in energy?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['9:4.2 «Mind is not inherent in energy; energy is receptive and responsive to mind; mind can be superimposed upon energy, but consciousness is not inherent in the purely material level.»']
+
+[[question]]
+id = 83
+q = 'Is spirit always intelligent, i.e. minded in some way?'
+a = [
+  'yes',
+  'not necessarily',
+]
+right = ['yes']
+refs = ['9:4.2 «Spirit is always intelligent, minded in some way.»']
+
+[[question]]
+id = 84
+q = 'Is the Conjoint Creator absolute?'
+a = [
+  'yes',
+  'no',
+  'only in the realms of universal intelligence',
+]
+right = ['only in the realms of universal intelligence']
+refs = ['9:4.3 «The Conjoint Creator is absolute only in the domain of mind, in the realms of universal intelligence.»']
+
+[[question]]
+id = 85
+q = 'What is the source of the mind endowment of the seven superuniverses?'
+a = [
+  'Seven Master Spirits',
+  'Seven Supreme Executives',
+  'Architects of the Master Universe',
+  'Ancients of Days',
+  'The Infinite Spirit',
+]
+right = ['Seven Master Spirits']
+refs = ['9:4.3 «The mind endowment of the seven superuniverses is derived from the Seven Master Spirits, the primary personalities of the Conjoint Creator.»']
+
+[[question]]
+id = 86
+q = 'Energy is thing, mind is meaning, spirit is \ldots'
+a = [
+  'value',
+  'substance',
+  'destiny',
+  'light',
+]
+right = ['value']
+refs = ['9:4.5 «Energy is thing, mind is meaning, spirit is value.»']

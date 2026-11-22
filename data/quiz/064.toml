@@ -1,0 +1,206 @@
+# Paper 64, The Evolutionary Races of Color: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 64
+
+[[question]]
+id = 505
+q = 'How long ago did the colored races of humans appear?'
+a = [
+  '1 million years',
+  '500,000 years',
+  '100,000 years',
+  '46,000 years',
+  '6,000 years ago',
+]
+right = ['500,000 years']
+refs = ['61:7.4 «500,000 years ago, during the fifth advance of the ice, a new development accelerated the course of human evolution. Suddenly and in one generation the six colored races mutated from the aboriginal human stock.»']
+
+[[question]]
+id = 506
+q = 'Which three of the evolutionary races are primary (superior intellectually and spiritually)?'
+a = [
+  'red, yellow and blue',
+  'red, green and blue',
+  'orange, green and indigo',
+  'orange, green and blue',
+]
+right = ['red, yellow and blue']
+refs = ['64:7.3 «The primary Sangik peoples, the superior races, avoided the tropics, the red man going northeast to Asia, closely followed by the yellow man, while the blue race moved northwest into Europe.»']
+
+[[question]]
+id = 507
+q = 'Which three of the evolutionary races are secondary (inferior intellectually and spiritually)?'
+a = [
+  'orange, green and indigo',
+  'red, yellow and orange',
+  'red, yellow and blue',
+  'orange, yellow and indigo',
+]
+right = ['orange, green and indigo']
+refs = ['49:4.2 «There are six basic evolutionary races: three primary—red, yellow, and blue; and three secondary—orange, green, and indigo.»']
+
+[[question]]
+id = 508
+q = 'Which of these was a great leader of green men 350,000 years ago?'
+a = [
+  'Onagar',
+  'Porshunta',
+  'Fantad',
+  'Sontad',
+]
+right = ['Fantad']
+refs = ['64:6.17 «Before their dispersion these tribes experienced a great revival of culture under the leadership of Fantad, some three hundred and fifty thousand years ago.»']
+
+[[question]]
+id = 509
+q = 'Which of the colored races of humans was preferred by Adamites for mating?'
+a = [
+  'blue',
+  'red',
+  'yellow',
+  'indigo',
+]
+right = ['blue']
+refs = ['64:6.21']
+
+[[question]]
+id = 510
+q = 'Which two of the colored races of humans exhibited strains of giantism?'
+a = [
+  'green and orange',
+  'yellow and red',
+  'blue and indigo',
+  'blue and green',
+]
+right = ['green and orange']
+refs = ['51:4.2 «Even mortal stature tends to decrease from the red man down to the indigo race, although on Urantia unexpected strains of giantism appeared among the green and orange peoples.»']
+
+[[question]]
+id = 511
+q = 'Which colored races of our planet perished?'
+a = [
+  'green and orange',
+  'green and indigo',
+  'blue and indigo',
+  'red and yellow',
+]
+right = ['green and orange']
+refs = ['64:7.16 «As the Sangik migrations draw to a close, the green and orange races are gone, the red man holds North America, the yellow man eastern Asia, the blue man Europe, and the indigo race has gravitated to Africa.»']
+
+[[question]]
+id = 512
+q = 'Where is now the orange race of humans?'
+a = [
+  'became extinct',
+  'was taken by aliens',
+  'never existed',
+]
+right = ['became extinct']
+refs = ['64:6.13 «But as a race the orange man ceased to exist about one hundred thousand years ago.»']
+
+[[question]]
+id = 513
+q = 'Who was the great spiritual leader of the orange race about 300,000 years ago?'
+a = [
+  'Porshunta',
+  'Fantad',
+  'Sontad',
+  'Onamonalonton',
+  'Onagar',
+]
+right = ['Porshunta']
+refs = ['64:6.12 «But there was a great revival of higher living as a result of the wise leadership of Porshunta, the master mind of this unfortunate race, who ministered to them when their headquarters was at Armageddon some three hundred thousand years ago.»']
+
+[[question]]
+id = 514
+q = 'Where was the headquarters of the orange race?'
+a = [
+  'Armageddon',
+  'Jerusalem',
+  'Babylon',
+  'Memphis',
+]
+right = ['Armageddon']
+refs = ['64:6.12 «But there was a great revival of higher living as a result of the wise leadership of Porshunta, the master mind of this unfortunate race, who ministered to them when their headquarters was at Armageddon some three hundred thousand years ago.»']
+
+[[question]]
+id = 515
+q = 'Who was the first of the yellow men to teach and lead his people in the worship of “One Truth” instead of many?'
+a = [
+  'Singlangton',
+  'Orlandof',
+  'Porshunta',
+  'Enoch',
+  'Onamonalonton',
+]
+right = ['Singlangton']
+refs = ['45:4.8 «Singlangton, the first of the yellow men to teach and lead his people in the worship of “One Truth” instead of many.»']
+
+[[question]]
+id = 516
+q = 'When did Singlangton teach the yellow men of Urantia?'
+a = [
+  '10,000 years ago',
+  '100,000 years ago',
+  '200,000 years ago',
+  '212,000 years ago',
+  '300,000 years ago',
+  '370,000 years ago',
+]
+right = ['100,000 years ago']
+refs = ['64:6.15 «They traveled far from the influences of the spiritual headquarters of the world and drifted into great darkness following the Caligastia apostasy; but there occurred one brilliant age among this people when Singlangton, about one hundred thousand years ago»']
+
+[[question]]
+id = 517
+q = 'Which of these was a great leader of American red race 65,000 years ago?'
+a = [
+  'Onamonalonton',
+  'Sontad',
+  'Fantad',
+  'Porshunta',
+  'Onagar',
+]
+right = ['Onamonalonton']
+refs = ['64:6.7 «Because of this great retrogression the red men seemed doomed when, about sixty-five thousand years ago, Onamonalonton appeared as their leader and spiritual deliverer.»']
+
+[[question]]
+id = 518
+q = 'When did Onamonalonton live on Urantia?'
+a = [
+  '5,000 years ago',
+  '25,000 years ago',
+  '65,000 years ago',
+  '85,000 years ago',
+  '185,000 years ago',
+  '200,000 years ago',
+]
+right = ['65,000 years ago']
+refs = ['64:6.7 «Because of this great retrogression the red men seemed doomed when, about sixty-five thousand years ago, Onamonalonton appeared as their leader and spiritual deliverer.»']
+
+[[question]]
+id = 519
+q = 'What was Onamonalonton’s age when he died?'
+a = [
+  '46 years',
+  '66 years',
+  '96 years',
+  '126 years',
+  '156 years',
+  '200 years',
+]
+right = ['96 years']
+refs = ['64:6.7 «Onamonalonton lived to be ninety-six years of age and maintained his headquarters among the great redwood trees of California.»']
+
+[[question]]
+id = 520
+q = 'Where did Onamonalonton live?'
+a = [
+  'Canada',
+  'California',
+  'Texas',
+  'Mexico',
+]
+right = ['California']
+refs = ['64:6.7 «Onamonalonton lived to be ninety-six years of age and maintained his headquarters among the great redwood trees of California.»']

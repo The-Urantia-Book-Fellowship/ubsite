@@ -1,0 +1,28 @@
+# Paper 67, The Planetary Rebellion: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 67
+
+[[question]]
+id = 529
+q = 'Who was Nod?'
+a = [
+  'A rebel member of Caligastia’s staff',
+  'A descendant of Andon \&\ Fonta',
+  'A descendant of Adam',
+  'First-born son of Cain \&\ Remona',
+]
+right = ['A rebel member of Caligastia’s staff']
+refs = ['67:4.2 «The sixty members of the planetary staff who went into rebellion chose Nod as their leader.»']
+
+[[question]]
+id = 530
+q = 'Who were the Nodites?'
+a = [
+  'The joint offspring of 44 of the modified Andonites and 60 corporeal members of Caligastia’s staff who followed Nod into rebellion',
+  'Followers of Cain who departed from the Garden of Eden for the Land of Nod and married Remona',
+  'The joint offspring of Nod and his followers and the Adamites after the rebellion',
+]
+right = ['The joint offspring of 44 of the modified Andonites and 60 corporeal members of Caligastia’s staff who followed Nod into rebellion']
+refs = ['67:4.2 «knowing full well that the original sixty and their forty-four modified Andonite associates were doomed to suffer extinction by death, sooner or later. After the fall of Dalamatia the disloyal staff migrated to the north and the east. Their descendants were long known as the Nodites»']

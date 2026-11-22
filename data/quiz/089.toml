@@ -1,0 +1,18 @@
+# Paper 89, Sin, Sacrifice, and Atonement: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 89
+
+[[question]]
+id = 629
+q = 'Which animal was domesticated first?'
+a = [
+  'horse',
+  'dog',
+  'cow',
+  'pig',
+  'lion',
+]
+right = ['dog']
+refs = ['89:5.16 «The dog was the first domesticated animal and was held in high esteem both as such and as food.»']

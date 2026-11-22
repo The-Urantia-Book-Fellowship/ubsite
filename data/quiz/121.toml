@@ -1,0 +1,89 @@
+# Paper 121, The Times of Michael’s Bestowal: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 121
+
+[[question]]
+id = 689
+v = 2
+q = 'The notion that Israel is still “God’s chosen people” is \ldots'
+a = [
+  'divinely inspired and revealed truth',
+  'delusion, for the covenant has been abrogated on Tuesday, April 4, A.D. 30',
+]
+right = ['delusion, for the covenant has been abrogated on Tuesday, April 4, A.D. 30']
+refs = [
+  '175:3.1 «It was just before midnight on this Tuesday, April 4, A.D. 30, that the Sanhedrin, as then constituted, officially and unanimously voted to impose the death sentence upon both Jesus and Lazarus.»',
+  '175:3.2',
+  '92:3.2 «Religion has always been largely a matter of rites, rituals, observances, ceremonies, and dogmas. It has usually become tainted with that persistently mischief-making error, the chosen-people delusion.»',
+]
+
+[[question]]
+id = 690
+q = 'Who wrote “The Gospel according to Matthew”?'
+a = [
+  'Matthew',
+  'Isador',
+  'Luke',
+  'Mark',
+  'Paul',
+  'A slave named Cedes',
+]
+right = ['Isador']
+refs = ['121:8.7 «In the year 71, while living at Pella, Isador wrote the Gospel according to Matthew.»']
+
+[[question]]
+id = 691
+q = 'Who wrote “The Gospel according to Luke”?'
+a = [
+  'Matthew',
+  'Isador',
+  'Luke',
+  'Mark',
+  'Paul',
+  'A slave named Cedes',
+]
+right = ['Luke']
+refs = ['121:8.8 «The Gospel by Luke. Luke, the physician of Antioch in Pisidia, was a gentile convert of Paul, and he wrote quite a different story of the Master’s life.»']
+
+[[question]]
+id = 692
+q = 'When did Luke write his Gospel?'
+a = [
+  'A.D.~76',
+  'A.D.~70',
+  'A.D.~82',
+  'A.D.~86',
+  'A.D.~90',
+  'A.D.~99',
+]
+right = ['A.D.~82']
+refs = ['121:8.8 «Luke wrote in the year 82 in Achaia.»']
+
+[[question]]
+id = 693
+q = 'When did Luke finish “The Acts of the Apostles”?'
+a = [
+  'A.D.~76',
+  'A.D.~70',
+  'A.D.~80',
+  'A.D.~86',
+  'A.D.~90',
+  'Never finished',
+]
+right = ['Never finished']
+refs = ['121:8.8 «He planned three books dealing with the history of Christ and Christianity but died in A.D. 90 just before he finished the second of these works, the “Acts of the Apostles.”»']
+
+[[question]]
+id = 694
+q = 'What were Paul’s disciples first called at Antioch?'
+a = [
+  'Paulinians',
+  'Christians',
+  'Chasidim',
+  'Good Antiochians',
+  'Essenes',
+]
+right = ['Christians']
+refs = ['121:2.5 «In Antioch Paul’s disciples were first called “Christians.”»']

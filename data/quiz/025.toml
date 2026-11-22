@@ -1,0 +1,48 @@
+# Paper 25, The Messenger Hosts of Space: its questions in the quiz (data/quiz/README.md).
+# Converted from the British Study Edition's quiz.tex at 0a1f055 on 2026-11-22
+# (tools/quiz/convert.py); the master since.
+
+paper = 25
+
+[[question]]
+id = 350
+q = 'Which of these are classed among the Messenger Hosts of Space?'
+a = [
+  'Havona Servitals',
+  'Universal Conciliators',
+  'Technical Advisers',
+  'Graduate Guides',
+  'Associate Inspectors',
+  'Assigned Sentinels',
+  'Personal Aids of the Infinite Spirit',
+]
+right = [
+  'Havona Servitals',
+  'Universal Conciliators',
+  'Technical Advisers',
+]
+refs = ['25:0.1-8']
+
+[[question]]
+id = 351
+q = 'How many Technical Advisers are registered on Uversa?'
+a = [
+  '7 trillion',
+  '61 trillion',
+  '61 billion',
+  '7 billion',
+  '1 billion',
+  '1 million',
+]
+right = ['61 trillion']
+refs = ['25:4.10 «At the present time, not counting the mortals and midwayers who are all of transient attachment, the number of Technical Advisers registered on Uversa and operating in Orvonton is slightly in excess of sixty-one trillion.»']
+
+[[question]]
+id = 352
+q = 'Can omniaphim Paradise Companions serve with the ascendant creatures from the seven superuniverses?'
+a = [
+  'yes',
+  'no',
+]
+right = ['no']
+refs = ['25:8.8 «Hence the omniaphim serve not with the ascendant creatures from the seven superuniverses.»']
