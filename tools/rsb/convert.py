@@ -5,7 +5,7 @@
                                                     conversion with data/rsb/corrections.tsv applied
 
 The edition (config.rsb(), Tigran's repository; Bibles.org.uk, made
-by Tigran Aivazian and Vladimir Volovich) carries a book to a file, tex/Gen.tex
+by Tigran Aivazian) carries a book to a file, tex/Gen.tex
 and so on, its text unchanged since 2016.  As the KJV's was (Tigran,
 2026-11-21: "you can just convert and copy them in whatever format you need
 into ubsite"), it is converted once, and from then on data/rsb/ is the master:

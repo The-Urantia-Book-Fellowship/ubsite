@@ -1,6 +1,6 @@
 # The Russian Synodal Bible
 
-This directory is the site's copy of the Russian Synodal Bible (Синодальный перевод, 1876), in Tigran Aivazian's edition made with Vladimir Volovich for Bibles.org.uk, with its notes. `make bible` builds it into `var/bible.db` beside the King James Version (`data/kjv/`), and the site's `/bible` pages show the two side by side, a verse to a row.
+This directory is the site's copy of the Russian Synodal Bible (Синодальный перевод, 1876), in Tigran Aivazian's edition made for Bibles.org.uk, with its notes. `make bible` builds it into `var/bible.db` beside the King James Version (`data/kjv/`), and the site's `/bible` pages show the two side by side, a verse to a row.
 
 **The copy is the master.** It was converted once, on 2026-11-21, from Tigran's edition (`../russian-synodal-bible`, whose text has not changed since 2016; read at the commit `SOURCE.tsv` names, with each file's SHA-256), as the KJV's was from the study edition (Tigran, 2026-11-21: "you can just convert and copy them in whatever format you need into ubsite"). The edition is not read for it again. A change here is a reviewed commit, like any change to `data/`.
 
@@ -35,4 +35,4 @@ The table was made by `python -m tools.rsb.versify` from SIL's standard versific
 
 ## Its rights
 
-The Synodal translation of 1876 is in the public domain. The edition, its corrections and its notes, are Tigran's and Vladimir Volovich's, shown here by Tigran's word.
+The Synodal translation of 1876 is in the public domain. The edition, its corrections and its notes, are Tigran's, shown here by Tigran's word.

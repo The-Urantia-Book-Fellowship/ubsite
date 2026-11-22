@@ -194,8 +194,8 @@ sha256 = "9d37aa78180ceefd5e4aeeaedceccf16f21484e5eb17d5662e8beff31bc3d8a5"
 url    = "https://archive.org/download/kjv-1769-oxford-edition-full-bible/KJV%201769%20Oxford%20Edition%2C%20Full%20Bible_djvu.txt"
 sha256 = "1a8b518d804d3f5d907b902c5536080c7c9ad58a9749602cdf9ac07bb14aa05b"
 
-# The Russian Synodal Bible, Tigran's own edition (Bibles.org.uk, made with
-# Vladimir Volovich), shown beside the KJV (Tigran, 2026-11-21).  Converted ONCE
+# The Russian Synodal Bible, Tigran's own edition (Bibles.org.uk), shown beside
+# the KJV (Tigran, 2026-11-21).  Converted ONCE
 # into data/rsb/ by `python -m tools.rsb.convert`, which alone reads it, at the
 # commit `rev` resolves to, through build/readers/_io, as tools/kjv/convert.py
 # read the study edition's KJV: its text has not changed since 2016, and from

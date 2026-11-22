@@ -20,15 +20,15 @@ label = "KJV"
 en = "the Authorized Version of 1611, in the text of 1769, with its translators' marginal notes"
 ru = "Авторизованная версия 1611 года, в тексте 1769 года, с примечаниями переводчиков на полях"
 
-# Tigran's own edition, made with Vladimir Volovich for Bibles.org.uk
+# Tigran's own edition, made for Bibles.org.uk
 # (data/rsb/README.md); the Synodal translation of 1876 is in the public domain.
 [rsb]
 title = "Синодальный перевод"
 lang  = "ru"
 label = "Синодальный"
 [rsb.by]
-en = "the Russian Synodal translation of 1876, in the Bibles.org.uk edition of Tigran Aivazian and Vladimir Volovich, with its notes"
-ru = "Синодальный перевод 1876 года, в издании Bibles.org.uk Тиграна Айвазяна и Владимира Воловика, с его примечаниями"
+en = "the Russian Synodal translation of 1876, in the Bibles.org.uk edition of Tigran Aivazian, with its notes"
+ru = "Синодальный перевод 1876 года, в издании Bibles.org.uk Тиграна Айвазяна, с его примечаниями"
 
 # The books the KJV has not, by the names English Bibles give them, for the
 # Contents and the pages in English, where the KJV's names stand for its own:
