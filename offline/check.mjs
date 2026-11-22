@@ -16,9 +16,9 @@ const job = JSON.parse(fs.readFileSync(0, 'utf8'));
 const manifest = JSON.parse(fs.readFileSync(path.join(job.copy, 'manifest.json'), 'utf8'));
 const raw = {};
 // The translations' chunks too, each a download of its own (offline/pack.py),
-// and the King James Version's, which the manifest lists apart and the worker
-// keeps as it keeps a translation (sw.js downs), its database as "tr-kjv".
-const trs = (manifest.translations || []).concat(manifest.kjv ? [manifest.kjv] : []);
+// and the Bible's versions', which the manifest lists apart and the worker
+// keeps as it keeps a translation (sw.js downs).
+const trs = (manifest.translations || []).concat(manifest.bible || []);
 for (const c of manifest.chunks.concat(...trs.map((t) => t.chunks))) {
   const data = zlib.gunzipSync(fs.readFileSync(path.join(job.copy, c.file)));
   const h = crypto.createHash('sha256').update(data).digest('hex').slice(0, 16);
@@ -53,10 +53,15 @@ const db = new sqlite3.oo1.DB(':memory:');
 open(db, 'main', raw['text.db']);
 db.exec("ATTACH ':memory:' AS ix");
 open(db, 'ix', raw['index.db']);
-// The King James Version's, the copy's own, as sw.js attaches it.
-if (raw['kjv.db']) {
+// The Bible's, as sw.js attaches them: the KJV's, the copy's own, as `kjv`,
+// and the Synodal's, its download's, as `rsb`.
+if (raw['bible-kjv.db']) {
   db.exec("ATTACH ':memory:' AS kjv");
-  open(db, 'kjv', raw['kjv.db']);
+  open(db, 'kjv', raw['bible-kjv.db']);
+}
+if (raw['bible-rsb.db']) {
+  db.exec("ATTACH ':memory:' AS rsb");
+  open(db, 'rsb', raw['bible-rsb.db']);
 }
 // Every translation's database for search, as sw.js attaches those it keeps.
 for (const t of trs.filter((t) => raw[`tr-${t.key}.db`])) {
@@ -151,12 +156,15 @@ for (const p of Object.keys(job.pages).filter((p) => /^\/speech\/[^\/]+\//.test(
 // A search with fewer translations kept: each not kept has its list saying
 // so, in its place among the others, wherever the server's might stand (on
 // the overview, or opened whole), and the rest of the page is the server's.
-const RE_TR = /<section data-tr="([a-z0-9-]+)">[\s\S]*?<\/section>/g;
+// The Bible's lists too, a version's each (search.html data-bible): the
+// KJV's always the copy's own, the Synodal's from its download.
+const RE_TR = /<section data-(?:tr|bible)="([a-z0-9-]+)"(?: class="bybible")?>[\s\S]*?<\/section>/g;
 function lists(body) {
   const secs = {};
   const rest = body.replace(RE_TR, (m, k) => { secs[k] = m; return ''; }).replace('<div class="trhits"></div>', '');
   return { secs, rest };
 }
+const BIBLE_NOTKEPT = globalThis.ubT('bible:notkept');
 const NOTKEPT = globalThis.ubT('tr:notkept');
 for (const x of job.extras.filter((x) => x.path === '/search' && x.status === 200 && x.body !== undefined)) {
   const q = new URLSearchParams(x.query), scope = q.get('in') || '';
@@ -173,6 +181,14 @@ for (const x of job.extras.filter((x) => x.path === '/search' && x.status === 20
         if (mine.secs[t.key] !== want.secs[t.key]) why.push(`${t.key}: not the server's list`);
       } else if ((scope === '' || scope === t.key)
                  && !(mine.secs[t.key] || '').includes(NOTKEPT)) why.push(`${t.key}: does not say it is not kept`);
+    }
+    // The KJV's list is the copy's own whatever is kept; the Synodal's is
+    // the server's where kept, and where not says so, if words were searched.
+    if (sh.bible && (scope === '' || scope === 'kjv') && mine.secs.kjv !== want.secs.kjv) why.push("kjv: not the server's list");
+    if (sh.bible && (scope === '' || scope === 'rsb')) {
+      if (kept.includes('rsb')) {
+        if (mine.secs.rsb !== want.secs.rsb) why.push("rsb: not the server's list");
+      } else if (!(mine.secs.rsb || '').includes(BIBLE_NOTKEPT)) why.push('rsb: does not say it is not kept');
     }
     if (why.length) out.bad.push({ path: name, kept: kept.join(' ') || 'none', why: why.join('; ') });
   }

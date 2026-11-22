@@ -211,19 +211,33 @@ def universe(con: sqlite3.Connection) -> dict:
     quiz = [n for (n,) in con.execute("SELECT paper_n FROM quiz_paper ORDER BY paper_n")]
     # The chart of the personalities (build/cosmo.py), where the build has one.
     cosmo = bool(con.execute("SELECT 1 FROM cosmo_meta LIMIT 1").fetchone())
-    # The King James Version (build/kjv.py, var/kjv.db beside ub.db), where it
-    # is built: its books, each with the last verse of every chapter.
-    from ubsite import kjv
-    bible = None
-    if kjv.there():
-        with kjv.db() as k:
-            last: dict[str, list[int]] = {}
-            for abbr, n in k.execute("SELECT b.abbr, max(v.verse) FROM kjv_verse v JOIN kjv_book b ON b.id = v.book"
-                                     " GROUP BY v.book, v.chapter ORDER BY v.book, v.chapter"):
-                last.setdefault(abbr, []).append(n)
-        bible = [[b["abbr"], b["ref_name"], b["name"], last[b["abbr"]]] for b in kjv.books()]
+    # The Bible (build/bible.py, var/bible.db beside ub.db), where it is built:
+    # its books, each [abbr, its English name, the KJV's name or '', the
+    # Synodal's name and abbreviation or '', its group, the last verse an
+    # address may name on each of its pages, whether the KJV has it, the
+    # Synodal's chapters {c: [first verse, last]}, the KJV's reference name].
+    from ubsite import bible as B
+    books = None
+    if B.there():
+        with B.db() as k:
+            last: dict[int, dict[int, int]] = {}
+            for book, rc, kmax, smax in k.execute(
+                    "SELECT book, rc, max(CASE WHEN version = 'kjv' AND kind = 'verse' THEN verse END),"
+                    " max(CASE WHEN version = 'rsb' AND kind = 'verse' AND alt = 0 THEN verse END)"
+                    " FROM bible_verse GROUP BY book, rc ORDER BY book, rc"):
+                last.setdefault(book, {})[rc] = kmax if kmax is not None else smax
+            spans: dict[int, dict[str, list[int]]] = {}
+            for book, c, lo, hi in k.execute(
+                    "SELECT book, chapter, min(verse), max(verse) FROM bible_verse WHERE version = 'rsb'"
+                    " AND alt = 0 AND kind = 'verse' GROUP BY book, chapter ORDER BY book, chapter"):
+                spans.setdefault(book, {})[str(c)] = [lo, hi]
+        books = [[b["abbr"], b["en"], b["kjv"]["name"] if b["kjv"] else "",
+                  b["rsb"]["name"] if b["rsb"] else "", b["rsb"]["ref_name"] if b["rsb"] else "", b["grp"],
+                  [last[b["id"]].get(c, 0) for c in range(1, b["chapters"] + 1)], bool(b["kjv"]),
+                  spans.get(b["id"], {}), b["kjv"]["ref_name"] if b["kjv"] else ""]
+                 for b in B.books()]
     return {"papers": papers, "letters": letters, "slugs": slugs, "paths": paths,
-            "lasts": lasts, "misc": misc, "quiz": quiz, "cosmo": cosmo, "kjv": bible}
+            "lasts": lasts, "misc": misc, "quiz": quiz, "cosmo": cosmo, "bible": books}
 
 
 def _request(path: str) -> Request:
@@ -426,20 +440,44 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
     # does, or its words here.
     if u["cosmo"]:
         chunks["cosmo"] = {"pages": {"/cosmology": own("/cosmology", site.get("/cosmology"))}}
-    # The King James Version, a download of its own (Tigran, 2026-11-21), as
-    # a translation is: /kjv in a chunk of its own, and each book, its page and
-    # every chapter's, in another, kjv-<abbr>.  A verse's address is its
-    # chapter's page with the verses marked (offline-core.js), as a
-    # paragraph's is its section's.
-    kjvc: dict[str, dict] = {}
-    kjv_pages = 0
-    if u["kjv"]:
-        kjvc["kjv-toc"] = {"pages": {"/kjv": own("/kjv", site.get("/kjv"))}}
-        for abbr, _, _, lasts in u["kjv"]:
-            addrs = [f"/kjv/{abbr}"] + [f"/kjv/{abbr}/{c}" for c in range(1, len(lasts) + 1)]
-            kjvc[f"kjv-{abbr}"] = {"pages": {a: own(a, pg) for a, pg in
-                                              zip(addrs, site.get_many([(a, "") for a in addrs]))}}
-        kjv_pages = sum(len(c["pages"]) for c in kjvc.values())
+    # The Bible, each version a download of its own (Tigran, 2026-11-21: "treated
+    # the same way as we do the Urantia Book's texts (folding, ordering,
+    # offline, etc)"), as a translation is.  The KJV's: /bible in a chunk of
+    # its own, and each book it has, its page and every chapter's, in another,
+    # bible-<abbr>; the pages carry each row's base line, so they are what the
+    # Synodal is drawn into too.  The Synodal's: each book's, bible-rsb-<abbr>,
+    # the fragments of its chapters (/bible/tr/), the pages of the eleven books
+    # only it has, and what /bible/rsb/ sends a reader on to where that is not
+    # the address its numbers make (offline-core.js biblePage).  A verse's
+    # address is its chapter's page with the verses marked, as a paragraph's
+    # is its section's.
+    bibc: dict[str, dict] = {"kjv": {}, "rsb": {}}
+    bible_pages = 0
+    if u["bible"]:
+        from ubsite import bible as B
+        bibc["kjv"]["bible-toc"] = {"pages": {"/bible": own("/bible", site.get("/bible"))}}
+        for abbr, _, _, _, _, grp, lasts, has_kjv, _, _ in u["bible"]:
+            b = B.book(abbr)
+            addrs = [f"/bible/{abbr}"] + [f"/bible/{abbr}/{c}" for c in range(1, len(lasts) + 1)]
+            got = {a: own(a, pg) for a, pg in zip(addrs, site.get_many([(a, "") for a in addrs]))}
+            if has_kjv:
+                bibc["kjv"][f"bible-{abbr}"] = {"pages": got}
+            if b["rsb"]:
+                frags = {}
+                fpaths = [f"/bible/tr/{abbr}/{c}" for c in range(1, len(lasts) + 1) if A.bible_tr(b, c)["v"]]
+                for fp, fg in zip(fpaths, site.get_many([(x, "") for x in fpaths])):
+                    if fg.status != 200:
+                        raise Shape(f"{fp} answered {fg.status}")
+                    expect[fp] = sha(fg.text)
+                    frags[fp] = fg.text
+                one = {"rsb": B.synodal_table(b)}
+                if frags:
+                    one["frags"] = frags
+                if not has_kjv:
+                    one["pages"] = got
+                bibc["rsb"][f"bible-rsb-{abbr}"] = one
+        # Everything of the Bible's: its pages, and the Synodal's fragments.
+        bible_pages = sum(len(c.get("pages", {})) + len(c.get("frags", {})) for v in bibc.values() for c in v.values())
     # /api, asked again at API_HOST: the page at HOST but for its address, or the
     # address is not all of it that depends on the host.  The gate holds what
     # the worker makes of it to the page at HOST.
@@ -482,10 +520,9 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
         "papers": {str(p): secs for p, secs in u["papers"].items()},
         "lasts": u["lasts"], "letters": u["letters"], "slugs": u["slugs"], "paths": where,
         "misc": u["misc"], "quiz": u["quiz"], "cosmo": u["cosmo"],
-        # The King James Version's books, [abbr, the name a reference writes,
-        # the KJV's name, the last verse of each chapter], or false where the
-        # build has none: what /kjv's addresses are routed and explained by.
-        "kjv": u["kjv"] or False,
+        # The Bible's books (universe() above), or false where the build has
+        # none: what /bible's addresses are routed and explained by.
+        "bible": u["bible"] or False,
         # The voices whose lists the copy holds (audio-<key>), in Settings' order.
         "audio": voices,
         # What /tr/ is made of offline: the fragment's two ends, and each
@@ -501,7 +538,7 @@ def build(con: sqlite3.Connection) -> tuple[dict, dict, dict, dict]:
               "whole": len(u["papers"]),
               "headwords": len(u["slugs"]), "letters": len(u["letters"]), "misc": len(u["misc"]),
               "paths": sum(1 for p in expect if p.startswith("/i/") and "/read" in p),
-              "pages": len(expect) - spoken - fragments - tocs - tr_spoken - len(voices) - kjv_pages,
-              "spoken": spoken, "kjv_pages": kjv_pages,
+              "pages": len(expect) - spoken - fragments - tocs - tr_spoken - len(voices) - bible_pages,
+              "spoken": spoken, "bible_pages": bible_pages,
               "fragments": fragments, "tr_spoken": tr_spoken, "recordings": len(voices)}
-    return chunks, expect, counts, {k: c for k, c in trs.items() if c}, kjvc
+    return chunks, expect, counts, {k: c for k, c in trs.items() if c}, bibc

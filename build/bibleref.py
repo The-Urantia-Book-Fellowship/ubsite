@@ -5,7 +5,7 @@ The notes cite the Bible as plain words, as a reviewed note is written:
 and none is to be (the notes stay as written: data/study/README.md), so this
 reads the note's text as build/study.py expand() has set it (a tie is U+00A0,
 `--` an en dash) and makes each reference a `link` span over its own words,
-to the verse in the King James Version (var/kjv.db, build/kjv.py), so that the
+to the verse in the King James Version (var/bible.db, build/bible.py), so that the
 note's text, and the round trip, are as they were (Tigran, 2026-11-21: "so
 that our references to the Bible can point directly there").
 
@@ -42,7 +42,7 @@ from __future__ import annotations
 import pathlib
 import re
 
-from . import kjv
+from . import bible
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 KNOWN = ROOT / "tests" / "known-bible-carried.tsv"
@@ -78,13 +78,13 @@ class Recognizer:
 
     @classmethod
     def load(cls) -> "Recognizer | None":
-        """From var/kjv.db and data/kjv/books.tsv, or None where the KJV is
-        not built (make kjv)."""
-        if not kjv.OUT.exists():
+        """From var/bible.db and data/kjv/books.tsv, or None where the Bible
+        is not built (make bible)."""
+        if not bible.OUT.exists():
             return None
-        books = [dict(zip(kjv.BOOK_FIELDS, line.split("\t")))
-                 for line in (kjv.DATA / "books.tsv").read_text(encoding="utf-8").split("\n")[1:] if line]
-        return cls(books, kjv.verses_of(), read_known())
+        books = [dict(zip(bible.KJV_BOOK, line.split("\t")))
+                 for line in (bible.KJV / "books.tsv").read_text(encoding="utf-8").split("\n")[1:] if line]
+        return cls(books, bible.verses_of(), read_known())
 
     # -- one reference ------------------------------------------------------
     def _href(self, abbr: str, c: int, v: int | None, c2: int | None, v2: int | None,
@@ -99,7 +99,7 @@ class Recognizer:
             if c2 is not None and (c2 not in chs or c2 < c):
                 report.hard("study-bible-ref", where, f"{words!r}: no such run of chapters")
                 return None
-            return f"/kjv/{abbr}/{c}"
+            return f"/bible/{abbr}/{c}"
         if not 1 <= v <= chs[c]:
             report.hard("study-bible-ref", where, f"{words!r}: {abbr} {c} has no verse {v}")
             return None
@@ -107,12 +107,12 @@ class Recognizer:
             if not v < c2 <= chs[c]:
                 report.hard("study-bible-ref", where, f"{words!r}: no such run of verses")
                 return None
-            return f"/kjv/{abbr}/{c}:{v}-{c2}"
+            return f"/bible/{abbr}/{c}:{v}-{c2}"
         if c2 is not None:                      # 7:9--8:2, across a chapter's end: its first verse
             if c2 not in chs or not 1 <= v2 <= chs[c2] or (c2, v2) <= (c, v):
                 report.hard("study-bible-ref", where, f"{words!r}: no such run of verses")
                 return None
-        return f"/kjv/{abbr}/{c}:{v}"
+        return f"/bible/{abbr}/{c}:{v}"
 
     def find(self, text: str, spans, where: str, at: str, report, carry: bool = True) -> list[tuple]:
         """[(start, end, href)] for every reference in a note's `text`: `at`
@@ -205,18 +205,18 @@ def read_known() -> dict[tuple[str, str, int], str]:
     return out
 
 
-RE_HREF = re.compile(r'href="/kjv/([1-3]?[A-Z][a-z]{1,2})/(\d+)(?::(\d+)(?:-(\d+))?)?"')
+RE_HREF = re.compile(r'href="/bible/([1-3]?[A-Z][a-z]{1,2})/(\d+)(?::(\d+)(?:-(\d+))?)?"')
 
 
 def store(con) -> int:
-    """kjv_cite (build/schema/014_kjv_cite.sql): every verse a study note
+    """bible_cite (build/schema/014_bible_cite.sql): every verse a study note
     links to, from the note's own HTML, where these links were made.  The
-    KJV's page reads it, to name beside a verse the paragraphs whose notes
+    Bible's page reads it, to name beside a verse the paragraphs whose notes
     cite it."""
     rows = []
     for fid, pid, html in con.execute("SELECT id, paragraph_id, html FROM footnote WHERE kind = 'study' ORDER BY id"):
         for m in RE_HREF.finditer(html):
             v = int(m[3]) if m[3] else None
             rows.append((fid, pid, m[1], int(m[2]), v, int(m[4]) if m[4] else v))
-    con.executemany("INSERT INTO kjv_cite VALUES (?,?,?,?,?,?)", rows)
+    con.executemany("INSERT INTO bible_cite VALUES (?,?,?,?,?,?)", rows)
     return len(rows)

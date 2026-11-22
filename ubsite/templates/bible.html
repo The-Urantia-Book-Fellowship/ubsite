@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% set title = 'The Bible' %}
+{% from "_biblerail.html" import bname %}
+{#- The Bible's contents (app.py bible_contents, ubsite/bible.py): its 77
+    books, the Old Testament's, the Synodal's eleven non-canonical between the
+    testaments (Tigran, 2026-11-21: "Between the testaments"), and the New's,
+    each by its name in the interface's language (app.py book_name, as the
+    Contents at a chapter's left) with its count of chapters, to its page.  The versions'
+    own words stay theirs, as the book's do; what the page says of them is
+    the interface's.  Then each version, what it is and where the text came
+    from (data/kjv/README.md, data/rsb/README.md), with the credit for what
+    was taken from eBible.org's.  A book whose verses a study note cites is
+    marked (.cited), and the line under the name says how many and from how
+    many papers, the notes reviewed so far (app.py bible_cited). #}
+{% block body %}<main class="prose kjv kjvtoc">
+<h1>{{ t('The Bible') }}</h1>
+{%- if cited.verses %}
+<p class="kjvcite">{{ t('kjv:cited', v=cited.verses, p=cited.papers) }}</p>
+{%- endif %}
+{%- for grp, head in (('OT', 'The Old Testament'), ('DC', 'bible:dchead'), ('NT', 'The New Testament')) %}
+<section id="{{ grp|lower }}">
+  <h2>{{ t(head) }}</h2>
+  {%- if grp == 'DC' %}
+  <p class="bnote">{{ t('bible:dc') }}</p>
+  {%- endif %}
+  <ol class="kbooks">
+    {%- for b in books if b.grp == grp %}
+    <li{% if cited.books[b.abbr] %} class="cited"{% endif %}><a href="/bible/{{ b.abbr }}">{{ bname(b) }}</a><span class="nch">{{ b.chapters }}</span></li>
+    {%- endfor %}
+  </ol>
+</section>
+{%- endfor %}
+<section class="bversions">
+  <h2>{{ t('The versions') }}</h2>
+  {%- for v in bible_versions() %}
+  <p><span lang="{{ v.lang }}">{{ v.title }}</span> ({{ v.label }}): {{ t(v.by) }}.</p>
+  {%- endfor %}
+  <p class="kjvsrc">{{ t('kjv:source') }}</p>
+</section>
+</main>{% endblock %}

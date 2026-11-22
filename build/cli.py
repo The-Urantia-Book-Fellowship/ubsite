@@ -86,15 +86,17 @@ def main(argv: list[str]) -> int:
               f"{len(changed)} changed, {len(gone)} removed, {len(new)} added")
         return rc or (0 if ok else 1)
 
-    if cmd == "kjv":
-        # The King James Version, var/kjv.db, from data/kjv/ alone (build/kjv.py).
-        from . import kjv
+    if cmd == "bible":
+        # The Bible, var/bible.db: the KJV and the Synodal from data/kjv/ and
+        # data/rsb/ alone (build/bible.py).
+        from . import bible
         from .problems import Report
         report = Report()
-        stats = kjv.build(report)
+        stats = bible.build(report)
         if stats:
-            print(f"var/kjv.db: {stats['books']} books, {stats['chapters']:,} chapters, "
-                  f"{stats['verses']:,} verses, {stats['notes']:,} notes")
+            print(f"var/bible.db: {stats['books']} books, {stats['chapters']:,} chapters, {stats['rows']:,} rows; "
+                  f"KJV {stats['kjv_verses']:,} verses, {stats['kjv_titles']} titles, {stats['kjv_notes']:,} notes; "
+                  f"Synodal {stats['rsb_verses']:,} verses, {stats['rsb_notes']:,} notes")
         return report.emit()
 
     if cmd == "data":
@@ -125,10 +127,10 @@ def main(argv: list[str]) -> int:
         print(f"reading index at {at(ix)} ...")
         az = read_az(ix["tex"], report, rev=ix["at"])
         apps = read_appendices(ix["tex"], report, rev=ix["at"])
-        # The King James Version first (build/kjv.py): the study notes link
-        # their Bible references to it, and are held to it.
-        from . import kjv
-        kjv.ensure(report)
+        # The Bible first (build/bible.py): the study notes link their Bible
+        # references to the KJV in it, and are held to it.
+        from . import bible
+        bible.ensure(report)
         # The study edition's notes, for each paper reviewed in data/study/:
         # onto the press text before it is rendered, so one render places them.
         from . import study
@@ -416,9 +418,9 @@ def main(argv: list[str]) -> int:
         print("\n== the chart of the personalities ==")
         from .checks.check_cosmo import run as cosmo_run
         rc |= cosmo_run(dbf) if dbf.exists() else absent("var/ub.db (make data)")
-        print("\n== the King James Version ==")
-        from .checks.check_kjv import run as kjv_run
-        rc |= kjv_run()
+        print("\n== the Bible ==")
+        from .checks.check_bible import run as bible_run
+        rc |= bible_run()
         print("\n== the passages of the moment ==")
         from .passage import check as passage_check
         rc |= passage_check(dbf) if dbf.exists() else absent("var/ub.db (make data)")

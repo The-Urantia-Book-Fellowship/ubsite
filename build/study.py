@@ -232,7 +232,7 @@ def attach(papers, curated: dict[int, Curated], repo: dict, block: dict, report,
     # The notes' Bible references, links to the King James Version (build/bibleref.py).
     bible = bibleref.Recognizer.load()
     if bible is None:
-        report.hard("study-bible-kjv", "var/kjv.db", "the KJV is not built, and the notes link to it (make kjv)")
+        report.hard("study-bible-kjv", "var/bible.db", "the Bible is not built, and the notes link to it (make bible)")
     for n, cur in sorted(curated.items()):
         where = f"data/study/{cur.path.name}"
         orig = originals.get(n)

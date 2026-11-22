@@ -284,7 +284,7 @@
   // stays short as the Foundation's languages come (Tigran, 2026-11-04).  A
   // reader may still keep one it does not show.
   var trMain = trBox.querySelector('ul.offtrs'), trMore = trBox.querySelector('.offmore'),
-      trOrder = Array.prototype.slice.call(trBox.querySelectorAll('.offtrs:not(.offkjv) li'));
+      trOrder = Array.prototype.slice.call(trBox.querySelectorAll('.offtrs:not(.offbible) li'));
   function trFold() {
     var shown = window.ubSettings ? String(window.ubSettings.get().translations || '').split(' ') : [];
     var others = trOrder.filter(function (li) { return shown.indexOf(li.querySelector('input').value) < 0; });
@@ -323,6 +323,7 @@
       box.checked = false;
       return;
     }
+    var mine = (have && have.tr) || [], adds = [box.value];
     if (!box.checked) {
       var w = box.closest('li').querySelector('.w'), t = ((have && have.trs) || []).filter(function (x) { return x.key === box.value; })[0],
           p = { t: T.same(w ? w.textContent.replace(/\s+/g, ' ').trim() : box.value), s: mb(t ? t.bytes : 0) };
@@ -333,10 +334,10 @@
       return ask('drop', { tr: box.value }).then(function (s) { show(s); fresh(); });
     }
     persist(true);
-    if (!have) return on([box.value]);
+    if (!have) return on(adds);
     going = true;
-    show(Object.assign({}, last, { busy: { done: 0, total: 0, adding: [box.value], copy: !!last.latest } }));
-    newestWorker().then(function () { return ask('get', { tr: (have.tr || []).concat(box.value) }); }).then(function (s) {
+    show(Object.assign({}, last, { busy: { done: 0, total: 0, adding: adds, copy: !!last.latest } }));
+    newestWorker().then(function () { return ask('get', { tr: mine.concat(adds) }); }).then(function (s) {
       going = false;
       show(s);
       if (s && s.error) fresh();

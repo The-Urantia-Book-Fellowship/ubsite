@@ -1304,14 +1304,15 @@ a.fn + a.fn[data-k="st"] { padding-left: 0; margin-left: 0; }
    own leading.  A fraction its font has no character for, n⁄d, is drawn as
    one by the font's own (`frac`). */
 .tf { display: none; margin: -.45rem 0 .85rem; font-size: 1rem; line-height: 1.45; }
-.trfold { display: flex; align-items: baseline; min-height: 1.45em; font: inherit; color: var(--faint);
+/* The Bible's fold (.bfold, ub.js bibFolds) is the same line. */
+:is(.trfold, .bfold) { display: flex; align-items: baseline; min-height: 1.45em; font: inherit; color: var(--faint);
   background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
   -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-.trfold::before { content: ""; display: inline-block; flex: none; width: .34em; height: .34em;
+:is(.trfold, .bfold)::before { content: ""; display: inline-block; flex: none; width: .34em; height: .34em;
   margin: 0 .5em .1em .26em; border: solid currentColor; border-width: 0 1.5px 1.5px 0;
   transform: rotate(-45deg); transition: transform .12s; }
-.trfold[aria-expanded="true"]::before { transform: rotate(45deg); }
-@media (hover: hover) { .trfold:hover { color: var(--ink); } }
+:is(.trfold, .bfold)[aria-expanded="true"]::before { transform: rotate(45deg); }
+@media (hover: hover) { :is(.trfold, .bfold):hover { color: var(--ink); } }
 .tf .tr { border-left: 2px solid var(--rule); padding: .1rem 0 .1rem .8rem; margin: .3rem 0 .4rem; }
 .tf .tr[hidden] { display: none; }
 .tf .trtabs { display: flex; flex-wrap: wrap; gap: .2rem 1rem; margin: 0 0 .35rem; font-size: .95rem; }
@@ -1388,12 +1389,13 @@ p.t.ftxw { margin-top: 1.5rem; }
 /* What the columns need, which ub.js asks of a probe it puts in the article
    for the asking, its --n the number of columns: each its least, the gaps
    between them, and on a wide screen the margin's track and its gap where
-   the index is shown.  Here, so that no length is written twice; what there
-   is, ub.js takes from the frame's boxes. */
+   the index is shown, but on the Bible's pages, which have none.  Here, so
+   that no length is written twice; what there is, ub.js takes from the
+   frame's boxes. */
 .cprobe { position: absolute; visibility: hidden; pointer-events: none; height: 0;
           width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem); }
 @media (min-width: 62.01rem) {
-  :root:not([data-margin="off"], [data-index="off"]) article:not(.partpage) > .cprobe {
+  :root:not([data-margin="off"], [data-index="off"]) article:not(.partpage, .biblech) > .cprobe {
          width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem + 26ch + 2rem); }
 }
 /* In columns the folds give way to them, from first paint, and the paper's
@@ -2123,29 +2125,43 @@ dialog.settings .sub { margin: .35rem 0 .05rem; font-size: 1.02rem; }
    by language.  A translation's title, and under it who made it and what it
    covers. */
 dialog.settings .trintro { color: var(--faint); font-size: .95rem; margin: 0 0 .6rem; }
+/* The Texts tab's two subtabs, the book's texts and the Bible's (base.html
+   .txtabs; Tigran, 2026-11-21), Theme's segmented control across the panel. */
+dialog.settings .txtabs { display: flex; margin: .2rem 0 1rem; border-radius: .9rem; }
+/* Each name on one line, which fits at 320 px at every Interface text size
+   but the largest, where it may break rather than run out of the dialog
+   (trap 68, measured at each size in both languages). */
+dialog.settings .txtabs button { flex: 1 1 auto; min-width: 0; padding: .12rem .45rem; font: inherit; font-size: .92rem;
+  line-height: 1.3; white-space: nowrap; color: var(--ink); background: none; border: 0; cursor: pointer; }
+:root[data-uisize="125"] dialog.settings .txtabs button { white-space: normal; }
+dialog.settings .txtabs button + button { border-left: 1px solid var(--rule); }
+dialog.settings .txtabs button:hover { background: color-mix(in oklch, var(--link) 10%, transparent); }
+dialog.settings .txtabs [aria-selected="true"] { color: var(--paper); background: var(--link); }
+dialog.settings .txtabs button:focus-visible { outline: 2px solid var(--link); outline-offset: -3px; }
+dialog.settings .txsub[hidden] { display: none; }
 dialog.settings .trnone { color: var(--faint); font-style: italic; font-size: .95rem; margin: .1rem 0 .7rem; }
-dialog.settings .trlist { list-style: none; margin: .3rem 0 .9rem; padding: 0; display: grid; gap: .5rem; }
-dialog.settings .trlist[hidden] { display: none; }
-dialog.settings .trlist li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; align-items: start; }
-dialog.settings ol.trlist { counter-reset: tr; }
-dialog.settings ol.trlist li { grid-template-columns: 1.1em minmax(0, 1fr) auto; counter-increment: tr;
+dialog.settings :is(.trlist, .blist) { list-style: none; margin: .3rem 0 .9rem; padding: 0; display: grid; gap: .5rem; }
+dialog.settings :is(.trlist, .blist)[hidden] { display: none; }
+dialog.settings :is(.trlist, .blist) li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 .5rem; align-items: start; }
+dialog.settings ol:is(.trlist, .blist) { counter-reset: tr; }
+dialog.settings ol:is(.trlist, .blist) li { grid-template-columns: 1.1em minmax(0, 1fr) auto; counter-increment: tr;
   border: 1px solid var(--rule); border-radius: 6px; padding: .4rem .45rem .4rem .55rem; background: var(--paper); }
-dialog.settings ol.trlist li::before { content: counter(tr); color: var(--faint); font-size: .85rem; padding-top: .2rem; }
-dialog.settings .trlist label { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .1rem 0;
+dialog.settings ol:is(.trlist, .blist) li::before { content: counter(tr); color: var(--faint); font-size: .85rem; padding-top: .2rem; }
+dialog.settings :is(.trlist, .blist) label { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .1rem 0;
   align-items: baseline; padding: 0; }
-dialog.settings .trlist .d { grid-column: 2; line-height: 1.35; }
-dialog.settings .trlist .cr { display: block; }
-dialog.settings .trlist .lang { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
-dialog.settings .trother :is(.lang, .mv) { display: none; }
+dialog.settings :is(.trlist, .blist) .d { grid-column: 2; line-height: 1.35; }
+dialog.settings :is(.trlist, .blist) .cr { display: block; }
+dialog.settings :is(.trlist, .blist) .lang { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+dialog.settings :is(.trother, .bother) :is(.lang, .mv) { display: none; }
 /* Shown, a card is no switch: × hides it.  Its buttons stand beside its
    title, and who made it and what it covers under both, across the card, so
    that on a phone the line is not cut into a column of words. */
-dialog.settings .trshown input { display: none; }
-dialog.settings .trshown label { display: contents; cursor: default; pointer-events: none; }
-dialog.settings .trshown li::before { grid-row: 1 / span 2; }
-dialog.settings .trshown .w { grid-column: 2; grid-row: 1; align-self: center; }
-dialog.settings .trshown .mv { grid-column: 3; grid-row: 1; }
-dialog.settings .trshown .d { grid-column: 2 / -1; grid-row: 2; margin-top: .15rem; }
+dialog.settings :is(.trshown, .bshown) input { display: none; }
+dialog.settings :is(.trshown, .bshown) label { display: contents; cursor: default; pointer-events: none; }
+dialog.settings :is(.trshown, .bshown) li::before { grid-row: 1 / span 2; }
+dialog.settings :is(.trshown, .bshown) .w { grid-column: 2; grid-row: 1; align-self: center; }
+dialog.settings :is(.trshown, .bshown) .mv { grid-column: 3; grid-row: 1; }
+dialog.settings :is(.trshown, .bshown) .d { grid-column: 2 / -1; grid-row: 2; margin-top: .15rem; }
 dialog.settings .trlang { margin: .2rem 0 0; font-size: .95rem; }
 /* The Offline tab's translations, kept in the offline copy (base.html .offtr):
    a tick and a title, and under the title its size, or how far its download
@@ -2542,8 +2558,13 @@ footer[data-copy]::before { content: "This page is from the offline copy of " at
 :root:not([data-studynotes="off"]):not([data-studysearch="off"]) .bystudy { display: block; }
 :root[data-indexsearch="off"] .results > .ix { display: none; }
 :root[data-trsearch="off"] .trhits { display: none; }
-/* The King James Version's list (search.html .bykjv), while Settings shows it. */
-:root[data-kjvsearch="off"] .bykjv { display: none; }
+/* The Bible's lists (search.html .bybible), a version's while the Bible's
+   pages show it (settings.py `bible`: the KJV alone unless a reader adds the
+   Synodal) and while Settings shows the Bible in search results. */
+.bybible[data-bible="rsb"] { display: none; }
+:root[data-bible~="rsb"] .bybible[data-bible="rsb"] { display: block; }
+:root[data-bible]:not([data-bible~="kjv"]) .bybible[data-bible="kjv"] { display: none; }
+:root[data-biblesearch="off"] .bybible { display: none; }
 .kjvh .kjvnote { display: block; margin: .15rem 0 0 1.2rem; font-size: .92em; }
 .kjvh .kjvnote .lbl { font-variant-caps: small-caps; letter-spacing: .04em; color: var(--faint); margin-right: .3em; }
 .trhits { display: none; flex-direction: column; gap: 1.6rem; margin: 1.6rem 0; }
@@ -2775,6 +2796,7 @@ details.papers nav a { padding: .1rem .35rem; min-width: 1.6rem; text-align: cen
   .a { font-size: 8.5pt; margin: .2rem 0 .8rem 1.5rem; color: #444; }
   .jesus { print-color-adjust: exact; }
   .js .notes { display: block; }
+  .js main.bible .ka { display: block; }
   .pop { display: none; }
   a { color: inherit; text-decoration: none; }
 }
@@ -3380,24 +3402,100 @@ main.cosmo { padding: .6rem 0 0; --cedge: color-mix(in oklch, var(--ink) 42%, va
 }
 @media print { .ctools, .clegend > summary, .cmap { display: none; } .cview { height: auto; overflow: visible; } }
 
-/* ---- the King James Version (templates/kjv*.html, 2026-11-21) ----------- */
-/* Its contents, a book's title and chapters, and a chapter, set as the book's
-   text is: the reader's measure, justified, hyphenated by Knuth's patterns
-   (build/kjv.py).  A chapter is a reader's page, and the bar at the foot is
-   hidden there as on the book's: the running head's Home is the way out. */
+/* ---- the Bible (templates/bible*.html, 2026-11-21) ------------------------- */
+/* The King James Version and the Russian Synodal Bible, a verse of each to a
+   row (ubsite/bible.py; the KJV's alone that morning).  Its contents, a
+   book's title and chapters, and a chapter, set as the book's text is: the
+   reader's measure, justified, hyphenated as each version's own TeX would.  A
+   chapter is a reader's page, and the bar at the foot is hidden there as on
+   the book's: the running head's Home is the way out. */
 /* A chapter's page is a reader's (main.reader), the Bible's Contents at the
-   left (_kjvrail.html), its text the measure wide, with no margin for the
-   index: the rail, the gap, the measure and the padding.  Width: Full frees
-   it as it frees the book's text (the contents and a book's page are .prose,
-   which Full already frees).  The text's width by --textw, which columns
-   set, as the book's is, for the Synodal Bible beside it to come. */
-main.reader.kjv { max-width: calc(var(--textw, var(--measure)) + 20.8rem); }
-main.reader.kjv article > :is(.kjvtop, .kverses, .notes, .transport, .kend) { max-width: var(--measure); }
-:root[data-width="full"] main.reader.kjv,
-:root[data-width="full"] main.reader.kjv article > :is(.kjvtop, .kverses, .notes, .transport, .kend) { max-width: none; }
-/* The chapters of the book in the rail, a row of numbers, the one being read
-   on the rail's band, held close about it. */
+   left (_biblerail.html), each row a verse the measure wide, and under a
+   verse a study note cites the paragraphs whose notes cite it, a line of its
+   own (.ka): no margin's track beside the text, as the index has beside the
+   book's, which would stand empty but for one row in a hundred and take its
+   room from the text, the columns' above all (Tigran, 2026-11-21:
+   "Dedicating the whole column for 'Study notes at...' (practically empty!)
+   is a bad idea").  Width: Full frees the text as it frees the book's.  The
+   text's width by --textw, which columns set (ub.js bibDraw), as the book's
+   is. */
+main.reader.bible article > :is(.kjvtop, .notes, .transport, .kend) { max-width: var(--textw, var(--measure)); }
+:root[data-width="full"] main.reader.bible article > :is(.kjvtop, .notes, .transport, .kend) { max-width: none; }
+main.reader.bible:has(> article.bcmp) { --textw: calc(var(--cols) * var(--measure) + (var(--cols) - 1) * 2rem); }
+.krow { display: grid; grid-template-columns: minmax(0, var(--measure)); column-gap: 2rem; }
+:root[data-width="full"] .krow { grid-template-columns: minmax(0, 1fr); }
+.krow > * { grid-column: 1; }
+.krow > .ka { margin: 0 0 .3rem; }
+/* The orange dot at a cited verse's end, the flame's colour, as on a cited
+   book and chapter in the Contents, a note's mark (a.fn) whose card is the
+   line .ka, which scripts hide (bible_chapter.html; Tigran, 2026-11-21:
+   "even a small line under each row is a waste"). */
+.js main.bible .ka { display: none; }
+a.fn[data-k="kc"] { color: var(--flame); }
+a.fn[data-k="kc"]::after { background: currentColor; margin-left: calc(var(--ring) * .12); }
+a.fn[data-k="kc"].on::after { box-shadow: 0 0 0 calc(var(--ring) * .09) color-mix(in oklch, var(--flame) 40%, transparent); }
+/* In columns (ub.js bibDraw; article.bcmp), a cell to each text shown, in the
+   reader's order, the line of study notes under them, across them all, and a
+   line naming them at the window's top, as the book's columns have. */
+article.bcmp .krow { grid-template-columns: repeat(var(--cols), minmax(0, var(--measure))); }
+:root[data-width="full"] article.bcmp .krow { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+article.bcmp .krow > .bc { grid-column: var(--c); grid-row: 1; min-width: 0; }
+article.bcmp .krow > :is(.bwho, .btf) { display: none; }
+article.bcmp .krow > .ka { grid-column: 1 / -1; }
+article.bcmp .bnames { position: sticky; top: 0; z-index: 2; background: var(--paper);
+  padding: 1rem 0 .3rem; margin: -1rem 0 .6rem; border-bottom: 1px solid var(--rule); }
+article.bcmp .bnames > .cn { grid-column: var(--c); grid-row: 1; margin: 0; font-size: .8rem; line-height: 1.3; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--faint); position: relative; padding-right: 1.6rem; }
+article.bcmp .bnames b { font-weight: inherit; color: var(--ink); }
+/* A text's ×, at its name's top right corner, stops showing it, as the
+   book's columns' does (article.cmp .cmpnames .cnx; ub.js bibDraw). */
+article.bcmp .bnames .bnx { position: absolute; top: 0; right: 0; padding: 0 .2rem; border: 0;
+  background: none; color: var(--faint); font: inherit; font-size: 1.15rem; line-height: 1; cursor: pointer; }
+article.bcmp .bnames .bnx:hover { color: var(--ink); }
+article.bcmp .bnames .bnx:focus-visible { outline: 2px solid var(--link); outline-offset: 1px; }
+/* The heads over the columns, each over its own, level: a row for the
+   books' titles, which stand on its foot, the main line level with the
+   main line, and a row for the chapters', each head a subgrid of the two
+   (Genesis 1: the KJV's title three lines, the Synodal's two). */
+article.bcmp .kjvtop .bhds { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: auto auto; column-gap: 2rem; }
+article.bcmp .kjvtop .bhds > .bhd { grid-column: var(--c); grid-row: 1 / span 2; display: grid; grid-template-rows: subgrid; }
+article.bcmp .kjvtop .bhd > .ktitle { grid-row: 1; align-self: end; }
+article.bcmp .kjvtop .bhd > h1 { grid-row: 2; }
+/* A fold under each row, its other texts, as the book's are (.tf): shown
+   where two texts are, the first stands in the row and the rest are folded
+   under it, a tap on any fold opening them all or folding them all
+   (settings.py tropen, which the book's folds share). */
+.btf { display: none; margin: -.1rem 0 .55rem; font-size: 1rem; line-height: 1.45; }
+:root:is([data-bible="kjv rsb"], [data-bible="rsb kjv"]) .btf { display: block; }
+.btf .tr { border-left: 2px solid var(--rule); padding: .1rem 0 .1rem .8rem; margin: .3rem 0 .4rem;
+           font-size: var(--size); line-height: var(--lead); }
+.btf .tr[hidden] { display: none; }
+.btf .who { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); margin: .1rem 0 .15rem; }
+.kjvtop .btf { max-width: var(--measure); margin: -.8rem auto 1.2rem; text-align: left; }
+/* Before the first drawing, where the Synodal is the first text: the KJV's
+   lines it takes the place of hidden, their room kept, until ub.js has drawn
+   (:root.bibready), so that no English is seen for a moment. */
+:root[data-bible^="rsb"]:not(.bibready) main.bible :is(.krow > [data-k="kjv"], .kjvtop .bhd[data-k="kjv"]) { visibility: hidden; }
+/* A run of rows the Synodal has alone, in a chapter of the KJV's, named over
+   its first (.bwho), unless the Synodal is the first text; and a line of the
+   one text that has a row standing in for the first, named (ub.js .bstand). */
+.bwho { margin: .9rem 0 .2rem; font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+:root[data-bible^="rsb"] .bwho { display: none; }
+p.kv.bstand::before { content: attr(data-who); content: attr(data-who) / ""; display: block; margin: .6rem 0 .1rem;
+  font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); text-indent: 0; }
+/* A book's page, its titles as each version prints it, the first text's. */
+.bheads > .bhd[data-k="rsb"]:not(:only-child) { display: none; }
+:root[data-bible^="rsb"] .bheads > .bhd[data-k="kjv"]:not(:only-child) { display: none; }
+:root[data-bible^="rsb"] .bheads > .bhd[data-k="rsb"] { display: block; }
+.bnokjv, .bnote { color: var(--faint); font-size: .92rem; text-align: center; }
+.bnote { text-align: left; margin: -.2rem 0 .6rem; }
+.bversions p { margin: .4rem 0; }
 .kjvrail ol.kch { display: flex; flex-wrap: wrap; gap: .1rem .2rem; }
+/* A book the Synodal numbers otherwise lists its chapters both ways, in the
+   rail and on its page, and the first text's numbers are shown (Tigran,
+   2026-11-21: "match the Contents to the actual books"; _biblerail.html). */
+:root:not([data-bible^="rsb"]) ol.kchs, :root[data-bible^="rsb"] ol.kchk { display: none; }
 .kjvrail ol.kch li { margin: 0; }
 .kjvrail ol.kch a { display: block; min-width: 1.8em; text-align: center; font-variant-numeric: lining-nums tabular-nums; }
 .kjvrail ol.kch li.here > a { box-shadow: 0 0 0 .12rem color-mix(in oklch, var(--link) 12%, transparent); }
@@ -3415,7 +3513,6 @@ main.reader.kjv article > :is(.kjvtop, .kverses, .notes, .transport, .kend) { ma
 .kjvtop { text-align: center; }
 .kjvtop h1 { margin: 0 0 1.4rem; font-size: 1rem; font-weight: 400; letter-spacing: .14em;
              text-transform: uppercase; color: var(--text); }
-.kverses { max-width: var(--measure); }
 /* A verse a paragraph (never p.t), its number drawn from data-n so that a
    copy takes its words alone, and after it the 1769's paragraph mark. */
 p.kv { margin: 0 0 .3rem; color: var(--text); line-height: var(--lead); --line: var(--lead);
@@ -3424,13 +3521,27 @@ p.kv { margin: 0 0 .3rem; color: var(--text); line-height: var(--lead); --line: 
 p.kv .vn::before { content: attr(data-n); position: relative; top: -.4em; margin-right: .3em;
                    font-size: .66em; font-variant-numeric: lining-nums; color: var(--faint); }
 p.kv.pil .vn::after { content: "\00b6"; margin-right: .3em; color: var(--faint); }
+/* The Synodal's own chapter, where it is not the page's (data-c), in a fold,
+   where no head of its names it, and where a second chapter of it opens on
+   the page (.newc). */
+:is(.btf, p.kv.newc) .vn[data-c]::before { content: attr(data-c) ":" attr(data-n); }
+/* A Synodal verse 0, a psalm's title or a book's prologue, set as the KJV's
+   title is, without a number. */
+p.kv.kt { margin: .9rem 0 .5rem; font-size: .9em; font-style: italic; text-align: center; text-wrap: balance; }
+p.kv.kt .vn { display: none; }
+/* A paragraph opening inside a Synodal verse (\rsbpar, build/bible.py). */
+p.kv .pm::before { content: "\00a0\00b6"; color: var(--faint); }
 /* A book opens as a paper does (p.t.opening, above): its first letter dropped
    two lines, and its first verse's number, and mark, not shown, as a printed
    Bible sets it, so that the letter is the line's first. */
 p.kv.opening::first-letter { -webkit-initial-letter: 2; initial-letter: 2; font-size-adjust: none;
                              margin: 0 .06em -.3em 0; }
 p.kv.opening .vn { display: none; }
-p.kv.opening { margin-top: .4rem; }
+/* At least two lines tall, the letter's: a first verse of one line (Genesis
+   1:1, 1 Chronicles 1:1) would leave the letter reaching into the next verse,
+   Chrome drawing the next block's line over it (Tigran, 2026-11-21: "We get
+   overprinting in the very first thing the users will see, Genesis 1"). */
+p.kv.opening { margin-top: .4rem; min-height: 2lh; }
 /* A psalm's title, small, as the KJV sets it; a letter of Psalm 119 a
    heading; an epistle's subscription after its last verse, small. */
 p.kvh, p.kva { margin: .9rem 0 .5rem; font-size: .9em; font-style: italic; color: var(--text);
@@ -3441,10 +3552,10 @@ h2.kvl { margin: 1.6rem 0 .5rem; font-size: .95rem; font-weight: 400; letter-spa
 p.kend { margin: 2rem 0 0; text-align: center; font-size: .9rem; letter-spacing: .08em; color: var(--faint); }
 /* A verse's marginal note: an asterisk, raised, as the edition's \ts{*},
    drawn like a study note's number, opening the note as a card (ub.js open). */
-a.fn[data-k="kjv"]::after { content: "\2060*"; font-size: .8em; top: -.45em; padding: 0 .12em; margin-left: .03em;
-                            border: 0; border-radius: .3em; }
-a.fn[data-k="kjv"].on::after { background: var(--link); color: var(--paper); }
-@media (hover: hover) { a.fn[data-k="kjv"]:hover::after { background: var(--link); color: var(--paper); } }
+a.fn:is([data-k="kjv"], [data-k="rsb"])::after { content: "\2060*"; font-size: .8em; top: -.45em; padding: 0 .12em;
+                            margin-left: .03em; border: 0; border-radius: .3em; }
+a.fn:is([data-k="kjv"], [data-k="rsb"]).on::after { background: var(--link); color: var(--paper); }
+@media (hover: hover) { a.fn:is([data-k="kjv"], [data-k="rsb"]):hover::after { background: var(--link); color: var(--paper); } }
 /* The paragraphs whose study notes cite a verse (app.py kjv_cited), under
    it, small; and a dot after a book or a chapter a note cites. */
 p.kvc { margin: -.1rem 0 .45rem; font-size: .82em; line-height: 1.3; color: var(--faint); }

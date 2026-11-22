@@ -29,9 +29,10 @@ note's line drawn around its snippet as a study note's is, and their full-text
 indexes, read through views that take ё as е, all declared as ub.db declares
 them.  The worker attaches each one the copy keeps, by its key.
 
-The King James Version's, from var/kjv.db, is a third of the copy's own,
-attached as `kjv` (kjv_db), so that every reader's search lists its verses,
-its pages being a download of their own.
+The Bible's, from var/bible.db, a database to a version (bible_db): the
+KJV's a third of the copy's own, attached as `kjv`, so that every reader's
+search lists its verses, its pages being a download of their own; the
+Synodal's with its download, attached as `rsb`, as a translation's is.
 """
 
 from __future__ import annotations
@@ -164,27 +165,42 @@ def tr_db(con: sqlite3.Connection, key: str) -> bytes:
     return _done(out)
 
 
-def kjv_db() -> bytes:
-    """The King James Version as search reads it (ubsite/kjv.py hits): each
-    verse's place and its book's name, and the full-text indexes of the verses
-    and of the translators' notes, declared as var/kjv.db declares them, each
-    its own copy as there.  In Base (offline/pack.py), the KJV's pages being a
-    download of their own: the worker attaches it as `kjv`."""
-    from ubsite import kjv
+def bible_db(version: str) -> bytes:
+    """A version of the Bible as search reads it (ubsite/bible.py hits): each
+    verse's place and its book's name as that version writes a reference, its
+    words where they may be read with ё as е, and the full-text indexes of the
+    verses and of the notes, declared as var/bible.db declares them, each its
+    own copy as there.  The KJV's in Base (offline/pack.py), its pages being a
+    download of their own: the worker attaches it as `kjv`; the Synodal's
+    with its download, as a translation's is, attached as `rsb`."""
+    from ubsite import bible as B
+    vt, nt = B.FTS[version]
     out = sqlite3.connect(":memory:")
     out.executescript("""
-        CREATE TABLE kjv_book (id INTEGER PRIMARY KEY, abbr TEXT NOT NULL, ref_name TEXT NOT NULL);
-        CREATE TABLE kjv_verse (id INTEGER PRIMARY KEY, book INTEGER NOT NULL,
-                                chapter INTEGER NOT NULL, verse INTEGER NOT NULL);
+        CREATE TABLE bible_book (id INTEGER PRIMARY KEY, abbr TEXT NOT NULL, ref_name TEXT NOT NULL);
+        CREATE TABLE bible_verse (id INTEGER PRIMARY KEY, book INTEGER NOT NULL, chapter INTEGER NOT NULL,
+                                  verse INTEGER NOT NULL, alt INTEGER NOT NULL, kind TEXT NOT NULL,
+                                  rc INTEGER NOT NULL, rv INTEGER NOT NULL, rs INTEGER NOT NULL,
+                                  full TEXT NOT NULL);
+        CREATE TABLE bible_note (id INTEGER PRIMARY KEY, verse_id INTEGER NOT NULL, text TEXT NOT NULL);
     """)
-    with kjv.db() as k:
-        for name in ("kjv_verse_fts", "kjv_note_fts"):
+    with B.db() as k:
+        for name in (vt, nt):
             out.execute(_declared(k, name))
-        out.executemany("INSERT INTO kjv_book VALUES (?,?,?)",
-                        k.execute("SELECT id, abbr, ref_name FROM kjv_book ORDER BY id"))
-        out.executemany("INSERT INTO kjv_verse VALUES (?,?,?,?)",
-                        k.execute("SELECT id, book, chapter, verse FROM kjv_verse ORDER BY id"))
-        for t in ("kjv_verse_fts", "kjv_note_fts"):
+        out.executemany("INSERT INTO bible_book VALUES (?,?,?)",
+                        [(b["id"], b["abbr"], b["en"] if version == "kjv" else b["rsb"]["ref_name"])
+                         for b in B.books() if b[version]])
+        # The words are kept only where a snippet is read back into them, the
+        # Synodal's ё (bible.py _unfold); the KJV's would be 4 MB for nothing.
+        full = "trim(head || ' ' || text || ' ' || after)" if version == "rsb" else "''"
+        out.executemany("INSERT INTO bible_verse VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        k.execute(f"SELECT id, book, chapter, verse, alt, kind, rc, rv, rs, {full} FROM bible_verse"
+                                  " WHERE version = ? ORDER BY id", (version,)))
+        out.executemany("INSERT INTO bible_note VALUES (?,?,?)",
+                        k.execute("SELECT n.id, n.verse_id, CASE WHEN ? = 'rsb' THEN n.text ELSE '' END"
+                                  " FROM bible_note n JOIN bible_verse v ON v.id = n.verse_id WHERE v.version = ?"
+                                  " ORDER BY n.id", (version, version)))
+        for t in (vt, nt):
             out.executemany(f"INSERT INTO {t} (rowid, text) VALUES (?, ?)",
                             k.execute(f"SELECT rowid, text FROM {t} ORDER BY rowid"))
             out.execute(f"INSERT INTO {t}({t}) VALUES('optimize')")

@@ -27,7 +27,7 @@ The three source repositories must be at the paths `sources.toml` gives, relativ
 | `study` | `../urantia-study-edition` | **at HEAD**: by `make check`, and by `make data` for each paper whose notes are reviewed in `data/study/` |
 | `block` | `../block-sources` | Matthew Block's charts, no git: `make data` reads its `MANIFEST.tsv` alone, which counts once a paper's notes are reviewed |
 
-The King James Version needs none of them: `var/kjv.db` is built from `data/kjv/` alone (`make kjv`, which `make data` runs where `data/kjv/` has moved), the study edition's KJV converted once on 2026-11-21 (`data/kjv/README.md`). `./deploy/deploy.sh` ships it beside `var/ub.db`, only where a host's is another.
+The Bible needs none of them: `var/bible.db` is built from `data/kjv/`, `data/rsb/` and `data/bible.toml` alone (`make bible`, which `make data` runs where they have moved), the study edition's KJV and Tigran's Russian Synodal edition each converted once on 2026-11-21 (`data/kjv/README.md`, `data/rsb/README.md`). `./deploy/deploy.sh` ships it beside `var/ub.db`, only where a host's is another.
 
 Then:
 

@@ -332,6 +332,13 @@ class Pages(unittest.TestCase):
         # And the translations' short names, which no language translates (data/translations.toml).
         with open(ROOT / "data" / "translations.toml", "rb") as fh:
             names |= {w for x in tomllib.load(fh).values() for w in re.findall(r"[A-Za-z]{2,}", x["label"])}
+        # And the Bible's versions' titles and short names (data/bible.toml),
+        # never translated either, and the Synodal's edition's publisher,
+        # Bibles.org.uk, which its Russian credit names (2026-11-21).
+        with open(ROOT / "data" / "bible.toml", "rb") as fh:
+            names |= {w for k, x in tomllib.load(fh).items() if k != "names"
+                      for w in re.findall(r"[A-Za-z]{2,}", x["title"] + " " + x["label"])}
+        names |= {"Bibles", "org", "uk"}
         self.assertEqual(words - names, set())
 
 

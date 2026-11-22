@@ -64,8 +64,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology", "kjv_witness"):
-            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology(); kjv_witness is tools/kjv/compare.py's
+        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology", "kjv_witness", "rsb", "rsb_vrs"):
+            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology(); kjv_witness is tools/kjv/compare.py's, rsb and rsb_vrs tools/rsb/'s
         if "zip" in cfg:
             repos[key] = _zip(key, cfg)
             continue
@@ -226,6 +226,29 @@ def kjv_witness() -> dict:
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["kjv_witness"]
     return {"url": cfg["url"], "sha256": cfg["sha256"]}
+
+
+def rsb() -> dict:
+    """{path, tex, rev, at, commit, url} of the Russian Synodal Bible's
+    edition, which tools/rsb/convert.py alone reads (data/rsb/ the master since
+    its conversion): the same fields load() gives a repository it reads."""
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["rsb"]
+    path = (ROOT / cfg["path"]).resolve()
+    if not path.is_dir():
+        raise SystemExit(f"config: source 'rsb' not found at {path}")
+    commit = _git(path, "rev-parse", f"{cfg['rev']}^{{commit}}")
+    if commit is None:
+        raise SystemExit(f"config: rsb: cannot resolve rev {cfg['rev']!r} in {path}")
+    return {"key": "rsb", "path": path, "tex": path / cfg.get("tex", "tex"), "rev": cfg["rev"],
+            "at": commit, "commit": commit, "url": cfg.get("url")}
+
+
+def rsb_vrs() -> dict:
+    """{base, files} of the versification files tools/rsb/versify.py fetches."""
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["rsb_vrs"]
+    return {"base": cfg["base"], "files": list(cfg["files"]), "sha256": dict(cfg["sha256"])}
 
 
 def block() -> dict:

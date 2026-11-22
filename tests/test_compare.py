@@ -63,8 +63,8 @@ class Room(unittest.TestCase):
 
     def test_no_setting_and_nothing_that_needs_one(self):
         # The texts' order, the English's place among them its own setting
-        # (2026-11-20), and no switch.
-        self.assertEqual([s[0] for s in TRANSLATIONS], ["translations", "english"])
+        # (2026-11-20), the Bible's texts in order (2026-11-21), and no switch.
+        self.assertEqual([s[0] for s in TRANSLATIONS], ["translations", "english", "bible"])
         self.assertNotIn("compare", NEEDS)
         self.assertNotIn("compare", defaults())
         body = get("/1:1", raw=True)[2]
@@ -115,8 +115,9 @@ class Room(unittest.TestCase):
         self.assertIn("  --mincol: calc(var(--measure) * 35 / 70);", css)
         self.assertIn(".cprobe { position: absolute; visibility: hidden; pointer-events: none; height: 0;\n"
                       "          width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem); }", css)
-        # The margin's track and its gap, on a wide screen with the index shown.
-        self.assertIn('  :root:not([data-margin="off"], [data-index="off"]) article:not(.partpage) > .cprobe {\n'
+        # The margin's track and its gap, on a wide screen with the index
+        # shown, but on the Bible's pages, which have none (2026-11-21).
+        self.assertIn('  :root:not([data-margin="off"], [data-index="off"]) article:not(.partpage, .biblech) > .cprobe {\n'
                       "         width: calc(var(--n) * var(--mincol) + (var(--n) - 1) * 2rem + 26ch + 2rem); }", css)
         # No length of the stylesheet's is written again in the script.
         fits = js[js.index("function cmpFits(art, n) {"):js.index("function cmpDecide() {")]
@@ -132,8 +133,13 @@ class Room(unittest.TestCase):
         js = (ROOT / "ubsite/static/ub.js").read_text()
         self.assertIn(":root.compare main.reader:has(> article:is(.cmp, .partpage)) {\n"
                       "  --textw: calc(var(--cols) * var(--measure) + (var(--cols) - 1) * 2rem); }", css)
-        # Four for the book's pages, and a chapter of the KJV's (2026-11-21).
-        self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 5)
+        # Four for the book's pages; a chapter of the Bible's is a reader's
+        # page with the margin's track, the book's frame (2026-11-21; the
+        # KJV's had a fifth that morning, without it), its columns' --textw
+        # its own rule (ub.css main.reader.bible:has(> article.bcmp)).
+        self.assertEqual(css.count("max-width: calc(var(--textw, var(--measure)) + "), 4)
+        self.assertIn("main.reader.bible:has(> article.bcmp) { --textw: calc(var(--cols) * var(--measure)"
+                      " + (var(--cols) - 1) * 2rem); }", css)
         self.assertNotRegex(css, r"\.reader[^{]*\{[^}]*max-width: calc\(var\(--measure\)")
         self.assertIn("if (on) art.parentNode.style.setProperty('--cols', ks.length);", js)
         self.assertNotIn("art.style.setProperty('--cols'", js)

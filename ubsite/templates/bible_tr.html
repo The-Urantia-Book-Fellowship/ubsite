@@ -1,0 +1,18 @@
+{% import "_bible.html" as L %}
+{#- A chapter's lines of the version whose base line the page does not carry
+    (app.py bible_tr_of, /bible/tr/<Abbr>/<c>): the Synodal's, for every row
+    whose base line is the KJV's, each with the row it stands in, and its
+    head; ub.js draws them (bibFetch, bibDraw).  Its notes as asides, which a
+    mark opens as cards.  No ids: the drawer gives a line the row's id where
+    it draws it first. -#}
+<div class="btrs">
+{{ L.head(b.rsb, 'rsb', head, c == 1) }}
+{%- for row in ch.rows if row.base == 'kjv' and row.rsb %}
+<div class="brt" data-k="rsb" data-row="{{ row.id }}">
+  {%- for v in row.rsb %}
+  {{ L.verse(v, 'rsb', c, ids=False) }}
+  {%- endfor %}
+</div>
+{%- for v in row.rsb %}{{ L.notes(v, 'rsb', row.id) }}{% endfor %}
+{%- endfor %}
+</div>

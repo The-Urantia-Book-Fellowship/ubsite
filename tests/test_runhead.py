@@ -64,7 +64,8 @@ class RunningHead(unittest.TestCase):
         # Russian text"); the English only where the fragment cannot be had.
         # A translation's line, its first text's too, which has the id
         # (2026-11-20); the English's own head for the English, "up".
-        self.assertIn("if (p.dataset.k && p.dataset.k !== 'up' && p.dataset.ref) headTr(p); else headSay(headOf(p));", JS)
+        # Not a verse of the Bible's, whose line names its version too (2026-11-21).
+        self.assertIn("if (p.dataset.k && p.dataset.k !== 'up' && p.dataset.ref && !p.classList.contains('kv')) headTr(p);", JS)
         tr = JS[JS.index("function headTr(p) {"):JS.index("function showHead(p) {")]
         self.assertIn("trFetch(sec, p.dataset.ref.split('.')[0]).then(function (got) {", tr)
         self.assertIn("var g = got.h[k];", tr)
@@ -88,9 +89,10 @@ class RunningHead(unittest.TestCase):
     def test_a_translation_tapped_in_columns_is_named_alone(self):
         # Never the English beside it (Tigran, 2026-11-08): its own reference
         # in the head, and Back from the Contents kept by the row's English.
-        self.assertIn("return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt, p.kv[id]') ||", JS)
-        # A verse of the Bible names its chapter and its number (2026-11-21).
-        self.assertIn("? p.closest('article[data-c]').dataset.c + ':' + p.id.slice(1) : p.id || p.dataset.ref;", JS)
+        self.assertIn("return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt, p.kv[id], p.kv[data-ref]') ||", JS)
+        # A verse of the Bible names itself as its version numbers it, the
+        # Synodal's 22:1 on the KJV's Psalm 23, a title its chapter (2026-11-21).
+        self.assertIn("? (p.dataset.ref || '').replace(/:0$/, '') : p.id || p.dataset.ref;", JS)
         self.assertIn("toContents(p && (p.id ? p : document.getElementById(p.dataset.ref)), p && p.dataset.k || '');", JS)
 
     def test_a_tap_on_a_title_names_its_own_sections_first_paragraph(self):

@@ -182,6 +182,35 @@ sha256 = "98eca8ecc97af984e205c282d6a0e994af41612029e49a223e85677b71cf9e99"
 url    = "https://ebible.org/Scriptures/eng-kjv_usfm.zip"
 sha256 = "9d37aa78180ceefd5e4aeeaedceccf16f21484e5eb17d5662e8beff31bc3d8a5"
 
+# The Russian Synodal Bible, Tigran's own edition (Bibles.org.uk, made with
+# Vladimir Volovich), shown beside the KJV (Tigran, 2026-11-21).  Converted ONCE
+# into data/rsb/ by `python -m tools.rsb.convert`, which alone reads it, at the
+# commit `rev` resolves to, through build/readers/_io, as tools/kjv/convert.py
+# read the study edition's KJV: its text has not changed since 2016, and from
+# the conversion on data/rsb/ is the master (data/rsb/README.md).  Not a source
+# the build reads, so config.load() leaves it out and no build records it.
+[rsb]
+path = "../russian-synodal-bible"
+tex  = "tex"
+rev  = "HEAD"
+url  = "https://github.com/tigran123/russian-synodal-bible"
+
+# The witness the Synodal's numbering was mapped to the KJV's by
+# (tools/rsb/versify.py, 2026-11-21): SIL's standard versification files, MIT
+# (github.com/sillsdev/libpalaso, SIL.Scripture/Resources), each mapping its own
+# numbering to the Hebrew's (BHS, org.vrs): rso the Russian Orthodox, the
+# Synodal with its non-canonical books, rsc the Protestant edition of it, eng
+# the English.  Composed through BHS they say which KJV verse each Synodal verse
+# is; data/rsb/versification.tsv is what was ruled from that.  Fetched only by
+# `python -m tools.rsb.versify --fetch`, into var/rsb/vrs/; never by the build.
+[rsb_vrs]
+base = "https://raw.githubusercontent.com/sillsdev/libpalaso/master/SIL.Scripture/Resources/"
+files = ["rso.vrs.txt", "rsc.vrs.txt", "eng.vrs.txt"]
+[rsb_vrs.sha256]
+"rso.vrs.txt" = "36dd088244fc5b41fa8f3d0dcce58412e3b944c9bdc8bbce818abdfb03df3072"
+"rsc.vrs.txt" = "10beba712a98f9175268b770c24193897a1e6cdc0e5f2bb413423a839781471a"
+"eng.vrs.txt" = "003981c7f43c69b73b60d40a3f35f72e7ee017a686a6fb206f19a1b721157541"
+
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
 # directory against that list.

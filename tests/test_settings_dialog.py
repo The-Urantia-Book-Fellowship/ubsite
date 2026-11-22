@@ -38,7 +38,10 @@ class Tabs(unittest.TestCase):
         # "Settings => Translations tab should probably be renamed Settings =>
         # Texts"); its key stays, and with it every id.
         self.assertEqual([t[4] for t in tabs], ["Reading", "Show", "Texts", "Listening", "Offline"])
-        self.assertEqual(self.dialog.count('role="tab"'), len(groups))
+        # And the Texts tab's two subtabs, the book's texts and the Bible's, a
+        # tablist of their own in its panel (Tigran, 2026-11-21).
+        self.assertEqual(self.dialog.count('role="tab"'), len(groups) + 2)
+        self.assertEqual(re.findall(r'<button type="button" role="tab" data-sub="(\w+)"', self.dialog), ["book", "bible"])
         for key, controls, _, _, _ in tabs:
             self.assertEqual(key, controls)
 

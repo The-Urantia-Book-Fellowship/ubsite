@@ -1,0 +1,66 @@
+{#- The Bible's lines, as a chapter's page sets its base lines and its
+    fragment the other version's (templates/bible_chapter.html, bible_tr.html;
+    ubsite/bible.py chapter), the same markup in both, so that ub.js moves a
+    line from one place to another and never makes one.
+
+    A verse is p.kv, never p.t: nothing of the reader's place in the book,
+    its bookmarks or its running head takes a verse for a paragraph of the
+    book.  Its version in data-k, its own reference in data-ref (the
+    Synodal's 22:1 on the KJV's Psalm 23), its id its row's where it is the
+    row's first line (bible.py line_id); none in the fragment, whose lines
+    ub.js gives the row's id where it draws one first.  Its number drawn by CSS from data-n,
+    as a preview's is, so that a copy of the verses is their words: the KJV's
+    its verse, the Synodal's its own, and its chapter (data-c) where that is
+    not the page's (9:22 on the KJV's Psalm 10), which CSS shows in a fold and
+    where a second chapter of it begins on the page (.newc), its head naming
+    the first; 3 Ezra's bracketed series in its brackets, (36).  A Synodal
+    verse 0, a psalm's title or a prologue, is set as a title (.kt).  The paragraph mark of the 1769 or of the edition drawn
+    too (.pil).  A book's first verse opens it, its first letter dropped two
+    lines and its number not shown, as a printed Bible sets it (.opening;
+    Tigran, 2026-11-21).  The verses an address names are .hit.
+
+    A KJV psalm's title is its row 0, p.kvh, the Synodal's a numbered verse;
+    a letter of Psalm 119 a heading over its verse, as is the Synodal's
+    heading over 2 Chronicles 37 and Sirach's prologue.  An epistle's
+    subscription after its last verse. -#}
+{% macro verse(v, k, c, focus=None, last=None, ids=True, mark='') -%}
+{%- if v.kind == 'title' %}
+<p class="kvh"{% if ids %} id="{{ v.line_id }}"{% endif %} data-k="{{ k }}" data-ref="{{ v.chapter }}:0">{{ v.html_hy|safe }}</p>
+{%- else %}
+{%- if v.head %}
+{%- if k == 'kjv' and v.head[:-1].isupper() %}
+<h2 class="kvl" data-k="{{ k }}">{{ v.head_html|safe }}</h2>
+{%- else %}
+<p class="kvh" data-k="{{ k }}"{% if k == 'rsb' %} lang="ru"{% endif %}>{{ v.head_html|safe }}</p>
+{%- endif %}{% endif %}
+{%- set num = ('(%d)' % v.verse) if v.alt else ('' if v.verse == 0 else v.verse) %}
+<p class="kv{% if v.verse == 0 %} kt{% endif %}{% if v.newc %} newc{% endif %}{% if v.pilcrow %} pil{% endif %}{% if v.chapter == 1 and v.verse == 1 and not v.alt %} opening{% endif %}{% if focus and focus <= v.verse <= last and v.kind == 'verse' and not v.alt %} hit{% endif %}"{% if ids %} id="{{ v.line_id }}"{% endif %} data-k="{{ k }}" data-ref="{{ v.ref }}"{% if k == 'rsb' %} lang="ru"{% endif %}><span class="vn" data-n="{{ num }}"{% if k == 'rsb' and v.chapter != c and v.verse %} data-c="{{ v.chapter }}"{% endif %}></span>{{ v.html_hy|safe }}{{ mark }}</p>
+{%- if v.after %}
+<p class="kva" data-k="{{ k }}">{{ v.after_html|safe }}</p>
+{%- endif %}
+{%- endif %}
+{%- endmacro %}
+
+{#- A verse's notes, each an aside the mark opens as a card (ub.js open()),
+    named by the verse's own reference. -#}
+{% macro notes(v, k, row='') -%}
+{%- for n in v.notes %}
+<aside class="note" id="fn{{ n.key }}" data-k="{{ k }}"{% if row %} data-of="{{ row }}"{% endif %}{% if k == 'rsb' %} lang="ru"{% endif %}><p><span class="lbl">{{ v.ref or (v.chapter ~ ':0') }}</span> {{ n.html_hy|safe }}</p></aside>
+{%- endfor %}
+{%- endmacro %}
+
+{#- A version's head of a chapter: the book's title page on its first
+    chapter, then the chapter, as that version calls it. -#}
+{% macro head(x, k, h1, first, mark='') -%}
+<div class="bhd" data-k="{{ k }}"{% if k == 'rsb' %} lang="ru"{% endif %}>
+  {%- if first and x %}
+  <{{ 'p' if h1 else 'h1' }} class="ktitle">{% for line, main in x.title_lines %}<span class="{{ 'tm' if main else 'tl' }}">{{ line }}{% if loop.index0 == x.title_note_at %}<a class="fn" href="#fnt{{ k }}" id="fnreft{{ k }}" data-k="{{ k }}" aria-label="{{ 'Примечание' if k == 'rsb' else 'Note' }}"></a>{% endif %}</span>{% endfor %}</{{ 'p' if h1 else 'h1' }}>
+  {%- endif %}
+  {%- if h1 %}
+  <h1>{{ h1 }}{{ mark }}</h1>
+  {%- endif %}
+</div>
+{%- if first and x and x.title_note %}
+<aside class="note" id="fnt{{ k }}" data-k="{{ k }}" hidden{% if k == 'rsb' %} lang="ru"{% endif %}><p>{{ x.title_note }}</p></aside>
+{%- endif %}
+{%- endmacro %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}{% set title = tr('{x} — The Bible', x=here) %}
+{% from "_transport.html" import step %}
+{% from "_biblerail.html" import biblerail %}
+{% import "_bible.html" as L %}
+{#- The paragraphs whose study notes cite a verse, or the chapter whole
+    (app.py bible_cited): the Bible read from its side (Tigran, 2026-11-21),
+    each a link, which Paragraph previews show in a card.  An orange dot at
+    the verse's end, a.fn[data-k="kc"], opens them as a card, as a note's
+    star opens its note (ub.js open()), and takes no room: no margin beside
+    the text, nor a line under the verse, which stood empty but for one row
+    in a hundred (Tigran, the same day: "even a small line under each row is
+    a waste"; "the orange dot", a cited chapter's in the Contents).  The line
+    itself, .ka, the card's words, shown with scripts off and in print. #}
+{% macro cites(refs) -%}
+<p class="kvc"><span class="lbl">{{ t('Study notes at') }}</span> {% for r in refs %}<a href="/{{ r }}">{{ r }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+{%- endmacro %}
+{% macro kc(id) -%}
+<a class="fn" data-k="kc" href="#kc{{ id }}" {{ ta('aria-label', 'Study notes at') }}></a>
+{%- endmacro %}
+{#- A chapter of the Bible (app.py bible_chapter, ubsite/bible.py), a list of
+    rows, each the verses of the KJV and the Synodal that are the same words,
+    in the KJV's numbering (data/rsb/versification.tsv; Tigran, 2026-11-21:
+    "in parallel columns with KJV and generally treated the same way as we do
+    the Urantia Book's texts").  Set as the book's text is: the reader's
+    measure, justified, hyphenated as each version's own TeX would.
+
+    The page carries each row's base line, the KJV's where the row has one,
+    else the Synodal's, which no setting changes: ub.js draws the other's from
+    /bible/tr/<Abbr>/<c> (bibFetch), whose version is the article's data-trv,
+    the reader's first text in the base line's place, the rest in columns
+    where the window has room and in a fold under each row where it has not
+    (bibDraw), as the book's texts are drawn.  A row of the Synodal's alone, in
+    a chapter of the KJV's, is named over the first of its run (.bwho), unless
+    the Synodal is the first text.
+
+    Under a row, the paragraphs whose study notes cite its verses (.ka), the
+    card of an orange dot at the end of its first text shown, whichever that
+    is (ub.js bibDraw moves it), and a line there with scripts off and in
+    print.  The notes are the chapter's endnotes with scripts off and in
+    print, each a card at its mark.
+
+    A reader's page, main.reader, with the Bible's Contents at the left as
+    the book's are (_biblerail.html), and a tap on the text brings down the
+    running head, the verse's reference a button to them, the book's name,
+    Settings and Home (ub.js tapHead). #}
+{% block body %}
+<main class="reader bible">
+  {{ biblerail(books, b, c, sn) }}
+  <article class="biblech{% if not ch.kjv %} bonly{% endif %}" data-book="{{ b.ref_name }}" data-book-ru="{{ b.ru }}" data-c="{{ c }}"
+           data-abbr="{{ b.abbr }}"{% if trv %} data-trv="{{ trv }}" data-has="rsb"{% endif %}>
+    <header class="kjvtop">
+      <p class="kup"><a href="/bible">{{ t('The Bible') }}</a> · <a href="/bible/{{ b.abbr }}">{{ t(book_name(b)) }}</a></p>
+      {%- if ch.kjv %}
+      {#- The KJV's head in its own words, whatever the interface's language
+          (Tigran, 2026-11-21: "in the actual text the title should match its
+          own text"), as the Synodal's is «Глава 3». #}
+      {{ L.head(b.kjv, 'kjv', ('Psalm ' if b.abbr == 'Psa' else 'Chapter ') ~ c, first, kc('0') if cited[0] else '') }}
+      {%- else %}
+      {{ L.head(b.rsb, 'rsb', rhead, first, kc('0') if cited[0] else '') }}
+      {%- if not b.kjv %}
+      <p class="bnokjv">{{ t('bible:dc') }}</p>
+      {%- endif %}
+      {%- endif %}
+      {%- if cited[0] %}
+      <div class="ka" id="kc0">{{ cites(cited[0]) }}</div>
+      {%- endif %}
+    </header>
+    <div class="kverses">
+    {%- set ns = namespace(run=false) %}
+    {%- for row in ch.rows %}
+    {%- set refs = [] %}
+    {%- for v in row.kjv if v.kind == 'verse' %}{% for r in cited[v.verse] or [] if r not in refs %}{% set _ = refs.append(r) %}{% endfor %}{% endfor %}
+    <div class="krow" data-row="{{ row.id }}">
+      {%- if row.base == 'rsb' and ch.kjv and not ns.run %}
+      <p class="bwho" lang="ru">{{ bible_versions()[1].label }}</p>
+      {%- endif %}
+      {%- set ns.run = row.base == 'rsb' %}
+      {%- for v in row[row.base] %}
+      {{ L.verse(v, row.base, c, focus if (row.base == 'kjv' or not ch.kjv) else None, last, mark=kc(row.id) if refs and loop.last else '') }}
+      {%- endfor %}
+      {%- if refs %}
+      <div class="ka" id="kc{{ row.id }}">{{ cites(refs) }}</div>
+      {%- endif %}
+      {%- if row.base == 'kjv' and row.rsb %}
+      <div class="btf" data-has="rsb"><button class="bfold" type="button" aria-expanded="false"></button></div>
+      {%- endif %}
+    </div>
+    {%- endfor %}
+    </div>
+    {%- if final and b.kjv and b.kjv.end_text and ch.kjv %}
+    <p class="kend">{{ b.kjv.end_text }}</p>
+    {%- endif %}
+    {%- set noted = [] %}
+    {%- for row in ch.rows %}{% for v in row[row.base] if v.notes %}{% set _ = noted.append((v, row.base)) %}{% endfor %}{% endfor %}
+    {%- if noted %}
+    <section class="notes kjvn" {{ ta('aria-label', 'Notes') }}>
+      <h3>{{ t('Notes') }}</h3>
+      {%- for v, k in noted %}
+      {{ L.notes(v, k) }}
+      {%- endfor %}
+    </section>
+    {%- endif %}
+    <nav class="transport" {{ ta('aria-label', 'Books and chapters') }}>
+      {%- for k in ('fb', 'prev', 'next', 'ff') %}
+      {{ step(k, go[k]) }}
+      {%- endfor %}
+    </nav>
+  </article>
+</main>
+{#- What the drawer needs of each version: its short name and language. #}
+<script type="application/json" id="ub-bible">{{ bible_json()|safe }}</script>
+{% endblock %}

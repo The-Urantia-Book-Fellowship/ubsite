@@ -65,8 +65,9 @@
       // later than its version, and takes nothing from it on one: the first
       // script, which named no version, noted whatever it was sent and said
       // of a setting it did not keep that it was back at its default.  Raised
-      // whenever a setting comes to follow the account: 4 with kjvsearch.
-      V = 4;
+      // whenever a setting comes to follow the account: 4 with biblesearch,
+      // 5 with bible, the Bible's texts in order.
+      V = 5;
   var timer = 0, running = null, declined = false;
 
   function get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }

@@ -244,7 +244,9 @@ paths       = 3881       # 2,058 headwords in book order, 1,823 of them by theme
                          # 2026-11-01: vale of tears has two entries since the index's reading of Paper 40;
                          # 1,821 until 2026-11-09: terrestrial escape cites a second chapter since its reading of Papers 49-52)
 spoken      = 1626       # one to a section
-chunks      = 433        # 432 until 2026-11-21, the King James Version's database for search (kjv.db) one more; 431 until 2026-11-19: one more among the assets, static/account.js, the
+bible_pages = 2629       # the Bible's pages and the Synodal's fragments (2026-11-21): /bible, 77 books' pages and
+                         # 1,362 chapters', 1,189 fragments of the Synodal's lines on the KJV's chapters
+chunks      = 500        # 433 until the evening of 2026-11-21, when the KJV's pages came into Base (Tigran: "Pages in Base, like the book"), /bible and a chunk to each of its 66 books; 432 until that morning, the King James Version's database for search (kjv.db) one more; 431 until 2026-11-19: one more among the assets, static/account.js, the
                          # script of what follows a reader's account, which only a reader signed
                          # in runs;
                          # 423 until 2026-11-18, when the home page's part cards took their pictures:
@@ -272,8 +274,8 @@ chunks      = 433        # 432 until 2026-11-21, the King James Version's databa
                          # reading paths under V take a chunk more (read-V-1); 419 since
                          # 2026-11-04: each recording's list of files by paper, audio-mh, for
                          # keeping it offline (one chunk to a voice)
-download_mb = [36.0, 58.0]   # 52.0 at the top until 2026-11-21, when the King James Version's database for search, 3.5 MB, came into Base; gzipped, and so kept in the browser: 45.0 at measurement; 48.3 on 2026-10-30; 47.9 on 2026-10-31 and 2026-11-01
-raw_mb      = [160.0, 250.0] # unpacked: 198.2 at measurement; 218.2 with the Russian (2026-10-25); 224.9 on 2026-10-30; 223.4 on 2026-10-31; 223.1 on 2026-11-01
+download_mb = [36.0, 64.0]   # 57.1 at 2026-11-21, with the KJV, its pages and its database for search, 8.3 MB of Base; 58.0 at the top that day, 52.0 before, when its database for search, 3.5 MB, came into Base; gzipped, and so kept in the browser: 45.0 at measurement; 48.3 on 2026-10-30; 47.9 on 2026-10-31 and 2026-11-01
+raw_mb      = [160.0, 300.0] # unpacked: 273.4 with the KJV (2026-11-21; 250.0 at the top before); 198.2 at measurement; 218.2 with the Russian (2026-10-25); 224.9 on 2026-10-30; 223.4 on 2026-10-31; 223.1 on 2026-11-01
 
 # The chart of the personalities (build/cosmo.py), from the snapshot of
 # Alexander Alyuev's repository in data/cosmology/chart.json.  Reported, as the
@@ -297,24 +299,35 @@ persons_with_headword = 116     # 104 by a name of theirs as written, 12 by data
 units_with_headword   = 24      # 10 by name, 14 by the table; the mortal and his Adjuster has none
 canvas        = [1900, 6680]
 
-# The King James Version, var/kjv.db (build/kjv.py), from data/kjv/: the study
-# edition's KJV at the commit below, converted once, 56 slips mended
-# (data/kjv/corrections.tsv) and 3,231 lines taken from the 1769 witness by
-# Tigran's rulings (data/kjv/witness.tsv).  build/checks/check_kjv.py.
-[kjv]
-source_commit = "0a1f055"       # the study edition; its KJV unchanged since 7e652d3 (2021-09-21)
+# The Bible, var/bible.db (build/bible.py), from data/: the King James Version
+# (data/kjv/: the study edition's KJV at 0a1f055, converted once, 56 slips
+# mended and 3,231 lines taken from the 1769 witness by Tigran's rulings) and
+# the Russian Synodal Bible (data/rsb/: Tigran's edition at 9604008, converted
+# once), a verse to a row by data/rsb/versification.tsv.  build/checks/check_bible.py.
+[bible]
+source_commit = "kjv 0a1f055, rsb 9604008"
 measured_on   = "2026-11-21"
-books         = 66
-chapters      = 1189
-verses        = 31102
-notes         = 6684        # the edition's 6,648, three moved, and 36 more of the 1769's
-pilcrows      = 2970        # the 1769's, the last at Acts 20:36
-heads         = 138         # 116 psalms' titles and Psalm 119's 22 letters
-afters        = 14          # the epistles' subscriptions, Romans to Hebrews
-supplied      = 21527       # the translators' supplied words, in the verses (one more in a note)
-sc            = 6563        # the LORD in small capitals, in the verses (61 more in the notes)
-corrections   = 56          # data/kjv/corrections.tsv
-witness_lines = 3231        # data/kjv/witness.tsv: 2,970 pilcrows, 138 heads, 14 subscriptions, 109 notes
+books         = 77          # the KJV's 66 and the Synodal's eleven non-canonical, between the testaments
+chapters      = 1362        # the pages: the KJV's 1,189, the eleven's 169, Psa 151, 2Ch 37, Dan 13 and 14, and Sir's and Est's prologues on their chapter 1
+rows          = 37249
+rows_both     = 31207       # rows with a verse of each
+kjv_books     = 66
+kjv_chapters  = 1189
+kjv_verses    = 31102
+kjv_titles    = 116         # the psalms' titles, set apart, a row 0 each
+kjv_notes     = 6684        # the edition's 6,648, three moved, and 36 more of the 1769's
+kjv_pilcrows  = 2970        # the 1769's, the last at Acts 20:36
+kjv_supplied  = 21528       # the translators' supplied words: 21,527 in the verses, one in a note
+kjv_sc        = 6624        # the LORD in small capitals: 6,563 in the verses, 61 in the notes
+kjv_corrections   = 56      # data/kjv/corrections.tsv
+kjv_witness_lines = 3231    # data/kjv/witness.tsv: 2,970 pilcrows, 138 heads, 14 subscriptions, 109 notes
+rsb_books     = 77
+rsb_chapters  = 1362        # as it numbers them, chapter 0 (Est, Sir) not counted
+rsb_verses    = 37255       # with its titles, 3 Ezra's seventy bracketed and the prologues
+rsb_notes     = 110         # in its verses and headings; and 19 on its books' titles
+rsb_pilcrows  = 2289        # a paragraph opening at a verse's head (\rsbpar); 16 more inside a verse
+rsb_supplied  = 3871
+rsb_table_lines = 239       # data/rsb/versification.tsv, 22 of them by reading
 
 # The translations, each a download of its own that a reader chooses in Settings'
 # Offline tab, and none of the above (offline/pack.py): a chunk to every twenty
@@ -333,10 +346,12 @@ download_mb = [10.0, 14.0]   # 11.77 at measurement (8.85 before its spoken text
 [offline.translations.uf-ru]
 download_mb = [10.0, 14.0]   # 11.81 at measurement (8.88 before its spoken text), 46.08 unpacked: the whole book, 10 chunks, 10 spoken, and search
 
-# The King James Version's pages, a download of their own as a translation is
-# (Tigran, 2026-11-21; offline/pack.py `kjv`): /kjv, its 66 books and 1,189
-# chapters, a chunk to /kjv and one to each book.  Its database for search is
-# in Base (`chunks` above), so that every reader's search lists its verses.
-[offline.kjv]
-pages       = 1256
-download_mb = [1.0, 4.0]
+# The Bible (Tigran, 2026-11-21; offline/pack.py `bible`): the KJV's pages in
+# Base, as the book's English is ("Pages in Base, like the book"), /bible and a
+# chunk to each of its 66 books, which carry each row's base line, with its
+# database for search (`chunks` and `download_mb` above); the Synodal a download
+# of its own, as a translation is, a chunk to each of its 77 books, the
+# fragments of its chapters, the pages of its eleven own books and what
+# /bible/rsb/ sends on, and its database for search.
+[offline.bible.rsb]
+download_mb = [6.0, 13.0]    # 9.28 at measurement, 37.7 unpacked, its database for search with it (9.42 while the KJV was a download beside it)

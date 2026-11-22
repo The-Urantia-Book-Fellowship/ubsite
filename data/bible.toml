@@ -1,0 +1,50 @@
+# What a reader is told about each version of the Bible the site shows (build/bible.py,
+# var/bible.db), as data/translations.toml tells of the book's translations.  The
+# table's name is the version's key: a reader's setting `bible` stores it, and
+# the pages' markup names it (data-k), so it never changes once deployed.  The
+# order of the tables is the versions' order: the first is the base, the text a
+# page carries for every row that has a verse of it.
+#
+#   title   the work's own title, as it calls itself: never translated
+#   lang    the language it is in, as a tag (BCP 47)
+#   label   its short name, a column's and a fold's, the same in every language
+#           of the interface
+#   by      what it is and who made the copy shown, in each language of the
+#           interface (Settings, /bible)
+
+[kjv]
+title = "King James Version"
+lang  = "en"
+label = "KJV"
+[kjv.by]
+en = "the Authorized Version of 1611, in the text of 1769, with its translators' marginal notes"
+ru = "Авторизованная версия 1611 года, в тексте 1769 года, с примечаниями переводчиков на полях"
+
+# Tigran's own edition, made with Vladimir Volovich for Bibles.org.uk
+# (data/rsb/README.md); the Synodal translation of 1876 is in the public domain.
+[rsb]
+title = "Синодальный перевод"
+lang  = "ru"
+label = "Синодальный"
+[rsb.by]
+en = "the Russian Synodal translation of 1876, in the Bibles.org.uk edition of Tigran Aivazian and Vladimir Volovich, with its notes"
+ru = "Синодальный перевод 1876 года, в издании Bibles.org.uk Тиграна Айвазяна и Владимира Воловика, с его примечаниями"
+
+# The books the KJV has not, by the names English Bibles give them, for the
+# Contents and the pages in English, where the KJV's names stand for its own:
+# the Synodal's 2 and 3 Ezra are the Greek's 1 Esdras and the Latin's 2
+# Esdras, as the 1611 KJV's Apocrypha names them; its Epistle of Jeremiah is
+# that Apocrypha's Epistle of Jeremy, its Sirach its Ecclesiasticus.  Their
+# abbreviations, in the addresses, stay the copy's.
+[names]
+"2Ez" = "1 Esdras"
+Tob   = "Tobit"
+Jdt   = "Judith"
+Wis   = "Wisdom of Solomon"
+Sir   = "Sirach"
+Epj   = "Epistle of Jeremiah"
+Bar   = "Baruch"
+"1Ma" = "1 Maccabees"
+"2Ma" = "2 Maccabees"
+"3Ma" = "3 Maccabees"
+"3Ez" = "2 Esdras"

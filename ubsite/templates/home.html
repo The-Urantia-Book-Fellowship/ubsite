@@ -102,11 +102,12 @@
       <span class="sub">{{ t('home:t:contents', n=stats.papers) }}</span></a></li>
     <li class="ix"><a href="/index">{{ chrome.way_svg('index') }}<span class="lbl">{{ t('Index') }}</span>
       <span class="sub">{{ t('home:t:index', e=stats.az_entries, h=stats.headwords) }}</span></a></li>
-    {#- The King James Version (kjv.html), where it is built (Tigran, 2026-11-21:
-        "A tile on the home page"). #}
-    {%- if kjv_there() %}
-    <li><a href="/kjv">{{ chrome.way_svg('kjv') }}<span class="lbl">{{ t('King James Version') }}</span>
-      <span class="sub">{{ t('home:t:kjv', b=66, v=31102) }}</span></a></li>
+    {#- The Bible (bible.html), where it is built (Tigran, 2026-11-21: "A tile
+        on the home page"; the KJV's that morning, the Bible's since the
+        Synodal came beside it). #}
+    {%- if bible_there() %}
+    <li><a href="/bible">{{ chrome.way_svg('bible') }}<span class="lbl">{{ t('The Bible') }}</span>
+      <span class="sub">{{ t('home:t:bible') }}</span></a></li>
     {%- endif %}
     {#- The chart of the personalities (cosmology.html), where the build has one. #}
     {%- if stats.cosmo_persons %}

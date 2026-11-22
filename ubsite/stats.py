@@ -159,9 +159,11 @@ def page_kind(path: str) -> tuple[str, str]:
         return "quiz", path[6:]
     if path == "/help":
         return "help", ""
-    # The King James Version (ubsite/kjv.py, 2026-11-21): its pages by book.
-    if path == "/kjv" or path.startswith("/kjv/"):
-        return "kjv", path[5:]
+    # The Bible (ubsite/bible.py, 2026-11-21): its pages by book; not the
+    # Synodal's fragments, which a page fetches, nor its own addresses, which
+    # send a reader on.
+    if path == "/bible" or (path.startswith("/bible/") and not path.startswith(("/bible/tr/", "/bible/rsb/"))):
+        return "bible", path[7:]
     return "other", path
 
 
@@ -169,7 +171,7 @@ KIND_LABEL = {"section": "Sections of the text", "paper": "Whole papers", "conce
               "path": "Reading paths",
               "index": "The index, by letter", "appendix": "Appendices",
               "search": "Search", "home": "Home page", "contents": "Contents", "lists": "Lists",
-              "quiz": "The quiz", "help": "Help", "kjv": "King James Version",
+              "quiz": "The quiz", "help": "Help", "bible": "The Bible",
               "other": "Other"}
 
 

@@ -1,0 +1,11 @@
+# Chapters of the Bible (var/bible.db, data/rsb/versification.tsv) where the
+# rows of the KJV and the Synodal, compared by their words' lengths, correlate
+# no better than the same texts shifted one verse either way
+# (build/checks/check_bible.py): psalms of lines all of a length, each read row
+# by row on 2026-11-21 and found right.  The gate requires exactly this list: a
+# new one fails, and so does one that goes away.
+# book	chapter (the KJV's)	why
+Psa	112	ten lines of one length; read: 111:1-10 are 112:1-10
+Psa	136	the refrain «ибо вовек милость Его» in every verse; read: 135:1-26 are 136:1-26
+Psa	149	nine lines of one length; read: 149:1-9 are 149:1-9
+Psa	150	«Хвалите Его» six times; read: 150:1-6 are 150:1-6

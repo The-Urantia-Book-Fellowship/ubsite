@@ -336,10 +336,12 @@ class Counter:
             if status not in (200, 304):
                 return
             kind, rest = "browser", ()
-        elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/", "/quiz/board/", "/account/")):
+        elif path in SKIP or path.startswith(("/rail/", "/offline/", "/tr/", "/bible/tr/", "/quiz/board/",
+                                              "/account/")):
             return                                 # /rail/N: a paper opened in the left rail;
                                                    # /offline/: a copy downloading (sw.js);
                                                    # /tr/: a section's translations, for a fold;
+                                                   # /bible/tr/: a chapter's Synodal, for its page;
                                                    # /quiz/board/: the board's JSON, for its page;
                                                    # /account/: signing in (account.py), whose
                                                    # callback has Google's code in its query, which

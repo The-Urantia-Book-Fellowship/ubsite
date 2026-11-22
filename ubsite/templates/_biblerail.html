@@ -1,0 +1,64 @@
+{#- The Bible's Contents, the left rail of a chapter's page, as the book's is
+    (templates/_rail.html; Tigran, 2026-11-21: "Contents (the tree of Bible
+    books down to chapter level) on the left"): the Old Testament, the
+    Synodal's eleven non-canonical books between the testaments, the New, and
+    the book being read open to its chapters, the chapter being read on the
+    pale band.  Another book is .lazy: opened, its chapters come from its own
+    page (ub.js, the rail's toggle), which the offline copy keeps with the
+    chapters; with JavaScript off it is a link.  The chapters a row of numbers
+    (ol.kch), as a book's page has them.  The same fold, the same place on a
+    wide screen and a phone, the same running head's way to it (ub.js
+    toContents).
+
+    Each book's name in the interface's language (app.py book_name; Tigran,
+    2026-11-21: "the Bible books should be in Russian if the Russian UI is
+    selected"), whichever text is first: a book is named alike in every
+    version, as a paper of the book is not, whose titles are each
+    translation's; the eleven the KJV has not by English Bibles' names in
+    English.  The text's own title pages and heads stay its own.
+
+    The chapters numbered as the first text numbers them (Tigran, 2026-11-21:
+    "if it is the first (or especially if it is the only one) then it makes
+    sense to match the Contents to the actual books"): a book the Synodal
+    numbers otherwise (ubsite/bible.py numbers(), `sn`, the Psalms above all)
+    has both lists, ol.kchk the KJV's and ol.kchs the Synodal's, each of its
+    chapters to the page and row its first verse stands in, and ub.css shows
+    the one of the first text (:root[data-bible^="rsb"]); the chapter being
+    read the Synodal's its page's first verse is in.
+
+    A name in the Contents is a way to the first of what it holds, a book's
+    to its first chapter and a testament's to its first book's (Tigran,
+    2026-11-21: "when I click on, say, 'Psalms' in the Contents in the left
+    column I expect to see Psalm 1 and not that map of chapters"; "in the
+    Contents the parent node is just a shortcut for the first of its
+    children. Unless it is a Part in Urantia Book with its own title page"):
+    a book's page, the map of its chapters, is /bible's way in, and the line
+    over a chapter's.  Its chapters are lifted from that page, data-ch. -#}
+{% macro bname(x) -%}
+{{ t(book_name(x)) }}
+{%- endmacro %}
+{% macro biblerail(books, here_b, here_c, sn=None) -%}
+<nav class="rail kjvrail" {{ ta('aria-label', 'The Bible') }}>
+<div class="railhead"><button class="railfold" type="button" aria-controls="rail-tree" aria-expanded="true"><span>{{ t('Contents') }}</span></button></div>
+<ol id="rail-tree">
+{%- for grp, head in (('OT', 'The Old Testament'), ('DC', 'bible:dchead'), ('NT', 'The New Testament')) %}
+{%- set fb = books|selectattr('grp', 'equalto', grp)|first %}
+<li class="part"><details{% if here_b.grp == grp %} open{% endif %}><summary><a href="/bible/{{ fb.abbr }}/1">{{ t(head) }}</a></summary>
+<ol>
+{%- for x in books if x.grp == grp %}
+{%- if x.abbr == here_b.abbr %}
+<li class="here"><details open><summary><a href="/bible/{{ x.abbr }}/1" data-ch="/bible/{{ x.abbr }}">{{ bname(x) }}</a></summary><ol class="kch{% if sn %} kchk{% endif %}">
+  {%- for c in range(1, x.chapters + 1) %}<li{% if c == here_c %} class="here"{% endif %}><a href="/bible/{{ x.abbr }}/{{ c }}">{{ c }}</a></li>{% endfor -%}
+</ol>
+{%- if sn %}<ol class="kch kchs">
+  {%- for s, h in sn.list %}<li{% if s == sn.here.get(here_c) %} class="here"{% endif %}><a href="{{ h }}">{{ s }}</a></li>{% endfor -%}
+</ol>{% endif %}</details></li>
+{%- else %}
+<li class="lazy"><details><summary><a href="/bible/{{ x.abbr }}/1" data-ch="/bible/{{ x.abbr }}">{{ bname(x) }}</a></summary></details></li>
+{%- endif %}
+{%- endfor %}
+</ol></details></li>
+{%- endfor %}
+</ol>
+</nav>
+{%- endmacro %}

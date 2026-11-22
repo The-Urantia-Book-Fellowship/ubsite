@@ -162,7 +162,9 @@ class Dialog(unittest.TestCase):
         # The list and the English's place in it (2026-11-20): Compare's
         # switch stood under the list from 2026-11-08 to 2026-11-16, since
         # when the columns come where the window has room.
-        self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations", "english"])
+        # And the Bible's texts in order, a list of their own under The Bible
+        # (2026-11-21), its hidden input `bible`.
+        self.assertEqual(re.findall(r'name="(\w+)"', self.panel), ["translations", "english", "bible"])
         # The English is a row of the list, among the others until shown.
         self.assertIn('<li data-k="up"><label><input type="checkbox" value="up">', self.panel)
 

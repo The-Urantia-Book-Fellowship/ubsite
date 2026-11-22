@@ -1134,7 +1134,7 @@ class Words(unittest.TestCase):
                  "notesearch", "onward", "pages", "paranum", "pilcrow", "preview", "quiz", "rate", "redletter",
                  "studynotes", "studysearch", "theme", "tips", "translations", "trsearch", "voice", "whole"}
         self.assertEqual(set(settings.followed()) - FIRST, set(settings.LATE))
-        self.assertEqual(settings.LATE, {"tropen": 2, "trtab": 2, "english": 3, "kjvsearch": 4})
+        self.assertEqual(settings.LATE, {"tropen": 2, "trtab": 2, "english": 3, "biblesearch": 4, "bible": 5})
         self.assertTrue(all(isinstance(v, int) and v >= 2 for v in settings.LATE.values()))
         js = (ROOT / "ubsite" / "static" / "account.js").read_text(encoding="utf-8")
         self.assertEqual(re.findall(r"\n      V = (\d+);\n", js), [str(max(settings.LATE.values()))])

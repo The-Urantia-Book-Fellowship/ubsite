@@ -39,6 +39,9 @@ POINT = {
     # The text API's mark for a 1955 reading (build/versions.py), where the
     # site's is the fnref link: empty, and the reading in readings_1955.
     "v1955":     '<span class="v1955"></span>',
+    # A paragraph opening inside a Synodal verse (build/bible.py, \rsbpar): a
+    # pilcrow drawn by CSS, as the KJV's at a verse's head is.
+    "pilcrow":   '<span class="pm"></span>',
 }
 
 
@@ -109,7 +112,7 @@ def render(text: str, spans, note_key: str = "", shy=()) -> str:
 
 
 def _point(s, note_key: str) -> str:
-    if s.kind in ("dotleader", "v1955"):
+    if s.kind in ("dotleader", "v1955", "pilcrow"):
         return POINT[s.kind]
     if s.kind == "fnref":
         n = (s.attr or {}).get("i", 0) if isinstance(s.attr, dict) else 0
@@ -139,6 +142,12 @@ def _point(s, note_key: str) -> str:
             key = s.attr["key"]
             return (f'<a class="fn" href="#fn{key}" id="fnref{key}" data-k="kjv"'
                     f' aria-label="Translators’ note"></a>')
+        # A note of the Synodal's edition (build/bible.py), where it stands in
+        # its verse: the same mark, named in the language of its text.
+        if kind == "rsb":
+            key = s.attr["key"]
+            return (f'<a class="fn" href="#fn{key}" id="fnref{key}" data-k="rsb"'
+                    f' aria-label="Примечание"></a>')
         if kind == "variant-1955":
             return (f'<a class="fn" href="#fn{k}" id="fnref{k}" data-k="1955"'
                     f' aria-label="1955 reading"></a>')

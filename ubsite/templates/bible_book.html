@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% set title = tr('{x} — The Bible', x=book_name(b)) %}
+{% import "_bible.html" as L %}
+{#- A book of the Bible (app.py bible_book): its title as each version prints
+    it, the lines in small capitals and the main one large, the first text's
+    shown (.bhd[data-k], ub.css), and its chapters, a number to each, to the
+    chapter's page, one a study note cites marked (.cited, app.py
+    bible_cited).  The ol.kchaps the rail of a chapter's page lifts a book's
+    chapters from (ub.js railGot).  A book the Synodal numbers otherwise has
+    both lists, the KJV's (.kchk) and the Synodal's (.kchs), the first text's
+    shown, as the rail has (_biblerail.html). #}
+{% block body %}<main class="prose kjv kjvbook">
+<p class="kup"><a href="/bible">{{ t('The Bible') }}</a></p>
+<div class="bheads">
+{%- if b.kjv %}{{ L.head(b.kjv, 'kjv', '', true) }}{% endif %}
+{%- if b.rsb %}{{ L.head(b.rsb, 'rsb', '', true) }}{% endif %}
+</div>
+{%- if not b.kjv %}
+<p class="bnokjv">{{ t('bible:dc') }}</p>
+{%- endif %}
+<h2>{{ t('Psalms') if b.abbr == 'Psa' else t('Chapters') }}</h2>
+<ol class="kchaps{% if sn %} kchk{% endif %}">
+  {%- for c in range(1, b.chapters + 1) %}
+  <li{% if cited[c] %} class="cited"{% endif %}><a href="/bible/{{ b.abbr }}/{{ c }}">{{ c }}</a></li>
+  {%- endfor %}
+</ol>
+{%- if sn %}
+<ol class="kchaps kchs">
+  {%- for s, h in sn.list %}
+  <li{% if s in scited %} class="cited"{% endif %}><a href="{{ h }}">{{ s }}</a></li>
+  {%- endfor %}
+</ol>
+{%- endif %}
+</main>{% endblock %}

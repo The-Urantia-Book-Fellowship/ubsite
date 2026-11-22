@@ -29,10 +29,12 @@ ALLOWED = {
     "tools/kjv/convert.py": "data/kjv/",           # the KJV's copy, converted once from the study edition
     "tools/kjv/compare.py": "var/kjv/",            # its witness, fetched, and the comparison with it
     "tools/kjv/merge.py": "data/kjv/witness.tsv",  # what the copy takes from the witness, by ruling
+    "tools/rsb/convert.py": "data/rsb/",           # the Synodal's copy, converted once from Tigran's edition
+    "tools/rsb/versify.py": "var/rsb/",            # SIL's files and the proposal; with --write, the table it was ruled into
     "build/cli.py": "var/",                        # ub.db, built as ub.db.tmp and swapped in
     "build/db.py": "var/",                         # a database built afresh, the old one removed
     "build/oracle.py": "var/",                     # the oracles' sandboxes, their inputs linked in
-    "build/kjv.py": "var/",                        # kjv.db, built as kjv.db.tmp and swapped in
+    "build/bible.py": "var/",                      # bible.db, built as bible.db.tmp and swapped in
 }
 
 
@@ -94,8 +96,9 @@ class NoWrites(unittest.TestCase):
         # to the same rule so that it never grows a reason to.
         # tools/study/ reads the study edition and Block's charts, tools/quiz/
         # the edition's quiz, tools/cosmo/ the repository of the chart of the
-        # personalities, tools/kjv/ the study edition's KJV, once.
-        for d in ("build", "offline", "tools/study", "tools/quiz", "tools/cosmo", "tools/kjv"):
+        # personalities, tools/kjv/ the study edition's KJV, once, tools/rsb/
+        # the Synodal's edition, once.
+        for d in ("build", "offline", "tools/study", "tools/quiz", "tools/cosmo", "tools/kjv", "tools/rsb"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 
@@ -241,7 +244,7 @@ class NoWrites(unittest.TestCase):
             # the Foundation's zips are inside the project, in data/uf/.
             for bad in ("urantia-uversa-press-claude", "../index",
                         "urantia-study-edition", "Urantia-MH-Audio", "RUS-Voyner", "block-sources",
-                        "../ud", "urantia-ru", "data/uf", "UniverseGenealogy"):
+                        "../ud", "urantia-ru", "data/uf", "UniverseGenealogy", "russian-synodal-bible"):
                 for m in [*WRITE_OPEN.finditer(src), *WRITERS.finditer(src)]:
                     seg = src[max(0, m.start() - 200):m.end() + 200]
                     self.assertNotIn(bad, seg,

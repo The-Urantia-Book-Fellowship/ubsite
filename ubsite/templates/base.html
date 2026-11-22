@@ -498,6 +498,19 @@ window.ubUnit = function (where) {
           second hidden input, which ub.js keeps with the first.  Drawn among
           those shown, where it stands until a reader moves or hides it; its
           × greyed while it is the only one shown, as every row's is then. #}
+      {#- Two subtabs, the book's texts and the Bible's, each its own list in
+          its own order (Tigran, 2026-11-21: "Settings => Texts should have two
+          subtabs: Urantia Book and Bible where one can choose which texts and
+          in which order to show them"), drawn as Theme's segmented control and
+          not as a second row of the dialog's tabs; open at the Bible's on a
+          page of the Bible (ub.js txShow).  Only where the Bible is built. #}
+      {%- if bible_there() %}
+      <div class="seg txtabs" role="tablist" {{ ta('aria-label', 'Texts|tab') }}>
+        <button type="button" role="tab" data-sub="book" aria-selected="true"><span>{{ t('The Urantia Book') }}</span></button>
+        <button type="button" role="tab" data-sub="bible" aria-selected="false"><span>{{ t('The Bible') }}</span></button>
+      </div>
+      <div class="txsub" data-sub="book">
+      {%- endif %}
       <input type="hidden" name="{{ it.key }}"><input type="hidden" name="english">
       <p class="trintro">{{ t('tr:intro') }}</p>
       <p class="sub">{{ t('Shown, in this order') }}</p>
@@ -523,6 +536,32 @@ window.ubUnit = function (where) {
       {%- endfor %}
       {#- What a fold needs of each: its name in a tab, and who made it. #}
       <script type="application/json" id="ub-translations">{{ translations_json()|safe }}</script>
+      {%- if bible_there() %}
+      </div>
+      {%- endif %}
+      {%- elif it.kind == 'bible' %}
+      {#- The Bible's texts, its versions in the reader's order (settings.py
+          `bible`; Tigran, 2026-11-21: "treated the same way as we do the
+          Urantia Book's texts"): a list of its own, as the book's is, ticked,
+          ordered and hidden the same way, the KJV alone until a reader adds
+          the Synodal.  Its rows data-b, never data-k, and its lists .blist,
+          never .trlist, which the book's texts are found by (ub.js trFill);
+          the hidden input the setting's value, which ub.js keeps (bFill). #}
+      {%- if bible_there() %}
+      <div class="txsub" data-sub="bible" hidden>
+      <input type="hidden" name="bible">
+      <p class="trintro">{{ t('bible:intro') }}</p>
+      <ol class="blist bshown"></ol>
+      <ul class="blist bother">
+        {%- for v in bible_versions() %}
+        <li data-b="{{ v.key }}"><label><input type="checkbox" value="{{ v.key }}">
+          <span class="w"><span lang="{{ v.lang }}">{{ v.title }}</span> <span class="nobreak">({{ v.label }})</span> <span class="lang">{{ t(LANGUAGES.get(v.lang, 'English')) }}</span></span>
+          <small class="d">{{ t(v.by) }}</small></label>
+          <span class="mv"><button type="button" class="up" {{ ta('aria-label', 'Move up') }} {{ ta('title', 'Move up') }}>↑</button><button type="button" class="down" {{ ta('aria-label', 'Move down') }} {{ ta('title', 'Move down') }}>↓</button><button type="button" class="drop" {{ ta('aria-label', 'Hide this text') }} {{ ta('title', 'Hide this text') }}>×</button></span></li>
+        {%- endfor %}
+      </ul>
+      </div>
+      {%- endif %}
       {%- elif it.kind == 'voices' %}
       {#- The voices, a menu against each text, the English first and then
           each translation by its short name, as its column names it
@@ -605,14 +644,18 @@ window.ubUnit = function (where) {
           them, and a reader may still keep one it does not show. #}
       <details class="offmore" hidden><summary><span class="rfold"></span><span class="w"></span></summary>
       <ul class="offtrs"></ul></details>
-      {#- The King James Version, a download of its own as a translation is
-          (Tigran, 2026-11-21; sw.js downs), its tick a list of its own, which
-          the translations' fold leaves alone (offline.js trOrder). #}
-      {%- if kjv_there() %}
-      <ul class="offtrs offkjv">
-        <li><label><input type="checkbox" value="kjv" disabled>
-          <span class="w">{{ t('King James Version') }}</span>
+      {#- The Bible: the KJV in Base, as the book's English is (Tigran,
+          2026-11-21: "Pages in Base, like the book"); the Synodal a download
+          of its own, as a translation is (sw.js downs), its tick a list of its
+          own, which the translations' fold leaves alone (offline.js trOrder). #}
+      {%- if bible_there() %}
+      <p class="sub">{{ t('The Bible') }}</p>
+      <ul class="offtrs offbible">
+        {%- for v in bible_versions() if v.key != 'kjv' %}
+        <li><label><input type="checkbox" value="{{ v.key }}" disabled>
+          <span class="w"><span lang="{{ v.lang }}">{{ v.title }}</span></span>
           <small class="st"></small></label></li>
+        {%- endfor %}
       </ul>
       {%- endif %}
       <p class="why" hidden></p>

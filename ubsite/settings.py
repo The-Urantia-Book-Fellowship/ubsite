@@ -199,12 +199,13 @@ SHOW = [
     # 2026-10-28).  /search?in=ud still answers.
     ("trsearch", "switch", "Translations in search results", True, [],
      "those ticked under Translations, their words and their translators\u2019 notes"),
-    # The King James Version among the search results (ubsite/kjv.py hits),
-    # its verses and its translators' notes, a list of its own after the
-    # study notes'; on by default (Tigran, 2026-11-21: "In search").
-    # /search?in=kjv still answers.
-    ("kjvsearch", "switch", "King James Version in search results", True, [],
-     "its verses and its translators\u2019 notes"),
+    # The Bible among the search results (ubsite/bible.py hits): each version
+    # the Bible's pages show (`bible`, below), its verses and its notes, a list
+    # of its own after the study notes'; on by default (Tigran, 2026-11-21: "In
+    # search"; the KJV's alone until the Synodal came beside it the same day,
+    # `kjvsearch`, never deployed).  /search?in=kjv and ?in=rsb still answer.
+    ("biblesearch", "switch", "The Bible in search results", True, [],
+     "the verses and notes of the versions shown"),
     # The British Study Edition's quiz (build/quiz.py): the invitation after
     # the last paragraph of each paper that has questions, and its line on the
     # home page.  /quiz and /quiz/N answer an address asked for, as the index's
@@ -245,6 +246,16 @@ SHOW = [
 TRANSLATIONS = [
     ("translations", "translations", "Texts", "", [], ""),
     ("english", "part", "", "", [], ""),
+    # The Bible's texts, its versions in the reader's order, the keys of
+    # data/bible.toml separated by spaces, as `translations` is: the first set
+    # where a row's base line stands, the rest in columns where the window has
+    # room and in each row's fold where it has not (ub.js bibDraw), as the
+    # book's texts are (Tigran, 2026-11-21: "treated the same way as we do the
+    # Urantia Book's texts (folding, ordering, offline, etc)").  The KJV alone
+    # unless a reader adds the Synodal ("Hidden until ticked"), and never none:
+    # where none of those shown has a verse, the version that has it stands in.
+    # A list of its own in the Texts tab, under The Bible.
+    ("bible", "bible", "The Bible", "kjv", [], ""),
 ]
 # Until 2026-11-16 a switch stood under the list, `compare`, "Translations in
 # parallel columns": the English and each translation ticked side by side, a
@@ -390,8 +401,9 @@ DEVICE = ["uisize", "size", "lead", "width", "bvoice", "trvoices", "rail", "marg
 # follow later is named here with the next version, and V is raised with it.
 # `english`, the English's place among the texts, came at 3 (2026-11-20): a
 # script before it shows the English first whatever the account says.
-# `kjvsearch`, the King James Version in search results, came at 4 (2026-11-21).
-LATE = {"tropen": 2, "trtab": 2, "english": 3, "kjvsearch": 4}
+# `biblesearch`, the Bible in search results, came at 4, and `bible`, the
+# Bible's texts in order, at 5 (both 2026-11-21, before either was deployed).
+LATE = {"tropen": 2, "trtab": 2, "english": 3, "biblesearch": 4, "bible": 5}
 
 
 # A site's own defaults, by the host a page is read at, where they differ from

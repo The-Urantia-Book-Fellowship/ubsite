@@ -135,10 +135,10 @@ if [ -n "$(git status --porcelain -- data/cosmology)" ]; then
     git status --short -- data/cosmology >&2
     exit 1
 fi
-if [ -n "$(git status --porcelain -- data/kjv)" ]; then
-    echo "refusing: data/kjv/ holds the King James Version's copy, not committed." >&2
+if [ -n "$(git status --porcelain -- data/kjv data/rsb data/bible.toml)" ]; then
+    echo "refusing: data/kjv/, data/rsb/ and data/bible.toml hold the Bible's copies, not committed." >&2
     echo "          Review the diff and commit it, then deploy." >&2
-    git status --short -- data/kjv >&2
+    git status --short -- data/kjv data/rsb data/bible.toml >&2
     exit 1
 fi
 
@@ -269,7 +269,7 @@ ship() {
         # nor the one it replaced names is pruned, as the AI voice's files are;
         # the translations' too, which the manifest lists apart (offline/pack.py),
         # and the King James Version's.
-        local chunks='import json, sys; d = sys.stdin.read().strip(); m = json.loads(d) if d else {}; print("\n".join(c["file"][2:] for c in m.get("chunks", []) + [c for t in m.get("translations", []) + ([m["kjv"]] if "kjv" in m else []) for c in t["chunks"]]))'
+        local chunks='import json, sys; d = sys.stdin.read().strip(); m = json.loads(d) if d else {}; print("\n".join(c["file"][2:] for c in m.get("chunks", []) + [c for t in m.get("translations", []) + m.get("bible", []) for c in t["chunks"]]))'
         local before keep stale
         echo "==> offline copy ($(du -sh var/offline/c | cut -f1))"
         before=$(ssh "$HOST" "cat $DEST/var/offline/manifest.json 2>/dev/null || true" | python3 -c "$chunks")
@@ -293,13 +293,13 @@ ship() {
         # being served. mv within a filesystem is atomic.
         rsync -az --info=progress2 var/ub.db "$HOST:$DEST/var/ub.db.new"
         ssh "$HOST" "mv $DEST/var/ub.db.new $DEST/var/ub.db"
-        # The King James Version, var/kjv.db beside it (build/kjv.py), in the
-        # same way, and only where the host's is another: it moves only when
-        # data/kjv/ does.
-        if [ "$(ssh "$HOST" "sha256sum $DEST/var/kjv.db 2>/dev/null | cut -d' ' -f1")" != "$(sha256sum var/kjv.db | cut -d' ' -f1)" ]; then
-            echo "==> shipping var/kjv.db ($(du -h var/kjv.db | cut -f1))"
-            rsync -az --info=progress2 var/kjv.db "$HOST:$DEST/var/kjv.db.new"
-            ssh "$HOST" "mv $DEST/var/kjv.db.new $DEST/var/kjv.db"
+        # The Bible, var/bible.db beside it (build/bible.py), in the same way,
+        # and only where the host's is another: it moves only when data/kjv/,
+        # data/rsb/ or data/bible.toml does.
+        if [ "$(ssh "$HOST" "sha256sum $DEST/var/bible.db 2>/dev/null | cut -d' ' -f1")" != "$(sha256sum var/bible.db | cut -d' ' -f1)" ]; then
+            echo "==> shipping var/bible.db ($(du -h var/bible.db | cut -f1))"
+            rsync -az --info=progress2 var/bible.db "$HOST:$DEST/var/bible.db.new"
+            ssh "$HOST" "mv $DEST/var/bible.db.new $DEST/var/bible.db"
         fi
 
         # Prune: an AI file neither the new database nor the one it replaced names.

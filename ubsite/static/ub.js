@@ -63,8 +63,11 @@
   // of it and asks for a section's again; and as a page loads (below, with
   // Work offline).
   function shownTo(o) {
-    var sw = navigator.serviceWorker, w = sw && sw.controller;
-    if (w) w.postMessage({ cmd: 'shown', tr: String(o.translations || '').split(' ').filter(Boolean) });
+    var sw = navigator.serviceWorker, w = sw && sw.controller, tr = String(o.translations || '').split(' ').filter(Boolean);
+    // The Bible's Synodal too, where its pages show it (settings.py `bible`):
+    // its lines and its list in search are the copy's only where it keeps it.
+    if (String(o.bible || '').split(' ').indexOf('rsb') >= 0) tr.push('rsb');
+    if (w) w.postMessage({ cmd: 'shown', tr: tr });
   }
   function announce(k, o) {
     shownTo(o);
@@ -392,6 +395,7 @@
       });
       idle(o);
       trFill();
+      bFill();
     };
     // The Texts tab (settings.py TRANSLATIONS): those shown, in the reader's
     // order, numbered, each with ↑ and ↓, then the others, by language, in
@@ -463,6 +467,82 @@
         order[i] = order[j];
         order[j] = k;
         trSet(order);
+        b.disabled ? b.closest('li').querySelector('input').focus() : b.focus();
+      });
+    }
+    // The Bible's list (settings.py `bible`; base.html .blist): its versions
+    // shown, in the reader's order, numbered, each with ↑, ↓ and ×, then the
+    // others; a tick puts one at the end of the order, and the last one shown
+    // stays, as the book's texts do (trFill).  Its own, for the book's finds
+    // its rows by .trlist and data-k.
+    // The Texts tab's subtabs, the book's texts and the Bible's (base.html
+    // .txtabs; Tigran, 2026-11-21): one list shown at a time, the Bible's on
+    // a page of the Bible, the book's elsewhere, until a tap chooses.
+    var txTabs = form.querySelector('.txtabs');
+    var txShow = function (k) {
+      Array.prototype.forEach.call(txTabs.querySelectorAll('button[data-sub]'), function (b) {
+        b.setAttribute('aria-selected', b.dataset.sub === k ? 'true' : 'false');
+      });
+      Array.prototype.forEach.call(form.querySelectorAll('.txsub'), function (d) { d.hidden = d.dataset.sub !== k; });
+    };
+    if (txTabs) {
+      txTabs.addEventListener('click', function (ev) {
+        var b = ev.target.closest('button[data-sub]');
+        if (b) txShow(b.dataset.sub);
+      });
+      txShow(/^\/bible(\/|$)/.test(location.pathname) ? 'bible' : 'book');
+    }
+    var bShown = form.querySelector('.bshown');
+    var bOrder = function () {
+      var ks = String(load().bible || 'kjv').split(' ').filter(function (k) {
+        return k && form.querySelector('.blist li[data-b="' + k + '"]');
+      });
+      return ks.length ? ks : ['kjv'];
+    };
+    var bFill = function () {
+      if (!bShown) return;
+      var order = bOrder(), other = form.querySelector('.bother');
+      Array.prototype.slice.call(form.querySelectorAll('.blist li[data-b]'))
+        .sort(function (x, y) { return x.dataset.i - y.dataset.i; })
+        .forEach(function (li) {
+          var at = order.indexOf(li.dataset.b);
+          li.querySelector('input').checked = at >= 0;
+          li.querySelector('.up').disabled = at <= 0;
+          li.querySelector('.down').disabled = at < 0 || at === order.length - 1;
+          li.querySelector('.drop').disabled = at < 0 || order.length < 2;
+          if (at < 0) other.appendChild(li);
+        });
+      order.forEach(function (k) { bShown.appendChild(form.querySelector('.blist li[data-b="' + k + '"]')); });
+      other.hidden = !other.children.length;
+    };
+    var bSet = function (order) {
+      window.ubSettings.set('bible', order.join(' '));
+      bFill();
+      resettable();
+    };
+    if (bShown) {
+      Array.prototype.forEach.call(form.querySelectorAll('.blist li[data-b]'), function (li, i) { li.dataset.i = i; });
+      form.addEventListener('change', function (ev) {
+        var el = ev.target;
+        if (el.type !== 'checkbox' || !el.closest('.blist')) return;
+        var order = bOrder().filter(function (k) { return k !== el.value; });
+        if (el.checked) order.push(el.value);
+        if (!order.length) { el.checked = true; return; }
+        bSet(order);
+      });
+      form.addEventListener('click', function (ev) {
+        var b = ev.target.closest('.blist .up, .blist .down, .blist .drop');
+        if (!b || b.disabled) return;
+        if (b.classList.contains('drop')) {
+          var gone = b.closest('li').dataset.b;
+          bSet(bOrder().filter(function (k) { return k !== gone; }));
+          return (form.querySelector('.bshown .drop') || form.querySelector('.bother li[data-b="' + gone + '"] input')).focus();
+        }
+        var k = b.closest('li').dataset.b, order = bOrder(), i = order.indexOf(k), j = i + (b.classList.contains('up') ? -1 : 1);
+        if (i < 0 || j < 0 || j >= order.length) return;
+        order[i] = order[j];
+        order[j] = k;
+        bSet(order);
         b.disabled ? b.closest('li').querySelector('input').focus() : b.focus();
       });
     }
@@ -821,25 +901,33 @@
   // for on the document, capturing, because toggle does not bubble -- and so
   // it holds after listen.js swaps <main>.
   var railGot = {};
-  // A book of the King James Version's Contents (templates/_kjvrail.html)
-  // opens to its chapters, lifted from the book's own page, which the
-  // offline copy keeps with them; if that fails, the book's link is followed.
+  // A book of the Bible's Contents (templates/_biblerail.html) opens to its
+  // chapters, lifted from the book's own page (data-ch; its link goes to its
+  // first chapter), which the offline copy keeps with them; if that fails,
+  // the book's link is followed.
   document.addEventListener('toggle', function (ev) {
     var d = ev.target, li = d.parentNode, a, put;
     if (d.tagName !== 'DETAILS' || !d.open || !li || !li.classList || !li.classList.contains('lazy') ||
         d.querySelector('ol') || !li.closest('.kjvrail') || !(a = d.querySelector('summary a'))) return;
     put = function (html) { if (!d.querySelector('ol')) d.insertAdjacentHTML('beforeend', html); };
-    if (railGot[a.pathname]) return put(railGot[a.pathname]);
-    fetch(a.pathname, { credentials: 'same-origin' })
+    var src = a.dataset.ch || a.pathname;
+    if (railGot[src]) return put(railGot[src]);
+    fetch(src, { credentials: 'same-origin' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function (h) {
-        var got = new DOMParser().parseFromString(h, 'text/html').querySelectorAll('.kchaps a'), ol = '';
-        if (!got.length) throw new Error('no chapters');
-        Array.prototype.forEach.call(got, function (x) {
-          ol += '<li><a href="' + x.getAttribute('href') + '">' + x.textContent + '</a></li>';
+        // Each of its lists, a book the Synodal numbers otherwise having two,
+        // the KJV's and the Synodal's, which ub.css shows by the first text.
+        var lists = new DOMParser().parseFromString(h, 'text/html').querySelectorAll('ol.kchaps'), ol = '';
+        if (!lists.length) throw new Error('no chapters');
+        Array.prototype.forEach.call(lists, function (l) {
+          ol += '<ol class="kch' + (l.classList.contains('kchk') ? ' kchk' : l.classList.contains('kchs') ? ' kchs' : '') + '">';
+          Array.prototype.forEach.call(l.querySelectorAll('a'), function (x) {
+            ol += '<li><a href="' + x.getAttribute('href') + '">' + x.textContent + '</a></li>';
+          });
+          ol += '</ol>';
         });
-        railGot[a.pathname] = '<ol class="kch">' + ol + '</ol>';
-        put(railGot[a.pathname]);
+        railGot[src] = ol;
+        put(railGot[src]);
       })
       .catch(function () { location.href = a.href; });
   }, true);
@@ -2531,6 +2619,319 @@
   });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (cmpIs != null) cmpCheck(null); });
   addEventListener('pageshow', function (ev) { if (ev.persisted) cmpCheck(null); });
+
+  // ---- The Bible's texts (Tigran, 2026-11-21: the Synodal "in parallel
+  // columns with KJV and generally treated the same way as we do the Urantia
+  // Book's texts (folding, ordering, offline, etc)") ----------------------------
+  // A chapter's page (templates/bible_chapter.html) is a list of rows,
+  // .krow, each the verses of the KJV and the Synodal that are the same
+  // words, and carries each row's base line, the KJV's where the row has one,
+  // else the Synodal's; the Synodal's lines for the rest are the fragment,
+  // /bible/tr/<Abbr>/<c> (bibFetch).  The texts shown, in the reader's order,
+  // are `bible` (settings.py): each row's first that it has stands where the
+  // base line stood, carrying the row's id; the rest stand in columns beside
+  // it where the window has room for them all (cmpFits, the book's own
+  // measure), and in a fold under it where it has not, a tap on any fold
+  // opening or folding them all, the book's folds' one state (`tropen`).
+  // Where none of those shown has a row, the line that has it stands in, the
+  // KJV's named (.bstand), the Synodal's runs named by the page (.bwho).  Its
+  // own names, all `bib`, for ub.js is one function (trap 42).  The book's
+  // drawing (cmpDraw, trAll) finds nothing of these and leaves them alone.
+  var bibArt = document.querySelector('main.reader.bible > article.biblech'), BIB = [], bibBy = {},
+      bibGot = null, bibCols = null, bibBase = null, bibW = innerWidth, bibHeadMark = null;
+  try { BIB = JSON.parse((document.getElementById('ub-bible') || {}).textContent || '[]'); } catch (e) {}
+  BIB.forEach(function (x) { bibBy[x.key] = x; });
+  function bibTexts() {
+    var ks = String(load().bible || 'kjv').split(' ').filter(function (k) { return bibBy[k]; });
+    return ks.length ? ks : ['kjv'];
+  }
+  // The rows, each with its base lines kept as the page drew them, once.
+  function bibRows() {
+    if (bibBase) return bibBase;
+    bibBase = Array.prototype.map.call(bibArt.querySelectorAll('.kverses > .krow'), function (row) {
+      var lines = Array.prototype.filter.call(row.children, function (el) { return el.dataset.k && !el.matches('.btf'); });
+      return { row: row, id: row.dataset.row, k: lines.length ? lines[0].dataset.k : 'kjv', lines: lines,
+               ka: row.querySelector(':scope > .ka'), tf: row.querySelector(':scope > .btf'),
+               who: row.querySelector(':scope > .bwho'), mark: row.querySelector('a.fn[data-k="kc"]') };
+    });
+    return bibBase;
+  }
+  // The other version's lines, by row, and its head and notes; null where the
+  // page has none to fetch or it cannot be had (offline, not kept).
+  function bibFetch() {
+    var v = bibArt.dataset.trv;
+    if (!v) return Promise.resolve(null);
+    if (!bibGot) {
+      bibGot = fetch('/bible/tr/' + bibArt.dataset.abbr + '/' + bibArt.dataset.c + '?v=' + encodeURIComponent(v))
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+        .then(function (h) {
+          var t = document.createElement('template'), got = { rows: {}, notes: {}, head: null };
+          t.innerHTML = h;
+          Array.prototype.forEach.call(t.content.querySelectorAll('.brt[data-row]'), function (d) {
+            got.rows[d.dataset.row] = Array.prototype.slice.call(d.children);
+          });
+          Array.prototype.forEach.call(t.content.querySelectorAll('aside[data-of]'), function (d) {
+            (got.notes[d.dataset.of] = got.notes[d.dataset.of] || []).push(d);
+          });
+          got.head = t.content.querySelector('.bhd[data-k]');
+          got.headNote = t.content.querySelector('.btrs > aside.note:not([data-of])');
+          return got;
+        });
+      bibGot.catch(function () { bibGot = null; });
+    }
+    return bibGot.catch(function () { return null; });
+  }
+  // The versions this page has, in the reader's order: a base line's, and
+  // the fragment's where the page names one (data-has).
+  function bibShown() {
+    var has = {};
+    bibRows().forEach(function (r) { has[r.k] = true; });
+    (bibArt.dataset.has || '').split(' ').forEach(function (k) { if (k) has[k] = true; });
+    return bibTexts().filter(function (k) { return has[k]; });
+  }
+  function bibKeep(change) {
+    // The row at the window's top, kept where it stands (a fold's opening or
+    // the columns' drawing moves every row below it).
+    var top = null, at = 0;
+    bibRows().some(function (r) {
+      var b = r.row.getBoundingClientRect();
+      if (b.bottom > 0) { top = r.row; at = b.top; return true; }
+      return false;
+    });
+    return Promise.resolve(change()).then(function () {
+      if (top && top.getBoundingClientRect().top !== at && scrollY > 0)
+        scrollBy(0, top.getBoundingClientRect().top - at);
+    });
+  }
+  // A version's lines for a row, fresh: the base's are the page's own, the
+  // other's clones of the fragment's.
+  function bibLines(r, k, got) {
+    if (k === r.k) return r.lines;
+    return got && got.rows[r.id] ? got.rows[r.id].map(function (el) { return el.cloneNode(true); }) : [];
+  }
+  function bibNotes(r, got) {
+    if (!got || !got.notes[r.id]) return null;
+    var d = document.createElement('div');
+    d.className = 'tnotes';
+    d.hidden = true;
+    got.notes[r.id].forEach(function (a) { d.appendChild(a.cloneNode(true)); });
+    return d;
+  }
+  // The row's id on its first line shown, which arrive(), the running head
+  // and the place find it by; a line that gives it up keeps it in data-rid.
+  function bibId(r, first) {
+    var hit = r.lines.some(function (el) { return el.classList.contains('hit'); });
+    r.row.querySelectorAll('[id="' + r.id + '"]').forEach(function (el) { if (el !== first) { el.dataset.rid = r.id; el.removeAttribute('id'); } });
+    if (first) first.id = r.id;
+    // The tint of a verse the address names goes with it (as ftxPut's .hit).
+    r.row.querySelectorAll('[data-drawn].hit, .bc .hit').forEach(function (el) { if (el !== first) el.classList.remove('hit'); });
+    if (first && hit) first.classList.add('hit');
+  }
+  function bibDraw() {
+    if (!bibArt) return Promise.resolve();
+    var ks = bibShown(), cols = ks.length > 1 && cmpFits(bibArt, ks.length), want = ks.indexOf('rsb') >= 0;
+    bibCols = cols;
+    bibW = innerWidth;
+    return (want ? bibFetch() : Promise.resolve(null)).then(function (got) {
+      var main = bibArt.parentNode, top = bibArt.querySelector('.kjvtop'), heads, names;
+      bibArt.classList.toggle('bcmp', !!cols);
+      if (cols) main.style.setProperty('--cols', ks.length); else main.style.removeProperty('--cols');
+      // The heads: the base's the page's, the other's the fragment's.
+      heads = top.querySelector('.bhds');
+      if (!heads) {
+        heads = document.createElement('div');
+        heads.className = 'bhds';
+        top.querySelector('.bhd').before(heads);
+        heads.appendChild(top.querySelector('.bhd'));
+        if (got && got.head) {
+          heads.appendChild(got.head.cloneNode(true));
+          if (got.headNote) heads.appendChild(got.headNote.cloneNode(true));
+        }
+      } else if (got && got.head && !heads.querySelector('.bhd[data-k="rsb"]')) {
+        heads.appendChild(got.head.cloneNode(true));
+        if (got.headNote) heads.appendChild(got.headNote.cloneNode(true));
+      }
+      var hk = Array.prototype.map.call(heads.querySelectorAll('.bhd[data-k]'), function (h) { return h.dataset.k; }),
+          hfirst = ks.filter(function (k) { return hk.indexOf(k) >= 0; })[0] || hk[0];
+      Array.prototype.forEach.call(heads.querySelectorAll('.bhd[data-k]'), function (h) {
+        var i = ks.indexOf(h.dataset.k);
+        h.style.setProperty('--c', i + 1);
+        h.hidden = cols ? i < 0 : h.dataset.k !== hfirst;
+        h.style.order = i < 0 ? 9 : i;
+      });
+      heads.style.display = cols ? '' : 'block';
+      // The line naming the columns, at the window's top, each name with its
+      // ×, which stops showing that text, as the book's columns have (Tigran,
+      // 2026-11-21: "where are the crosses to hide a text column, like for
+      // UB?"; below).
+      names = bibArt.querySelector('.bnames');
+      if (names) names.remove();
+      if (cols) {
+        names = document.createElement('div');
+        names.className = 'krow bnames';
+        names.innerHTML = ks.map(function (k, i) {
+          return '<p class="cn" style="--c:' + (i + 1) + '"><b lang="' + bibBy[k].lang + '">' + bibBy[k].label + '</b>' +
+                 '<button type="button" class="bnx" data-k="' + k + '" ' +
+                 T.a('aria-label', 'Hide this text') + ' ' + T.a('title', 'Hide this text') + '>×</button></p>';
+        }).join('');
+        bibArt.querySelector('.kverses').prepend(names);
+      }
+      bibRows().forEach(function (r) {
+        var row = r.row, has = {}, mine = [], first;
+        // Undrawn: every cell and every drawn line out, the base's lines back.
+        Array.prototype.forEach.call(row.querySelectorAll(':scope > .bc, :scope > [data-drawn]'), function (el) { el.remove(); });
+        if (r.tf) { var p = r.tf.querySelector('.tr'); if (p) p.remove(); }
+        r.lines.forEach(function (el) { el.classList.remove('bstand'); el.removeAttribute('data-who'); row.insertBefore(el, r.ka || r.tf || null); });
+        ['kjv', 'rsb'].forEach(function (k) { if (k === r.k || (got && got.rows[r.id])) has[k] = true; });
+        ks.forEach(function (k) { if (has[k]) mine.push(k); });
+        first = mine[0] || r.k;
+        r.mine = mine;
+        r.first = first;
+        if (cols) {
+          ks.forEach(function (k, i) {
+            var cell = document.createElement('div'), ls = has[k] ? bibLines(r, k, got) : [];
+            cell.className = 'bc';
+            cell.dataset.k = k;
+            cell.style.setProperty('--c', i + 1);
+            ls.forEach(function (el) { cell.appendChild(el); });
+            if (k !== r.k) { var n = bibNotes(r, got); if (n) cell.appendChild(n); }
+            row.insertBefore(cell, r.ka || r.tf || null);
+          });
+          // The base's lines a column the reader does not show: out.
+          if (ks.indexOf(r.k) < 0) r.lines.forEach(function (el) { el.remove(); });
+          bibId(r, row.querySelector('.bc [data-ref]'));
+        } else {
+          // The first text in the base line's place, the base's lines out
+          // where it is another's.
+          if (first !== r.k) {
+            r.lines.forEach(function (el) { el.remove(); });
+            bibLines(r, first, got).forEach(function (el) {
+              el.dataset.drawn = '1';
+              row.insertBefore(el, r.ka || r.tf || null);
+            });
+            var n = bibNotes(r, got);
+            if (n) { n.dataset.drawn = '1'; row.insertBefore(n, r.ka || r.tf || null); }
+          }
+          // A KJV line standing in where the reader's first is another, named.
+          var lead = row.querySelector(':scope > p.kv[data-k], :scope > p.kvh[data-k]');
+          if (lead && first === 'kjv' && ks[0] !== 'kjv') {
+            lead.classList.add('bstand');
+            lead.dataset.who = bibBy.kjv.label;
+          }
+          bibId(r, lead);
+        }
+      });
+      // The orange dot of a verse the study notes cite, at the end of the
+      // row's first text shown, whichever it is (bible_chapter.html), and a
+      // chapter's at its first head's.
+      bibRows().forEach(function (r) {
+        if (!r.mark) return;
+        // In columns the first cell with a verse, the cells being in the
+        // reader's order; else the row's own lines, the first text's.
+        var cell = cols ? Array.prototype.filter.call(r.row.querySelectorAll(':scope > .bc'), function (c) {
+              return c.querySelector(':scope > p.kv'); })[0] : r.row,
+            ls = cell ? cell.querySelectorAll(':scope > p.kv') : [];
+        if (ls.length) ls[ls.length - 1].appendChild(r.mark);
+      });
+      if (bibHeadMark === null) bibHeadMark = top.querySelector('a.fn[data-k="kc"]') || false;
+      if (bibHeadMark) {
+        var h1 = heads.querySelector('.bhd[data-k="' + hfirst + '"] h1') || heads.querySelector('.bhd h1');
+        if (h1) h1.appendChild(bibHeadMark);
+      }
+      bibFolds(got);
+      document.documentElement.classList.add('bibready');
+    });
+  }
+  // The folds: each row's other texts shown, under it, open or shut with all
+  // the rest (trOpen); in columns none.
+  function bibFolds(got) {
+    var ks = bibShown();
+    bibRows().forEach(function (r) {
+      var tf = r.tf, b = tf && tf.querySelector('.bfold'), others, panel;
+      if (!tf) return;
+      others = (r.mine || []).filter(function (k) { return k !== r.first; });
+      tf.hidden = !others.length || !!bibCols;
+      if (tf.hidden) return;
+      b.textContent = others.map(function (k) { return bibBy[k].label; }).join(', ');
+      b.setAttribute('aria-expanded', trOpen ? 'true' : 'false');
+      panel = tf.querySelector('.tr');
+      // Shut with the rest, but for the one an address opened (#tr-rsb).
+      var open = trOpen || tf.dataset.one === '1';
+      b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open) { if (panel) panel.hidden = true; return; }
+      if (!panel) { panel = document.createElement('div'); panel.className = 'tr'; tf.appendChild(panel); }
+      panel.hidden = false;
+      panel.innerHTML = '';
+      others.forEach(function (k) {
+        // Each named where the fold holds more than one, as the book's are.
+        if (others.length > 1) {
+          var who = document.createElement('p');
+          who.className = 'who';
+          who.textContent = bibBy[k].label;
+          panel.appendChild(who);
+        }
+        bibLines(r, k, got).forEach(function (el) {
+          var c = el === r.lines[0] || r.lines.indexOf(el) >= 0 ? el.cloneNode(true) : el;
+          c.removeAttribute('id');
+          panel.appendChild(c);
+        });
+        if (k !== r.k) { var n = bibNotes(r, got); if (n) panel.appendChild(n); }
+      });
+    });
+    ks = null;
+  }
+  if (bibArt) {
+    // A search's hit in the Synodal, or its numbers typed in the search box,
+    // arrive at /bible/Psa/23:1#tr-rsb: the row's fold opened at it, where
+    // the Synodal is no first text and the page is in folds.
+    if (location.hash === '#tr-rsb') {
+      var hitRow = bibArt.querySelector('.krow:has(> .hit)'), hitTf = hitRow && hitRow.querySelector(':scope > .btf');
+      if (hitTf) hitTf.dataset.one = '1';
+    }
+    bibDraw();
+    // A column's ×: that text out of those shown, as Settings' Texts takes
+    // it out, and the page drawn again without it (ub:settings, below).
+    bibArt.addEventListener('click', function (ev) {
+      var x = ev.target.closest && ev.target.closest('.bnames .bnx');
+      if (!x) return;
+      var order = bibTexts().filter(function (k) { return k !== x.dataset.k; });
+      if (order.length) window.ubSettings.set('bible', order.join(' '));
+    });
+    bibArt.addEventListener('click', function (ev) {
+      var b = ev.target.closest && ev.target.closest('.bfold');
+      if (!b) return;
+      ev.preventDefault();
+      var want = b.getAttribute('aria-expanded') !== 'true';
+      Array.prototype.forEach.call(bibArt.querySelectorAll('.btf[data-one]'), function (x) { delete x.dataset.one; });
+      trOpen = want;
+      trTap = true;
+      try { window.ubSettings.set('tropen', want); } finally { trTap = false; }
+      bibKeep(function () { return bibFetch().then(bibFolds); });
+    });
+    document.addEventListener('ub:settings', function (ev) {
+      var k = ev.detail.key;
+      if (k === 'bible') return void bibKeep(bibDraw);
+      if (k === 'tropen' && (ev.detail.all.tropen === true) !== trOpen) {
+        trOpen = ev.detail.all.tropen === true;
+        bibKeep(function () { return bibFetch().then(bibFolds); });
+      }
+      if ((k === 'margin' || k === 'index' || k === 'width' || k === 'uisize' || k === 'size') && bibShown().length > 1 &&
+          (bibShown().length > 1 && cmpFits(bibArt, bibShown().length)) !== bibCols) bibKeep(bibDraw);
+    });
+    var bibTick = 0;
+    addEventListener('resize', function () {
+      if (innerWidth === bibW || bibTick) return;
+      bibTick = requestAnimationFrame(function () {
+        bibTick = 0;
+        var n = bibShown().length;
+        if ((n > 1 && cmpFits(bibArt, n)) !== bibCols) bibKeep(bibDraw);
+      });
+    });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+      var n = bibShown().length;
+      if ((n > 1 && cmpFits(bibArt, n)) !== bibCols) bibKeep(bibDraw);
+    });
+  }
   // Part I is open in the Foreword's rail for the Foreword's sake (templates/
   // _rail.html), and its line of script shuts it where Settings puts the
   // Foreword before the parts; a rail swapped in runs no script.
@@ -2840,8 +3241,8 @@
   var PV = /^\/(\d+)(?::|#\1:)(\d+)\.(\d+)(?:-(\d+))?$/, pv = null, pvSeq = 0, pvTimer = 0, pvHide = 0, pvPages = {};
   // A verse of the King James Version, or a run of them (build/bibleref.py
   // makes a study note's references so, 2026-11-21): the verses in the card,
-  // from the chapter's page.  A chapter alone, /kjv/Psa/23, has none.
-  var PVK = /^\/kjv\/([1-3]?[A-Z][a-z]{1,2})\/(\d+):(\d+)(?:-(\d+))?$/;
+  // from the chapter's page.  A chapter alone, /bible/Psa/23, has none.
+  var PVK = /^\/bible\/([1-3]?[A-Z][a-z]{1,2})\/(\d+):(\d+)(?:-(\d+))?$/;
   function pvOn() { return document.documentElement.dataset.preview === 'true'; }
   function pvLink(t) {
     var a = t && t.closest && t.closest('a[href]'), m, c;
@@ -2897,20 +3298,24 @@
     }
     return out;
   }
-  // A chapter's verses, from its page (templates/kjv_chapter.html): each
-  // p.kv, without its number and its note's mark; with the book's name as the
-  // page has it, for the card's head.
+  // A chapter's verses, from its page (templates/bible_chapter.html): each
+  // KJV p.kv, without its number and its note's mark; with the book's name as
+  // the page has it, for the card's head.  The KJV's, as a preview of the
+  // book's paragraphs is the English's, whatever the reader shows.
   function pvVerses(doc, r) {
-    var out = [], n, p, book = doc.querySelector('.kup a[href^="/kjv/"]:last-child');
+    var out = [], n, p, book = doc.querySelector('.kup a[href^="/bible/"]:last-child');
     for (n = r.n; n <= r.last; n++) {
       p = doc.getElementById('v' + n);
-      if (!p || !p.classList.contains('kv')) break;
+      if (!p || !p.classList.contains('kv') || p.dataset.k !== 'kjv') break;
       p = p.cloneNode(true);
       p.removeAttribute('id');
       p.className = '';
       Array.prototype.forEach.call(p.querySelectorAll('.vn, a.fn'), function (x) { x.remove(); });
       out.push(p);
     }
+    // The breadcrumb names the book in both languages (x-en, x-ru: trap 33);
+    // the card is the KJV's, and names it in English.
+    book = book && (book.querySelector('x-en') || book);
     return { ps: out, tr: '', name: book ? book.textContent : r.kjv };
   }
   // A translation's words for the paragraphs, each with its language, as far
@@ -2959,12 +3364,12 @@
   function pvOpen(r, byTouch) {
     pvShut();
     var seq = pvSeq, ref = r.kjv ? '' : r.p + ':' + r.s + '.' + r.n + (r.last > r.n ? '-' + r.last : ''),
-        href = r.kjv ? '/kjv/' + r.kjv + '/' + r.c + ':' + r.n + (r.last > r.n ? '-' + r.last : '') : '/' + ref,
+        href = r.kjv ? '/bible/' + r.kjv + '/' + r.c + ':' + r.n + (r.last > r.n ? '-' + r.last : '') : '/' + ref,
         sec = !r.kjv && document.querySelector('section[id="' + r.p + ':' + r.s + '"]'),
         words = r.tr && trBy[r.tr]
           ? trFetch(sec, r.p + ':' + r.s).then(function (got) { return pvTrParas(got, r); }, function () { return []; })
           : Promise.resolve([]);
-    (r.kjv ? pvFetch('/kjv/' + r.kjv + '/' + r.c).then(function (doc) { return pvVerses(doc, r); })
+    (r.kjv ? pvFetch('/bible/' + r.kjv + '/' + r.c).then(function (doc) { return pvVerses(doc, r); })
      : words.then(function (ps) {
       if (ps.length) return { ps: ps, tr: r.tr };
       return pvPage(r.p, r.s).then(function (doc) { return { ps: pvParas(doc, r), tr: '' }; });
@@ -3190,7 +3595,7 @@
   function paraOf(t, y, x) {
     var cell, row;
     if (!t.closest) return null;
-    return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt, p.kv[id]') ||
+    return t.closest('p.t[id], p.t[data-ref], .rc p.rt, .tf p.rt, p.kv[id], p.kv[data-ref]') ||
            ((cell = t.closest('.rc')) && cell.querySelector('p.rt')) ||
            paraCol((row = t.closest('.grid > .row')) && row.querySelector('p.t[id]'), x) || paraUnder(t, y, x);
   }
@@ -3257,8 +3662,9 @@
   function headOf(p) {
     var top = document.querySelector('main article > header.papertop'), rhs, rh = null, i,
         bible = p && p.classList && p.classList.contains('kv') && p.closest('article[data-book]');
-    // A verse of the King James Version: its book's name (templates/kjv_chapter.html).
-    if (bible) return { num: '', title: bible.dataset.book, author: '' };
+    // A verse of the Bible: its book's name in its version's language
+    // (templates/bible_chapter.html).
+    if (bible) return { num: '', title: p.dataset.k === 'rsb' && bible.dataset.bookRu || bible.dataset.book, author: '' };
     if (top && top.querySelector('h1')) {
       return { num: top.querySelector('.papernum') ? top.querySelector('.papernum').innerHTML : '',
                title: top.querySelector('h1').textContent,
@@ -3362,10 +3768,12 @@
     if (headP) headP.classList.remove('named');
     headP = p;
     p.classList.add('named');
-    // A verse's reference, its chapter's and its own number: 1:4.
-    head.querySelector('.ref').textContent = p.classList.contains('kv') && p.closest('article[data-c]')
-      ? p.closest('article[data-c]').dataset.c + ':' + p.id.slice(1) : p.id || p.dataset.ref;
-    if (p.dataset.k && p.dataset.k !== 'up' && p.dataset.ref) headTr(p); else headSay(headOf(p));
+    // A verse's reference as its version numbers it, 1:4, the Synodal's 22:1
+    // on the KJV's Psalm 23 (data-ref); a title's, its chapter.
+    head.querySelector('.ref').textContent = p.classList.contains('kv')
+      ? (p.dataset.ref || '').replace(/:0$/, '') : p.id || p.dataset.ref;
+    if (p.dataset.k && p.dataset.k !== 'up' && p.dataset.ref && !p.classList.contains('kv')) headTr(p);
+    else headSay(headOf(p));
     head.hidden = false;
     headAt = clampY();
     headSlack = 2 * (parseFloat(getComputedStyle(p).lineHeight) || 28);

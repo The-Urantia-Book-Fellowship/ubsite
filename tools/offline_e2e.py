@@ -680,7 +680,9 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                 "/part/2", "/search?q=prayer", "/search?q=self-conscious&in=text", "/search?q=Badanon&in=notes",
                 "/i/jesus/read", "/i/prayer/read/theme",
                 "/rail/120?v=1", "/static/fonts/UBGoudy.woff2", "/speech/101:4", "/speech/0:0", "/changelog",
-                "/quiz", "/quiz/32", "/101"]
+                "/quiz", "/quiz/32", "/101",
+                # The KJV's pages, in Base as the book's English is (2026-11-21).
+                "/bible", "/bible/Gen", "/bible/Gen/1", "/bible/Psa/23:1-3"]
         for u in urls:
             with urllib.request.urlopen(BASE + u) as r:
                 want[u] = r.read()
@@ -841,7 +843,16 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                 got, n = re.subn(rb'<div class="trhits"><section data-tr="urantia-ru">.*?not in the offline copy'
                                  rb'.*?</section></div>', b"", got, flags=re.S)
                 ok(n == 1, "a search offline says a translation ticked and not kept is not searched")
+                # And the Bible's Synodal, not kept, its list saying so, hidden
+                # while the Bible's pages do not show it (2026-11-21).
+                got, n = re.subn(rb'<section data-bible="rsb" class="bybible"><h2>[^\n]*</h2>\n<p class="none notkept">'
+                                 rb'.*?</p></section>', b"", got, flags=re.S)
+                ok(n == 1, "and so does the Synodal, not kept")
             ok(got == want[u], f"{u}: as the server sends it ({len(got):,} bytes)")
+        # And a book only the Synodal has, its download not kept: said so, and
+        # not taken for a page missing.
+        got = pg.evaluate("u => fetch(u).then(r => r.text())", "/bible/Tob/1")
+        ok("not in the offline copy" in got, "a book only the Synodal has, not kept, says so offline")
         t = time.time()
         pg.goto(BASE + "/search?q=thought+adjuster")
         print(f"  a first search, the engine starting: {(time.time() - t) * 1000:.0f} ms")

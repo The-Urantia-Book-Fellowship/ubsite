@@ -82,7 +82,7 @@ def _build(entries: list[dict]) -> str:
 def build(con: sqlite3.Connection) -> dict:
     """Build the copy into var/offline/; return its manifest."""
     from ubsite import app as A
-    chunks, expect, counts, trs, kjvc = pages.build(con)
+    chunks, expect, counts, trs, bibc = pages.build(con)
     entries: list[dict] = []
     files: dict[str, bytes] = {}
 
@@ -116,21 +116,27 @@ def build(con: sqlite3.Connection) -> dict:
         translations.append({"key": key, "build": _build(mine), "bytes": sum(e["bytes"] for e in mine),
                              "raw": sum(e["raw"] for e in mine), "chunks": mine})
 
-    # The King James Version (Tigran, 2026-11-21): its pages a download of
-    # their own, as a translation is, listed apart from them, `kjv`, so that a
-    # worker or a page from before neither sees it nor takes it for a
-    # translation of the book; and its database for search in Base, the copy's
-    # own, which the worker attaches as `kjv`, so that every reader's search
-    # is the copy's, the KJV's list with it, as the server's is (his ruling,
-    # the same day, of three ways: "Search database in Base").
-    bible = None
-    if kjvc:
-        add("kjv.db", "db", searchdb.kjv_db())
+    # The Bible (Tigran, 2026-11-21): the KJV's pages in Base, as the book's
+    # English is (his ruling that evening, of three ways: "Pages in Base, like
+    # the book"; a download of their own that morning), since they carry each
+    # row's base line and are what the Synodal is drawn into, with its
+    # database for search, the copy's own, which the worker attaches as `kjv`;
+    # and the Synodal a download of its own, as a translation is, its lines,
+    # its eleven books' pages, what /bible/rsb/ sends on and its database for
+    # search, listed apart from the translations, `bible`, so that a worker or
+    # a page from before neither sees it nor takes it for a translation of
+    # the book.
+    bible = []
+    if bibc["kjv"]:
+        for name, obj in bibc["kjv"].items():
+            add(name, "pages", _json(obj))
+        add("bible-kjv.db", "db", searchdb.bible_db("kjv"))
         mine = []
-        for name, obj in kjvc.items():
-            add(name, "tr", _json(obj), into=mine, tr="kjv")
-        bible = {"key": "kjv", "build": _build(mine), "bytes": sum(e["bytes"] for e in mine),
-                 "raw": sum(e["raw"] for e in mine), "chunks": mine}
+        for name, obj in bibc["rsb"].items():
+            add(name, "tr", _json(obj), into=mine, tr="rsb")
+        add("bible-rsb.db", "db", searchdb.bible_db("rsb"), into=mine, tr="rsb")
+        bible.append({"key": "rsb", "build": _build(mine), "bytes": sum(e["bytes"] for e in mine),
+                      "raw": sum(e["raw"] for e in mine), "chunks": mine})
 
     src = {r[0]: {"commit": r[1], "date": r[2]} for r in con.execute(
         "SELECT repo, commit_id, committed_at FROM build_source WHERE repo IN ('press', 'index')")}
@@ -143,7 +149,7 @@ def build(con: sqlite3.Connection) -> dict:
         "counts": counts, "news": news.news(), "chunks": entries, "translations": translations,
     }
     if bible:
-        manifest["kjv"] = bible
+        manifest["bible"] = bible
     write(files, json.dumps(manifest, ensure_ascii=False, indent=1).encode("utf-8"), _json(expect))
     return manifest
 

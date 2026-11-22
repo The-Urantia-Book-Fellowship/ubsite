@@ -47,6 +47,7 @@ SPAN_KINDS = {
     "url",         # \myurl
     "nobreak",
     "shy",         # \-                     -- zero width; where the press lets this word break
+    "pilcrow",     # the Synodal's \rsbpar   -- zero width; a paragraph opening inside a verse
 }
 
 

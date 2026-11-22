@@ -13,9 +13,9 @@
   {%- endif %}
 </ul>
 {#- Said only when every list here is turned off. #}
-{%- if kjv_there() %}
+{%- if bible_there() %}
 <ul class="ways">
-  <li>{{ t('lists:kjv') }}</li>
+  <li>{{ t('lists:bible') }}</li>
 </ul>
 {%- endif %}
 {% if stats.study_notes %}<p class="nolists both">{{ t('The 1955 readings and the study notes are both turned off in Settings.') }}</p>

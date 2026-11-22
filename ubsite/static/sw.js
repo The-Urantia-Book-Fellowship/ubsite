@@ -182,15 +182,15 @@ function copy() {
   return held;
 }
 // What a manifest offers to keep beside the copy, each a download of its own:
-// the translations, in Settings' order, and the King James Version, which the
-// manifest lists apart (offline/pack.py `kjv`, 2026-11-21), so that a worker
-// from before neither sees it nor takes it for a translation: its pages, kept
-// as a translation is, by its key, `kjv`, in meta.tr; its database for search
-// is the copy's own (database()).
+// the translations, in Settings' order, and the Bible's versions, which the
+// manifest lists apart (offline/pack.py `bible`, 2026-11-21), so that a worker
+// from before neither sees them nor takes them for translations: each kept as
+// a translation is, by its key, `kjv` the pages, `rsb` the Synodal's, in
+// meta.tr; the KJV's database for search is the copy's own (database()).
 function downs(m) {
-  return (m.translations || []).concat(m.kjv ? [m.kjv] : []);
+  return (m.translations || []).concat(m.bible || []);
 }
-// The translations a copy keeps, and the KJV: those meta names that its
+// The translations a copy keeps, and the Bible's versions: those meta names that its
 // manifest lists, in the manifest's order, which is Settings'.
 function kept(m, meta) {
   var tr = meta.tr || {};
@@ -244,16 +244,18 @@ function sqlite() {
   engine.catch(function () { engine = null; });
   return engine;
 }
-// The copy's databases: the index's attached to the text's as `ix`, the King
-// James Version's as `kjv` where the copy has it (since 2026-11-21), and each
-// translation's it keeps as "tr-<key>" (offline/searchdb.py).  A translation
-// kept by a copy made before 2026-10-26 has none, and search counts it as not
-// kept.
+// The copy's databases: the index's attached to the text's as `ix`, the
+// Bible's KJV's as `kjv` where the copy has it, and the Synodal's as `rsb`
+// where it keeps it (since 2026-11-21), and each translation's it keeps as
+// "tr-<key>" (offline/searchdb.py).  A translation kept by a copy made before
+// 2026-10-26 has none, and search counts it as not kept.
 function database(c) {
   if (c.db) return c.db;
-  var trs = c.kept.filter(function (k) { return c.byName['tr-' + k + '.db']; }), bible = !!c.byName['kjv.db'];
+  var trs = c.kept.filter(function (k) { return c.byName['tr-' + k + '.db']; }), bible = !!c.byName['bible-kjv.db'],
+      rsb = c.kept.indexOf('rsb') >= 0 && !!c.byName['bible-rsb.db'];
   var read = function (name) { return bytes(c, name).then(function (r) { return r.arrayBuffer(); }); };
-  c.db = Promise.all([sqlite(), read('text.db'), read('index.db'), bible ? read('kjv.db') : null].concat(trs.map(function (k) {
+  c.db = Promise.all([sqlite(), read('text.db'), read('index.db'), bible ? read('bible-kjv.db') : null,
+                      rsb ? read('bible-rsb.db') : null].concat(trs.map(function (k) {
     return read('tr-' + k + '.db');
   }))).then(function (got) {
     var s = got[0], db = new s.oo1.DB(':memory:');
@@ -270,11 +272,15 @@ function database(c) {
       db.exec("ATTACH ':memory:' AS kjv");
       open('kjv', got[3]);
     }
+    if (rsb) {
+      db.exec("ATTACH ':memory:' AS rsb");
+      open('rsb', got[4]);
+    }
     trs.forEach(function (k, i) {
       db.exec("ATTACH ':memory:' AS \"tr-" + k + '"');
-      open('tr-' + k, got[4 + i]);
+      open('tr-' + k, got[5 + i]);
     });
-    return { db: db, mem: function () { return new s.oo1.DB(':memory:'); }, kept: trs };
+    return { db: db, mem: function () { return new s.oo1.DB(':memory:'); }, kept: trs.concat(rsb ? ['rsb'] : []) };
   });
   c.db.catch(function () { c.db = null; });
   return c.db;
