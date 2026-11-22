@@ -26,6 +26,9 @@ PER_VOICE = [
     ("hours",      "hours", "SELECT CAST(ROUND(COALESCE(SUM(duration_ms), 0) / 3600000.0) AS INT)"
                             " FROM audio_file WHERE source_id = ?"),
     ("segments",   None,    "SELECT COUNT(*) FROM audio_segment WHERE source_id = ?"),
+    # Its compact copy (tools/audio/compact.py), in megabytes, where it has one.
+    ("compact MB", "compact_mb", "SELECT CAST(ROUND(COALESCE(SUM(c.bytes), 0) / 1e6) AS INT)"
+                                 " FROM audio_compact c JOIN audio_file f ON f.id = c.file_id WHERE f.source_id = ?"),
 ]
 # The words of the paragraph a segment reads, in the text its voice reads: the
 # English's, or the translation's, counted by its spaces.
@@ -53,6 +56,21 @@ INVARIANTS = [
      """SELECT COUNT(*) FROM audio_file WHERE head IS NOT NULL AND (
           substr(head, 1, 1) <> x'FF' OR instr(head, CAST('Info' AS BLOB)) = 0 OR head_at < 0
           OR head_at > bytes)"""),
+    # The compact copy (2026-11-22): one to every file of a reading that has
+    # one, and none to a reading that has none; named as its file, .webm for
+    # .mp3, which is how the app and the worker find it; made from the file
+    # the build checked, and of its length, so that the segments hold for it.
+    ("a reading with a compact copy has one of every file it uses",
+     """SELECT COUNT(*) FROM audio_file f JOIN audio_source s ON s.id = f.source_id
+         WHERE s.compact_root IS NOT NULL
+           AND NOT EXISTS (SELECT 1 FROM audio_compact c WHERE c.file_id = f.id)"""),
+    ("a compact copy is of a reading that has one",
+     """SELECT COUNT(*) FROM audio_compact c JOIN audio_file f ON f.id = c.file_id
+         JOIN audio_source s ON s.id = f.source_id WHERE s.compact_root IS NULL"""),
+    ("a compact copy is its file's: its name, its master, its length to 80 ms",
+     """SELECT COUNT(*) FROM audio_compact c JOIN audio_file f ON f.id = c.file_id
+         WHERE f.name NOT LIKE '%.mp3' OR c.name <> substr(f.name, 1, length(f.name) - 4) || '.webm'
+            OR c.master_sha256 <> f.sha256 OR abs(c.duration_ms - f.duration_ms) > 80"""),
     ("every paragraph has its segment, where a voice is aligned",
      """SELECT COUNT(*) FROM paragraph p CROSS JOIN audio_source s
          WHERE s.granularity = 'paragraph'

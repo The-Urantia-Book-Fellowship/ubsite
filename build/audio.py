@@ -17,6 +17,11 @@ the aligner's output, paragraph by paragraph -- each file is one segment,
 played from its start to its end.  <key>-unread.tsv names the paragraphs the
 reading leaves out.
 
+A human reading may have a compact copy, Opus in WebM at a low rate, which a
+browser that can play it is sent (the config's `compact`, made by
+tools/audio/compact.py): data/audio/<key>-compact.tsv lists it, and its
+directory, under var/, is checked against the list as the masters' are.
+
 The AI voice (key 'ai') is made here by tools/tts/book.py, one MP3 per section
 under var/audio/ai/, and data/audio/ai.tsv and ai-files.tsv are its output, as
 mh.tsv is the aligner's.  It is checked against its list the same way.
@@ -97,9 +102,9 @@ def _load_ai(con, src, source_id, report) -> dict[str, int]:
     comments, _, rows = _tsv(DATA / "ai.tsv")
     sections = {(p, n): sid for sid, p, n in con.execute("SELECT id, paper_n, n FROM section")}
     paras = {ref: (pid, sid) for pid, sid, ref in con.execute("SELECT id, section_id, ref FROM paragraph")}
-    con.execute("INSERT INTO audio_source VALUES (?,?,?,?,?,?,?,?,?,?)",
+    con.execute("INSERT INTO audio_source VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (source_id, "ai", src["label"], src["kind"], src["root"], "paragraph",
-                 " ".join(comments) or None, src["credit"], src["credit_url"], None))
+                 " ".join(comments) or None, src["credit"], src["credit_url"], None, None))
     file_id = {}
     base = con.execute("SELECT COALESCE(MAX(id), 0) FROM audio_file").fetchone()[0]
     for name in sorted(files):
@@ -314,10 +319,11 @@ def _load_human(con, key: str, src, source_id: int, report) -> dict[str, int]:
         for name, (sid, pid) in claimed.items():
             segs.append((sid, pid, name, 0, listed[name][1], None))
 
-    con.execute("INSERT INTO audio_source VALUES (?,?,?,?,?,?,?,?,?,?)",
+    compact = _compact(key, src, listed, claimed, report)
+    con.execute("INSERT INTO audio_source VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (source_id, key, src["label"], src["kind"], str(src["path"]),
                  "paragraph" if aligned.exists() else "section", revision,
-                 src["credit"], src["credit_url"], tr))
+                 src["credit"], src["credit_url"], tr, src["compact"]["root"] if compact else None))
     for ref, why in unread(key).items():
         if ref not in paras:
             report.hard("audio-unread-ref", ref, f"{key}-unread.tsv names no such paragraph")
@@ -333,6 +339,8 @@ def _load_human(con, key: str, src, source_id: int, report) -> dict[str, int]:
         con.execute("INSERT INTO audio_file (id, source_id, name, bytes, duration_ms, sha256,"
                     " head_at, head, sent_sha256) VALUES (?,?,?,?,?,?,?,?,?)",
                     (file_id[name], source_id, name, b, d, sha, at, head, sent))
+        if name in compact:
+            con.execute("INSERT INTO audio_compact VALUES (?,?,?,?,?,?)", (file_id[name], *compact[name]))
     para_ord = {pid: o for pid, _sid, o in paras.values()}
 
     def order(s):
@@ -345,5 +353,61 @@ def _load_human(con, key: str, src, source_id: int, report) -> dict[str, int]:
                     " file_id, start_ms, end_ms, match, speech_sha, ord)"
                     " VALUES (?,?,?,?,?,?,?,NULL,?)",
                     (source_id, sid, pid, file_id[name], start, end, match, i))
-    return {f"audio_{key}_files": len(claimed), f"audio_{key}_segments": len(segs),
-            f"audio_{key}_seconds": sum(listed[n][1] for n in claimed) // 1000}
+    out = {f"audio_{key}_files": len(claimed), f"audio_{key}_segments": len(segs),
+           f"audio_{key}_seconds": sum(listed[n][1] for n in claimed) // 1000}
+    if compact:
+        out[f"audio_{key}_compact_bytes"] = sum(c[1] for c in compact.values())
+    return out
+
+
+def compact_name(name: str) -> str | None:
+    """A file's compact copy's name: the file's, .webm for .mp3.  The app
+    and the worker go from one to the other by that rule alone."""
+    return name[:-4] + ".webm" if name.endswith(".mp3") else None
+
+
+def _compact(key: str, src, listed, claimed, report) -> dict[str, tuple]:
+    """A reading's compact copy (tools/audio/compact.py), by master's name:
+    {name: (its name, bytes, duration_ms, sha256, master_sha256)}, one to
+    every file the site uses.  The directory against data/audio/<key>-compact.tsv
+    by size, as the masters are checked against theirs; each copy made from
+    the master as it is listed (its digest), and of its length to 80 ms.
+    None of it where the config gives the reading no compact copy."""
+    cfg = src["compact"]
+    if not cfg:
+        return {}
+    path = DATA / f"{key}-compact.tsv"
+    if not path.exists():
+        report.hard("audio-compact-unmade", key, f"the config gives {key} a compact copy and there is"
+                    f" no data/audio/{key}-compact.tsv: .venv/bin/python -m tools.audio.compact {key}")
+        return {}
+    copies = {name: (int(b), int(d), sha, master) for name, b, d, sha, master in _tsv(path)[2]}
+    if not cfg["path"].is_dir():
+        report.hard("audio-compact-absent", cfg["root"], "the compact copy is not where the config says"
+                    f" (.venv/bin/python -m tools.audio.compact {key})")
+        return {}
+    on_disk = {p.relative_to(cfg["path"]).as_posix(): p.stat().st_size for p in cfg["path"].rglob("*.webm")}
+    for name in sorted(on_disk.keys() - copies.keys()):
+        report.hard("audio-compact-unlisted", name, f"a copy data/audio/{key}-compact.tsv does not list")
+    for name in sorted(copies.keys() - on_disk.keys()):
+        report.hard("audio-compact-missing", name, f"listed in {key}-compact.tsv but not on disk")
+    out = {}
+    for name in sorted(claimed):
+        c = compact_name(name)
+        if c not in copies:
+            report.hard("audio-compact-missing", name, f"no copy of it in {key}-compact.tsv")
+            continue
+        b, d, sha, master = copies[c]
+        if master != listed[name][2]:
+            report.hard("audio-compact-stale", c, f"made from another {name} than {key}-files.tsv lists:"
+                        f" delete it and make it again")
+        elif abs(d - listed[name][1]) > 80:
+            report.hard("audio-compact-length", c, f"{d} ms, its master {listed[name][1]} ms")
+        elif c in on_disk and on_disk[c] != b:
+            report.hard("audio-compact-changed", c, f"{on_disk[c]:,} bytes on disk, {b:,} listed")
+        else:
+            out[name] = (c, b, d, sha, master)
+    used = {compact_name(n) for n in claimed}
+    for c in sorted(copies.keys() - used):
+        report.hard("audio-compact-unused", c, f"{key}-compact.tsv lists a copy of a file the site does not use")
+    return out

@@ -636,12 +636,25 @@
     kept: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-6.5"/></svg>'
   };
   ICONS.some = ICONS.none;
+  // The compact copy (2026-11-22): where this browser plays Opus in WebM, a
+  // voice that has one (its list's `cbytes`) is kept as it, and its sizes
+  // here are the copy's; `form` goes to the worker with the papers asked for
+  // (recAct, sw.js keep).  Nothing names it: the reader sees the sizes
+  // (Tigran, 2026-11-21: "the users will only see the much smaller sizes").
+  // listen.js asks for it by the same test.
+  var OPUS = (function () {
+    try { return !!document.createElement('audio').canPlayType('audio/webm; codecs="opus"'); } catch (e) { return false; }
+  })();
   function recList(key) {
     if (recLists[key]) return recLists[key];
     var p = recLists[key] = fetch('/offline/audio/' + key + '.json', { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
       return r.json();
     }).then(function (list) {
+      if (OPUS && list.cbytes) {
+        list.form = 'webm';
+        [list].concat(list.parts, list.papers).forEach(function (x) { x.bytes = x.cbytes; });
+      }
       list.byN = {};
       list.papers.forEach(function (x) { list.byN[x.n] = x; });
       recIdx[key] = list;
@@ -744,7 +757,8 @@
     var b = 0;
     ns.forEach(function (n) {
       if (busy && busy.v === key && busy.n === n) b += busy.done;
-      else if (v.kept.indexOf(n) >= 0) b += byN[n].bytes;
+      // Kept, its size as kept, which may be the MP3s' (sw.js `held`), else the list's.
+      else if (v.kept.indexOf(n) >= 0) b += (v.held && v.held[n]) || byN[n].bytes;
       else if (v.partial[n]) b += v.partial[n];
     });
     return b;
@@ -761,7 +775,7 @@
             : st === 'some' ? T.k('Kept in part, {s}; tap to keep the rest')
             : what.n !== undefined ? T.k('Keep Paper {n} offline ({s})')
             : what.r !== undefined ? T.k('Keep Part {r} offline ({s})') : T.k('Keep the whole of {v} offline ({s})');
-    if (st === 'some') p.s = size(held);
+    if (st === 'some' || st === 'kept') p.s = size(held);
     T.attr(btn, 'title', key, p);
     T.attr(btn, 'aria-label', key, p);
   }
@@ -844,13 +858,16 @@
     var have = last && last.have;
     if (st === 'busy') return ask('stop', { voice: key, papers: ns }).then(show);
     if (st === 'kept') {
-      var list = recIdx[key], b = ns.reduce(function (t, n) { return t + (list && list.byN[n] ? list.byN[n].bytes : 0); }, 0);
+      var list = recIdx[key], v = (last && last.audio && last.audio.voices && last.audio.voices[key]) || { kept: [], partial: {} };
+      var b = list ? heldOf(ns.filter(function (n) { return list.byN[n]; }), v, null, key, list.byN) : 0;
       if (!window.confirm(T.text('offline:recdrop', { n: ns.length, v: recName(key), s: size(b) }))) return Promise.resolve();
       return ask('unkeep', { voice: key, papers: ns }).then(show);
     }
+    var asked = { voice: key, papers: ns };
+    if (recIdx[key] && recIdx[key].form) asked.form = recIdx[key].form;
     persist(true);
-    if (!have) return Promise.resolve(on(null, { voice: key, papers: ns }));
-    return ask('keep', { voice: key, papers: ns }).then(function (r) { show(r); estimate(); });
+    if (!have) return Promise.resolve(on(null, asked));
+    return ask('keep', asked).then(function (r) { show(r); estimate(); });
   }
   window.ubOfflineUI.rec = function (st, key, n) { return ensure(key).then(function () { return recAct(st, key, [n]); }); };
   recBox.addEventListener('click', function (ev) {

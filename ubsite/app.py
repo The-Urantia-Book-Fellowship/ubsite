@@ -807,7 +807,23 @@ def audio_file(request: Request, key: str, name: str):
     frame after its ID3v2 tag (build/mp3.py; 1,356 of Григорий Войнер's):
     the file on the disk is the master, untouched, and `_with_head` sends it
     with the frame the build stored put in, whole or by range.
+
+    A name in .webm is a file's compact copy, where its reading has one
+    (audio_compact, 2026-11-22): the file's own name, .webm for .mp3, which
+    listen.js asks for where the browser plays Opus, from the reading's
+    compact_root under the project.
     """
+    headers = {"Cache-Control": "public, max-age=31536000, immutable"}
+    if name.endswith(".webm"):
+        try:
+            row = db().execute(
+                "SELECT s.compact_root FROM audio_compact c JOIN audio_file f ON f.id = c.file_id"
+                " JOIN audio_source s ON s.id = f.source_id WHERE s.key = ? AND c.name = ?", (key, name)).fetchone()
+        except sqlite3.Error:
+            row = None
+        if row is None:
+            raise HTTPException(status_code=404)
+        return FileResponse(ROOT / row["compact_root"] / name, media_type="audio/webm", headers=headers)
     try:
         row = db().execute(
             "SELECT s.root, f.head_at, f.head, f.sent_sha256 FROM audio_file f"
@@ -818,7 +834,6 @@ def audio_file(request: Request, key: str, name: str):
         raise HTTPException(status_code=404)
     # A relative root is the project's own (the AI voice, under var/).
     path = ROOT / row["root"] / name
-    headers = {"Cache-Control": "public, max-age=31536000, immutable"}
     if row["head"] is None:
         return FileResponse(path, media_type="audio/mpeg", headers=headers)
     return _with_head(request, path, row["head_at"], bytes(row["head"]), row["sent_sha256"], headers)
@@ -910,13 +925,17 @@ def section_audio(con, section_id: int) -> dict:
     A segment's ref is its paragraph's, or null for the spoken heading.  A
     reading of a translation says so, `tr` its key and `lang` its language:
     the player starts it from that translation's ▶ and marks that
-    translation's lines, never the English text's (listen.js).
+    translation's lines, never the English text's (listen.js).  A reading
+    with a compact copy says so too, `compact`: each file's is at its
+    address, .webm for .mp3, which listen.js asks for where the browser
+    plays Opus; the addresses here stay the files', for a browser that does
+    not, and for a page from before the copy.
     """
     out = {}
     try:
         rows = con.execute(
             "SELECT s.key, s.label, s.kind, s.granularity, s.credit, s.credit_url,"
-            "  s.translation AS tr, t.lang, f.name, g.start_ms, g.end_ms,"
+            "  s.translation AS tr, s.compact_root, t.lang, f.name, g.start_ms, g.end_ms,"
             "  p.ref FROM audio_segment g JOIN audio_source s ON s.id=g.source_id"
             " JOIN audio_file f ON f.id=g.file_id"
             " LEFT JOIN translation t ON t.key = s.translation"
@@ -932,6 +951,8 @@ def section_audio(con, section_id: int) -> dict:
                                  "credit_url": r["credit_url"], "files": [], "segs": []}
             if r["tr"]:
                 v["tr"], v["lang"] = r["tr"], r["lang"]
+            if r["compact_root"]:
+                v["compact"] = True
         url = f"/audio/{r['key']}/{r['name']}"
         if url not in v["files"]:
             v["files"].append(url)
@@ -1087,7 +1108,14 @@ def _audio_list(key: str, mtime_ns: int) -> bytes | None:
     to the list; each paper's and part's size and length, and the voice's own.
     A file is heard in one paper: a recording of part of the book lists the
     papers it has, and the parts that have any.  Made once per database, and
-    the same bytes from the same rows (CLAUDE.md trap 29)."""
+    the same bytes from the same rows (CLAUDE.md trap 29).
+
+    A reading with a compact copy (2026-11-22) has each copy's size and the
+    head of its digest after the file's, `[name, bytes, sha, cbytes, csha]`,
+    and each paper's, part's and its own size in it, `cbytes`, beside
+    `bytes`: appended, so that a worker or a page from before reads the file
+    as it did.  offline.js shows the copy's sizes where the browser plays
+    Opus, and asks the worker to keep the copy (sw.js keepOne)."""
     con = db()
     src = con.execute("SELECT id, key, label, kind, credit, credit_url, translation FROM audio_source"
                       " WHERE key = ?", (key,)).fetchone()
@@ -1098,8 +1126,9 @@ def _audio_list(key: str, mtime_ns: int) -> bytes | None:
             # As sent: with its Info frame, where it has one (audio_file()).
             "SELECT f.name, f.bytes + COALESCE(LENGTH(f.head), 0) AS bytes, f.duration_ms,"
             " COALESCE(f.sent_sha256, f.sha256) AS sha256, MIN(sec.paper_n) AS paper,"
-            " COUNT(DISTINCT sec.paper_n) AS papers"
+            " COUNT(DISTINCT sec.paper_n) AS papers, c.bytes AS cbytes, c.sha256 AS csha256"
             " FROM audio_file f JOIN audio_segment g ON g.file_id = f.id JOIN section sec ON sec.id = g.section_id"
+            " LEFT JOIN audio_compact c ON c.file_id = f.id"
             " WHERE f.source_id = ? GROUP BY f.id ORDER BY paper, f.name", (src["id"],)):
         if r["papers"] != 1:
             raise RuntimeError(f"audio {key}: {r['name']} is heard in {r['papers']} papers")
@@ -1115,9 +1144,12 @@ def _audio_list(key: str, mtime_ns: int) -> bytes | None:
                 titles[r["paper_n"]] = (r["text"], titles[r["paper_n"]][1])
         for r in con.execute("SELECT n, title FROM tr_part WHERE translation = ?", (src["translation"],)):
             part_titles[r["n"]] = r["title"]
+    compact = bool(by_paper) and all(f["cbytes"] is not None for fs in by_paper.values() for f in fs)
     papers = [{"n": n, "title": titles[n][0], "part": titles[n][1],
                "bytes": sum(f["bytes"] for f in fs), "seconds": round(sum(f["duration_ms"] for f in fs) / 1000),
-               "files": [[f["name"], f["bytes"], f["sha256"][:16]] for f in fs]}
+               "files": [[f["name"], f["bytes"], f["sha256"][:16]]
+                         + ([f["cbytes"], f["csha256"][:16]] if compact else []) for f in fs],
+               **({"cbytes": sum(f["cbytes"] for f in fs)} if compact else {})}
               for n, fs in sorted(by_paper.items())]
     parts = []
     for p in con.execute("SELECT n, title, first_paper, last_paper FROM part ORDER BY n"):
@@ -1126,10 +1158,12 @@ def _audio_list(key: str, mtime_ns: int) -> bytes | None:
         if mine:
             parts.append({"n": p["n"], "title": part_titles[p["n"]], "first": first, "last": p["last_paper"],
                           "papers": len(mine), "of": p["last_paper"] - first + 1,
-                          "bytes": sum(x["bytes"] for x in mine), "seconds": sum(x["seconds"] for x in mine)})
+                          "bytes": sum(x["bytes"] for x in mine), "seconds": sum(x["seconds"] for x in mine),
+                          **({"cbytes": sum(x["cbytes"] for x in mine)} if compact else {})})
     data = {"key": key, "label": src["label"], "kind": src["kind"], "credit": src["credit"],
             "credit_url": src["credit_url"], "bytes": sum(x["bytes"] for x in papers),
-            "seconds": sum(x["seconds"] for x in papers), "parts": parts, "papers": papers}
+            "seconds": sum(x["seconds"] for x in papers), "parts": parts, "papers": papers,
+            **({"cbytes": sum(x["cbytes"] for x in papers)} if compact else {})}
     return json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()
 
 

@@ -181,6 +181,19 @@
   // it has failed (audio's error), and its voice menu stands beside the message.
   var NEEDS_NET = T.k('The recordings need a connection. Offline, your browser\u2019s voice can read it.');
   var NOT_KEPT = T.k('This paper\u2019s recording is not kept offline: Settings, in its Offline tab, keeps it. Your browser\u2019s voice can read it.');
+  // A recording's compact copy (2026-11-22): Opus in WebM, an eighth to a
+  // quarter of the MP3s' size, at each file's address with .webm for .mp3 (app.py
+  // audio_file), where the voice has one (`compact`, app.py section_audio)
+  // and this browser plays it; the MP3 itself where not, Safari before 17.4,
+  // and once a copy fails to load online (audio's error), for the rest of the
+  // page.  Never a choice, nor named: offline.js keeps the same form.
+  var OPUS = (function () {
+    try { return !!document.createElement('audio').canPlayType('audio/webm; codecs="opus"'); } catch (e) { return false; }
+  })();
+  function srcOf(v, i) {
+    var u = v.files[i];
+    return OPUS && v.compact ? u.replace(/\.mp3$/, '.webm') : u;
+  }
   // Section d's voice kk; the browser's is made from its paragraphs, d.ids,
   // or a translation's, those it has.  A recording, the English's or a
   // translation's, is the section's own.
@@ -838,7 +851,9 @@
   }
 
   // ---- playing ---------------------------------------------------------------
-  // Segment i, played -- or with `quiet`, made ready, for play() to start.
+  // Segment i, played -- or with `quiet`, made ready, for play() to start;
+  // `wasQuiet` which it was, for the MP3 tried after a compact copy failed.
+  var wasQuiet = false;
   function go(i, quiet) {
     if (!V || i < 0 || i >= V.segs.length) return;
     trouble = null;
@@ -865,9 +880,10 @@
     var s = V.segs[i], t = s[2] / 1000;
     if (file !== s[1]) {
       file = s[1];
-      audio.src = V.files[file];
+      audio.src = srcOf(V, file);
       audio.preload = 'auto';
     }
+    wasQuiet = !!quiet;
     audio.defaultPlaybackRate = audio.playbackRate = rate();
     // Before the metadata is in, currentTime cannot be set everywhere; seek
     // once it arrives.
@@ -1181,6 +1197,17 @@
   // Offline with a worker, the recording is one not kept (sw.js answers a kept
   // one, online or not): the bar says where it is kept (2026-11-04).
   audio.addEventListener('error', function () {
+    // A compact copy that did not load, online: a browser that said it plays
+    // Opus and does not, or a host without the copy.  The MP3s from here on,
+    // this paragraph again from its start.  Offline it is a copy not kept,
+    // which the MP3 would not be either.
+    var e = audio.error;
+    if (OPUS && V && k >= 0 && /\.webm$/.test(audio.getAttribute('src') || '') && navigator.onLine !== false &&
+        e && (e.code === 3 || e.code === 4)) {
+      OPUS = false;
+      file = -1;
+      return go(k, wasQuiet);
+    }
     if (audio.getAttribute('src'))
       tell(navigator.onLine === false ? (navigator.serviceWorker && navigator.serviceWorker.controller ? T(NOT_KEPT) : T(NEEDS_NET))
                                       : T('The recording could not be loaded. Your browser\u2019s voice can read without it.'));

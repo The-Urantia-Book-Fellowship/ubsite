@@ -21,8 +21,10 @@ right all the same).
 
 It asks for the files of each reading named below: one of Merritt Horn's,
 sent as it is, and of Войнер's the longest of those sent with a frame, a
-short one of them, one at 192 kbit/s and one that needed no frame.  The file
-the browser is sent must also be as long as the database lists it.
+short one of them, one at 192 kbit/s and one that needed no frame; and the
+compact copies of three of them (2026-11-22), Opus in WebM, which Chrome is
+sent, and which must play from the same places, the cuts being the MP3s'.  The
+file the browser is sent must also be as long as the database lists it.
 
 Playwright is in .venv as a dev requirement and drives the system's Chrome.
 It runs the app itself on 127.0.0.1:8136 with the visit counter off and no
@@ -47,7 +49,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 PORT = "8136"
 BASE = "http://127.0.0.1:" + PORT
 FILES = ["/audio/mh/paper001/P001_01.mp3", "/audio/voyner/181-02.mp3", "/audio/voyner/136-10.mp3",
-         "/audio/voyner/03-00.mp3", "/audio/voyner/01-01.mp3"]
+         "/audio/voyner/03-00.mp3", "/audio/voyner/01-01.mp3",
+         "/audio/mh/paper001/P001_01.webm", "/audio/voyner/181-02.webm", "/audio/voyner/01-01.webm"]
 # What the measuring adds between the clock's reading and the sound's arrival,
 # and how far from it a place may be.
 LATENCY, SLACK = -0.26, 0.15
@@ -129,11 +132,14 @@ def ok(cond, what):
 
 
 def listed() -> dict[str, tuple[int, int]]:
-    """{address: (bytes as sent, duration in ms)} for the files asked for."""
+    """{address: (bytes as sent, duration in ms)} for the files asked for,
+    and their compact copies."""
     con = sqlite3.connect(f"file:{ROOT / 'var' / 'ub.db'}?mode=ro", uri=True)
     return {f"/audio/{key}/{name}": (b, d) for key, name, b, d in con.execute(
         "SELECT s.key, f.name, f.bytes + COALESCE(LENGTH(f.head), 0), f.duration_ms"
-        " FROM audio_file f JOIN audio_source s ON s.id = f.source_id")}
+        " FROM audio_file f JOIN audio_source s ON s.id = f.source_id"
+        " UNION ALL SELECT s.key, c.name, c.bytes, c.duration_ms FROM audio_compact c"
+        " JOIN audio_file f ON f.id = c.file_id JOIN audio_source s ON s.id = f.source_id")}
 
 
 def run() -> int:

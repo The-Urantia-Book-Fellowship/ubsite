@@ -482,13 +482,20 @@ def headwords(ub: sqlite3.Connection, slugs: list[str]) -> dict:
 
 
 def audio_sections(ub: sqlite3.Connection) -> dict:
-    """A recording's file name -> the section it reads, as 'paper:section'."""
+    """A recording's file name -> the section it reads, as 'paper:section';
+    its compact copy's name too (2026-11-22), which most browsers are sent."""
     try:
-        return {name: ref for name, ref in ub.execute(
+        out = {name: ref for name, ref in ub.execute(
             "SELECT DISTINCT f.name, s.paper_n || ':' || s.n FROM audio_file f"
             " JOIN audio_segment g ON g.file_id = f.id JOIN section s ON s.id = g.section_id")}
     except sqlite3.Error:
         return {}
+    try:
+        out.update({name: out[master] for name, master in ub.execute(
+            "SELECT c.name, f.name FROM audio_compact c JOIN audio_file f ON f.id = c.file_id") if master in out})
+    except sqlite3.Error:
+        pass                                        # a database from before the compact copy
+    return out
 
 
 def geoip_date() -> str | None:

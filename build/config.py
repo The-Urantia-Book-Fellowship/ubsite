@@ -133,6 +133,9 @@ def audio() -> dict:
     nearest first, as a tuple (none, an empty one).  The aligner matches each
     paragraph to the text at whichever is nearer what was heard
     (tools/align/edition.py); the site shows the text the build reads, as ever.
+    `compact`, where the site sends a compact copy of it: {kbps, root, path},
+    `root` as written, under var/, which the database records and the app
+    resolves against its own tree, as the AI voice's; None where there is none.
     """
     with open(ROOT / "sources.toml", "rb") as fh:
         raw = tomllib.load(fh).get("audio", {})
@@ -146,8 +149,20 @@ def audio() -> dict:
                     "credit_url": cfg.get("credit_url"), "present": path.is_dir(),
                     "translation": cfg.get("translation"),
                     "edition": tuple([e] if isinstance(e := cfg.get("edition", []), str) else e),
-                    "glob": cfg.get("glob", "paper*/*.mp3"), "name": cfg.get("name")}
+                    "glob": cfg.get("glob", "paper*/*.mp3"), "name": cfg.get("name"),
+                    "compact": _compact(cfg.get("compact"))}
     return out
+
+
+def _compact(cfg) -> dict | None:
+    """A reading's [audio.<key>] compact = {kbps, path}: the copy made here,
+    which must lie inside the project, as what deploy.sh ships must."""
+    if cfg is None:
+        return None
+    path = (ROOT / cfg["path"]).resolve()
+    if pathlib.Path(cfg["path"]).is_absolute() or not str(path).startswith(str(ROOT.resolve()) + "/"):
+        raise SystemExit(f"sources.toml: a compact copy is made inside the project, not at {cfg['path']}")
+    return {"kbps": int(cfg["kbps"]), "root": cfg["path"], "path": path}
 
 
 def srt() -> dict:

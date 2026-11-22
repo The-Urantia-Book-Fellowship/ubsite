@@ -231,28 +231,39 @@ class Pages(unittest.TestCase):
         self.assertEqual(call("/offline/audio/nobody.json")[0], 404)
         self.assertEqual(call("/offline/audio/MH.json")[0], 404)
         d = json.loads(body)
-        self.assertEqual(set(d), {"key", "label", "kind", "credit", "credit_url", "bytes", "seconds", "parts", "papers"})
+        self.assertEqual(set(d), {"key", "label", "kind", "credit", "credit_url", "bytes", "seconds", "parts", "papers", "cbytes"})
         self.assertEqual((d["key"], d["label"], d["kind"]), ("mh", "Merritt Horn", "human"))
         con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
         files = {n: (b, sha) for n, b, sha in con.execute(
             "SELECT f.name, f.bytes, f.sha256 FROM audio_file f JOIN audio_source s ON s.id = f.source_id"
             " WHERE s.key = 'mh'")}
+        # And each file's compact copy, its size and the head of its digest
+        # after the file's (2026-11-22), each total's beside the file's.
+        copies = {n: (b, sha) for n, b, sha in con.execute(
+            "SELECT f.name, c.bytes, c.sha256 FROM audio_compact c JOIN audio_file f ON f.id = c.file_id"
+            " JOIN audio_source s ON s.id = f.source_id WHERE s.key = 'mh'")}
+        self.assertEqual(set(copies), set(files))
         self.assertEqual([p["n"] for p in d["papers"]], list(range(197)))
         self.assertEqual(sum(len(p["files"]) for p in d["papers"]), len(files))
         for p in d["papers"]:
-            self.assertEqual(set(p), {"n", "title", "part", "bytes", "seconds", "files"})
-            for name, b, h16 in p["files"]:
+            self.assertEqual(set(p), {"n", "title", "part", "bytes", "seconds", "files", "cbytes"})
+            for name, b, h16, cb, ch16 in p["files"]:
                 self.assertEqual((b, h16), (files[name][0], files[name][1][:16]))
+                self.assertEqual((cb, ch16), (copies[name][0], copies[name][1][:16]))
                 self.assertTrue(name.startswith(f"paper{p['n']:03d}/"), name)
             self.assertEqual(p["bytes"], sum(f[1] for f in p["files"]))
+            self.assertEqual(p["cbytes"], sum(f[3] for f in p["files"]))
         self.assertEqual(d["bytes"], sum(b for b, _ in files.values()))
+        self.assertEqual(d["cbytes"], sum(b for b, _ in copies.values()))
+        self.assertLess(d["cbytes"], d["bytes"] / 7)
         self.assertEqual(d["papers"][0], {**d["papers"][0], "title": "Foreword", "part": 1})
         self.assertEqual([(x["n"], x["first"], x["last"], x["papers"], x["of"]) for x in d["parts"]],
                          [(1, 0, 31, 32, 32), (2, 32, 56, 25, 25), (3, 57, 119, 63, 63), (4, 120, 196, 77, 77)])
         for part in d["parts"]:
             mine = [p for p in d["papers"] if part["first"] <= p["n"] <= part["last"]]
-            self.assertEqual((part["bytes"], part["seconds"]),
-                             (sum(p["bytes"] for p in mine), sum(p["seconds"] for p in mine)))
+            self.assertEqual((part["bytes"], part["cbytes"], part["seconds"]),
+                             (sum(p["bytes"] for p in mine), sum(p["cbytes"] for p in mine),
+                              sum(p["seconds"] for p in mine)))
         self.assertEqual(d["seconds"], sum(p["seconds"] for p in d["parts"]))
         # Gzipped where the browser takes it, as /l10n.js is: nginx compresses
         # only under /static/.  And the same bytes twice (CLAUDE.md trap 29).
@@ -269,7 +280,7 @@ class Pages(unittest.TestCase):
         status, _h, body = call("/offline/audio/voyner.json")
         self.assertEqual(status, 200)
         d = json.loads(body)
-        self.assertEqual(set(d), {"key", "label", "kind", "credit", "credit_url", "bytes", "seconds", "parts", "papers"})
+        self.assertEqual(set(d), {"key", "label", "kind", "credit", "credit_url", "bytes", "seconds", "parts", "papers", "cbytes"})
         self.assertEqual((d["key"], d["label"], d["kind"], d["credit"]), ("voyner", "Grigory Voyner", "human", None))
         con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
         # Each file as it is sent: 1,356 of them with an Info frame before
@@ -279,6 +290,10 @@ class Pages(unittest.TestCase):
         files = {n: (b, sha) for n, b, sha in con.execute(
             "SELECT f.name, f.bytes + COALESCE(LENGTH(f.head), 0), COALESCE(f.sent_sha256, f.sha256)"
             " FROM audio_file f JOIN audio_source s ON s.id = f.source_id WHERE s.key = 'voyner'")}
+        copies = {n: (b, sha) for n, b, sha in con.execute(
+            "SELECT f.name, c.bytes, c.sha256 FROM audio_compact c JOIN audio_file f ON f.id = c.file_id"
+            " JOIN audio_source s ON s.id = f.source_id WHERE s.key = 'voyner'")}
+        self.assertEqual(set(copies), set(files))
         self.assertEqual(con.execute(
             "SELECT COUNT(*), MIN(LENGTH(f.head)), MAX(LENGTH(f.head)) FROM audio_file f JOIN audio_source s"
             " ON s.id = f.source_id WHERE s.key = 'voyner' AND f.head IS NOT NULL").fetchone(), (1356, 208, 626))
@@ -290,10 +305,12 @@ class Pages(unittest.TestCase):
         self.assertEqual([p["n"] for p in d["papers"]], list(range(197)))
         for p in d["papers"]:
             self.assertEqual(len(p["files"]), sections[p["n"]] - (p["n"] in (19, 50)), p["n"])
-            for name, b, h16 in p["files"]:
+            for name, b, h16, cb, ch16 in p["files"]:
                 self.assertEqual((b, h16), (files[name][0], files[name][1][:16]))
+                self.assertEqual((cb, ch16), (copies[name][0], copies[name][1][:16]))
                 self.assertTrue(name.startswith(f"{p['n']:02d}-"), name)
         self.assertEqual(d["bytes"], sum(b for b, _ in files.values()))
+        self.assertEqual(d["cbytes"], sum(b for b, _ in copies.values()))
         self.assertEqual((d["papers"][0]["title"], d["papers"][1]["title"]), ("Предисловие", "Отец Всего Сущего"))
         self.assertEqual([x["title"] for x in d["parts"]],
                          [t for (t,) in con.execute("SELECT title FROM tr_part WHERE translation = 'urantia-ru' ORDER BY n")])
@@ -311,6 +328,12 @@ class Pages(unittest.TestCase):
         self.assertEqual(call("/audio/mh/paper040/P040_11.mp3")[0], 404)
         self.assertEqual(call("/audio/voyner/7-07.mp3")[0], 404)
         self.assertEqual(call("/audio/mh/01-01.mp3")[0], 404)
+        # And each one's compact copy by its name, .webm for .mp3, and no
+        # other: not a file's left out, nor one under another voice's key.
+        self.assertEqual(call("/audio/mh/paper040/P040_11.webm")[0], 404)
+        self.assertEqual(call("/audio/voyner/7-07.webm")[0], 404)
+        self.assertEqual(call("/audio/mh/01-01.webm")[0], 404)
+        self.assertEqual(call("/audio/voyner/01-01.webm.part")[0], 404)
 
     def test_every_kind_of_page_cuts_and_joins_again(self):
         from offline import pages, site

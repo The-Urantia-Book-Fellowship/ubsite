@@ -4,7 +4,8 @@ reading of USGNY (urantia-ru), 2026-11-12.
 With Whole paper off and on (CLAUDE.md trap 44), USGNY ticked, in a window
 with room for it in a column beside the English (ub.js cmpFits; a setting
 until 2026-11-16): the ▶ in the translation's cell plays the recording from that
-paragraph, /audio/voyner/..., the bar names it "USGNY · Grigory Voyner", and
+paragraph, /audio/voyner/... (its compact copy, .webm, which Chrome plays,
+since 2026-11-22), the bar names it "USGNY · Grigory Voyner", and
 the line marked is the translation's, never the English paragraph; the
 English paragraph's ▶ still plays Merritt Horn's and marks the English; the
 bar's list of voices has the recording first under the translation, and a
@@ -94,8 +95,9 @@ def until(pg, js: str, timeout: float = 10.0) -> bool:
 
 
 def asks(pg, asked: list, path: str, timeout: float = 10.0) -> bool:
-    """Wait for the page to have asked for path: a request is told of a
-    moment after the tap that made it."""
+    """Wait for the page to have asked for path, by a request or by an
+    <audio>'s src (context): either is told of a moment after the tap that
+    made it."""
     end = time.time() + timeout
     while time.time() < end:
         if path in asked:
@@ -119,6 +121,14 @@ def context(b, settings: dict, phone: bool = False, wide: bool = False):
     asked: list[str] = []
     pg.on("request", lambda r: asked.append(urllib.parse.urlparse(r.url).path)
           if "/audio/" in r.url or "/speech/" in r.url else None)
+    # And every address the player gives its <audio>: a file it has had
+    # whole is played again from Chrome's media cache with no request, which
+    # a compact copy, 0.65 MB where the MP3 was 2.9, is (2026-11-22).
+    ctx.expose_binding("ubHeard", lambda _src, path: asked.append(path))
+    ctx.add_init_script("""(() => { const d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src');
+      Object.defineProperty(HTMLMediaElement.prototype, 'src', { configurable: true, get() { return d.get.call(this); },
+        set(v) { if (v && window.ubHeard) window.ubHeard(new URL(v, location.href).pathname); d.set.call(this, v); } });
+    })();""")
     errors: list[str] = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
     return ctx, pg, asked, errors
@@ -139,7 +149,7 @@ def columns(b, whole: bool) -> None:
 
     pg.click(cell)
     ok(until(pg, "document.querySelector('p.rt.now') !== null"), say + "its ▶ starts a reading")
-    ok(asks(pg, asked, "/audio/voyner/01-01.mp3") and not any(a.startswith("/speech/") for a in asked),
+    ok(asks(pg, asked, "/audio/voyner/01-01.webm") and not any(a.startswith("/speech/") for a in asked),
        say + f"which is the recording, not the browser's voice ({sorted(set(asked))})")
     ok(pg.evaluate(VOICE) == "USGNY · Grigory Voyner", say + f"the bar names it with its translation ({pg.evaluate(VOICE)!r})")
     now = pg.evaluate(NOW)
@@ -155,7 +165,7 @@ def columns(b, whole: bool) -> None:
     del asked[:]
     pg.click("[id='1:1.4'] .playp")
     ok(until(pg, "(document.querySelector('p.t.now') || {}).id === '1:1.4'"), say + "the English ▶ marks the English paragraph")
-    ok(asks(pg, asked, "/audio/mh/paper001/P001_01.mp3") and set(asked) == {"/audio/mh/paper001/P001_01.mp3"}
+    ok(asks(pg, asked, "/audio/mh/paper001/P001_01.webm") and set(asked) == {"/audio/mh/paper001/P001_01.webm"}
        and pg.evaluate(VOICE) == "Merritt Horn" and pg.evaluate(NOW)["line"] is None,
        say + f"in Merritt Horn's reading, and the translation's mark is gone ({asked}, {pg.evaluate(VOICE)!r})")
 
@@ -169,7 +179,7 @@ def columns(b, whole: bool) -> None:
     pg.click(".player .voices [role=menuitemradio]:has-text('Grigory Voyner')")
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.ref === '1:1.4'"),
        say + "picked there, it goes on from the same paragraph, marked in the translation")
-    ok(asks(pg, asked, "/audio/voyner/01-01.mp3") and set(asked) == {"/audio/voyner/01-01.mp3"}
+    ok(asks(pg, asked, "/audio/voyner/01-01.webm") and set(asked) == {"/audio/voyner/01-01.webm"}
        and pg.evaluate(VOICE) == "USGNY · Grigory Voyner",
        say + f"in the recording ({asked})")
 
@@ -240,20 +250,20 @@ def fold(b, whole: bool) -> None:
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.ref === '1:1.2'"),
        say + "its ▶ starts a reading there, the translation's line marked")
     now = pg.evaluate(NOW)
-    ok(now["of"] == "urantia-ru" and now["para"] is None and asks(pg, asked, "/audio/voyner/01-01.mp3")
+    ok(now["of"] == "urantia-ru" and now["para"] is None and asks(pg, asked, "/audio/voyner/01-01.webm")
        and not any(a.startswith("/speech/") for a in asked) and pg.evaluate(VOICE) == "USGNY · Grigory Voyner",
        say + f"in the recording, the English paragraph unmarked ({now}, {sorted(set(asked))}, {pg.evaluate(VOICE)!r})")
     pg.click(".player .close")
     del asked[:]
     pg.click("[id='1:1.2'] .playp")
     ok(until(pg, "(document.querySelector('p.t.now') || {}).id === '1:1.2'")
-       and asks(pg, asked, "/audio/mh/paper001/P001_01.mp3"), say + "the English ▶ plays the English")
+       and asks(pg, asked, "/audio/mh/paper001/P001_01.webm"), say + "the English ▶ plays the English")
     pg.click(".player .voicebox .voice")
     pg.click(".player .voices [role=menuitemradio]:has-text('Grigory Voyner')")
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.ref === '1:1.2'"),
        say + "the recording, picked in the bar, marks the translation's line in the fold")
     now = pg.evaluate(NOW)
-    ok(now["of"] == "urantia-ru" and now["para"] is None and asks(pg, asked, "/audio/voyner/01-01.mp3"),
+    ok(now["of"] == "urantia-ru" and now["para"] is None and asks(pg, asked, "/audio/voyner/01-01.webm"),
        say + f"and it is the recording that plays ({now}, {sorted(set(asked))})")
     ok(not errors, say + "no script error: " + "; ".join(errors))
     ctx.close()
@@ -278,7 +288,7 @@ def tabs(b) -> None:
     ok(re.fullmatch(r"\d+:\d\d", pg.evaluate(times)[0] or "") is not None, f"with the paragraph's time ({pg.evaluate(times)})")
     pg.click(row + ".tf.open .trtabs > .playp")
     ok(until(pg, "(document.querySelector('p.rt.now') || {dataset: {}}).dataset.k === 'urantia-ru'")
-       and asks(pg, asked, "/audio/voyner/01-01.mp3"), f"which plays it ({sorted(set(asked))})")
+       and asks(pg, asked, "/audio/voyner/01-01.webm"), f"which plays it ({sorted(set(asked))})")
     stored = json.loads(pg.evaluate("localStorage.getItem('ub_settings')"))
     ok(stored.get("trtab") == "urantia-ru" and pg.locator(row + ".tf.open .trtabs button[aria-pressed='true']").count() == 1,
        f"and is no tab: the tab chosen is as it was ({stored.get('trtab')!r})")
@@ -467,7 +477,7 @@ def lacking(b) -> None:
     ok(asks(pg, asked, "/speech/urantia-ru/19:0"), f"its own ▶ there is the browser's voice ({sorted(set(asked))})")
     # From its last paragraph the browser's voice is soon done, and carries on.
     ok(until(pg, "location.pathname === '/19:1'", 20), "which, done with 19:0, carries on into 19:1")
-    ok(asks(pg, asked, "/audio/voyner/19-01.mp3") and until(pg, "/Voyner/.test((%s)())" % VOICE),
+    ok(asks(pg, asked, "/audio/voyner/19-01.webm") and until(pg, "/Voyner/.test((%s)())" % VOICE),
        f"in the recording, which 19:1 has ({sorted(set(asked))}, {pg.evaluate(VOICE)!r})")
     ok(until(pg, "document.querySelector('p.rt.now') !== null")
        and pg.evaluate(NOW)["of"] == "urantia-ru", f"marking the translation's line there ({pg.evaluate(NOW)})")
@@ -481,13 +491,14 @@ def lacking(b) -> None:
     pg.wait_for_selector(sel, timeout=15000)
     last = pg.evaluate("[...document.querySelectorAll(\"%s\")].pop().dataset.ref" % sel)
     pg.click(f".rc[data-k='urantia-ru']:has(p.rt[data-ref='{last}']) .stk > .playp")
-    ok(asks(pg, asked, "/audio/voyner/18-07.mp3") and until(pg, "/Voyner/.test((%s)())" % VOICE),
+    ok(asks(pg, asked, "/audio/voyner/18-07.webm") and until(pg, "/Voyner/.test((%s)())" % VOICE),
        f"18:7's last paragraph, {last}, plays in the recording")
     ok(until(pg, "location.pathname !== '/18:7'", 25), "at its end the reading carries on")
     ok(asks(pg, asked, "/speech/urantia-ru/19:0"),
        f"through 19:0 in the browser's voice, the recording having none of it ({sorted(set(asked))})")
-    ok("/audio/voyner/19-00.mp3" not in asked, "the file so named, which is 192:0 again, is never asked for")
-    ok(until(pg, "location.pathname === '/19:1'", 25) and asks(pg, asked, "/audio/voyner/19-01.mp3")
+    ok("/audio/voyner/19-00.mp3" not in asked and "/audio/voyner/19-00.webm" not in asked,
+       "the file so named, which is 192:0 again, is never asked for, in either form")
+    ok(until(pg, "location.pathname === '/19:1'", 25) and asks(pg, asked, "/audio/voyner/19-01.webm")
        and until(pg, "/Voyner/.test((%s)())" % VOICE),
        f"and at 19:1 the recording is back ({pg.evaluate('location.pathname')}, {pg.evaluate(VOICE)!r})")
     stored = json.loads(pg.evaluate("localStorage.getItem('ub_settings')"))

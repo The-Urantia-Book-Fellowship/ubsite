@@ -206,6 +206,8 @@ files = 1627                     # 1,629 on the disc: 1,626 sections, the Acknow
                                  # name in data/audio/mh-overrides.tsv
 hours = 121
 pace  = [1.0, 4.0]               # his median 2.4, 98% of paragraphs between 1.7 and 2.9
+compact_mb = 864                 # the compact copy the site sends, Opus at 16 kbps (2026-11-22,
+                                 # tools/audio/compact.py): 15.86 kbps on average, 121.07 h
 
 [audio.voyner]
 measured_on = "2026-11-12"
@@ -217,6 +219,8 @@ hours = 154                      # 154.48, by the frames: 1,356 of the files say
                                  # themselves (build/mp3.py)
 pace  = [0.8, 3.0]               # his median 1.63 words of the translation a second, 97% of
                                  # paragraphs between 1.2 and 2.2, none outside 0.88-2.68
+compact_mb = 981                 # the compact copy, Opus at 14 kbps (2026-11-22): 14.11 kbps
+                                 # on average, 154.49 h
 
 [offline]
 measured_on = "2026-11-18"

@@ -235,6 +235,17 @@ files = ["rso.vrs.txt", "rsc.vrs.txt", "eng.vrs.txt"]
 # needs a line in data/audio/<key>-overrides.tsv, or the build fails.
 # `translation`, where it reads one: the key of the text whose paragraphs it
 # is cut at and whose ▶ plays it.  With none, the English.
+#
+# `compact`, where the site sends a compact copy of it (2026-11-22): Opus,
+# mono, in WebM, at `kbps`, the rate Tigran chose by ear on 2026-11-21 ("the
+# difference is almost unnoticeable"), each file made from its master by
+# tools/audio/compact.py into `path`, under var/ and so relative to the
+# project, here and on both hosts, which deploy.sh ships it to; listed with
+# its size and SHA-256 in data/audio/<key>-compact.tsv, which the build
+# checks the directory against.  A browser that can play it is sent it,
+# streamed and kept offline; one that cannot, and a page from before it, the
+# master, as before.  Not a master: made here, and made again from the
+# masters at will, the same rate giving the same bytes for the same ffmpeg.
 [audio.mh]
 # Merritt Horn's reading of the whole book: one MP3 per section, 121 hours, as
 # published on the Uversa Press DVD (2006): 128 kbps joint stereo, 44.1 kHz.
@@ -248,6 +259,10 @@ label = "Merritt Horn"
 kind  = "human"
 glob  = "paper*/*.mp3"
 name  = '^paper(?P<folder>\d{3})/P(?P<paper>\d{3})_(?P<section>\d{2})(?:-(?P<with>\d{2}))?\.mp3$'
+# 16 kbps: 0.87 GB for the 121 hours, where the DVD's files are 6.6 GiB.  All his
+# files are stereo and nearly all two copies of one channel; the mix to mono is
+# required to keep every band of each (tools/audio/compact.py mono_keeps).
+compact = { kbps = 16, path = "var/audio/compact/mh" }
 
 [audio.voyner]
 # Григорий Войнер's reading of the whole book in Russian: one MP3 per section,
@@ -291,6 +306,9 @@ translation = "urantia-ru"
 edition = ["94b54ca", "507a36b"]
 glob  = "*.mp3"
 name  = '^(?P<paper>\d{2,3})-(?P<section>\d{2})(?:-(?P<with>\d{2}))?\.mp3$'
+# 14 kbps: 0.98 GB for the 154 hours, where the masters are 4.2 GiB.  Below 14,
+# libopus narrows the sound to 8 kHz; at 14 it keeps the masters' treble.
+compact = { kbps = 14, path = "var/audio/compact/voyner" }
 
 [audio.ai]
 # The AI voice: Higgs TTS 3 (Boson AI's Higgs Audio), cloned from a synthetic

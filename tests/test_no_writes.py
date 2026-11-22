@@ -32,6 +32,8 @@ ALLOWED = {
     "tools/kjv/facsimile.py": "var/kjv/",          # the 1769 printing's OCR, fetched, and the review of the glosses' places
     "tools/rsb/convert.py": "data/rsb/",           # the Synodal's copy, converted once from Tigran's edition
     "tools/rsb/versify.py": "var/rsb/",            # SIL's files and the proposal; with --write, the table it was ruled into
+    "tools/audio/manifest.py": "data/audio/",      # a recording's list of files, and of those sent with an Info frame
+    "tools/audio/compact.py": "var/audio/compact/",  # the recordings' compact copy (by ffmpeg), and its list in data/audio/
     "build/cli.py": "var/",                        # ub.db, built as ub.db.tmp and swapped in
     "build/db.py": "var/",                         # a database built afresh, the old one removed
     "build/oracle.py": "var/",                     # the oracles' sandboxes, their inputs linked in
@@ -98,8 +100,9 @@ class NoWrites(unittest.TestCase):
         # tools/study/ reads the study edition and Block's charts, tools/quiz/
         # the edition's quiz, tools/cosmo/ the repository of the chart of the
         # personalities, tools/kjv/ the study edition's KJV, once, tools/rsb/
-        # the Synodal's edition, once.
-        for d in ("build", "offline", "tools/study", "tools/quiz", "tools/cosmo", "tools/kjv", "tools/rsb"):
+        # the Synodal's edition, once, tools/audio/ the recordings.
+        for d in ("build", "offline", "tools/study", "tools/quiz", "tools/cosmo", "tools/kjv", "tools/rsb",
+                  "tools/audio"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 

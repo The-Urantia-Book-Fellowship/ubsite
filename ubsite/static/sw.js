@@ -80,10 +80,11 @@ self.addEventListener('activate', function (e) {
 // ---- What is kept --------------------------------------------------------
 // meta: {current: build, checked: ms, latest: {build, made, text, index,
 // bytes, raw, fetch, full} or null, error, tr: {key: build}, audio: {queue:
-// [{v, n}], error, words}}.  `fetch` is what an update to `latest` would
+// [{v, n, f}], error, words}}.  `fetch` is what an update to `latest` would
 // download; `tr`, the translations kept, each at the build of its own it was
-// fetched at; `audio`, the papers of each voice asked for and not yet whole
-// (The recordings kept, below), never what is kept, which the caches say.
+// fetched at; `audio`, the papers of each voice asked for and not yet whole,
+// `f` 'webm' where the compact copy was asked for (The recordings kept,
+// below), never what is kept, which the caches say.
 // `sure`: the copy is the site's build, by the last check or a download just
 // ended, and this worker has asked since it took over; only then does the
 // copy answer first (the fetch handler).  `shown`: the translations the
@@ -320,6 +321,31 @@ function audioList(key) {
   return p;
 }
 function audioPath(key, name) { return '/audio/' + key + '/' + name; }
+// The compact copy (2026-11-22): a file's at its address, .webm for .mp3
+// (app.py audio_file), its size and digest after the file's in the list,
+// [name, bytes, sha, cbytes, csha].  A page asks for it where its browser
+// plays Opus (listen.js), and has it kept there (`keep`'s `form`); a page
+// from before, or in a browser that does not, asks for the file and keeps
+// it, as before.  Either form kept is the file kept, so that a reader who
+// kept the MP3s before the copy keeps them (Tigran, 2026-11-21: "let them
+// keep their old mp3s"); either answers a request for the other
+// (audioAnswer), which a browser that kept the copy plays, and lets both go.
+function otherForm(path) {
+  return /\.mp3$/.test(path) ? path.slice(0, -4) + '.webm' : /\.webm$/.test(path) ? path.slice(0, -5) + '.mp3' : null;
+}
+function audioType(path) { return /\.webm$/.test(path) ? 'audio/webm' : 'audio/mpeg'; }
+// What a file of the list takes in the cache, in whichever form is kept:
+// its bytes, or 0 where neither is.
+function keptSize(have, key, f) {
+  if (f.length > 3 && have[audioPath(key, otherForm(f[0]))]) return f[3];
+  return have[audioPath(key, f[0])] ? f[1] : 0;
+}
+// A file as it is to be fetched for keeping: [address, bytes, digest], the
+// copy's where it was asked for and the list has one.
+function fileForm(key, f, form) {
+  return form === 'webm' && f.length > 3 ? [audioPath(key, otherForm(f[0])), f[3], f[4]]
+                                         : [audioPath(key, f[0]), f[1], f[2]];
+}
 // The paths a voice's cache holds.
 function audioHave(key) {
   return caches.has(AUDIO + key).then(function (has) {
@@ -339,8 +365,8 @@ function hashOf(data) {
   });
 }
 // What is kept, for the tab and the bar: for each voice with a cache or in
-// the queue, the papers kept whole, those kept in part with the bytes held,
-// and the bytes in all; the queue; the file under way (`busy`, plain data);
+// the queue, the papers kept whole (and the bytes each holds, `held`), those
+// kept in part with the bytes held, and the bytes in all; the queue; the file under way (`busy`, plain data);
 // why the last one stopped.  A voice whose list cannot be had, offline with a
 // copy from before the lists, says so (`nolist`).
 var audioBusy = null, audioRunning = null, audioAbort = null;
@@ -351,13 +377,16 @@ function audioState() {
     got[1].forEach(function (n) { if (n.indexOf(AUDIO) === 0) keys[n.slice(AUDIO.length)] = true; });
     return Promise.all(Object.keys(keys).map(function (key) {
       return Promise.all([audioList(key).catch(function () { return null; }), audioHave(key)]).then(function (x) {
-        var list = x[0], have = x[1], v = { kept: [], partial: {}, bytes: 0 };
+        var list = x[0], have = x[1], v = { kept: [], partial: {}, bytes: 0, held: {} };
         if (!list) { v.nolist = true; return [key, v]; }
         list.papers.forEach(function (p) {
           var n = 0, b = 0;
-          p.files.forEach(function (f) { if (have[audioPath(key, f[0])]) { n++; b += f[1]; } });
+          p.files.forEach(function (f) { var s = keptSize(have, key, f); if (s) { n++; b += s; } });
           if (n && n === p.files.length) v.kept.push(p.n);
           else if (n) v.partial[p.n] = b;
+          // The bytes a paper kept whole holds, in whichever form (2026-11-22):
+          // a paper kept as MP3s before the compact copy says their size.
+          if (n && n === p.files.length) v.held[p.n] = b;
           v.bytes += b;
         });
         return [key, v];
@@ -401,11 +430,14 @@ function dequeue(q) {
 // again) or a paper is asked for: the page's own rule was not enough, its
 // word of the state coming by two roads in no order (sw.js tell(), and the
 // answer on the message's port), so that a state told before the failure
-// could come after it and set it pumping again (2026-11-21).
+// could come after it and set it pumping again (2026-11-21).  A file is
+// fetched in the form its paper was asked for (`q.f`, the compact copy's
+// 'webm', or none, the file itself), and one kept in either form is not
+// fetched again.
 function keepOne(next) {
   if (audioRunning) return audioRunning;
   if (running) return tell();
-  var ctl = audioAbort = new AbortController(), q, paper, file, url, missing;
+  var ctl = audioAbort = new AbortController(), q, paper, file, url, missing, want, name;
   audioRunning = readMeta().then(function (meta) {
     var queue = (meta.audio || {}).queue || [];
     if (!queue.length || (next && meta.audio.error)) return null;
@@ -413,24 +445,27 @@ function keepOne(next) {
     return Promise.all([audioList(q.v), audioHave(q.v)]).then(function (got) {
       paper = got[0].byPaper[q.n];
       if (!paper) return dequeue(q).then(function () { return 'again'; });
-      missing = paper.files.filter(function (f) { return !got[1][audioPath(q.v, f[0])]; });
+      missing = paper.files.filter(function (f) { return !keptSize(got[1], q.v, f); });
       if (!missing.length) return dequeue(q).then(function () { return 'again'; });
       file = missing[0];
-      url = audioPath(q.v, file[0]);
-      var held = paper.bytes - missing.reduce(function (s, f) { return s + f[1]; }, 0);
-      audioBusy = { v: q.v, n: q.n, done: held, total: paper.bytes, left: missing.length, of: paper.files.length };
+      want = fileForm(q.v, file, q.f);
+      url = want[0];
+      name = url.slice(audioPath(q.v, '').length);
+      var held = paper.files.reduce(function (s, f) { return s + keptSize(got[1], q.v, f); }, 0);
+      var total = held + missing.reduce(function (s, f) { return s + fileForm(q.v, f, q.f)[1]; }, 0);
+      audioBusy = { v: q.v, n: q.n, done: held, total: total, left: missing.length, of: paper.files.length };
       tell();
       // Past the browser's cache, which must not keep a second copy of the
       // file, nor answer with a part of it kept from playing (a 206).
       return fetch(url, { cache: 'no-store', headers: { 'X-UB-Fetch': 'keep' }, signal: ctl.signal }).then(function (r) {
-        if (r.status !== 200) throw stopped(T.k('{x} could not be fetched ({s})'), { x: file[0], s: r.status });
-        return readAll(r, file[0], file[1], function (n) { audioBusy.done = held + n; tell(); });
+        if (r.status !== 200) throw stopped(T.k('{x} could not be fetched ({s})'), { x: name, s: r.status });
+        return readAll(r, name, want[1], function (n) { audioBusy.done = held + n; tell(); });
       }).then(function (buf) {
         return hashOf(buf).then(function (h) {
-          if (buf.byteLength !== file[1] || h !== file[2]) throw stopped(T.k('{x} arrived damaged'), { x: file[0] });
+          if (buf.byteLength !== want[1] || h !== want[2]) throw stopped(T.k('{x} arrived damaged'), { x: name });
           return caches.open(AUDIO + q.v).then(function (c) {
             return c.put(url, new Response(buf, { headers: {
-              'Content-Type': 'audio/mpeg', 'Content-Length': String(buf.byteLength), 'Accept-Ranges': 'bytes' } }));
+              'Content-Type': audioType(url), 'Content-Length': String(buf.byteLength), 'Accept-Ranges': 'bytes' } }));
           }).catch(function (e) {
             throw stopped(T.k('this browser has no room for it ({e})'), { e: String(e && e.name || e) });
           });
@@ -460,17 +495,21 @@ function keepOne(next) {
   return audioRunning;
 }
 // Papers of a voice asked for: those not whole go on the queue, as asked, and
-// the first file is fetched.
-function keep(v, ns) {
+// the first file is fetched.  `form` 'webm', the compact copy, where the page
+// asks for it (offline.js, where its browser plays Opus), kept on the
+// queue's entry as `f`; a paper asked for again takes the form asked last.
+function keep(v, ns, form) {
   return Promise.all([audioList(v), audioHave(v)]).then(function (got) {
     var want = ns.filter(function (n) {
       var p = got[0].byPaper[n];
-      return p && p.files.some(function (f) { return !got[1][audioPath(v, f[0])]; });
+      return p && p.files.some(function (f) { return !keptSize(got[1], v, f); });
     });
     return updateMeta(function (meta) {
       var a = meta.audio || (meta.audio = { queue: [] }), q = a.queue || (a.queue = []);
       want.forEach(function (n) {
-        if (!q.some(function (x) { return x.v === v && x.n === n; })) q.push({ v: v, n: n });
+        var x = q.filter(function (x) { return x.v === v && x.n === n; })[0];
+        if (!x) q.push(x = { v: v, n: n });
+        if (form) x.f = form; else delete x.f;
       });
       a.error = a.words = null;
     });
@@ -491,7 +530,10 @@ function unkeep(v, ns) {
     return caches.open(AUDIO + v).then(function (c) {
       return Promise.all(ns.map(function (n) {
         var p = got[0].byPaper[n];
-        return p && Promise.all(p.files.map(function (f) { return c.delete(audioPath(v, f[0])); }));
+        // Both forms, whichever is kept (otherForm).
+        return p && Promise.all(p.files.map(function (f) {
+          return Promise.all([c.delete(audioPath(v, f[0])), c.delete(otherForm(audioPath(v, f[0])))]);
+        }));
       })).then(function () { return c.keys(); }).then(function (ks) {
         if (!ks.length) return caches.delete(AUDIO + v);
       });
@@ -518,17 +560,25 @@ function stopAudio(v, ns) {
 // so the slice is cut here from the file's Blob, which reads only what the
 // player takes, the last file's Blob kept so that a seek does not read it
 // again.  Anything not kept goes to the network as it did, with its own
-// Range, and is never kept on the way.
+// Range, and is never kept on the way.  A file kept in the other form
+// answers too (otherForm): the MP3 kept before the compact copy, asked for
+// as the copy, or the copy, asked for as the MP3 by a page from before it.
 var blobMemo = null;
 function audioAnswer(req, path, key) {
   return caches.has(AUDIO + key).then(function (has) {
     if (!has) return fetch(req);
-    return caches.open(AUDIO + key).then(function (c) { return c.match(path); }).then(function (hit) {
-      if (!hit) return fetch(req);
+    return caches.open(AUDIO + key).then(function (c) {
+      var alt = otherForm(path);
+      return c.match(path).then(function (hit) {
+        return hit ? [path, hit] : alt && c.match(alt).then(function (h) { return h && [alt, h]; });
+      });
+    }).then(function (got) {
+      if (!got) return fetch(req);
+      var at = got[0], hit = got[1];
       var range = req.headers.get('range');
       if (!range) return hit;
-      var blob = blobMemo && blobMemo.path === path ? Promise.resolve(blobMemo.blob)
-               : hit.blob().then(function (bl) { blobMemo = { path: path, blob: bl }; return bl; });
+      var blob = blobMemo && blobMemo.path === at ? Promise.resolve(blobMemo.blob)
+               : hit.blob().then(function (bl) { blobMemo = { path: at, blob: bl }; return bl; });
       return blob.then(function (bl) {
         var total = bl.size, m = /^bytes=(\d*)-(\d*)$/.exec(range.trim()), a, b;
         if (m && m[1] !== '') { a = +m[1]; b = m[2] === '' ? total - 1 : Math.min(+m[2], total - 1); }
@@ -536,7 +586,7 @@ function audioAnswer(req, path, key) {
         if (!m || a > b || a >= total)
           return new Response(null, { status: 416, headers: { 'Content-Range': 'bytes */' + total } });
         return new Response(bl.slice(a, b + 1), { status: 206, headers: {
-          'Content-Type': 'audio/mpeg', 'Content-Length': String(b - a + 1),
+          'Content-Type': hit.headers.get('Content-Type') || audioType(at), 'Content-Length': String(b - a + 1),
           'Content-Range': 'bytes ' + a + '-' + b + '/' + total, 'Accept-Ranges': 'bytes' } });
       });
     });
@@ -931,7 +981,9 @@ function setAuto(on) {
 // copy is every browser's, let go only by the browser's own site data.
 // `keep` names a voice and its papers to keep, or nothing, to fetch the next
 // file of the queue, with `next` true for nothing after a file that failed
-// (since 2026-11-21; a page from before asks without it, as it always did);
+// (since 2026-11-21; a page from before asks without it, as it always did),
+// and `form` 'webm' for the compact copy (since 2026-11-22; with none, the
+// files themselves, as a page from before keeps them);
 // `unkeep` a voice and papers to let go.  A check's says
 // too whether it reached the site: `reached` true or false, or none where it
 // did not ask, or failed otherwise (a 404: the site is there, with no copy).
@@ -945,7 +997,8 @@ self.addEventListener('message', function (e) {
   ns = Array.isArray(ns) ? ns.map(Number).filter(function (n) { return Number.isInteger(n) && n >= 0; }) : [];
   var p = cmd === 'get' ? download(Array.isArray(tr) ? tr.filter(function (k) { return typeof k === 'string'; }) : undefined)
         : cmd === 'drop' ? drop(String(tr))
-        : cmd === 'keep' ? (voice ? keep(String(voice), ns) : keepOne(!!e.data.next)).then(state)
+        : cmd === 'keep' ? (voice ? keep(String(voice), ns, e.data.form === 'webm' ? 'webm' : null)
+                                  : keepOne(!!e.data.next)).then(state)
         : cmd === 'unkeep' ? unkeep(String(voice), ns).then(state)
         : cmd === 'stop' ? stopAudio(voice ? String(voice) : null, ns).then(state)
         : cmd === 'check' ? check(!!e.data.force).then(function (asked) {

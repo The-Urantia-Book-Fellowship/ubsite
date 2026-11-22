@@ -228,11 +228,23 @@ ship() {
     fi
 
     if [ "$BUILD" = 1 ]; then
+        # The recordings' compact copies (2026-11-22; tools/audio/compact.py,
+        # sources.toml `compact`), made here under var/, which the rsync above
+        # skips: to the same relative path on the host, adding and never
+        # deleting, as the AI voice's.  1.85 GB the first time; after that a
+        # listing, the copies never changing.
+        local croot
+        for croot in $(sqlite3 var/ub.db "SELECT compact_root FROM audio_source WHERE compact_root IS NOT NULL ORDER BY id"); do
+            echo "==> compact recordings to $COPY_HOST:$DEST/$croot ($(du -sh "$croot" | cut -f1))"
+            ssh "$COPY_HOST" "mkdir -p $DEST/$croot"
+            rsync -a --info=progress2 --exclude '*.part' "$croot"/ "$COPY_HOST:$DEST/$croot/"
+        done
+
         # The database names every recording it will serve; the host must hold
         # exactly those files, at the path the database records -- a relative one
         # under $DEST.  By size, which is cheap and catches a missing or truncated
         # copy; the SHA-256s are in data/audio/<key>-files.tsv for when that is
-        # not enough.
+        # not enough.  And each compact copy, under the reading's compact_root.
         local key root want have missing
         for key in $(sqlite3 var/ub.db "SELECT key FROM audio_source ORDER BY id"); do
             root=$(sqlite3 var/ub.db "SELECT root FROM audio_source WHERE key='$key'")
@@ -252,6 +264,19 @@ ship() {
                 exit 1
             fi
             echo "    $(echo "$want" | wc -l) files present"
+            croot=$(sqlite3 var/ub.db "SELECT COALESCE(compact_root, '') FROM audio_source WHERE key='$key'")
+            [ -n "$croot" ] || continue
+            want=$(sqlite3 -separator ' ' var/ub.db \
+                "SELECT c.name, c.bytes FROM audio_compact c JOIN audio_file f ON f.id=c.file_id
+                   JOIN audio_source s ON s.id=f.source_id WHERE s.key='$key'" | LC_ALL=C sort)
+            have=$(ssh "$HOST" "{ cd '$DEST/$croot' 2>/dev/null && find . -name '*.webm' -printf '%P %s\n'; } || true" | LC_ALL=C sort)
+            missing=$(LC_ALL=C comm -23 <(echo "$want") <(echo "$have") | head -5)
+            if [ -n "$missing" ]; then
+                echo "FAILED: $HOST lacks, or has a different size of, compact copies the database serves:" >&2
+                echo "$missing" >&2
+                exit 1
+            fi
+            echo "    $(echo "$want" | wc -l) compact copies present"
         done
 
         # The AI files the database being replaced names: kept through this

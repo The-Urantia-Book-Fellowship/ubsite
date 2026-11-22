@@ -24,7 +24,10 @@ CREATE TABLE audio_source (
   -- other, the translations being stored under our numbering; what differs is
   -- whose ▶ plays it and whose lines it marks (Григорий Войнер's, of
   -- urantia-ru, 2026-11-12).
-  translation TEXT REFERENCES translation(key)
+  translation TEXT REFERENCES translation(key),
+  -- The directory its compact copy is served from (audio_compact), relative
+  -- to the project, here and on both hosts; NULL where it has none.
+  compact_root TEXT
 );
 
 CREATE TABLE audio_file (
@@ -44,6 +47,22 @@ CREATE TABLE audio_file (
   sent_sha256 TEXT,
   UNIQUE (source_id, name),
   CHECK ((head IS NULL) = (head_at IS NULL) AND (head IS NULL) = (sent_sha256 IS NULL))
+);
+
+-- The compact copy of a file (2026-11-22; sources.toml [audio.<key>] compact,
+-- tools/audio/compact.py): Opus, mono, in WebM, under the source's
+-- compact_root, named as the file is, .webm for .mp3, and of its length to
+-- 80 ms, so that the segments hold for it.  A browser that can play it is
+-- sent it (listen.js), and keeps it offline (sw.js); one that cannot, and a
+-- page from before it, the file itself.  `master_sha256` is the sha256 of
+-- the file it was made from, which the build holds to the file's.
+CREATE TABLE audio_compact (
+  file_id INTEGER PRIMARY KEY REFERENCES audio_file(id),
+  name TEXT NOT NULL,                         -- under compact_root: 'paper133/P133_02.webm'
+  bytes INTEGER NOT NULL,
+  duration_ms INTEGER NOT NULL,
+  sha256 TEXT NOT NULL,
+  master_sha256 TEXT NOT NULL
 );
 
 CREATE TABLE audio_segment (

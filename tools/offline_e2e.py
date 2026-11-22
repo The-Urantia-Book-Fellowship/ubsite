@@ -688,9 +688,11 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                 want[u] = r.read()
 
         print("Keeping a recording")
-        # Paper 161, the smallest: four files, 16.6 MB, from this machine's
-        # copy of the DVD (sources.toml audio.mh), kept in a cache of its own,
-        # one file a message (sw.js, The recordings kept).
+        # Paper 161, the smallest: four files, 16.6 MB on the DVD, from this
+        # machine's copy of it (sources.toml audio.mh), kept in a cache of its
+        # own, one file a message (sw.js, The recordings kept); and since
+        # 2026-11-22 its compact copy, 2.1 MB, which Chrome plays (below, Kept
+        # as MP3s, for the MP3s themselves).
         pg.goto(BASE + "/101:4")
         offline_tab(pg)
         pg.click("dialog.settings .recvoice[data-key='mh'] > summary .rname")
@@ -703,21 +705,21 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         pg.wait_for_selector(VR + ".recpart", state="attached", timeout=15000)
         ok(pg.locator("dialog.settings .recvoice").count() == 2
            and en(pg, VR + "> summary .rname") == "Grigory Voyner" and en(pg, VR + "> summary .rpt") == "· USGNY"
-           and en(pg, VR + "> summary .rmeta") == "154 h · 4.48 GB",
+           and en(pg, VR + "> summary .rmeta") == "154 h · 981 MB",
            f"the Russian reading has its fold, named with its translation ({en(pg, VR + '> summary .w')!r}, {en(pg, VR + '> summary .rmeta')!r})")
         ok(pg.locator(VR + ".recpart").count() == 4 and pg.locator(VR + ".recrow").count() == 197
            and "Отец Всего Сущего" in pg.evaluate(f"document.querySelector(\"{VR}.recrow[data-n='1'] .rname\").textContent"),
            "with its four parts and 197 papers, under the translation's titles")
-        ok(en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rmeta") == "121 h · 6.98 GB",
-           "its row says its hours and size")
+        ok(en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rmeta") == "121 h · 864 MB",
+           "its row says its hours and size, the compact copy's (6.98 GB of MP3s)")
         pg.click("dialog.settings .recvoice[data-key='mh'] .recpart[data-first='120'] > summary .rname")
         row = "dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161'] .keep"
-        ok(pg.get_attribute(row, "data-st") == "none" and pg.get_attribute(row, "title") == "Keep Paper 161 offline (17 MB)",
+        ok(pg.get_attribute(row, "data-st") == "none" and pg.get_attribute(row, "title") == "Keep Paper 161 offline (2.1 MB)",
            f"Paper 161's row offers to keep it ({pg.get_attribute(row, 'title')!r})")
         # Its third file not there: the download stops, and asks for it once,
         # where it asked again at once, for ever (review of 2026-11-09), and the
         # tab offers to try again, which, the file back, keeps the paper.
-        gone = "/audio/mh/paper161/P161_02.mp3"
+        gone = "/audio/mh/paper161/P161_02.webm"
         fail, tries = copy.with_name("audio-fail"), copy.with_name("audio-asked")
         fail.write_text(gone)
         pg.click(row)
@@ -744,18 +746,19 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         n = len(tries.read_text().split()) if tries.exists() else 0
         ok(n == 1, f"a word of the worker's from before the failure, come after it, does not have the file fetched again ({n} times)")
         ok(pg.locator("dialog.settings .offrec .why .recagain").is_visible(), "and the tab still offers to try again")
-        ok(en(pg, "dialog.settings .offrec .why").startswith("The download stopped: paper161/P161_02.mp3 could not be fetched (404). Try again"),
+        ok(en(pg, "dialog.settings .offrec .why").startswith("The download stopped: paper161/P161_02.webm could not be fetched (404). Try again"),
            f"and the tab says why, with Try again ({en(pg, 'dialog.settings .offrec .why')!r})")
         fail.unlink()
         pg.click("dialog.settings .offrec .why .recagain")
         pg.wait_for_function(f"document.querySelector(\"{row}\").dataset.st === 'kept'", timeout=120000)
         kept = pg.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.map(k => new URL(k.url).pathname).sort())")
-        ok(kept == [f"/audio/mh/paper161/P161_0{i}.mp3" for i in range(4)], f"its four files are in the cache ({kept})")
-        ok(pg.get_attribute(row, "title") == "Kept, 17 MB; tap to let go"
+        ok(kept == [f"/audio/mh/paper161/P161_0{i}.webm" for i in range(4)],
+           f"its four files are in the cache, in their compact copy ({kept})")
+        ok(pg.get_attribute(row, "title") == "Kept, 2.1 MB; tap to let go"
            and en(pg, "dialog.settings .recvoice[data-key='mh'] .recpart[data-first='120'] > summary .rst") == "1 of 77 papers"
-           and en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rst") == "1 of 197 papers kept, 17 MB",
+           and en(pg, "dialog.settings .recvoice[data-key='mh'] > summary .rst") == "1 of 197 papers kept, 2.1 MB",
            "the row, its part and the voice say so")
-        ok(en(pg, "dialog.settings .recstate").startswith("17 MB kept in this browser; room for about"),
+        ok(en(pg, "dialog.settings .recstate").startswith("2.1 MB kept in this browser; room for about"),
            f"and the block counts it against the browser's room ({en(pg, 'dialog.settings .recstate')!r})")
         ok(not pg.evaluate("[...document.querySelectorAll('dialog.settings .offtrs li')].length") == 0
            and pg.get_attribute("dialog.settings .offmore", "hidden") is None,
@@ -793,13 +796,20 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         probe = ("async (a) => { try { const r = await fetch(a[0], a[1] ? {headers: {Range: a[1]}} : {});"
                  " const b = await r.arrayBuffer(); return [r.status, r.headers.get('content-range'), b.byteLength]; }"
                  " catch (e) { return ['rejected']; } }")
-        f = "/audio/mh/paper161/P161_00.mp3"
-        ok(pg.evaluate(probe, [f, None]) == [200, None, 1163180], "offline, a kept file answers whole")
-        ok(pg.evaluate(probe, [f, "bytes=100-199"]) == [206, "bytes 100-199/1163180", 100]
-           and pg.evaluate(probe, [f, "bytes=0-"]) == [206, "bytes 0-1163179/1163180", 1163180],
+        f = "/audio/mh/paper161/P161_00.webm"
+        ok(pg.evaluate(probe, [f, None]) == [200, None, 144064], "offline, a kept file answers whole")
+        ok(pg.evaluate(probe, [f, "bytes=100-199"]) == [206, "bytes 100-199/144064", 100]
+           and pg.evaluate(probe, [f, "bytes=0-"]) == [206, "bytes 0-144063/144064", 144064],
            "a range of it is cut from the cache, 206 with its Content-Range, as a seek asks")
-        ok(pg.evaluate(probe, [f, "bytes=5000000-"]) == [416, "bytes */1163180", 0], "a range past its end is 416")
-        ok(pg.evaluate(probe, ["/audio/mh/paper101/P101_04.mp3", None]) == ["rejected"], "a file not kept fails, as before")
+        ok(pg.evaluate(probe, [f, "bytes=5000000-"]) == [416, "bytes */144064", 0], "a range past its end is 416")
+        typed = pg.evaluate("u => fetch(u, {headers: {Range: 'bytes=0-3'}}).then(r => r.headers.get('content-type'))", f)
+        ok(typed == "audio/webm", f"as the copy it is ({typed})")
+        # A page from before the copy asks for the MP3: the copy kept answers.
+        ok(pg.evaluate(probe, [f[:-5] + ".mp3", "bytes=0-"]) == [206, "bytes 0-144063/144064", 144064],
+           "the MP3's address is answered from the copy kept, for a page from before it")
+        ok(pg.evaluate(probe, ["/audio/mh/paper101/P101_04.webm", None]) == ["rejected"]
+           and pg.evaluate(probe, ["/audio/mh/paper101/P101_04.mp3", None]) == ["rejected"],
+           "a file not kept fails, in either form, as before")
         # The home page's part cards, each its picture, whichever width this
         # screen takes: the copy holds both (offline/pack.py ART; since 2026-11-18).
         pg.goto(BASE + "/")
@@ -1040,7 +1050,7 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
            "offline, a paper not kept cannot be asked for, and one kept can be let go")
         pg.click("dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161'] .keep")
         until(pg, "() => caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", True, 10000)
-        ok(asked and asked[-1].startswith("This deletes 1 paper of Merritt Horn from this browser, 17 MB.")
+        ok(asked and asked[-1].startswith("This deletes 1 paper of Merritt Horn from this browser, 2.1 MB.")
            and pg.get_attribute("dialog.settings .recvoice[data-key='mh'] .recrow[data-n='161'] .keep", "data-st") == "none",
            f"asked first, and let go, its cache goes with its last file ({(asked or [''])[-1][:60]!r})")
         pg.keyboard.press("Escape")
@@ -1494,6 +1504,78 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         ok(pg.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.length)") == 4,
            "the bar's ↓ keeps the paper being heard")
         pg.click(".player button.close")
+
+        print("Kept as MP3s")
+        # A browser that cannot play Opus in WebM (Safari before 17.4) is sent
+        # the MP3s and keeps them, as every browser did before the compact copy
+        # (2026-11-22); and a reader who kept them then, or there, keeps them,
+        # the copy asked for being answered from the MP3 (Tigran, 2026-11-21:
+        # "let them keep their old mp3s").  Paper 161 let go first.
+        pg.evaluate("""() => new Promise(done => { const ch = new MessageChannel(); ch.port1.onmessage = done;
+            navigator.serviceWorker.controller.postMessage({ cmd: 'unkeep', voice: 'mh', papers: [161] }, [ch.port2]); })""")
+        until(pg, "() => caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", True, 10000)
+        old = ctx.new_page()
+        old.on("dialog", accept)
+        old.add_init_script("HTMLMediaElement.prototype.canPlayType = function (t) {"
+                            " return /webm/i.test(t) ? '' : 'maybe'; };")
+        heard = []
+        old.on("request", lambda r: heard.append(urllib.parse.urlparse(r.url).path) if "/audio/" in r.url else None)
+        old.goto(BASE + "/161:1")
+        offline_tab(old)
+        old.click(MH + "> summary .rname")
+        old.wait_for_selector(MH + ".recpart", timeout=15000)
+        old.click(MH + ".recpart[data-first='120'] > summary .rname")
+        ok(en(old, MH + "> summary .rmeta") == "121 h · 6.98 GB" and old.get_attribute(row, "title") == "Keep Paper 161 offline (17 MB)",
+           f"where WebM does not play, the tab gives the MP3s' sizes ({en(old, MH + '> summary .rmeta')!r},"
+           f" {old.get_attribute(row, 'title')!r})")
+        old.click(row)
+        old.wait_for_function(f"document.querySelector(\"{row}\").dataset.st === 'kept'", timeout=120000)
+        cached = old.evaluate("caches.open('ub-audio-mh').then(c => c.keys()).then(ks => ks.map(k => new URL(k.url).pathname).sort())")
+        ok(cached == [f"/audio/mh/paper161/P161_0{i}.mp3" for i in range(4)], f"and keeps the MP3s ({cached})")
+        old.keyboard.press("Escape")
+        heard.clear()
+        old.locator("p.t .playp").first.click()
+        old.wait_for_timeout(2500)
+        ok(old.get_attribute(".player .toggle", "aria-label") == "Pause" and heard and all(h.endswith(".mp3") for h in heard),
+           f"and plays them ({heard[:2]})")
+        old.close()
+        # The same browser able to play it again: the paper is kept, at the
+        # MP3s' size, and the copy asked for is answered from them, offline too.
+        heard = []
+        pg.on("request", lambda r: heard.append(urllib.parse.urlparse(r.url).path) if "/audio/" in r.url else None)
+        pg.goto(BASE + "/161:1")
+        offline_tab(pg)
+        pg.click(MH + "> summary .rname")
+        pg.wait_for_selector(MH + ".recpart", timeout=15000)
+        pg.click(MH + ".recpart[data-first='120'] > summary .rname")
+        ok(pg.get_attribute(row, "data-st") == "kept" and pg.get_attribute(row, "title") == "Kept, 17 MB; tap to let go"
+           and en(pg, MH + "> summary .rst") == "1 of 197 papers kept, 17 MB",
+           f"a paper kept as MP3s counts as kept, at their size ({pg.get_attribute(row, 'title')!r},"
+           f" {en(pg, MH + '> summary .rst')!r})")
+        pg.keyboard.press("Escape")
+        ctx.set_offline(True)
+        heard.clear()
+        pg.locator("p.t .playp").first.click()
+        pg.wait_for_timeout(3000)
+        ok(pg.get_attribute(".player .toggle", "aria-label") == "Pause" and not pg.inner_text(".player .who")
+           and heard and all(h.endswith(".webm") for h in heard),
+           f"offline, the copy asked for plays from the MP3s kept ({heard[:2]}, {pg.inner_text('.player .who')!r})")
+        ok(pg.evaluate(probe, ["/audio/mh/paper161/P161_00.webm", "bytes=0-"]) == [206, "bytes 0-1163179/1163180", 1163180]
+           and pg.evaluate("u => fetch(u, {headers: {Range: 'bytes=0-3'}}).then(r => r.headers.get('content-type'))",
+                           "/audio/mh/paper161/P161_00.webm") == "audio/mpeg",
+           "answered with the MP3, as an MP3")
+        pg.click(".player button.close")
+        ctx.set_offline(False)
+        offline_tab(pg)
+        # The folds as this page left them, open: opened again, not toggled.
+        pg.evaluate("sel => { const d = document.querySelector(sel); d.open = true;"
+                    " d.querySelector(\".recpart[data-first='120']\").open = true; }", MH.strip())
+        pg.wait_for_selector(row, timeout=15000)
+        pg.click(row)
+        until(pg, "() => caches.keys().then(ks => !ks.some(k => k.startsWith('ub-audio-')))", True, 10000)
+        ok(asked and asked[-1].startswith("This deletes 1 paper of Merritt Horn from this browser, 17 MB."),
+           f"let go, asked first at the MP3s' size, they go ({(asked or [''])[-1][:60]!r})")
+        pg.keyboard.press("Escape")
         offline_tab(pg)
         ok(not pg.locator("dialog.settings .offcopy input:not(.auto)").count()
            and not pg.locator("dialog.settings .offcopy button").count(),
