@@ -86,7 +86,7 @@ make tts-assemble       one MP3 per section from what has been made -> data/audi
 .venv/bin/python -m tools.rsb.versify [--fetch|--check|--write]   SIL's versification composed against both copies -> var/rsb/review.md; --write -> data/rsb/versification.tsv
 ```
 
-The ML environments (`venv-align`, `venv-tts`, `venv-chatterbox`, `venv-higgs`, `venv-vllm`) and their caches live in **`~/Software/ml`**, on the NVMe home, never in `requirements.txt` and never on `/Audio`. They are for the audio work on the GPU **and nothing else** (Tigran, 2026-10-16): a general tool's dependencies go in `.venv`, or are fetched into the tree by URL and digest (the SQLite release). TeX Live 2026 and Node 24 stay system installs; README, "What this machine needs besides". Playwright was in a `venv-browser` there until that day; it is now in `requirements-dev.in`.
+The ML environments (`venv-align`, `venv-tts`, `venv-vllm`) and their caches live in **`~/Software/ml`**, on the NVMe home, never in `requirements.txt` and never on `/Audio`. They are for the audio work on the GPU **and nothing else** (Tigran, 2026-10-16): a general tool's dependencies go in `.venv`, or are fetched into the tree by URL and digest (the SQLite release). TeX Live 2026 and Node 24 stay system installs; README, "What this machine needs besides". Playwright was in a `venv-browser` there until that day; it is now in `requirements-dev.in`.
 
 `make data` never edits in place: it builds `var/ub.db.tmp` and swaps it in, so a failed build leaves the previous database untouched.
 

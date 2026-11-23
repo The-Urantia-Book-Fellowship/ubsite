@@ -12,7 +12,7 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-chatterbox tts-bakeoff-higgs tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot bible data check offline e2e test paranoid serve serve-bg stop accounts-prune ports geoip clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot bible data check offline e2e test paranoid serve serve-bg stop accounts-prune ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
@@ -70,16 +70,6 @@ tts-venv:
 tts-bakeoff:
 	@CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 HF_HOME=$(ML)/hf \
 		$(ML)/venv-tts/bin/python -m tools.tts.bakeoff
-
-## tts-bakeoff-chatterbox  the same passages in Chatterbox's stock voice (its own venv)
-tts-bakeoff-chatterbox:
-	@CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 HF_HOME=$(ML)/hf \
-		$(ML)/venv-chatterbox/bin/python -m tools.tts.bakeoff_chatterbox
-
-## tts-bakeoff-higgs  0:0.1 in Higgs Audio v2's voices (its own venv; repo in $(ML)/src)
-tts-bakeoff-higgs:
-	@CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 HF_HOME=$(ML)/hf \
-		$(ML)/venv-higgs/bin/python -m tools.tts.bakeoff_higgs
 
 ## tts-bakeoff-higgs3  0:0.1 in Higgs TTS 3, cloned from synthetic references (vLLM-Omni venv)
 tts-bakeoff-higgs3:
