@@ -123,6 +123,8 @@
                        'pause': 'M4 2.5h3v11H4zM9.5 2.5h3v11h-3z',
                        'prev': 'M3 2.5h2v11H3zM13.5 2.5v11L5.5 8z',
                        'next': 'M11 2.5h2v11h-2zM2.5 2.5v11l8-5.5z',
+                       'sprev': 'M1 2.5h2v11H1zM9.25 2.5v11L3.5 8zM15 2.5v11L9.25 8z',
+                       'snext': 'M13 2.5h2v11h-2zM6.75 2.5v11L12.5 8zM1 2.5v11L6.75 8z',
                        'close': 'M4 4l8 8M12 4l-8 8'} %}
 {% macro player_svg(name) -%}
 <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path{% if name == 'close' %} class="stroke"{% endif %} d="{{ player_paths[name] }}"/></svg>

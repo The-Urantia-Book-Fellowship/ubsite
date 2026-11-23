@@ -2581,11 +2581,14 @@ def paper_page(request: Request, paper: int):
         onward = {"href": go["ff"]["href"], "label": w.en.unescape()}
         if l10n.BILINGUAL:
             onward["label_ru"] = w["ru"].unescape()
+    # Where ⏮⏮ goes back to from the paper's first section: the paper
+    # before, whole, from its last section (listen.js secStep).
+    back = go["fb"] and {"href": go["fb"]["href"]}
     return page(request, "paper.html", paper=p, texts=texts,
                 paras=[q for d in texts for q in d["paras"]],
                 notes={k: v for d in texts for k, v in d["notes"].items()},
                 study={k: v for d in texts for k, v in d["study"].items()},
-                refw=refw(q for d in texts for q in d["paras"]), go=go, onward=onward,
+                refw=refw(q for d in texts for q in d["paras"]), go=go, onward=onward, back=back,
                 quizcall_n=queries.quiz_count(con, paper) or None, audio=whole_audio(texts))
 
 
@@ -2703,13 +2706,16 @@ def read(request: Request, ref: str):
             onward["label"] = w.en.unescape()
             if l10n.BILINGUAL:
                 onward["label_ru"] = w["ru"].unescape()
+    # And where ⏮⏮ goes back to, the section before, as ⏮ in the transport
+    # bar does (listen.js secStep).
+    back = go["prev"] and {"href": go["prev"]["href"]}
     # A paper's last section asks, after its notes, whether to take its quiz,
     # where the paper has questions (Tigran, 2026-10-28).
     quizcall = None
     if not go["next"] or go["next"]["paper_n"] != paper:
         quizcall = queries.quiz_count(con, paper) or None
     return page(request, "section.html", paper=p, section=s, text=d, refw=refw(d["paras"]),
-                focus=focus, last=last, go=go, onward=onward, quizcall_n=quizcall)
+                focus=focus, last=last, go=go, onward=onward, back=back, quizcall_n=quizcall)
 
 
 def transport(con, paper: int, sec: int) -> dict:

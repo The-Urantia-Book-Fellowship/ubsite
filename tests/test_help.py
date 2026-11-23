@@ -173,6 +173,10 @@ class Pages(unittest.TestCase):
         self.assertIn('<aside class="note" id="fn11_7_3_0">', body)
         self.assertIn('<nav class="transport"', body)
         self.assertIn('<div class="player"', body)
+        # Its buttons in the bar's order, the section's around the paragraph's
+        # (listen.js makeBar, 2026-11-23), in both rows' pictures.
+        order = re.findall(r'<button type="button" class="(sprev|prev|toggle|next|snext)"', body)
+        self.assertEqual(order, ["sprev", "prev", "toggle", "next", "snext"] * 2)
         # The cloud in its states until it left the header (2026-11-17).
         self.assertNotIn('<path class="cloud"', body)
         self.assertIn('/static/help.js?v=', body)

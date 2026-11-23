@@ -71,6 +71,8 @@
   var NS = 'http://www.w3.org/2000/svg';
   var ICON = { play: 'M4.5 2.5v11l9-5.5z', pause: 'M4 2.5h3v11H4zM9.5 2.5h3v11h-3z',
                prev: 'M3 2.5h2v11H3zM13.5 2.5v11L5.5 8z', next: 'M11 2.5h2v11h-2zM2.5 2.5v11l8-5.5z',
+               sprev: 'M1 2.5h2v11H1zM9.25 2.5v11L3.5 8zM15 2.5v11L9.25 8z',
+               snext: 'M13 2.5h2v11h-2zM6.75 2.5v11L12.5 8zM1 2.5v11L6.75 8z',
                close: 'M4 4l8 8M12 4l-8 8' };
 
   function icon(name) {
@@ -302,14 +304,15 @@
       for (var j = k + 1; j < V.segs.length; j++) ms += (V.segs[j][3] - V.segs[j][2]) || 0;
     }
     el.hidden = !(ms > 0);
-    if (el.hidden) return;
+    // With no time, the buttons' room is measured all the same (leftFit).
+    if (el.hidden) { if (el.dataset.fit !== 'off') leftFit(el); return; }
     var c = clock(ms), wide = el.dataset.t && el.dataset.t.length !== c.length;
     if (el.dataset.t !== c) { el.dataset.t = c; el.innerHTML = lcd(c) + '<span class="tnow">' + c + '</span>'; }
     if (el.dataset.of !== (D.whole ? 'p' : 's')) {
       el.dataset.of = D.whole ? 'p' : 's';
       T.attr(el, 'title', D.whole ? T.k('Time left in this paper') : T.k('Time left in this section'));
     }
-    if (wide || !el.dataset.fit) leftFit(el);
+    if (wide || !el.dataset.fit || el.dataset.fit === 'off') leftFit(el);
   }
   // The screen where the bar's row has room for it, else the time in plain
   // figures, else none: measured, as the header's controls are (ub.js ctlFit,
@@ -321,12 +324,20 @@
   // Again as the window, the sizes or the language change, as a typeface
   // comes, as the name or the reference changes, and as the digits grow or
   // fall.
+  // And the buttons drawn closer (.tight, ub.css), where the row needs it,
+  // before the screen gives way, as the header's controls are drawn closer
+  // before anything is left out: with ⏮⏮ and ⏭⏭ (2026-11-23) a phone's
+  // row of buttons alone, no time at all, was wider than the bar at 320 px
+  // from 112.5% and at 360 px at 125%.  With no time shown (the browser's
+  // voice), the buttons alone, `off` noting that they were measured so.
   function leftFit(el) {
     el = el || (bar && bar.querySelector('.tleft'));
-    if (!el || el.hidden) return;
+    if (!bar || !el) return;
     var name = bar.querySelector('.voice span'), where = bar.querySelector('.where');
     var room = function () { return [name.clientWidth, where.clientWidth]; };
+    var shown = !el.hidden;
     el.dataset.fit = 'none';
+    bar.classList.remove('tight');
     var had = room();
     // Over, where the first button or the last stands outside the bar's
     // padding (the bar's own width, which overflow would show, takes the
@@ -334,15 +345,18 @@
     // or the reference has less room than with no time at all.
     var over = function () {
       var r = bar.getBoundingClientRect(), cs = getComputedStyle(bar), now = room(),
-          a = bar.querySelector('.prev').getBoundingClientRect(), z = bar.querySelector('.close').getBoundingClientRect();
+          a = bar.querySelector('.sprev').getBoundingClientRect(), z = bar.querySelector('.close').getBoundingClientRect();
       return a.left < r.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft) - 1 ||
              z.right > r.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight) + 1 ||
              now[0] < had[0] - 1 || now[1] < had[1] - 1;
     };
-    el.dataset.fit = 'lcd';
-    if (getComputedStyle(el).display === 'none' || !over()) return;
-    el.dataset.fit = 'plain';
-    if (over()) el.dataset.fit = 'none';
+    var tries = shown ? [['lcd', false], ['lcd', true], ['plain', true], ['none', true]] : [['off', false], ['off', true]];
+    for (var i = 0; i < tries.length; i++) {
+      el.dataset.fit = tries[i][0];
+      bar.classList.toggle('tight', tries[i][1]);
+      if (!i && shown && getComputedStyle(el).display === 'none') return;
+      if (!over()) return;
+    }
   }
   // The bar's form: two rows, the reference and the voice a line over the
   // buttons (ub.css .player.two), under 34rem always, and above it wherever
@@ -402,6 +416,10 @@
   function start(i, nv, kk) {
     nv = nv || PV;
     kk = kk || pkey;
+    // A section on its way is left behind (carryOn).
+    trip++;
+    carrying = false;
+    owe = oweP = 0;
     if (V && V.kind !== nv.kind) { hush(); audio.pause(); }
     // Another section's files, or another voice's: they are numbered afresh.
     if (!same(D, P) || key !== kk) file = -1;
@@ -524,6 +542,12 @@
     T.attr(prev, 'title', 'Back to the start of this paragraph (twice: the one before)');
     var tog = button('toggle', T.k('Play'), 'play');
     var nxt = button('next', T.k('Next paragraph'), 'next');
+    // And a section at a time, around the paragraph's (Tigran, 2026-11-23),
+    // the same press with Whole paper on or off (secBack, secNext).
+    var sprev = button('sprev', T.k('Back to the start of this section (twice: the one before)'), 'sprev');
+    T.attr(sprev, 'title', 'Back to the start of this section (twice: the one before)');
+    var snxt = button('snext', T.k('Next section'), 'snext');
+    T.attr(snxt, 'title', 'Next section');
     // What is being read, and by whom.  A tap on the reference brings its
     // paragraph into view.
     var where = document.createElement('span');
@@ -556,6 +580,8 @@
     var x = button('close', T.k('Stop and close'), 'close');
     prev.addEventListener('click', back);
     nxt.addEventListener('click', forward);
+    sprev.addEventListener('click', secBack);
+    snxt.addEventListener('click', secNext);
     tog.addEventListener('click', toggle);
     x.addEventListener('click', close);
     // The time left in what is heard, before the speed: shown on a phone,
@@ -563,7 +589,7 @@
     var left = document.createElement('span');
     left.className = 'tleft';
     left.hidden = true;
-    [prev, tog, nxt, mid, keepButton(), left, spd, on, x].forEach(function (e) { bar.appendChild(e); });
+    [sprev, prev, tog, nxt, snxt, mid, keepButton(), left, spd, on, x].forEach(function (e) { bar.appendChild(e); });
     document.body.appendChild(bar);
     document.body.classList.add('listening');
     drawKeep();
@@ -820,7 +846,7 @@
     bar.querySelector('.who').innerHTML = msg;
   }
   function render() {
-    if (!bar) return;
+    if (!bar || carrying) return;
     var tog = bar.querySelector('.toggle'), paused = !playing();
     tog.replaceChild(icon(paused ? 'play' : 'pause'), tog.firstChild);
     T.attr(tog, 'aria-label', paused ? T.k('Play') : T.k('Pause'));
@@ -834,6 +860,9 @@
     // room is measured again (leftFit, by drawLeft below).
     var tl = bar.querySelector('.tleft'), sig = bar.querySelector('.mid').textContent;
     if (tl.dataset.sig !== sig) { tl.dataset.sig = sig; rows(); delete tl.dataset.fit; }
+    // ⏭⏭ with no section after this one, at the book's end.
+    var st = V ? secStarts() : [];
+    bar.querySelector('.snext').disabled = !D.next && !(k >= 0 && secHere(st) + 1 < st.length);
     var on = bar.querySelector('.onward');
     on.hidden = !(k < 0 && D.next);
     // The next section's name, as app.py makes it in each language.
@@ -855,7 +884,9 @@
   // `wasQuiet` which it was, for the MP3 tried after a compact copy failed.
   var wasQuiet = false;
   function go(i, quiet) {
-    if (!V || i < 0 || i >= V.segs.length) return;
+    // Nothing of the section being left while the next one comes (carryOn):
+    // ⏵ or ⏮ pressed then would start it again.
+    if (!V || carrying || i < 0 || i >= V.segs.length) return;
     trouble = null;
     if (!bar) {
       makeBar();
@@ -909,13 +940,28 @@
   // is.  Twice in quick succession: the one before -- and each further quick
   // press one more.  Timed here, since a double tap is not reliably a dblclick
   // on a touch screen.
+  // Before the first thing heard here, a paper's title on the whole paper's
+  // page or a section's on a section's, the one before is the last paragraph
+  // of the page before, brought in as ⏮⏮ brings it (Tigran, 2026-11-23:
+  // "when it reads the title of a paper and I double-tap the paragraph I
+  // expect it to go back to the last paragraph of the previous paper"); a
+  // press made while it comes is counted (`oweP`, settle), back less one.
   var lastBack = 0;
   function back() {
     var now = Date.now(), again = now - lastBack < 400;
     lastBack = now;
     if (!V) return;
+    if (carrying) { if (again) oweP--; return; }
     if (k < 0) return go(V.segs.length - 1);
-    go(again && k > 0 ? k - 1 : k);
+    if (again) paraBack(); else go(k);
+  }
+  // The paragraph before the one being heard, here or on the page before.
+  // False where there is none, at 0:0.
+  function paraBack() {
+    if (k > 0) { go(k - 1); return true; }
+    if (!D.prev) return false;
+    carryOn(true, true, true);
+    return true;
   }
   // Ten seconds either way from the headphones; a sentence, for the browser's voice.
   function skip(d) {
@@ -923,8 +969,96 @@
       if (k >= 0) speakFrom(Math.max(0, Math.min(said.n + d, said.parts.length - 1)));
     } else audio.currentTime = Math.max(0, audio.currentTime + 10 * d);
   }
-  function forward() { if (k >= 0 && k + 1 < V.segs.length) go(k + 1); }
+  // The next paragraph; after the last here, the next page's first thing
+  // heard, its title, brought in as "Next" brings it, and at the end of a
+  // section the same (Tigran, 2026-11-23: "likewise the next paragraph
+  // button when reading the last paragraph of a paper should cross into the
+  // next paper").
+  function forward() {
+    if (!V) return;
+    if (carrying) { oweP++; return; }
+    paraOn();
+  }
+  function paraOn() {
+    if (k >= 0 && k + 1 < V.segs.length) { go(k + 1); return true; }
+    if (!D.next) return false;
+    carryOn(true);
+    return true;
+  }
+  // ---- a section at a time -----------------------------------------------------
+  // ⏮⏮ and ⏭⏭, around ⏮ and ⏭ (Tigran, 2026-11-23: "single tap or click on
+  // the left one should seek to the start of the current section, while the
+  // double-click or double-tap on it should seek to the start of the previous
+  // section"), the same press with Whole paper on or off.  On a section's
+  // page the queue is that section, and its neighbours are brought into the
+  // page as "Next" brings the next (carryOn); on the whole paper's page each
+  // section is a stretch of the queue, and the papers before and after are
+  // brought in at its ends.  A section starts at its first segment, its
+  // spoken heading where the voice has one.
+  // The section segment i is in: a paragraph's address to its dot, a
+  // heading's its own on the whole paper's page, "15:3", and on a section's,
+  // where it is null, that section.
+  function secAt(i) { var r = V.segs[i][0]; return r ? r.split('.')[0] : D.paper + ':' + D.section; }
+  // The first segment of each section the voice reads here, in order.
+  function secStarts() {
+    var out = [];
+    for (var i = 0; i < V.segs.length; i++) if (!i || secAt(i) !== secAt(i - 1)) out.push(i);
+    return out;
+  }
+  // Which of them holds the segment being heard; at the end, the last.
+  function secHere(st) {
+    var j = st.length - 1;
+    while (k >= 0 && j > 0 && st[j] > k) j--;
+    return j;
+  }
+  // Once: this section again, from its start.  Twice in quick succession:
+  // the one before, and each further quick press one more, as ⏮ goes.
+  var lastSec = 0;
+  function secBack() {
+    var now = Date.now(), again = now - lastSec < 400;
+    lastSec = now;
+    if (!V) return;
+    if (carrying) { if (again) owe--; return; }
+    if (again) return void secStep(-1);
+    var st = secStarts();
+    go(st[secHere(st)]);
+  }
+  function secNext() {
+    if (!V) return;
+    if (carrying) { owe++; return; }
+    secStep(1);
+  }
+  // One section on (d 1) or back (-1) from the one being heard: in the queue,
+  // or the next or the previous page's.  At the end of the section the one
+  // after it is the next.  False where there is none.
+  function secStep(d) {
+    var st = secStarts(), j = secHere(st) + d;
+    if (j >= 0 && j < st.length) { go(st[j]); return true; }
+    if (!(d < 0 ? D.prev : D.next)) return false;
+    carryOn(true, d < 0);
+    return true;
+  }
+  // The presses made while a section was being fetched, taken one at a time
+  // once it is in: a third quick ⏮⏮ across a page goes one more back, as it
+  // does within the whole paper; and ⏮'s and ⏭'s (`oweP`) first.
+  // Each until they are spent or one fetches another page, whose landing
+  // takes the rest: left over, they would be taken at some later carry.
+  function settle() {
+    while ((oweP || owe) && !carrying) {
+      var d;
+      if (oweP) {
+        d = oweP < 0 ? -1 : 1;
+        oweP -= d;
+        if (!(d < 0 ? paraBack() : paraOn())) oweP = 0;
+      } else {
+        d = owe < 0 ? -1 : 1;
+        owe -= d;
+        if (!secStep(d)) owe = 0;
+      }
+    }
+  }
   function finish() {
+    owe = oweP = 0;
     k = -1;
     mark();
     render();
@@ -935,29 +1069,52 @@
   }
 
   // ---- on into the next section, in this page --------------------------------
+  // Or back into the previous one, by ⏮⏮ (`back`; 2026-11-23): D.prev, the
+  // section before, across a paper's edge, or on the whole paper's page the
+  // paper before, whole (app.py read, paper_page).
   var pending = null;                // {href, html}: the next section's page, coming
+  // A page fetched for listening: the next, kept in `pending` as it is
+  // fetched ahead, or another, fetched as it is asked for.  X-UB-Fetch tells
+  // the visit counter a page fetched from one loaded.
+  function fetchPage(to) {
+    if (pending && pending.href === to.href) return pending.html;
+    var html = fetch(to.href, { credentials: 'same-origin', headers: { 'X-UB-Fetch': 'next' } }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    });
+    html.catch(function () {});
+    // The browser's voice's words for it, a section's; a whole paper's are
+    // asked for section by section as it is read (spoken).
+    if (V && V.kind === 'browser' && to.href.indexOf(':') >= 0) words(to.href, V.tr);
+    return html;
+  }
   function fetchNext() {
     var to = D.next;
     if (!to) return null;
-    if (!pending || pending.href !== to.href) {
-      // X-UB-Fetch tells the visit counter a page fetched ahead from one loaded.
-      pending = { href: to.href, html: fetch(to.href, { credentials: 'same-origin',
-                                                        headers: { 'X-UB-Fetch': 'next' } }).then(function (r) {
-        if (!r.ok) throw new Error(r.status);
-        return r.text();
-      }) };
-      pending.html.catch(function () {});
-      if (V && V.kind === 'browser') words(to.href, V.tr);
-    }
+    if (!pending || pending.href !== to.href) pending = { href: to.href, html: fetchPage(to) };
     return pending.html;
   }
-  // `tapped`: "Next", which goes on into a section a translation being read
-  // has none of, where carrying on by itself stops (Tigran, 2026-10-27).
-  function carryOn(tapped) {
-    var to = D.next;
+  // `tapped`: "Next", or ⏭⏭ or ⏮⏮, which go on into a section a translation
+  // being read has none of, where carrying on by itself stops (Tigran,
+  // 2026-10-27).  While the page comes, `carrying`: the bar stays as it was
+  // (render), and the section buttons' presses are counted (`owe`, settle).
+  // `trip` numbers each: × or a ▶ in the page while one comes leaves it
+  // behind (close, start), and what it brings is then dropped.
+  var carrying = false, owe = 0, oweP = 0, trip = 0;
+  // `last`: from the page's last paragraph, ⏮ pressed twice before its first.
+  function carryOn(tapped, back, last) {
+    var to = back ? D.prev : D.next;
     if (!to) return finish();
+    if (carrying) return;
+    carrying = true;
+    var mine = ++trip;
+    // What is heard stops: a section button is pressed in the middle of one.
+    hush();
+    audio.pause();
     k = -1;                            // nothing more to hear here
-    fetchNext().then(function (html) {
+    (back ? fetchPage(to) : fetchNext()).then(function (html) {
+      if (mine !== trip) return;
+      carrying = false;
       var doc = new DOMParser().parseFromString(html, 'text/html');
       var json = doc.getElementById('ub-audio');
       if (!doc.querySelector('main.reader') || !json) throw new Error('not a section page');
@@ -965,15 +1122,15 @@
         finish();
         return tell(T('The next section is not in {l}.', { l: T.html(TRS[V.tr].label) }));
       }
-      pending = null;
+      if (!back) pending = null;
       // The new section's files are numbered from 0 again: forget the old one.
       file = -1;
       // A translation goes on where the next section has it; else the English.
       // In the voice Settings asks for there (`trKey`): a recording lacks a
       // section now and then (Войнер's has no 19:0), which the browser's
       // voice then reads, and the recording goes on from the one after.
-      var t = trOf(key), kk = null;
-      if (same(P, D)) {
+      var t = trOf(key), kk = null, here = same(P, D);
+      if (here) {
         // The page shows the section that has ended: the next one takes its place.
         push(to.href);
         swap(doc);
@@ -995,11 +1152,20 @@
       }
       // With no recording of the section and no voice of the browser's to
       // read it, the next section is tried: nothing here can be heard.
-      if (V && V.kind === 'browser' && !synth) { D.next ? carryOn(tapped) : finish(); return; }
-      if (V) go(0); else finish();
+      if (V && V.kind === 'browser' && !synth) { (back ? D.prev : D.next) ? carryOn(tapped, back, last) : finish(); return; }
+      if (!V) return finish();
+      // Back into a whole paper, from its last section's start, or from the
+      // page's last paragraph, brought into view where the page is the one
+      // heard.
+      var st = back ? secStarts() : [0], i = last ? V.segs.length - 1 : st[st.length - 1];
+      go(i);
+      if (here && i > 0) toReading(true);
+      settle();
     }).catch(function () {
+      if (mine !== trip) return;
       // Offline, or the page changed shape: the link still works.
-      pending = null;
+      carrying = false;
+      if (!back) pending = null;
       finish();
     });
   }
@@ -1121,6 +1287,9 @@
     if (always || r.top < 40 || r.bottom > innerHeight - clearOf()) show(el);
   }
   function close() {
+    trip++;
+    carrying = false;
+    owe = oweP = 0;
     hush();
     audio.pause();
     audio.removeAttribute('src');

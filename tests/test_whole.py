@@ -135,6 +135,19 @@ class WholePaper(unittest.TestCase):
         self.assertEqual(j["voices"]["mh"]["segs"][0][0], None)
         self.assertNotIn("whole", j)
 
+    def test_the_section_buttons_know_where_back_is(self):
+        # ⏮⏮ pressed twice at a section's start goes to the one before
+        # (listen.js secStep, 2026-11-23): a section's page names the section
+        # before, across a paper's edge as the transport bar's ⏮ goes; the
+        # whole paper's page the paper before, whole; at the book's start none.
+        audio = lambda path: json.loads(re.search(r'id="ub-audio">(.*?)</script>', get(path, raw=True)[2], re.S)[1])
+        last = self.sections[14][-1]
+        for path, want in (("/15:3", "/15:2"), ("/15:0", f"/14:{last}"), ("/0:0", None),
+                           ("/15", "/14"), ("/1", "/0"), ("/0", None)):
+            j = audio(path)
+            self.assertEqual(j["prev"] and j["prev"]["href"], want, path)
+            self.assertEqual(set(j["prev"] or {}), {"href"} if want else set(), path)
+
     def test_compare_s_old_address_goes_to_the_page(self):
         plain, cmp = get("/15", raw=True), get("/15/compare", raw=True)
         self.assertEqual(plain[0], 200)

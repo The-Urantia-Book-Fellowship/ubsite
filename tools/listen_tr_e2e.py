@@ -31,7 +31,9 @@ section's end; the time left before the speed, on a screen of seven-segment
 digits read back from what is drawn, else plain figures, else none, an hour
 and more as h:mm:ss; on a desk and a tablet one row, the screen never costing
 the voice's name or the reference; and Follow along keeping the line being
-read clear of the bar at 125%.
+read clear of the bar at 125%.  With ⏮⏮ and ⏭⏭ around ⏮ and ⏭ (2026-11-23)
+the buttons drawn closer where the row needs it, before the time gives way,
+and at 320 px inside the bar at every size.
 
     .venv/bin/python tools/listen_tr_e2e.py        (after make data)
 
@@ -512,9 +514,9 @@ def lacking(b) -> None:
 GEO = """() => { const b = document.querySelector('.player'), q = s => { const e = s ? b.querySelector(s) : b;
       if (!e || !e.getClientRects().length) return null; const r = e.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; },
     n = b.querySelector('.voice span');
-  return { bar: q(''), mid: q('.mid'), prev: q('.prev'), toggle: q('.toggle'), close: q('.close'), onward: q('.onward'),
+  return { bar: q(''), mid: q('.mid'), prev: q('.prev'), sprev: q('.sprev'), toggle: q('.toggle'), close: q('.close'), onward: q('.onward'),
            left: q('.tleft'), rate: q('.rate'), t: b.querySelector('.tleft').textContent, title: b.querySelector('.tleft').title,
-           two: b.classList.contains('two'),
+           two: b.classList.contains('two'), tight: b.classList.contains('tight'),
            order: (() => { const k = [...b.children].filter(e => !e.matches('.mid, .onward') && e.getClientRects().length),
                n = e => e.className.split(' ')[0], s = k.slice().sort((x, y) => x.getBoundingClientRect().left - y.getBoundingClientRect().left);
              return s.map(n).join(' ') === k.map(n).join(' ') ? 'ok' : s.map(n).join(' '); })(),
@@ -544,14 +546,14 @@ FIT = "() => document.querySelector('.player .tleft').dataset.fit"
 
 
 def one_line(g: dict) -> bool:
-    """⏮, ⏵ and × centred on one line: under a short name the buttons once
-    wrapped into a third row."""
+    """⏮⏮, ⏮, ⏵ and × centred on one line: under a short name the buttons
+    once wrapped into a third row."""
     mid = lambda r: (r[1] + r[3]) / 2
-    if g["prev"][0] < g["inner"][0] - 1 or g["close"][2] > g["inner"][1] + 1:
+    if g["sprev"][0] < g["inner"][0] - 1 or g["close"][2] > g["inner"][1] + 1:
         return False                           # and inside the bar's padding
     if g["order"] != "ok" or (g["two"] and abs(g["side"][0] - g["side"][1]) > 2):
         return False                           # in their order, and in two rows centred
-    return all(abs(mid(g[x]) - mid(g["toggle"])) <= 2 for x in ("prev", "close", "rate") + (("left",) if g["left"] else ()))
+    return all(abs(mid(g[x]) - mid(g["toggle"])) <= 2 for x in ("sprev", "prev", "close", "rate") + (("left",) if g["left"] else ()))
 
 
 def secs(t: str) -> int:
@@ -656,6 +658,8 @@ def phone_bar(b) -> None:
                     ok(g["mid"][3] <= g["toggle"][1] + 1 and g["bar"][0] >= 0 and g["bar"][2] <= g["vw"]
                        and g["close"][2] <= g["bar"][2] and one_line(g),
                        say + f"on a line over the buttons, which are one line, the bar in the window ({g['bar']}, {g['mid']}, {g['toggle']})")
+                    if (ui, w) == ("100", 412):
+                        ok(not g["tight"], say + "the buttons at their ease, not drawn closer")
                     # The time left in the section, before the speed (Tigran,
                     # 2026-11-21), counting down as the reading goes on.
                     # As a watch's screen shows it, where the row has room,
@@ -683,6 +687,33 @@ def phone_bar(b) -> None:
                     pg.keyboard.press("Escape")
                 ok(not errors, say + "no script error: " + "; ".join(errors))
                 ctx.close()
+
+    # At 320 px, the narrowest phone: the nine buttons drawn closer
+    # (listen.js leftFit, .tight) and inside the bar at every size, the time
+    # left giving way as it did with seven before ⏮⏮ and ⏭⏭ (2026-11-23);
+    # and in the browser's voice, which has no time, drawn closer too.
+    for lang in ("en", "ru"):
+        for ui, want in (("100", "lcd"), ("112.5", "plain"), ("125", "none"), ("125", "browser")):
+            say = f"{lang} {ui}% 320 px{', the browser’s voice' if want == 'browser' else ''}: "
+            st = {"lang": lang, "uisize": ui}
+            if want == "browser":
+                st["voice"] = "browser"
+            ctx, pg, asked, errors = context(b, st, phone=True)
+            if want == "browser":
+                ctx.add_init_script(SLOW)
+            pg.set_viewport_size({"width": 320, "height": 800})
+            pg.goto(BASE + "/1:1")
+            pg.wait_for_selector("[id='1:1.2'] .stk > .playp", timeout=15000)
+            pg.click("[id='1:1.2'] .stk > .playp")
+            until(pg, "(document.querySelector('p.t.now') || {}).id === '1:1.2'")
+            pg.wait_for_timeout(200)
+            g = pg.evaluate(GEO)
+            ok(one_line(g) and g["two"] and g["tight"] and g["bar"][0] >= 0 and g["bar"][2] <= g["vw"],
+               say + f"the buttons drawn closer, inside the bar, in the window ({g['bar']}, {g['sprev']}, {g['close']}, {g['order']})")
+            fit = pg.evaluate(FIT)
+            ok(g["left"] is None if want == "browser" else fit == want, say + f"the time left: {fit}")
+            ok(not errors, say + "no script error: " + "; ".join(errors))
+            ctx.close()
 
     # The end of a section: 108:6.9 takes Merritt Horn 2.7 s, and Carry on
     # into the next section off, the bar says where to go on.

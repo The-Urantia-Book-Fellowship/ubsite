@@ -1993,6 +1993,9 @@ main { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .player .voices [role="group"] button { padding-left: 1.4rem; }
 .player .onward { white-space: nowrap; text-decoration: none; padding: 0 .5rem; }
 .player .close { color: var(--faint); }
+/* ⏭⏭ at the book's end, greyed in its place as the transport bar's icons
+   are there (.transport .off), so that nothing moves. */
+.player .snext:disabled { color: var(--rule); cursor: default; background: none; }
 /* A touch screen keeps :hover on whatever was tapped last, so ⏮ and ⏭ stayed
    lit after a tap on Android.  Hover is drawn only where there is a pointer that
    hovers; a tap shows by :active instead. */
@@ -2982,14 +2985,14 @@ h2.chap + .rh { margin-top: 1rem; }
    clear of the bar by its height (listen.js clearOf).  A grid, not a
    flex box that wraps: that is as wide as its widest item, and under a
    short name ("Merritt Horn") the buttons wrapped into a third row.  The
-   buttons each a column of the second row, seven at most (⏮ ⏵ ⏭ ↓, the
-   time left, the speed, ×; no ↓ and no time for the browser's voice),
+   buttons each a column of the second row, nine at most (⏮⏮ ⏮ ⏵ ⏭ ⏭⏭ ↓,
+   the time left, the speed, ×; no ↓ and no time for the browser's voice),
    spaced by their margins, so that a column left empty takes no room,
    and the line over them spanning them all, the bar as wide as the wider
    of the two (max-content: placed at the window's middle, the bar sized
    to fit had half the window to grow into, and a grid takes the least of
    it, the buttons' row). */
-.player.two { width: max-content; display: grid; grid-template-columns: 1fr repeat(7, auto) 1fr; justify-content: center;
+.player.two { width: max-content; display: grid; grid-template-columns: 1fr repeat(9, auto) 1fr; justify-content: center;
   justify-items: center; column-gap: 0; row-gap: 0; border-radius: 1.3rem; padding: .2rem .45rem .3rem; }
 /* A column at each end, flexible, takes what the line over the buttons
    has to spare, so that they stay in the middle with a column or two empty
@@ -2999,8 +3002,14 @@ h2.chap + .rh { margin-top: 1rem; }
    their order (one placed by its column went before the rest). */
 .player.two > * { grid-row: 2; }
 .player.two::before, .player.two::after { content: ""; grid-row: 2; grid-column: 1; }
-.player.two::after { grid-column: 9; }
+.player.two::after { grid-column: 11; }
 .player.two > :where(:not(.mid, .onward, .tleft)) { margin-inline: .075rem; }
+/* Drawn closer where the row needs it (listen.js leftFit, .tight), before
+   the time left gives way: no gaps, and less room in each button beside its
+   icon, ⏵ and ↓ keeping their circles (2026-11-23, with ⏮⏮ and ⏭⏭). */
+.player.two.tight > :where(:not(.mid, .onward)) { margin-inline: 0; }
+.player.two.tight > button:not(.toggle, .keep), .player.two.tight .ratebox > .rate { padding-inline: .28rem; }
+.player.two.tight .rate { min-width: 2.5rem; }
 .player.two .mid { grid-row: 1; grid-column: 1 / -1; justify-self: stretch; justify-content: center;
   align-items: baseline; font-size: .85rem; line-height: 1.15; }
 .player.two :is(.where, .voicebox) { flex: 0 1 auto; }

@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- The player has two more buttons, a section at a time, either side of the paragraph's: the left one goes back to the start of the section being heard, and pressed twice to the section before; the right one goes on to the next section. They work the same whether you read a section to a page or the whole paper, and step into the paper before or after at its ends.
 - Paper 1's quiz has 29 questions where it had one: 28 new, which ask what the paper means as well as what it says, such as why we call God Father, why he is invisible, and how union with him differs from a drop of water lost in the ocean; each shows the passage that answers it.
 - Unit conversions, under Charts on the home page: the units of time, distance, speed, weight and temperature the papers use, from the Paradise-Havona standard day and the Jerusem day to the standard mile of Jerusem and the gradant, each in the papers' words with its paragraph, beside the familiar ones; type a number in any row and every other row follows, and figures from the text fill the table at a tap.
 - The Bible, at /bible: the King James Version with its notes, each gloss a mark before the words it glosses as the 1769 printing set it, and the Russian Synodal beside it, a verse to a row, in columns where there is room and folded under each verse where not; Settings, Texts, has two subtabs, The Urantia Book and The Bible. A study note's Bible reference leads to its verses, as does Ин 3:16 in the search box, and an orange dot at a verse's end opens the paragraphs whose notes cite it; the offline copy holds the KJV, the Synodal a download of its own.
@@ -95,6 +96,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The player's paragraph buttons cross into the paper before or after: the one for the paragraph before, pressed twice while a paper's title is being read, goes back to the last paragraph of the paper before, and the one for the next paragraph, at a paper's last paragraph, goes on into the next paper from its title; on a section's own page they do the same at a section's title and last paragraph. They used to stop there.
 - A paper's quiz asks its questions in a new order each time you take it, and shows each question's answers in a new order too, but where the order means something, as yes and no, or numbers that rise; what to read again is listed in the paper's order.
 - A paper's quiz no longer opens with a line saying how many questions it has and where they come from; Question 1 of 29, as you go, says the count.
 - The index is revised from its reading of Paper 60, with nine entries more, among them the first true birds sprung from a reptilian group and not from the flying dinosaurs, the grasses second in importance only to the appearance of man, and the sea serpents' fifty-foot body; thirteen entries are reworded or have their citations put right, volcanoes among them.
