@@ -96,6 +96,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Changed
 
+- The paragraph a link takes you to lets go of its tint after five seconds, where it held it for seven.
 - The player's paragraph buttons cross into the paper before or after: the one for the paragraph before, pressed twice while a paper's title is being read, goes back to the last paragraph of the paper before, and the one for the next paragraph, at a paper's last paragraph, goes on into the next paper from its title; on a section's own page they do the same at a section's title and last paragraph. They used to stop there.
 - A paper's quiz asks its questions in a new order each time you take it, and shows each question's answers in a new order too, but where the order means something, as yes and no, or numbers that rise; what to read again is listed in the paper's order.
 - A paper's quiz no longer opens with a line saying how many questions it has and where they come from; Question 1 of 29, as you go, says the count.

@@ -959,7 +959,7 @@ p.t.head { text-align: center; }
 p.t.hit, p.t.now, .rt.hit, .rt.now, .tree li:target, p.kv.hit { scroll-margin-top: 3rem; }
 p.t.hit, p.t.named, .rc p.rt.hit, .rc p.rt.named, .tf p.rt.named, p.kv.hit, p.kv.named { background: color-mix(in oklch, var(--link) 12%, transparent);
           border-radius: 3px; box-shadow: 0 0 0 .35rem color-mix(in oklch, var(--link) 12%, transparent); }
-/* The paragraph arrived at, let go of by itself after seven seconds (ub.js
+/* The paragraph arrived at, let go of by itself after five seconds (ub.js
    hitLater): its tint fades, still .hit, so that a block's band, drawn
    before it, fades with it; then the script takes both classes off. */
 p.t.hit.hitgo, .rc p.rt.hit.hitgo, p.kv.hit.hitgo { background-color: transparent; box-shadow: 0 0 0 .35rem transparent;

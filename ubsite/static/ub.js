@@ -778,7 +778,8 @@
   // The paragraph marked as the place the page opened at: the English, or in
   // columns a translation's, where a search's hit in it opened the page (cmpHit).
   var HIT = 'p.t.hit, .rc p.rt.hit, p.kv.hit';
-  // And let go of by itself, seven seconds after it was arrived at, fading
+  // And let go of by itself, five seconds after it was arrived at (seven
+  // until 2026-11-23, Tigran: "Seven is too much"), fading
   // (ub.css .hitgo) for most of one more (Tigran, 2026-11-19: "to unhighlight
   // it you have to tap it twice ... which is not very convenient.  On the
   // other hand, not highlighting it at all is also not good.  So, how about we
@@ -787,7 +788,7 @@
   // tab not shown, a reference opened in the background, counted from when it
   // is shown.  Again from the start at each new arrival; a tap lets go of it
   // sooner (unhit, which ends the count too).
-  var HIT_HOLD = 7000, hitTimer = 0, hitWaits = false;
+  var HIT_HOLD = 5000, hitTimer = 0, hitWaits = false;
   function hitLater() {
     clearTimeout(hitTimer);
     hitTimer = 0;

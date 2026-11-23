@@ -32,10 +32,10 @@ class RunningHead(unittest.TestCase):
 
     def test_the_paragraph_arrived_at_is_let_go_of_by_itself(self):
         # Tigran, 2026-11-19: the mark of the paragraph a link arrived at
-        # goes after seven seconds, fading; one tapped (.named) stays.  The
+        # goes after five seconds, fading; one tapped (.named) stays.  The
         # columns' second placing (arrive(true)) neither marks again nor
         # counts again, and arrive() as a listener is handed no event for it.
-        self.assertIn("var HIT_HOLD = 7000,", JS)
+        self.assertIn("var HIT_HOLD = 5000,", JS)
         self.assertIn("p.t.hit.hitgo, .rc p.rt.hit.hitgo, p.kv.hit.hitgo { background-color: transparent;", CSS)
         self.assertIn(".verse p.t.hit.hitgo::before { background-color: transparent;", CSS)
         self.assertNotRegex(CSS, r"\.named[^{]*\.hitgo|\.hitgo[^{]*\.named")
