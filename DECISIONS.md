@@ -252,7 +252,7 @@ Ruled on 2026-11-18, when Tigran asked for sign-up by Google account so that set
 - **Google's button is drawn as Google's guidelines give it**, its mark in its four colours on white, the words in a plain face: the one control on the site not in the book's.
 - **Nothing of an account is in the visit counter's database, nor joined to it**: no address under `/account` is counted, the callback's above all, whose query has Google's code.
 - **A host's secrets are a file in `var/`, mode 0600, as `var/stats.passwd` is**, written by a command on the host: not the unit's, which would be a root step on each host, and never the repository's. With no such file a site has no accounts.
-- **AI, for the accounts given it, of four kinds** (Tigran, 2026-11-18): Ask the book, Explain this paragraph, Search by meaning, Translation help. To be planned by itself. Two things are his to rule then: `ROADMAP.md`'s "No AI search", and which model answers and by whose key or subscription.
+- **AI, for the accounts given it, of four kinds** (Tigran, 2026-11-18): Ask the book, Explain this paragraph, Search by meaning, Translation help. To be planned by itself. Two things are his to rule then: `ROADMAP.md`'s "No AI search", and which model answers and by whose key or subscription. The first was ruled on 2026-11-23: Search by meaning, for every reader, beside the index (`ROADMAP.md`, What not to build, reworded); the second is still open.
 
 ## The text API and the licence
 

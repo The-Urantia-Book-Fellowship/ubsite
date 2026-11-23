@@ -116,8 +116,7 @@ The press text is authoritative American; the British Study Edition is revised, 
 ## What not to build
 
 - **No discussion forum or comments.** Every site in this space has died of its comment section.
-- **No accounts before they are needed.** Anonymous, cookie-scoped preferences carry a long way.
-- **No "AI search".** The index *is* the semantic layer, made by people, and it is the entire differentiator. Burying it under an embedding model would be the single worst decision available here.
+- **Nothing that buries the index.** The index *is* the semantic layer, made by people, and it is the entire differentiator. Search by meaning (embeddings, ruled 2026-11-23) is built beside it, in a window of its own, with the index as one of its routes; nothing, AI or otherwise, replaces the index or mixes into the ordinary search.
 - **Do not re-derive the Paramony.** Urantiapedia has 13,000 Bible↔UB cross-references. Differentiate or link out.
 
 ---
