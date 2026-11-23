@@ -3534,6 +3534,114 @@
     a = document.querySelector('header a.brand');
     if (a) a.click(); else location.assign('/');
   });
+  // Gestures (Tigran, 2026-11-23), where a reader turns them on in Settings'
+  // Reading tab, off by default: "Let's make it easier to navigate the text
+  // by making swipe from the right to go to the next section (or paper if
+  // "Whole paper" setting is in effect) and swipe from the left to go to the
+  // previous section"; and at once, "let's make it _optional_ ... the
+  // setting that _enabled_ them, i.e. by default it is not set".  A finger
+  // drawn leftwards across the text goes on, and rightwards back, by a click
+  // on the page's own transport bar, as Home clicks the header's mark: ⏭, or
+  // ⏩ on the whole paper's page, which has no ⏭; ⏮, or ⏪.  So the Whole
+  // paper handler, listen.js's swap while a recording plays, the offline
+  // copy and the count go as for a tap on the bar, on a section, a whole
+  // paper, a part's page (its ⏭) and a Bible chapter alike (his choice).
+  // An arrow comes in from the side the page will come from as the finger
+  // moves, the bar's own icon in a disc with its label under it, and fills in
+  // once the stroke is long enough to count (his choice of three): moved back
+  // short of that before the finger lifts, nothing happens, so there is no
+  // time limit.  Never from the screen's very edge, which is Android's Back
+  // and Safari's history swipe; never with a second finger, on a page zoomed
+  // in, which a sideways stroke pans, nor while words are selected, the long
+  // press and its handles; and only on the text (main article), not in a
+  // card, a field or anything that scrolls sideways.  Every listener is
+  // passive: the browser scrolls, pinches and selects as ever, and a stroke
+  // whose first decisive move is more down than across is a scroll for good.
+  var GEDGE = 24, gst = null, garrow = null;
+  function gestOn() { return document.documentElement.dataset.gestures === 'true'; }
+  // The page's own link on (dir 1) or back (-1): in the transport bar at the
+  // text's end, not a part page's upper copy nor Help's examples, and of a
+  // pair the one the stylesheet shows (a part page's .fwin and .fwout).
+  function gestLink(dir) {
+    var navs = document.querySelectorAll('main article nav.transport:not(.upper)'),
+        ks = dir > 0 ? ['a.next', 'a.ff'] : ['a.prev', 'a.fb'], nav = null, as, i, k;
+    for (i = navs.length - 1; i >= 0 && !nav; i--) if (!navs[i].closest('.eg')) nav = navs[i];
+    for (k = 0; nav && k < ks.length; k++) {
+      as = nav.querySelectorAll(ks[k]);
+      for (i = 0; i < as.length; i++) if (as[i].getClientRects().length) return as[i];
+    }
+    return null;
+  }
+  // Something under the finger that scrolls sideways, the page itself too:
+  // the stroke is its own.
+  function gestSideways(t) {
+    var root = document.documentElement, o;
+    for (var e = t; e && e !== root && e !== document.body; e = e.parentElement) {
+      if (e.scrollWidth > e.clientWidth + 1 &&
+          ((o = getComputedStyle(e).overflowX) === 'auto' || o === 'scroll')) return true;
+    }
+    return root.scrollWidth > root.clientWidth + 1;
+  }
+  function gestGone() {
+    gst = null;
+    if (garrow) garrow.hidden = true;
+  }
+  function gestDraw(s) {
+    var svg;
+    if (!s.a) { if (garrow) garrow.hidden = true; return; }   // nowhere to go that way
+    if (!garrow) {
+      garrow = document.createElement('div');
+      garrow.className = 'swipe';
+      garrow.setAttribute('aria-hidden', 'true');
+      garrow.innerHTML = '<span class="disc"></span><span class="lbl"></span>';
+      document.body.appendChild(garrow);
+    }
+    svg = s.a.querySelector('svg');
+    garrow.firstChild.innerHTML = svg ? svg.outerHTML : '';
+    garrow.lastChild.textContent = s.a.getAttribute('aria-label') || '';
+    garrow.classList.toggle('back', s.dir < 0);
+    garrow.classList.remove('armed');
+  }
+  document.addEventListener('touchstart', function (ev) {
+    var p = ev.touches[0], t = ev.target, vv = window.visualViewport, w = document.documentElement.clientWidth;
+    gestGone();
+    if (ev.touches.length !== 1 || !gestOn() || !t.closest) return;
+    if (p.clientX < GEDGE || p.clientX > w - GEDGE || (vv && vv.scale > 1.01)) return;
+    if (!getSelection().isCollapsed || document.querySelector('dialog[open]')) return;
+    if (!t.closest('main article') || t.closest('.pop, .eg, input, textarea, select, [contenteditable]')) return;
+    if (Array.prototype.some.call(document.querySelectorAll('.tour-card'),
+                                  function (c) { return c.getClientRects().length; })) return;
+    if (gestSideways(t)) return;
+    gst = { x: p.clientX, y: p.clientY, id: p.identifier, across: false, dir: 0, a: null, armed: false };
+  }, { passive: true });
+  document.addEventListener('touchmove', function (ev) {
+    var s = gst, p, dx, dy, ax, ay, dir, need;
+    if (!s) return;
+    p = ev.touches[0];
+    if (ev.touches.length !== 1 || p.identifier !== s.id) return gestGone();
+    dx = p.clientX - s.x; dy = p.clientY - s.y;
+    ax = Math.abs(dx); ay = Math.abs(dy);
+    if (!s.across) {
+      if (ax < 10 && ay < 10) return;
+      if (ay >= ax) return gestGone();      // a scroll
+      s.across = true;
+    }
+    dir = dx < 0 ? 1 : -1;
+    if (dir !== s.dir) { s.dir = dir; s.a = gestLink(dir); gestDraw(s); }
+    need = Math.min(Math.max(64, innerWidth * .2), 150);
+    s.armed = !!s.a && ax >= need && ay <= ax / 2 && getSelection().isCollapsed;
+    if (!s.a) return;
+    garrow.hidden = ax <= 16;
+    garrow.style.setProperty('--p', Math.min(1, Math.max(0, (ax - 16) / (need - 16))).toFixed(3));
+    garrow.classList.toggle('armed', s.armed);
+  }, { passive: true });
+  document.addEventListener('touchend', function (ev) {
+    var a = gst && gst.armed && !ev.touches.length && gst.a;
+    gestGone();
+    if (a && getSelection().isCollapsed) a.click();
+  }, { passive: true });
+  document.addEventListener('touchcancel', gestGone, { passive: true });
+  document.addEventListener('ub:swap', gestGone);
   // Only a finger's tap, or a pen's: a mouse's click selects words.  And the
   // selection as it stood before the tap, which the browser clears before the
   // tap's click (tapHead, below).

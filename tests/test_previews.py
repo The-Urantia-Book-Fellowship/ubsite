@@ -79,7 +79,13 @@ class Drag(unittest.TestCase):
         self.assertIn("el.addEventListener('touchmove', function (ev) {", f)
         self.assertIn("}, { passive: false });", f)
         self.assertEqual(JS.count("passive: false"), 1)
-        self.assertNotRegex(JS, r"document\.addEventListener\('touch(?:start|move)'")
+        # On the document only passive listeners, which no touch waits for:
+        # the swipe's (gestOn, 2026-11-23), each passive: true.
+        at = [m.start() for m in re.finditer(r"document\.addEventListener\('touch(?:start|move|end|cancel)'", JS)]
+        self.assertEqual(len(at), 4)
+        for i in at:
+            call = JS[i:JS.index("});", i) + 3] if "function" in JS[i:i + 60] else JS[i:JS.index(");", i) + 2]
+            self.assertTrue(call.endswith("{ passive: true });"), call[:80])
 
     def test_decided_once_at_the_first_move(self):
         f = body("popTouch")

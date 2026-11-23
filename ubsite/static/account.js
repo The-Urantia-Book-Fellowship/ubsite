@@ -66,8 +66,8 @@
       // script, which named no version, noted whatever it was sent and said
       // of a setting it did not keep that it was back at its default.  Raised
       // whenever a setting comes to follow the account: 4 with biblesearch,
-      // 5 with bible, the Bible's texts in order.
-      V = 5;
+      // 5 with bible, the Bible's texts in order, 6 with gestures.
+      V = 6;
   var timer = 0, running = null, declined = false;
 
   function get(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }

@@ -10,6 +10,7 @@ Under each version, Added, Changed, Deprecated, Removed, Fixed and Security are 
 
 ### Added
 
+- On a phone or a tablet a swipe across the text can turn to the next section, or the next paper with Whole paper on, and back the other way, a chapter at a time in the Bible; an arrow shows where it goes. Turn it on with Gestures in Settings, Reading.
 - The player has two more buttons, a section at a time, either side of the paragraph's: the left one goes back to the start of the section being heard, and pressed twice to the section before; the right one goes on to the next section. They work the same whether you read a section to a page or the whole paper, and step into the paper before or after at its ends.
 - Paper 1's quiz has 29 questions where it had one: 28 new, which ask what the paper means as well as what it says, such as why we call God Father, why he is invisible, and how union with him differs from a drop of water lost in the ocean; each shows the passage that answers it.
 - Unit conversions, under Charts on the home page: the units of time, distance, speed, weight and temperature the papers use, from the Paradise-Havona standard day and the Jerusem day to the standard mile of Jerusem and the gradant, each in the papers' words with its paragraph, beside the familiar ones; type a number in any row and every other row follows, and figures from the text fill the table at a tap.

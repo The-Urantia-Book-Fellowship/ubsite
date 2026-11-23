@@ -154,6 +154,20 @@ READING = [
     # section 4); SITE_DEFAULTS sets a site's default meanwhile.
     ("foreword", "switch", "Foreword in Part I", True, [],
      "wherever the parts are listed; off, it stands on its own before them"),
+    # Gestures on a touch screen (Tigran, 2026-11-23: "Let's make it easier to
+    # navigate the text by making swipe from the right to go to the next
+    # section (or paper if "Whole paper" setting is in effect) and swipe from
+    # the left to go to the previous section"; and at once, "let's make it
+    # _optional_, i.e. add a global setting (for future gestures as well)
+    # ... the setting that _enabled_ them, i.e. by default it is not set").
+    # A swipe across the text does what the page's transport bar does, by
+    # clicking it: to the left ⏭, or ⏩ on the whole paper's page, to the
+    # right ⏮ or ⏪ (ub.js gestOn).  Every gesture to come goes behind this
+    # switch.  No CSS rule of effect: ub.js reads it, as it reads preview;
+    # the one rule hides the row where the device has no touch screen (his
+    # choice the same day), and it follows the account (LATE).
+    ("gestures", "switch", "Gestures", False, [],
+     "on a touch screen, a swipe to the left goes on a section, or a paper with Whole paper on, and to the right back"),
 ]
 SHOW = [
     # Off, the site is the book alone, with its 1955 readings if they are on:
@@ -403,7 +417,8 @@ DEVICE = ["uisize", "size", "lead", "width", "bvoice", "trvoices", "rail", "marg
 # script before it shows the English first whatever the account says.
 # `biblesearch`, the Bible in search results, came at 4, and `bible`, the
 # Bible's texts in order, at 5 (both 2026-11-21, before either was deployed).
-LATE = {"tropen": 2, "trtab": 2, "english": 3, "biblesearch": 4, "bible": 5}
+# `gestures`, the swipe and every gesture to come, at 6 (2026-11-23).
+LATE = {"tropen": 2, "trtab": 2, "english": 3, "biblesearch": 4, "bible": 5, "gestures": 6}
 
 
 # A site's own defaults, by the host a page is read at, where they differ from

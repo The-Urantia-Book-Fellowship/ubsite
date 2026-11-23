@@ -1710,6 +1710,41 @@ article.cmp .row:has(> .verse) > .rc { margin-top: .6rem; }
 @media (hover: hover) {
   .transport a:hover { background: color-mix(in oklch, var(--link) 10%, transparent); }
 }
+/* A swipe's arrow, with Gestures on (ub.js gestOn; Tigran, 2026-11-23): the
+   transport bar's own icon in a disc, come in from the side the page will
+   come from as the finger moves (--p, 0 to 1), the link's label under it,
+   and filled in, blue, once the stroke is long enough to count.  Slid in,
+   not faded: a label half seen through left the text under it showing.
+   Over the text and the running head, under a card and the dialog; never a
+   target. */
+.swipe { position: fixed; z-index: 5; top: 50%; right: .8rem; display: grid; justify-items: end;
+  gap: .45rem; pointer-events: none;
+  transform: translate(calc((1 - var(--p, 0)) * 3.5rem), -50%); }
+.swipe.back { right: auto; left: .8rem; justify-items: start;
+  transform: translate(calc((var(--p, 0) - 1) * 3.5rem), -50%); }
+.swipe[hidden] { display: none; }
+.swipe .disc { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%;
+  background: var(--card); color: var(--link); border: 1px solid var(--rule);
+  box-shadow: 0 4px 14px rgb(0 0 0 / .14); transition: background-color .12s, color .12s, border-color .12s; }
+.swipe svg { width: 1.3rem; height: 1.3rem; fill: currentColor; display: block; }
+.swipe.armed .disc { background: var(--link); border-color: var(--link); color: var(--paper); }
+.swipe .lbl { font-size: .8rem; line-height: 1.25; white-space: nowrap; color: var(--faint);
+  background: var(--card); border: 1px solid var(--rule); border-radius: .4rem;
+  padding: calc(.15rem + var(--lift)) .5rem .15rem; }
+.swipe.armed .lbl { color: var(--ink); }
+/* And the browser's own swipe through the history held off while they are on:
+   Chrome on a touch screen with no system gesture for Back, a laptop's,
+   takes a sideways stroke the page does not scroll for Back or Forward, so a
+   swipe to the right went back a section and back in the history too, and
+   one that fell short still went back (found by tools/swipe_e2e.py).  The
+   system's own Back from a phone's edge, and Safari's, are not the page's
+   to hold, and a stroke from the edge is never a swipe (ub.js GEDGE). */
+:root[data-gestures="true"] { overscroll-behavior-x: none; }
+/* Its switch only where the device has a touch screen (Tigran, the same
+   day): a desk's mouse has nothing to swipe with. */
+@media not (any-pointer: coarse) {
+  dialog.settings label:has(> input[name="gestures"]) { display: none; }
+}
 
 /* ---- listening (listen.js) --------------------------------------------- */
 button svg { width: 1em; height: 1em; fill: currentColor; display: block; }
