@@ -4,6 +4,11 @@
 
 PY      := .venv/bin/python
 DB      := var/ub.db
+# onnxruntime's Linux wheel reports to Microsoft unless this is in the
+# environment as it loads (CLAUDE.md trap 79).  ubsite/meaning.py sets it
+# itself; here for everything else a target runs, the ML environments' tools
+# among them, which load the library through others (Whisper's voice detector).
+export ORT_DISABLE_TELEMETRY := 1
 # The ML environments: on the NVMe home, never on /Audio, never in requirements.txt.
 ML      := $(HOME)/Software/ml
 ALIGN   := $(ML)/venv-align/bin/python

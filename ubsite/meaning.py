@@ -45,6 +45,26 @@ class TooLong(ValueError):
     """A text of more than MAX_TOKENS tokens."""
 
 
+def runtime():
+    """onnxruntime, told first to report nothing.  The library's Linux wheel
+    carries Microsoft's telemetry (1.32.0 does; found 2026-11-24, in the
+    journal of the first host given it): unless ORT_DISABLE_TELEMETRY is in
+    the environment as the library loads, every process that makes a session
+    writes a device id and a queue of events under ~/.cache/Microsoft/ and
+    tells mobile.events.data.microsoft.com what it runs on, the system, the
+    processor, the program's name, and by the fields compiled in the model's
+    file name and hashes and how long its runs took.  No text given to a
+    model is among them; all the same a host of this site tells nobody what
+    it runs.  `disable_telemetry_events()` after the import does not stop it:
+    traced, the connection is made all the same.  This is the only import of
+    the library (tests/test_meaning.py holds every one to it), for the
+    server, the build and the retrieval test alike."""
+    import os
+    os.environ["ORT_DISABLE_TELEMETRY"] = "1"
+    import onnxruntime
+    return onnxruntime
+
+
 class Embedder:
     """bge-m3: texts to unit vectors of 1,024 float32, the CLS token of the
     last hidden state, L2-normalised, with no prefix, as the model is made to
@@ -59,9 +79,9 @@ class Embedder:
 
     def __init__(self, model: pathlib.Path = MODEL, threads: int = 4, gpu: bool = False):
         import numpy
-        import onnxruntime
         from tokenizers import Tokenizer
 
+        onnxruntime = runtime()
         self.np = numpy
         opts = onnxruntime.SessionOptions()
         opts.intra_op_num_threads = threads

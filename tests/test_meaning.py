@@ -43,6 +43,40 @@ def ro(path: pathlib.Path) -> sqlite3.Connection:
     return sqlite3.connect(f"file:{path}?mode=ro", uri=True)
 
 
+class Quiet(unittest.TestCase):
+    """onnxruntime's Linux wheel reports to Microsoft unless
+    ORT_DISABLE_TELEMETRY is in the environment as it loads (CLAUDE.md trap
+    79): found in a host's journal on 2026-11-24, after the first deploy."""
+
+    def test_the_runtime_is_imported_in_one_place_told_first_to_report_nothing(self):
+        found = []
+        for d in ("ubsite", "build", "tools", "offline", "tests"):
+            for f in sorted((ROOT / d).rglob("*.py")):
+                for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                    if re.match(r"\s*(import|from)\s+onnxruntime\b", line):
+                        found.append(f"{f.relative_to(ROOT)}:{n}")
+        self.assertEqual(len(found), 1, found)
+        self.assertTrue(found[0].startswith("ubsite/meaning.py:"), found)
+        import inspect
+        src = inspect.getsource(meaning.runtime)
+        self.assertIn("import onnxruntime", src, "the one import is runtime()'s")
+        self.assertLess(src.index('os.environ["ORT_DISABLE_TELEMETRY"] = "1"'), src.index("    import onnxruntime"))
+
+    def test_it_is_told_even_where_the_environment_said_otherwise(self):
+        was = os.environ.pop("ORT_DISABLE_TELEMETRY", None)
+        try:
+            ort = meaning.runtime()
+            self.assertEqual(os.environ.get("ORT_DISABLE_TELEMETRY"), "1")
+            self.assertTrue(hasattr(ort, "InferenceSession"))
+        finally:
+            if was is not None:
+                os.environ["ORT_DISABLE_TELEMETRY"] = was
+
+    def test_the_unit_and_the_makefile_say_it_too(self):
+        self.assertIn("\nEnvironment=ORT_DISABLE_TELEMETRY=1\n", (ROOT / "deploy/ubsite.service").read_text())
+        self.assertRegex((ROOT / "Makefile").read_text(), r"(?m)^export ORT_DISABLE_TELEMETRY := 1$")
+
+
 class Pins(unittest.TestCase):
     def test_the_gpu_environment_is_pinned_as_the_site_is(self):
         """tools/embed/requirements.in is written by hand: the runtime's GPU

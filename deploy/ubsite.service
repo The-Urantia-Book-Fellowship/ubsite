@@ -39,6 +39,12 @@ RestartSec=5
 # pages a second (2026-10-27).
 Environment=MALLOC_ARENA_MAX=2
 
+# onnxruntime, which runs Search by meaning's model, reports to Microsoft
+# unless told not to as it loads (ubsite/meaning.py runtime(), which sets
+# this itself before its one import; CLAUDE.md trap 79). Said here too, so
+# that the host does not depend on that line alone.
+Environment=ORT_DISABLE_TELEMETRY=1
+
 # A leak-catcher, not a budget: about 200 MB RSS at rest, under 700 MB under a
 # long burst (above). ub.db is read through the page cache, which is not charged
 # here.

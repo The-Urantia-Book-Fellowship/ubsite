@@ -261,6 +261,8 @@ Then, from anywhere: twelve questions one after another, of which the twelfth is
 
 **Tried here first** (2026-11-24, trap 43): nginx 1.28.3, the VPS's version, built in a scratch directory and run as an ordinary user in front of the dev server with `deploy/ubsite-sigmaai.nginx`, only the ports, the certificate and the paths changed. The file parses; `/meaning` is the page; a question is answered through it with its twenty passages in 0.15 s, in Russian too; one of 300 Cyrillic letters, the longest the page sends, is a body of 609 bytes and goes through the site's 1 KB; a body of 1.1 KB is nginx's 413, which the page words as a question too long; a GET of `/meaning/find` is the app's 405; and of a run of questions the twelfth and every one after it was a 429.
 
+**The runtime's telemetry, off.** onnxruntime, which runs the model, reports to Microsoft unless `ORT_DISABLE_TELEMETRY=1` is in the environment as it loads (CLAUDE.md trap 79). `ubsite/meaning.py` sets it itself before its one import, so a host needs no step for it; `deploy/ubsite.service` says it too since 2026-11-24, and is installed as in step 1 whenever the unit is next installed. With it on, a worker's start writes "Failed to persist telemetry device ID" in the journal, the unit having no home to write in: `journalctl -u ubsite | grep -i telemetry` must be empty after a restart.
+
 After a deploy: `curl -s https://ubsite.sigmaai.au/healthz` says `"meaning":true`; `systemctl show ubsite -p MemoryCurrent` on the host is about 4 GB once both workers have answered; and `journalctl -u ubsite | grep "Search by meaning"` is empty, a line there being the model that failed to load, with why.
 
 ## The offline copy's chunks, kept by nginx
