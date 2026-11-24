@@ -102,6 +102,10 @@
       <span class="sub">{{ t('home:t:contents', n=stats.papers) }}</span></a></li>
     <li class="ix"><a href="/index">{{ chrome.way_svg('index') }}<span class="lbl">{{ t('Index') }}</span>
       <span class="sub">{{ t('home:t:index', e=stats.az_entries, h=stats.headwords) }}</span></a></li>
+    {#- Search by meaning (meaning.html; Tigran, 2026-11-24: "A tile on the
+        home page"), after the index, which it searches through. #}
+    <li><a href="/meaning">{{ chrome.way_svg('meaning') }}<span class="lbl">{{ t('Search by meaning') }}</span>
+      <span class="sub">{{ t('home:t:meaning') }}</span></a></li>
     {#- The Bible (bible.html), where it is built (Tigran, 2026-11-21: "A tile
         on the home page"; the KJV's that morning, the Bible's since the
         Synodal came beside it). #}

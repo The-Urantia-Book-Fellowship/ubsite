@@ -24,6 +24,7 @@ limit_req_zone $binary_remote_addr zone=ubsite_api:10m rate=40r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_board:10m rate=10r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_sync:10m rate=30r/m;
 limit_req_zone $binary_remote_addr zone=ubsite_stats:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=ubsite_meaning:10m rate=20r/m;
 
 # nginx's own copies of the offline copy's chunks. See deploy/ubsite.nginx.
 proxy_cache_path /var/cache/ubsite-nginx levels=1:2 keys_zone=ubsite_chunks:1m
@@ -105,6 +106,21 @@ server {
     location = /account/sync {
         client_max_body_size 1m;
         limit_req zone=ubsite_sync burst=10 nodelay;
+        limit_req_status 429;
+        proxy_pass http://127.0.0.1:8130;
+        include /etc/nginx/proxy_params;
+    }
+
+    # A question put to Search by meaning (ubsite/meaning.py; app.py
+    # meaning_find): the model turns it into a vector on this host's own CPU,
+    # a tenth of a second of four cores, so twenty a minute from one address,
+    # which a reader trying one question after another does not reach.  The
+    # page says so in words at a 429 (static/meaning.js).  The question is in
+    # the body, which no log keeps, and fits the site's 1 KB.  The app turns
+    # away all but a few at once itself, whatever stands in front of it.  An
+    # exact match (trap 19).
+    location = /meaning/find {
+        limit_req zone=ubsite_meaning burst=10 nodelay;
         limit_req_status 429;
         proxy_pass http://127.0.0.1:8130;
         include /etc/nginx/proxy_params;

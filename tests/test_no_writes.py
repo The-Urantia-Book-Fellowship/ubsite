@@ -32,6 +32,9 @@ ALLOWED = {
     "tools/rsb/versify.py": "var/rsb/",            # SIL's files and the proposal; with --write, the table it was ruled into
     "tools/audio/manifest.py": "data/audio/",      # a recording's list of files, and of those sent with an Info frame
     "tools/audio/compact.py": "var/audio/compact/",  # the recordings' compact copy (by ffmpeg), and its list in data/audio/
+    "tools/embed/fetch.py": "var/embed/",          # the model Search by meaning embeds with, placed and held to its digests
+    "tools/embed/build.py": "var/",                # embed.db, built as embed.db.tmp and swapped in; its cache and log in var/embed/
+    "tools/embed/bench.py": "var/embed/",          # the retrieval test's report, and the vectors of its questions
     "build/cli.py": "var/",                        # ub.db, built as ub.db.tmp and swapped in
     "build/db.py": "var/",                         # a database built afresh, the old one removed
     "build/oracle.py": "var/",                     # the oracles' sandboxes, their inputs linked in
@@ -99,8 +102,9 @@ class NoWrites(unittest.TestCase):
         # the edition's quiz, once, tools/cosmo/ the repository of the chart of the
         # personalities, tools/kjv/ the study edition's KJV, once, tools/rsb/
         # the Synodal's edition, once, tools/audio/ the recordings.
+        # tools/embed/ reads the databases and the model, and writes the vectors.
         for d in ("build", "offline", "tools/study", "tools/quiz", "tools/cosmo", "tools/kjv", "tools/rsb",
-                  "tools/audio"):
+                  "tools/audio", "tools/embed"):
             for p in (ROOT / d).rglob("*.py"):
                 yield p.relative_to(ROOT).as_posix(), p.read_text()
 

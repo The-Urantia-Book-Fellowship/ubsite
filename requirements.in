@@ -10,6 +10,15 @@ jinja2
 # city are looked up as a request is counted, and the IP is then dropped.
 maxminddb
 
+# Search by meaning (ubsite/meaning.py): the embedding model, bge-m3 in ONNX,
+# run on the host's CPU for each question; its tokenizer; and numpy, for the
+# one matrix product a search is.  The same three embed a changed text at the
+# build (`make embed`); the 3090's build of the runtime is tools/embed's own
+# (tools/embed/requirements.in), never here.
+onnxruntime
+tokenizers
+numpy
+
 # The build.  fontTools subsets UB Goudy to the corpus; the woff extra brings
 # brotli, without which it cannot write WOFF2.
 fonttools[woff]

@@ -50,7 +50,7 @@ FORMAT = 2
 # copy is one for every host (offline-core.js HOSTED); until 2026-10-15 they
 # were in it.  The tab's icon is chosen in the page from its address, so every
 # site's is kept (build()).
-ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js", "quiz.js", "help.js", "cosmo.js", "account.js", "units.js"]
+ASSETS = ["ub.css", "ub.js", "listen.js", "offline.js", "quiz.js", "help.js", "cosmo.js", "account.js", "units.js", "meaning.js"]
 # The pictures a stored page shows, each at every width it is made at, since
 # the browser chooses one by its screen and the copy must have whichever it
 # asks for: the home page's four part cards (ubsite/static/art/, made by

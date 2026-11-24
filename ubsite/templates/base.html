@@ -329,7 +329,19 @@ window.ubUnit = function (where) {
     <svg class="glass" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.2 10.2 14.5 14.5"/></svg>
     <input name="q" value="{{ q|default('') }}" {{ ta('aria-label', 'Search') }}
     {{ ta('title', 'Search (Ctrl+X, with any words selected)') }} aria-keyshortcuts="Control+X"
-    {{ ta('placeholder', 'a word, or a citation like 1:4.2') }} autocomplete="off"></form>
+    {{ ta('placeholder', 'a word, or a citation like 1:4.2') }} autocomplete="off">
+    {#- The other search (meaning.html; Tigran, 2026-11-24: "In the header's
+        search box", and the same day, of the link it first was: "should be a
+        tickbox, not a link. So one can send the query by pressing ENTER").
+        Ticked, Enter in the box asks its words of Search by meaning, on its
+        page, as a question in the address's fragment (ub.js bymGo); not
+        ticked, Enter is the ordinary search, as ever.  The tick is the
+        reader's, kept on the device (localStorage ub_bym, no setting), and
+        the same on every page.  Hidden until ub.js runs, and with no name:
+        with scripts off the box is the ordinary search alone, and nothing of
+        the tick is sent.  After the box, so that nothing of the offline
+        copy's cut at the box's value moves. #}
+    <label class="bym" {{ ta('title', 'find:bym') }} hidden><input type="checkbox"><span>{{ t('By meaning') }}</span></label></form>
   {#- The controls, in one box so that on a phone they wrap as one: at the
       end of the name's line where they fit, else together on the line under
       it (ub.css .top .ctl): the gear, the half-disc, full screen, the

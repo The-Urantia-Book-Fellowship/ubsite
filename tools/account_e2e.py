@@ -454,7 +454,7 @@ def main(what=None) -> int:
                         f'pictures = "{GOOGLE}/photo/[a-z]+"\n', encoding="utf-8")
         google = http.server.ThreadingHTTPServer(("127.0.0.1", int(GOOGLE.rsplit(":", 1)[1])), Google)
         threading.Thread(target=google.serve_forever, daemon=True).start()
-        env = dict(os.environ, UB_VISITS="off", UB_ACCOUNT_CONF=str(conf), UB_USER_DB=str(tmp / "user.db"))
+        env = dict(os.environ, UB_VISITS="off", UB_MEANING="off", UB_ACCOUNT_CONF=str(conf), UB_USER_DB=str(tmp / "user.db"))
         server = subprocess.Popen([str(ROOT / ".venv" / "bin" / "python"), "-c", SERVE, str(ROOT / "var" / "no-offline-copy"),
                                    SITE.rsplit(":", 1)[1]], cwd=ROOT, env=env)
         try:

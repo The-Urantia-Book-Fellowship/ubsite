@@ -298,7 +298,7 @@ def main() -> int:
         try:
             for name, base in (("a", A), ("b", B)):
                 # Each site's board beside it, as var/quiz.db is on a host.
-                env = dict(os.environ, UB_VISITS="off", UB_BOARD_DB=str(tmp / name / "quiz.db"))
+                env = dict(os.environ, UB_VISITS="off", UB_MEANING="off", UB_BOARD_DB=str(tmp / name / "quiz.db"))
                 servers.append(subprocess.Popen(
                     [str(ROOT / ".venv" / "bin" / "python"), "-c", SERVE, str(ROOT / "var" / "no-offline-copy"),
                      base.rsplit(":", 1)[1]], cwd=ROOT, env=env))

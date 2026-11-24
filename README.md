@@ -58,7 +58,7 @@ The rest are needed only by the tool named:
 | `pdftotext` (poppler-utils) | 26.01 | `tools/hyphen_print.py` |
 | `ffprobe` (ffmpeg) | 8.0 | `tools/audio/manifest.py` |
 
-Nothing else a tool uses lives outside the tree, but the audio work's environments in `~/Software/ml` ([Listening](#listening)). SQLite's WebAssembly release is fetched by URL and held to a digest, into `vendor/` by `make vendor-sync`. The hosts need none of this but uv: `deploy.sh` ships what was built here.
+Nothing else a tool uses lives outside the tree, but the environments in `~/Software/ml`: the audio work's ([Listening](#listening)), and `venv-embed`, the 3090's build of the runtime that embeds the whole book for Search by meaning (`make embed-venv`; `make embed GPU=1`). The model itself, 2.3 GB, is named in `sources.toml` `[embed]` by revision and digest and placed in `var/embed/bge-m3/` by `make embed-fetch`, from Hugging Face's cache in `~/Software/ml/hf` where it is there. SQLite's WebAssembly release is fetched by URL and held to a digest, into `vendor/` by `make vendor-sync`. The hosts need none of this but uv: `deploy.sh` ships what was built here.
 
 ---
 
@@ -148,14 +148,17 @@ The build writes `var/ub.db.tmp` and moves it into place only on success, so a f
 
 Near the end it says where the [text API](#the-text-api) stands: `unchanged at version N`, or, when anything a syncing site receives has changed, `version N+1: … records new or changed`. In that case it has appended the new version to `data/text/`, which must be committed with the change that made it (step 5).
 
-### 3. `make check` and `make test`
+### 3. `make embed`, `make check` and `make test`
 
 ```
+make embed        # Search by meaning's vectors of what make data changed, on the CPU; a minute after an edit of the index
 make check        # every gate, about 8 s, after rebuilding the oracles from the sources
 make offline      # the copy Work offline keeps, and its gates, about 45 s (needs Node)
 make test         # unit tests, including the never-write-to-a-master guard
 make paranoid     # optional: fingerprint the three trees, build, prove nothing moved
 ```
+
+`make embed` embeds only the texts that are new, and writes `var/embed.db` only where a unit has changed; without it `make check` fails on "units that are not today's". Where more than 2,000 are new, which is a change to the recipe (`build/embed.py`) or to the whole text, it stops and names `make embed GPU=1`, the 3090's four minutes. `./deploy/deploy.sh` runs it itself.
 
 When a gate fails because a source *legitimately* changed a number:
 

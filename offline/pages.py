@@ -208,6 +208,8 @@ def universe(con: sqlite3.Connection) -> dict:
                "/privacy", "/terms"]
             # The charts and Unit conversions (2026-11-22), one page each.
             + ["/charts"] + (["/units"] if con.execute("SELECT 1 FROM unit LIMIT 1").fetchone() else [])
+            # Search by meaning's page (2026-11-24), which says it needs the network.
+            + ["/meaning"]
             + [f"/part/{r[0]}" for r in con.execute("SELECT n FROM part ORDER BY n")])
     # The papers the quiz has questions on (build/quiz.py), each a page /quiz/N.
     quiz = [n for (n,) in con.execute("SELECT paper_n FROM quiz_paper ORDER BY paper_n")]

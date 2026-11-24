@@ -23,7 +23,7 @@ TEMPLATES = ROOT / "ubsite" / "templates"
 STATIC = ROOT / "ubsite" / "static"
 HELP_JS = (STATIC / "help.js").read_text(encoding="utf-8")
 CHROME = (TEMPLATES / "_chrome.html").read_text(encoding="utf-8")
-CHAPTERS = ["text", "index", "moving", "search", "listening", "notes", "translations", "settings", "account",
+CHAPTERS = ["text", "index", "moving", "search", "meaning", "listening", "notes", "translations", "settings", "account",
             "offline", "quiz", "chart", "russian", "keys", "about"]
 
 

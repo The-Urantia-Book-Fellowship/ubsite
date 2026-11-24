@@ -64,8 +64,8 @@ def load() -> dict:
 
     repos = {}
     for key, cfg in raw.items():
-        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology", "kjv_witness", "kjv_1769", "rsb", "rsb_vrs"):
-            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology(); kjv_witness and kjv_1769 tools/kjv/'s, rsb and rsb_vrs tools/rsb/'s
+        if key in ("audio", "srt", "texlive", "sqlite_wasm", "sbl_greek", "sbl_hebrew", "block", "cosmology", "kjv_witness", "kjv_1769", "rsb", "rsb_vrs", "embed"):
+            continue                                # not repositories the build reads: see audio(), srt(), texlive(), sqlite_wasm(), sbl(), block(), cosmology(); kjv_witness and kjv_1769 tools/kjv/'s, rsb and rsb_vrs tools/rsb/'s, embed tools/embed/'s
         if "zip" in cfg:
             repos[key] = _zip(key, cfg)
             continue
@@ -273,6 +273,16 @@ def rsb_vrs() -> dict:
     with open(ROOT / "sources.toml", "rb") as fh:
         cfg = tomllib.load(fh)["rsb_vrs"]
     return {"base": cfg["base"], "files": list(cfg["files"]), "sha256": dict(cfg["sha256"])}
+
+
+def embed() -> dict:
+    """{repo, rev, base, dim, sha256} of the model Search by meaning embeds
+    with: `sha256` maps each of its files, by its path in the repository, to
+    its digest.  tools/embed/ fetches and reads it; the build never does."""
+    with open(ROOT / "sources.toml", "rb") as fh:
+        cfg = tomllib.load(fh)["embed"]
+    return {"repo": cfg["repo"], "rev": cfg["rev"], "base": cfg["base"], "dim": cfg["dim"],
+            "sha256": dict(cfg["sha256"])}
 
 
 def block() -> dict:

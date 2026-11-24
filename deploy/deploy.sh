@@ -20,6 +20,13 @@
 set -euo pipefail
 
 HOSTS="${UBSITE_HOSTS:-pi5 sigmaai.au}"
+# The hosts that answer Search by meaning (ubsite/meaning.py): the model, 2.3
+# GB, and var/embed.db go to these alone, and each must give the service 6G
+# (deploy/ubsite.service MemoryMax; deploy/README.md).  Not pi5, whose power
+# does not carry four cores at full load (2026-11-23); the host that takes
+# ubsite.ddns.net over from it is named here then.
+EMBED_HOSTS="${UBSITE_EMBED_HOSTS:-sigmaai.au}"
+EMBED_NEEDS=6442450944                          # 6G, in bytes, as systemctl says it
 DEST="${UBSITE_DEST:-/home/tigran/ubsite}"
 UV="${UBSITE_UV:-/home/tigran/.local/bin/uv}"   # uv lives here on both, not /usr/local/bin
 PORT="${UBSITE_PORT:-8130}"                     # 8000 and 8090 are taken on pi5, 8000 on the VPS
@@ -65,6 +72,11 @@ done
 if [ "$BUILD" = 1 ]; then
     echo "==> building the database here"
     make data
+    # Search by meaning's vectors, of the texts just built: what has changed
+    # is embedded here on the CPU, and where that is the whole book the step
+    # stops and names the 3090's (`make embed GPU=1`).  Before the gates, of
+    # which it is one.
+    make embed
     make check
     make offline
 fi
@@ -177,12 +189,36 @@ code_in() {
 }
 
 # One host: everything from here on is done once for each, with what was built above.
+# Whether a host answers Search by meaning.
+embeds() {
+    case " $EMBED_HOSTS " in *" $1 "*) return 0 ;; esac
+    return 1
+}
+
 ship() {
     local HOST="$1"
     local COPY_HOST
     COPY_HOST="$(copy_host "$HOST")"
     echo
     echo "=== $HOST"
+
+    # Before anything is copied: the model in two workers needs the memory
+    # the unit allows, and a service killed for want of it takes the site
+    # down with it.  Read without root; raising it is a root step.
+    if [ "$BUILD" = 1 ] && embeds "$HOST"; then
+        local max
+        max=$(ssh "$HOST" "systemctl show ubsite -p MemoryMax --value" 2>/dev/null || true)
+        if [ "$max" != "infinity" ] && { [ -z "$max" ] || [ "$max" -lt "$EMBED_NEEDS" ]; }; then
+            echo "STOPPED: on $HOST the service's MemoryMax is ${max:-unknown}, and Search by meaning needs 6G." >&2
+            echo "         Nothing was copied.  deploy/README.md, Search by meaning, step 1: from here," >&2
+            echo "           scp deploy/ubsite.service $HOST:/tmp/ubsite.service" >&2
+            echo "         and as root there," >&2
+            echo "           install -m0644 -o root -g root /tmp/ubsite.service /etc/systemd/system/ubsite.service" >&2
+            echo "           systemctl daemon-reload && systemctl restart ubsite" >&2
+            echo "         Or UBSITE_EMBED_HOSTS=\"\" $0 ... to deploy without Search by meaning." >&2
+            exit 1
+        fi
+    fi
 
     echo "==> rsync to $HOST:$NEXT, swapped in just before the restart"
     # Excluded: .venv (per-architecture, the target builds its own), var/ except the
@@ -326,6 +362,26 @@ ship() {
             rsync -az --info=progress2 var/bible.db "$HOST:$DEST/var/bible.db.new"
             ssh "$HOST" "mv $DEST/var/bible.db.new $DEST/var/bible.db"
         fi
+        # Search by meaning, where the host answers it: the model, once, each
+        # file held to its digest where it lands (2.3 GB; never again unless
+        # the model named changes), and the vectors, var/embed.db, as the
+        # Bible's database goes, where the host's is another.
+        if embeds "$HOST"; then
+            local sent sums
+            ssh "$HOST" "mkdir -p $DEST/var/embed/bge-m3"
+            sent=$(rsync -a --ignore-existing --itemize-changes var/embed/bge-m3/ "$COPY_HOST:$DEST/var/embed/bge-m3/" | grep '^<f' || true)
+            if [ -n "$sent" ]; then
+                echo "==> shipped the model to $HOST: $(echo "$sent" | wc -l) files; checking their digests there"
+                sums=$(.venv/bin/python -c "from build import config; print(''.join(f'{s}  {n}\n' for n, s in config.embed()['sha256'].items()), end='')")
+                echo "$sums" | ssh "$HOST" "cd $DEST/var/embed/bge-m3 && sha256sum -c --quiet -" \
+                    || { echo "FAILED: the model on $HOST is not the one named" >&2; exit 1; }
+            fi
+            if [ "$(ssh "$HOST" "sha256sum $DEST/var/embed.db 2>/dev/null | cut -d' ' -f1")" != "$(sha256sum var/embed.db | cut -d' ' -f1)" ]; then
+                echo "==> shipping var/embed.db ($(du -h var/embed.db | cut -f1))"
+                rsync -az --info=progress2 var/embed.db "$COPY_HOST:$DEST/var/embed.db.new"
+                ssh "$HOST" "mv $DEST/var/embed.db.new $DEST/var/embed.db"
+            fi
+        fi
 
         # Prune: an AI file neither the new database nor the one it replaced names.
         # grep exits 1 when it passes nothing, as it does while there are no AI
@@ -347,14 +403,34 @@ ship() {
         ssh "$HOST" "sudo systemctl restart ubsite"
         echo "==> waiting for /healthz"
         local i out
-        for i in $(seq 1 30); do
+        # A minute where the host loads Search by meaning's model, which the
+        # first time is read from the disk, 2.3 GB of it.
+        for i in $(seq 1 60); do
             out=$(ssh "$HOST" "curl -sf http://127.0.0.1:$PORT/healthz" 2>/dev/null || true)
             case "$out" in
-                *'"ok":true'*) echo "    $out"; echo "==> $HOST up"; return 0 ;;
+                *'"ok":true'*)
+                    # Up, where the host answers Search by meaning, is the model
+                    # loaded too, and a question answered with passages:
+                    # /healthz says "meaning" true, false while a worker is
+                    # still loading it, and null on a host that has no model,
+                    # which one that was just sent it must not be.
+                    case "$out" in
+                        *'"meaning":true'*)
+                            ssh "$HOST" "curl -sf -X POST -H 'Content-Type: application/json' --data '{\"q\":\"Who is the Universal Father?\"}' http://127.0.0.1:$PORT/meaning/find" \
+                                | grep -q 'class="mnp"' || { echo "FAILED: Search by meaning on $HOST answered no passage" >&2; exit 1; }
+                            echo "    Search by meaning answers" ;;
+                        *'"meaning":false'*) sleep 1; continue ;;
+                        *)  if [ "$BUILD" = 1 ] && embeds "$HOST"; then
+                                echo "FAILED: $HOST was sent Search by meaning's model and says it has none" >&2
+                                ssh "$HOST" "journalctl --no-pager -n 20 -u ubsite" 2>/dev/null || true
+                                exit 1
+                            fi ;;
+                    esac
+                    echo "    $out"; echo "==> $HOST up"; return 0 ;;
             esac
             sleep 1
         done
-        echo "FAILED: /healthz on $HOST did not report ok within 30s" >&2
+        echo "FAILED: /healthz on $HOST did not report ok, or Search by meaning's model loaded, within 60s" >&2
         ssh "$HOST" "systemctl --no-pager -n 20 status ubsite" || true
         exit 1
     fi

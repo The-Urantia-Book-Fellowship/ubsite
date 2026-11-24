@@ -1758,7 +1758,7 @@
   // so under every paragraph, and the fold tapped does (the click, below).
   // A promise of how many it opened.
   function trAll() {
-    var art = cmpArt(), n = cmpN, secs, shutIn = function (sec) {
+    var art = txtArt(), n = cmpN, secs, shutIn = function (sec) {
       return Array.prototype.filter.call(sec.querySelectorAll('.tf[data-has]:not(.open)'), function (tf) {
         return trKeys(tf).length;
       });
@@ -1767,7 +1767,7 @@
     secs = Array.prototype.filter.call(art.querySelectorAll('section[data-trv]'), function (sec) { return shutIn(sec).length; });
     if (!secs.length) return Promise.resolve(0);
     return Promise.all(secs.map(function (sec) {
-      return trFetch(sec, sec.id).then(function (got) { return got; }, function () { return null; });
+      return trFetch(sec, secOf(sec)).then(function (got) { return got; }, function () { return null; });
     })).then(function (gots) {
       var draws = [];
       if (n !== cmpN || !trOpen || cmpIs || !art.isConnected) return 0;
@@ -2008,6 +2008,17 @@
   // lays them in columns (part.html, ub.css .dividers).
   var cmpN = 0, cmpIs = null, cmpW = innerWidth;
   function cmpArt() { return document.querySelector('main.reader > article'); }
+  // Search by meaning's passages (templates/_meaning.html): paragraphs from
+  // anywhere in the book, each run of them set as the text is, in a <section>
+  // with its section's version (data-trv) and its address in data-sec, an id
+  // being the page's own and a section standing there twice.  The folds and
+  // each paragraph's first text are drawn over them as over the text
+  // (meanDraw, below); never columns.
+  function meanArt() { return document.querySelector('main.meaning .mnlist'); }
+  // Where the page's texts are: the text's article, or those passages.
+  function txtArt() { return cmpArt() || meanArt(); }
+  // A section's address, for its translations (trFetch).
+  function secOf(sec) { return sec.dataset.sec || sec.id; }
   // The texts shown that this page has, in the reader's order: the English,
   // which every page has, where it is shown, and each translation ticked that
   // has any paragraph here, or on a part's page whose divider it has.
@@ -2564,6 +2575,35 @@
   // columns were there (review of 2026-11-09).
   var cmpSwapped = null;
   document.addEventListener('ub:swap', function () { cmpSwapped = cmpDraw(); });
+  // Search by meaning's answer, as its page sets it (static/meaning.js,
+  // 'ub:meaning') and as the list of texts changes: each fold's line saying
+  // how many it holds; where a text other than the English comes first, each
+  // paragraph's first text set where the English stood, once every passage's
+  // section's translations are had, as on the folds' page of the text
+  // (cmpDraw); and the folds open where the reader keeps them so (trAll).  A
+  // reader with no translation ticked asks for nothing.
+  var meanN = 0;
+  function meanDraw() {
+    var art = meanArt(), n = ++meanN, secs, ks;
+    if (!art) return Promise.resolve(0);
+    ftxUndraw(art);
+    Array.prototype.forEach.call(art.querySelectorAll('.tf.open'), trShut);
+    Array.prototype.forEach.call(art.querySelectorAll('.tf .tr'), function (el) { el.remove(); });
+    trSync();
+    secs = art.querySelectorAll('section[data-trv]');
+    ks = cmpKeys(art);
+    if (!secs.length || !ftxAny()) return trAll();
+    return Promise.all(Array.prototype.map.call(secs, function (sec) {
+      return trFetch(sec, secOf(sec)).then(function (got) { return got; }, function () { return null; });
+    })).then(function (gots) {
+      if (n !== meanN || !art.isConnected) return 0;
+      ftxRows(art, secs, gots, ks, null);
+      bmPaint();
+      return trAll();
+    });
+  }
+  document.addEventListener('ub:meaning', function () { meanDraw(); });
+  document.addEventListener('ub:trkept', function () { if (meanArt()) meanDraw(); });
   document.addEventListener('ub:page', function () {
     var drawn = cmpSwapped, t = Date.now();
     cmpSwapped = null;
@@ -2596,6 +2636,7 @@
   var cmpSoon = false, cmpMust = false,
       CMP_ROOM = { rail: 1, margin: 1, index: 1, size: 1, uisize: 1, width: 1, face: 1 };
   document.addEventListener('ub:settings', function (ev) {
+    if ((ev.detail.key === 'translations' || ev.detail.key === 'english') && meanArt()) meanDraw();
     if (ev.detail.key === 'translations' || ev.detail.key === 'english') cmpMust = true;
     else if (!CMP_ROOM.hasOwnProperty(ev.detail.key)) return;
     if (cmpSoon) return;
@@ -4975,6 +5016,60 @@
     var page = document.querySelector('main.units'), js;
     if (!page) return;
     if (window.ubUnits) return window.ubUnits();
+    js = document.createElement('script');
+    js.src = page.dataset.src;
+    document.head.appendChild(js);
+  });
+
+  // By meaning, the tick at the end of the header's search box (base.html
+  // .bym; Tigran, 2026-11-24: "should be a tickbox, not a link. So one can
+  // send the query by pressing ENTER").  Ticked, Enter in the box asks its
+  // words of Search by meaning: on its page, as a question in the address's
+  // fragment, which is not sent (meaning.js asks it by a POST).  Not ticked,
+  // Enter is the ordinary search.  The tick is kept on the device, the same
+  // on every page, and no setting.  The box's placeholder says which search
+  // it is.  Before listen.js's own hold on the form, which a submit already
+  // answered leaves alone; the link clicked is listen.js's to take while a
+  // recording plays, as any link is.
+  var bymTick = document.querySelector('.find .bym input');
+  function bymShow() {
+    var box = bymTick.form.querySelector('input[name="q"]');
+    if (bymTick.checked) T.attr(box, 'placeholder', 'meaning:placeholder');
+    else T.attr(box, 'placeholder', 'a word, or a citation like 1:4.2');
+  }
+  function bymGo(q) {
+    var a;
+    if (location.pathname === '/meaning' && q && window.ubMeaning && window.ubMeaning.put) return window.ubMeaning.put(q);
+    a = document.createElement('a');
+    a.href = '/meaning' + (q ? '#q=' + encodeURIComponent(q) : '');
+    a.hidden = true;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  if (bymTick) {
+    try { bymTick.checked = localStorage.getItem('ub_bym') === '1'; } catch (e) {}
+    bymTick.closest('.bym').hidden = false;
+    bymShow();
+    bymTick.addEventListener('change', function () {
+      try {
+        if (bymTick.checked) localStorage.setItem('ub_bym', '1'); else localStorage.removeItem('ub_bym');
+      } catch (e) {}
+      bymShow();
+      // The box takes the keys: what follows a tick is words, or Enter.
+      bymTick.form.querySelector('input[name="q"]').focus({ preventScroll: true });
+    });
+    document.addEventListener('submit', function (ev) {
+      if (ev.target !== bymTick.form || !bymTick.checked) return;
+      ev.preventDefault();
+      bymGo(bymTick.form.querySelector('input[name="q"]').value.replace(/\s+/g, ' ').trim());
+    }, true);
+  }
+  // And Search by meaning (meaning.html, static/meaning.js).
+  document.addEventListener('ub:swap', function () {
+    var page = document.querySelector('main.meaning'), js;
+    if (!page) return;
+    if (window.ubMeaning) return window.ubMeaning();
     js = document.createElement('script');
     js.src = page.dataset.src;
     document.head.appendChild(js);

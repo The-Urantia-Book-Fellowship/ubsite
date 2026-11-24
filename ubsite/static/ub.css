@@ -227,6 +227,33 @@ a:hover { text-decoration-thickness: 2px; }
 .find input:hover { border-color: var(--link); }
 .find input:focus { background: var(--paper); border-color: var(--link); outline: 0;
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--link) 22%, transparent); }
+/* The other search's tick, at the box's right end (base.html .bym): ticked,
+   Enter asks the box's words of Search by meaning (ub.js bymGo).  The box
+   keeps its room, and a placeholder too long for what is left ends in an
+   ellipsis: on a phone at the larger sizes the two do not both fit, whatever
+   the language, and nothing fixed in rem could say where (CLAUDE.md trap 68).
+   The room is taken only once ub.js has shown the tick. */
+.find input[name="q"] { text-overflow: ellipsis; }
+.find:has(> .bym:not([hidden])) input[name="q"] { padding-right: 7.1rem; }
+.find .bym { position: absolute; right: .3rem; top: 50%; transform: translateY(-50%); display: flex; align-items: center;
+  gap: .35rem; height: calc(100% - .5rem); padding: 0 .65rem 0 .65rem; border-left: 1px solid var(--field-edge);
+  font-size: .82rem; line-height: 1; color: var(--ink); white-space: nowrap; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; }
+.find .bym[hidden] { display: none; }
+.find .bym > input { flex: none; width: .9rem; height: .9rem; margin: 0; padding: 0; accent-color: var(--link); cursor: pointer; }
+.find .bym > span { position: relative; top: var(--lift); }
+.find .bym:hover > span, .find .bym:has(> input:checked) > span { color: var(--link); }
+.find .bym > input:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+/* In a narrow box, a phone's at the larger sizes, the tick's two words stand
+   one over the other, and the box has that much more to type in: by the box's
+   own width in rem, which a container's query measures by the page's letters
+   as they are, where a window's would by the browser's (trap 68). */
+.find { container: find / inline-size; }
+@container find (max-width: 19rem) {
+  .find:has(> .bym:not([hidden])) input[name="q"] { padding-right: 5.3rem; }
+  .find .bym { gap: .3rem; padding: 0 .55rem; }
+  .find .bym > span { white-space: normal; width: min-content; font-size: .7rem; line-height: 1.05; }
+}
 .find .glass { position: absolute; left: .75rem; top: 50%; width: .95rem; height: .95rem;
   transform: translateY(-50%); pointer-events: none; color: var(--link); }
 .find .glass * { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
@@ -3209,6 +3236,75 @@ main.prose.charts { max-width: 92ch; }
 .minibold { fill: color-mix(in oklch, var(--ink) 70%, transparent); }
 .minipic.units .minibar { fill: color-mix(in oklch, var(--faint) 40%, transparent); }
 :root:not([data-lang="ru"]) .minipic .ru, :root[data-lang="ru"] .minipic .en { display: none; }
+
+/* ---- Search by meaning (/meaning; templates/meaning.html, _meaning.html, static/meaning.js) ----
+   A box for a question, and under it the answer: the index's entries nearest
+   the question, in a row; then the passages, each under a line saying where
+   it is and by which routes it came, set as the text itself is set, in the
+   text's own grid (.grid, .row, p.t, .a, .tf), so that every setting of the
+   text holds for them, the index's entries that brought a passage stand in
+   the margin beside it as the index stands beside the text, and its
+   translations fold under it; then the study notes and the King James
+   Version, lists as the ordinary search has them (.hits), shown and hidden by
+   the same switches (.ix, .bystudy, .bybible).  The page is as wide as a
+   reading path's, the text's measure and the margin; what is not the text
+   keeps to the measure.  What stands around the text is sized in em, of the
+   text, which grows with the window (Tigran, 2026-11-22).  Every class begins
+   with mn (CLAUDE.md trap 58). */
+main.prose.meaning { max-width: calc(var(--measure) + 2rem + 26ch + 2.4rem); padding: 2rem 1.2rem 0; }
+.meaning > :is(h1, .mnlead, .mnform, .mntry, .mnsay, noscript) { max-width: var(--measure); }
+.mnform { display: flex; align-items: stretch; gap: .6em; margin: 1.3em 0 .7em; }
+.mnq { flex: 1 1 0; width: 0; min-width: 0; font: inherit; font-size: 1em; line-height: 1.3; color: var(--text);
+       padding: calc(.5em + var(--lift)) 1em calc(.5em - var(--lift)); background: var(--field);
+       border: 1px solid var(--field-edge); border-radius: 999px; -webkit-appearance: none; appearance: none; }
+.mnq::placeholder { color: var(--faint); opacity: 1; }
+.mnq:hover { border-color: var(--link); }
+.mnq:focus { background: var(--paper); border-color: var(--link); outline: 0;
+             box-shadow: 0 0 0 3px color-mix(in oklch, var(--link) 22%, transparent); }
+.mnq::-webkit-search-cancel-button { -webkit-appearance: none; }
+.mngo { flex: none; font-size: 1em; padding-top: 0; padding-bottom: 0; }
+.mngo > span { position: relative; top: var(--lift); }
+.mntry { margin: 1.1em 0 0; font-size: .92em; }
+.mntry p { margin: 0 0 .25em; color: var(--faint); }
+.mntry ul { list-style: none; margin: 0; padding: 0; }
+.mntry li { margin: 0 0 .2em; }
+/* Once a question is asked, what the page is and its examples make way for the answer. */
+.meaning.mnasked :is(.mnlead, .mntry) { display: none; }
+.mnsay { margin: 1.4em 0 0; }
+.mnout { margin-top: 1.2em; }
+.mnout > .mnanswer > section { margin: 1.8em 0 0; }
+.mnout h2 { margin: 0 0 .5em; }
+.mnout h2 span { color: var(--faint); font-size: .9rem; }
+/* The index's entries one to a line, as every list of results is (Tigran,
+   2026-11-24: "always one line per results"); a row of them, run on, they
+   were until then. */
+.mnentries a { text-decoration: none; }
+.mnentries a:hover { text-decoration: underline; }
+.mnlist { min-width: 0; }
+.mnp { margin: 0 0 1.5em; }
+.mnp + .mnp { border-top: 1px solid var(--rule); padding-top: .9em; }
+.mnh { max-width: var(--measure); margin: 0 0 .55em; display: flex; flex-wrap: wrap; align-items: baseline;
+       gap: .1em 1em; font-size: .82em; line-height: 1.35; }
+.mnwhere { color: var(--ink); text-decoration: none; font-variant-caps: small-caps; letter-spacing: .03em; }
+.mnwhere:hover { color: var(--link); text-decoration: underline; }
+.mnwhy { color: var(--faint); font-style: italic; }
+.mnwhy > span + span::before { content: "\00b7"; margin: 0 .45em; font-style: normal; }
+.mnp .grid > .row:last-child > p.t { margin-bottom: 0; }
+/* The lists are as wide as the passages' text, whatever that is: each stands
+   in the text's own grid, in its first track, so that Measured it is the
+   measure, at Full what the margin leaves of the page, and the whole page
+   with the index folded (Tigran, 2026-11-24, of the Bible's list, which kept
+   the measure at Full, half his screen, while the passages took the page). */
+.mngrid > .hits { grid-column: 1; min-width: 0; margin: 0; }
+:root[data-width="full"] .mnh { max-width: none; }
+/* On the ordinary search's results, the way to the other search (search.html). */
+.results .bymeaning { margin: .1rem 0 0; font-size: .95rem; }
+@media (max-width: 40rem) {
+  main.prose.meaning { padding: 1.4rem 1.2rem 0; }
+  .mnform { gap: .4em; }
+  .mnq { padding-left: .8em; padding-right: .8em; }
+  .mngo { padding-left: .9em; padding-right: .9em; }
+}
 
 /* ---- unit conversions (/units; units.html, units.js) ----------------------
    A table to each measure, a row to each unit: a field for its value, then its

@@ -22,7 +22,7 @@ from ubsite import app as site, l10n  # noqa: E402
 
 PAGES = {"/privacy": ("Privacy", "privacy:lead"), "/terms": ("Terms of use", "terms:lead")}
 # When each last changed, as its lead says it: moved with the page's words.
-CHANGED = {"privacy:lead": "2026-11-19", "terms:lead": "2026-11-18"}
+CHANGED = {"privacy:lead": "2026-11-24", "terms:lead": "2026-11-18"}
 
 
 class Words(unittest.TestCase):

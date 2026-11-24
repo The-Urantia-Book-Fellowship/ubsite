@@ -363,6 +363,11 @@
     // slash after it the server sends on to it, as for the chart (below).
     if (path === '/charts/' || path === '/units/') return { res: redirect(origin + path.slice(0, -1), 307) };
     if (path === '/charts' || path === '/units') return { res: away(sh, T('This page is read online.')) };
+    // Search by meaning's page (app.py meaning_page), in the misc chunk since
+    // 2026-11-24: a copy from before has it not.  What the page asks is a
+    // POST, which the worker never sees, and the server's alone.
+    if (path === '/meaning/') return { res: redirect(origin + path.slice(0, -1), 307) };
+    if (path === '/meaning') return { res: away(sh, T('This page is read online.')) };
     if (path === '/quiz/board') return { res: away(sh, T('The quiz board is read online.')) };
     // The chart of the personalities (app.py cosmology_page), a chunk of its
     // own.  A copy made before 2026-11-13 has none, and the network's failure
@@ -852,7 +857,8 @@
       else mid = h.more ? '<p class="more"><a href="/search?q=' + uq + '&amp;in=' + name + '">' + T(all, { n: h.n }) + '</a></p>' : '';
       return '\n' + mid + '\n';
     }
-    var o = '<main class="prose results">\n<h1>' + esc(q) + '</h1>\n';
+    var o = '<main class="prose results">\n<h1>' + esc(q) + '</h1>\n' +
+            '<p class="bymeaning"><a href="/meaning#q=' + uq + '">' + T('Search by meaning for these words') + '</a></p>\n';
     if (scope) o += '<p class="hint"><a href="/search?q=' + uq + '">' + T('All results for “{q}”', { q: q }) + '</a></p>';
     o += '\n';
     if (didyou.length)

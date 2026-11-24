@@ -428,6 +428,9 @@ def main(argv: list[str]) -> int:
         print("\n== the Bible ==")
         from .checks.check_bible import run as bible_run
         rc |= bible_run()
+        print("\n== Search by meaning's vectors ==")
+        from .checks.check_embed import run as embed_run
+        rc |= embed_run()
         print("\n== the passages of the moment ==")
         from .passage import check as passage_check
         rc |= passage_check(dbf) if dbf.exists() else absent("var/ub.db (make data)")

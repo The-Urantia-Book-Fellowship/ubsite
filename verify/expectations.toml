@@ -238,7 +238,7 @@ compact_mb = 981                 # the compact copy, Opus at 14 kbps (2026-11-22
 
 [offline]
 measured_on = "2026-11-18"
-pages       = 10619      # 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,882 reading paths,
+pages       = 10620      # one more since 2026-11-24, Search by meaning's page, /meaning; 10,619 before: 1,626 sections, 4,735 headwords, 27 index letters, 21 more (/help since 2026-11-06), 3,882 reading paths,
                          # and since 2026-10-28 the quiz: /quiz and the 126 papers' /quiz/N;
                          # one fewer since 2026-10-30: Paper 138's one question dropped;
                          # 197 more the same day: the whole paper's page, /N, joined from its
@@ -266,7 +266,7 @@ paths       = 3882       # 2,058 headwords in book order, 1,824 of them by theme
 spoken      = 1626       # one to a section
 bible_pages = 2629       # the Bible's pages and the Synodal's fragments (2026-11-21): /bible, 77 books' pages and
                          # 1,362 chapters', 1,189 fragments of the Synodal's lines on the KJV's chapters
-chunks      = 498        # 497 until the evening of 2026-11-22, when Unit conversions came, its script, static/units.js, one more among the assets; 500 until 2026-11-22, when a reading path's line of paper stopped carrying the interface's Russian beside Paper N (ДОКУМЕНТ 103 in the English's head), 3.15 MB fewer of the reading paths' 145, three chunks fewer of them; 433 until the evening of 2026-11-21, when the KJV's pages came into Base (Tigran: "Pages in Base, like the book"), /bible and a chunk to each of its 66 books; 432 until that morning, the King James Version's database for search (kjv.db) one more; 431 until 2026-11-19: one more among the assets, static/account.js, the
+chunks      = 499        # 498 until 2026-11-24, when Search by meaning came, its script, static/meaning.js, one more among the assets; 497 until the evening of 2026-11-22, when Unit conversions came, its script, static/units.js, one more among the assets; 500 until 2026-11-22, when a reading path's line of paper stopped carrying the interface's Russian beside Paper N (ДОКУМЕНТ 103 in the English's head), 3.15 MB fewer of the reading paths' 145, three chunks fewer of them; 433 until the evening of 2026-11-21, when the KJV's pages came into Base (Tigran: "Pages in Base, like the book"), /bible and a chunk to each of its 66 books; 432 until that morning, the King James Version's database for search (kjv.db) one more; 431 until 2026-11-19: one more among the assets, static/account.js, the
                          # script of what follows a reader's account, which only a reader signed
                          # in runs;
                          # 423 until 2026-11-18, when the home page's part cards took their pictures:
@@ -335,6 +335,20 @@ book_units    = 17         # time 10 (57:0.1's year among them), distance 1, spe
 about         = 4
 examples      = 16
 gated         = 6          # 14:1.12, 15:7.2, 33:6.7, 43:3.2, 35:6.1, 54:6.6
+
+# Search by meaning's units, var/embed.db (build/embed.py composes them from
+# var/ub.db and var/bible.db; tools/embed/build.py embeds them with bge-m3;
+# build/checks/check_embed.py).  The paragraphs and the KJV's passages move
+# only with the book, the KJV's copy and the recipe, and are held exactly.  The index's entries that cite something and the study
+# notes on the site move as the index is edited and as a paper's notes are
+# reviewed, and are held in a band, as the index's own counts are reported.
+[embed]
+source_commit = "press b814f6e, index e5c12fe, data/kjv, data/study; recipe 1"
+measured_on   = "2026-11-24"
+para          = 14586      # every paragraph, one
+kjv           = 8740       # 1769's paragraphs to Acts 20:36 and a chapter after; one over 8 verses in runs of 5, each 3 on
+entry         = [27000, 31000]   # 28,633 at measurement, of the index's 34,842
+note          = [500, 3000]      # 560 at measurement, Papers 0-17 and 32 with five written ahead
 
 # The Bible, var/bible.db (build/bible.py), from data/: the King James Version
 # (data/kjv/: the study edition's KJV at 0a1f055, converted once, 56 slips

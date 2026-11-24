@@ -229,6 +229,40 @@ cd ~/ubsite && .venv/bin/python -m ubsite.board list
 
 ---
 
+## Search by meaning
+
+A host answers Search by meaning (`ubsite/meaning.py`; `ARCHITECTURE.md`, Search by meaning) where it has the model, `var/embed/bge-m3/`, and the vectors, `var/embed.db`. `deploy.sh` ships both to the hosts its `EMBED_HOSTS` names, `sigmaai.au` alone at present: not pi5, whose power does not carry four cores at full load, and the host that takes ubsite.ddns.net over from it is named there then. On a host without them `/healthz` says `"meaning": null` and the page says Search by meaning is not available on this site.
+
+Two steps need root on such a host, once, and neither is run by `deploy.sh`.
+
+**1. The unit's memory, before the first deploy that carries the model.** Each of the two workers holds the model, 1.5 GB, and the vectors, 0.25 GB, private to it, so `deploy/ubsite.service` says `MemoryMax=6G` where it said 2G. `deploy.sh` reads the limit on the host (`systemctl show ubsite -p MemoryMax`, no root) and stops, naming this step, where it is under 6G. The unit must be the tree's, which the deploy has not yet put there, so copy it first, from the workstation:
+
+```
+scp deploy/ubsite.service sigmaai.au:/tmp/ubsite.service
+```
+
+and as root on the host:
+
+```
+install -m0644 -o root -g root /tmp/ubsite.service /etc/systemd/system/ubsite.service
+systemctl daemon-reload
+systemctl restart ubsite
+systemctl show ubsite -p MemoryMax        # MemoryMax=6442450944
+```
+
+**2. nginx's limit, after the deploy.** The search works without it, behind the app's own cap (one embedding at a time in a worker, four waiting); this adds twenty questions a minute from one address, in a zone of its own, on `location = /meaning/find`. From `~/ubsite` on the host, as root:
+
+```
+install -m0644 -o root -g root deploy/ubsite-sigmaai.nginx /etc/nginx/sites-available/ubsite.sigmaai.au
+nginx -t && systemctl reload nginx
+```
+
+Then, from anywhere: twelve questions one after another, of which the twelfth is answered 429, eleven being the burst and the one that is due (after that one more every three seconds), and the page says "That was many questions in a short time."
+
+**Tried here first** (2026-11-24, trap 43): nginx 1.28.3, the VPS's version, built in a scratch directory and run as an ordinary user in front of the dev server with `deploy/ubsite-sigmaai.nginx`, only the ports, the certificate and the paths changed. The file parses; `/meaning` is the page; a question is answered through it with its twenty passages in 0.15 s, in Russian too; one of 300 Cyrillic letters, the longest the page sends, is a body of 609 bytes and goes through the site's 1 KB; a body of 1.1 KB is nginx's 413, which the page words as a question too long; a GET of `/meaning/find` is the app's 405; and of a run of questions the twelfth and every one after it was a 429.
+
+After a deploy: `curl -s https://ubsite.sigmaai.au/healthz` says `"meaning":true`; `systemctl show ubsite -p MemoryCurrent` on the host is about 4 GB once both workers have answered; and `journalctl -u ubsite | grep "Search by meaning"` is empty, a line there being the model that failed to load, with why.
+
 ## The offline copy's chunks, kept by nginx
 
 Every browser fetches the offline copy since 2026-11-10, about 48 MB in some 420 chunks on a first visit, and until then each chunk was read and sent by the app, two workers, for every browser. nginx now keeps each chunk the app has sent once (`proxy_cache`, in the location `~ "^/offline/c/[0-9a-f]{16}\.gz$"` of both server blocks) and answers the next browser from its own file, without asking the app. A chunk is named by the hash of what it holds, so a kept one is never out of date; what a deploy changes has a new name, and the app sends that once more. `deploy.sh` is unchanged, and so are the permissions of `~/ubsite`.

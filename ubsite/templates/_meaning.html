@@ -1,0 +1,58 @@
+{#- The answer to one question put to Search by meaning (app.py meaning_find,
+    _meaning_answer; ubsite/meaning.py search): a fragment, which the page's
+    script sets under its box (static/meaning.js).  The same for every reader
+    who asks the same question: what a setting hides, the study notes, the
+    Bible, a translation's fold, is here for all and hidden by the style.
+
+    Each list's heading says how many it holds, in parentheses, as the
+    ordinary search's do (Tigran, 2026-11-24: "In the Text (20)").  Each
+    list stands in the text's own grid (.grid.mngrid), in the text's track, so
+    that at every width, Measured or Full, with the margin shown or folded, a
+    list is exactly as wide as the passages' text.
+
+    First the index's own entries nearest the question, one to a line, each a
+    link to its line on its concept page, so that the index stays in sight
+    (Tigran, 2026-11-24).  Then the passages, the likeliest first, each a run of
+    paragraphs of one section under a line saying where it is and by which
+    routes it came, and set as the text itself is set (_text.html grid): the
+    entries that brought it beside it, as the index stands beside the text, and
+    its translations' folds under it.  Each is a <section> with the version its
+    section's translations are asked under, as a section's own page has
+    (data-trv; data-sec its address, an id being the page's, and a section
+    may stand here twice): ub.js draws the reader's texts over them
+    (ub.js meanDraw).  Then the study notes, where one is near, and the King
+    James Version's passages, each a list of its own, as the ordinary search
+    has them. -#}
+{%- from "_text.html" import grid, chip, endnotes %}
+{%- from "_hits.html" import study_hit %}
+{%- set WHY = {'meaning': 'by meaning', 'words': 'by words', 'index': 'through the index'} %}
+<div class="mnanswer"{% if lang %} data-words="{{ lang }}"{% endif %}>
+{%- if entries %}
+<section class="mnix ix"><h2>{{ t('In the index') }} <span>{{ t('({n:,})', n=entries|length) }}</span></h2>
+<div class="grid mngrid"><ul class="hits mnentries">{% for c in entries %}<li>{{ chip(c) }}</li>{% endfor %}</ul></div>
+</section>
+{%- endif %}
+<section class="mntext"><h2>{{ t('In the text') }} <span>{{ t('({n:,})', n=passages|length) }}</span></h2>
+<article class="mnlist" style="--refw: {{ refw }}">
+{%- for x in passages %}
+<section class="mnp" data-sec="{{ x.sec }}"{% if x.trv %} data-trv="{{ x.trv }}"{% endif %}>
+<header class="mnh"><a class="mnwhere" href="/{{ x.ref }}">{% if x.paper_n %}{{ t('Paper {n}', n=x.paper_n) }} · {% endif %}{{ x.paper_title }}
+  {%- if x.section_n %} · {{ x.section_n }}{% if x.combined %}–{{ x.combined }}{% endif %}. {{ x.section_title|safe }}{% endif %}</a>
+  <span class="mnwhy">{% for w in x.why %}<span>{{ t(WHY[w]) }}</span>{% endfor %}</span></header>
+{{ grid(x.rows, x.citers, x.nciters, x.tr_has) }}
+</section>
+{%- endfor %}
+{{ endnotes(paras, notes, study) }}
+</article>
+</section>
+{%- if stnotes %}
+<section class="mnnotes bystudy"><h2>{{ t('In the study notes') }} <span>{{ t('({n:,})', n=stnotes|length) }}</span></h2>
+<div class="grid mngrid"><ul class="hits">{% for s in stnotes %}{{ study_hit(s) }}{% endfor %}</ul></div>
+</section>
+{%- endif %}
+{%- if kjv %}
+<section class="mnbible bybible" data-bible="kjv"><h2>{{ t('In the King James Version') }} <span>{{ t('({n:,})', n=kjv|length) }}</span></h2>
+<div class="grid mngrid"><ul class="hits kjvh">{% for h in kjv %}<li><a href="{{ h.href }}">{{ t(h.ref) }}</a> {{ h.text }}</li>{% endfor %}</ul></div>
+</section>
+{%- endif %}
+</div>

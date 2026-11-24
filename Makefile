@@ -12,7 +12,7 @@ NV      := $(ML)/venv-align/lib/python3.12/site-packages/nvidia
 CUDA    := CUDA_DEVICE_ORDER=PCI_BUS_ID HF_HOME=$(ML)/hf \
            LD_LIBRARY_PATH=$(NV)/cublas/lib:$(NV)/cudnn/lib
 
-.PHONY: align-venv align-transcribe align-repair align align-spotcheck tts-venv tts-bakeoff tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot bible data check offline e2e test paranoid serve serve-bg stop accounts-prune ports geoip clean help
+.PHONY: align-venv align-transcribe align-repair align align-spotcheck embed-venv embed-fetch embed tts-venv tts-bakeoff tts-bakeoff-higgs3 tts tts-assemble tts-hear all venv lock sources vendor-check vendor-sync srt-snapshot cosmo-snapshot bible data check offline e2e test paranoid serve serve-bg stop accounts-prune ports geoip clean help
 
 help:
 	@sed -n 's/^## //p' Makefile
@@ -66,6 +66,17 @@ tts-venv:
 	@UV_CACHE_DIR=$(ML)/uv-cache uv venv -q $(ML)/venv-tts --python $$(cat .python-version)
 	@UV_CACHE_DIR=$(ML)/uv-cache uv pip install -q --python $(ML)/venv-tts -r tools/tts/requirements.in
 
+## embed-venv    create the embedder's GPU venv in $(ML) (onnxruntime-gpu, CUDA and cuDNN), anew
+# Made anew each time: the runtime's GPU build and its CPU build are one
+# module under two names, and installing the one over the other leaves both.
+embed-venv:
+	@UV_CACHE_DIR=$(ML)/uv-cache uv venv -q --clear $(ML)/venv-embed --python $$(cat .python-version)
+	@UV_CACHE_DIR=$(ML)/uv-cache uv pip install -q --python $(ML)/venv-embed -r tools/embed/requirements.in
+
+## embed-fetch   place the model Search by meaning embeds with in var/embed/bge-m3/, held to its digests
+embed-fetch:
+	@HF_HOME=$(ML)/hf $(PY) -m tools.embed.fetch
+
 ## tts-bakeoff   the same hard passages in each candidate voice, beside Merritt Horn -> var/tts/bakeoff/
 tts-bakeoff:
 	@CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 HF_HOME=$(ML)/hf \
@@ -116,6 +127,17 @@ bible:
 ## data          build var/ub.db from the three sources
 data: vendor-check
 	@$(PY) -m build data
+
+## embed         var/embed.db, Search by meaning's vectors, from var/ub.db and var/bible.db (GPU=1: on the 3090, the whole book anew)
+# What has changed since the last time, on this machine's CPU, by the site's
+# own environment; with GPU=1 under $(ML)/venv-embed on the 3090 (`make
+# embed-venv`), which a CPU run asks for itself where too much is new.
+embed:
+ifdef GPU
+	@CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 $(ML)/venv-embed/bin/python -m tools.embed.build --gpu
+else
+	@$(PY) -m tools.embed.build
+endif
 
 ## check         run every gate against the built database
 check:

@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% set title = 'Search by meaning' %}
+{#- Search by meaning's page (Tigran, 2026-11-23: "a separate search window in
+    the UI, to avoid confusion with the normal search we have now"; a page,
+    2026-11-24): a question in a reader's own words, in English or Russian,
+    and under it the passages of the book that answer it (ubsite/meaning.py;
+    ARCHITECTURE.md, Search by meaning).
+
+    The page is the same for every reader and every question, and is in the
+    offline copy.  The question is in the address, after the #, as a
+    conversion is in /units' (#jday=3): a browser does not send that part, so
+    the page's script reads it and asks the server by a POST
+    (static/meaning.js; app.py meaning_find), and no question is in a log or a
+    count.  Typed, linked or come back to, it is asked one way.  What comes
+    back is templates/_meaning.html, set in .mnout.
+
+    The examples are questions to tap, each in the interface's language; the
+    script takes the one that is shown.  Without scripts the page says what it
+    is and that it needs them, and the box, which has no name, sends nothing:
+    a question never goes to the server in an address, where a log would keep it.  Every class begins with mn (CLAUDE.md trap 58). -#}
+{% block body %}<main class="prose meaning" data-src="{{ asset('meaning.js') }}" data-most="{{ most }}">
+<h1>{{ t('Search by meaning') }}</h1>
+<p class="lead mnlead">{{ t('meaning:lead') }}</p>
+<form class="mnform" role="search" action="/meaning">
+  <input class="mnq" type="search" maxlength="{{ most }}" autocomplete="off" autocapitalize="sentences" enterkeyhint="search"
+         {{ ta('aria-label', 'Your question') }} {{ ta('placeholder', 'meaning:placeholder') }}>
+  <button class="pill solid mngo" type="submit"><span>{{ t('Search|meaning') }}</span></button>
+</form>
+<div class="mntry">
+  <p>{{ t('For example:') }}</p>
+  <ul>
+    <li><a class="mnex" href="#">{{ t('meaning:ex:1') }}</a></li>
+    <li><a class="mnex" href="#">{{ t('meaning:ex:2') }}</a></li>
+    <li><a class="mnex" href="#">{{ t('meaning:ex:3') }}</a></li>
+    <li><a class="mnex" href="#">{{ t('meaning:ex:4') }}</a></li>
+    <li><a class="mnex" href="#">{{ t('meaning:ex:5') }}</a></li>
+    <li><a class="mnex" href="#">{{ t('meaning:ex:6') }}</a></li>
+  </ul>
+</div>
+<p class="mnsay" role="status" aria-live="polite" hidden></p>
+<div class="mnout" hidden></div>
+<noscript><p class="mnsay">{{ t('meaning:noscript') }}</p></noscript>
+</main>{% endblock %}
+{% block scripts %}<script src="{{ asset('meaning.js') }}" defer></script>{% endblock %}

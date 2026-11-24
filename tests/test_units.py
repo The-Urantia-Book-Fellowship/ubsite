@@ -298,7 +298,7 @@ class Pages(unittest.TestCase):
         self.assertIn('<text class="miniv ru" x="632" y="490">12\u202f175,0618394</text>', raw)
         home = self.get("/")[2]
         self.assertRegex(home, r'<li><a href="/charts"><svg [^>]*>.*?</svg><span class="lbl">Charts</span>')
-        self.assertEqual(len(re.findall(r"<li[ >]", home[home.index('<ul class="ftiles">'):home.index("</ul>", home.index('<ul class="ftiles">'))])), 7)
+        self.assertEqual(len(re.findall(r"<li[ >]", home[home.index('<ul class="ftiles">'):home.index("</ul>", home.index('<ul class="ftiles">'))])), 8)
         help_ = self.get("/help")[2]
         self.assertIn('<a href="/units">Unit conversions</a>', help_)
 

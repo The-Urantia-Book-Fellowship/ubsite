@@ -47,6 +47,7 @@ BASE = "http://localhost:8131"
 SERVER = """
 import asyncio, os, pathlib, sys, types
 os.environ["UB_VISITS"] = "off"
+os.environ["UB_MEANING"] = "off"       # no model in the suite's server (ubsite/meaning.py here)
 sys.path.insert(0, sys.argv[2])
 import uvicorn
 from starlette.responses import Response
@@ -886,11 +887,24 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
         # and what the browser keeps of it, which /quiz then shows.
         pg.goto(BASE + "/quiz/32")
         pg.wait_for_selector(".qopt")
-        pg.locator(".qopt").nth(1).click()
-        ok(pg.locator(".qopt.ok").count() == 1 and pg.locator(".qverdict.r").count() == 1,
-           "a quiz is asked and answered offline")
+        # A paper's questions come in a new order each time, and each one's
+        # answers (quiz.js shuffle, 2026-11-22): the question asked is found
+        # by its words, and its right answers by their places as written
+        # (data-k).  Until 2026-11-24 this clicked the second answer shown and
+        # looked for the paper's first question as written, which after the
+        # shuffle passed only by chance.
+        q = pg.evaluate("""() => { const qs = JSON.parse(document.getElementById('ub-quiz').textContent).q,
+          t = document.querySelector('.quizrun .qq').textContent, d = document.createElement('div');
+          return qs.find(q => { d.innerHTML = q.q; return d.textContent === t; }); }""")
+        right = [k for k in range(len(q["a"])) if q["m"] >> k & 1]
+        for k in right:
+            pg.click(f'.quizrun .qopt[data-k="{k}"]')
+        if len(right) > 1:
+            pg.click(".quizrun .qcheck")
+        ok(pg.locator(".qopt.ok").count() == len(right) and pg.locator(".qverdict.r").count() == 1,
+           f"a quiz is asked and answered offline (question {q['id']}, {len(right)} right)")
         kept = pg.evaluate("JSON.parse(localStorage.getItem('ub_quiz')).first")
-        ok(kept.get("366.1") == 2, f"its first answer kept, by id and layout ({kept})")
+        ok(kept.get(f"{q['id']}.{q['v']}") == q["m"], f"its first answer kept, by id and layout ({kept})")
         pg.goto(BASE + "/quiz/board")
         ok("read online" in pg.inner_text("main"), "the quiz's board is said to be read online")
         pg.goto(BASE + "/101:4.2-3")
@@ -1616,6 +1630,12 @@ def run(copy: pathlib.Path, log: pathlib.Path, srv: Server) -> int:
                                                         ".then(r => r ? r.json() : {}).then(x => !x.current)"),
            f"the worker stopped part of the way through, with no copy yet ({first} of {len(m['chunks'])} chunks)")
         pg.goto(BASE + "/101:5")
+        # By the worker's own note that the copy is whole, and only then the
+        # panel's: ub.js says `kept` of any page that has a worker, before
+        # offline.js has the worker's word, and on a busy machine the wait
+        # returned on that guess, 104 chunks of 499 fetched (2026-11-24).
+        until(pg, "() => caches.open('ub-meta').then(c => c.match('/offline/meta'))"
+                  ".then(r => r ? r.json() : {}).then(x => !!x.current)", True, 120000)
         pg.wait_for_function(f"document.querySelector('{PANEL}').dataset.have === 'kept'", timeout=120000)
         fetched = log.read_text().count("/offline/c/") - before
         ok(len(m["chunks"]) <= fetched <= len(m["chunks"]) + 4,

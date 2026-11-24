@@ -40,9 +40,17 @@ RestartSec=5
 Environment=MALLOC_ARENA_MAX=2
 
 # A leak-catcher, not a budget: about 200 MB RSS at rest, under 700 MB under a
-# long burst (above), so 2G leaves room for the features to come. ub.db is read
-# through the page cache, which is not charged here.
-MemoryMax=2G
+# long burst (above). ub.db is read through the page cache, which is not charged
+# here.
+#
+# 6G since 2026-11-24, 2G before: Search by meaning (ubsite/meaning.py) loads
+# its model into each worker, 1.5 GB of it private to the worker (measured:
+# two copies side by side share nothing), and the vectors beside it, 0.25 GB,
+# so the two workers hold about 3.9 GB where the host has the model, and a
+# burst of pages on top. A host without the model, which deploy.sh ships only
+# to those it names, uses what it did. deploy.sh reads this limit on the host
+# before it ships the model, and stops where it is under 6G.
+MemoryMax=6G
 
 # The service reads a database and writes sockets. It needs nothing else.
 NoNewPrivileges=yes

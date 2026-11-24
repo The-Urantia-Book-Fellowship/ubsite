@@ -1,0 +1,13 @@
+# The embedder's own environment, for the 3090 -- NOT the site's.  It lives in
+# ~/Software/ml (the Makefile's ML variable), and no host ever needs it: what
+# it makes is var/embed.db, which deploy.sh ships.  `make embed GPU=1` runs
+# tools/embed/build.py under it when the whole book is embedded anew; a few
+# changed units are embedded on the CPU by the site's own .venv.
+#
+# The runtime's GPU build takes the place of the site's CPU build (the two
+# cannot be installed together), with CUDA and cuDNN from NVIDIA's own wheels.
+# The versions are the site's pins, requirements.txt, written here by hand and
+# held to them by tests/test_meaning.py: change them together.
+onnxruntime-gpu[cuda,cudnn]==1.32.0
+tokenizers==0.23.3
+numpy==2.5.5

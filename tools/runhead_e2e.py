@@ -971,7 +971,7 @@ uvicorn.run(A.app, host="127.0.0.1", port=int(sys.argv[2]), log_level="warning")
 
 
 def main() -> int:
-    env = dict(os.environ, UB_VISITS="off")
+    env = dict(os.environ, UB_VISITS="off", UB_MEANING="off")
     srv = subprocess.Popen([str(ROOT / ".venv" / "bin" / "python"), "-c", NO_COPY,
                             str(ROOT / "var" / "no-offline-copy"), "8132"], cwd=ROOT, env=env)
     try:

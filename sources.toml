@@ -223,6 +223,28 @@ files = ["rso.vrs.txt", "rsc.vrs.txt", "eng.vrs.txt"]
 "rsc.vrs.txt" = "10beba712a98f9175268b770c24193897a1e6cdc0e5f2bb413423a839781471a"
 "eng.vrs.txt" = "003981c7f43c69b73b60d40a3f35f72e7ee017a686a6fb206f19a1b721157541"
 
+# The model Search by meaning turns a text into a vector with (Tigran,
+# 2026-11-23: "obviously I want the best quality"): BAAI's bge-m3, MIT, in
+# Xenova's ONNX export of it (huggingface.co/Xenova/bge-m3, MIT), at full
+# precision, fp32: `onnx/model.onnx` is the graph, `onnx/model.onnx_data` its
+# 2.27 GB of weights beside it, `tokenizer.json` the tokenizer.  Fixed by the
+# repository's revision and each file's SHA-256, which is also the name Hugging
+# Face keeps the file under.  The same three files embed the book's units at
+# the build (tools/embed/build.py) and a reader's question on the hosts
+# (ubsite/meaning.py), so a vector of the one is comparable with a vector of
+# the other.  Placed in var/embed/bge-m3/ by `python -m tools.embed.fetch`,
+# from Hugging Face's cache on this machine where it has them, else by
+# address; shipped to the hosts by deploy.sh; never read by `make data`.
+[embed]
+repo = "Xenova/bge-m3"
+rev  = "4de13258303883538bd53b696b452bf8099f0858"
+base = "https://huggingface.co/Xenova/bge-m3/resolve/4de13258303883538bd53b696b452bf8099f0858/"
+dim  = 1024
+[embed.sha256]
+"onnx/model.onnx"      = "5d89a0010dd39aa2cfa8b22bb49f06904c5bbf5877135f877da419480f40cde3"
+"onnx/model.onnx_data" = "1eebfb28493f67bba03ce0ef64bfdc7fc5a3bd9d7493f818bb1d78cd798416b4"
+"tokenizer.json"       = "6710678b12670bc442b99edc952c4d996ae309a7020c1fa0096dd245c2faf790"
+
 # The recordings.  Not repositories: no git, no revision.  Each is listed by
 # file in data/audio/ with its size and SHA-256, and the build checks the
 # directory against that list.

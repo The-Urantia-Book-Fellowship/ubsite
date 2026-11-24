@@ -12,6 +12,10 @@
 {% endmacro %}
 {% block body %}<main class="prose results">
 <h1>{{ q }}</h1>
+{#- The other search (meaning.html; Tigran, 2026-11-24): the same words put to
+    it, in the address's fragment, which is not sent.  Offline it leads to the
+    page that says it needs the network. #}
+<p class="bymeaning"><a href="/meaning#q={{ q|urlencode }}">{{ t('Search by meaning for these words') }}</a></p>
 {% if scope %}<p class="hint"><a href="/search?q={{ q|urlencode }}">{{ t('All results for “{q}”', q=q) }}</a></p>{% endif %}
 {% if diagnose and diagnose[1] %}<p class="didyou">{{ t('Did you mean') }}
   {% for c in diagnose[1] %}<a href="/search?q={{ c|urlencode }}">{{ c }}</a>{% if not loop.last %} {{ t('or') }} {% endif %}{% endfor %}?</p>{% endif %}

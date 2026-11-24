@@ -12,6 +12,7 @@ them together; the margin index folds where it stands (templates/_fold.html).
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import functools
 import gzip
@@ -37,15 +38,27 @@ from markupsafe import Markup, escape  # noqa: E402
 from starlette.concurrency import run_in_threadpool  # noqa: E402
 from starlette.exceptions import HTTPException  # noqa: E402
 
-from ubsite import account, api, bible, board, l10n, queries, settings, stats, visits  # noqa: E402
+from ubsite import account, api, bible, board, l10n, meaning, queries, settings, stats, visits  # noqa: E402
 
 DB = ROOT / "var" / "ub.db"
 STATIC = ROOT / "ubsite" / "static"
 # The offline copy (offline/, `make offline`): its manifest and its chunks.
 OFFLINE = ROOT / "var" / "offline"
+
+
+@contextlib.asynccontextmanager
+async def _lifespan(_app):
+    """As a worker starts, the app's one hook: Search by meaning's model is
+    loaded behind the start, where the host has one, so that neither the
+    worker nor the first question waits for it (ubsite/meaning.py start).  The
+    tests' in-process app sends no lifespan, and never loads it."""
+    meaning.start()
+    yield
+
+
 # No /openapi.json: it described every HTML route by accident, and a site
 # looking for the text API would have taken it for that.  /api documents it.
-app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=_lifespan)
 app.mount("/static", StaticFiles(directory=ROOT / "ubsite" / "static"), name="static")
 # The text API, /api/v1 (ubsite/api.py): before the catch-all /{ref} below.
 app.include_router(api.router)
@@ -93,7 +106,7 @@ T.env.globals["asset"] = asset
 # server runs; named by a hash of what it sends, so a build that changes
 # nothing moves nothing (CLAUDE.md trap 29).
 L10N_SCRIPTS = ("ub.js", "listen.js", "offline.js", "sw.js", "offline-core.js", "quiz.js", "help.js", "cosmo.js",
-                "account.js", "units.js")
+                "account.js", "units.js", "meaning.js")
 L10N_JS = ROOT / "ubsite" / "l10n.js"
 
 
@@ -1236,6 +1249,9 @@ def healthz():
         return {"ok": bool(n and n[0] == 14586), "paragraphs": n[0] if n else 0,
                 "built_at": built[0] if built else None,
                 "text_version": tv[0] if tv else None,
+                # Search by meaning: true, answering; false, this host has the
+                # model and has not loaded it, yet or at all; null, it has none.
+                "meaning": meaning.status(),
                 "sources": {k: {"commit": v["commit"], "dirty": v["dirty"]}
                             for k, v in sources().items()}}
     except Exception as exc:                       # noqa: BLE001
@@ -1719,6 +1735,155 @@ def units_page(request: Request):
     if u is None:
         return missing(request, "There is no page at this address.")
     return page(request, "units.html", u=u)
+
+
+# ---- Search by meaning (ubsite/meaning.py; templates/meaning.html, _meaning.html; static/meaning.js) ----
+
+MEANING_HEAD = {"Cache-Control": "no-store", "X-Robots-Tag": "noindex"}
+# nginx's own limit for a body, which a question of 300 characters fits.
+MEANING_BODY = 1024
+
+
+@app.get("/meaning", response_class=HTMLResponse)
+def meaning_page(request: Request):
+    """Search by meaning's page: the box, and the answer under it, which the
+    page's script asks for (static/meaning.js).  The same for every reader and
+    every question: the question is in the address's fragment, which a browser
+    does not send, so it is in no log and no count."""
+    return page(request, "meaning.html", most=meaning.QUESTION)
+
+
+def _meaning_json(body: dict, status: int, head: dict | None = None) -> JSONResponse:
+    return JSONResponse(body, status_code=status, headers={**MEANING_HEAD, **(head or {})})
+
+
+@app.post("/meaning/find")
+async def meaning_find(request: Request):
+    """One question, {"q": ...}, answered with the passages that answer it,
+    as HTML for the page to set in (templates/_meaning.html); a refusal as
+    JSON, {"error": a word the page has a sentence for}.
+
+    Nothing of the question is kept: a POST is not counted (visits.Counter
+    takes GETs alone), uvicorn writes no access log, nginx logs a POST's
+    address without its body, and nothing here writes it, in an error either,
+    of which only the kind is said."""
+    if int(request.headers.get("content-length") or 0) > MEANING_BODY:
+        return _meaning_json({"error": "long"}, 413)
+    raw = await request.body()
+    if len(raw) > MEANING_BODY:
+        return _meaning_json({"error": "long"}, 413)
+    try:
+        got = json.loads(raw)
+    except (ValueError, RecursionError):
+        got = None
+    if not isinstance(got, dict):
+        return _meaning_json({"error": "json"}, 400)
+    try:
+        q = meaning.question(got.get("q"))
+        return HTMLResponse(await run_in_threadpool(_meaning_answer, q), headers=MEANING_HEAD)
+    except meaning.Refused as e:
+        return _meaning_json({"error": e.why}, e.status, {"Retry-After": "2"} if e.why == "busy" else None)
+    except (meaning.Mismatch, sqlite3.Error) as e:
+        print(f"Search by meaning: {type(e).__name__}", file=sys.stderr, flush=True)
+        return _meaning_json({"error": "none"}, 503)
+
+
+def _meaning_answer(q: str) -> str:
+    """The answer to one question, drawn: meaning.search()'s ids as the rows
+    templates/_meaning.html sets, each passage as the text itself is set
+    (templates/_text.html grid), with the index entries that brought it
+    beside it, its translations' folds under it, and its paragraphs' 1955
+    readings and study notes for their cards."""
+    con = db()
+    res = meaning.search(q, con)
+    marks = lambda xs: ",".join("?" * len(xs))
+    ids = [pid for run in res["runs"] for pid in run]
+    paras = {r["id"]: r for r in con.execute(
+        "SELECT p.*, u.page AS page_1955 FROM paragraph p LEFT JOIN uf_paragraph u ON u.paragraph_id = p.id"
+        f" WHERE p.id IN ({marks(ids)})", ids)}
+    secs = {r["id"]: r for r in con.execute(
+        "SELECT s.*, k.title AS paper_title FROM section s JOIN paper k ON k.id = s.paper_id"
+        f" WHERE s.id IN (SELECT section_id FROM paragraph WHERE id IN ({marks(ids)}))", ids)}
+    passages = []
+    for run in res["runs"]:
+        ps = [paras[i] for i in run]
+        s = secs[ps[0]["section_id"]]
+        tr_has, trv = _tr_marks(db_version(), l10n.BILINGUAL, s["paper_n"], s["n"])
+        rows: list[dict] = []
+        for x in ps:                                   # a block of verse set as one, as queries.section() sets it
+            if x["src"] == "vs":
+                rows.append({"p": x})
+            elif x["verse_start"] or not rows or "lines" not in rows[-1]:
+                rows.append({"lines": [x]})
+            else:
+                rows[-1]["lines"].append(x)
+        citers, nciters = {}, {}
+        for pid in run:
+            eids = res["via"].get(pid)
+            if eids:
+                cs = con.execute(
+                    "SELECT c.paragraph_id, " + queries.CHIP_COLS + " FROM para_citers c"
+                    " JOIN index_entry e ON e.id = c.entry_id JOIN index_entry r ON r.id = e.root_id"
+                    + queries.CHIP_JOIN + f" WHERE c.paragraph_id = ? AND c.precision = 'para'"
+                    f" AND e.id IN ({marks(eids)}) ORDER BY" + queries.CHIP_ORDER, (pid, *eids)).fetchall()
+                if cs:
+                    nciters[pid] = len(cs)
+                    citers[pid] = queries.groups(con, queries.windows(con, cs))
+        passages.append({
+            "ref": ps[0]["ref"] + (f"-{ps[-1]['para_n']}" if len(ps) > 1 else ""),
+            "sec": f"{s['paper_n']}:{s['n']}", "paper_n": s["paper_n"], "paper_title": s["paper_title"],
+            "section_n": s["n"], "section_title": s["title_html"], "combined": s["combined_with"],
+            "rows": rows, "citers": citers, "nciters": nciters, "tr_has": tr_has, "trv": trv,
+            "why": [w for w in ("meaning", "words", "index") if any(w in res["why"][pid] for pid in run)]})
+    by_note: dict[int, list] = {}
+    for n in queries.notes(con, f"p.id IN ({marks(ids)})", tuple(ids)) if ids else ():
+        by_note.setdefault(n["paragraph_id"], []).append(n)
+    by_study: dict[int, list] = {}
+    for n in queries.study(con, f"p.id IN ({marks(ids)})", tuple(ids)) if ids else ():
+        by_study.setdefault(n["paragraph_id"], []).append(n)
+    chips = {r["eid"]: r for r in con.execute(
+        "SELECT " + queries.CHIP_COLS + " FROM index_entry e JOIN index_entry r ON r.id = e.root_id"
+        + queries.CHIP_JOIN + f" WHERE e.id IN ({marks(res['entries'])})", res["entries"])}
+    found = {n["key"]: n for n in queries.study(con, f"s.key IN ({marks(res['notes'])})", tuple(res["notes"]))} \
+        if res["notes"] else {}
+    stnotes = [_study_hit(found[k], Markup(escape(_opening(_plain(found[k]["html"])))))
+               for k in res["notes"] if k in found]
+    kjv = []
+    for abbr, chapter, a, z in res["kjv"] if bible.there() else ():
+        b = bible.book(abbr)
+        with bible.db() as bcon:
+            text = " ".join(t for (t,) in bcon.execute(
+                "SELECT v.text FROM bible_verse v WHERE v.version = 'kjv' AND v.book = ? AND v.chapter = ?"
+                " AND v.kind = 'verse' AND v.verse BETWEEN ? AND ? ORDER BY v.id", (b["id"], int(chapter), a, z)))
+        kjv.append({"href": bible.href(b, int(chapter), a, z), "text": text,
+                    "ref": book_name(b, int(chapter)) + (f":{a}" + (f"-{z}" if z != a else ""))})
+    ordered = [paras[i] for i in ids]
+    return T.env.get_template("_meaning.html").render(
+        passages=passages, entries=[chips[e] for e in res["entries"] if e in chips], stnotes=stnotes, kjv=kjv,
+        paras=ordered, notes=by_note, study=by_study, refw=refw(ordered), lang=res["lang"])
+
+
+@functools.lru_cache(maxsize=2048)
+def _tr_marks(mtime_ns: int, bilingual: bool, paper: int, sec: int) -> tuple[dict, str]:
+    """What a passage's folds need of its section's translations: which have
+    each paragraph, and the version their fragment is asked under.  Kept for
+    every section, being small, where translated() keeps the fragments
+    themselves for a few: an answer names twenty sections from anywhere in
+    the book, and making a fragment only to hash it is 10 ms of each."""
+    tr = translated(paper, sec)
+    return tr["has"], tr["v"]
+
+
+def _plain(markup: str) -> str:
+    """A note's HTML as its words."""
+    return html.unescape(RE_TAG.sub("", markup))
+
+
+def _opening(words: str, most: int = 240) -> str:
+    """A note's first words, to a word's end, with an ellipsis where cut."""
+    if len(words) <= most:
+        return words
+    return words[:most].rsplit(" ", 1)[0].rstrip(",;:—– ") + "…"
 
 
 @app.get("/lists/1955", response_class=HTMLResponse)
